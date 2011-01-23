@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{02970578-949F-4B9E-A373-75A28DF880EA}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PSFilterShim</RootNamespace>
+    <AssemblyName>PSFilterShim</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>Svn</SccProjectName>
+    <SccLocalPath>Svn</SccLocalPath>
+    <SccAuxPath>Svn</SccAuxPath>
+    <SccProvider>SubversionScc</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;PSSDK_3_0</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;PSSDK_3_0</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PaintDotNet.Base">
+      <HintPath>..\..\..\Program Files\Paint.NET\PaintDotNet.Base.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Core">
+      <HintPath>..\..\..\Program Files\Paint.NET\PaintDotNet.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Effects">
+      <HintPath>..\..\..\Program Files\Paint.NET\PaintDotNet.Effects.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PSApi\AboutRecord.cs" />
+    <Compile Include="PSApi\AdvanceStateProc.cs" />
+    <Compile Include="PSApi\BufferProcs.cs" />
+    <Compile Include="PSApi\ColorPicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="PSApi\ColorServicesCallbacks.cs" />
+    <Compile Include="PSApi\ColorServicesConstants.cs" />
+    <Compile Include="PSApi\ColorServicesConvert.cs" />
+    <Compile Include="PSApi\ColorServicesProc.cs" />
+    <Compile Include="PSApi\ColorServicesSelector.cs" />
+    <Compile Include="PSApi\DebugFlags.cs" />
+    <Compile Include="PSApi\DisplayPixelsProc.cs" />
+    <Compile Include="PSApi\FilterCase.cs" />
+    <Compile Include="PSApi\FilterCaseInfo.cs" />
+    <Compile Include="PSApi\FilterLoadException.cs" />
+    <Compile Include="PSApi\FilterRecord.cs" />
+    <Compile Include="PSApi\FilterSelector.cs" />
+    <Compile Include="PSApi\GetPropertyProc.cs" />
+    <Compile Include="PSApi\HandleProc.cs" />
+    <Compile Include="PSApi\HostProcs.cs" />
+    <Compile Include="PSApi\ImageModes.cs" />
+    <Compile Include="PSApi\ImageServicesProc.cs" />
+    <Compile Include="PSApi\ImageSizeTooLargeException.cs" />
+    <Compile Include="PSApi\LoadPsFilter.cs" />
+    <Compile Include="PSApi\NativeConstants.cs" />
+    <Compile Include="PSApi\NativeMethods.cs" />
+    <Compile Include="PSApi\NativeStructs.cs" />
+    <Compile Include="PSApi\ParameterData.cs" />
+    <Compile Include="PSApi\PIProperty.cs" />
+    <Compile Include="PSApi\PlatformData.cs" />
+    <Compile Include="PSApi\PluginData.cs" />
+    <Compile Include="PSApi\PlugInMonitor.cs" />
+    <Compile Include="PSApi\PluginPhase.cs" />
+    <Compile Include="PSApi\Point.cs" />
+    <Compile Include="PSApi\ProcessEventProc.cs" />
+    <Compile Include="PSApi\ProgressFunc.cs" />
+    <Compile Include="PSApi\ProgressProc.cs" />
+    <Compile Include="PSApi\PropertyProcs.cs" />
+    <Compile Include="PSApi\PSConstants.cs" />
+    <Compile Include="PSApi\PSError.cs" />
+    <Compile Include="PSApi\PSImagePlane.cs" />
+    <Compile Include="PSApi\PSPixelMap.cs" />
+    <Compile Include="PSApi\Rect.cs" />
+    <Compile Include="PSApi\ResourceProc.cs" />
+    <Compile Include="PSApi\RGBColor.cs" />
+    <Compile Include="PSApi\Utility.cs" />
+    <Compile Include="PSApi\VPoint.cs" />
+    <Compile Include="PSApi\VRect.cs" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>call "$(DevEnvDir)..\tools\vsvars32.bat"
+editbin.exe /NXCOMPAT:NO $(TargetPath) 
+
+copy "$(TargetPath)" "C:\Program Files\Paint.NET\Effects" /y
+if "$(ConfigurationName)" == "Debug" copy "$(TargetDir)$(TargetName).pdb" "C:\Program Files\Paint.NET\Effects" /y</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>del "C:\Program Files\Paint.NET\Effects\$(TargetName).pdb"</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
