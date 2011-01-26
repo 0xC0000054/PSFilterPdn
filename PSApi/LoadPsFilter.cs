@@ -1518,7 +1518,9 @@ namespace PSFilterLoad.PSApi
 
 					if (bpp == nplanes && bmpw == w)
 					{
-						int len = data.Stride * data.Height;
+                        int stride = (bmpw * 4); // bugfix to calculate the stride based on the requested data width, LockBits apparently does not do this
+ 
+						int len = stride * data.Height;
 
 						byte[] rgbData = new byte[len];
 
@@ -1528,7 +1530,7 @@ namespace PSFilterLoad.PSApi
 
 						inData = Marshal.AllocHGlobal(len);
 
-						inRowBytes = data.Stride;
+						inRowBytes = stride;
 						Marshal.Copy(rgbData, 0, inData, len);
 					}
 					else
@@ -2191,7 +2193,7 @@ namespace PSFilterLoad.PSApi
 			NativeMethods.GlobalUnlock(handles[h.ToInt64()].pointer);
 		}
 
-		static void host_proc(short selector, ref int data)
+		static void host_proc(short selector, IntPtr data)
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Format("{0} : {1}", selector, data)); 
