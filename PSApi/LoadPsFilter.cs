@@ -1884,57 +1884,63 @@ namespace PSFilterLoad.PSApi
             {
                 BitmapData data = bmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
 
-                unsafe
+                try
                 {
-                    if (source.colBytes == 1)
+                    unsafe
                     {
-                        for (int y = 0; y < data.Height; y++)
+                        if (source.colBytes == 1)
                         {
-                            for (int i = 0; i < 3; i++)
+                            for (int y = 0; y < data.Height; y++)
                             {
-                                int ofs = i;
-                                switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
+                                for (int i = 0; i < 3; i++)
                                 {
-                                    case 0:
-                                        ofs = 2;
-                                        break;
-                                    case 2:
-                                        ofs = 0;
-                                        break;
-                                }
-                                byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + ofs;
-                                byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (i * source.planeBytes);
+                                    int ofs = i;
+                                    switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
+                                    {
+                                        case 0:
+                                            ofs = 2;
+                                            break;
+                                        case 2:
+                                            ofs = 0;
+                                            break;
+                                    }
+                                    byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + ofs;
+                                    byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (i * source.planeBytes);
 
+                                    for (int x = 0; x < data.Width; x++)
+                                    {
+                                        *p = *q;
+
+                                        p += 3;
+                                        q += source.colBytes;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int y = 0; y < data.Height; y++)
+                            {
+                                byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
                                 for (int x = 0; x < data.Width; x++)
                                 {
-                                    *p = *q;
+                                    byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (x * source.colBytes);
+                                    p[0] = q[2];
+                                    p[1] = q[1];
+                                    p[2] = q[0];
 
                                     p += 3;
-                                    q += source.colBytes;
+                                    //q += source.colBytes;
                                 }
                             }
                         }
                     }
-                    else
-                    {
-                        for (int y = 0; y < data.Height; y++)
-                        {
-                            byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
-                            for (int x = 0; x < data.Width; x++)
-                            {
-                                byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (x * source.colBytes);
-                                p[0] = q[2];
-                                p[1] = q[1];
-                                p[2] = q[0];
 
-                                p += 3;
-                                //q += source.colBytes;
-                            }
-                        }
-                    }
                 }
-
-                bmp.UnlockBits(data);
+                finally
+                {
+                    bmp.UnlockBits(data);
+                }
 
                 using (Graphics gr = Graphics.FromHdc(platformContext))
                 {
