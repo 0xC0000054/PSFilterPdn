@@ -534,7 +534,8 @@ namespace PSFilterLoad.PSApi
 
 		static bool IgnoreAlphaChannel(PluginData data)
 		{
-			if (data.category == "Filter Forge" || data.category == "DCE Tools" || data.category == "L'amico Perry")
+            if (data.category == "Filter Forge" || data.category == "DCE Tools" ||
+                data.category.Contains("Eye Candy") || data.category == "Almathera")
 			{
 				return true;
 			}
@@ -1518,20 +1519,30 @@ namespace PSFilterLoad.PSApi
 
 					if (bpp == nplanes && bmpw == w)
 					{
-                        int stride = (bmpw * 4); // bugfix to calculate the stride based on the requested data width, LockBits apparently does not do this
- 
-						int len = stride * data.Height;
+                        int stride = (bmpw * 4); 
+                        int len = stride * data.Height;
 
-						byte[] rgbData = new byte[len];
+                        inData = Marshal.AllocHGlobal(len);
+                        inRowBytes = stride;
 
-						Marshal.Copy(data.Scan0, rgbData, 0, len);
+                        /* the stride for the source image and destination buffer will almost never match
+                         * so copy the data manually swapping the pixel order along the way
+                         */
+                        for (int y = 0; y < data.Height; y++)
+                        {
+                            byte* srcRow = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                            byte* dstRow = (byte*)inData.ToPointer() + (y * stride);
+                            for (int x = 0; x < data.Width; x++)
+                            {
+                                dstRow[0] = srcRow[2];
+                                dstRow[1] = srcRow[1];
+                                dstRow[2] = srcRow[0];
+                                dstRow[3] = srcRow[3];
 
-						rgbData = SwapRGB(rgbData, bpp);
-
-						inData = Marshal.AllocHGlobal(len);
-
-						inRowBytes = stride;
-						Marshal.Copy(rgbData, 0, inData, len);
+                                srcRow += 4;
+                                dstRow += 4;
+                            }
+                        }
 					}
 					else
 					{
@@ -1593,7 +1604,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="rect">The target rectangle within the image.</param>
 		/// <param name="loplane">The output loPlane.</param>
 		/// <param name="hiplane">The output hiPlane.</param>
-		static void store_buf(IntPtr outData, int outRowBytes, Rect16 rect, int loplane, int hiplane)
+		static unsafe void store_buf(IntPtr outData, int outRowBytes, Rect16 rect, int loplane, int hiplane)
 		{
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("inRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { outRowBytes.ToString(), Utility.RectToString(rect), loplane.ToString(), hiplane.ToString() }));
@@ -1624,55 +1635,55 @@ namespace PSFilterLoad.PSApi
 					{
 						if (nplanes == bpp && bmpw == w)
 						{
-							Debug.WriteLine(string.Format("outRowBytes = {0}, data.Stride = {1}", outRowBytes, data.Stride));
+                            for (int y = 0; y < data.Height; y++)
+                            {
+                                byte* srcRow = (byte*)outData.ToPointer() + (y * outRowBytes);
+                                byte* dstRow = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                                for (int x = 0; x < data.Width; x++)
+                                {
+                                    dstRow[0] = srcRow[2];
+                                    dstRow[1] = srcRow[1];
+                                    dstRow[2] = srcRow[0];
+                                    dstRow[3] = srcRow[3];
 
-							int outlen = outRowBytes * bmph; // the stride of the outData may not match the destination bitmap so use the outRowBytes 
-
-							byte[] outBytes = new byte[outlen];
-
-							Marshal.Copy(outData, outBytes, 0, outlen);
-
-							outBytes = SwapRGB(outBytes, bpp); // RGBA to BGRA
-
-							Marshal.Copy(outBytes, 0, data.Scan0, outlen);
+                                    srcRow += 4;
+                                    dstRow += 4;
+                                }
+                            }
 						}
 						else
 						{
-							unsafe
+							for (int y = 0; y < data.Height; y++)
 							{
-								for (int y = 0; y < data.Height; y++)
+								byte* dstPtr = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+
+								for (int i = loplane; i <= hiplane; i++)
 								{
-									byte* dstPtr = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
-
-									for (int i = loplane; i <= hiplane; i++)
+									int ofs = i;
+									switch (i)
 									{
-										int ofs = i;
-										switch (i)
-										{
-											case 0:
-												ofs = 2;
-												break;
-											case 2:
-												ofs = 0;
-												break;
-										}
+										case 0:
+											ofs = 2;
+											break;
+										case 2:
+											ofs = 0;
+											break;
+									}
 										
-										for (int x = 0; x < data.Width; x++)
-										{ 
-											byte *q = (byte*)outData.ToPointer() + (y * outRowBytes) + (x * nplanes) + (i - loplane);
-											byte *p = dstPtr +  ((x * bpp) + ofs);
+									for (int x = 0; x < data.Width; x++)
+									{ 
+										byte *q = (byte*)outData.ToPointer() + (y * outRowBytes) + (x * nplanes) + (i - loplane);
+										byte *p = dstPtr +  ((x * bpp) + ofs);
 
-											byte *alpha = dstPtr + ((x * bpp) + 3); 
+										byte *alpha = dstPtr + ((x * bpp) + 3); 
 											
-											*p = *q;
+										*p = *q;
 
-											*alpha = 255;
-										}
+										*alpha = 255;
 									}
 								}
-
-								
 							}
+							
 						}
 					}
 					finally
@@ -1683,24 +1694,6 @@ namespace PSFilterLoad.PSApi
 					
 				}
 			}
-		}
-		/// <summary>
-		/// Swaps a byte array from BGR to RGB or RGB to BGR.
-		/// </summary>
-		/// <param name="bytes">The byte array to swap.</param>
-		/// <param name="bpp">The number of bits per pixel of the data, always 4 under Paint.NET.</param>
-		/// <returns>The swapped array.</returns>
-		static byte[] SwapRGB(byte[] bytes, int bpp)
-		{
-			Byte tmp;
-			for (int x = 0; x < bytes.GetLength(0); x += bpp)
-			{
-				tmp = bytes[(x + 2)];
-				bytes[x + 2] = bytes[x];
-				bytes[x] = tmp;
-			}
-
-			return bytes;
 		}
 
 		static short allocate_buffer_proc(int size, ref System.IntPtr bufferID)
