@@ -1603,24 +1603,6 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 		}
-        /// <summary>
-        /// Swaps a byte array from BGR to RGB or RGB to BGR.
-        /// </summary>
-        /// <param name="bytes">The byte array to swap.</param>
-        /// <param name="bpp">The number of bits per pixel of the data, always 4 under Paint.NET.</param>
-        /// <returns>The swapped array.</returns>
-		static byte[] SwapRGB(byte[] bytes, int bpp)
-		{
-			Byte tmp;
-			for (int x = 0; x < bytes.GetLength(0); x += bpp)
-			{
-				tmp = bytes[(x + 2)];
-				bytes[x + 2] = bytes[x];
-				bytes[x] = tmp;
-			}
-
-			return bytes;
-		}
 
 		static short allocate_buffer_proc(int size, ref System.IntPtr bufferID)
 		{
