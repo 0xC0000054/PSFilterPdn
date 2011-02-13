@@ -5,7 +5,7 @@ namespace PSFilterLoad.PSApi
     /// <summary>
     /// The struct that holds the saved filter parameter data.
     /// </summary>
-    public struct ParameterData : IDisposable
+    public sealed class ParameterData : IDisposable
     {
 
         private IntPtr parmHandle;
