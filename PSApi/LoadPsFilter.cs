@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using PSFilterPdn.Properties;
 using System.IO;
+using System.Drawing.Drawing2D;
 
 namespace PSFilterLoad.PSApi
 {
@@ -439,6 +440,7 @@ namespace PSFilterLoad.PSApi
 	   
 		static float dpiX;
 		static float dpiY;
+        static Rectangle roi;
 
 		/// <summary>
 		/// Loads and runs Photoshop Filters
@@ -501,8 +503,8 @@ namespace PSFilterLoad.PSApi
 				dpiX = gr.DpiX;
 				dpiY = gr.DpiY;
 			}
-
-			if (eep.GetSelection(eep.SourceSurface.Bounds).GetBoundsInt() == eep.SourceSurface.Bounds)
+            roi = eep.GetSelection(eep.SourceSurface.Bounds).GetBoundsInt();
+			if (roi == eep.SourceSurface.Bounds)
 			{
 				filterCase = FilterCase.filterCaseEditableTransparencyNoSelection;
 			}
@@ -535,7 +537,7 @@ namespace PSFilterLoad.PSApi
 		static bool IgnoreAlphaChannel(PluginData data)
 		{
             if (data.category == "Filter Forge" || data.category == "DCE Tools" ||
-                data.category.Contains("Eye Candy") || data.category == "Almathera")
+                data.category.Contains("Eye Candy"))
 			{
 				return true;
 			}
@@ -1369,9 +1371,11 @@ namespace PSFilterLoad.PSApi
         /// Fill the output buffer with data, some plugins set this to false if they modify all the image data
         /// </summary>
         static bool fillOutData = true;
+        static bool applyFilter;
 
         static short advance_state_proc()
         {
+            filterRecord = (FilterRecord)filterRecordPtr.Target;
 
             if (src_valid)
             {
@@ -1385,7 +1389,7 @@ namespace PSFilterLoad.PSApi
                 /* store the dest image if the outRect has not been covered or if the
                  * outLoPlane and/or outHiPlane is different. 
                 */
-                if (!RectCovered(outRect, lastStoredOutRect) || (lastOutLoPlane != outLoPlane || lastOutHiPlane != outHiPlane))
+                if (applyFilter && (!RectCovered(outRect, lastStoredOutRect) || (lastOutLoPlane != outLoPlane || lastOutHiPlane != outHiPlane)))
                 {
                     store_buf(filterRecord.outData, outRowBytes, outRect, outLoPlane, outHiPlane);
                     lastStoredOutRect = outRect;
@@ -1397,10 +1401,6 @@ namespace PSFilterLoad.PSApi
                 filterRecord.outData = IntPtr.Zero;
                 dst_valid = false;
             }
-
-
-
-            filterRecord = (FilterRecord)filterRecordPtr.Target;
 
 #if DEBUG
             Ping(DebugFlags.AdvanceState, string.Format("Inrect = {0}, Outrect = {1}", Utility.RectToString(filterRecord.inRect), Utility.RectToString(filterRecord.outRect)));
@@ -1863,7 +1863,7 @@ namespace PSFilterLoad.PSApi
 		} 
 #endif
 
-        static short display_pixels_proc(ref PSPixelMap source, ref VRect srcRect, int dstRow, int dstCol, System.IntPtr platformContext)
+        static unsafe short display_pixels_proc(ref PSPixelMap source, ref VRect srcRect, int dstRow, int dstCol, System.IntPtr platformContext)
         {
 #if DEBUG
             Ping(DebugFlags.DisplayPixels, string.Format("source: bounds = {0}, ImageMode = {1}, colBytes = {2}, rowBytes = {3},planeBytes = {4}, BaseAddress = {5}", new object[]{Utility.RectToString(source.bounds), ((ImageModes)source.imageMode).ToString("G"),
@@ -1878,75 +1878,184 @@ namespace PSFilterLoad.PSApi
             int h = srcRect.bottom - srcRect.top;
             int planes = filterRecord.planes;
 
-
-
-            using (Bitmap bmp = new Bitmap(w, h, PixelFormat.Format24bppRgb))
+            if (source.mat != IntPtr.Zero)
             {
-                BitmapData data = bmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+                PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.mat, typeof(PSPixelMask));
+            }
+            Bitmap maskBmp = null;
+            if (source.masks != IntPtr.Zero)
+            {
+                PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
+
+                maskBmp = new Bitmap(w, h, PixelFormat.Format24bppRgb);
+
+
+                BitmapData data = maskBmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, maskBmp.PixelFormat);
+                try
+                {
+                    for (int y = 0; y < h; y++)
+                    {
+                        byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                        for (int x = 0; x < data.Width; x++)
+                        {
+                            byte* q = (byte*)mask.maskData.ToPointer() + (mask.rowBytes * y) + (x * mask.colBytes);
+                            p[0] = p[1] = p[2] = q[0];
+
+                            p += 3;
+                            //q += source.colBytes;
+                        }
+                    }
+                }
+                finally
+                {
+                    maskBmp.UnlockBits(data);
+                }
+
+                //maskBmp.Save( "mask.png"), ImageFormat.Png);
+            }
+
+            PixelFormat format = (planes == 4 && (source.colBytes == 4 || source.colBytes == 1)) ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
+            int bpp = (Bitmap.GetPixelFormatSize(format) / 8);
+
+            using (Bitmap bmp = new Bitmap(w, h, format))
+            {
+                BitmapData data = bmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, bmp.PixelFormat);
 
                 try
                 {
-                    unsafe
+                    for (int y = 0; y < data.Height; y++)
                     {
+                        if (planes == 4 && source.colBytes == 1)
+                        {
+                            for (int x = 0; x < data.Width; x++)
+                            {
+                                byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + (x * 4);
+                                p[3] = 255;
+                            }
+                        }
+
                         if (source.colBytes == 1)
                         {
-                            for (int y = 0; y < data.Height; y++)
+
+                            for (int i = 0; i < planes; i++)
                             {
-                                for (int i = 0; i < 3; i++)
+                                int ofs = i;
+                                switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
                                 {
-                                    int ofs = i;
-                                    switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
-                                    {
-                                        case 0:
-                                            ofs = 2;
-                                            break;
-                                        case 2:
-                                            ofs = 0;
-                                            break;
-                                    }
-                                    byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + ofs;
-                                    byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (i * source.planeBytes);
+                                    case 0:
+                                        ofs = 2;
+                                        break;
+                                    case 2:
+                                        ofs = 0;
+                                        break;
+                                }
+                                byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + ofs;
+                                byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (i * source.planeBytes);
 
-                                    for (int x = 0; x < data.Width; x++)
-                                    {
-                                        *p = *q;
+                                for (int x = 0; x < data.Width; x++)
+                                {
+                                    *p = *q;
 
-                                        p += 3;
-                                        q += source.colBytes;
-                                    }
+                                    p += bpp;
+                                    q += source.colBytes;
                                 }
                             }
+
                         }
                         else
                         {
-                            for (int y = 0; y < data.Height; y++)
-                            {
-                                byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
-                                for (int x = 0; x < data.Width; x++)
-                                {
-                                    byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (x * source.colBytes);
-                                    p[0] = q[2];
-                                    p[1] = q[1];
-                                    p[2] = q[0];
 
-                                    p += 3;
-                                    //q += source.colBytes;
+                            byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                            for (int x = 0; x < data.Width; x++)
+                            {
+                                byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (x * source.colBytes);
+                                p[0] = q[2];
+                                p[1] = q[1];
+                                p[2] = q[0];
+                                if (source.colBytes == 4)
+                                {
+                                    p[3] = q[3];
                                 }
+
+                                p += bpp;
+                                //q += source.colBytes;
                             }
                         }
                     }
+
 
                 }
                 finally
                 {
                     bmp.UnlockBits(data);
                 }
+                bool maskNonEmpty = false;
+                if (maskBmp != null)
+                {
+
+                    BitmapData maskBD = maskBmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadOnly, maskBmp.PixelFormat);
+                    BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadWrite, bmp.PixelFormat);
+                    try
+                    {
+                        for (int y = 0; y < h; y++)
+                        {
+                            byte* q = (byte*)maskBD.Scan0.ToPointer() + (y * maskBD.Stride);
+                            byte* p = (byte*)bmpData.Scan0.ToPointer() + (y * bmpData.Stride);
+                            for (int x = 0; x < maskBD.Width; x++)
+                            {
+                                if ((q[0] < 255 && p[3] < 255) && (q[0]!= p[3]))
+                                {
+                                    byte alpha = PaintDotNet.Int32Util.ClampToByte((p[3] - q[0]));
+
+                                    p[3] = alpha;
+                                    if (!maskNonEmpty)
+                                    {
+                                        maskNonEmpty = true;
+                                    }
+                                }
+                                q += 3;
+                                p += 4;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        maskBmp.UnlockBits(maskBD);
+                        bmp.UnlockBits(bmpData);
+                    }
+                }
 
                 using (Graphics gr = Graphics.FromHdc(platformContext))
                 {
-                    gr.DrawImageUnscaled(bmp, dstCol, dstRow);
+                    if (maskNonEmpty)
+                    {
+                        using (Bitmap temp = new Bitmap(w, h, PixelFormat.Format32bppArgb))
+                        {
+
+                            using (Graphics tempGr = Graphics.FromImage(temp))
+                            {
+                                Rectangle rect = new Rectangle(0, 0, w, h);
+                                tempGr.FillRectangle(new HatchBrush(HatchStyle.LargeCheckerBoard, Color.Gainsboro, Color.White), rect);
+
+                                tempGr.CompositingMode = CompositingMode.SourceOver;
+                                tempGr.CompositingQuality = CompositingQuality.HighQuality;
+                                tempGr.DrawImageUnscaled(bmp, rect);
+                            }
+
+                            // temp.Save(Path.Combine(Application.StartupPath, "masktemp.png"), ImageFormat.Png);
+
+                            gr.DrawImageUnscaled(temp, dstCol, dstRow);
+                        }
+
+                    }
+                    else
+                    {
+                        gr.DrawImage(bmp, dstCol, dstRow);
+                    }
                 }
             }
+
+
 
             return PSError.noErr;
         }
@@ -2222,6 +2331,10 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.MiscCallbacks, string.Format("Done = {0}, Total = {1}", done, total));
 			Ping(DebugFlags.MiscCallbacks, string.Format("progress_proc = {0}", (((double)done / (double)total) * 100d).ToString())); 
 #endif
+            if (!applyFilter)
+            {
+                applyFilter = true;
+            }
 			if (progressFunc != null)
 			{
 				progressFunc.Invoke(done, total);
@@ -2298,32 +2411,48 @@ namespace PSFilterLoad.PSApi
 			return (int)(value << 16);
 		}
 
-		static void setup_sizes()
-		{
-			filterRecord.imageSize.h = (short)source.Width;
-			filterRecord.imageSize.v = (short)source.Height;
+        static void setup_sizes()
+        {
+            filterRecord.imageSize.h = (short)source.Width;
+            filterRecord.imageSize.v = (short)source.Height;
 
-			if (ignoreAlpha)
-			{
-				filterRecord.planes = (short)3;
-			}
-			else
-			{
-				filterRecord.planes = (short)4;
-			}
-			filterRecord.filterRect.left = (short)0;
-			filterRecord.filterRect.top = (short)0;
-			filterRecord.filterRect.right = (short)source.Width;
-			filterRecord.filterRect.bottom = (short)source.Height; 
-			
-			
-			filterRecord.imageHRes = long2fixed((long)(dpiX + 0.5));
-			filterRecord.imageVRes = long2fixed((long)(dpiY + 0.5));
-			filterRecord.floatCoord.h = (short)0;
-			filterRecord.floatCoord.v = (short)0;
-			filterRecord.wholeSize.h = (short)source.Width;
-			filterRecord.wholeSize.v = (short)source.Height;
-		}
+            if (ignoreAlpha)
+            {
+                filterRecord.planes = (short)3;
+            }
+            else
+            {
+                filterRecord.planes = (short)4;
+            }
+
+            if (filterCase == FilterCase.filterCaseEditableTransparencyWithSelection)
+            {
+                filterRecord.floatCoord.h = (short)roi.Left;
+                filterRecord.floatCoord.v = (short)roi.Top;
+                filterRecord.filterRect.left = (short)roi.Left;
+                filterRecord.filterRect.top = (short)roi.Top;
+                filterRecord.filterRect.right = (short)roi.Right;
+                filterRecord.filterRect.bottom = (short)roi.Bottom;
+
+                dest = (Bitmap)source.Clone();
+            }
+            else
+            {
+                filterRecord.floatCoord.h = (short)0;
+                filterRecord.floatCoord.v = (short)0;
+                filterRecord.filterRect.left = (short)0;
+                filterRecord.filterRect.top = (short)0;
+                filterRecord.filterRect.right = (short)source.Width;
+                filterRecord.filterRect.bottom = (short)source.Height;
+            }
+
+
+            filterRecord.imageHRes = long2fixed((long)(dpiX + 0.5));
+            filterRecord.imageVRes = long2fixed((long)(dpiY + 0.5));
+
+            filterRecord.wholeSize.h = (short)source.Width;
+            filterRecord.wholeSize.v = (short)source.Height;
+        }
 
 		static void setup_delegates()
 		{ 
