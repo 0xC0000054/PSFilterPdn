@@ -46,20 +46,19 @@ namespace PSFilterLoad.PSApi
         filterDataHandlingForegroundZap = 11,
       
     }
-    [Flags]
-    internal enum FilterCaseInfoFlags : byte
+    internal static class FilterCaseInfoFlags
     {
-          /// PIFilterDontCopyToDestinationBit -> 0
-        PIFilterDontCopyToDestinationBit = 0,
+        /// PIFilterDontCopyToDestinationBit -> 0
+        public const byte PIFilterDontCopyToDestinationBit = 0;
 
         /// PIFilterWorksWithBlankDataBit -> 1
-        PIFilterWorksWithBlankDataBit = 1,
+        public const byte PIFilterWorksWithBlankDataBit = 1;
 
         /// PIFilterFiltersLayerMaskBit -> 2
-        PIFilterFiltersLayerMaskBit = 2,
+        public const byte PIFilterFiltersLayerMaskBit = 2;
 
         /// PIFilterWritesOutsideSelectionBit -> 3
-        PIFilterWritesOutsideSelectionBit = 3
+        public const byte PIFilterWritesOutsideSelectionBit = 3;
     }
 
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 1)]
