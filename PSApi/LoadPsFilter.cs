@@ -1371,11 +1371,9 @@ namespace PSFilterLoad.PSApi
         /// Fill the output buffer with data, some plugins set this to false if they modify all the image data
         /// </summary>
         static bool fillOutData = true;
-        static bool applyFilter;
 
         static short advance_state_proc()
         {
-            filterRecord = (FilterRecord)filterRecordPtr.Target;
 
             if (src_valid)
             {
@@ -1389,7 +1387,7 @@ namespace PSFilterLoad.PSApi
                 /* store the dest image if the outRect has not been covered or if the
                  * outLoPlane and/or outHiPlane is different. 
                 */
-                if (applyFilter && (!RectCovered(outRect, lastStoredOutRect) || (lastOutLoPlane != outLoPlane || lastOutHiPlane != outHiPlane)))
+                if (!RectCovered(outRect, lastStoredOutRect) || (lastOutLoPlane != outLoPlane || lastOutHiPlane != outHiPlane))
                 {
                     store_buf(filterRecord.outData, outRowBytes, outRect, outLoPlane, outHiPlane);
                     lastStoredOutRect = outRect;
@@ -1401,6 +1399,10 @@ namespace PSFilterLoad.PSApi
                 filterRecord.outData = IntPtr.Zero;
                 dst_valid = false;
             }
+
+
+
+            filterRecord = (FilterRecord)filterRecordPtr.Target;
 
 #if DEBUG
             Ping(DebugFlags.AdvanceState, string.Format("Inrect = {0}, Outrect = {1}", Utility.RectToString(filterRecord.inRect), Utility.RectToString(filterRecord.outRect)));
@@ -2331,10 +2333,6 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.MiscCallbacks, string.Format("Done = {0}, Total = {1}", done, total));
 			Ping(DebugFlags.MiscCallbacks, string.Format("progress_proc = {0}", (((double)done / (double)total) * 100d).ToString())); 
 #endif
-            if (!applyFilter)
-            {
-                applyFilter = true;
-            }
 			if (progressFunc != null)
 			{
 				progressFunc.Invoke(done, total);
