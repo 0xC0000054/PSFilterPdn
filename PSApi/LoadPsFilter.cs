@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using PSFilterPdn.Properties;
-using System.IO;
-using System.Drawing.Drawing2D;
 
 namespace PSFilterLoad.PSApi
 {
