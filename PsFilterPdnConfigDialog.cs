@@ -16,7 +16,7 @@ using System.Threading;
 
 namespace PSFilterPdn
 {
-    internal class PsFilterPdnConfigDialog : EffectConfigDialog
+    internal sealed class PsFilterPdnConfigDialog : EffectConfigDialog
     {
         private Button buttonOK;
         private TabControl tabControl1;
@@ -602,7 +602,7 @@ namespace PSFilterPdn
             string filterInfo = (string)this.Invoke(new GetFilterCaseInfoStringDelegate(GetFilterCaseInfoString), new object[] {data});
             string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { data.fileName, data.entryPoint, data.title, data.category, filterInfo});
 
-            string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", this.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked)), bool.FalseString, bool.FalseString);
+            string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0},{1}", this.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked)), showAboutBoxcb.Checked, bool.FalseString);
 
             ParameterData parm = ParameterData.Empty;
             if (parmData.ContainsKey(data.fileName))
@@ -667,7 +667,7 @@ namespace PSFilterPdn
 
         private void SetProxyResultData(string dest, PluginData data)
         { 
-            if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage))
+            if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && !showAboutBoxcb.Checked)
             {
                 if (!parmData.ContainsKey(data.fileName))
                 {
