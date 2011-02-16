@@ -10,6 +10,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.ComponentModel;
+using System.Globalization;
 
 namespace PSFilterPdn
 {
@@ -78,21 +79,20 @@ namespace PSFilterPdn
             }
         }
         ParameterData proxyParmData;
-        bool outputDone;
         private void UpdateProxyProgress(object sender, DataReceivedEventArgs e)
         {
             if (!string.IsNullOrEmpty(e.Data))
             {
-                if (e.Data.StartsWith("parm"))
+                if (e.Data.StartsWith("parm", StringComparison.Ordinal))
                 {
                     string[] split = e.Data.Substring(4).Split(new char[] { ',' });
 
                     proxyParmData = new ParameterData();
 
-                    proxyParmData.HandleSize = long.Parse(split[0]);
-                    proxyParmData.ParmHandle = new IntPtr(long.Parse(split[1]));
-                    proxyParmData.PluginData = new IntPtr(long.Parse(split[2]));
-                    proxyParmData.StoreMethod = int.Parse(split[3]);
+                    proxyParmData.HandleSize = long.Parse(split[0], CultureInfo.InvariantCulture);
+                    proxyParmData.ParmHandle = new IntPtr(long.Parse(split[1], CultureInfo.InvariantCulture));
+                    proxyParmData.PluginData = new IntPtr(long.Parse(split[2], CultureInfo.InvariantCulture));
+                    proxyParmData.StoreMethod = int.Parse(split[3], CultureInfo.InvariantCulture);
                     if (!string.IsNullOrEmpty(split[4]))
                     {
                         proxyParmData.ParmDataBytes = Convert.FromBase64String(split[4]);
@@ -104,10 +104,28 @@ namespace PSFilterPdn
                     proxyParmData.ParmDataIsPSHandle = bool.Parse(split[6]);
                     proxyParmData.PluginDataIsPSHandle = bool.Parse(split[7]);
 
-                    outputDone = true;
                 }
             }
         }
+        private static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
+        {
+            FilterCaseInfo[] info = new FilterCaseInfo[7];
+            string[] split = input.Split(new char[] { ':' });
+
+            for (int i = 0; i < split.Length; i++)
+            {
+                FilterCaseInfo fici = info[i];
+                string[] data = split[i].Split(new char[] { ',' });
+
+                fici.inputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[0]);
+                fici.outputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[1]);
+                fici.flags1 = byte.Parse(data[2], NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                fici.flags2 = 0;
+            }
+
+            return info;
+        }
+
         private Process proxyProcess = null;
 
         private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token)
@@ -121,25 +139,25 @@ namespace PSFilterPdn
 
             string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
 
-            string pColor = String.Format("{0},{1},{2}", base.EnvironmentParameters.PrimaryColor.R, base.EnvironmentParameters.PrimaryColor.G, base.EnvironmentParameters.PrimaryColor.B);
-            string sColor = String.Format("{0},{1},{2}", base.EnvironmentParameters.SecondaryColor.R, base.EnvironmentParameters.SecondaryColor.G, base.EnvironmentParameters.SecondaryColor.B);
+            string pColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", base.EnvironmentParameters.PrimaryColor.R, base.EnvironmentParameters.PrimaryColor.G, base.EnvironmentParameters.PrimaryColor.B);
+            string sColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", base.EnvironmentParameters.SecondaryColor.R, base.EnvironmentParameters.SecondaryColor.G, base.EnvironmentParameters.SecondaryColor.B);
 
             Rectangle sRect = base.EnvironmentParameters.GetSelection(base.EnvironmentParameters.SourceSurface.Bounds).GetBoundsInt();
-            string rect = String.Format("{0},{1},{2},{3}", new object[] { sRect.X, sRect.Y, sRect.Width, sRect.Height });
+            string rect = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3}", new object[] { sRect.X, sRect.Y, sRect.Width, sRect.Height });
 
-            string owner = Process.GetCurrentProcess().MainWindowHandle.ToInt64().ToString();
+            string owner = Process.GetCurrentProcess().MainWindowHandle.ToInt64().ToString(CultureInfo.InvariantCulture);
 
-            string pd = String.Format("\"{0}\",{1},\"{2}\",\"{3}\",{4}", new object[] {token.FileName, token.EntryPoint, token.Title, token.Category, token.FillOutData });
+            string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { token.FileName, token.EntryPoint, token.Title, token.Category, token.FilterCaseInfo });
 
-            string lpsArgs = String.Format("{0},{1}", bool.FalseString, token.ReShowDialog ? bool.FalseString : bool.TrueString);
+            string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0},{1}", bool.FalseString, token.ReShowDialog ? bool.FalseString : bool.TrueString);
 
             ParameterData parm = token.ParmData;
 
             string parmBytes = parm.ParmDataBytes == null ? string.Empty : Convert.ToBase64String(parm.ParmDataBytes);
             string pluginDataBytes = parm.PluginDataBytes == null ? string.Empty : Convert.ToBase64String(parm.PluginDataBytes);
-            string parms = String.Format("{0},{1},{2},{3},{4},{5},{6},{7}", new object[] { parm.HandleSize, parm.ParmHandle.ToInt64(), parm.PluginData.ToInt64(), parm.StoreMethod, parmBytes, pluginDataBytes, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
-            
-            string pArgs = string.Format("\"{0}\" \"{1}\" {2} {3} {4} {5} {6} {7}", new object[] { src, dest, pColor, sColor, rect, owner, pd, lpsArgs});
+            string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5},{6},{7}", new object[] { parm.HandleSize, parm.ParmHandle.ToInt64(), parm.PluginData.ToInt64(), parm.StoreMethod, parmBytes, pluginDataBytes, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
+
+            string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} {7}", new object[] { src, dest, pColor, sColor, rect, owner, pd, lpsArgs });
 
             Debug.WriteLine(pArgs);
 
@@ -152,7 +170,6 @@ namespace PSFilterPdn
 
             proxyResult = true; // assume the filter succeded this will be set to false if it failed
             proxyErrorMessage = string.Empty;
-            outputDone = false;
 
             proxyProcess = new Process();
 
@@ -166,11 +183,12 @@ namespace PSFilterPdn
             try
             {
                 bool st = proxyProcess.Start();
+                proxyProcess.StandardInput.WriteLine(pd);
                 proxyProcess.StandardInput.WriteLine(parms);
                 proxyProcess.BeginErrorReadLine();
                 proxyProcess.BeginOutputReadLine();
 
-                while ((!outputDone && string.IsNullOrEmpty(proxyErrorMessage)) || !proxyProcess.HasExited)
+                while (!proxyProcess.HasExited)
                 {
                     Application.DoEvents(); // Keep the message pump running while we wait for the proxy to exit
                     Thread.Sleep(250);
@@ -239,9 +257,10 @@ namespace PSFilterPdn
                             {                           
                                 lps.IsRepeatEffect = true;
                             }
-                        
+
+                            FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
                             PluginData pdata = new PluginData(){ fileName = token.FileName, entryPoint= token.EntryPoint, title = token.Title,
-                             category = token.Category, fillOutData = token.FillOutData};
+                             category = token.Category, filterInfo = fci};
 
                             bool result = lps.RunPlugin(pdata, false);
 
