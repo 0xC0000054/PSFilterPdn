@@ -14,8 +14,7 @@ using System.Globalization;
 
 namespace PSFilterPdn
 {
-    public class PSFilterPdn_Effect
-        : PaintDotNet.Effects.Effect
+    public sealed class PSFilterPdn_Effect : PaintDotNet.Effects.Effect
     {
 
         public static string StaticName
@@ -37,8 +36,9 @@ namespace PSFilterPdn
         public PSFilterPdn_Effect()
             : base(PSFilterPdn_Effect.StaticName, PSFilterPdn_Effect.StaticIcon, EffectFlags.Configurable | EffectFlags.SingleThreaded)
         {
-
-           
+            dlg = null;
+            proxyResult = false;
+            proxyErrorMessage = string.Empty;
         }
        
         /// <summary>
@@ -50,7 +50,7 @@ namespace PSFilterPdn
             return base.IsCancelRequested;
         }
 
-        PsFilterPdnConfigDialog dlg = null;
+        PsFilterPdnConfigDialog dlg;
         public override EffectConfigDialog CreateConfigDialog()
         {
             dlg = new PsFilterPdnConfigDialog();
@@ -115,7 +115,7 @@ namespace PSFilterPdn
             for (int i = 0; i < split.Length; i++)
             {
                 FilterCaseInfo fici = info[i];
-                string[] data = split[i].Split(new char[] { ',' });
+                string[] data = split[i].Split(new char[] { '_' });
 
                 fici.inputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[0]);
                 fici.outputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[1]);
