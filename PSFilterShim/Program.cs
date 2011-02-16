@@ -32,7 +32,7 @@ namespace PSFilterShim
 #if DEBUG
             System.Diagnostics.Debug.WriteLine(string.Format("SetProcessDEPPolicy returned {0}", res));
 #endif 
-			if (args.Length > 0 && args.Length == 8)
+			if (args.Length > 0 && args.Length == 7)
 			{
 				string src = args[0]; // the filename of the source image
 				string dstImg = args[1]; // the filename of the destiniation image
@@ -48,19 +48,22 @@ namespace PSFilterShim
 
 				IntPtr owner = new IntPtr(long.Parse(args[5]));
 
-				string[] plugData = args[6].Split(new char[] { ',' }); 
+				
+				string[] lpsArgs = args[6].Split(new char[] { ',' }); 
+
+				bool showAbout = bool.Parse(lpsArgs[0]);
+				bool repeatEffect = bool.Parse(lpsArgs[1]);
+
+                string[] plugData = Console.ReadLine().Split(new char[] { ',' }); 
 				PluginData pdata = new PluginData();
 				pdata.fileName = plugData[0];
 				pdata.entryPoint = plugData[1];
                 pdata.title = plugData[2];
                 pdata.category = plugData[3];
-                pdata.fillOutData = bool.Parse(plugData[4]);
+                pdata.filterInfo = string.IsNullOrEmpty(plugData[4]) ? null : GetFilterCaseInfoFromString(plugData[4]);
 
 
-				string[] lpsArgs = args[7].Split(new char[] { ',' }); 
 
-				bool showAbout = bool.Parse(lpsArgs[0]);
-				bool repeatEffect = bool.Parse(lpsArgs[1]);
 
                 string[] parmData = Console.ReadLine().Split(new char[] {','});
 
@@ -112,10 +115,28 @@ namespace PSFilterShim
 			
 		}
 
+        static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
+        {
+            FilterCaseInfo[] info = new FilterCaseInfo[7];
+            string[] split = input.Split(new char[] { ':' });
+
+            for (int i = 0; i < split.Length; i++)
+            {
+                string[] data = split[i].Split(new char[] { '_' });
+
+                info[i].inputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[0]);
+                info[i].outputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[1]);
+                info[i].flags1 = byte.Parse(data[2], NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                info[i].flags2 = 0;
+            }
+
+            return info;
+        }
+
 		static void UpdateProgress(int done, int total)
 		{
 			double progress = ((double)done / (double)total) * 100d;
-			Console.WriteLine(((int)progress).ToString());
+			Console.WriteLine(((int)progress).ToString(CultureInfo.InvariantCulture));
 		}
 
 
