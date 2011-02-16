@@ -70,5 +70,9 @@ namespace PSFilterLoad.PSApi
         [DllImport("kernel32.dll", EntryPoint = "GlobalMemoryStatusEx")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GlobalMemoryStatusEx([In, Out] NativeStructs.MEMORYSTATUSEX lpBuffer);
+
+        [DllImport("kernel32.dll", EntryPoint = "LocalSize")]
+        public static extern UIntPtr LocalSize([In()] System.IntPtr hMem);
+ 
     }
 }
