@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace PSFilterPdn
 {
-    internal class Settings
+    internal sealed class Settings
     {
         XmlDocument xmlDocument = new XmlDocument();
                 
