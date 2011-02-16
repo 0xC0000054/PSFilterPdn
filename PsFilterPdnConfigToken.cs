@@ -4,7 +4,7 @@ using PaintDotNet;
 
 namespace PSFilterPdn
 {
-    public class PSFilterPdnConfigToken : PaintDotNet.Effects.EffectConfigToken
+    public sealed class PSFilterPdnConfigToken : PaintDotNet.Effects.EffectConfigToken
     {
         private string category;
         private Surface dest;
