@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace PSFilterLoad.PSApi
 {
-    class ColorPicker : ColorDialog
+    internal sealed class ColorPicker : ColorDialog
     {
 
         private string title = string.Empty;
