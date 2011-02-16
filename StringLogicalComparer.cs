@@ -7,7 +7,7 @@ using System.Globalization;
 
 namespace ns
 {
-    public sealed class StringLogicalComparer : IComparer
+    internal sealed class StringLogicalComparer : IComparer
     {
         private static readonly IComparer _default = new StringLogicalComparer();
 
