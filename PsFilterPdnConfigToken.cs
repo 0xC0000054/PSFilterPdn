@@ -11,7 +11,7 @@ namespace PSFilterPdn
         private string entryPoint;
         private string fileName;
         private string title;
-        private bool fillOutData;
+        private string filterCaseInfo;
         private ParameterData parmData;
         private bool reShowDialog;
         private bool runWith32BitShim;
@@ -23,7 +23,7 @@ namespace PSFilterPdn
             {
                 return category;
             }
-            set
+            internal set
             {
                 category = value;
             }
@@ -35,7 +35,7 @@ namespace PSFilterPdn
             {
                 return dest;
             }
-            set
+            internal set
             {
                 dest = value;
             }
@@ -47,7 +47,7 @@ namespace PSFilterPdn
             {
                 return entryPoint;
             }
-            set
+            internal set
             {
                 entryPoint = value;
             }
@@ -59,21 +59,21 @@ namespace PSFilterPdn
             {
                 return fileName;
             }
-            set
+            internal set
             {
                 fileName = value;
             }
         }
 
-        public bool FillOutData
+        public string FilterCaseInfo
         {
             get
             {
-                return fillOutData;
+                return filterCaseInfo;
             }
-            set
+            internal set
             {
-                fillOutData = value;
+                filterCaseInfo = value;
             }
         }
 
@@ -95,7 +95,7 @@ namespace PSFilterPdn
             {
                 return parmData;
             }
-            set
+            internal set
             {
                 parmData = value;
             }
@@ -110,7 +110,7 @@ namespace PSFilterPdn
             {
                 return reShowDialog;
             }
-            set
+            internal set
             {
                 reShowDialog = value;
             }
@@ -122,19 +122,19 @@ namespace PSFilterPdn
             {
                 return runWith32BitShim;
             }
-            set
+            internal set
             {
                 runWith32BitShim = value;
             }
         }
 
-        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, bool filloutdata, ParameterData parm, Surface dest, bool reshowdialog, bool useshim)
+        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, string filterCaseInfo, ParameterData parm, Surface dest, bool reshowdialog, bool useshim)
             : base()
         {
             this.category = category;
             this.dest = dest;
             this.entryPoint = entryPoint;
-            this.fillOutData = filloutdata;
+            this.filterCaseInfo = filterCaseInfo;
             this.fileName = fileName;
             this.title = title;
             this.parmData = parm;
@@ -149,7 +149,7 @@ namespace PSFilterPdn
             this.dest = copyMe.dest;
             this.entryPoint = copyMe.entryPoint;
             this.fileName = copyMe.fileName;
-            this.fillOutData = copyMe.fillOutData;
+            this.filterCaseInfo= copyMe.filterCaseInfo;
             this.title = copyMe.title;
             this.parmData = copyMe.parmData;
             this.reShowDialog = copyMe.reShowDialog;
