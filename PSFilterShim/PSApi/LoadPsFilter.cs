@@ -1703,7 +1703,7 @@ namespace PSFilterLoad.PSApi
         }
         static void buffer_free_proc(System.IntPtr bufferID)
         {
-            long size = NativeMethods.GlobalSize(bufferID).ToInt64();
+            long size = (long)NativeMethods.LocalSize(bufferID).ToUInt64();
 #if DEBUG
             Ping(DebugFlags.BufferSuite, string.Format("Buffer address = {0:X8}, Size = {1}", bufferID.ToInt64(), size));
 #endif
