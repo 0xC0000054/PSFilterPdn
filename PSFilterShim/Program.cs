@@ -87,7 +87,7 @@ namespace PSFilterShim
 
                         bool result = lps.RunPlugin(pdata, showAbout);
 
-                        if (result && string.IsNullOrEmpty(lps.ErrorMessage))
+                        if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
                         {
                             lps.Dest.Save(dstImg, ImageFormat.Png);
                             string parmBytes = lps.ParmData.ParmDataBytes == null ? string.Empty : Convert.ToBase64String(lps.ParmData.ParmDataBytes);
