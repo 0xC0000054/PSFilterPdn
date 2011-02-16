@@ -71,5 +71,8 @@ namespace PSFilterLoad.PSApi
 
         [DllImport("ntdll.dll", EntryPoint = "memcpy", CharSet = CharSet.Unicode)]
         public static extern void memcpy(IntPtr Destination, IntPtr Source, UIntPtr Length);
+
+        [DllImport("kernel32.dll", EntryPoint = "LocalSize")]
+        public static extern UIntPtr LocalSize([In()] System.IntPtr hMem);
     }
 }
