@@ -1752,11 +1752,11 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			Ping(DebugFlags.BufferSuite, string.Format("Buffer address = {0:X8}, Size = {1}", bufferID.ToInt64(), size));
 #endif     
-			/*if (size > 0L)
+			if (size > 0L)
 			{
 				GC.RemoveMemoryPressure(size);
 			}
-			Marshal.FreeHGlobal(buffID);*/
+			Marshal.FreeHGlobal(bufferID);
 		   
 		}
 		static IntPtr buffer_lock_proc(System.IntPtr bufferID, byte moveHigh)
