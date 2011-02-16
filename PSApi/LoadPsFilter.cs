@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using PSFilterPdn.Properties;
+using System.Globalization;
 
 namespace PSFilterLoad.PSApi
 {
@@ -16,20 +17,22 @@ namespace PSFilterLoad.PSApi
 	{
 
 		#region EnumRes
-		private static bool IS_INTRESOURCE(IntPtr value)
-		{
-			if (((uint)value) > ushort.MaxValue)
-			{
-				return false;
-			}
-			return true;
-		}
-		private static string GET_RESOURCE_NAME(IntPtr value)
-		{
-			if (IS_INTRESOURCE(value))
-				return value.ToString();
-			return Marshal.PtrToStringUni(value);
-		}
+#if DEBUG
+        private static bool IS_INTRESOURCE(IntPtr value)
+        {
+            if (((uint)value) > ushort.MaxValue)
+            {
+                return false;
+            }
+            return true;
+        }
+        private static string GET_RESOURCE_NAME(IntPtr value)
+        {
+            if (IS_INTRESOURCE(value))
+                return value.ToString();
+            return Marshal.PtrToStringUni(value);
+        } 
+#endif
 
 		private static string StringFromPString(IntPtr PString)
 		{
@@ -111,9 +114,6 @@ namespace PSFilterLoad.PSApi
 			// the plugin entrypoint for the current platform
 			PIPropertyID entryPoint = (IntPtr.Size == 8) ? PIPropertyID.PIWin64X86CodeProperty : PIPropertyID.PIWin32X86CodeProperty;
 
-            // assume this is true so it will work if the filter does not have a FilterCaseInfo structure
-            enumData.fillOutData = true; 
-
 			for (int i = 0; i < count; i++)
 			{
 				PIProperty pipp = (PIProperty)Marshal.PtrToStructure(propPtr, typeof(PIProperty));
@@ -145,7 +145,7 @@ namespace PSFilterLoad.PSApi
 					if (HiWord(fltrversion) > PSConstants.latestFilterVersion ||
 						(HiWord(fltrversion) == PSConstants.latestFilterVersion && LoWord(fltrversion) > PSConstants.latestFilterSubVersion))
 					{
-						throw new FilterLoadException(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumData.fileName, HiWord(fltrversion).ToString(), LoWord(fltrversion).ToString(), PSConstants.latestFilterVersion.ToString(), PSConstants.latestFilterSubVersion.ToString() }));
+						throw new FilterLoadException(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumData.fileName, HiWord(fltrversion).ToString(CultureInfo.CurrentCulture), LoWord(fltrversion).ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) }));
 					}
 				}
 				else if (propKey == PIPropertyID.PIImageModesProperty)
@@ -175,24 +175,13 @@ namespace PSFilterLoad.PSApi
 				{
 					IntPtr ptr = new IntPtr((propPtr.ToInt64() + dataOfs));
 
-					FilterCaseInfo fici = (FilterCaseInfo)Marshal.PtrToStructure(ptr, typeof(FilterCaseInfo));
-					if (((FilterCaseInfoFlags)fici.flags1) == FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit)
-					{
-						enumData.fillOutData = false;
-					}
-					
-#if DEBUG
-					if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
-					{
-						Debug.WriteLine(fici.inputHandling.ToString("G"));
-						Debug.WriteLine(fici.outputHandling.ToString("G"));
-						bool writesOutsideSelection = ((((FilterCaseInfoFlags)fici.flags1 & FilterCaseInfoFlags.PIFilterWritesOutsideSelectionBit) == FilterCaseInfoFlags.PIFilterWritesOutsideSelectionBit));
-						bool blankData = (((FilterCaseInfoFlags)fici.flags1 & FilterCaseInfoFlags.PIFilterWorksWithBlankDataBit) == FilterCaseInfoFlags.PIFilterWorksWithBlankDataBit);
-						bool filterMasks = (((FilterCaseInfoFlags)fici.flags1 & FilterCaseInfoFlags.PIFilterFiltersLayerMaskBit) == FilterCaseInfoFlags.PIFilterFiltersLayerMaskBit);
+                    enumData.filterInfo = new FilterCaseInfo[7];
+                    for (int j = 0; j < 7; j++)
+                    {
+                        enumData.filterInfo[j] = (FilterCaseInfo)Marshal.PtrToStructure(ptr, typeof(FilterCaseInfo));
+                        ptr = new IntPtr(ptr.ToInt64() + (long)Marshal.SizeOf(typeof(FilterCaseInfo)));
+                    }
 
-						Debug.WriteLine(String.Format("fillOutData = {0}, PIFilterWorksWithBlankDataBit = {1},PIFilterFiltersLayerMaskBit = {2}, PIFilterWritesOutsideSelectionBit = {3}", new object[] {!fillOutData, blankData, filterMasks, writesOutsideSelection}));
-					}
-#endif     
 				}
 
 				int padOfs = pipp.propertyLength; 
@@ -483,6 +472,7 @@ namespace PSFilterLoad.PSApi
 			phase = PluginPhase.None;
 			isRepeatEffect = false;
 			errorMessage = String.Empty;
+            fillOutData = true;
 				
 			filterRecord = new FilterRecord();
 			platformData = new PlatformData();
@@ -535,21 +525,32 @@ namespace PSFilterLoad.PSApi
 
 		static bool IgnoreAlphaChannel(PluginData data)
 		{
-            if (data.category == "Filter Forge" || data.category == "DCE Tools" ||
-                data.category.Contains("Eye Candy"))
+            if (data.category == "Filter Forge" || data.category == "DCE Tools")
 			{
 				return true;
 			}
 
-			// The list in PSFilterShim's LoadPsFilter must be updated to reflect changes in this list.
-			string[] plugins = new string[17] {"Anaglyph Flip", "ChromaSolarize","Demitone 25", "Demitone 50", 
+            Dictionary<string, string[]> ignoreAlphaList = new Dictionary<string, string[]>();
+ 
+            ignoreAlphaList.Add("Flaming Pear", new string[17] {"Anaglyph Flip", "ChromaSolarize","Demitone 25", "Demitone 50", 
 			"Gray From Red", "Gray From Green", "Gray From Blue", "HSL -> RGB", "Lab ->RGB","Make Iso Cube Tile",
-			"RGB -> HSL", "RGB -> LAB", "Swap Green:Blue", "Swap Red:Blue", "Swap Red:Green", "Tachyon", "Vitriol"};
+			"RGB -> HSL", "RGB -> LAB", "Swap Green:Blue", "Swap Red:Blue", "Swap Red:Green", "Tachyon", "Vitriol"});
 
-			foreach (var item in plugins)
+
+			// The list in PSFilterShim's LoadPsFilter must be updated to reflect changes in this list.
+
+
+			foreach (var item in ignoreAlphaList)
 			{
-				if (data.title == item)
+				if (data.category == item.Key)
 				{
+                    foreach (string title in item.Value)
+                    {
+                        if (data.title == title)
+                        {
+                            return true;
+                        }
+                    }
 					return true;
 				}
 			}
@@ -1159,15 +1160,33 @@ namespace PSFilterLoad.PSApi
 				Debug.WriteLine("LoadFilter failed"); 
 #endif
 				return false;
-			}
-			fillOutData = pdata.fillOutData;
+			}			
+            
+            ignoreAlpha = IgnoreAlphaChannel(pdata);
+
+            if (ignoreAlpha)
+            {
+                switch (filterCase)
+                {
+                    case FilterCase.filterCaseEditableTransparencyNoSelection:
+                        filterCase = FilterCase.filterCaseFlatImageNoSelection;
+                        break;
+                    case FilterCase.filterCaseEditableTransparencyWithSelection:
+                        filterCase = FilterCase.filterCaseFlatImageWithSelection;
+                        break;
+                }
+            }
+
+            if (pdata.filterInfo != null)
+            {
+                fillOutData = ((pdata.filterInfo[filterCase].flags1 & FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit) == 0);
+            }
 
 			if (showAbout)
 			{
 				return plugin_about(pdata);
 			}
 
-			ignoreAlpha = IgnoreAlphaChannel(pdata);
 
 			setup_delegates();
 			setup_suites();
@@ -1369,7 +1388,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Fill the output buffer with data, some plugins set this to false if they modify all the image data
         /// </summary>
-        static bool fillOutData = true;
+        static bool fillOutData;
 
         static short advance_state_proc()
         {
@@ -1493,7 +1512,15 @@ namespace PSFilterLoad.PSApi
 						gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 						gr.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
 					  
-						gr.DrawImage(source, Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom)); // draw the requested portion of the image
+                        if ((filterCase == FilterCase.filterCaseEditableTransparencyWithSelection 
+                            || filterCase == FilterCase.filterCaseFlatImageWithSelection))
+	                    {
+						    gr.DrawImage(source, Rectangle.FromLTRB(0, 0, bmpw, bmph), roi, GraphicsUnit.Pixel); // draw the requested portion of the image
+	                    }
+                        else
+	                    {
+                            gr.DrawImage(source, Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom));
+	                    }
 					}
 
 					lockRect = new Rectangle(0, 0, bmpw, bmph);
@@ -1597,6 +1624,7 @@ namespace PSFilterLoad.PSApi
 
 			}
 		}
+
 		/// <summary>
 		/// Stores the output buffer to the destination image.
 		/// </summary>
@@ -1720,15 +1748,15 @@ namespace PSFilterLoad.PSApi
 		}
 		static void buffer_free_proc(System.IntPtr bufferID)
 		{
-			long size = NativeMethods.GlobalSize(bufferID).ToInt64();
+			long size = (long)NativeMethods.LocalSize(bufferID).ToUInt64();
 #if DEBUG
 			Ping(DebugFlags.BufferSuite, string.Format("Buffer address = {0:X8}, Size = {1}", bufferID.ToInt64(), size));
-#endif
-			if (size > 0L)
+#endif     
+			/*if (size > 0L)
 			{
 				GC.RemoveMemoryPressure(size);
 			}
-			Marshal.FreeHGlobal(bufferID);
+			Marshal.FreeHGlobal(buffID);*/
 		   
 		}
 		static IntPtr buffer_lock_proc(System.IntPtr bufferID, byte moveHigh)
@@ -1766,29 +1794,34 @@ namespace PSFilterLoad.PSApi
 #else
 					string name = StringFromPString(info.pickerPrompt);
 #endif
-					using (ColorPicker picker = new ColorPicker())
-					{
-						picker.Title = name;
-						picker.AllowFullOpen = true;
-						picker.AnyColor = true;
-						picker.SolidColorOnly = true;
+                    if (!string.IsNullOrEmpty(name)) // only show the picker dialog if the title is not empty
+                    {
+                         using (ColorPicker picker = new ColorPicker())
+                         {
+                             picker.Title = name;
+                             picker.AllowFullOpen = true;
+                             picker.AnyColor = true;
+                             picker.SolidColorOnly = true;
 
-						picker.Color = Color.FromArgb(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
+                             picker.Color = Color.FromArgb(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
 
-						if (picker.ShowDialog() == DialogResult.OK)
-						{
-							info.colorComponents[0] = picker.Color.R;
-							info.colorComponents[1] = picker.Color.G;
-							info.colorComponents[2] = picker.Color.B;					
-                            
-                            err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
+                             if (picker.ShowDialog() == DialogResult.OK)
+                             {
+                                 info.colorComponents[0] = picker.Color.R;
+                                 info.colorComponents[1] = picker.Color.G;
+                                 info.colorComponents[2] = picker.Color.B;
 
-						}
-						else
-						{
-							err = PSError.userCanceledErr;
-						}
-					}
+                                 err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
+
+                             }
+                             else
+                             {
+                                err = PSError.userCanceledErr;
+                             }
+                                 
+                         }   
+                          
+                    }
 
 					break;
 				case ColorServicesSelector.plugIncolorServicesConvertColor:
@@ -2022,6 +2055,7 @@ namespace PSFilterLoad.PSApi
                     finally
                     {
                         maskBmp.UnlockBits(maskBD);
+                        maskBmp.Dispose();;
                         bmp.UnlockBits(bmpData);
                     }
                 }
@@ -2036,7 +2070,10 @@ namespace PSFilterLoad.PSApi
                             using (Graphics tempGr = Graphics.FromImage(temp))
                             {
                                 Rectangle rect = new Rectangle(0, 0, w, h);
-                                tempGr.FillRectangle(new HatchBrush(HatchStyle.LargeCheckerBoard, Color.Gainsboro, Color.White), rect);
+                                HatchBrush brush = new HatchBrush(HatchStyle.LargeCheckerBoard, Color.Gainsboro, Color.White);;
+                                tempGr.FillRectangle(brush, rect);
+                                brush.Dispose();
+
 
                                 tempGr.CompositingMode = CompositingMode.SourceOver;
                                 tempGr.CompositingQuality = CompositingQuality.HighQuality;
@@ -2422,7 +2459,8 @@ namespace PSFilterLoad.PSApi
                 filterRecord.planes = (short)4;
             }
 
-            if (filterCase == FilterCase.filterCaseEditableTransparencyWithSelection)
+            if (filterCase == FilterCase.filterCaseEditableTransparencyWithSelection 
+                || filterCase == FilterCase.filterCaseFlatImageWithSelection)
             {
                 filterRecord.floatCoord.h = (short)roi.Left;
                 filterRecord.floatCoord.v = (short)roi.Top;
@@ -2431,7 +2469,7 @@ namespace PSFilterLoad.PSApi
                 filterRecord.filterRect.right = (short)roi.Right;
                 filterRecord.filterRect.bottom = (short)roi.Bottom;
 
-                dest = (Bitmap)source.Clone();
+                //dest = (Bitmap)source.Clone();
             }
             else
             {
@@ -2734,8 +2772,6 @@ namespace PSFilterLoad.PSApi
 					}
 					parmData.Dispose();
 					progressFunc = null;
-
-
 
 					if (handle_valid(data))
 					{
