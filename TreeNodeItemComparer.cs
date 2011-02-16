@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace PSFilterPdn
 {
-    class TreeNodeItemComparer : IComparer
+    internal sealed class TreeNodeItemComparer : IComparer
     {
         private SortOrder order;
         public TreeNodeItemComparer()
