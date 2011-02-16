@@ -64,7 +64,7 @@ namespace PSFilterPdn
 
         protected override void InitialInitToken()
         {
-            theEffectToken = new PSFilterPdnConfigToken(string.Empty, string.Empty, string.Empty, string.Empty, true, ParameterData.Empty, null, false, false);
+            theEffectToken = new PSFilterPdnConfigToken(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, ParameterData.Empty, null, false, false);
         }
 
         protected override void InitTokenFromDialog()
@@ -73,7 +73,7 @@ namespace PSFilterPdn
             ((PSFilterPdnConfigToken)EffectToken).Dest = this.destSurface;
             ((PSFilterPdnConfigToken)EffectToken).EntryPoint = this.entryPoint;
             ((PSFilterPdnConfigToken)EffectToken).FileName = this.fileName;
-            ((PSFilterPdnConfigToken)EffectToken).FillOutData = this.fillOutData;
+            ((PSFilterPdnConfigToken)EffectToken).FilterCaseInfo = this.filterCaseInfo;
             ((PSFilterPdnConfigToken)EffectToken).Title = this.title;
             ((PSFilterPdnConfigToken)EffectToken).ParmData = (!string.IsNullOrEmpty(this.fileName) && parmData.ContainsKey(fileName))  ? parmData[fileName] : ParameterData.Empty;
             ((PSFilterPdnConfigToken)EffectToken).ReShowDialog = this.reShowFilter;
@@ -421,7 +421,7 @@ namespace PSFilterPdn
         private string fileName;
         private string entryPoint;
         private string title;
-        private bool fillOutData;
+        private string filterCaseInfo;
         private Dictionary<string, ParameterData> parmData = new Dictionary<string, ParameterData>();
 
         private abort abortFunc = null;
@@ -469,14 +469,12 @@ namespace PSFilterPdn
             proxyParmData.ParmDataIsPSHandle = bool.Parse(split[6]);
             proxyParmData.PluginDataIsPSHandle = bool.Parse(split[7]);
 
-            outputDone = true;
         }
         delegate void SetProxyErrorResultDelegate(string data);
         delegate void SetProxyParameterDataDelegate(string data);
         delegate void UpdateProxyProgressDelegate(int value); 
 
         ParameterData proxyParmData;
-        bool outputDone;
         private void UpdateProxyProgress(object sender, DataReceivedEventArgs e)
         {
             if (!string.IsNullOrEmpty(e.Data))
@@ -506,7 +504,6 @@ namespace PSFilterPdn
                             proxyParmData.PluginDataBytes = Convert.FromBase64String(split[5]);
                         }
 
-                        outputDone = true;
                     }
                 }
                 else
@@ -527,7 +524,7 @@ namespace PSFilterPdn
 
         private void SetProxyErrorResult(string data)
         {
-            if (data.StartsWith("Proxy"))
+            if (data.StartsWith("Proxy", StringComparison.Ordinal))
             {
                 string[] status = data.Substring(5).Split(new char[] { ',' });
 
@@ -553,7 +550,7 @@ namespace PSFilterPdn
                 }
                 else
                 {
-                    if (e.Data.StartsWith("Proxy"))
+                    if (e.Data.StartsWith("Proxy", StringComparison.Ordinal))
                     {
                         string[] status = e.Data.Substring(5).Split(new char[] { ',' });
 
@@ -573,7 +570,7 @@ namespace PSFilterPdn
         }
         private string GetHandleString()
         {
-            return this.Handle.ToInt64().ToString();
+            return this.Handle.ToInt64().ToString(CultureInfo.InvariantCulture);
         }
 
         delegate void SetProxyResultDelegate(string dest, PluginData data);
@@ -602,7 +599,8 @@ namespace PSFilterPdn
 
             string owner = (string)this.Invoke(new GetHandleStringDelegate(GetHandleString));
 
-            string pd = String.Format(CultureInfo.InvariantCulture, "\"{0}\",{1},\"{2}\",\"{3}\",{4}", new object[] { data.fileName, data.entryPoint, data.title, data.category, data.fillOutData });
+            string filterInfo = (string)this.Invoke(new GetFilterCaseInfoStringDelegate(GetFilterCaseInfoString), new object[] {data});
+            string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { data.fileName, data.entryPoint, data.title, data.category, filterInfo});
 
             string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", this.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked)), bool.FalseString, bool.FalseString);
 
@@ -616,10 +614,11 @@ namespace PSFilterPdn
             string pluginDataBytes = parm.PluginDataBytes == null ? string.Empty : Convert.ToBase64String(parm.PluginDataBytes);
             string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5},{6},{7}", new object[] { parm.HandleSize, parm.ParmHandle.ToInt64(), parm.PluginData.ToInt64(), parm.StoreMethod, parmBytes, pluginDataBytes, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
 
-            string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} {7}", new object[] { src, dest, pColor, sColor, rect, owner, pd, lpsArgs });
+            string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
 
+#if DEBUG
             Debug.WriteLine(pArgs);
-
+#endif
             
 
             ProcessStartInfo psi = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe"), pArgs);
@@ -631,7 +630,6 @@ namespace PSFilterPdn
 
             proxyResult = true; // assume the filter succeded this will be set to false if it failed
             proxyErrorMessage = string.Empty;
-            outputDone = false;
 
             proxyProcess = new Process();
 
@@ -639,18 +637,19 @@ namespace PSFilterPdn
             proxyProcess.OutputDataReceived += new DataReceivedEventHandler(UpdateProxyProgress);
             proxyProcess.ErrorDataReceived += new DataReceivedEventHandler(ProxyErrorDataReceived);
 
-
             proxyProcess.StartInfo = psi;
 
             try
             {
                 bool st = proxyProcess.Start();
+                proxyProcess.StandardInput.WriteLine(pd);
                 proxyProcess.StandardInput.WriteLine(parms);
                 proxyProcess.BeginErrorReadLine();
                 proxyProcess.BeginOutputReadLine();
+#if DEBUG
                 Debug.WriteLine("Started = " + st.ToString());
-
-                while (!outputDone && string.IsNullOrEmpty(proxyErrorMessage))
+#endif
+                while (!proxyProcess.HasExited)
                 {
                     Application.DoEvents();
                     Thread.Sleep(250);
@@ -681,7 +680,7 @@ namespace PSFilterPdn
                 this.entryPoint = data.entryPoint;
                 this.title = data.title;
                 this.category = data.category;
-                this.fillOutData = data.fillOutData;
+                this.filterCaseInfo = GetFilterCaseInfoString(data);
                 using (Bitmap dst = new Bitmap(dest))
                 {
                     this.destSurface = Surface.CopyFromBitmap(dst);
@@ -824,7 +823,7 @@ namespace PSFilterPdn
                                 this.entryPoint = data.entryPoint;
                                 this.title = data.title;
                                 this.category = data.category;
-                                this.fillOutData = data.fillOutData;
+                                this.filterCaseInfo = GetFilterCaseInfoString(data);
                                 if (ReShowEffectDialog(data))
                                 {
                                     this.reShowFilter = true; // Flaming Pear filters fail if the Repeat Effect command is used without re-showing the dialog.
@@ -886,7 +885,7 @@ namespace PSFilterPdn
             catch (ArgumentOutOfRangeException ex)
             {
 #if DEBUG
-               Debug.WriteLine(ex.Message);
+                Debug.WriteLine(ex.Message);
                 Debug.Write(ex.StackTrace); 
 #else
                 MessageBox.Show(this, ex.Message + Environment.NewLine + ex.StackTrace, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -1256,7 +1255,7 @@ namespace PSFilterPdn
                 }
                 UpdateFilterList();
             }
-
+            // set the useDEPProxy flag.
             if (IntPtr.Size == 4 && PaintDotNet.SystemLayer.OS.IsVistaOrLater)
             {
                 uint depFlags;
@@ -1273,8 +1272,6 @@ namespace PSFilterPdn
                     }
                 }
             }
-           
-           
         }
         protected override void OnShown(EventArgs e)
         {
@@ -1356,7 +1353,7 @@ namespace PSFilterPdn
         {
             if (settings != null)
             {
-                settings.PutSetting("searchSubDirs", subDirSearchCb.Checked.ToString());
+                settings.PutSetting("searchSubDirs", subDirSearchCb.Checked.ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -1452,6 +1449,32 @@ namespace PSFilterPdn
                     remDirBtn.Enabled = true;
                 }
             }
+        }
+        delegate string GetFilterCaseInfoStringDelegate(PluginData data); 
+        private string GetFilterCaseInfoString(PluginData data)
+        {
+            if (data.filterInfo != null)
+            {
+                string fici = string.Empty;
+
+                for (int i = 0; i < 7; i++)
+                {
+                    FilterCaseInfo info = data.filterInfo[i];
+                    string inputHandling = info.inputHandling.ToString("G");
+                    string outputHandling = info.inputHandling.ToString("G");
+
+
+                    fici += string.Format(CultureInfo.InvariantCulture, "{0}_{1}_{2}", new object[] { inputHandling, outputHandling, info.flags1.ToString(CultureInfo.InvariantCulture) });
+                    if (i < 6)
+                    {
+                        fici += ":";
+                    }
+                }
+
+                return fici;
+            }
+
+            return string.Empty;
         }
     }
 }
