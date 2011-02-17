@@ -1212,7 +1212,8 @@ namespace PSFilterLoad.PSApi
 
             if (pdata.filterInfo != null)
             {
-                fillOutData = ((pdata.filterInfo[filterCase].flags1 & FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit) == 0);
+                // compensate for the fact that the FilterCaseInfo array is zero indexed.
+                fillOutData = ((pdata.filterInfo[(filterCase - 1)].flags1 & FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit) == 0);
             } 
             isFM_FF = IsFMOrFFPlugin(pdata);
 
