@@ -551,7 +551,6 @@ namespace PSFilterLoad.PSApi
                             return true;
                         }
                     }
-					return true;
 				}
 			}
 			return false;
