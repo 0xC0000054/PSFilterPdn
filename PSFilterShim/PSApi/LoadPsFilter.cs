@@ -2014,7 +2014,7 @@ namespace PSFilterLoad.PSApi
                             using (Graphics tempGr = Graphics.FromImage(temp))
                             {
                                 Rectangle rect = new Rectangle(0, 0, w, h);
-                                tempGr.FillRectangle(new HatchBrush(HatchStyle.LargeCheckerBoard, Color.Gainsboro, Color.White), rect);
+                                tempGr.FillRectangle(new HatchBrush(HatchStyle.LargeCheckerBoard, Color.FromArgb(192, 192, 192), Color.White), rect);
 
                                 tempGr.CompositingMode = CompositingMode.SourceOver;
                                 tempGr.CompositingQuality = CompositingQuality.HighQuality;
