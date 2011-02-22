@@ -2070,7 +2070,7 @@ namespace PSFilterLoad.PSApi
                             using (Graphics tempGr = Graphics.FromImage(temp))
                             {
                                 Rectangle rect = new Rectangle(0, 0, w, h);
-                                HatchBrush brush = new HatchBrush(HatchStyle.LargeCheckerBoard, Color.Gainsboro, Color.White);;
+                                HatchBrush brush = new HatchBrush(HatchStyle.LargeCheckerBoard, Color.FromArgb(192, 192, 192), Color.White); ;
                                 tempGr.FillRectangle(brush, rect);
                                 brush.Dispose();
 
