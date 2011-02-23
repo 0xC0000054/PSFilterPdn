@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using PSFilterLoad.PSApi;
 using System.Globalization;
 using System.IO;
+using PSFilterLoad.PSApi;
 
 namespace PSFilterShim
 {
