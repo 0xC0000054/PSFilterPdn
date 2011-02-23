@@ -455,20 +455,20 @@ namespace PSFilterPdn
 
 			proxyParmData = new ParameterData();
 
-			proxyParmData.HandleSize = long.Parse(split[0]);
-			proxyParmData.ParmHandle = new IntPtr(long.Parse(split[1]));
-			proxyParmData.PluginData = new IntPtr(long.Parse(split[2]));
-			proxyParmData.StoreMethod = int.Parse(split[3]);
-			if (!string.IsNullOrEmpty(split[4]))
-			{
-				proxyParmData.ParmDataBytes = Convert.FromBase64String(split[4]);
-			}
-			if (!string.IsNullOrEmpty(split[5]))
-			{
-				proxyParmData.PluginDataBytes = Convert.FromBase64String(split[5]);
-			}
-			proxyParmData.ParmDataIsPSHandle = bool.Parse(split[6]);
-			proxyParmData.PluginDataIsPSHandle = bool.Parse(split[7]);
+            proxyParmData.ParmDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
+            proxyParmData.StoreMethod = int.Parse(split[1], CultureInfo.InvariantCulture);
+
+            proxyParmData.ParmDataIsPSHandle = bool.Parse(split[2]);
+            proxyParmData.PluginDataIsPSHandle = bool.Parse(split[3]);
+
+            if (!string.IsNullOrEmpty(split[4]))
+            {
+                proxyParmData.ParmDataBytes = File.ReadAllBytes(split[4]);
+            }
+            if (!string.IsNullOrEmpty(split[5]))
+            {
+                proxyParmData.PluginDataBytes = File.ReadAllBytes(split[5]);
+            }
 
 		}
 		delegate void SetProxyErrorResultDelegate(string data);
@@ -492,18 +492,21 @@ namespace PSFilterPdn
 
 						proxyParmData = new ParameterData();
 
-						proxyParmData.HandleSize = long.Parse(split[0]);
-						proxyParmData.ParmHandle = new IntPtr(long.Parse(split[1]));
-						proxyParmData.PluginData = new IntPtr(long.Parse(split[2]));
-						proxyParmData.StoreMethod = int.Parse(split[3]);
-						if (!string.IsNullOrEmpty(split[4]))
-						{
-							proxyParmData.ParmDataBytes = Convert.FromBase64String(split[4]);
-						}
-						if (!string.IsNullOrEmpty(split[5]))
-						{
-							proxyParmData.PluginDataBytes = Convert.FromBase64String(split[5]);
-						}
+                        proxyParmData.ParmDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
+                        proxyParmData.StoreMethod = int.Parse(split[1], CultureInfo.InvariantCulture);
+                      
+                        proxyParmData.ParmDataIsPSHandle = bool.Parse(split[2]);
+                        proxyParmData.PluginDataIsPSHandle = bool.Parse(split[3]);
+
+                        if (!string.IsNullOrEmpty(split[4]))
+                        {
+                            proxyParmData.ParmDataBytes = File.ReadAllBytes(split[4]);
+                        }
+                        if (!string.IsNullOrEmpty(split[5]))
+                        {
+                            proxyParmData.PluginDataBytes = File.ReadAllBytes(split[5]);
+                        }
+
 
 					}
 				}
@@ -580,8 +583,10 @@ namespace PSFilterPdn
 		Process proxyProcess = new Process();
 		string src = string.Empty;
 		string dest = string.Empty;
-
-		private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
+        string parmBytesFileName;
+        string pluginDataBytesFileName;
+		
+        private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
 		{
 			src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
 
@@ -611,9 +616,20 @@ namespace PSFilterPdn
 				parm = parmData[data.fileName];
 			}
 
-			string parmBytes = parm.ParmDataBytes == null ? string.Empty : Convert.ToBase64String(parm.ParmDataBytes);
-			string pluginDataBytes = parm.PluginDataBytes == null ? string.Empty : Convert.ToBase64String(parm.PluginDataBytes);
-			string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5},{6},{7}", new object[] { parm.HandleSize, parm.ParmHandle.ToInt64(), parm.PluginData.ToInt64(), parm.StoreMethod, parmBytes, pluginDataBytes, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
+            string parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
+            string pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
+
+            if (!string.IsNullOrEmpty(parmBytesFileName))
+            {
+                File.WriteAllBytes(parmBytesFileName, parm.ParmDataBytes);
+            }
+
+            if (!string.IsNullOrEmpty(pluginDataBytesFileName))
+            {
+                File.WriteAllBytes(pluginDataBytesFileName, parm.PluginDataBytes);
+            }
+
+			string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5}", new object[] { parm.ParmDataSize, parm.StoreMethod, parmBytesFileName, pluginDataBytesFileName, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
 
 			string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
 
@@ -738,6 +754,14 @@ namespace PSFilterPdn
 			{
 				File.Delete(dest);
 			}
+            if (File.Exists(parmBytesFileName))
+            {
+                File.Delete(parmBytesFileName);
+            }
+            if (File.Exists(pluginDataBytesFileName))
+            {
+                File.Delete(pluginDataBytesFileName);
+            }
 
 			proxyThread.Abort();
 			proxyThread = null;
