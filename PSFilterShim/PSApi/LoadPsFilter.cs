@@ -516,13 +516,12 @@ namespace PSFilterLoad.PSApi
 
         static bool IgnoreAlphaChannel(PluginData data)
         {
-            if (data.category == "Filter Forge" || data.category == "DCE Tools"
-                || data.category.Contains("Eye Candy") || data.category == "L'amico Perry")
+            if (data.category == "Filter Forge" || data.category == "DCE Tools" || data.category == "L'amico Perry")
             {
                 return true;
             }
 
-            // The list in PSFilterShim's LoadPsFilter must be updated to reflect changes in this list.
+            /*// The list in PSFilterShim's LoadPsFilter must be updated to reflect changes in this list.
             Dictionary<string, string[]> ignoreAlphaList = new Dictionary<string, string[]>();
 
             ignoreAlphaList.Add("Flaming Pear", new string[17] {"Anaglyph Flip", "ChromaSolarize","Demitone 25", "Demitone 50", 
@@ -541,7 +540,24 @@ namespace PSFilterLoad.PSApi
                         }
                     }
                 }
+            }*/
+            if (data.filterInfo != null)
+            {
+                if (data.filterInfo[(filterCase - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
+                {
+                    switch (filterCase)
+                    {
+                        case FilterCase.filterCaseEditableTransparencyNoSelection:
+                            filterCase = FilterCase.filterCaseFlatImageNoSelection;
+                            break;
+                        case FilterCase.filterCaseFlatImageWithSelection:
+                            filterCase = FilterCase.filterCaseFlatImageWithSelection;
+                            break;
+                    }
+                    return true;
+                }
             }
+
             return false;
         }
 
@@ -635,52 +651,6 @@ namespace PSFilterLoad.PSApi
                 pdata.entry.dll = IntPtr.Zero;
                 pdata.entry.entry = null;
             }
-        }
-
-        static bool isFM_FF;
-        /// <summary>
-        /// Determines whether the filter is a Filter Meister or Filter Factory plugin.
-        /// </summary>
-        /// <param name="data">The <c>PluginData</c> to check.</param>
-        /// <returns>
-        ///   <c>true</c> if the filter is a Filter Meister or Filter Factory plugin; otherwise, <c>false</c>.
-        /// </returns>
-        static bool IsFMOrFFPlugin(PluginData data)
-        {
-            bool isFF = !NativeMethods.EnumResourceNames(data.entry.dll, "PARM", new EnumResNameDelegate(delegate(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
-            {
-
-                IntPtr find = NativeMethods.FindResource(hModule, lpszName, lpszType);
-                if (find == IntPtr.Zero)
-                {
-                    return true;
-                }
-                return false;
-            }), IntPtr.Zero);
-
-            bool isFMCode = !NativeMethods.EnumResourceNames(data.entry.dll, "FMCODE", new EnumResNameDelegate(delegate(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
-            {
-
-                IntPtr find = NativeMethods.FindResource(hModule, lpszName, lpszType);
-                if (find == IntPtr.Zero)
-                {
-                    return true;
-                }
-                return false;
-            }), IntPtr.Zero);
-            bool isFMDlg = !NativeMethods.EnumResourceNamesWithID(data.entry.dll, NativeConstants.RT_DIALOG, new EnumResNameDelegate(delegate(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
-            {
-
-
-                if (Marshal.PtrToStringAnsi(lpszName) == "FILTERPARAM")
-                {
-                    return true;
-                }
-                return false;
-            }), IntPtr.Zero);
-
-
-            return (isFF || isFMCode || isFMDlg);
         }
 
         /// <summary>
@@ -1220,7 +1190,6 @@ namespace PSFilterLoad.PSApi
                 // compensate for the fact that the FilterCaseInfo array is zero indexed.
                 fillOutData = ((pdata.filterInfo[(filterCase - 1)].flags1 & FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit) == 0);
             } 
-            isFM_FF = IsFMOrFFPlugin(pdata);
 
             if (showAbout)
             {
@@ -1417,6 +1386,7 @@ namespace PSFilterLoad.PSApi
 
             return PSError.noErr;
         }
+
 
         /// <summary>
         /// Fills the input buffer with data from the source image.
