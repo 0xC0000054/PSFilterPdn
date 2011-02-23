@@ -142,6 +142,7 @@ namespace PSFilterPdn
             this.runWith32BitShim = useshim;
         }
 
+#pragma warning disable 628
         protected PSFilterPdnConfigToken(PSFilterPdnConfigToken copyMe)
             : base(copyMe)
         {
@@ -155,6 +156,7 @@ namespace PSFilterPdn
             this.reShowDialog = copyMe.reShowDialog;
             this.runWith32BitShim = copyMe.runWith32BitShim;
         }
+#pragma warning disable 628
 
         public override object Clone()
         {
