@@ -524,35 +524,29 @@ namespace PSFilterLoad.PSApi
 		static bool ignoreAlpha;
 
 		static bool IgnoreAlphaChannel(PluginData data)
-		{
+        {
             if (data.category == "Filter Forge" || data.category == "DCE Tools")
-			{
-				return true;
-			}
+            {
+                return true;
+            }
 
-            Dictionary<string, string[]> ignoreAlphaList = new Dictionary<string, string[]>();
- 
-            ignoreAlphaList.Add("Flaming Pear", new string[17] {"Anaglyph Flip", "ChromaSolarize","Demitone 25", "Demitone 50", 
-			"Gray From Red", "Gray From Green", "Gray From Blue", "HSL -> RGB", "Lab ->RGB","Make Iso Cube Tile",
-			"RGB -> HSL", "RGB -> LAB", "Swap Green:Blue", "Swap Red:Blue", "Swap Red:Green", "Tachyon", "Vitriol"});
-
-
-			// The list in PSFilterShim's LoadPsFilter must be updated to reflect changes in this list.
-
-
-			foreach (var item in ignoreAlphaList)
-			{
-				if (data.category == item.Key)
-				{
-                    foreach (string title in item.Value)
+            if (data.filterInfo != null)
+            {
+                if (data.filterInfo[(filterCase - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
+                { 
+                    switch (filterCase)
                     {
-                        if (data.title == title)
-                        {
-                            return true;
-                        }
+                        case FilterCase.filterCaseEditableTransparencyNoSelection:
+                            filterCase = FilterCase.filterCaseFlatImageNoSelection;
+                            break;
+                        case FilterCase.filterCaseFlatImageWithSelection:
+                            filterCase = FilterCase.filterCaseFlatImageWithSelection;
+                            break;
                     }
-				}
-			}
+                    return true;
+                } 
+            }
+
 			return false;
 		}
 
@@ -1165,19 +1159,6 @@ namespace PSFilterLoad.PSApi
 			}			
             
             ignoreAlpha = IgnoreAlphaChannel(pdata);
-
-            if (ignoreAlpha)
-            {
-                switch (filterCase)
-                {
-                    case FilterCase.filterCaseEditableTransparencyNoSelection:
-                        filterCase = FilterCase.filterCaseFlatImageNoSelection;
-                        break;
-                    case FilterCase.filterCaseEditableTransparencyWithSelection:
-                        filterCase = FilterCase.filterCaseFlatImageWithSelection;
-                        break;
-                }
-            }
 
             if (pdata.filterInfo != null)
             {
