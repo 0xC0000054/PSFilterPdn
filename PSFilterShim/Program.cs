@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using PSFilterLoad.PSApi;
 using System.Globalization;
+using System.IO;
 
 namespace PSFilterShim
 {
@@ -68,14 +69,12 @@ namespace PSFilterShim
                 string[] parmData = Console.ReadLine().Split(new char[] {','});
 
                 ParameterData parm = new ParameterData();
-                parm.HandleSize = long.Parse(parmData[0]);
-                parm.ParmHandle = new IntPtr(long.Parse(parmData[1]));
-                parm.PluginData = new IntPtr(long.Parse(parmData[2]));
-                parm.StoreMethod = int.Parse(parmData[3]);
-                parm.ParmDataBytes = string.IsNullOrEmpty(parmData[4]) ? null : Convert.FromBase64String(parmData[4]);
-                parm.PluginDataBytes = string.IsNullOrEmpty(parmData[5]) ? null : Convert.FromBase64String(parmData[5]);
-                parm.ParmDataIsPSHandle = bool.Parse(parmData[6]);
-                parm.PluginDataIsPSHandle = bool.Parse(parmData[7]);
+                parm.ParmDataSize = long.Parse(parmData[0]);
+                parm.StoreMethod = int.Parse(parmData[1]);
+                parm.ParmDataBytes = string.IsNullOrEmpty(parmData[2]) ? null : File.ReadAllBytes(parmData[2]);
+                parm.PluginDataBytes = string.IsNullOrEmpty(parmData[3]) ? null : File.ReadAllBytes(parmData[3]);
+                parm.ParmDataIsPSHandle = bool.Parse(parmData[4]);
+                parm.PluginDataIsPSHandle = bool.Parse(parmData[5]);
                 try
                 {
                     using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, owner))
@@ -90,10 +89,22 @@ namespace PSFilterShim
                         if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
                         {
                             lps.Dest.Save(dstImg, ImageFormat.Png);
-                            string parmBytes = lps.ParmData.ParmDataBytes == null ? string.Empty : Convert.ToBase64String(lps.ParmData.ParmDataBytes);
-                            string pluginDataBytes = lps.ParmData.PluginDataBytes == null ? string.Empty : Convert.ToBase64String(lps.ParmData.PluginDataBytes);
 
-                            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "parm{0},{1},{2},{3},{4},{5},{6},{7}", new object[] { lps.ParmData.HandleSize, lps.ParmData.ParmHandle.ToInt64(), lps.ParmData.PluginData.ToInt64(), lps.ParmData.StoreMethod, parmBytes, pluginDataBytes, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle }));
+                            string parmBytesFileName = lps.ParmData.ParmDataBytes == null ? string.Empty : Path.Combine(Path.GetDirectoryName(dstImg), "filterParmBytes.dat");
+                            string pluginDataBytesFileName = lps.ParmData.PluginDataBytes == null ? string.Empty : Path.Combine(Path.GetDirectoryName(dstImg), "filterParmBytes.dat");
+
+                            if (!string.IsNullOrEmpty(parmBytesFileName))
+                            {
+                                File.WriteAllBytes(parmBytesFileName, lps.ParmData.ParmDataBytes);
+                            }
+
+                            if (!string.IsNullOrEmpty(pluginDataBytesFileName))
+                            {
+                                File.WriteAllBytes(pluginDataBytesFileName, lps.ParmData.PluginDataBytes);
+                            }
+                            
+                            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "parm{0},{1},{2},{3},{4},{5}", new object[] { lps.ParmData.ParmDataSize, lps.ParmData.StoreMethod, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle, pluginDataBytesFileName, pluginDataBytesFileName}));
+
                         }
                         else
                         {
