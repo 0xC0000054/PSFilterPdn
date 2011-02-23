@@ -1,46 +1,21 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
 {
     /// <summary>
     /// The struct that holds the saved filter parameter data.
     /// </summary>
-    public sealed class ParameterData : IDisposable
+    public sealed class ParameterData
     {
 
-        private IntPtr parmHandle;
-        private long handleSize;
+        private long parmDataSize;
         private byte[] paramDataBytes;
         private bool parmDataIsPSHandle;
-        private IntPtr pluginData;
         private long pluginDataSize;
         private byte[] pluginDataBytes;
         private bool pluginDataIsPSHandle;
         private int storeMethod;
-
-        public IntPtr ParmHandle
-        {
-            get
-            {
-                return parmHandle;
-            }
-            internal set
-            {
-                parmHandle = value;
-            }
-        }
-
-        public long HandleSize
-        {
-            get
-            {
-                return handleSize;
-            }
-            internal set
-            {
-                handleSize = value;
-            }
-        }
 
         public byte[] ParmDataBytes
         {
@@ -51,6 +26,18 @@ namespace PSFilterLoad.PSApi
             internal set
             {
                 paramDataBytes = value;
+            }
+        }
+
+        public long ParmDataSize
+        {
+            get
+            {
+                return parmDataSize;
+            }
+            internal set
+            {
+                parmDataSize = value;
             }
         }
 
@@ -69,16 +56,15 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-
-        public IntPtr PluginData
+        public byte[] PluginDataBytes
         {
             get
             {
-                return pluginData;
+                return pluginDataBytes;
             }
             internal set
             {
-                pluginData = value;
+                pluginDataBytes = value;
             }
         }
 
@@ -94,17 +80,6 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public byte[] PluginDataBytes
-        {
-            get
-            {
-                return pluginDataBytes;
-            }
-            internal set
-            {
-                pluginDataBytes = value;
-            }
-        }
         /// <summary>
         /// Is the plugin data a PS Handle (OTOF signature).
         /// </summary>
@@ -134,18 +109,9 @@ namespace PSFilterLoad.PSApi
 
         public static readonly ParameterData Empty = new ParameterData();
 
-        #region IDisposable Members
-        private bool disposed;
-        public void Dispose()
+        public ParameterData()
         {
-            if (!disposed)
-            {
-                parmHandle = IntPtr.Zero;
-                pluginData = IntPtr.Zero;
-                disposed = true;
-            }
         }
-
-        #endregion
+       
     }
 }
