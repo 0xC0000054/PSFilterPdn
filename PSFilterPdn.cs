@@ -1,16 +1,16 @@
 using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Threading;
 using System.Windows.Forms;
 using PaintDotNet;
 using PaintDotNet.Effects;
 using PSFilterLoad.PSApi;
 using PSFilterPdn.Properties;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Threading;
-using System.ComponentModel;
-using System.Globalization;
 
 namespace PSFilterPdn
 {
