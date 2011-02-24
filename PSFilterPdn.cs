@@ -38,7 +38,10 @@ namespace PSFilterPdn
         {
             dlg = null;
             proxyResult = false;
+            proxyProcess = null;
             proxyErrorMessage = string.Empty;
+            parmBytesFileName = string.Empty;
+            pluginDataBytesFileName = string.Empty;
         }
        
         /// <summary>
@@ -79,6 +82,7 @@ namespace PSFilterPdn
             }
         }
         ParameterData proxyParmData;
+
         private void UpdateProxyProgress(object sender, DataReceivedEventArgs e)
         {
             if (!string.IsNullOrEmpty(e.Data))
@@ -97,10 +101,12 @@ namespace PSFilterPdn
 
                     if (!string.IsNullOrEmpty(split[4]))
                     {
+                        parmBytesFileName = split[4];
                         proxyParmData.ParmDataBytes = File.ReadAllBytes(split[4]);
                     }
                     if (!string.IsNullOrEmpty(split[5]))
                     {
+                        pluginDataBytesFileName = split[5];
                         proxyParmData.PluginDataBytes = File.ReadAllBytes(split[5]);
                     }
 
@@ -126,8 +132,9 @@ namespace PSFilterPdn
             return info;
         }
 
-        private Process proxyProcess = null;
-
+        private Process proxyProcess;
+        string parmBytesFileName;
+        string pluginDataBytesFileName;
         private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token)
         {
             string src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
@@ -158,8 +165,8 @@ namespace PSFilterPdn
                 ParameterData parm = token.ParmData;
 
 
-                string parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
-                string pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
+                parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
+                pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
 
                 if (!string.IsNullOrEmpty(parmBytesFileName))
                 {
