@@ -1981,20 +1981,40 @@ namespace PSFilterLoad.PSApi
 
                 using (Graphics gr = Graphics.FromHdc(platformContext))
                 {
-                    if (maskNonEmpty)
+                    if (maskNonEmpty || source.colBytes == 4)
                     {
                         using (Bitmap temp = new Bitmap(w, h, PixelFormat.Format32bppArgb))
                         {
 
+
+                            Rectangle rect = new Rectangle(0, 0, w, h);
+                            BitmapData bd = temp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                            try
+                            {
+                                for (int y = 0; y < temp.Height; y++)
+                                {
+                                    byte* p = (byte*)bd.Scan0.ToPointer() + (y * data.Stride);
+                                    for (int x = 0; x < data.Width; x++)
+                                    {
+                                        byte v = (byte)((((x ^ y) & 8) * 8) + 191);
+
+                                        p[0] = p[1] = p[2] = v;
+                                        p[3] = 255;
+
+                                        p += 4;
+                                    }
+                                }
+                            }
+                            finally
+                            {
+                                temp.UnlockBits(bd);
+                            }
+
                             using (Graphics tempGr = Graphics.FromImage(temp))
                             {
-                                Rectangle rect = new Rectangle(0, 0, w, h);
-                                tempGr.FillRectangle(new HatchBrush(HatchStyle.LargeCheckerBoard, Color.FromArgb(192, 192, 192), Color.White), rect);
-
-                                tempGr.CompositingMode = CompositingMode.SourceOver;
-                                tempGr.CompositingQuality = CompositingQuality.HighQuality;
                                 tempGr.DrawImageUnscaled(bmp, rect);
                             }
+
 
                             // temp.Save(Path.Combine(Application.StartupPath, "masktemp.png"), ImageFormat.Png);
 
