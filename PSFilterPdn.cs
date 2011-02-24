@@ -131,72 +131,75 @@ namespace PSFilterPdn
         private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token)
         {
             string src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
-
-            using (Bitmap bmp = base.EnvironmentParameters.SourceSurface.CreateAliasedBitmap())
-            {
-                bmp.Save(src, System.Drawing.Imaging.ImageFormat.Png);
-            }
-
-            string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
-
-            string pColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", base.EnvironmentParameters.PrimaryColor.R, base.EnvironmentParameters.PrimaryColor.G, base.EnvironmentParameters.PrimaryColor.B);
-            string sColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", base.EnvironmentParameters.SecondaryColor.R, base.EnvironmentParameters.SecondaryColor.G, base.EnvironmentParameters.SecondaryColor.B);
-
-            Rectangle sRect = base.EnvironmentParameters.GetSelection(base.EnvironmentParameters.SourceSurface.Bounds).GetBoundsInt();
-            string rect = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3}", new object[] { sRect.X, sRect.Y, sRect.Width, sRect.Height });
-
-            string owner = Process.GetCurrentProcess().MainWindowHandle.ToInt64().ToString(CultureInfo.InvariantCulture);
-
-            string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { token.FileName, token.EntryPoint, token.Title, token.Category, token.FilterCaseInfo });
-
-            string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0},{1}", bool.FalseString, token.ReShowDialog ? bool.FalseString : bool.TrueString);
-
-            ParameterData parm = token.ParmData;
-
-
-            string parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
-            string pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
-
-            if (!string.IsNullOrEmpty(parmBytesFileName))
-            {
-                File.WriteAllBytes(parmBytesFileName, parm.ParmDataBytes);
-            }
-
-            if (!string.IsNullOrEmpty(pluginDataBytesFileName))
-            {
-                File.WriteAllBytes(pluginDataBytesFileName, parm.PluginDataBytes);
-            }
-
-            string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5}", new object[] { parm.ParmDataSize, parm.StoreMethod, parmBytesFileName, pluginDataBytesFileName, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
-
-
-            string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
-
-#if DEBUG
-            Debug.WriteLine(pArgs);
-#endif
-
-            ProcessStartInfo psi = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe"), pArgs);
-            psi.RedirectStandardInput = true;
-            psi.RedirectStandardError = true;
-            psi.RedirectStandardOutput = true;
-            psi.CreateNoWindow = true;
-            psi.UseShellExecute = false;
-
-            proxyResult = true; // assume the filter succeded this will be set to false if it failed
-            proxyErrorMessage = string.Empty;
-
-            proxyProcess = new Process();
-
-            proxyProcess.EnableRaisingEvents = true;
-            proxyProcess.OutputDataReceived += new DataReceivedEventHandler(UpdateProxyProgress);
-            proxyProcess.ErrorDataReceived += new DataReceivedEventHandler(ProxyErrorDataReceived);
-
-
-            proxyProcess.StartInfo = psi;
-
             try
             {
+                using (FileStream fs = new FileStream(src, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    using (Bitmap bmp = base.EnvironmentParameters.SourceSurface.CreateAliasedBitmap())
+                    {
+                        bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                }
+
+                string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
+
+                string pColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", base.EnvironmentParameters.PrimaryColor.R, base.EnvironmentParameters.PrimaryColor.G, base.EnvironmentParameters.PrimaryColor.B);
+                string sColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", base.EnvironmentParameters.SecondaryColor.R, base.EnvironmentParameters.SecondaryColor.G, base.EnvironmentParameters.SecondaryColor.B);
+
+                Rectangle sRect = base.EnvironmentParameters.GetSelection(base.EnvironmentParameters.SourceSurface.Bounds).GetBoundsInt();
+                string rect = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3}", new object[] { sRect.X, sRect.Y, sRect.Width, sRect.Height });
+
+                string owner = Process.GetCurrentProcess().MainWindowHandle.ToInt64().ToString(CultureInfo.InvariantCulture);
+
+                string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { token.FileName, token.EntryPoint, token.Title, token.Category, token.FilterCaseInfo });
+
+                string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0},{1}", bool.FalseString, token.ReShowDialog ? bool.FalseString : bool.TrueString);
+
+                ParameterData parm = token.ParmData;
+
+
+                string parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
+                string pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
+
+                if (!string.IsNullOrEmpty(parmBytesFileName))
+                {
+                    File.WriteAllBytes(parmBytesFileName, parm.ParmDataBytes);
+                }
+
+                if (!string.IsNullOrEmpty(pluginDataBytesFileName))
+                {
+                    File.WriteAllBytes(pluginDataBytesFileName, parm.PluginDataBytes);
+                }
+
+                string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5}", new object[] { parm.ParmDataSize, parm.StoreMethod, parmBytesFileName, pluginDataBytesFileName, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
+
+
+                string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
+
+#if DEBUG
+                Debug.WriteLine(pArgs);
+#endif
+
+                ProcessStartInfo psi = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe"), pArgs);
+                psi.RedirectStandardInput = true;
+                psi.RedirectStandardError = true;
+                psi.RedirectStandardOutput = true;
+                psi.CreateNoWindow = true;
+                psi.UseShellExecute = false;
+
+                proxyResult = true; // assume the filter succeded this will be set to false if it failed
+                proxyErrorMessage = string.Empty;
+
+                proxyProcess = new Process();
+
+                proxyProcess.EnableRaisingEvents = true;
+                proxyProcess.OutputDataReceived += new DataReceivedEventHandler(UpdateProxyProgress);
+                proxyProcess.ErrorDataReceived += new DataReceivedEventHandler(ProxyErrorDataReceived);
+
+
+                proxyProcess.StartInfo = psi;
+
+
                 bool st = proxyProcess.Start();
                 proxyProcess.StandardInput.WriteLine(pd);
                 proxyProcess.StandardInput.WriteLine(parms);
@@ -242,6 +245,14 @@ namespace PSFilterPdn
                     File.Delete(pluginDataBytesFileName);
                 }
 
+            }
+            catch (ArgumentException ax)
+            {
+                MessageBox.Show(ax.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show(ex.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Win32Exception wx)
             {
