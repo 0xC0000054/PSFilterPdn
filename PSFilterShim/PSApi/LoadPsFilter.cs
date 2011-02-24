@@ -1356,6 +1356,12 @@ namespace PSFilterLoad.PSApi
                 fill_buf(ref filterRecord.inData, ref filterRecord.inRowBytes, filterRecord.inRect, filterRecord.inLoPlane, filterRecord.inHiPlane);
                 src_valid = true;
             }
+            
+            Marshal.WriteIntPtr(filterRecordPtr.AddrOfPinnedObject(), inDataOfs, filterRecord.inData);
+            Marshal.WriteInt32(filterRecordPtr.AddrOfPinnedObject(), inRowBytesOfs, filterRecord.inRowBytes);
+
+            filterRecord = (FilterRecord)filterRecordPtr.Target;
+
 
             if (RectNonEmpty(filterRecord.outRect))
             {
@@ -1375,8 +1381,7 @@ namespace PSFilterLoad.PSApi
                 dst_valid = true;
             }
 
-            Marshal.WriteIntPtr(filterRecordPtr.AddrOfPinnedObject(), inDataOfs, filterRecord.inData);
-            Marshal.WriteInt32(filterRecordPtr.AddrOfPinnedObject(), inRowBytesOfs, filterRecord.inRowBytes);
+            
 
 #if DEBUG
             Debug.WriteLine(string.Format("indata = {0:X8}, inRowBytes = {1}", filterRecord.inData.ToInt64(), filterRecord.inRowBytes));
@@ -1879,17 +1884,18 @@ namespace PSFilterLoad.PSApi
                 {
                     for (int y = 0; y < data.Height; y++)
                     {
-                        if (planes == 4 && source.colBytes == 1)
-                        {
-                            for (int x = 0; x < data.Width; x++)
-                            {
-                                byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + (x * 4);
-                                p[3] = 255;
-                            }
-                        }
-
+                       
                         if (source.colBytes == 1)
                         {
+ 
+                            if (planes == 4 && source.colBytes == 1)
+                            {
+                                for (int x = 0; x < data.Width; x++)
+                                {
+                                    byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + (x * 4);
+                                    p[3] = 255;
+                                }
+                            }
 
                             for (int i = 0; i < planes; i++)
                             {
@@ -1920,9 +1926,9 @@ namespace PSFilterLoad.PSApi
                         {
 
                             byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                            byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y);
                             for (int x = 0; x < data.Width; x++)
                             {
-                                byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (x * source.colBytes);
                                 p[0] = q[2];
                                 p[1] = q[1];
                                 p[2] = q[0];
@@ -1932,7 +1938,7 @@ namespace PSFilterLoad.PSApi
                                 }
 
                                 p += bpp;
-                                //q += source.colBytes;
+                                q += source.colBytes;
                             }
                         }
                     }
