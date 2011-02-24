@@ -750,6 +750,12 @@ namespace PSFilterPdn
 			}
 			else
 			{
+                if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage) && proxyErrorMessage != Resources.UserCanceledError)
+                {
+                    MessageBox.Show(this, proxyErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+
 				if (destSurface != null)
 				{
 					destSurface.Dispose();
@@ -765,6 +771,8 @@ namespace PSFilterPdn
 
 				filterProgressBar.Value = 0;
 			}
+
+
 
 			if (filterProgressBar.Value == filterProgressBar.Maximum)
 			{
