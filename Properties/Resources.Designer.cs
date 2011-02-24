@@ -61,7 +61,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad parameters.
+        ///   Looks up a localized string similar to Bad parameters..
         /// </summary>
         internal static string BadParameters {
             get {
@@ -79,7 +79,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Disk full.
+        ///   Looks up a localized string similar to Disk full..
         /// </summary>
         internal static string DiskFullError {
             get {
@@ -88,7 +88,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This Paint.NET plug-in does not support colBytes other than 1.
+        ///   Looks up a localized string similar to This Paint.NET plug-in does not support colBytes other than 1..
         /// </summary>
         internal static string errHostDoesNotSupportColStep {
             get {
@@ -97,7 +97,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Requires services not provided by this Paint.NET plug-in.
+        ///   Looks up a localized string similar to Requires services not provided by this Paint.NET plug-in..
         /// </summary>
         internal static string errPlugInHostInsufficient {
             get {
@@ -106,7 +106,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A requested property could not be found.
+        ///   Looks up a localized string similar to A requested property could not be found..
         /// </summary>
         internal static string errPlugInPropertyUndefined {
             get {
@@ -115,7 +115,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File I/O error.
+        ///   Looks up a localized string similar to File I/O error..
         /// </summary>
         internal static string FileIOError {
             get {
@@ -124,7 +124,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File open error.
+        ///   Looks up a localized string similar to File open error..
         /// </summary>
         internal static string FileOpenError {
             get {
@@ -133,7 +133,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File read error.
+        ///   Looks up a localized string similar to File read error..
         /// </summary>
         internal static string FileReadError {
             get {
@@ -142,7 +142,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File write error.
+        ///   Looks up a localized string similar to File write error..
         /// </summary>
         internal static string FileWriteError {
             get {
@@ -178,7 +178,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid PiPl version in {0}: {1},  Expected version 0.
+        ///   Looks up a localized string similar to Invalid PiPl version in {0}: {1},  Expected version 0..
         /// </summary>
         internal static string InvalidPiPLVersionFormat {
             get {
@@ -187,7 +187,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid sample point.
+        ///   Looks up a localized string similar to Invalid sample point..
         /// </summary>
         internal static string InvalidSamplePoint {
             get {
@@ -196,7 +196,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Null handle error.
+        ///   Looks up a localized string similar to Null handle error..
         /// </summary>
         internal static string NullHandleError {
             get {
@@ -205,7 +205,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Out of memory.
+        ///   Looks up a localized string similar to Out of memory..
         /// </summary>
         internal static string OutOfMemoryError {
             get {
@@ -214,7 +214,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unsupported image mode.
+        ///   Looks up a localized string similar to Unsupported image mode..
         /// </summary>
         internal static string UnsupportedImageMode {
             get {

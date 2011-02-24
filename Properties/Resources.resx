@@ -122,55 +122,55 @@
     <comment>UserCanceledError description</comment>
   </data>
   <data name="FileReadError" xml:space="preserve">
-    <value>File read error</value>
+    <value>File read error.</value>
     <comment>FileReadError description</comment>
   </data>
   <data name="FileWriteError" xml:space="preserve">
-    <value>File write error</value>
+    <value>File write error.</value>
     <comment>FileWriteError description</comment>
   </data>
   <data name="FileOpenError" xml:space="preserve">
-    <value>File open error</value>
+    <value>File open error.</value>
     <comment>FileOpenError description</comment>
   </data>
   <data name="DiskFullError" xml:space="preserve">
-    <value>Disk full</value>
+    <value>Disk full.</value>
     <comment>DiskFull description</comment>
   </data>
   <data name="FileIOError" xml:space="preserve">
-    <value>File I/O error</value>
+    <value>File I/O error.</value>
     <comment>FileIOError description</comment>
   </data>
   <data name="OutOfMemoryError" xml:space="preserve">
-    <value>Out of memory</value>
+    <value>Out of memory.</value>
     <comment>OutOfMemory description</comment>
   </data>
   <data name="NullHandleError" xml:space="preserve">
-    <value>Null handle error</value>
+    <value>Null handle error.</value>
     <comment>NullHandleError description</comment>
   </data>
   <data name="BadParameters" xml:space="preserve">
-    <value>Bad parameters</value>
+    <value>Bad parameters.</value>
     <comment>BadParameters description</comment>
   </data>
   <data name="UnsupportedImageMode" xml:space="preserve">
-    <value>Unsupported image mode</value>
+    <value>Unsupported image mode.</value>
     <comment>UnsupportedImageMode description</comment>
   </data>
   <data name="errPlugInHostInsufficient" xml:space="preserve">
-    <value>Requires services not provided by this Paint.NET plug-in</value>
+    <value>Requires services not provided by this Paint.NET plug-in.</value>
     <comment>RequiresServicesNotProvidedByThisPlugIn description</comment>
   </data>
   <data name="errPlugInPropertyUndefined" xml:space="preserve">
-    <value>A requested property could not be found</value>
+    <value>A requested property could not be found.</value>
     <comment>ARequestedPropertyCouldNotBeFound description</comment>
   </data>
   <data name="errHostDoesNotSupportColStep" xml:space="preserve">
-    <value>This Paint.NET plug-in does not support colBytes other than 1</value>
+    <value>This Paint.NET plug-in does not support colBytes other than 1.</value>
     <comment>ThisPlugInDoesNotSupportColBytesOtherThan1 description</comment>
   </data>
   <data name="InvalidSamplePoint" xml:space="preserve">
-    <value>Invalid sample point</value>
+    <value>Invalid sample point.</value>
     <comment>InvalidSamplePoint description</comment>
   </data>
   <data name="ConfigDialog_FilterSearchBox_BackText" xml:space="preserve">
@@ -186,6 +186,6 @@
     <value>Image Width must be less than or equal to 32000 pixels.</value>
   </data>
   <data name="InvalidPiPLVersionFormat" xml:space="preserve">
-    <value>Invalid PiPl version in {0}: {1},  Expected version 0</value>
+    <value>Invalid PiPl version in {0}: {1},  Expected version 0.</value>
   </data>
 </root>
