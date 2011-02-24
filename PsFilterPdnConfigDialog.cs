@@ -471,10 +471,12 @@ namespace PSFilterPdn
 
             if (!string.IsNullOrEmpty(split[4]))
             {
+                parmBytesFileName = split[4];
                 proxyParmData.ParmDataBytes = File.ReadAllBytes(split[4]);
             }
             if (!string.IsNullOrEmpty(split[5]))
             {
+                pluginDataBytesFileName = split[5];
                 proxyParmData.PluginDataBytes = File.ReadAllBytes(split[5]);
             }
 
@@ -508,10 +510,12 @@ namespace PSFilterPdn
 
                         if (!string.IsNullOrEmpty(split[4]))
                         {
+                            parmBytesFileName = split[4];
                             proxyParmData.ParmDataBytes = File.ReadAllBytes(split[4]);
                         }
                         if (!string.IsNullOrEmpty(split[5]))
                         {
+                            pluginDataBytesFileName = split[5];
                             proxyParmData.PluginDataBytes = File.ReadAllBytes(split[5]);
                         }
 
