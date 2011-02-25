@@ -525,7 +525,7 @@ namespace PSFilterLoad.PSApi
 
 		static bool IgnoreAlphaChannel(PluginData data)
         {
-            if (data.category == "Filter Forge" || data.category == "DCE Tools")
+            if (data.category == "DCE Tools")
             {
                 return true;
             }
@@ -1687,12 +1687,14 @@ namespace PSFilterLoad.PSApi
 									{ 
 										byte *q = (byte*)outData.ToPointer() + (y * outRowBytes) + (x * nplanes) + (i - loplane);
 										byte *p = dstPtr +  ((x * bpp) + ofs);
-
-										byte *alpha = dstPtr + ((x * bpp) + 3); 
+                                        
+                                        if (hiplane < 3)
+                                        {
+                                            byte* alpha = dstPtr + ((x * bpp) + 3);
+                                            *alpha = 255;
+                                        }
 											
 										*p = *q;
-
-										*alpha = 255;
 									}
 								}
 							}
