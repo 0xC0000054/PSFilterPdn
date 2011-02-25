@@ -1898,42 +1898,6 @@ namespace PSFilterLoad.PSApi
             int h = srcRect.bottom - srcRect.top;
             int planes = filterRecord.planes;
 
-            if (source.mat != IntPtr.Zero)
-            {
-                PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.mat, typeof(PSPixelMask));
-            }
-            Bitmap maskBmp = null;
-            if (source.masks != IntPtr.Zero)
-            {
-                PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
-
-                maskBmp = new Bitmap(w, h, PixelFormat.Format24bppRgb);
-
-
-                BitmapData data = maskBmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, maskBmp.PixelFormat);
-                try
-                {
-                    for (int y = 0; y < h; y++)
-                    {
-                        byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
-                        for (int x = 0; x < data.Width; x++)
-                        {
-                            byte* q = (byte*)mask.maskData.ToPointer() + (mask.rowBytes * y) + (x * mask.colBytes);
-                            p[0] = p[1] = p[2] = q[0];
-
-                            p += 3;
-                            //q += source.colBytes;
-                        }
-                    }
-                }
-                finally
-                {
-                    maskBmp.UnlockBits(data);
-                }
-
-                //maskBmp.Save( "mask.png"), ImageFormat.Png);
-            }
-
             PixelFormat format = (planes == 4 && (source.colBytes == 4 || source.colBytes == 1)) ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
             int bpp = (Bitmap.GetPixelFormatSize(format) / 8);
 
@@ -1945,17 +1909,18 @@ namespace PSFilterLoad.PSApi
                 {
                     for (int y = 0; y < data.Height; y++)
                     {
-                        if (planes == 4 && source.colBytes == 1)
-                        {
-                            for (int x = 0; x < data.Width; x++)
-                            {
-                                byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + (x * 4);
-                                p[3] = 255;
-                            }
-                        }
 
                         if (source.colBytes == 1)
                         {
+
+                            if (planes == 4 && source.colBytes == 1)
+                            {
+                                for (int x = 0; x < data.Width; x++)
+                                {
+                                    byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + (x * 4);
+                                    p[3] = 255;
+                                }
+                            }
 
                             for (int i = 0; i < planes; i++)
                             {
@@ -1986,9 +1951,9 @@ namespace PSFilterLoad.PSApi
                         {
 
                             byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                            byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y);
                             for (int x = 0; x < data.Width; x++)
                             {
-                                byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (x * source.colBytes);
                                 p[0] = q[2];
                                 p[1] = q[1];
                                 p[2] = q[0];
@@ -1998,7 +1963,7 @@ namespace PSFilterLoad.PSApi
                                 }
 
                                 p += bpp;
-                                //q += source.colBytes;
+                                q += source.colBytes;
                             }
                         }
                     }
@@ -2009,68 +1974,32 @@ namespace PSFilterLoad.PSApi
                 {
                     bmp.UnlockBits(data);
                 }
-                bool maskNonEmpty = false;
-                if (maskBmp != null)
-                {
-
-                    BitmapData maskBD = maskBmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadOnly, maskBmp.PixelFormat);
-                    BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadWrite, bmp.PixelFormat);
-                    try
-                    {
-                        for (int y = 0; y < h; y++)
-                        {
-                            byte* q = (byte*)maskBD.Scan0.ToPointer() + (y * maskBD.Stride);
-                            byte* p = (byte*)bmpData.Scan0.ToPointer() + (y * bmpData.Stride);
-                            for (int x = 0; x < maskBD.Width; x++)
-                            {
-                                if ((q[0] < 255 && p[3] < 255) && (q[0]!= p[3]))
-                                {
-                                    byte alpha = PaintDotNet.Int32Util.ClampToByte((p[3] - q[0]));
-
-                                    p[3] = alpha;
-                                    if (!maskNonEmpty)
-                                    {
-                                        maskNonEmpty = true;
-                                    }
-                                }
-                                q += 3;
-                                p += 4;
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        maskBmp.UnlockBits(maskBD);
-                        maskBmp.Dispose();;
-                        bmp.UnlockBits(bmpData);
-                    }
-                }
 
                 using (Graphics gr = Graphics.FromHdc(platformContext))
                 {
-                    if (maskNonEmpty || source.colBytes == 4)
+                    if (source.colBytes == 4)
                     {
                         using (Bitmap temp = new Bitmap(w, h, PixelFormat.Format32bppArgb))
                         {
 
-                            
+
                             Rectangle rect = new Rectangle(0, 0, w, h);
                             BitmapData bd = temp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
                             try
                             {
                                 for (int y = 0; y < temp.Height; y++)
-			                    {
-			                        byte *p = (byte*)bd.Scan0.ToPointer() + (y * data.Stride);
+                                {
+                                    byte* p = (byte*)bd.Scan0.ToPointer() + (y * data.Stride);
                                     for (int x = 0; x < data.Width; x++)
-			                        {
+                                    {
                                         byte v = (byte)((((x ^ y) & 8) * 8) + 191);
 
                                         p[0] = p[1] = p[2] = v;
                                         p[3] = 255;
 
                                         p += 4;
-			                        }
-			                    }
+                                    }
+                                }
                             }
                             finally
                             {
@@ -2100,7 +2029,6 @@ namespace PSFilterLoad.PSApi
 
             return PSError.noErr;
         }
-
 
 		static bool handle_valid(IntPtr h)
 		{
