@@ -45,15 +45,15 @@ namespace PSFilterPdn
 		public PsFilterPdnConfigDialog()
 		{
 			InitializeComponent();
-            filterTreeItems = null;
-            parmData = new Dictionary<string, ParameterData>();
-            proxyProcess = null;
-            src = string.Empty;
-            dest = string.Empty;
-            parmBytesFileName = string.Empty;
-            pluginDataBytesFileName = string.Empty;
-            destSurface = null;
-            proxyThread = null;
+			filterTreeItems = null;
+			parmData = new Dictionary<string, ParameterData>();
+			proxyProcess = null;
+			src = string.Empty;
+			dest = string.Empty;
+			parmBytesFileName = string.Empty;
+			pluginDataBytesFileName = string.Empty;
+			destSurface = null;
+			proxyThread = null;
 		}
 
 		private static class NativeMethods
@@ -463,22 +463,22 @@ namespace PSFilterPdn
 
 			proxyParmData = new ParameterData();
 
-            proxyParmData.ParmDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
-            proxyParmData.StoreMethod = int.Parse(split[1], CultureInfo.InvariantCulture);
+			proxyParmData.ParmDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
+			proxyParmData.StoreMethod = int.Parse(split[1], CultureInfo.InvariantCulture);
 
-            proxyParmData.ParmDataIsPSHandle = bool.Parse(split[2]);
-            proxyParmData.PluginDataIsPSHandle = bool.Parse(split[3]);
+			proxyParmData.ParmDataIsPSHandle = bool.Parse(split[2]);
+			proxyParmData.PluginDataIsPSHandle = bool.Parse(split[3]);
 
-            if (!string.IsNullOrEmpty(split[4]))
-            {
-                parmBytesFileName = split[4];
-                proxyParmData.ParmDataBytes = File.ReadAllBytes(split[4]);
-            }
-            if (!string.IsNullOrEmpty(split[5]))
-            {
-                pluginDataBytesFileName = split[5];
-                proxyParmData.PluginDataBytes = File.ReadAllBytes(split[5]);
-            }
+			if (!string.IsNullOrEmpty(split[4]))
+			{
+				parmBytesFileName = split[4];
+				proxyParmData.ParmDataBytes = File.ReadAllBytes(split[4]);
+			}
+			if (!string.IsNullOrEmpty(split[5]))
+			{
+				pluginDataBytesFileName = split[5];
+				proxyParmData.PluginDataBytes = File.ReadAllBytes(split[5]);
+			}
 
 		}
 		delegate void SetProxyErrorResultDelegate(string data);
@@ -502,22 +502,22 @@ namespace PSFilterPdn
 
 						proxyParmData = new ParameterData();
 
-                        proxyParmData.ParmDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
-                        proxyParmData.StoreMethod = int.Parse(split[1], CultureInfo.InvariantCulture);
-                      
-                        proxyParmData.ParmDataIsPSHandle = bool.Parse(split[2]);
-                        proxyParmData.PluginDataIsPSHandle = bool.Parse(split[3]);
+						proxyParmData.ParmDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
+						proxyParmData.StoreMethod = int.Parse(split[1], CultureInfo.InvariantCulture);
+					  
+						proxyParmData.ParmDataIsPSHandle = bool.Parse(split[2]);
+						proxyParmData.PluginDataIsPSHandle = bool.Parse(split[3]);
 
-                        if (!string.IsNullOrEmpty(split[4]))
-                        {
-                            parmBytesFileName = split[4];
-                            proxyParmData.ParmDataBytes = File.ReadAllBytes(split[4]);
-                        }
-                        if (!string.IsNullOrEmpty(split[5]))
-                        {
-                            pluginDataBytesFileName = split[5];
-                            proxyParmData.PluginDataBytes = File.ReadAllBytes(split[5]);
-                        }
+						if (!string.IsNullOrEmpty(split[4]))
+						{
+							parmBytesFileName = split[4];
+							proxyParmData.ParmDataBytes = File.ReadAllBytes(split[4]);
+						}
+						if (!string.IsNullOrEmpty(split[5]))
+						{
+							pluginDataBytesFileName = split[5];
+							proxyParmData.PluginDataBytes = File.ReadAllBytes(split[5]);
+						}
 
 
 					}
@@ -595,118 +595,150 @@ namespace PSFilterPdn
 		Process proxyProcess = new Process();
 		string src;
 		string dest;
-        string parmBytesFileName;
-        string pluginDataBytesFileName;
+		string parmBytesFileName;
+		string pluginDataBytesFileName;
 		
-        private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
+		private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
 		{
 			src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
 
-            try
-            {
+			try
+			{
 
-                using (FileStream fs = new FileStream(src, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    using (Bitmap bmp = base.EffectSourceSurface.CreateAliasedBitmap())
-                    {
-                        bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
-                    }
-                }
+				using (FileStream fs = new FileStream(src, FileMode.Create, FileAccess.Write, FileShare.None))
+				{
+					using (Bitmap bmp = base.EffectSourceSurface.CreateAliasedBitmap())
+					{
+						bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
+					}
+				}
 
 
 
-                dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
+				dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
 
-                string pColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", eep.PrimaryColor.R, eep.PrimaryColor.G, eep.PrimaryColor.B);
-                string sColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", eep.SecondaryColor.R, eep.SecondaryColor.G, eep.SecondaryColor.B);
+				string pColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", eep.PrimaryColor.R, eep.PrimaryColor.G, eep.PrimaryColor.B);
+				string sColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", eep.SecondaryColor.R, eep.SecondaryColor.G, eep.SecondaryColor.B);
 
-                Rectangle sRect = eep.GetSelection(base.EffectSourceSurface.Bounds).GetBoundsInt();
-                string rect = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3}", new object[] { sRect.X, sRect.Y, sRect.Width, sRect.Height });
+				Rectangle sRect = eep.GetSelection(base.EffectSourceSurface.Bounds).GetBoundsInt();
+				string rect = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3}", new object[] { sRect.X, sRect.Y, sRect.Width, sRect.Height });
 
-                string owner = (string)this.Invoke(new GetHandleStringDelegate(GetHandleString));
+				string owner = (string)this.Invoke(new GetHandleStringDelegate(GetHandleString));
 
-                string filterInfo = (string)this.Invoke(new GetFilterCaseInfoStringDelegate(GetFilterCaseInfoString), new object[] { data });
-                string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { data.fileName, data.entryPoint, data.title, data.category, filterInfo });
+				string filterInfo = (string)this.Invoke(new GetFilterCaseInfoStringDelegate(GetFilterCaseInfoString), new object[] { data });
+				string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { data.fileName, data.entryPoint, data.title, data.category, filterInfo });
 
-                string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0},{1}", this.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked)), showAboutBoxcb.Checked, bool.FalseString);
+				string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0},{1}", this.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked)), showAboutBoxcb.Checked, bool.FalseString);
 
-                ParameterData parm = ParameterData.Empty;
-                if (parmData.ContainsKey(data.fileName))
-                {
-                    parm = parmData[data.fileName];
-                }
+				ParameterData parm = ParameterData.Empty;
+				if (parmData.ContainsKey(data.fileName))
+				{
+					parm = parmData[data.fileName];
+				}
 
-                string parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
-                string pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
+				string parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
+				string pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
 
-                if (!string.IsNullOrEmpty(parmBytesFileName))
-                {
-                    File.WriteAllBytes(parmBytesFileName, parm.ParmDataBytes);
-                }
+				if (!string.IsNullOrEmpty(parmBytesFileName))
+				{
+					File.WriteAllBytes(parmBytesFileName, parm.ParmDataBytes);
+				}
 
-                if (!string.IsNullOrEmpty(pluginDataBytesFileName))
-                {
-                    File.WriteAllBytes(pluginDataBytesFileName, parm.PluginDataBytes);
-                }
+				if (!string.IsNullOrEmpty(pluginDataBytesFileName))
+				{
+					File.WriteAllBytes(pluginDataBytesFileName, parm.PluginDataBytes);
+				}
 
-                string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5}", new object[] { parm.ParmDataSize, parm.StoreMethod, parmBytesFileName, pluginDataBytesFileName, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
+				string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5}", new object[] { parm.ParmDataSize, parm.StoreMethod, parmBytesFileName, pluginDataBytesFileName, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
 
-                string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
+				string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
 
 #if DEBUG
-                Debug.WriteLine(pArgs);
+				Debug.WriteLine(pArgs);
 #endif
 
 
-                ProcessStartInfo psi = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe"), pArgs);
-                psi.RedirectStandardInput = true;
-                psi.RedirectStandardError = true;
-                psi.RedirectStandardOutput = true;
-                psi.CreateNoWindow = true;
-                psi.UseShellExecute = false;
+				ProcessStartInfo psi = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe"), pArgs);
+				psi.RedirectStandardInput = true;
+				psi.RedirectStandardError = true;
+				psi.RedirectStandardOutput = true;
+				psi.CreateNoWindow = true;
+				psi.UseShellExecute = false;
 
-                proxyResult = true; // assume the filter succeded this will be set to false if it failed
-                proxyErrorMessage = string.Empty;
+				proxyResult = true; // assume the filter succeded this will be set to false if it failed
+				proxyErrorMessage = string.Empty;
 
-                proxyProcess = new Process();
+				proxyProcess = new Process();
 
-                proxyProcess.EnableRaisingEvents = true;
-                proxyProcess.OutputDataReceived += new DataReceivedEventHandler(UpdateProxyProgress);
-                proxyProcess.ErrorDataReceived += new DataReceivedEventHandler(ProxyErrorDataReceived);
+				proxyProcess.EnableRaisingEvents = true;
+				proxyProcess.OutputDataReceived += new DataReceivedEventHandler(UpdateProxyProgress);
+				proxyProcess.ErrorDataReceived += new DataReceivedEventHandler(ProxyErrorDataReceived);
 
-                proxyProcess.StartInfo = psi;
+				proxyProcess.StartInfo = psi;
+				try
+				{
 
 
-                bool st = proxyProcess.Start();
-                proxyProcess.StandardInput.WriteLine(pd);
-                proxyProcess.StandardInput.WriteLine(parms);
-                proxyProcess.BeginErrorReadLine();
-                proxyProcess.BeginOutputReadLine();
+					bool st = proxyProcess.Start();
+					proxyProcess.StandardInput.WriteLine(pd);
+					proxyProcess.StandardInput.WriteLine(parms);
+					proxyProcess.BeginErrorReadLine();
+					proxyProcess.BeginOutputReadLine();
 #if DEBUG
-                Debug.WriteLine("Started = " + st.ToString());
-#endif
-                while (!proxyProcess.HasExited)
-                {
-                    Application.DoEvents();
-                    Thread.Sleep(250);
-                }
+					Debug.WriteLine("Started = " + st.ToString());
+#endif                   
+                    proxyProcess.WaitForExit();
+
+					/*while (!proxyProcess.HasExited)
+					{
+						Application.DoEvents();
+						Thread.Sleep(250);
+					}*/
 
 
-                this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, data });
+					this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, data });
+				}
+				finally
+				{
+					proxyProcess.Dispose();
+					proxyProcess = null;
 
-            }
-            catch (ArgumentException ax)
-            {
-                MessageBox.Show(ax.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                MessageBox.Show(ex.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            catch (Win32Exception wx)
-            {
-                MessageBox.Show(wx.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+                    proxyThread.Abort();
+					proxyThread.Join();
+					proxyThread = null;
+
+					if (File.Exists(src))
+					{
+						File.Delete(src);
+					}
+					if (File.Exists(dest))
+					{
+						File.Delete(dest);
+					}
+					if (File.Exists(parmBytesFileName))
+					{
+						File.Delete(parmBytesFileName);
+					}
+					if (File.Exists(pluginDataBytesFileName))
+					{
+						File.Delete(pluginDataBytesFileName);
+					}
+
+				}
+
+			}
+			catch (ArgumentException ax)
+			{
+				MessageBox.Show(ax.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+			catch (UnauthorizedAccessException ex)
+			{
+				MessageBox.Show(ex.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+			catch (Win32Exception wx)
+			{
+				MessageBox.Show(wx.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
 		}
 
 		private void SetProxyResultData(string dest, PluginData data)
@@ -725,17 +757,17 @@ namespace PSFilterPdn
 				this.title = data.title;
 				this.category = data.category;
 				this.filterCaseInfo = GetFilterCaseInfoString(data);
-                try
-                {
-                    using (Bitmap dst = new Bitmap(dest))
-                    {
-                        this.destSurface = Surface.CopyFromBitmap(dst);
-                    }
-                }
-                catch (FileNotFoundException fx)
-                {
-                    MessageBox.Show(fx.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error); 
-                }
+				try
+				{
+					using (Bitmap dst = new Bitmap(dest))
+					{
+						this.destSurface = Surface.CopyFromBitmap(dst);
+					}
+				}
+				catch (FileNotFoundException fx)
+				{
+					MessageBox.Show(fx.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error); 
+				}
 				
 
 				if (ReShowEffectDialog(data))
@@ -754,10 +786,10 @@ namespace PSFilterPdn
 			}
 			else
 			{
-                if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage) && proxyErrorMessage != Resources.UserCanceledError)
-                {
-                    MessageBox.Show(this, proxyErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+				if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage) && proxyErrorMessage != Resources.UserCanceledError)
+				{
+					MessageBox.Show(this, proxyErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
 
 
 				if (destSurface != null)
@@ -785,29 +817,6 @@ namespace PSFilterPdn
 
 			FinishTokenUpdate();
 
-			proxyProcess.Dispose();
-			proxyProcess = null;
-
-
-            if (File.Exists(src))
-            {
-                File.Delete(src);
-            }
-			if (File.Exists(dest))
-			{
-				File.Delete(dest);
-			}
-            if (File.Exists(parmBytesFileName))
-            {
-                File.Delete(parmBytesFileName);
-            }
-            if (File.Exists(pluginDataBytesFileName))
-            {
-                File.Delete(pluginDataBytesFileName);
-            }
-
-			proxyThread.Abort();
-			proxyThread = null;
 		}
 
 		/// <summary>
