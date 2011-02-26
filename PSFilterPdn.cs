@@ -89,7 +89,7 @@ namespace PSFilterPdn
             {
                 if (e.Data.StartsWith("parm", StringComparison.Ordinal))
                 {
-                    string[] split = e.Data.Substring(4).Split(new char[] { ':' });
+                    string[] split = e.Data.Substring(4).Split(new char[] { ',' });
 
                     proxyParmData = new ParameterData();
 
