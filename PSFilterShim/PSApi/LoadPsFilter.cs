@@ -516,31 +516,20 @@ namespace PSFilterLoad.PSApi
 
         static bool IgnoreAlphaChannel(PluginData data)
         {
-            if (/*data.category == "Filter Forge" || */data.category == "DCE Tools" || data.category == "L'amico Perry")
+            if (data.category == "DCE Tools" || data.category == "L'amico Perry")
             {
+                switch (filterCase)
+                {
+                    case FilterCase.filterCaseEditableTransparencyNoSelection:
+                        filterCase = FilterCase.filterCaseFlatImageNoSelection;
+                        break;
+                    case FilterCase.filterCaseEditableTransparencyWithSelection:
+                        filterCase = FilterCase.filterCaseFlatImageWithSelection;
+                        break;
+                }
                 return true;
             }
 
-            /*// The list in PSFilterShim's LoadPsFilter must be updated to reflect changes in this list.
-            Dictionary<string, string[]> ignoreAlphaList = new Dictionary<string, string[]>();
-
-            ignoreAlphaList.Add("Flaming Pear", new string[17] {"Anaglyph Flip", "ChromaSolarize","Demitone 25", "Demitone 50", 
-			"Gray From Red", "Gray From Green", "Gray From Blue", "HSL -> RGB", "Lab ->RGB","Make Iso Cube Tile",
-			"RGB -> HSL", "RGB -> LAB", "Swap Green:Blue", "Swap Red:Blue", "Swap Red:Green", "Tachyon", "Vitriol"});
-
-            foreach (var item in ignoreAlphaList)
-            {
-                if (data.category == item.Key)
-                {
-                    foreach (string title in item.Value)
-                    {
-                        if (data.title == title)
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }*/
             if (data.filterInfo != null)
             {
                 if (data.filterInfo[(filterCase - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
@@ -1172,17 +1161,9 @@ namespace PSFilterLoad.PSApi
             }
             ignoreAlpha = IgnoreAlphaChannel(pdata);
 
-            if (ignoreAlpha)
+            if (!ignoreAlpha)
             {
-                switch (filterCase)
-                {
-                    case FilterCase.filterCaseEditableTransparencyNoSelection:
-                        filterCase = FilterCase.filterCaseFlatImageNoSelection;
-                        break;
-                    case FilterCase.filterCaseEditableTransparencyWithSelection:
-                        filterCase = FilterCase.filterCaseFlatImageWithSelection;
-                        break;
-                }
+                DrawCheckerBoardBitmap();
             }
 
             if (pdata.filterInfo != null)
@@ -1356,12 +1337,6 @@ namespace PSFilterLoad.PSApi
                 fill_buf(ref filterRecord.inData, ref filterRecord.inRowBytes, filterRecord.inRect, filterRecord.inLoPlane, filterRecord.inHiPlane);
                 src_valid = true;
             }
-            
-            Marshal.WriteIntPtr(filterRecordPtr.AddrOfPinnedObject(), inDataOfs, filterRecord.inData);
-            Marshal.WriteInt32(filterRecordPtr.AddrOfPinnedObject(), inRowBytesOfs, filterRecord.inRowBytes);
-
-            filterRecord = (FilterRecord)filterRecordPtr.Target;
-
 
             if (RectNonEmpty(filterRecord.outRect))
             {
@@ -1381,7 +1356,8 @@ namespace PSFilterLoad.PSApi
                 dst_valid = true;
             }
 
-            
+            Marshal.WriteIntPtr(filterRecordPtr.AddrOfPinnedObject(), inDataOfs, filterRecord.inData);
+            Marshal.WriteInt32(filterRecordPtr.AddrOfPinnedObject(), inRowBytesOfs, filterRecord.inRowBytes);
 
 #if DEBUG
             Debug.WriteLine(string.Format("indata = {0:X8}, inRowBytes = {1}", filterRecord.inData.ToInt64(), filterRecord.inRowBytes));
@@ -1918,44 +1894,20 @@ namespace PSFilterLoad.PSApi
                 {
                     bmp.UnlockBits(data);
                 }
-               
+
                 using (Graphics gr = Graphics.FromHdc(platformContext))
                 {
                     if (source.colBytes == 4)
                     {
                         using (Bitmap temp = new Bitmap(w, h, PixelFormat.Format32bppArgb))
                         {
-
-
                             Rectangle rect = new Rectangle(0, 0, w, h);
-                            BitmapData bd = temp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-                            try
-                            {
-                                for (int y = 0; y < temp.Height; y++)
-                                {
-                                    byte* p = (byte*)bd.Scan0.ToPointer() + (y * data.Stride);
-                                    for (int x = 0; x < data.Width; x++)
-                                    {
-                                        byte v = (byte)((((x ^ y) & 8) * 8) + 191);
-
-                                        p[0] = p[1] = p[2] = v;
-                                        p[3] = 255;
-
-                                        p += 4;
-                                    }
-                                }
-                            }
-                            finally
-                            {
-                                temp.UnlockBits(bd);
-                            }
 
                             using (Graphics tempGr = Graphics.FromImage(temp))
                             {
+                                tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
                                 tempGr.DrawImageUnscaled(bmp, rect);
                             }
-
-
                             // temp.Save(Path.Combine(Application.StartupPath, "masktemp.png"), ImageFormat.Png);
 
                             gr.DrawImageUnscaled(temp, dstCol, dstRow);
@@ -1973,6 +1925,36 @@ namespace PSFilterLoad.PSApi
 
             return PSError.noErr;
         }
+
+        static Bitmap checkerBoardBitmap;
+        static unsafe void DrawCheckerBoardBitmap()
+        {
+            checkerBoardBitmap = new Bitmap(source.Width, source.Height, PixelFormat.Format24bppRgb);
+
+            BitmapData bd = checkerBoardBitmap.LockBits(new Rectangle(0, 0, checkerBoardBitmap.Width, checkerBoardBitmap.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+            try
+            {
+                for (int y = 0; y < checkerBoardBitmap.Height; y++)
+                {
+                    byte* p = (byte*)bd.Scan0.ToPointer() + (y * bd.Stride);
+                    for (int x = 0; x < checkerBoardBitmap.Width; x++)
+                    {
+                        byte v = (byte)((((x ^ y) & 8) * 8) + 191);
+
+                        p[0] = p[1] = p[2] = v;
+
+                        p += 3;
+                    }
+                }
+            }
+            finally
+            {
+                checkerBoardBitmap.UnlockBits(bd);
+            }
+
+        }
+
+
         static bool handle_valid(IntPtr h)
         {
             return ((handles != null) && handles.ContainsKey(h.ToInt64()));
@@ -2677,7 +2659,11 @@ namespace PSFilterLoad.PSApi
                         dest.Dispose();
                         dest = null;
                     }
-
+                    if (checkerBoardBitmap != null)
+                    {
+                        checkerBoardBitmap.Dispose();
+                        checkerBoardBitmap = null;
+                    }
 
                     disposed = true;
                 }
