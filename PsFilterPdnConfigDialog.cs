@@ -686,14 +686,12 @@ namespace PSFilterPdn
 					proxyProcess.BeginOutputReadLine();
 #if DEBUG
 					Debug.WriteLine("Started = " + st.ToString());
-#endif                   
-                    proxyProcess.WaitForExit();
-
-					/*while (!proxyProcess.HasExited)
+#endif
+					while (!proxyProcess.HasExited)
 					{
 						Application.DoEvents();
 						Thread.Sleep(250);
-					}*/
+					}
 
 
 					this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, data });
@@ -703,11 +701,7 @@ namespace PSFilterPdn
 					proxyProcess.Dispose();
 					proxyProcess = null;
 
-                    proxyThread.Abort();
-					proxyThread.Join();
-					proxyThread = null;
-
-					if (File.Exists(src))
+                    if (File.Exists(src))
 					{
 						File.Delete(src);
 					}
@@ -723,6 +717,11 @@ namespace PSFilterPdn
 					{
 						File.Delete(pluginDataBytesFileName);
 					}
+
+					proxyThread.Abort();
+					proxyThread = null;
+
+					
 
 				}
 
