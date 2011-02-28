@@ -188,4 +188,7 @@
   <data name="InvalidPiPLVersionFormat" xml:space="preserve">
     <value>Invalid PiPl version in {0}: {1},  Expected version 0.</value>
   </data>
+  <data name="PSFilterShimNotFound" xml:space="preserve">
+    <value>PSFilterShim.exe is not in the Effects folder.</value>
+  </data>
 </root>

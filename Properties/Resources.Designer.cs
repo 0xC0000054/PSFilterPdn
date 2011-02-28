@@ -214,6 +214,15 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to PSFilterShim.exe is not in the Effects folder..
+        /// </summary>
+        internal static string PSFilterShimNotFound {
+            get {
+                return ResourceManager.GetString("PSFilterShimNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unsupported image mode..
         /// </summary>
         internal static string UnsupportedImageMode {
