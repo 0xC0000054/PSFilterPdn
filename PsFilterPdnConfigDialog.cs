@@ -605,7 +605,7 @@ namespace PSFilterPdn
             // check that PSFilterShim exists first thing and abort if it does not.
             string shimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
 
-            if (!File.Exists(shimPath)) // this should never happen
+            if (!File.Exists(shimPath))
             {
                 MessageBox.Show(Resources.PSFilterShimNotFound, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
