@@ -137,7 +137,18 @@ namespace PSFilterPdn
         string pluginDataBytesFileName;
         private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token)
         {
+            // check that PSFilterShim exists first thing and abort if it does not.
+            string shimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
+
+            if (!File.Exists(shimPath)) // this should never happen
+            {
+                MessageBox.Show(Resources.PSFilterShimNotFound, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             string src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
+            string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
+            
             try
             {
                 using (FileStream fs = new FileStream(src, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -148,7 +159,6 @@ namespace PSFilterPdn
                     }
                 }
 
-                string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
 
                 string pColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", base.EnvironmentParameters.PrimaryColor.R, base.EnvironmentParameters.PrimaryColor.G, base.EnvironmentParameters.PrimaryColor.B);
                 string sColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", base.EnvironmentParameters.SecondaryColor.R, base.EnvironmentParameters.SecondaryColor.G, base.EnvironmentParameters.SecondaryColor.B);
@@ -187,7 +197,7 @@ namespace PSFilterPdn
                 Debug.WriteLine(pArgs);
 #endif
 
-                ProcessStartInfo psi = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe"), pArgs);
+                ProcessStartInfo psi = new ProcessStartInfo(shimPath, pArgs);
                 psi.RedirectStandardInput = true;
                 psi.RedirectStandardError = true;
                 psi.RedirectStandardOutput = true;
@@ -232,9 +242,6 @@ namespace PSFilterPdn
                     }
                 }
 
-                proxyProcess.Dispose();
-                proxyProcess = null;
-
                 if (File.Exists(src))
                 {
                     File.Delete(src);
@@ -264,6 +271,14 @@ namespace PSFilterPdn
             catch (Win32Exception wx)
             {
                 MessageBox.Show(wx.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                if (proxyProcess != null)
+                {
+                    proxyProcess.Dispose();
+                    proxyProcess = null; 
+                }
             }
            
         }
