@@ -473,11 +473,19 @@ namespace PSFilterLoad.PSApi
 			isRepeatEffect = false;
 			errorMessage = String.Empty;
 			fillOutData = true;
+            disposed = false;
+            frsetup = false;
+            suitesSetup = false;
 				
 			filterRecord = new FilterRecord();
 			platformData = new PlatformData();
 			platformData.hwnd = owner;
 			platFormDataPtr = GCHandle.Alloc(platformData, GCHandleType.Pinned);
+
+            inDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "inData").ToInt32();
+            outDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "outData").ToInt32();
+            inRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "inRowBytes").ToInt32();
+            outRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "outRowBytes").ToInt32();
 
 			source = (Bitmap)eep.SourceSurface.CreateAliasedBitmap().Clone();
 
@@ -515,11 +523,11 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// The Secondary (background) color in PDN
 		/// </summary>
-		static byte[] secondaryColor = null;
+		static byte[] secondaryColor;
 		/// <summary>
 		/// The Primary (foreground) color in PDN
 		/// </summary>
-		static byte[] primaryColor = null;
+		static byte[] primaryColor;
 
 		static bool ignoreAlpha;
 
@@ -2483,7 +2491,7 @@ namespace PSFilterLoad.PSApi
 			addResourceProc = new AddPIResourceProc(resource_add_proc);
 		}
 
-		static bool suitesSetup = false;
+		static bool suitesSetup;
 		static void setup_suites()
 		{
 			if (suitesSetup)
@@ -2547,7 +2555,7 @@ namespace PSFilterLoad.PSApi
 			resource_procs.getProc = Marshal.GetFunctionPointerForDelegate(getResourceProc);
 			resource_procsPtr = GCHandle.Alloc(resource_procs, GCHandleType.Pinned);
 		}
-		static bool frsetup = false;
+		static bool frsetup;
 		static unsafe void setup_filter_record()
 		{
 			if (frsetup)
@@ -2654,7 +2662,7 @@ namespace PSFilterLoad.PSApi
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
-		private bool disposed = false;
+		private bool disposed;
 		private void Dispose(bool disposing)
 		{
 			if (!disposed)
@@ -2755,7 +2763,6 @@ namespace PSFilterLoad.PSApi
                         checkerBoardBitmap.Dispose();
                         checkerBoardBitmap = null;
                     }
-
 
 					disposed = true;
 				}
