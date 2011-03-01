@@ -427,6 +427,9 @@ namespace PSFilterLoad.PSApi
             isRepeatEffect = false;
             errorMessage = String.Empty;
             fillOutData = true;
+            disposed = false;
+            frsetup = false;
+            suitesSetup = false;
 
             filterRecord = new FilterRecord();
             platformData = new PlatformData();
@@ -464,7 +467,10 @@ namespace PSFilterLoad.PSApi
                 source = (Bitmap)bmp.Clone();
             }
 
-
+            inDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "inData").ToInt32();
+            outDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "outData").ToInt32();
+            inRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "inRowBytes").ToInt32();
+            outRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "outRowBytes").ToInt32();
 
             dest = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
 
@@ -506,11 +512,11 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// The Secondary (background) color in PDN
         /// </summary>
-        static byte[] secondaryColor = null;
+        static byte[] secondaryColor;
         /// <summary>
         /// The Primary (foreground) color in PDN
         /// </summary>
-        static byte[] primaryColor = null;
+        static byte[] primaryColor;
 
         static bool ignoreAlpha;
 
@@ -1282,10 +1288,10 @@ namespace PSFilterLoad.PSApi
         static bool src_valid;
         static bool dst_valid;
 
-        static int inDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "inData").ToInt32();
-        static int outDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "outData").ToInt32();
-        static int inRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "inRowBytes").ToInt32();
-        static int outRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "outRowBytes").ToInt32();
+        static int inDataOfs;
+        static int outDataOfs;
+        static int inRowBytesOfs;
+        static int outRowBytesOfs;
 
         static Rect16 lastStoredOutRect;
         static int lastOutLoPlane;
@@ -2390,7 +2396,7 @@ namespace PSFilterLoad.PSApi
             addResourceProc = new AddPIResourceProc(resource_add_proc);
         }
 
-        static bool suitesSetup = false;
+        static bool suitesSetup;
         static void setup_suites()
         {
             if (suitesSetup)
@@ -2454,7 +2460,7 @@ namespace PSFilterLoad.PSApi
             resource_procs.getProc = Marshal.GetFunctionPointerForDelegate(getResourceProc);
             resource_procsPtr = GCHandle.Alloc(resource_procs, GCHandleType.Pinned);
         }
-        static bool frsetup = false;
+        static bool frsetup;
         static unsafe void setup_filter_record()
         {
             if (frsetup)
@@ -2561,7 +2567,7 @@ namespace PSFilterLoad.PSApi
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        private bool disposed = false;
+        private bool disposed;
         private void Dispose(bool disposing)
         {
             if (!disposed)
