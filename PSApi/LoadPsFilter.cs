@@ -2247,23 +2247,26 @@ namespace PSFilterLoad.PSApi
 
 			try
 			{
-				h = Marshal.ReAllocHGlobal(h, new IntPtr(newSize));
+				PSHandle handle = new PSHandle() { pointer = Marshal.ReAllocHGlobal(h, new IntPtr(newSize)), size = newSize};
+
+                if (handles[h.ToInt64()].size > 0)
+                {
+                    GC.RemoveMemoryPressure((long)handles[h.ToInt64()].size);
+                }
+                handles.Remove(h.ToInt64());
+
+			    if (newSize > 0)
+			    {
+				    GC.AddMemoryPressure(newSize);
+			    }
+                h = handle.pointer;
+                handles.Add(h.ToInt64(), handle);
 			}
 			catch (OutOfMemoryException)
 			{
 				return PSError.memFullErr;
 			} 
-
-			if (handles[h.ToInt64()].size > 0)
-			{
-				GC.RemoveMemoryPressure((long)handles[h.ToInt64()].size);
-			}
-
-			handles[h.ToInt64()] = new PSHandle() { pointer = h, size = newSize };
-			if (newSize > 0)
-			{
-				GC.AddMemoryPressure(newSize);
-			}
+		
 			return PSError.noErr;
 		}
 		static void handle_unlock_proc(IntPtr h)
