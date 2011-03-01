@@ -21,5 +21,19 @@ namespace PSFilterLoad.PSApi
 
             return i;
         }
+        public static byte ClampToByte(this int i)
+        {
+            if (i < 0)
+            {
+                i = 0;
+            }
+
+            if (i > 255)
+            {
+                i = 255;
+            }
+
+            return (byte)i;
+        }
     }
 }
