@@ -6,7 +6,7 @@ namespace PSFilterLoad.PSApi
     /// <summary>
     /// The class that holds the saved filter parameter data.
     /// </summary>
-    public sealed class ParameterData
+    internal sealed class ParameterData
     {
         
         private long parmDataSize;
