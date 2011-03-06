@@ -45,7 +45,7 @@ namespace PSFilterLoad.PSApi
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void UnlockPIHandleProc(System.IntPtr h);
 
-    [StructLayoutAttribute(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    [StructLayoutAttribute(LayoutKind.Sequential)]
     internal struct HandleProcs
     {
         /// int16->short
