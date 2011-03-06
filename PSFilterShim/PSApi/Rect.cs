@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential)]
     internal struct Rect16
     {
         /// short
@@ -13,5 +13,20 @@ namespace PSFilterLoad.PSApi
         public short bottom;
         /// short
         public short right;
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Rect16)
+            {
+                Rect16 rect = (Rect16)obj;
+                return (this.left == rect.left && this.top == rect.top && this.right == rect.right && this.bottom == rect.bottom);
+            }
+            else
+            { 
+                return false;
+            }
+            
+        }
+       
     }
 }
