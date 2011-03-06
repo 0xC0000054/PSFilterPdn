@@ -872,7 +872,7 @@ namespace PSFilterLoad.PSApi
                     Marshal.Copy(parmData.PluginDataBytes, 0, parmDataHandle, parmData.PluginDataBytes.Length);
 
                     Marshal.WriteIntPtr(data, parmDataHandle);
-                    Marshal.Copy(sig, 0, new IntPtr(parmDataHandle.ToInt64() + 4L), 4);
+                    Marshal.Copy(sig, 0, new IntPtr(data.ToInt64() + 4L), 4);
 
                 }
                 else
