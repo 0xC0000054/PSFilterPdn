@@ -120,13 +120,12 @@ namespace PSFilterPdn
 
             for (int i = 0; i < split.Length; i++)
             {
-                FilterCaseInfo fici = info[i];
                 string[] data = split[i].Split(new char[] { '_' });
 
-                fici.inputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[0]);
-                fici.outputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[1]);
-                fici.flags1 = byte.Parse(data[2], NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-                fici.flags2 = 0;
+                info[i].inputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[0]);
+                info[i].outputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[1]);
+                info[i].flags1 = byte.Parse(data[2], NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                info[i].flags2 = 0;
             }
 
             return info;
