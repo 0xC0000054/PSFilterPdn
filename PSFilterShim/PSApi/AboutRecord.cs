@@ -3,7 +3,7 @@
 
 namespace PSFilterLoad.PSApi
 {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential)]
     unsafe struct AboutRecord 
     {
         /// void*
