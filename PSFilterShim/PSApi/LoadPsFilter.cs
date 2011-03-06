@@ -545,7 +545,7 @@ namespace PSFilterLoad.PSApi
                         case FilterCase.filterCaseEditableTransparencyNoSelection:
                             filterCase = FilterCase.filterCaseFlatImageNoSelection;
                             break;
-                        case FilterCase.filterCaseFlatImageWithSelection:
+                        case FilterCase.filterCaseEditableTransparencyWithSelection:
                             filterCase = FilterCase.filterCaseFlatImageWithSelection;
                             break;
                     }
@@ -1935,7 +1935,7 @@ namespace PSFilterLoad.PSApi
         static Bitmap checkerBoardBitmap;
         static unsafe void DrawCheckerBoardBitmap()
         {
-            checkerBoardBitmap = new Bitmap(source.Width, source.Height, PixelFormat.Format24bppRgb);
+            checkerBoardBitmap = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
 
             BitmapData bd = checkerBoardBitmap.LockBits(new Rectangle(0, 0, checkerBoardBitmap.Width, checkerBoardBitmap.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
             try
@@ -1948,8 +1948,8 @@ namespace PSFilterLoad.PSApi
                         byte v = (byte)((((x ^ y) & 8) * 8) + 191);
 
                         p[0] = p[1] = p[2] = v;
-
-                        p += 3;
+                        p[3] = 255;
+                        p += 4;
                     }
                 }
             }
