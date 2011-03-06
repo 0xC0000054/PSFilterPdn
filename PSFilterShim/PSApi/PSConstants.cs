@@ -48,9 +48,6 @@ namespace PSFilterLoad.PSApi
         /// The fourth bit in the first byte is RGB.
         /// </summary>
         public const int flagSupportsRGBColor = 16;
-        /// <summary>
-        /// The sixth bit in the first byte is Grayscale 
-        /// </summary>
-        public const int flagSupportsGrayScale = 64;
+       
     }
 }
