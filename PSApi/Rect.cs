@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
+#pragma warning disable 0659
     [StructLayout(LayoutKind.Sequential)]
     internal struct Rect16
     {
@@ -27,5 +28,7 @@ namespace PSFilterLoad.PSApi
             }
 
         }
+
     }
+#pragma warning restore 0659
 }
