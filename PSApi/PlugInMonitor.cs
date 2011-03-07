@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 { 
     
-    [StructLayout(LayoutKind.Sequential]
+    [StructLayout(LayoutKind.Sequential)]
     struct PlugInMonitor
     {
         /// Fixed->int
