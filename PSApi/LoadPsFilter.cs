@@ -962,8 +962,10 @@ namespace PSFilterLoad.PSApi
 			}
 			while (RectNonEmpty(filterRecord.inRect) || RectNonEmpty(filterRecord.outRect))
 			{
-				advance_state_proc();
-				
+                if (!outRect.Equals(filterRecord.outRect))
+                {
+                    advance_state_proc();
+                }				
 				result = PSError.noErr;
 
 #if DEBUG
@@ -1386,9 +1388,6 @@ namespace PSFilterLoad.PSApi
 		static int inRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "inRowBytes").ToInt32();
 		static int outRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "outRowBytes").ToInt32();
 
-		static Rect16 lastStoredOutRect;
-		static int lastOutLoPlane;
-		static int lastOutHiPlane;
 		static Rect16 outRect;
 		static int outRowBytes;
 		static int outLoPlane;
@@ -1400,35 +1399,23 @@ namespace PSFilterLoad.PSApi
 
 		static short advance_state_proc()
 		{
+			filterRecord = (FilterRecord)filterRecordPtr.Target;
 
 			if (src_valid)
 			{
 				Marshal.FreeHGlobal(filterRecord.inData);
-				filterRecord.inData = IntPtr.Zero;
 				src_valid = false;
 			}
 
 			if (dst_valid)
 			{
-				/* store the dest image if the outRect has not been covered or if the
-				 * outLoPlane and/or outHiPlane is different. 
-				*/
-				if (!RectCovered(outRect, lastStoredOutRect) || (lastOutLoPlane != outLoPlane || lastOutHiPlane != outHiPlane))
-				{
-					store_buf(filterRecord.outData, outRowBytes, outRect, outLoPlane, outHiPlane);
-					lastStoredOutRect = outRect;
-					lastOutLoPlane = outLoPlane;
-					lastOutHiPlane = outHiPlane;
-				}
+				store_buf(filterRecord.outData, outRowBytes, outRect, outLoPlane, outHiPlane);
 
 				Marshal.FreeHGlobal(filterRecord.outData);
 				filterRecord.outData = IntPtr.Zero;
 				dst_valid = false;
 			}
 
-
-
-			filterRecord = (FilterRecord)filterRecordPtr.Target;
 
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("Inrect = {0}, Outrect = {1}", Utility.RectToString(filterRecord.inRect), Utility.RectToString(filterRecord.outRect)));
