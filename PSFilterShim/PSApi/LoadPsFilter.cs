@@ -950,7 +950,9 @@ namespace PSFilterLoad.PSApi
 			}
 			while (RectNonEmpty(filterRecord.inRect) || RectNonEmpty(filterRecord.outRect))
 			{
-				if (!outRect.Equals(filterRecord.outRect))
+                // check if the inRect and outRect are the same or if the number of planes equals 1.
+                if ((!inRect.Equals(filterRecord.inRect) || ((filterRecord.inHiPlane - filterRecord.inLoPlane) + 1) == 1) || 
+                    (!outRect.Equals(filterRecord.outRect) || ((filterRecord.outHiPlane - filterRecord.outLoPlane) + 1) == 1))
 				{
 					advance_state_proc();
 				}
@@ -1186,6 +1188,11 @@ namespace PSFilterLoad.PSApi
 			{
 				DrawCheckerBoardBitmap();
 			}
+            else // otherwise if ignoreAlpha is true make the "dest" image 24-bit RGB.
+            {
+                dest.Dispose();
+                dest = new Bitmap(source.Width, source.Height, PixelFormat.Format24bppRgb);
+            }
 
 			if (pdata.filterInfo != null)
 			{
@@ -1312,6 +1319,7 @@ namespace PSFilterLoad.PSApi
 		static int outRowBytes;
 		static int outLoPlane;
 		static int outHiPlane;
+        static Rect16 inRect;
 		/// <summary>
 		/// Fill the output buffer with data, some plugins set this to false if they modify all the image data
 		/// </summary>
@@ -1344,7 +1352,8 @@ namespace PSFilterLoad.PSApi
 			if (RectNonEmpty(filterRecord.inRect))
 			{
 				fill_buf(ref filterRecord.inData, ref filterRecord.inRowBytes, filterRecord.inRect, filterRecord.inLoPlane, filterRecord.inHiPlane);
-				src_valid = true;
+                inRect = filterRecord.inRect;
+                src_valid = true;
 			}
 
 			if (RectNonEmpty(filterRecord.outRect))
@@ -1601,6 +1610,7 @@ namespace PSFilterLoad.PSApi
 						{
 							unsafe
 							{
+                                int destBpp = ignoreAlpha ? 3 : 4;
 								for (int y = 0; y < data.Height; y++)
 								{
 									byte* dstPtr = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
@@ -1617,13 +1627,13 @@ namespace PSFilterLoad.PSApi
 												ofs = 0;
 												break;
 										}
+                                        byte* q = (byte*)outData.ToPointer() + (y * outRowBytes) + (i - loplane);
+								        byte* p = dstPtr + ofs;
 
 										for (int x = 0; x < data.Width; x++)
 										{
-											byte* q = (byte*)outData.ToPointer() + (y * outRowBytes) + (x * nplanes) + (i - loplane);
-											byte* p = dstPtr + ((x * bpp) + ofs);
-
-											if (hiplane < 3)
+											
+											if (!ignoreAlpha && hiplane < 3)
 											{
 												byte* alpha = dstPtr + ((x * bpp) + 3);
 												*alpha = 255; 
@@ -1632,7 +1642,8 @@ namespace PSFilterLoad.PSApi
 
 											*p = *q;
 
-											
+                                            p += destBpp;
+                                            q += nplanes;
 										}
 									}
 								}
@@ -1715,26 +1726,29 @@ namespace PSFilterLoad.PSApi
 #else
 					string name = StringFromPString(info.pickerPrompt);
 #endif
-					using (ColorPicker picker = new ColorPicker())
-					{
-						picker.Title = name;
-						picker.AllowFullOpen = true;
-						picker.AnyColor = true;
-						picker.SolidColorOnly = true;
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        using (ColorPicker picker = new ColorPicker())
+                        {
+                            picker.Title = name;
+                            picker.AllowFullOpen = true;
+                            picker.AnyColor = true;
+                            picker.SolidColorOnly = true;
 
-						picker.Color = Color.FromArgb(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
+                            picker.Color = Color.FromArgb(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
 
-						if (picker.ShowDialog() == DialogResult.OK)
-						{
-							info.colorComponents[0] = picker.Color.R;
-							info.colorComponents[1] = picker.Color.G;
-							info.colorComponents[2] = picker.Color.B;
-						}
-						else
-						{
-							err = PSError.userCanceledErr;
-						}
-					}
+                            if (picker.ShowDialog() == DialogResult.OK)
+                            {
+                                info.colorComponents[0] = picker.Color.R;
+                                info.colorComponents[1] = picker.Color.G;
+                                info.colorComponents[2] = picker.Color.B;
+                            }
+                            else
+                            {
+                                return PSError.userCanceledErr;
+                            }
+                        } 
+                    }
 					err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
 
 					break;
