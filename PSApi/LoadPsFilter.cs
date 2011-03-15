@@ -962,12 +962,8 @@ namespace PSFilterLoad.PSApi
 			}
 			while (RectNonEmpty(filterRecord.inRect) || RectNonEmpty(filterRecord.outRect))
 			{
-                // check if the inRect and outRect are the same or if the number of planes equals 1.
-                if ((!inRect.Equals(filterRecord.inRect) || ((filterRecord.inHiPlane - filterRecord.inLoPlane) + 1) == 1) ||
-                    (!outRect.Equals(filterRecord.outRect) || ((filterRecord.outHiPlane - filterRecord.outLoPlane) + 1) == 1))
-                {
-                    advance_state_proc();
-                }			
+
+                advance_state_proc();
 				result = PSError.noErr;
 
 #if DEBUG
@@ -1409,20 +1405,9 @@ namespace PSFilterLoad.PSApi
         {
             filterRecord = (FilterRecord)filterRecordPtr.Target;
 
-            if (src_valid)
-            {
-                Marshal.FreeHGlobal(filterRecord.inData);
-                filterRecord.inData = IntPtr.Zero;
-                src_valid = false;
-            }
-
-            if (dst_valid)
+            if (dst_valid && RectNonEmpty(outRect))
             {
                 store_buf(filterRecord.outData, outRowBytes, outRect, outLoPlane, outHiPlane);
-
-                Marshal.FreeHGlobal(filterRecord.outData);
-                filterRecord.outData = IntPtr.Zero;
-                dst_valid = false;
             }
 
 #if DEBUG
@@ -1431,16 +1416,38 @@ namespace PSFilterLoad.PSApi
 
             if (RectNonEmpty(filterRecord.inRect))
             {
-                fill_buf(ref filterRecord.inData, ref filterRecord.inRowBytes, filterRecord.inRect, filterRecord.inLoPlane, filterRecord.inHiPlane);
-                inRect = filterRecord.inRect;
-                src_valid = true;
+                // only fill the buffer if the inRect has changed or the number of planes is one.
+                if (!inRect.Equals(filterRecord.inRect) || ((filterRecord.inHiPlane - filterRecord.inLoPlane) + 1) == 1)
+                {
+                    if (src_valid)
+                    {
+                        Marshal.FreeHGlobal(filterRecord.inData);
+                        filterRecord.inData = IntPtr.Zero;
+                        src_valid = false;
+                    }
+
+                    fill_buf(ref filterRecord.inData, ref filterRecord.inRowBytes, filterRecord.inRect, filterRecord.inLoPlane, filterRecord.inHiPlane);
+                    inRect = filterRecord.inRect;
+                    filterRecord.inColumnBytes = (filterRecord.inHiPlane - filterRecord.inLoPlane) + 1;
+                    src_valid = true;
+                }
             }
 
             if (RectNonEmpty(filterRecord.outRect))
             {
-                if (fillOutData)
+                // only fill the buffer if fillOutData is true and the outRect has changed or the number of planes is one.
+                if (fillOutData && (!outRect.Equals(filterRecord.outRect) || ((filterRecord.outHiPlane - filterRecord.outLoPlane) + 1) == 1))
                 {
+                    if (dst_valid)
+                    {
+                        Marshal.FreeHGlobal(filterRecord.outData);
+                        filterRecord.outData = IntPtr.Zero;
+                        dst_valid = false;
+                    }
+
                     fill_buf(ref filterRecord.outData, ref filterRecord.outRowBytes, filterRecord.outRect, filterRecord.outLoPlane, filterRecord.outHiPlane);
+                    filterRecord.outColumnBytes = (filterRecord.outHiPlane - filterRecord.outLoPlane) + 1;
+                    dst_valid = true;
                 }
 #if DEBUG
                 Debug.WriteLine(string.Format("outRowBytes = {0}", filterRecord.outRowBytes));
@@ -1450,8 +1457,6 @@ namespace PSFilterLoad.PSApi
                 outRect = filterRecord.outRect;
                 outLoPlane = filterRecord.outLoPlane;
                 outHiPlane = filterRecord.outHiPlane;
-
-                dst_valid = true;
             }
 
             Marshal.WriteIntPtr(filterRecordPtr.AddrOfPinnedObject(), inDataOfs, filterRecord.inData);
@@ -2735,6 +2740,21 @@ namespace PSFilterLoad.PSApi
 					{
 						resource_procsPtr.Free();
 					}
+
+                    if (src_valid)
+                    {
+                        Marshal.FreeHGlobal(filterRecord.inData);
+                        filterRecord.inData = IntPtr.Zero;
+                        src_valid = false;
+                    }
+
+                    if (dst_valid)
+                    {
+                        Marshal.FreeHGlobal(filterRecord.outData);
+                        filterRecord.outData = IntPtr.Zero;
+                        dst_valid = false;
+                    }
+
 					if (filterRecordPtr.IsAllocated)
 					{
 						filterRecordPtr.Free();
