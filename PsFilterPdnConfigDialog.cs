@@ -1070,6 +1070,7 @@ namespace PSFilterPdn
 		private static void GetFilterItemsList(BackgroundWorker worker, DoWorkEventArgs e)
 		{
 			List<PluginData> pd;
+            List<FilterLoadException> exceptions;
 			UpdateFilterListParm parm = (UpdateFilterListParm)e.Argument;
 			parm.exceptions = new List<FilterLoadException>();
 			Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>();
@@ -1091,41 +1092,42 @@ namespace PSFilterPdn
 
 					if (fi.Exists)
 					{
-						try
+						if (LoadPsFilter.QueryPlugin(fi.FullName, out pd, out exceptions))
 						{
-							if (LoadPsFilter.QueryPlugin(fi.FullName, out pd))
-							{
-								foreach (var item in pd)
-								{
-									count++;
+                            if (exceptions.Count > 0)
+                            {
+                                parm.exceptions.AddRange(exceptions);
+                            }
+                            else
+                            {
+                                foreach (var item in pd)
+                                {
+                                    count++;
 
-									if (nodes.ContainsKey(item.category))
-									{
-										TreeNode node = nodes[item.category];
-										TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
-										if (IsNotDuplicateNode(ref node, subNode, item))
-										{
-											node.Nodes.Add(subNode);
-										}
-									}
-									else
-									{
-										TreeNode node = new TreeNode(item.category);
+                                    if (nodes.ContainsKey(item.category))
+                                    {
+                                        TreeNode node = nodes[item.category];
+                                        TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
+                                        if (IsNotDuplicateNode(ref node, subNode, item))
+                                        {
+                                            node.Nodes.Add(subNode);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        TreeNode node = new TreeNode(item.category);
 
-										
-										TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
-										
-										node.Nodes.Add(subNode);
 
-										nodes.Add(item.category, node); 
-									} 
-								}
-							}
+                                        TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
+
+                                        node.Nodes.Add(subNode);
+
+                                        nodes.Add(item.category, node);
+                                    }
+                                } 
+                            }
 						}
-						catch (FilterLoadException ex)
-						{
-							parm.exceptions.Add(ex);
-						}
+						
 					}
 				}
 			}
