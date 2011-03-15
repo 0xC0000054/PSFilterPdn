@@ -178,6 +178,15 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} is not a valid Photoshop Filter..
+        /// </summary>
+        internal static string InvalidPhotoshopFilterFormat {
+            get {
+                return ResourceManager.GetString("InvalidPhotoshopFilterFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid PiPl version in {0}: {1},  Expected version 0..
         /// </summary>
         internal static string InvalidPiPLVersionFormat {
@@ -223,11 +232,29 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} does not support the plugInModeRGBColor image mode..
+        /// </summary>
+        internal static string RGBColorUnsupportedModeFormat {
+            get {
+                return ResourceManager.GetString("RGBColorUnsupportedModeFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unsupported image mode..
         /// </summary>
         internal static string UnsupportedImageMode {
             get {
                 return ResourceManager.GetString("UnsupportedImageMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported.
+        /// </summary>
+        internal static string UnsupportedInterfaceVersionFormat {
+            get {
+                return ResourceManager.GetString("UnsupportedInterfaceVersionFormat", resourceCulture);
             }
         }
         

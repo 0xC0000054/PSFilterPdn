@@ -187,8 +187,21 @@
   </data>
   <data name="InvalidPiPLVersionFormat" xml:space="preserve">
     <value>Invalid PiPl version in {0}: {1},  Expected version 0.</value>
+    <comment>Thrown when the filter has an invalid PiPL version.</comment>
   </data>
   <data name="PSFilterShimNotFound" xml:space="preserve">
     <value>PSFilterShim.exe is not in the Effects folder.</value>
+  </data>
+  <data name="InvalidPhotoshopFilterFormat" xml:space="preserve">
+    <value>{0} is not a valid Photoshop Filter.</value>
+    <comment>Thrown when the filter is not a valid photoshop filter, (eg. wrong file extension).</comment>
+  </data>
+  <data name="RGBColorUnsupportedModeFormat" xml:space="preserve">
+    <value>{0} does not support the plugInModeRGBColor image mode.</value>
+    <comment>Thrown when the filter does not support plugInModeRGBColor images.</comment>
+  </data>
+  <data name="UnsupportedInterfaceVersionFormat" xml:space="preserve">
+    <value>{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported</value>
+    <comment>Thrown when the filter uses a newer filter interface version than 4.0.</comment>
   </data>
 </root>
