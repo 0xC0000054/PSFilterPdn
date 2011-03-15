@@ -923,8 +923,9 @@ namespace PSFilterLoad.PSApi
 
 		static bool plugin_apply(PluginData pdata)
 		{
-			Debug.Assert(phase == PluginPhase.Prepare);
-
+#if DEBUG
+            Debug.Assert(phase == PluginPhase.Prepare);
+#endif
 			result = PSError.noErr;
 
 #if DEBUG
