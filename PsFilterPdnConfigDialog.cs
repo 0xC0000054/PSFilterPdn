@@ -26,7 +26,7 @@ namespace PSFilterPdn
 		private Button addDirBtn;
 		private ListView searchDirListView;
 		private ColumnHeader dirHeader;
-		private Button runFltrBtn;
+		private Button runFilterBtn;
 		private BackgroundWorker updateFilterListBw;
 		private Panel fltrLoadProressPanel;
 		private Label fldrLdNameLbl;
@@ -122,7 +122,7 @@ namespace PSFilterPdn
             this.fldrLoadCountLbl = new System.Windows.Forms.Label();
             this.fldrloadproglbl = new System.Windows.Forms.Label();
             this.fldrLoadProgBar = new System.Windows.Forms.ProgressBar();
-            this.runFltrBtn = new System.Windows.Forms.Button();
+            this.runFilterBtn = new System.Windows.Forms.Button();
             this.filterTree = new System.Windows.Forms.TreeView();
             this.dirTab = new System.Windows.Forms.TabPage();
             this.subDirSearchCb = new System.Windows.Forms.CheckBox();
@@ -179,7 +179,7 @@ namespace PSFilterPdn
             this.filterTab.Controls.Add(this.filterSearchBox);
             this.filterTab.Controls.Add(this.showAboutBoxcb);
             this.filterTab.Controls.Add(this.fltrLoadProressPanel);
-            this.filterTab.Controls.Add(this.runFltrBtn);
+            this.filterTab.Controls.Add(this.runFilterBtn);
             this.filterTab.Controls.Add(this.filterTree);
             this.filterTab.Location = new System.Drawing.Point(4, 22);
             this.filterTab.Name = "filterTab";
@@ -275,16 +275,15 @@ namespace PSFilterPdn
             this.fldrLoadProgBar.Size = new System.Drawing.Size(151, 23);
             this.fldrLoadProgBar.TabIndex = 0;
             // 
-            // runFltrBtn
+            // runFilterBtn
             // 
-            this.runFltrBtn.Enabled = false;
-            this.runFltrBtn.Location = new System.Drawing.Point(243, 266);
-            this.runFltrBtn.Name = "runFltrBtn";
-            this.runFltrBtn.Size = new System.Drawing.Size(75, 23);
-            this.runFltrBtn.TabIndex = 1;
-            this.runFltrBtn.Text = "Run Filter";
-            this.runFltrBtn.UseVisualStyleBackColor = true;
-            this.runFltrBtn.Click += new System.EventHandler(this.runFltrBtn_Click);
+            this.runFilterBtn.Location = new System.Drawing.Point(243, 266);
+            this.runFilterBtn.Name = "runFilterBtn";
+            this.runFilterBtn.Size = new System.Drawing.Size(75, 23);
+            this.runFilterBtn.TabIndex = 1;
+            this.runFilterBtn.Text = "Run Filter";
+            this.runFilterBtn.UseVisualStyleBackColor = true;
+            this.runFilterBtn.Click += new System.EventHandler(this.runFilterBtn_Click);
             // 
             // filterTree
             // 
@@ -855,7 +854,7 @@ namespace PSFilterPdn
 		private bool reShowFilter;
 		private bool runWith32BitShim;
 		Thread proxyThread;
-		private void runFltrBtn_Click(object sender, EventArgs e)
+		private void runFilterBtn_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -1300,12 +1299,12 @@ namespace PSFilterPdn
 		{
 			if (filterTree.SelectedNode.Tag != null)
 			{
-				runFltrBtn.Enabled = true;
+				runFilterBtn.Enabled = true;
 				fileNameLbl.Text = Path.GetFileName(((PluginData)(filterTree.SelectedNode.Tag)).fileName);
 			}
 			else
 			{
-				runFltrBtn.Enabled = false;
+				runFilterBtn.Enabled = false;
 				fileNameLbl.Text = string.Empty;
 			}
 		}
