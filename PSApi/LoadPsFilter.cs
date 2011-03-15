@@ -89,6 +89,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 				Debug.WriteLine(string.Format("LockResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumData.fileName)); 
 #endif
+
 				return true;
 			}
 
@@ -98,110 +99,109 @@ namespace PSFilterLoad.PSApi
 			short fb = Marshal.ReadInt16(lockRes); // PiPL Resources always start with 1, this seems to be Photoshop's signature
 			version = Marshal.ReadInt32(lockRes, 2);
 
-			if (version != 0)
-			{
-				throw new FilterLoadException(string.Format("Invalid PiPl version in {0}: {1},  Expected version 0", enumData.fileName, version));
-			}
+            if (version != 0)
+            {
+                enumErrorList.Add(new FilterLoadException(string.Format(Resources.InvalidPiPLVersionFormat, enumData.fileName, version)));
+            }
 
-			int count = Marshal.ReadInt32(lockRes, 6);
+            int count = Marshal.ReadInt32(lockRes, 6);
 
-			long pos = (lockRes.ToInt64() + 10L);
+            long pos = (lockRes.ToInt64() + 10L);
 
-			IntPtr propPtr = new IntPtr(pos);
+            IntPtr propPtr = new IntPtr(pos);
 
-			long dataOfs = Marshal.OffsetOf(typeof(PIProperty), "propertyData").ToInt64();
+            long dataOfs = Marshal.OffsetOf(typeof(PIProperty), "propertyData").ToInt64();
 
-			// the plugin entrypoint for the current platform
-			PIPropertyID entryPoint = (IntPtr.Size == 8) ? PIPropertyID.PIWin64X86CodeProperty : PIPropertyID.PIWin32X86CodeProperty;
+            // the plugin entrypoint for the current platform
+            PIPropertyID entryPoint = (IntPtr.Size == 8) ? PIPropertyID.PIWin64X86CodeProperty : PIPropertyID.PIWin32X86CodeProperty;
 
-			for (int i = 0; i < count; i++)
-			{
-				PIProperty pipp = (PIProperty)Marshal.PtrToStructure(propPtr, typeof(PIProperty));
-				PIPropertyID propKey = (PIPropertyID)pipp.propertyKey;
+            for (int i = 0; i < count; i++)
+            {
+                PIProperty pipp = (PIProperty)Marshal.PtrToStructure(propPtr, typeof(PIProperty));
+                PIPropertyID propKey = (PIPropertyID)pipp.propertyKey;
 #if DEBUG
-				if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
-				{
-					Debug.WriteLine(string.Format("prop = {0}", propKey.ToString("X")));
-					Debug.WriteLine(PropToString(pipp.propertyKey));
-				}
+                if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
+                {
+                    Debug.WriteLine(string.Format("prop = {0}", propKey.ToString("X")));
+                    Debug.WriteLine(PropToString(pipp.propertyKey));
+                }
 #endif
-				if (propKey == PIPropertyID.PIKindProperty) 
-				{
-					if (PropToString((uint)pipp.propertyData.ToInt64()) != "8BFM")
-					{
-						throw new FilterLoadException(string.Format("{0} is not a valid Photoshop Filter", enumData.fileName));
-					}
-				}
-				else if (((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty)) // the entrypoint for the current platform, this filters out incomptable processors archatectures
-				{
-					String ep = Marshal.PtrToStringAnsi(new IntPtr((propPtr.ToInt64() + dataOfs)), pipp.propertyLength).TrimEnd('\0');
-					enumData.entryPoint = ep;
-					// If it is a 32-bit plugin on a 64-bit OS run it with the 32-bit shim.
-					enumData.runWith32BitShim = (IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty);
-				}
-				else if (propKey == PIPropertyID.PIVersionProperty)
-				{
-					long fltrversion = pipp.propertyData.ToInt64();
-					if (HiWord(fltrversion) > PSConstants.latestFilterVersion ||
-						(HiWord(fltrversion) == PSConstants.latestFilterVersion && LoWord(fltrversion) > PSConstants.latestFilterSubVersion))
-					{
-						throw new FilterLoadException(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumData.fileName, HiWord(fltrversion).ToString(CultureInfo.CurrentCulture), LoWord(fltrversion).ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) }));
-					}
-				}
-				else if (propKey == PIPropertyID.PIImageModesProperty)
-				{
-					byte[] bytes = BitConverter.GetBytes(pipp.propertyData.ToInt64());
+                if (propKey == PIPropertyID.PIKindProperty)
+                {
+                    if (PropToString((uint)pipp.propertyData.ToInt64()) != "8BFM")
+                    {
+                        enumErrorList.Add(new FilterLoadException(string.Format(Resources.InvalidPhotoshopFilterFormat, enumData.fileName)));
+                    }
+                }
+                else if (((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty)) // the entrypoint for the current platform, this filters out incomptable processors archatectures
+                {
+                    String ep = Marshal.PtrToStringAnsi(new IntPtr((propPtr.ToInt64() + dataOfs)), pipp.propertyLength).TrimEnd('\0');
+                    enumData.entryPoint = ep;
+                    // If it is a 32-bit plugin on a 64-bit OS run it with the 32-bit shim.
+                    enumData.runWith32BitShim = (IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty);
+                }
+                else if (propKey == PIPropertyID.PIVersionProperty)
+                {
+                    long fltrversion = pipp.propertyData.ToInt64();
+                    if (HiWord(fltrversion) > PSConstants.latestFilterVersion ||
+                        (HiWord(fltrversion) == PSConstants.latestFilterVersion && LoWord(fltrversion) > PSConstants.latestFilterSubVersion))
+                    {
+                        enumErrorList.Add(new FilterLoadException(string.Format(Resources.UnsupportedInterfaceVersionFormat, new object[] { enumData.fileName, HiWord(fltrversion).ToString(CultureInfo.CurrentCulture), LoWord(fltrversion).ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) })));
+                    }
+                }
+                else if (propKey == PIPropertyID.PIImageModesProperty)
+                {
+                    byte[] bytes = BitConverter.GetBytes(pipp.propertyData.ToInt64());
 
-					bool rgb = ((bytes[0] & PSConstants.flagSupportsRGBColor) == PSConstants.flagSupportsRGBColor);
+                    bool rgb = ((bytes[0] & PSConstants.flagSupportsRGBColor) == PSConstants.flagSupportsRGBColor);
 
-					if (!rgb)
-					{
-						throw new FilterLoadException(string.Format("{0} does not support the plugInModeRGBColor image mode.", enumData.fileName));
-					}
+                    if (!rgb)
+                    {
+                        enumErrorList.Add(new FilterLoadException(string.Format(Resources.RGBColorUnsupportedModeFormat, enumData.fileName)));
+                    }
 
-				}
-				else if (propKey == PIPropertyID.PICategoryProperty)
-				{
-					String cat = StringFromPString(new IntPtr((propPtr.ToInt64() + dataOfs)));
-					enumData.category = cat;
-				}
-				else if (propKey == PIPropertyID.PINameProperty)
-				{
-					IntPtr ptr = new IntPtr((propPtr.ToInt64() + dataOfs));
-					String title = StringFromPString(ptr);
-					enumData.title = title;
-				}
-				else if (propKey == PIPropertyID.PIFilterCaseInfoProperty)
-				{
-					IntPtr ptr = new IntPtr((propPtr.ToInt64() + dataOfs));
+                }
+                else if (propKey == PIPropertyID.PICategoryProperty)
+                {
+                    String cat = StringFromPString(new IntPtr((propPtr.ToInt64() + dataOfs)));
+                    enumData.category = cat;
+                }
+                else if (propKey == PIPropertyID.PINameProperty)
+                {
+                    String title = StringFromPString(new IntPtr((propPtr.ToInt64() + dataOfs)));
+                    enumData.title = title;
+                }
+                else if (propKey == PIPropertyID.PIFilterCaseInfoProperty)
+                {
+                    IntPtr ptr = new IntPtr((propPtr.ToInt64() + dataOfs));
 
-					enumData.filterInfo = new FilterCaseInfo[7];
-					for (int j = 0; j < 7; j++)
-					{
-						enumData.filterInfo[j] = (FilterCaseInfo)Marshal.PtrToStructure(ptr, typeof(FilterCaseInfo));
-						ptr = new IntPtr(ptr.ToInt64() + (long)Marshal.SizeOf(typeof(FilterCaseInfo)));
-					}
+                    enumData.filterInfo = new FilterCaseInfo[7];
+                    for (int j = 0; j < 7; j++)
+                    {
+                        enumData.filterInfo[j] = (FilterCaseInfo)Marshal.PtrToStructure(ptr, typeof(FilterCaseInfo));
+                        ptr = new IntPtr(ptr.ToInt64() + (long)Marshal.SizeOf(typeof(FilterCaseInfo)));
+                    }
 
-				}
+                }
 
-				int padOfs = pipp.propertyLength; 
+                int padOfs = pipp.propertyLength;
 
-				while (padOfs % 4 > 0) // get the length of the 4 byte alignment padding
-				{
-					padOfs++;
-				}
-				padOfs = padOfs - pipp.propertyLength;
+                while (padOfs % 4 > 0) // get the length of the 4 byte alignment padding
+                {
+                    padOfs++;
+                }
+                padOfs = padOfs - pipp.propertyLength;
 
 #if DEBUG
-				if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
-				{
-					Debug.WriteLine(string.Format("i = {0}, propPtr = {1}", i.ToString(), ((long)propPtr).ToString()));
-				}
-#endif           
-				pos += (long)(16 + pipp.propertyLength + padOfs);
-				propPtr = new IntPtr(pos);
+                if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
+                {
+                    Debug.WriteLine(string.Format("i = {0}, propPtr = {1}", i.ToString(), ((long)propPtr).ToString()));
+                }
+#endif
+                pos += (long)(16 + pipp.propertyLength + padOfs);
+                propPtr = new IntPtr(pos);
 
-			}
+            }
 
 			if (!queryPlugin)
 			{
@@ -476,6 +476,8 @@ namespace PSFilterLoad.PSApi
             disposed = false;
             frsetup = false;
             suitesSetup = false;
+            enumErrorList = null;
+            enumResList = null;
 				
 			filterRecord = new FilterRecord();
 			platformData = new PlatformData();
@@ -598,11 +600,17 @@ namespace PSFilterLoad.PSApi
 						queryPlugin = false;
 					}
 					GCHandle gch = GCHandle.Alloc(pdata);
+                    enumErrorList = new List<FilterLoadException>();
 					try
 					{
 
 						if (NativeMethods.EnumResourceNames(dll, "PiPl", new EnumResNameDelegate(EnumRes), GCHandle.ToIntPtr(gch)))
 						{
+                            if (enumErrorList.Count > 0)
+                            {
+                                throw enumErrorList[0];
+                            }
+
 							pdata = (PluginData)gch.Target;
 							if (pdata.entryPoint != null)
 							{
@@ -621,7 +629,6 @@ namespace PSFilterLoad.PSApi
 								}
 							
 							}
-
 						}
 						else
 						{
@@ -1237,7 +1244,8 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
-		static List<PluginData> enumResList = null;
+		static List<PluginData> enumResList;
+        static List<FilterLoadException> enumErrorList;
 
 		static void AddFoundPluginData(PluginData data)
 		{
@@ -1247,18 +1255,21 @@ namespace PSFilterLoad.PSApi
 			}
 			enumResList.Add(data);
 		}
-		/// <summary>
-		/// Querys a 8bf plugin 
-		/// </summary>
-		/// <param name="fileName">The fileName to query.</param>
-		/// <param name="pluginData">The list filters within the plugin.</param>
-		/// <returns>True if succssful otherwise false</returns>
-		public static bool QueryPlugin(string fileName, out List<PluginData> pluginData)
+        /// <summary>
+        /// Querys a 8bf plugin
+        /// </summary>
+        /// <param name="fileName">The fileName to query.</param>
+        /// <param name="pluginData">The list filters within the plugin.</param>
+        /// <returns>
+        /// True if succssful otherwise false
+        /// </returns>
+		public static bool QueryPlugin(string fileName, out List<PluginData> pluginData, out List<FilterLoadException> loadErrors)
 		{
 			if (String.IsNullOrEmpty(fileName))
 				throw new ArgumentException("fileName is null or empty.", "fileName");
 
 			pluginData = new List<PluginData>();
+            loadErrors = new List<FilterLoadException>();
 
 			bool result = false;
 
@@ -1271,36 +1282,42 @@ namespace PSFilterLoad.PSApi
 				PluginData pdata = new PluginData() { fileName = fileName };
 				GCHandle gch = GCHandle.Alloc(pdata);
 				enumResList = null;
-				try
-				{
-					if (!queryPlugin)
-					{
-						queryPlugin = true;
-					}
+                enumErrorList = new List<FilterLoadException>();
+                try
+                {
+                    if (!queryPlugin)
+                    {
+                        queryPlugin = true;
+                    }
 
-					if (NativeMethods.EnumResourceNames(dll, "PiPl", new EnumResNameDelegate(EnumRes), GCHandle.ToIntPtr(gch)))
-					{
-						foreach (PluginData data in enumResList)
-						{
-							if (data.entryPoint != null) // Was the entrypoint found for the plugin.
-							{
-								pluginData.Add(data);
-								if (!result)
-								{ 
-									result = true;
-								}
-							} 
-						}
-					}
+                    if (NativeMethods.EnumResourceNames(dll, "PiPl", new EnumResNameDelegate(EnumRes), GCHandle.ToIntPtr(gch)))
+                    {
+                        loadErrors.AddRange(enumErrorList);
+                        foreach (PluginData data in enumResList)
+                        {
+                            if (data.entryPoint != null) // Was the entrypoint found for the plugin.
+                            {
+                                pluginData.Add(data);
+                                if (!result)
+                                {
+                                    result = true;
+                                }
+                            }
+                        }
+                    }
 #if DEBUG
 
-					else
-					{
-						Ping(DebugFlags.Error, string.Format("EnumResourceNames(PiPL) failed for {0}", fileName));
-					} 
+                    else
+                    {
+                        Ping(DebugFlags.Error, string.Format("EnumResourceNames(PiPL) failed for {0}", fileName));
+                    }
 #endif
 
-				}
+                }
+                catch (FilterLoadException)
+                {
+                    throw;
+                }
 				finally
 				{
 					gch.Free();
