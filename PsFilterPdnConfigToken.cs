@@ -128,7 +128,7 @@ namespace PSFilterPdn
             }
         }
 
-        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, string filterCaseInfo, ParameterData parm, Surface dest, bool reshowdialog, bool useshim)
+        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, string filterCaseInfo, ParameterData parm, Surface dest, bool reShowDialog, bool useShim)
             : base()
         {
             this.category = category;
@@ -138,8 +138,8 @@ namespace PSFilterPdn
             this.fileName = fileName;
             this.title = title;
             this.parmData = parm;
-            this.reShowDialog = reshowdialog;
-            this.runWith32BitShim = useshim;
+            this.reShowDialog = reShowDialog;
+            this.runWith32BitShim = useShim;
         }
 
 #pragma warning disable 628
