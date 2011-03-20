@@ -27,10 +27,6 @@ namespace PSFilterLoad.PSApi
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool FreeLibrary(IntPtr hModule);
 
-        [DllImport("kernel32.dll", EntryPoint = "FreeResource")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool FreeResource([In()]System.IntPtr hResData);
-
         [SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments", MessageId = "1"), DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
         public static extern IntPtr GetProcAddress([In()] IntPtr hModule, [In()] string lpProcName);
 
