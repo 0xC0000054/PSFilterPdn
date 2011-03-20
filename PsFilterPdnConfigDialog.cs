@@ -31,7 +31,7 @@ namespace PSFilterPdn
 		private Panel fltrLoadProressPanel;
 		private Label fldrLdNameLbl;
 		private Label fldrLoadCountLbl;
-		private Label fldrloadproglbl;
+		private Label fldrLoadProgLbl;
 		private ProgressBar fldrLoadProgBar;
 		private CheckBox showAboutBoxcb;
 		private TabPage logTab;
@@ -120,7 +120,7 @@ namespace PSFilterPdn
             this.fltrLoadProressPanel = new System.Windows.Forms.Panel();
             this.fldrLdNameLbl = new System.Windows.Forms.Label();
             this.fldrLoadCountLbl = new System.Windows.Forms.Label();
-            this.fldrloadproglbl = new System.Windows.Forms.Label();
+            this.fldrLoadProgLbl = new System.Windows.Forms.Label();
             this.fldrLoadProgBar = new System.Windows.Forms.ProgressBar();
             this.runFilterBtn = new System.Windows.Forms.Button();
             this.filterTree = new System.Windows.Forms.TreeView();
@@ -146,7 +146,7 @@ namespace PSFilterPdn
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 1;
-            this.buttonCancel.Text = "Cancel";
+            this.buttonCancel.Text = Resources.ConfigDialog_buttonCancel_Text;
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
@@ -156,7 +156,7 @@ namespace PSFilterPdn
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(75, 23);
             this.buttonOK.TabIndex = 2;
-            this.buttonOK.Text = "OK";
+            this.buttonOK.Text = Resources.ConfigDialog_buttonOK_Text;
             this.buttonOK.UseVisualStyleBackColor = true;
             this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
             // 
@@ -186,7 +186,7 @@ namespace PSFilterPdn
             this.filterTab.Padding = new System.Windows.Forms.Padding(3);
             this.filterTab.Size = new System.Drawing.Size(452, 324);
             this.filterTab.TabIndex = 0;
-            this.filterTab.Text = "Filters";
+            this.filterTab.Text = Resources.ConfigDialog_filterTab_Text;
             // 
             // filterProgressBar
             // 
@@ -214,7 +214,7 @@ namespace PSFilterPdn
             this.filterSearchBox.Name = "filterSearchBox";
             this.filterSearchBox.Size = new System.Drawing.Size(230, 20);
             this.filterSearchBox.TabIndex = 15;
-            this.filterSearchBox.Text = "Search Filters";
+            this.filterSearchBox.Text = Resources.ConfigDialog_FilterSearchBox_BackText;
             this.filterSearchBox.TextChanged += new System.EventHandler(this.filterSearchBox_TextChanged);
             this.filterSearchBox.Enter += new System.EventHandler(this.filterSearchBox_Enter);
             this.filterSearchBox.Leave += new System.EventHandler(this.filterSearchBox_Leave);
@@ -226,14 +226,14 @@ namespace PSFilterPdn
             this.showAboutBoxcb.Name = "showAboutBoxcb";
             this.showAboutBoxcb.Size = new System.Drawing.Size(104, 17);
             this.showAboutBoxcb.TabIndex = 3;
-            this.showAboutBoxcb.Text = "Show About box";
+            this.showAboutBoxcb.Text = Resources.ConfigDialog_showAboutBoxcb_Text;
             this.showAboutBoxcb.UseVisualStyleBackColor = true;
             // 
             // fltrLoadProressPanel
             // 
             this.fltrLoadProressPanel.Controls.Add(this.fldrLdNameLbl);
             this.fltrLoadProressPanel.Controls.Add(this.fldrLoadCountLbl);
-            this.fltrLoadProressPanel.Controls.Add(this.fldrloadproglbl);
+            this.fltrLoadProressPanel.Controls.Add(this.fldrLoadProgLbl);
             this.fltrLoadProressPanel.Controls.Add(this.fldrLoadProgBar);
             this.fltrLoadProressPanel.Location = new System.Drawing.Point(243, 157);
             this.fltrLoadProressPanel.Name = "fltrLoadProressPanel";
@@ -259,14 +259,14 @@ namespace PSFilterPdn
             this.fldrLoadCountLbl.TabIndex = 2;
             this.fldrLoadCountLbl.Text = "(2 of 3)";
             // 
-            // fldrloadproglbl
+            // fldrLoadProgLbl
             // 
-            this.fldrloadproglbl.AutoSize = true;
-            this.fldrloadproglbl.Location = new System.Drawing.Point(3, 3);
-            this.fldrloadproglbl.Name = "fldrloadproglbl";
-            this.fldrloadproglbl.Size = new System.Drawing.Size(105, 13);
-            this.fldrloadproglbl.TabIndex = 1;
-            this.fldrloadproglbl.Text = "Folder load progress:";
+            this.fldrLoadProgLbl.AutoSize = true;
+            this.fldrLoadProgLbl.Location = new System.Drawing.Point(3, 3);
+            this.fldrLoadProgLbl.Name = "fldrLoadProgLbl";
+            this.fldrLoadProgLbl.Size = new System.Drawing.Size(105, 13);
+            this.fldrLoadProgLbl.TabIndex = 1;
+            this.fldrLoadProgLbl.Text = Resources.ConfigDialog_fldrLoadProgLbl_Text;
             // 
             // fldrLoadProgBar
             // 
@@ -281,7 +281,7 @@ namespace PSFilterPdn
             this.runFilterBtn.Name = "runFilterBtn";
             this.runFilterBtn.Size = new System.Drawing.Size(75, 23);
             this.runFilterBtn.TabIndex = 1;
-            this.runFilterBtn.Text = "Run Filter";
+            this.runFilterBtn.Text = Resources.ConfigDialog_runFilterBtn_Text;
             this.runFilterBtn.UseVisualStyleBackColor = true;
             this.runFilterBtn.Click += new System.EventHandler(this.runFilterBtn_Click);
             // 
@@ -305,7 +305,7 @@ namespace PSFilterPdn
             this.dirTab.Padding = new System.Windows.Forms.Padding(3);
             this.dirTab.Size = new System.Drawing.Size(452, 324);
             this.dirTab.TabIndex = 1;
-            this.dirTab.Text = "Search Directories";
+            this.dirTab.Text = Resources.ConfigDialog_dirTab_Text;
             this.dirTab.UseVisualStyleBackColor = true;
             // 
             // subDirSearchCb
@@ -317,7 +317,7 @@ namespace PSFilterPdn
             this.subDirSearchCb.Name = "subDirSearchCb";
             this.subDirSearchCb.Size = new System.Drawing.Size(130, 17);
             this.subDirSearchCb.TabIndex = 3;
-            this.subDirSearchCb.Text = "Search Subdirectories";
+            this.subDirSearchCb.Text = Resources.ConfigDialog_subDirSearchCb_Text;
             this.subDirSearchCb.UseVisualStyleBackColor = true;
             this.subDirSearchCb.CheckedChanged += new System.EventHandler(this.subDirSearchCb_CheckedChanged);
             // 
@@ -327,7 +327,7 @@ namespace PSFilterPdn
             this.remDirBtn.Name = "remDirBtn";
             this.remDirBtn.Size = new System.Drawing.Size(75, 23);
             this.remDirBtn.TabIndex = 2;
-            this.remDirBtn.Text = "Remove";
+            this.remDirBtn.Text = Resources.ConfigDialog_remDirBtn_Text;
             this.remDirBtn.UseVisualStyleBackColor = true;
             this.remDirBtn.Click += new System.EventHandler(this.remDirBtn_Click);
             // 
@@ -337,7 +337,7 @@ namespace PSFilterPdn
             this.addDirBtn.Name = "addDirBtn";
             this.addDirBtn.Size = new System.Drawing.Size(75, 23);
             this.addDirBtn.TabIndex = 1;
-            this.addDirBtn.Text = "Add...";
+            this.addDirBtn.Text = Resources.ConfigDialog_addDirBtn_Text;
             this.addDirBtn.UseVisualStyleBackColor = true;
             this.addDirBtn.Click += new System.EventHandler(this.addDirBtn_Click);
             // 
@@ -356,7 +356,7 @@ namespace PSFilterPdn
             // 
             // dirHeader
             // 
-            this.dirHeader.Text = "Directories";
+            this.dirHeader.Text = Resources.ConfigDialog_dirHeader_Text;
             this.dirHeader.Width = 417;
             // 
             // logTab
@@ -367,7 +367,7 @@ namespace PSFilterPdn
             this.logTab.Padding = new System.Windows.Forms.Padding(3);
             this.logTab.Size = new System.Drawing.Size(452, 324);
             this.logTab.TabIndex = 2;
-            this.logTab.Text = "Error Log";
+            this.logTab.Text = Resources.ConfigDialog_logTab_Text;
             this.logTab.UseVisualStyleBackColor = true;
             // 
             // errorTextBox
@@ -397,7 +397,7 @@ namespace PSFilterPdn
             this.Controls.Add(this.buttonCancel);
             this.Location = new System.Drawing.Point(0, 0);
             this.Name = "PsFilterPdnConfigDialog";
-            this.Text = "8bf Filter";
+            this.Text = PSFilterPdn_Effect.StaticName;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PSFilterPdnConfigDialog_FormClosing);
             this.Controls.SetChildIndex(this.buttonCancel, 0);
             this.Controls.SetChildIndex(this.buttonOK, 0);
@@ -490,7 +490,7 @@ namespace PSFilterPdn
 		{
 			if (!string.IsNullOrEmpty(e.Data))
 			{
-				if (e.Data.StartsWith("parm"))
+				if (e.Data.StartsWith("parm", StringComparison.Ordinal))
 				{
 					if (this.InvokeRequired)
 					{
@@ -526,11 +526,11 @@ namespace PSFilterPdn
 				{
 					if (this.InvokeRequired)
 					{
-						this.Invoke(new UpdateProxyProgressDelegate(UpdateProgress), new object[] {int.Parse(e.Data)});
+						this.Invoke(new UpdateProxyProgressDelegate(UpdateProgress), new object[] {int.Parse(e.Data, CultureInfo.InvariantCulture)});
 					}
 					else
 					{
-						filterProgressBar.Value = int.Parse(e.Data).Clamp(0, 100);
+						filterProgressBar.Value = int.Parse(e.Data, CultureInfo.InvariantCulture).Clamp(0, 100);
 					}
 					
 				}
@@ -595,10 +595,10 @@ namespace PSFilterPdn
 		Process proxyProcess = new Process();
 		string src;
 		string dest;
-		string parmBytesFileName;
-		string pluginDataBytesFileName;
         bool proxyRunning;
-		
+        string parmBytesFileName;
+        string pluginDataBytesFileName;
+
 		private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
 		{
             // check that PSFilterShim exists first thing and abort if it does not.
@@ -638,7 +638,7 @@ namespace PSFilterPdn
                 string filterInfo = (string)this.Invoke(new GetFilterCaseInfoStringDelegate(GetFilterCaseInfoString), new object[] { data });
                 string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { data.fileName, data.entryPoint, data.title, data.category, filterInfo });
 
-                string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0},{1}", this.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked)), showAboutBoxcb.Checked, bool.FalseString);
+                string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0},{1}", this.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked)), bool.FalseString);
 
                 ParameterData parm = ParameterData.Empty;
                 if (parmData.ContainsKey(data.fileName))
@@ -646,8 +646,8 @@ namespace PSFilterPdn
                     parm = parmData[data.fileName];
                 }
 
-                string parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
-                string pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
+                parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
+                pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
 
                 if (!string.IsNullOrEmpty(parmBytesFileName))
                 {
@@ -834,7 +834,7 @@ namespace PSFilterPdn
 		/// </summary>
 		/// <param name="data">The PluginData to check.</param>
 		/// <returns>True if the dialog needs to be reshown, otherwise false.</returns>
-		private bool ReShowEffectDialog(PluginData data)
+		private static bool ReShowEffectDialog(PluginData data)
 		{
 			string[] reshowCategories = new string[1]{
 				"Flaming Pear",
