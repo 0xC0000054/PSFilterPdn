@@ -93,15 +93,14 @@ namespace PSFilterLoad.PSApi
 				return true;
 			}
 
-
-			int version = -1;
-
+#if DEBUG
 			short fb = Marshal.ReadInt16(lockRes); // PiPL Resources always start with 1, this seems to be Photoshop's signature
-			version = Marshal.ReadInt32(lockRes, 2);
+#endif			
+            int version = Marshal.ReadInt32(lockRes, 2);
 
             if (version != 0)
             {
-                enumErrorList.Add(new FilterLoadException(string.Format(Resources.InvalidPiPLVersionFormat, enumData.fileName, version)));
+                enumErrorList.Add(new FilterLoadException(string.Format(CultureInfo.CurrentUICulture, Resources.InvalidPiPLVersionFormat, enumData.fileName, version)));
             }
 
             int count = Marshal.ReadInt32(lockRes, 6);
@@ -111,9 +110,6 @@ namespace PSFilterLoad.PSApi
             IntPtr propPtr = new IntPtr(pos);
 
             long dataOfs = Marshal.OffsetOf(typeof(PIProperty), "propertyData").ToInt64();
-
-            // the plugin entrypoint for the current platform
-            PIPropertyID entryPoint = (IntPtr.Size == 8) ? PIPropertyID.PIWin64X86CodeProperty : PIPropertyID.PIWin32X86CodeProperty;
 
             for (int i = 0; i < count; i++)
             {
@@ -130,7 +126,7 @@ namespace PSFilterLoad.PSApi
                 {
                     if (PropToString((uint)pipp.propertyData.ToInt64()) != "8BFM")
                     {
-                        enumErrorList.Add(new FilterLoadException(string.Format(Resources.InvalidPhotoshopFilterFormat, enumData.fileName)));
+                        enumErrorList.Add(new FilterLoadException(string.Format(CultureInfo.CurrentUICulture, Resources.InvalidPhotoshopFilterFormat, enumData.fileName)));
                     }
                 }
                 else if (((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty)) // the entrypoint for the current platform, this filters out incomptable processors archatectures
@@ -146,7 +142,7 @@ namespace PSFilterLoad.PSApi
                     if (HiWord(fltrversion) > PSConstants.latestFilterVersion ||
                         (HiWord(fltrversion) == PSConstants.latestFilterVersion && LoWord(fltrversion) > PSConstants.latestFilterSubVersion))
                     {
-                        enumErrorList.Add(new FilterLoadException(string.Format(Resources.UnsupportedInterfaceVersionFormat, new object[] { enumData.fileName, HiWord(fltrversion).ToString(CultureInfo.CurrentCulture), LoWord(fltrversion).ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) })));
+                        enumErrorList.Add(new FilterLoadException(string.Format(CultureInfo.CurrentUICulture, Resources.UnsupportedInterfaceVersionFormat, new object[] { enumData.fileName, HiWord(fltrversion).ToString(CultureInfo.CurrentCulture), LoWord(fltrversion).ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) })));
                     }
                 }
                 else if (propKey == PIPropertyID.PIImageModesProperty)
@@ -157,7 +153,7 @@ namespace PSFilterLoad.PSApi
 
                     if (!rgb)
                     {
-                        enumErrorList.Add(new FilterLoadException(string.Format(Resources.RGBColorUnsupportedModeFormat, enumData.fileName)));
+                        enumErrorList.Add(new FilterLoadException(string.Format(CultureInfo.CurrentUICulture, Resources.RGBColorUnsupportedModeFormat, enumData.fileName)));
                     }
 
                 }
@@ -250,18 +246,6 @@ namespace PSFilterLoad.PSApi
 			return (rect.left < rect.right && rect.top < rect.bottom);
 		}
 
-		/// <summary>
-		/// Checks if the Rect16 structures are equal.
-		/// </summary>
-		/// <param name="lhs">The left hand side Rect16 to check.</param>
-		/// <param name="rhs">The the right hand side Rect16 to check.</param>
-		/// <returns>True if they are equal otherwise false</returns>
-		static bool RectCovered(Rect16 lhs, Rect16 rhs)
-		{
-			return ((lhs.left == rhs.left) && (lhs.top == rhs.top) && (lhs.right == rhs.right) && (lhs.bottom == rhs.bottom));
-		}
-
-		
 		struct PSHandle
 		{
 			public IntPtr pointer;
@@ -404,10 +388,6 @@ namespace PSFilterLoad.PSApi
  
 		public abort AbortFunc
 		{
-			get 
-			{
-				return abortFunc;
-			}
 			set
 			{
 				abortFunc = value;
@@ -1210,7 +1190,6 @@ namespace PSFilterLoad.PSApi
 #endif
 				return false;
 			}
-			GC.KeepAlive(filterRecord);
 
 			FreeLibrary(ref pdata);
 			return true;
