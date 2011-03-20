@@ -175,6 +175,7 @@
   </data>
   <data name="ConfigDialog_FilterSearchBox_BackText" xml:space="preserve">
     <value>Search Filters</value>
+    <comment>The gray text in the FilterSearchBox.</comment>
   </data>
   <data name="ImageSizeTooLarge" xml:space="preserve">
     <value>Image Size must be less than or equal to 32000x32000 pixels.</value>
@@ -203,5 +204,41 @@
   <data name="UnsupportedInterfaceVersionFormat" xml:space="preserve">
     <value>{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported</value>
     <comment>Thrown when the filter uses a newer filter interface version than 4.0.</comment>
+  </data>
+  <data name="ConfigDialog_addDirBtn_Text" xml:space="preserve">
+    <value>Add...</value>
+  </data>
+  <data name="ConfigDialog_buttonCancel_Text" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ConfigDialog_buttonOK_Text" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="ConfigDialog_dirHeader_Text" xml:space="preserve">
+    <value>Directories</value>
+  </data>
+  <data name="ConfigDialog_dirTab_Text" xml:space="preserve">
+    <value>Search Directories</value>
+  </data>
+  <data name="ConfigDialog_filterTab_Text" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="ConfigDialog_fldrLoadProgLbl_Text" xml:space="preserve">
+    <value>Folder load progress:</value>
+  </data>
+  <data name="ConfigDialog_logTab_Text" xml:space="preserve">
+    <value>Error Log</value>
+  </data>
+  <data name="ConfigDialog_remDirBtn_Text" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="ConfigDialog_runFilterBtn_Text" xml:space="preserve">
+    <value>Run Filter</value>
+  </data>
+  <data name="ConfigDialog_showAboutBoxcb_Text" xml:space="preserve">
+    <value>Show About box</value>
+  </data>
+  <data name="ConfigDialog_subDirSearchCb_Text" xml:space="preserve">
+    <value>Search Subdirectories</value>
   </data>
 </root>
