@@ -14,10 +14,6 @@ namespace PSFilterLoad.PSApi
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool EnumResourceNames([In]IntPtr hModule, [In()]string lpszType, EnumResNameDelegate lpEnumFunc, [MarshalAs(UnmanagedType.SysInt)]IntPtr lParam);
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Portability", "CA1901:PInvokeDeclarationsShouldBePortable", MessageId = "1"), DllImport("kernel32.dll", EntryPoint = "EnumResourceNamesW", CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool EnumResourceNamesWithID(IntPtr hModule, uint lpszType, EnumResNameDelegate lpEnumFunc, IntPtr lParam);
-
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         public static extern IntPtr FindResource([In]IntPtr hModule, [In()]IntPtr lpName, [In()]IntPtr lpType);
         
@@ -30,10 +26,6 @@ namespace PSFilterLoad.PSApi
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool FreeLibrary(IntPtr hModule);
-
-        [DllImport("kernel32.dll", EntryPoint = "FreeResource")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool FreeResource([In()]System.IntPtr hResData);
 
         [SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments", MessageId = "1"), DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
         public static extern IntPtr GetProcAddress([In()] IntPtr hModule, [In()] string lpProcName);
