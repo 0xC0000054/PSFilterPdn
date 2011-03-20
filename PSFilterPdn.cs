@@ -68,7 +68,7 @@ namespace PSFilterPdn
         {
             if (!string.IsNullOrEmpty(e.Data))
             {
-                if (e.Data.StartsWith("Proxy"))
+                if (e.Data.StartsWith("Proxy", StringComparison.Ordinal))
                 {
                     string[] status = e.Data.Split(new char[] { ',' });
 
@@ -216,7 +216,7 @@ namespace PSFilterPdn
                 proxyProcess.StartInfo = psi;
 
 
-                bool st = proxyProcess.Start();
+                proxyProcess.Start();
                 proxyProcess.StandardInput.WriteLine(pd);
                 proxyProcess.StandardInput.WriteLine(parms);
                 proxyProcess.BeginErrorReadLine();
