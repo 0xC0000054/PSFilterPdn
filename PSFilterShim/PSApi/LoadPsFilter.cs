@@ -1035,26 +1035,28 @@ namespace PSFilterLoad.PSApi
 
 			restore_parm();
 
-			filterRecord.isFloating = Convert.ToByte(false);
-			filterRecord.haveMask = Convert.ToByte(false);
-			filterRecord.autoMask = Convert.ToByte(false);
-			// maskRect
-			filterRecord.maskData = IntPtr.Zero;
-			filterRecord.maskRowBytes = 0;
+            filterRecord.isFloating = 0;
+            filterRecord.haveMask = 0;
+            filterRecord.autoMask = 0;
+            // maskRect
+            filterRecord.maskData = IntPtr.Zero;
+            filterRecord.maskRowBytes = 0;
 
-			filterRecord.imageMode = PSConstants.plugInModeRGBColor;
-			filterRecord.inLayerPlanes = 3;
-			if (ignoreAlpha)
-			{
-				filterRecord.inTransparencyMask = 0; // Ignore the alpha channel, some FlamingPear plugins do not handle it correctly
-			}
-			else
-			{
-				filterRecord.inTransparencyMask = 1; // Paint.NET is always PixelFormat.Format32bppArgb
-			}
-			filterRecord.inLayerMasks = 0;
-			filterRecord.inInvertedLayerMasks = 0;
-			filterRecord.inNonLayerPlanes = 0;
+            filterRecord.imageMode = PSConstants.plugInModeRGBColor;
+            if (ignoreAlpha)
+            {
+                filterRecord.inLayerPlanes = 0;
+                filterRecord.inTransparencyMask = 0; // Paint.NET is always PixelFormat.Format32bppArgb			
+                filterRecord.inNonLayerPlanes = 3;
+            }
+            else
+            {
+                filterRecord.inLayerPlanes = 3;
+                filterRecord.inTransparencyMask = 1; // Paint.NET is always PixelFormat.Format32bppArgb			
+                filterRecord.inNonLayerPlanes = 0;
+            }
+            filterRecord.inLayerMasks = 0;
+            filterRecord.inInvertedLayerMasks = 0;
 
 			filterRecord.outLayerPlanes = filterRecord.inLayerPlanes;
 			filterRecord.outTransparencyMask = filterRecord.inTransparencyMask;
@@ -2505,8 +2507,8 @@ namespace PSFilterLoad.PSApi
 
 			filterRecord.handleProcs = handle_procPtr.AddrOfPinnedObject();
 
-			filterRecord.supportsDummyChannels = Convert.ToByte(false);
-			filterRecord.supportsAlternateLayouts = Convert.ToByte(false);
+			filterRecord.supportsDummyChannels = 0;
+			filterRecord.supportsAlternateLayouts = 0;
 			filterRecord.wantLayout = 0;
 			filterRecord.filterCase = filterCase;
 			filterRecord.dummyPlaneValue = -1;
