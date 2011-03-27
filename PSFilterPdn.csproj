@@ -77,6 +77,9 @@
     <Reference Include="PaintDotNet.Effects, Version=3.58.4081.24585, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>Refrences\PaintDotNet.Effects.dll</HintPath>
     </Reference>
+    <Reference Include="PaintDotNet.SystemLayer">
+      <HintPath>Refrences\PaintDotNet.SystemLayer.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -88,6 +91,7 @@
     <Compile Include="PSApi\LoadPsFilter.cs" />
     <Compile Include="PSApi\ProgressFunc.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
+    <Compile Include="PSApi\SafeLibraryHandle.cs" />
     <Compile Include="PsFilterPdnConfigToken.cs" />
     <Compile Include="PSFilterPdn.cs" />
     <Compile Include="PsFilterPdnConfigDialog.cs">
@@ -125,7 +129,6 @@
     <Compile Include="PSApi\NativeConstants.cs" />
     <Compile Include="PSApi\NativeMethods.cs" />
     <Compile Include="PSApi\NativeStructs.cs" />
-    <Compile Include="PSApi\ParameterData.cs" />
     <Compile Include="PSApi\PIProperty.cs" />
     <Compile Include="PSApi\PlatformData.cs" />
     <Compile Include="PSApi\PluginData.cs" />
