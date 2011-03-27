@@ -40,8 +40,6 @@ namespace PSFilterPdn
             proxyResult = false;
             proxyProcess = null;
             proxyErrorMessage = string.Empty;
-            parmBytesFileName = string.Empty;
-            pluginDataBytesFileName = string.Empty;
         }
        
         /// <summary>
@@ -81,38 +79,7 @@ namespace PSFilterPdn
                 }
             }
         }
-        ParameterData proxyParmData;
-
-        private void UpdateProxyProgress(object sender, DataReceivedEventArgs e)
-        {
-            if (!string.IsNullOrEmpty(e.Data))
-            {
-                if (e.Data.StartsWith("parm", StringComparison.Ordinal))
-                {
-                    string[] split = e.Data.Substring(4).Split(new char[] { ',' });
-
-                    proxyParmData = new ParameterData();
-
-                    proxyParmData.ParmDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
-                    proxyParmData.StoreMethod = int.Parse(split[1], CultureInfo.InvariantCulture);
-
-                    proxyParmData.ParmDataIsPSHandle = bool.Parse(split[2]);
-                    proxyParmData.PluginDataIsPSHandle = bool.Parse(split[3]);
-
-                    if (!string.IsNullOrEmpty(split[4]))
-                    {
-                        parmBytesFileName = split[4];
-                        proxyParmData.ParmDataBytes = File.ReadAllBytes(split[4]);
-                    }
-                    if (!string.IsNullOrEmpty(split[5]))
-                    {
-                        pluginDataBytesFileName = split[5];
-                        proxyParmData.PluginDataBytes = File.ReadAllBytes(split[5]);
-                    }
-
-                }
-            }
-        }
+       
         private static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
         {
             FilterCaseInfo[] info = new FilterCaseInfo[7];
@@ -132,8 +99,6 @@ namespace PSFilterPdn
         }
 
         private Process proxyProcess;
-        string parmBytesFileName;
-        string pluginDataBytesFileName;
         private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token)
         {
             // check that PSFilterShim exists first thing and abort if it does not.
@@ -169,26 +134,7 @@ namespace PSFilterPdn
 
                 string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { token.FileName, token.EntryPoint, token.Title, token.Category, token.FilterCaseInfo });
 
-                string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0},{1}", bool.FalseString, token.ReShowDialog ? bool.FalseString : bool.TrueString);
-
-                ParameterData parm = token.ParmData;
-
-
-                parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
-                pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterPluginBytes.dat");
-
-                if (!string.IsNullOrEmpty(parmBytesFileName))
-                {
-                    File.WriteAllBytes(parmBytesFileName, parm.ParmDataBytes);
-                }
-
-                if (!string.IsNullOrEmpty(pluginDataBytesFileName))
-                {
-                    File.WriteAllBytes(pluginDataBytesFileName, parm.PluginDataBytes);
-                }
-
-                string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5},{6}", new object[] { parm.ParmDataSize, parm.PluginDataSize, parm.StoreMethod, parmBytesFileName, pluginDataBytesFileName, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
-
+                string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0}", bool.FalseString);
 
                 string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
 
@@ -209,7 +155,6 @@ namespace PSFilterPdn
                 proxyProcess = new Process();
 
                 proxyProcess.EnableRaisingEvents = true;
-                proxyProcess.OutputDataReceived += new DataReceivedEventHandler(UpdateProxyProgress);
                 proxyProcess.ErrorDataReceived += new DataReceivedEventHandler(ProxyErrorDataReceived);
 
 
@@ -218,7 +163,6 @@ namespace PSFilterPdn
 
                 proxyProcess.Start();
                 proxyProcess.StandardInput.WriteLine(pd);
-                proxyProcess.StandardInput.WriteLine(parms);
                 proxyProcess.BeginErrorReadLine();
                 proxyProcess.BeginOutputReadLine();
 
@@ -248,14 +192,6 @@ namespace PSFilterPdn
                 if (File.Exists(dest))
                 {
                     File.Delete(dest);
-                }
-                if (File.Exists(parmBytesFileName))
-                {
-                    File.Delete(parmBytesFileName);
-                }
-                if (File.Exists(pluginDataBytesFileName))
-                {
-                    File.Delete(pluginDataBytesFileName);
                 }
 
             }
@@ -306,12 +242,6 @@ namespace PSFilterPdn
                         using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, Process.GetCurrentProcess().MainWindowHandle))
                         {
                             lps.AbortFunc = new abort(AbortFunc);
-                            lps.ParmData = token.ParmData;
-
-                            if (!token.ReShowDialog) // bugfix for Flaming Pear filters, they must reshow the dialog or they will crash
-                            {                           
-                                lps.IsRepeatEffect = true;
-                            }
 
                             FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
                             PluginData pdata = new PluginData(){ fileName = token.FileName, entryPoint= token.EntryPoint, title = token.Title,
