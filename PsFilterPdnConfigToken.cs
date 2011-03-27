@@ -12,7 +12,6 @@ namespace PSFilterPdn
         private string fileName;
         private string title;
         private string filterCaseInfo;
-        private ParameterData parmData;
         private bool reShowDialog;
         private bool runWith32BitShim;
         
@@ -88,18 +87,6 @@ namespace PSFilterPdn
                 title = value;
             }
         } 
-        
-        public ParameterData ParmData
-        {
-            get
-            {
-                return parmData;
-            }
-            internal set
-            {
-                parmData = value;
-            }
-        }
 
         /// <summary>
         /// Reshow the filter dialog when the Repeat Effect command is run. 
@@ -128,7 +115,7 @@ namespace PSFilterPdn
             }
         }
 
-        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, string filterCaseInfo, ParameterData parm, Surface dest, bool reShowDialog, bool useShim)
+        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, string filterCaseInfo, Surface dest, bool reShowDialog, bool useShim)
             : base()
         {
             this.category = category;
@@ -137,7 +124,6 @@ namespace PSFilterPdn
             this.filterCaseInfo = filterCaseInfo;
             this.fileName = fileName;
             this.title = title;
-            this.parmData = parm;
             this.reShowDialog = reShowDialog;
             this.runWith32BitShim = useShim;
         }
@@ -152,7 +138,6 @@ namespace PSFilterPdn
             this.fileName = copyMe.fileName;
             this.filterCaseInfo= copyMe.filterCaseInfo;
             this.title = copyMe.title;
-            this.parmData = copyMe.parmData;
             this.reShowDialog = copyMe.reShowDialog;
             this.runWith32BitShim = copyMe.runWith32BitShim;
         }
