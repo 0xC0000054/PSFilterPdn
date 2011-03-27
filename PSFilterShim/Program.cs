@@ -59,34 +59,37 @@ namespace PSFilterShim
 				pdata.category = plugData[3];
 				pdata.filterInfo = string.IsNullOrEmpty(plugData[4]) ? null : GetFilterCaseInfoFromString(plugData[4]);
 
-				try
-				{
-					using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, owner))
-					{
-						lps.ProgressFunc = new ProgressProc(UpdateProgress);
+                try
+                {
+                    using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, owner))
+                    {
+                        lps.ProgressFunc = new ProgressProc(UpdateProgress);
 
-                        System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.AboveNormal;
-   
+
                         bool result = lps.RunPlugin(pdata, showAbout);
-                       
-						if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
-						{
-							lps.Dest.Save(dstImg, ImageFormat.Png);
-						}
-						else
-						{
-							Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "Proxy{0},{1}", result.ToString(), lps.ErrorMessage));
-						}
-					}
-				}
-				catch (FilterLoadException flex)
-				{
-					Console.Error.WriteLine(flex.Message);
-				}
-				catch (ImageSizeTooLargeException ex)
-				{
-					Console.Error.WriteLine(ex.Message);
-				}
+
+                        if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
+                        {
+                            lps.Dest.Save(dstImg, ImageFormat.Png);
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "Proxy{0},{1}", result.ToString(), lps.ErrorMessage));
+                        }
+                    }
+                }
+                catch (FileNotFoundException fx)
+                {
+                    Console.Error.WriteLine(fx.Message);
+                }
+                catch (EntryPointNotFoundException epnf)
+                {
+                    Console.Error.WriteLine(epnf.Message);
+                }
+                catch (ImageSizeTooLargeException ex)
+                {
+                    Console.Error.WriteLine(ex.Message);
+                }
 
 
 			}
