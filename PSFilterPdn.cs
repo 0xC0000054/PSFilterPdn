@@ -70,7 +70,7 @@ namespace PSFilterPdn
             {
                 if (e.Data.StartsWith("Proxy", StringComparison.Ordinal))
                 {
-                    string[] status = e.Data.Split(new char[] { ',' });
+                    string[] status = e.Data.Substring(5).Split(new char[] { ',' });
 
                     proxyResult = bool.Parse(status[0]);
                     proxyErrorMessage = status[1];
@@ -175,7 +175,7 @@ namespace PSFilterPdn
 
 
                 parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
-                pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
+                pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterPluginBytes.dat");
 
                 if (!string.IsNullOrEmpty(parmBytesFileName))
                 {
@@ -187,7 +187,7 @@ namespace PSFilterPdn
                     File.WriteAllBytes(pluginDataBytesFileName, parm.PluginDataBytes);
                 }
 
-                string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5}", new object[] { parm.ParmDataSize, parm.StoreMethod, parmBytesFileName, pluginDataBytesFileName, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
+                string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5},{6}", new object[] { parm.ParmDataSize, parm.PluginDataSize, parm.StoreMethod, parmBytesFileName, pluginDataBytesFileName, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
 
 
                 string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
