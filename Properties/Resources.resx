@@ -241,4 +241,10 @@
   <data name="ConfigDialog_subDirSearchCb_Text" xml:space="preserve">
     <value>Search Subdirectories</value>
   </data>
+  <data name="ConfigDialog_fldrLdNameLbl_Format" xml:space="preserve">
+    <value>({0})</value>
+  </data>
+  <data name="ConfigDialog_fldrLoadCountLbl_Format" xml:space="preserve">
+    <value>(0 of {0})</value>
+  </data>
 </root>

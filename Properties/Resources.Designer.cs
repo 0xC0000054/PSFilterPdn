@@ -133,6 +133,24 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ({0}).
+        /// </summary>
+        internal static string ConfigDialog_fldrLdNameLbl_Format {
+            get {
+                return ResourceManager.GetString("ConfigDialog_fldrLdNameLbl_Format", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to (0 of {0}).
+        /// </summary>
+        internal static string ConfigDialog_fldrLoadCountLbl_Format {
+            get {
+                return ResourceManager.GetString("ConfigDialog_fldrLoadCountLbl_Format", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folder load progress:.
         /// </summary>
         internal static string ConfigDialog_fldrLoadProgLbl_Text {
