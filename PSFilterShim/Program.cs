@@ -49,11 +49,7 @@ namespace PSFilterShim
 
 				IntPtr owner = new IntPtr(long.Parse(args[5]));
 
-				
-				string[] lpsArgs = args[6].Split(new char[] { ',' }); 
-
-				bool showAbout = bool.Parse(lpsArgs[0]);
-				bool repeatEffect = bool.Parse(lpsArgs[1]);
+				bool showAbout = bool.Parse(args[6]);
 
 				string[] plugData = Console.ReadLine().Split(new char[] { ',' }); 
 				PluginData pdata = new PluginData();
@@ -63,49 +59,19 @@ namespace PSFilterShim
 				pdata.category = plugData[3];
 				pdata.filterInfo = string.IsNullOrEmpty(plugData[4]) ? null : GetFilterCaseInfoFromString(plugData[4]);
 
-
-
-
-				string[] parmData = Console.ReadLine().Split(new char[] {','});
-
-				ParameterData parm = new ParameterData();
-				parm.ParmDataSize = long.Parse(parmData[0]);
-                parm.PluginDataSize = long.Parse(parmData[1]);
-				parm.StoreMethod = int.Parse(parmData[2]);
-				parm.ParmDataBytes = string.IsNullOrEmpty(parmData[3]) ? null : File.ReadAllBytes(parmData[2]);
-				parm.PluginDataBytes = string.IsNullOrEmpty(parmData[4]) ? null : File.ReadAllBytes(parmData[3]);
-				parm.ParmDataIsPSHandle = bool.Parse(parmData[5]);
-				parm.PluginDataIsPSHandle = bool.Parse(parmData[6]);
 				try
 				{
 					using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, owner))
 					{
 						lps.ProgressFunc = new ProgressProc(UpdateProgress);
-						lps.ParmData = parm;
 
-						lps.IsRepeatEffect = repeatEffect;
-
-						bool result = lps.RunPlugin(pdata, showAbout);
-
+                        System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+   
+                        bool result = lps.RunPlugin(pdata, showAbout);
+                       
 						if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
 						{
 							lps.Dest.Save(dstImg, ImageFormat.Png);
-
-							string parmBytesFileName = lps.ParmData.ParmDataBytes == null ? string.Empty : Path.Combine(Path.GetDirectoryName(dstImg), "filterParmBytes.dat");
-							string pluginDataBytesFileName = lps.ParmData.PluginDataBytes == null ? string.Empty : Path.Combine(Path.GetDirectoryName(dstImg), "filterParmBytes.dat");
-
-							if (!string.IsNullOrEmpty(parmBytesFileName))
-							{
-								File.WriteAllBytes(parmBytesFileName, lps.ParmData.ParmDataBytes);
-							}
-
-							if (!string.IsNullOrEmpty(pluginDataBytesFileName))
-							{
-								File.WriteAllBytes(pluginDataBytesFileName, lps.ParmData.PluginDataBytes);
-							}
-							
-							Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "parm{0},{1},{2},{3},{4},{5},{6}", new object[] { lps.ParmData.ParmDataSize, lps.ParmData.PluginDataSize, lps.ParmData.StoreMethod, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle, parmBytesFileName, pluginDataBytesFileName}));
-
 						}
 						else
 						{
