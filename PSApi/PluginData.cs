@@ -33,7 +33,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// The pointer to the dll module handle
         /// </summary>
-        public IntPtr dll;
+        public SafeLibraryHandle dll;
         /// <summary>
         /// The entrypoint for the FilterParmBlock and AboutRecord
         /// </summary>
