@@ -68,18 +68,14 @@
   </Target>
   -->
   <ItemGroup>
-    <Reference Include="PaintDotNet.Base">
-      <HintPath>..\..\..\..\..\..\Program Files\Paint.NET\PaintDotNet.Base.dll</HintPath>
+    <Reference Include="PaintDotNet.Base, Version=3.58.4081.24574, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>Refrences\PaintDotNet.Base.dll</HintPath>
     </Reference>
-    <Reference Include="PaintDotNet.Core">
-      <HintPath>..\..\..\..\..\..\Program Files\Paint.NET\PaintDotNet.Core.dll</HintPath>
+    <Reference Include="PaintDotNet.Core, Version=3.58.4081.24581, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>Refrences\PaintDotNet.Core.dll</HintPath>
     </Reference>
-    <Reference Include="PaintDotNet.Effects, Version=3.0.2477.19862, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files\Paint.NET\PaintDotNet.Effects.dll</HintPath>
-    </Reference>
-    <Reference Include="PaintDotNet.SystemLayer">
-      <HintPath>..\..\..\..\..\..\Program Files\Paint.NET\PaintDotNet.SystemLayer.dll</HintPath>
+    <Reference Include="PaintDotNet.Effects, Version=3.58.4081.24585, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>Refrences\PaintDotNet.Effects.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
