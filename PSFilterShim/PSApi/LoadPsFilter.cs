@@ -700,10 +700,16 @@ namespace PSFilterLoad.PSApi
 							parmData.ParmDataBytes = buf;
 							parmData.ParmDataIsPSHandle = true;
 						}
-
+                        
 					}
-
-					parmData.ParmDataSize = size;
+                    else
+                    {
+                        Byte[] buf = new byte[size];
+                        Marshal.Copy(filterRecord.parameters, buf, 0, (int)size);
+                        parmData.ParmDataBytes = buf;
+                    }
+					
+                    parmData.ParmDataSize = size;
 					parmData.StoreMethod = 1;
 					NativeMethods.GlobalUnlock(filterRecord.parameters);
 				}
@@ -725,6 +731,12 @@ namespace PSFilterLoad.PSApi
 						}
 
 					}
+                    else
+                    {
+                        Byte[] buf = new byte[size];
+                        Marshal.Copy(filterRecord.parameters, buf, 0, (int)size);
+                        parmData.ParmDataBytes = buf;
+                    }
 
 					parmData.ParmDataSize = size;
 					parmData.StoreMethod = 1;
