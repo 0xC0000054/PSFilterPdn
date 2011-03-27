@@ -5,6 +5,7 @@ using System.Text;
 
 namespace PSFilterLoad.PSApi
 {
+#if DEBUG
     enum PluginPhase
     {
         None,
@@ -12,5 +13,6 @@ namespace PSFilterLoad.PSApi
         Prepare,
         Start,
         Finish
-    }
+    } 
+#endif
 }
