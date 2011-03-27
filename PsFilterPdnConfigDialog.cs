@@ -464,20 +464,20 @@ namespace PSFilterPdn
 			proxyParmData = new ParameterData();
 
 			proxyParmData.ParmDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
-            proxyParmData.PluginDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
+            proxyParmData.PluginDataSize = long.Parse(split[1], CultureInfo.InvariantCulture);
 			proxyParmData.StoreMethod = int.Parse(split[2], CultureInfo.InvariantCulture);
 
 			proxyParmData.ParmDataIsPSHandle = bool.Parse(split[3]);
 			proxyParmData.PluginDataIsPSHandle = bool.Parse(split[4]);
 
-			if (!string.IsNullOrEmpty(split[4]))
-			{
-				parmBytesFileName = split[4];
-				proxyParmData.ParmDataBytes = File.ReadAllBytes(split[5]);
-			}
 			if (!string.IsNullOrEmpty(split[5]))
 			{
-				pluginDataBytesFileName = split[5];
+				parmBytesFileName = split[5];
+				proxyParmData.ParmDataBytes = File.ReadAllBytes(split[5]);
+			}
+			if (!string.IsNullOrEmpty(split[6]))
+			{
+				pluginDataBytesFileName = split[6];
 				proxyParmData.PluginDataBytes = File.ReadAllBytes(split[6]);
 			}
 
