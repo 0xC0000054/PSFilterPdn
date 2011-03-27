@@ -70,11 +70,12 @@ namespace PSFilterShim
 
 				ParameterData parm = new ParameterData();
 				parm.ParmDataSize = long.Parse(parmData[0]);
-				parm.StoreMethod = int.Parse(parmData[1]);
-				parm.ParmDataBytes = string.IsNullOrEmpty(parmData[2]) ? null : File.ReadAllBytes(parmData[2]);
-				parm.PluginDataBytes = string.IsNullOrEmpty(parmData[3]) ? null : File.ReadAllBytes(parmData[3]);
-				parm.ParmDataIsPSHandle = bool.Parse(parmData[4]);
-				parm.PluginDataIsPSHandle = bool.Parse(parmData[5]);
+                parm.PluginDataSize = long.Parse(parmData[1]);
+				parm.StoreMethod = int.Parse(parmData[2]);
+				parm.ParmDataBytes = string.IsNullOrEmpty(parmData[3]) ? null : File.ReadAllBytes(parmData[2]);
+				parm.PluginDataBytes = string.IsNullOrEmpty(parmData[4]) ? null : File.ReadAllBytes(parmData[3]);
+				parm.ParmDataIsPSHandle = bool.Parse(parmData[5]);
+				parm.PluginDataIsPSHandle = bool.Parse(parmData[6]);
 				try
 				{
 					using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, owner))
@@ -103,7 +104,7 @@ namespace PSFilterShim
 								File.WriteAllBytes(pluginDataBytesFileName, lps.ParmData.PluginDataBytes);
 							}
 							
-							Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "parm{0},{1},{2},{3},{4},{5}", new object[] { lps.ParmData.ParmDataSize, lps.ParmData.StoreMethod, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle, parmBytesFileName, pluginDataBytesFileName}));
+							Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "parm{0},{1},{2},{3},{4},{5},{6}", new object[] { lps.ParmData.ParmDataSize, lps.ParmData.PluginDataSize, lps.ParmData.StoreMethod, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle, parmBytesFileName, pluginDataBytesFileName}));
 
 						}
 						else
