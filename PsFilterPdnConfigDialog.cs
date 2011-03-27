@@ -464,20 +464,21 @@ namespace PSFilterPdn
 			proxyParmData = new ParameterData();
 
 			proxyParmData.ParmDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
-			proxyParmData.StoreMethod = int.Parse(split[1], CultureInfo.InvariantCulture);
+            proxyParmData.PluginDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
+			proxyParmData.StoreMethod = int.Parse(split[2], CultureInfo.InvariantCulture);
 
-			proxyParmData.ParmDataIsPSHandle = bool.Parse(split[2]);
-			proxyParmData.PluginDataIsPSHandle = bool.Parse(split[3]);
+			proxyParmData.ParmDataIsPSHandle = bool.Parse(split[3]);
+			proxyParmData.PluginDataIsPSHandle = bool.Parse(split[4]);
 
 			if (!string.IsNullOrEmpty(split[4]))
 			{
 				parmBytesFileName = split[4];
-				proxyParmData.ParmDataBytes = File.ReadAllBytes(split[4]);
+				proxyParmData.ParmDataBytes = File.ReadAllBytes(split[5]);
 			}
 			if (!string.IsNullOrEmpty(split[5]))
 			{
 				pluginDataBytesFileName = split[5];
-				proxyParmData.PluginDataBytes = File.ReadAllBytes(split[5]);
+				proxyParmData.PluginDataBytes = File.ReadAllBytes(split[6]);
 			}
 
 		}
@@ -647,7 +648,7 @@ namespace PSFilterPdn
                 }
 
                 parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
-                pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
+                pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterPluginBytes.dat");
 
                 if (!string.IsNullOrEmpty(parmBytesFileName))
                 {
@@ -659,7 +660,7 @@ namespace PSFilterPdn
                     File.WriteAllBytes(pluginDataBytesFileName, parm.PluginDataBytes);
                 }
 
-                string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5}", new object[] { parm.ParmDataSize, parm.StoreMethod, parmBytesFileName, pluginDataBytesFileName, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
+                string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5},{6}", new object[] { parm.ParmDataSize, parm.PluginDataSize, parm.StoreMethod, parmBytesFileName, pluginDataBytesFileName, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
 
                 string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
 
@@ -782,7 +783,7 @@ namespace PSFilterPdn
 
 				if (ReShowEffectDialog(data))
 				{
-					this.reShowFilter = true; // Flaming Pear filters fail if the Repeat Effect command is used without re-showing the dialog.
+                    this.reShowFilter = true; // Flaming Pear filters fail if the Repeat Effect command is used without re-showing the dialog.
 				}
 				else
 				{
@@ -1350,7 +1351,7 @@ namespace PSFilterPdn
 				UpdateFilterList();
 			}
 			// set the useDEPProxy flag.
-			if (IntPtr.Size == 4 && PaintDotNet.SystemLayer.OS.IsVistaOrLater)
+			if (IntPtr.Size == 4 && Environment.OSVersion.Version.Major >= 6)
 			{
 				uint depFlags;
 				int protect;
