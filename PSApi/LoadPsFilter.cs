@@ -355,8 +355,9 @@ namespace PSFilterLoad.PSApi
 
 		static Bitmap source = null;
 		static Bitmap dest = null;
-		static PluginPhase phase;
-
+#if DEBUG
+        static PluginPhase phase;
+#endif
 		static IntPtr data;
 		static short result;
 
@@ -426,7 +427,9 @@ namespace PSFilterLoad.PSApi
 			}
 
 			data = IntPtr.Zero;
-			phase = PluginPhase.None;
+#if DEBUG
+            phase = PluginPhase.None; 
+#endif
 			isRepeatEffect = false;
 			errorMessage = String.Empty;
 			fillOutData = true;
@@ -530,7 +533,7 @@ namespace PSFilterLoad.PSApi
 		{
 			bool loaded = false;
 
-			if (pdata.entry.dll != IntPtr.Zero)
+			if ((pdata.entry.dll != null) && !pdata.entry.dll.IsInvalid)
 				return true;     
 			
 			if (!string.IsNullOrEmpty(pdata.entryPoint)) // The filter has already been queried so take a shortcut.
@@ -548,9 +551,9 @@ namespace PSFilterLoad.PSApi
 			else
 			{
 				// load it as an datafile to keep from throwing a BadImageFormatException.
-				IntPtr dll = NativeMethods.LoadLibraryEx(pdata.fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE);
+				SafeLibraryHandle dll = NativeMethods.LoadLibraryEx(pdata.fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE);
 
-				if (dll != IntPtr.Zero)
+				if (!dll.IsInvalid)
 				{
 					if (queryPlugin)
 					{
@@ -561,7 +564,7 @@ namespace PSFilterLoad.PSApi
 					try
 					{
 
-						if (NativeMethods.EnumResourceNames(dll, "PiPl", new EnumResNameDelegate(EnumRes), GCHandle.ToIntPtr(gch)))
+						if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiPl", new EnumResNameDelegate(EnumRes), GCHandle.ToIntPtr(gch)))
 						{
                             if (enumErrorList.Count > 0)
                             {
@@ -571,8 +574,8 @@ namespace PSFilterLoad.PSApi
 							pdata = (PluginData)gch.Target;
 							if (pdata.entryPoint != null)
 							{
-								NativeMethods.FreeLibrary(dll);
-								dll = IntPtr.Zero;
+								dll.Dispose();
+								dll = null;
 
 								// now load the dll if the entrypoint has been found
 								pdata.entry.dll = NativeMethods.LoadLibraryEx(pdata.fileName, IntPtr.Zero, 0U);
@@ -597,13 +600,9 @@ namespace PSFilterLoad.PSApi
 						gch.Free();
 					}
 			
-				}   
-
-				if (dll != IntPtr.Zero)
-				{
-					NativeMethods.FreeLibrary(dll);
-					dll = IntPtr.Zero;
 				}
+
+                dll.Dispose();
 			}
 
 			return loaded;
@@ -615,10 +614,10 @@ namespace PSFilterLoad.PSApi
 		/// <param name="pdata">The PluginData to  free/</param>
 		static void FreeLibrary(ref PluginData pdata)
 		{
-			if (pdata.entry.dll != IntPtr.Zero)
+			if (!pdata.entry.dll.IsInvalid)
 			{
-				NativeMethods.FreeLibrary(pdata.entry.dll);
-				pdata.entry.dll = IntPtr.Zero;
+				pdata.entry.dll.Dispose();
+				pdata.entry.dll = null;
 				pdata.entry.entry = null;
 			}
 		}
@@ -659,8 +658,9 @@ namespace PSFilterLoad.PSApi
 
 		static bool plugin_apply(PluginData pdata)
 		{
-			Debug.Assert(phase == PluginPhase.Prepare);
- 
+#if DEBUG
+            Debug.Assert(phase == PluginPhase.Prepare);
+#endif 
 			result = PSError.noErr;
 
 #if DEBUG
@@ -763,7 +763,9 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			phase = PluginPhase.Parameters;
+#if DEBUG
+            phase = PluginPhase.Parameters; 
+#endif
 
 			return true;
 		}
@@ -851,7 +853,9 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			phase = PluginPhase.Prepare;
+#if DEBUG
+            phase = PluginPhase.Prepare; 
+#endif
 
 			return true;
 		}
@@ -987,11 +991,11 @@ namespace PSFilterLoad.PSApi
 
 			bool result = false;
 
-			IntPtr dll = NativeMethods.LoadLibraryEx(fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE);
+			SafeLibraryHandle dll = NativeMethods.LoadLibraryEx(fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE);
 			/* Use LOAD_LIBRARY_AS_DATAFILE to prevent a BadImageFormatException from being thrown if the file
 			 * is a different processor architecture than the parent process.
 			 */
-			if (dll != IntPtr.Zero)
+			if (!dll.IsInvalid)
 			{
 				PluginData pdata = new PluginData() { fileName = fileName };
 				GCHandle gch = GCHandle.Alloc(pdata);
@@ -1004,7 +1008,7 @@ namespace PSFilterLoad.PSApi
                         queryPlugin = true;
                     }
 
-                    if (NativeMethods.EnumResourceNames(dll, "PiPl", new EnumResNameDelegate(EnumRes), GCHandle.ToIntPtr(gch)))
+                    if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiPl", new EnumResNameDelegate(EnumRes), GCHandle.ToIntPtr(gch)))
                     {
                         loadErrors.AddRange(enumErrorList);
                         foreach (PluginData data in enumResList)
@@ -1035,8 +1039,8 @@ namespace PSFilterLoad.PSApi
 				finally
 				{
 					gch.Free();
-					NativeMethods.FreeLibrary(dll);
-					dll = IntPtr.Zero;
+					dll.Dispose();
+					dll = null;
 				}
 
 			}
@@ -2417,8 +2421,10 @@ namespace PSFilterLoad.PSApi
 			{
 				if (disposing)
 				{
-					platFormDataPtr.Free();
-
+                    if (platFormDataPtr.IsAllocated)
+                    {
+                        platFormDataPtr.Free();
+                    }
 					if (buffer_procPtr.IsAllocated)
 					{
 						buffer_procPtr.Free();
