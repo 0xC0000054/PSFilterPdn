@@ -46,12 +46,10 @@ namespace PSFilterPdn
 		{
 			InitializeComponent();
 			filterTreeItems = null;
-			parmData = new Dictionary<string, ParameterData>();
 			proxyProcess = null;
 			src = string.Empty;
 			dest = string.Empty;
-			parmBytesFileName = string.Empty;
-			pluginDataBytesFileName = string.Empty;
+            proxyProcess = new Process();
 			destSurface = null;
 			proxyThread = null;
 		}
@@ -68,11 +66,9 @@ namespace PSFilterPdn
 			public static extern bool GetProcessDEPPolicy([System.Runtime.InteropServices.InAttribute()] System.IntPtr hProcess, [System.Runtime.InteropServices.OutAttribute()] out uint lpFlags, [System.Runtime.InteropServices.OutAttribute()] out int lpPermanent) ;
 		}
 
-
-
 		protected override void InitialInitToken()
 		{
-			theEffectToken = new PSFilterPdnConfigToken(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, ParameterData.Empty, null, false, false);
+			theEffectToken = new PSFilterPdnConfigToken(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, null, false);
 		}
 
 		protected override void InitTokenFromDialog()
@@ -83,8 +79,6 @@ namespace PSFilterPdn
 			((PSFilterPdnConfigToken)EffectToken).FileName = this.fileName;
 			((PSFilterPdnConfigToken)EffectToken).FilterCaseInfo = this.filterCaseInfo;
 			((PSFilterPdnConfigToken)EffectToken).Title = this.title;
-			((PSFilterPdnConfigToken)EffectToken).ParmData = (!string.IsNullOrEmpty(this.fileName) && parmData.ContainsKey(fileName))  ? parmData[fileName] : ParameterData.Empty;
-			((PSFilterPdnConfigToken)EffectToken).ReShowDialog = this.reShowFilter;
 			((PSFilterPdnConfigToken)EffectToken).RunWith32BitShim = this.runWith32BitShim;
 		}
 
@@ -95,15 +89,6 @@ namespace PSFilterPdn
 			if (!string.IsNullOrEmpty(token.FileName))
 			{
 				lastSelectedFileName = token.FileName;
-				if (!parmData.ContainsKey(token.FileName))
-				{
-					parmData.Add(token.FileName, token.ParmData);
-				}
-				else
-				{
-					parmData[token.FileName] = token.ParmData;
-				}
-				
 			}
 		}
 
@@ -431,7 +416,6 @@ namespace PSFilterPdn
 		private string entryPoint;
 		private string title;
 		private string filterCaseInfo;
-		private Dictionary<string, ParameterData> parmData;
 
 		private abort abortFunc = null;
 
@@ -457,85 +441,22 @@ namespace PSFilterPdn
 			filterProgressBar.Value = value.Clamp(0, 100);
 		}
 
-		private void SetProxyParameterData(string data)
-		{
-			string[] split = data.Substring(4).Split(new char[] { ',' });
-
-			proxyParmData = new ParameterData();
-
-			proxyParmData.ParmDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
-            proxyParmData.PluginDataSize = long.Parse(split[1], CultureInfo.InvariantCulture);
-			proxyParmData.StoreMethod = int.Parse(split[2], CultureInfo.InvariantCulture);
-
-			proxyParmData.ParmDataIsPSHandle = bool.Parse(split[3]);
-			proxyParmData.PluginDataIsPSHandle = bool.Parse(split[4]);
-
-			if (!string.IsNullOrEmpty(split[5]))
-			{
-				parmBytesFileName = split[5];
-				proxyParmData.ParmDataBytes = File.ReadAllBytes(split[5]);
-			}
-			if (!string.IsNullOrEmpty(split[6]))
-			{
-				pluginDataBytesFileName = split[6];
-				proxyParmData.PluginDataBytes = File.ReadAllBytes(split[6]);
-			}
-
-		}
+		
 		delegate void SetProxyErrorResultDelegate(string data);
-		delegate void SetProxyParameterDataDelegate(string data);
 		delegate void UpdateProxyProgressDelegate(int value); 
 
-		ParameterData proxyParmData;
 		private void UpdateProxyProgress(object sender, DataReceivedEventArgs e)
 		{
 			if (!string.IsNullOrEmpty(e.Data))
 			{
-				if (e.Data.StartsWith("parm", StringComparison.Ordinal))
+				if (this.InvokeRequired)
 				{
-					if (this.InvokeRequired)
-					{
-						this.Invoke(new SetProxyParameterDataDelegate(SetProxyParameterData), new object[] { e.Data });
-					}
-					else
-					{
-						string[] split = e.Data.Substring(4).Split(new char[] { ',' });
-
-						proxyParmData = new ParameterData();
-
-						proxyParmData.ParmDataSize = long.Parse(split[0], CultureInfo.InvariantCulture);
-						proxyParmData.StoreMethod = int.Parse(split[1], CultureInfo.InvariantCulture);
-					  
-						proxyParmData.ParmDataIsPSHandle = bool.Parse(split[2]);
-						proxyParmData.PluginDataIsPSHandle = bool.Parse(split[3]);
-
-						if (!string.IsNullOrEmpty(split[4]))
-						{
-							parmBytesFileName = split[4];
-							proxyParmData.ParmDataBytes = File.ReadAllBytes(split[4]);
-						}
-						if (!string.IsNullOrEmpty(split[5]))
-						{
-							pluginDataBytesFileName = split[5];
-							proxyParmData.PluginDataBytes = File.ReadAllBytes(split[5]);
-						}
-
-
-					}
+					this.Invoke(new UpdateProxyProgressDelegate(UpdateProgress), new object[] {int.Parse(e.Data, CultureInfo.InvariantCulture)});
 				}
 				else
 				{
-					if (this.InvokeRequired)
-					{
-						this.Invoke(new UpdateProxyProgressDelegate(UpdateProgress), new object[] {int.Parse(e.Data, CultureInfo.InvariantCulture)});
-					}
-					else
-					{
-						filterProgressBar.Value = int.Parse(e.Data, CultureInfo.InvariantCulture).Clamp(0, 100);
-					}
-					
+					filterProgressBar.Value = int.Parse(e.Data, CultureInfo.InvariantCulture).Clamp(0, 100);
 				}
-				
 			}
 		}
 
@@ -593,14 +514,12 @@ namespace PSFilterPdn
 		delegate void SetProxyResultDelegate(string dest, PluginData data);
 		delegate bool GetShowAboutCheckedDelegate();
 		delegate string GetHandleStringDelegate();
-		Process proxyProcess = new Process();
+		Process proxyProcess;
 		string src;
 		string dest;
         bool proxyRunning;
-        string parmBytesFileName;
-        string pluginDataBytesFileName;
 
-		private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
+        private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
 		{
             // check that PSFilterShim exists first thing and abort if it does not.
             string shimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
@@ -639,28 +558,7 @@ namespace PSFilterPdn
                 string filterInfo = (string)this.Invoke(new GetFilterCaseInfoStringDelegate(GetFilterCaseInfoString), new object[] { data });
                 string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { data.fileName, data.entryPoint, data.title, data.category, filterInfo });
 
-                string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0},{1}", this.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked)), bool.FalseString);
-
-                ParameterData parm = ParameterData.Empty;
-                if (parmData.ContainsKey(data.fileName))
-                {
-                    parm = parmData[data.fileName];
-                }
-
-                parmBytesFileName = parm.ParmDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParmBytes.dat");
-                pluginDataBytesFileName = parm.PluginDataBytes == null ? string.Empty : Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterPluginBytes.dat");
-
-                if (!string.IsNullOrEmpty(parmBytesFileName))
-                {
-                    File.WriteAllBytes(parmBytesFileName, parm.ParmDataBytes);
-                }
-
-                if (!string.IsNullOrEmpty(pluginDataBytesFileName))
-                {
-                    File.WriteAllBytes(pluginDataBytesFileName, parm.PluginDataBytes);
-                }
-
-                string parms = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4},{5},{6}", new object[] { parm.ParmDataSize, parm.PluginDataSize, parm.StoreMethod, parmBytesFileName, pluginDataBytesFileName, parm.ParmDataIsPSHandle, parm.PluginDataIsPSHandle });
+                string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0}", this.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked)));
 
                 string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
 
@@ -690,7 +588,6 @@ namespace PSFilterPdn
 
                     bool st = proxyProcess.Start();
                     proxyProcess.StandardInput.WriteLine(pd);
-                    proxyProcess.StandardInput.WriteLine(parms);
                     proxyProcess.BeginErrorReadLine();
                     proxyProcess.BeginOutputReadLine();
 #if DEBUG
@@ -724,14 +621,6 @@ namespace PSFilterPdn
                     {
                         File.Delete(dest);
                     }
-                    if (File.Exists(parmBytesFileName))
-                    {
-                        File.Delete(parmBytesFileName);
-                    }
-                    if (File.Exists(pluginDataBytesFileName))
-                    {
-                        File.Delete(pluginDataBytesFileName);
-                    }
 
                     proxyThread.Abort();
                     proxyThread = null;
@@ -756,14 +645,6 @@ namespace PSFilterPdn
 		{ 
 			if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && !showAboutBoxcb.Checked)
 			{
-				if (!parmData.ContainsKey(data.fileName))
-				{
-					parmData.Add(data.fileName, proxyParmData);
-				}
-				else
-				{
-					parmData[data.fileName] = proxyParmData;
-				}
 				this.entryPoint = data.entryPoint;
 				this.title = data.title;
 				this.category = data.category;
@@ -778,16 +659,6 @@ namespace PSFilterPdn
 				catch (FileNotFoundException fx)
 				{
 					MessageBox.Show(fx.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error); 
-				}
-				
-
-				if (ReShowEffectDialog(data))
-				{
-                    this.reShowFilter = true; // Flaming Pear filters fail if the Repeat Effect command is used without re-showing the dialog.
-				}
-				else
-				{
-					this.reShowFilter = false;
 				}
 
 				if (filterProgressBar.Value < filterProgressBar.Maximum)
@@ -808,51 +679,15 @@ namespace PSFilterPdn
 					destSurface.Dispose();
 					destSurface = null;
 				}
-				if (parmData != null)
-				{
-					if (parmData.ContainsKey(data.fileName))
-					{
-						parmData.Remove(data.fileName);
-					}
-				}
-
-				filterProgressBar.Value = 0;
 			}
 
-
-
-			if (filterProgressBar.Value == filterProgressBar.Maximum)
-			{
-				filterProgressBar.Value = 0;
-			}
+			filterProgressBar.Value = 0;
 
 			FinishTokenUpdate();
 
 		}
 
-		/// <summary>
-		/// Checks if the parameters dialog needs to be reshown on the 'Repeat Effect' command. 
-		/// </summary>
-		/// <param name="data">The PluginData to check.</param>
-		/// <returns>True if the dialog needs to be reshown, otherwise false.</returns>
-		private static bool ReShowEffectDialog(PluginData data)
-		{
-			string[] reshowCategories = new string[1]{
-				"Flaming Pear",
-			};
-
-			foreach (string item in reshowCategories)
-			{
-				if (data.category.Equals(item, StringComparison.OrdinalIgnoreCase))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
 		private Surface destSurface;
-		private bool reShowFilter;
 		private bool runWith32BitShim;
 		Thread proxyThread;
 		private void runFilterBtn_Click(object sender, EventArgs e)
@@ -884,11 +719,6 @@ namespace PSFilterPdn
 							lps.AbortFunc = abortFunc;
 							lps.ProgressFunc = new ProgressProc(UpdateProgress);
 
-							if (parmData.ContainsKey(data.fileName))
-							{
-								lps.ParmData = parmData[data.fileName];
-							}
-
 							bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
 							bool userCanceled = (result && lps.ErrorMessage == Resources.UserCanceledError);
 
@@ -899,27 +729,11 @@ namespace PSFilterPdn
 
 							if (!showAboutBoxcb.Checked && result && !userCanceled)
 							{
-								if (!parmData.ContainsKey(data.fileName))
-								{
-									parmData.Add(data.fileName, lps.ParmData);
-								}
-								else
-								{
-									parmData[data.fileName] = lps.ParmData;
-								}
 								this.destSurface = Surface.CopyFromBitmap(lps.Dest);
 								this.entryPoint = data.entryPoint;
 								this.title = data.title;
 								this.category = data.category;
 								this.filterCaseInfo = GetFilterCaseInfoString(data);
-								if (ReShowEffectDialog(data))
-								{
-									this.reShowFilter = true; // Flaming Pear filters fail if the Repeat Effect command is used without re-showing the dialog.
-								}
-								else
-								{
-									this.reShowFilter = false;
-								}
 
 								if (filterProgressBar.Value < filterProgressBar.Maximum)
 								{
@@ -933,21 +747,10 @@ namespace PSFilterPdn
 									destSurface.Dispose();
 									destSurface = null;
 								}
-								if (parmData != null)
-								{
-									if (parmData.ContainsKey(data.fileName))
-									{
-										parmData.Remove(data.fileName);
-									}
-								}
 
-								filterProgressBar.Value = 0;
 							}
 
-							if (filterProgressBar.Value == filterProgressBar.Maximum)
-							{
-								filterProgressBar.Value = 0;
-							}
+							filterProgressBar.Value = 0;
 
 						} 
 						
@@ -979,16 +782,15 @@ namespace PSFilterPdn
 				MessageBox.Show(this, ex.Message + Environment.NewLine + ex.StackTrace, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 #endif
 			}
+#if DEBUG
 			catch (Exception ex)
 			{
-#if DEBUG
+
 				Debug.WriteLine(ex.Message);
 				Debug.Write(ex.StackTrace);
-#else
-				MessageBox.Show(this, ex.ToString(), this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-#endif
-				
+
 			}
+#endif			
 		}
 		
 		private void addDirBtn_Click(object sender, EventArgs e)
@@ -1059,7 +861,7 @@ namespace PSFilterPdn
 					fldrLoadProgBar.Maximum = searchDirListView.Items.Count;
 					fldrLoadProgBar.Step = 1;
 					fltrLoadProressPanel.Visible = true;
-					fldrLoadCountLbl.Text = String.Format("(0 of {0})", searchDirListView.Items.Count);
+					fldrLoadCountLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_fldrLoadCountLbl_Format, searchDirListView.Items.Count);
 					updateFilterListbw_Done = false;
 
 					updateFilterListBw.RunWorkerAsync(uflp);
@@ -1181,8 +983,8 @@ namespace PSFilterPdn
 		private void updateFilterListBw_ProgressChanged(object sender, ProgressChangedEventArgs e)
 		{
 			fldrLoadProgBar.PerformStep();
-			fldrLoadCountLbl.Text = String.Format(CultureInfo.CurrentCulture, "({0} of {1})", (e.ProgressPercentage + 1), searchDirListView.Items.Count);
-			fldrLdNameLbl.Text = String.Format(CultureInfo.CurrentCulture, "({0})", e.UserState);
+			fldrLoadCountLbl.Text = String.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_fldrLoadCountLbl_Format, (e.ProgressPercentage + 1), searchDirListView.Items.Count);
+			fldrLdNameLbl.Text = String.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_fldrLdNameLbl_Format, e.UserState);
 		}
 	   
 		private bool formClosePending;
