@@ -16,208 +16,6 @@ namespace PSFilterLoad.PSApi
 	internal sealed class LoadPsFilter : IDisposable
 	{
 
-		#region EnumRes
-#if DEBUG
-		private static bool IS_INTRESOURCE(IntPtr value)
-		{
-			if (((uint)value) > ushort.MaxValue)
-			{
-				return false;
-			}
-			return true;
-		}
-		private static string GET_RESOURCE_NAME(IntPtr value)
-		{
-			if (IS_INTRESOURCE(value))
-				return value.ToString();
-			return Marshal.PtrToStringUni(value);
-		} 
-#endif
-
-		private static string StringFromPString(IntPtr PString)
-		{
-			if (PString == IntPtr.Zero)
-			{
-				return string.Empty;
-			}
-			int length = (int)Marshal.ReadByte(PString);
-			PString = new IntPtr(PString.ToInt64() + 1L);
-			char[] data = new char[length];
-			for (int i = 0; i < length; i++)
-			{
-				data[i] = (char)Marshal.ReadByte(PString, i);
-			}
-
-			return new string(data).Trim(new char[] { ' ', '\0' });
-		}
-
-		private static bool queryPlugin;
-		private static bool EnumRes(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
-		{
-			GCHandle gch = GCHandle.FromIntPtr(lParam);
-
-			PluginData enumData = (PluginData)gch.Target;
-
-			IntPtr hRes = NativeMethods.FindResource(hModule, lpszName, lpszType);
-			if (hRes == IntPtr.Zero)
-			{
-#if DEBUG
-				Debug.WriteLine(string.Format("FindResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumData.fileName));
-#endif
-				return true;
-			}
-
-			IntPtr loadRes = NativeMethods.LoadResource(hModule, hRes);
-			if (loadRes == IntPtr.Zero)
-			{
-#if DEBUG
-				Debug.WriteLine(string.Format("LoadResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumData.fileName));
-#endif
-				return true;
-			}
-
-			IntPtr lockRes = NativeMethods.LockResource(loadRes);
-			if (lockRes == IntPtr.Zero)
-			{
-#if DEBUG
-				Debug.WriteLine(string.Format("LockResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumData.fileName));
-#endif
-				return true;
-			}
-
-
-			int version = -1;
-
-			short fb = Marshal.ReadInt16(lockRes); // PiPL Resources always start with 1, this seems to be Photoshop's signature
-			version = Marshal.ReadInt32(lockRes, 2);
-
-			if (version != 0)
-			{
-				throw new FilterLoadException(string.Format("Invalid PiPl version in {0}: {1},  Expected version 0", enumData.fileName, version));
-			}
-
-			int count = Marshal.ReadInt32(lockRes, 6);
-
-			long pos = (lockRes.ToInt64() + 10L);
-
-			IntPtr propPtr = new IntPtr(pos);
-
-			long dataOfs = Marshal.OffsetOf(typeof(PIProperty), "propertyData").ToInt64();
-
-			// the plugin entrypoint for the current platform
-			PIPropertyID entryPoint = (IntPtr.Size == 8) ? PIPropertyID.PIWin64X86CodeProperty : PIPropertyID.PIWin32X86CodeProperty;
-
-			for (int i = 0; i < count; i++)
-			{
-				PIProperty pipp = (PIProperty)Marshal.PtrToStructure(propPtr, typeof(PIProperty));
-				PIPropertyID propKey = (PIPropertyID)pipp.propertyKey;
-#if DEBUG
-				if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
-				{
-					Debug.WriteLine(string.Format("prop = {0}", propKey.ToString("X")));
-					Debug.WriteLine(PropToString(pipp.propertyKey));
-				}
-#endif
-				if (propKey == PIPropertyID.PIKindProperty)
-				{
-					if (PropToString((uint)pipp.propertyData.ToInt64()) != "8BFM")
-					{
-						throw new FilterLoadException(string.Format("{0} is not a valid Photoshop Filter", enumData.fileName));
-					}
-				}
-				else if (propKey == PIPropertyID.PIWin32X86CodeProperty) // the entrypoint for the current platform, this filters out incomptable processors archatectures
-				{
-					String ep = Marshal.PtrToStringAnsi(new IntPtr((propPtr.ToInt64() + dataOfs)), pipp.propertyLength).TrimEnd('\0');
-					enumData.entryPoint = ep;
-				}
-				else if (propKey == PIPropertyID.PIVersionProperty)
-				{
-					long fltrversion = pipp.propertyData.ToInt64();
-					if (HiWord(fltrversion) > PSConstants.latestFilterVersion ||
-						(HiWord(fltrversion) == PSConstants.latestFilterVersion && LoWord(fltrversion) > PSConstants.latestFilterSubVersion))
-					{
-						throw new FilterLoadException(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumData.fileName, HiWord(fltrversion).ToString(), LoWord(fltrversion).ToString(), PSConstants.latestFilterVersion.ToString(), PSConstants.latestFilterSubVersion.ToString() }));
-					}
-				}
-				else if (propKey == PIPropertyID.PIImageModesProperty)
-				{
-					byte[] bytes = BitConverter.GetBytes(pipp.propertyData.ToInt64());
-
-					bool rgb = ((bytes[0] & PSConstants.flagSupportsRGBColor) == PSConstants.flagSupportsRGBColor);
-
-					if (!rgb)
-					{
-						throw new FilterLoadException(string.Format("{0} does not support the plugInModeRGBColor image mode.", enumData.fileName));
-					}
-
-				}
-				else if (propKey == PIPropertyID.PICategoryProperty)
-				{
-					String cat = StringFromPString(new IntPtr((propPtr.ToInt64() + dataOfs)));
-					enumData.category = cat;
-				}
-				else if (propKey == PIPropertyID.PINameProperty)
-				{
-					IntPtr ptr = new IntPtr((propPtr.ToInt64() + dataOfs));
-					String title = StringFromPString(ptr);
-					enumData.title = title;
-				}
-				else if (propKey == PIPropertyID.PIFilterCaseInfoProperty)
-				{
-					IntPtr ptr = new IntPtr((propPtr.ToInt64() + dataOfs));
-
-					
-					enumData.filterInfo = new FilterCaseInfo[7];
-					for (int j = 0; j < 7; j++)
-					{
-						enumData.filterInfo[j] = (FilterCaseInfo)Marshal.PtrToStructure(ptr, typeof(FilterCaseInfo));
-						ptr = new IntPtr(ptr.ToInt64() + (long)Marshal.SizeOf(typeof(FilterCaseInfo)));
-					}
-
-				}
-
-				int padOfs = pipp.propertyLength;
-
-				while (padOfs % 4 > 0) // get the length of the 4 byte alignment padding
-				{
-					padOfs++;
-				}
-				padOfs = padOfs - pipp.propertyLength;
-
-#if DEBUG
-				if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
-				{
-					Debug.WriteLine(string.Format("i = {0}, propPtr = {1}", i.ToString(), ((long)propPtr).ToString()));
-				}
-#endif
-				pos += (long)(16 + pipp.propertyLength + padOfs);
-				propPtr = new IntPtr(pos);
-
-			}
-
-
-			gch.Target = enumData; // this is used for the LoadFilter function
-
-			return true;
-		}
-		private static int LoWord(long dwValue)
-		{
-			return (int)(dwValue & 0xFFFF);
-		}
-
-		private static int HiWord(long dwValue)
-		{
-			return (int)(dwValue >> 16) & 0xFFFF;
-		}
-		private static string PropToString(uint prop)
-		{
-			byte[] bytes = BitConverter.GetBytes(prop);
-			return new string(new char[] { (char)bytes[3], (char)bytes[2], (char)bytes[1], (char)bytes[0] });
-		}
-
-
-		#endregion
-
 #if DEBUG
 		private static DebugFlags dbgFlags;
 		static void Ping(DebugFlags dbg, string message)
@@ -349,7 +147,9 @@ namespace PSFilterLoad.PSApi
 
 		static Bitmap source = null;
 		static Bitmap dest = null;
-		static PluginPhase phase;
+#if DEBUG
+        static PluginPhase phase; 
+#endif
 
 		static IntPtr data;
 		static short result;
@@ -399,7 +199,9 @@ namespace PSFilterLoad.PSApi
 				throw new ArgumentNullException("selection", "selection is null.");
 
 			data = IntPtr.Zero;
-			phase = PluginPhase.None;
+#if DEBUG
+            phase = PluginPhase.None; 
+#endif
 			errorMessage = String.Empty;
 			fillOutData = true;
 			disposed = false;
@@ -529,82 +331,40 @@ namespace PSFilterLoad.PSApi
 
 			return false;
 		}
-
+        /// <summary>
+        /// Loads a Photroshop filter from the PluginData.
+        /// </summary>
+        /// <param name="pdata">The PluginData of the filter to load.</param>
+        /// <returns>True if sucessful, otherwise false.</returns>
+        /// <exception cref="System.FileNotFoundExecption">The file in the PluginData.fileName</exception>
 		static bool LoadFilter(ref PluginData pdata)
 		{
 			bool loaded = false;
 
-			if (pdata.entry.dll != IntPtr.Zero)
+			if ((pdata.entry.dll != null) && !pdata.entry.dll.IsInvalid)
 				return true;
 
 			if (!string.IsNullOrEmpty(pdata.entryPoint)) // The filter has already been queried so take a shortcut.
 			{
 				pdata.entry.dll = NativeMethods.LoadLibraryEx(pdata.fileName, IntPtr.Zero, 0U);
 
-				IntPtr entry = NativeMethods.GetProcAddress(pdata.entry.dll, pdata.entryPoint);
+                if (!pdata.entry.dll.IsInvalid)
+                {
+                    IntPtr entry = NativeMethods.GetProcAddress(pdata.entry.dll, pdata.entryPoint);
 
-				if (entry != IntPtr.Zero)
-				{
-					pdata.entry.entry = (filterep)Marshal.GetDelegateForFunctionPointer(entry, typeof(filterep));
-					loaded = true;
-				}
+                    if (entry != IntPtr.Zero)
+                    {
+                        pdata.entry.entry = (filterep)Marshal.GetDelegateForFunctionPointer(entry, typeof(filterep));
+                        loaded = true;
+                    } 
+                }
+                else
+                {
+                    int hr = Marshal.GetHRForLastWin32Error();
+                    Marshal.ThrowExceptionForHR(hr);
+                }
 			}
-			else
-			{
-				// load it as an datafile to keep from throwing a BadImageFormatException.
-				IntPtr dll = NativeMethods.LoadLibraryEx(pdata.fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE);
-
-				if (dll != IntPtr.Zero)
-				{
-					if (queryPlugin)
-					{
-						queryPlugin = false;
-					}
-					GCHandle gch = GCHandle.Alloc(pdata);
-					try
-					{
-
-						if (NativeMethods.EnumResourceNames(dll, "PiPl", new EnumResNameDelegate(EnumRes), GCHandle.ToIntPtr(gch)))
-						{
-							pdata = (PluginData)gch.Target;
-							if (pdata.entryPoint != null)
-							{
-								NativeMethods.FreeLibrary(dll);
-								dll = IntPtr.Zero;
-
-								// now load the dll if the entrypoint has been found
-								pdata.entry.dll = NativeMethods.LoadLibraryEx(pdata.fileName, IntPtr.Zero, 0U);
-
-								IntPtr entry = NativeMethods.GetProcAddress(pdata.entry.dll, pdata.entryPoint);
-
-								if (entry != IntPtr.Zero)
-								{
-									pdata.entry.entry = (filterep)Marshal.GetDelegateForFunctionPointer(entry, typeof(filterep));
-									loaded = true;
-								}
-
-							}
-
-						}
-						else
-						{
-							FreeLibrary(ref pdata);
-						}
-					}
-					finally
-					{
-						gch.Free();
-					}
-
-				}
-
-				if (dll != IntPtr.Zero)
-				{
-					NativeMethods.FreeLibrary(dll);
-					dll = IntPtr.Zero;
-				}
-			}
-
+			
 			return loaded;
 		}
 
@@ -614,13 +374,30 @@ namespace PSFilterLoad.PSApi
 		/// <param name="pdata">The PluginData to  free/</param>
 		static void FreeLibrary(ref PluginData pdata)
 		{
-			if (pdata.entry.dll != IntPtr.Zero)
+			if (!pdata.entry.dll.IsClosed)
 			{
-				NativeMethods.FreeLibrary(pdata.entry.dll);
-				pdata.entry.dll = IntPtr.Zero;
+				pdata.entry.dll.Dispose();
+				pdata.entry.dll = null;
 				pdata.entry.entry = null;
 			}
 		}
+
+        private static string StringFromPString(IntPtr PString)
+        {
+            if (PString == IntPtr.Zero)
+            {
+                return string.Empty;
+            }
+            int length = (int)Marshal.ReadByte(PString);
+            PString = new IntPtr(PString.ToInt64() + 1L);
+            char[] data = new char[length];
+            for (int i = 0; i < length; i++)
+            {
+                data[i] = (char)Marshal.ReadByte(PString, i);
+            }
+
+            return new string(data).Trim(new char[] { ' ', '\0' });
+        }
 
 		static bool plugin_about(PluginData pdata)
 		{
@@ -776,7 +553,9 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			phase = PluginPhase.Parameters;
+#if DEBUG
+            phase = PluginPhase.Parameters; 
+#endif
 
 			return true;
 		}
@@ -864,44 +643,19 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			phase = PluginPhase.Prepare;
+#if DEBUG
+            phase = PluginPhase.Prepare; 
+#endif
 
 			return true;
 		}
 
-		/// <summary>
-		/// Runs a photoshop filter
-		/// </summary>
-		/// <param name="fileName">The Filename of the filter to run</param>
-		/// <param name="showAbout">Show the filter's About Box</param>
-		/// <returns>True if successful otherwise false</returns>
-		/// <exception cref="System.ArgumentException">The fileName string is null or empty.</exception>
-		/// <exception cref="PSFilterLoad.PSApi.FilterLoadException">The Exception thrown when there is a problem with loading the Filter PiPl data.</exception>
-		public bool RunPlugin(string fileName, bool showAbout)
-		{
-			if (String.IsNullOrEmpty(fileName))
-				throw new ArgumentException("fileName is null or empty.", "fileName");
-
-			PluginData pdata = new PluginData() { fileName = fileName, entry = new PIEntrypoint() };
-
-			if (!LoadFilter(ref pdata))
-			{
-#if DEBUG
-				Debug.WriteLine("LoadFilter failed");
-#endif
-				return false;
-			}
-			return RunPlugin(pdata, showAbout);
-
-
-		}
 		/// <summary>
 		/// Runs a filter from the specified PluginData
 		/// </summary>
 		/// <param name="pdata">The PluginData to run</param>
 		/// <param name="showAbout">Show the Filter's About Box</param>
 		/// <returns>True if successful otherwise false</returns>
-		/// <exception cref="PSFilterLoad.PSApi.FilterLoadException">The Exception thrown when there is a problem with loading the Filter PiPl data.</exception>
 		public bool RunPlugin(PluginData pdata, bool showAbout)
 		{
 			if (!LoadFilter(ref pdata))
