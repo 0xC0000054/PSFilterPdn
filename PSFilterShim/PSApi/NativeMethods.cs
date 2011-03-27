@@ -8,27 +8,14 @@ namespace PSFilterLoad.PSApi
     static class NativeMethods
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        public static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
-
-        [DllImport("kernel32.dll", EntryPoint = "EnumResourceNamesW", CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool EnumResourceNames([In]IntPtr hModule, [In()]string lpszType, EnumResNameDelegate lpEnumFunc, [MarshalAs(UnmanagedType.SysInt)]IntPtr lParam);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        public static extern IntPtr FindResource([In]IntPtr hModule, [In()]IntPtr lpName, [In()]IntPtr lpType);
-        
-        [DllImport("Kernel32.dll", EntryPoint = "LoadResource", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern IntPtr LoadResource(IntPtr hModule, IntPtr hResource);
-
-        [DllImport("Kernel32.dll", EntryPoint = "LockResource", CharSet = CharSet.Unicode)]
-        public static extern IntPtr LockResource(IntPtr hGlobal);
+        public static extern SafeLibraryHandle LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool FreeLibrary(IntPtr hModule);
 
         [SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments", MessageId = "1"), DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
-        public static extern IntPtr GetProcAddress([In()] IntPtr hModule, [In()] string lpProcName);
+        public static extern IntPtr GetProcAddress([In()] SafeLibraryHandle hModule, [In(), MarshalAs(UnmanagedType.LPStr)] string lpProcName);
 
         [DllImport("kernel32.dll", EntryPoint = "GlobalAlloc")]
         public static extern IntPtr GlobalAlloc(uint uFlags, UIntPtr dwBytes);
