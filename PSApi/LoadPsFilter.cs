@@ -2345,6 +2345,8 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
+            filterRecord.bufferSpace = buffer_space_proc();
+
 			filterRecord.maxSpace = 1000000000;
 			filterRecord.hostSig = BitConverter.ToUInt32(Encoding.ASCII.GetBytes(".PDN"), 0);
 			filterRecord.hostProcs = Marshal.GetFunctionPointerForDelegate(hostProc);
