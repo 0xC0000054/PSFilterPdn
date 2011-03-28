@@ -207,6 +207,8 @@ namespace PSFilterLoad.PSApi
 			disposed = false;
 			frsetup = false;
 			suitesSetup = false;
+            sizesSetup = false;
+            frValuesSetup = false;
 
 			filterRecord = new FilterRecord();
 			platformData = new PlatformData();
@@ -563,8 +565,14 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
+        static bool frValuesSetup;
         static void SetFilterRecordValues()
         {
+            if (frValuesSetup)
+                return;
+
+            frValuesSetup = true;
+
             filterRecord.isFloating = 0;
             filterRecord.haveMask = 0;
             filterRecord.autoMask = 0;
@@ -1822,8 +1830,14 @@ namespace PSFilterLoad.PSApi
 			return (int)(value << 16);
 		}
 
+        static bool sizesSetup; 
 		static void setup_sizes()
 		{
+            if (sizesSetup)
+                return;
+
+            sizesSetup = true;
+
 			filterRecord.imageSize.h = (short)source.Width;
 			filterRecord.imageSize.v = (short)source.Height;
 
