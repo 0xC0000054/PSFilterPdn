@@ -2374,7 +2374,7 @@ namespace PSFilterLoad.PSApi
 			/* inputPadding */
 			/* outputPadding */
 			/* maskPadding */
-			filterRecord.samplingSupport = 0;
+			filterRecord.samplingSupport = 1;
 			/* reservedByte */
 			/* inputRate */
 			/* maskRate */			
