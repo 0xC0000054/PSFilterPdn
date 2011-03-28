@@ -528,7 +528,10 @@ namespace PSFilterLoad.PSApi
 		static bool plugin_parms(PluginData pdata)
 		{
 			result = PSError.noErr;
-
+            
+            /* Photoshop sets the size info before the filterSelectorParameters call even though the documentation says it does not.*/
+            setup_sizes(); 
+            SetFilterRecordValues();
 #if DEBUG
 			Ping(DebugFlags.Call, "Before filterSelectorParameters");
 #endif
@@ -560,19 +563,8 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
-		static bool plugin_prepare(PluginData pdata)
-		{
-			if (!LoadFilter(ref pdata))
-			{
-#if DEBUG
-				Ping(DebugFlags.Error, "LoadFilter failed");
-#endif
-				return false;
-			}
-
-
-			setup_sizes();
-
+        static void SetFilterRecordValues()
+        {
             filterRecord.isFloating = 0;
             filterRecord.haveMask = 0;
             filterRecord.autoMask = 0;
@@ -596,31 +588,46 @@ namespace PSFilterLoad.PSApi
             filterRecord.inLayerMasks = 0;
             filterRecord.inInvertedLayerMasks = 0;
 
-			filterRecord.outLayerPlanes = filterRecord.inLayerPlanes;
-			filterRecord.outTransparencyMask = filterRecord.inTransparencyMask;
-			filterRecord.outLayerMasks = filterRecord.inLayerMasks;
-			filterRecord.outInvertedLayerMasks = filterRecord.inInvertedLayerMasks;
-			filterRecord.outNonLayerPlanes = filterRecord.inNonLayerPlanes;
+            filterRecord.outLayerPlanes = filterRecord.inLayerPlanes;
+            filterRecord.outTransparencyMask = filterRecord.inTransparencyMask;
+            filterRecord.outLayerMasks = filterRecord.inLayerMasks;
+            filterRecord.outInvertedLayerMasks = filterRecord.inInvertedLayerMasks;
+            filterRecord.outNonLayerPlanes = filterRecord.inNonLayerPlanes;
 
-			filterRecord.absLayerPlanes = filterRecord.inLayerPlanes;
-			filterRecord.absTransparencyMask = filterRecord.inTransparencyMask;
-			filterRecord.absLayerMasks = filterRecord.inLayerMasks;
-			filterRecord.absInvertedLayerMasks = filterRecord.inInvertedLayerMasks;
-			filterRecord.absNonLayerPlanes = filterRecord.inNonLayerPlanes;
+            filterRecord.absLayerPlanes = filterRecord.inLayerPlanes;
+            filterRecord.absTransparencyMask = filterRecord.inTransparencyMask;
+            filterRecord.absLayerMasks = filterRecord.inLayerMasks;
+            filterRecord.absInvertedLayerMasks = filterRecord.inInvertedLayerMasks;
+            filterRecord.absNonLayerPlanes = filterRecord.inNonLayerPlanes;
 
-			filterRecord.inPreDummyPlanes = 0;
-			filterRecord.inPostDummyPlanes = 0;
-			filterRecord.outPreDummyPlanes = 0;
-			filterRecord.outPostDummyPlanes = 0;
+            filterRecord.inPreDummyPlanes = 0;
+            filterRecord.inPostDummyPlanes = 0;
+            filterRecord.outPreDummyPlanes = 0;
+            filterRecord.outPostDummyPlanes = 0;
 
-			filterRecord.inColumnBytes = 0;
-			filterRecord.inPlaneBytes = 1;
-			filterRecord.outColumnBytes = 0;
-			filterRecord.outPlaneBytes = 1;
+            filterRecord.inColumnBytes = ignoreAlpha ? 3 : 4;
+            filterRecord.inPlaneBytes = 1;
+            filterRecord.outColumnBytes = filterRecord.inColumnBytes;
+            filterRecord.outPlaneBytes = 1;
+
+            filterRecordPtr.Target = filterRecord;
+        }
+
+		static bool plugin_prepare(PluginData pdata)
+		{
+			if (!LoadFilter(ref pdata))
+			{
+#if DEBUG
+				Ping(DebugFlags.Error, "LoadFilter failed");
+#endif
+				return false;
+			}
+
+			setup_sizes();
+            SetFilterRecordValues();
 
 			result = PSError.noErr;
 
-			filterRecordPtr.Target = filterRecord;
 
 #if DEBUG
 			Ping(DebugFlags.Call, "Before filterSelectorPrepare");
