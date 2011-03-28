@@ -436,6 +436,8 @@ namespace PSFilterLoad.PSApi
             disposed = false;
             frsetup = false;
             suitesSetup = false;
+            sizesSetup = false;
+            frValuesSetup = false;
             enumErrorList = null;
             enumResList = null;
 				
@@ -739,6 +741,10 @@ namespace PSFilterLoad.PSApi
 		{
 			result = PSError.noErr;
 
+            /* Photoshop sets the size info before the filterSelectorParameters call even though the documentation says it does not.*/
+            setup_sizes();
+            SetFilterRecordValues();
+
 #if DEBUG
 			Ping(DebugFlags.Call, "Before filterSelectorParameters"); 
 #endif
@@ -770,6 +776,62 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
+        static bool frValuesSetup;
+        static void SetFilterRecordValues()
+        {
+            if (frValuesSetup)
+                return;
+
+            frValuesSetup = true;
+
+            filterRecord.isFloating = 0;
+            filterRecord.haveMask = 0;
+            filterRecord.autoMask = 0;
+            // maskRect
+            filterRecord.maskData = IntPtr.Zero;
+            filterRecord.maskRowBytes = 0;
+
+            filterRecord.imageMode = PSConstants.plugInModeRGBColor;
+            if (ignoreAlpha)
+            {
+                filterRecord.inLayerPlanes = 0;
+                filterRecord.inTransparencyMask = 0; // Paint.NET is always PixelFormat.Format32bppArgb			
+                filterRecord.inNonLayerPlanes = 3;
+            }
+            else
+            {
+                filterRecord.inLayerPlanes = 3;
+                filterRecord.inTransparencyMask = 1; // Paint.NET is always PixelFormat.Format32bppArgb			
+                filterRecord.inNonLayerPlanes = 0;
+            }
+            filterRecord.inLayerMasks = 0;
+            filterRecord.inInvertedLayerMasks = 0;
+
+            filterRecord.outLayerPlanes = filterRecord.inLayerPlanes;
+            filterRecord.outTransparencyMask = filterRecord.inTransparencyMask;
+            filterRecord.outLayerMasks = filterRecord.inLayerMasks;
+            filterRecord.outInvertedLayerMasks = filterRecord.inInvertedLayerMasks;
+            filterRecord.outNonLayerPlanes = filterRecord.inNonLayerPlanes;
+
+            filterRecord.absLayerPlanes = filterRecord.inLayerPlanes;
+            filterRecord.absTransparencyMask = filterRecord.inTransparencyMask;
+            filterRecord.absLayerMasks = filterRecord.inLayerMasks;
+            filterRecord.absInvertedLayerMasks = filterRecord.inInvertedLayerMasks;
+            filterRecord.absNonLayerPlanes = filterRecord.inNonLayerPlanes;
+
+            filterRecord.inPreDummyPlanes = 0;
+            filterRecord.inPostDummyPlanes = 0;
+            filterRecord.outPreDummyPlanes = 0;
+            filterRecord.outPostDummyPlanes = 0;
+
+            filterRecord.inColumnBytes = ignoreAlpha ? 3 : 4;
+            filterRecord.inPlaneBytes = 1;
+            filterRecord.outColumnBytes = filterRecord.inColumnBytes;
+            filterRecord.outPlaneBytes = 1;
+
+            filterRecordPtr.Target = filterRecord;
+        }
+
 		static bool plugin_prepare(PluginData pdata)
 		{
 			if (!LoadFilter(ref pdata))
@@ -782,55 +844,10 @@ namespace PSFilterLoad.PSApi
 
 		   
 			setup_sizes();
-
-			filterRecord.isFloating = 0;
-			filterRecord.haveMask = 0;
-			filterRecord.autoMask = 0;
-			// maskRect
-			filterRecord.maskData = IntPtr.Zero;
-			filterRecord.maskRowBytes = 0;
-
-			filterRecord.imageMode = PSConstants.plugInModeRGBColor;
-			if (ignoreAlpha) 
-			{
-                filterRecord.inLayerPlanes = 0;
-                filterRecord.inTransparencyMask = 0; // Paint.NET is always PixelFormat.Format32bppArgb			
-                filterRecord.inNonLayerPlanes = 3;
-            }
-			else
-			{			
-                filterRecord.inLayerPlanes = 3;
-				filterRecord.inTransparencyMask = 1; // Paint.NET is always PixelFormat.Format32bppArgb			
-                filterRecord.inNonLayerPlanes = 0;
-			}		   
-			filterRecord.inLayerMasks = 0;
-			filterRecord.inInvertedLayerMasks = 0;
-
-			filterRecord.outLayerPlanes = filterRecord.inLayerPlanes;
-			filterRecord.outTransparencyMask = filterRecord.inTransparencyMask;
-			filterRecord.outLayerMasks = filterRecord.inLayerMasks;
-			filterRecord.outInvertedLayerMasks = filterRecord.inInvertedLayerMasks;
-			filterRecord.outNonLayerPlanes = filterRecord.inNonLayerPlanes;
-
-			filterRecord.absLayerPlanes = filterRecord.inLayerPlanes;
-			filterRecord.absTransparencyMask = filterRecord.inTransparencyMask;
-			filterRecord.absLayerMasks = filterRecord.inLayerMasks;
-			filterRecord.absInvertedLayerMasks = filterRecord.inInvertedLayerMasks;
-			filterRecord.absNonLayerPlanes = filterRecord.inNonLayerPlanes;
-
-			filterRecord.inPreDummyPlanes = 0;
-			filterRecord.inPostDummyPlanes = 0;
-			filterRecord.outPreDummyPlanes = 0;
-			filterRecord.outPostDummyPlanes = 0;
-
-			filterRecord.inColumnBytes = 0;
-			filterRecord.inPlaneBytes = 1;
-			filterRecord.outColumnBytes = 0;
-			filterRecord.outPlaneBytes = 1;
-
+            SetFilterRecordValues();
+			
 			result = PSError.noErr;
 
-			filterRecordPtr.Target = filterRecord;
 
 #if DEBUG
 			Ping(DebugFlags.Call, "Before filterSelectorPrepare"); 
@@ -2154,8 +2171,14 @@ namespace PSFilterLoad.PSApi
 			return (int)(value << 16);
 		}
 
-		static void setup_sizes()
-		{
+        static bool sizesSetup;
+        static void setup_sizes()
+        {
+            if (sizesSetup)
+                return;
+
+            sizesSetup = true;
+
 			filterRecord.imageSize.h = (short)source.Width;
 			filterRecord.imageSize.v = (short)source.Height;
 
