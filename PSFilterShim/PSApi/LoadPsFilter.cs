@@ -1208,8 +1208,6 @@ namespace PSFilterLoad.PSApi
 		}
 		static int buffer_space_proc()
 		{
-           
-
 			return 1000000000;
 		}
 
@@ -2016,7 +2014,6 @@ namespace PSFilterLoad.PSApi
 			}
 
             filterRecord.bufferSpace = buffer_space_proc();
-
 			filterRecord.maxSpace = 1000000000;
 			filterRecord.hostSig = BitConverter.ToUInt32(Encoding.ASCII.GetBytes(".PDN"), 0);
 			filterRecord.hostProcs = Marshal.GetFunctionPointerForDelegate(hostProc);
@@ -2044,7 +2041,7 @@ namespace PSFilterLoad.PSApi
 			/* inputPadding */
 			/* outputPadding */
 			/* maskPadding */
-			filterRecord.samplingSupport = 0;
+			filterRecord.samplingSupport = 1;
 			/* reservedByte */
 			/* inputRate */
 			/* maskRate */
