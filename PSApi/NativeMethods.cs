@@ -29,11 +29,8 @@ namespace PSFilterLoad.PSApi
         public static extern bool FreeLibrary(IntPtr hModule);
 
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, BestFitMapping = false, SetLastError = true)]
         public static extern IntPtr GetProcAddress([In()] SafeLibraryHandle hModule, [In(), MarshalAs(UnmanagedType.LPStr)] string lpProcName);
-
-        [DllImport("kernel32.dll", EntryPoint = "GlobalAlloc")]
-        public static extern IntPtr GlobalAlloc(uint uFlags, UIntPtr dwBytes);
 
         [DllImport("kernel32.dll", EntryPoint = "GlobalSize")]
         public static extern IntPtr GlobalSize([In()] System.IntPtr hMem);
