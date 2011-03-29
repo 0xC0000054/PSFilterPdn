@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
 #pragma warning disable 0659
-    [StructLayout(LayoutKind.Sequential)]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2218:OverrideGetHashCodeOnOverridingEquals"), StructLayout(LayoutKind.Sequential)]
     internal struct Rect16
     {
         /// short
