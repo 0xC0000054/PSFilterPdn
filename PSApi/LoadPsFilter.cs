@@ -129,16 +129,16 @@ namespace PSFilterLoad.PSApi
                         enumErrorList.Add(new FilterLoadException(string.Format(CultureInfo.CurrentUICulture, Resources.InvalidPhotoshopFilterFormat, enumData.fileName)));
                     }
                 }
-                else if (((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty)) // the entrypoint for the current platform, this filters out incomptable processors archatectures
+                else if ((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty) // the entrypoint for the current platform, this filters out incomptable processors archatectures
                 {
-                    String ep = Marshal.PtrToStringAnsi(new IntPtr((propPtr.ToInt64() + dataOfs)), pipp.propertyLength).TrimEnd('\0');
+                    String ep = Marshal.PtrToStringAnsi(new IntPtr(propPtr.ToInt64() + dataOfs), pipp.propertyLength).TrimEnd('\0');
                     enumData.entryPoint = ep;
                     // If it is a 32-bit plugin on a 64-bit OS run it with the 32-bit shim.
                     enumData.runWith32BitShim = (IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty);
                 }
                 else if (propKey == PIPropertyID.PIVersionProperty)
                 {
-                    long fltrversion = pipp.propertyData.ToInt64();
+                    int fltrversion = Marshal.ReadInt32(new IntPtr(propPtr.ToInt64() + dataOfs));
                     if (HiWord(fltrversion) > PSConstants.latestFilterVersion ||
                         (HiWord(fltrversion) == PSConstants.latestFilterVersion && LoWord(fltrversion) > PSConstants.latestFilterSubVersion))
                     {
@@ -155,17 +155,14 @@ namespace PSFilterLoad.PSApi
                     {
                         enumErrorList.Add(new FilterLoadException(string.Format(CultureInfo.CurrentUICulture, Resources.RGBColorUnsupportedModeFormat, enumData.fileName)));
                     }
-
                 }
                 else if (propKey == PIPropertyID.PICategoryProperty)
                 {
-                    String cat = StringFromPString(new IntPtr((propPtr.ToInt64() + dataOfs)));
-                    enumData.category = cat;
+                    enumData.category = StringFromPString(new IntPtr(propPtr.ToInt64() + dataOfs));
                 }
                 else if (propKey == PIPropertyID.PINameProperty)
                 {
-                    String title = StringFromPString(new IntPtr((propPtr.ToInt64() + dataOfs)));
-                    enumData.title = title;
+                    enumData.title = StringFromPString(new IntPtr(propPtr.ToInt64() + dataOfs));
                 }
                 else if (propKey == PIPropertyID.PIFilterCaseInfoProperty)
                 {
@@ -180,32 +177,25 @@ namespace PSFilterLoad.PSApi
 
                 }
 
-                int padOfs = pipp.propertyLength;
-
-                while (padOfs % 4 > 0) // get the length of the 4 byte alignment padding
-                {
-                    padOfs++;
-                }
-                padOfs = padOfs - pipp.propertyLength;
-
+                int propertyDataPaddedLength = (pipp.propertyLength + 3) & ~3;
 #if DEBUG
                 if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
                 {
                     Debug.WriteLine(string.Format("i = {0}, propPtr = {1}", i.ToString(), ((long)propPtr).ToString()));
                 }
 #endif
-                pos += (long)(16 + pipp.propertyLength + padOfs);
+                pos += (long)(16 + propertyDataPaddedLength);
                 propPtr = new IntPtr(pos);
-
             }
 
-			if (!queryPlugin)
-			{
-				gch.Target = enumData; // this is used for the LoadFilter function
-			}
+			
 			if (queryPlugin)
 			{
 				AddFoundPluginData(enumData); // add each plugin found in the file to the query list
+			}
+            else
+			{
+				gch.Target = enumData; // this is used for the LoadFilter function
 			}
 
 			return true;
@@ -347,11 +337,7 @@ namespace PSFilterLoad.PSApi
 
 		}
 
-
-
 		static ProgressProc progressFunc;
-		bool isRepeatEffect;
-		
 
 		static Bitmap source = null;
 		static Bitmap dest = null;
@@ -430,7 +416,6 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             phase = PluginPhase.None; 
 #endif
-			isRepeatEffect = false;
 			errorMessage = String.Empty;
 			fillOutData = true;
             disposed = false;
@@ -549,62 +534,6 @@ namespace PSFilterLoad.PSApi
 					pdata.entry.entry = (filterep)Marshal.GetDelegateForFunctionPointer(entry, typeof(filterep));
 					loaded = true;
 				}
-			}
-			else
-			{
-				// load it as an datafile to keep from throwing a BadImageFormatException.
-				SafeLibraryHandle dll = NativeMethods.LoadLibraryEx(pdata.fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE);
-
-				if (!dll.IsInvalid)
-				{
-					if (queryPlugin)
-					{
-						queryPlugin = false;
-					}
-					GCHandle gch = GCHandle.Alloc(pdata);
-                    enumErrorList = new List<FilterLoadException>();
-					try
-					{
-
-						if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiPl", new EnumResNameDelegate(EnumRes), GCHandle.ToIntPtr(gch)))
-						{
-                            if (enumErrorList.Count > 0)
-                            {
-                                throw enumErrorList[0];
-                            }
-
-							pdata = (PluginData)gch.Target;
-							if (pdata.entryPoint != null)
-							{
-								dll.Dispose();
-								dll = null;
-
-								// now load the dll if the entrypoint has been found
-								pdata.entry.dll = NativeMethods.LoadLibraryEx(pdata.fileName, IntPtr.Zero, 0U);
-
-								IntPtr entry = NativeMethods.GetProcAddress(pdata.entry.dll, pdata.entryPoint);
-
-								if (entry != IntPtr.Zero)
-								{
-									pdata.entry.entry = (filterep)Marshal.GetDelegateForFunctionPointer(entry, typeof(filterep));
-									loaded = true;
-								}
-							
-							}
-						}
-						else
-						{
-							FreeLibrary(ref pdata);
-						}
-					}
-					finally
-					{
-						gch.Free();
-					}
-			
-				}
-
-                dll.Dispose();
 			}
 
 			return loaded;
@@ -878,32 +807,6 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		/// Runs a photoshop filter
-		/// </summary>
-		/// <param name="fileName">The Filename of the filter to run</param>
-		/// <param name="showAbout">Show the filter's About Box</param>
-		/// <returns>True if successful otherwise false</returns>
-		/// <exception cref="System.ArgumentException">The fileName string is null or empty.</exception>
-		/// <exception cref="PSFilterLoad.PSApi.FilterLoadException">The Exception thrown when there is a problem with loading the Filter PiPl data.</exception>
-		public bool RunPlugin(string fileName, bool showAbout)
-		{
-			if (String.IsNullOrEmpty(fileName))
-				throw new ArgumentException("fileName is null or empty.", "fileName");
-
-			PluginData pdata = new PluginData(){ fileName = fileName, entry = new PIEntrypoint() };
-
-			if (!LoadFilter(ref pdata))
-			{
-#if DEBUG
-				Debug.WriteLine("LoadFilter failed"); 
-#endif
-				return false;
-			}
-			return RunPlugin(pdata, showAbout);
-
-
-		}
-		/// <summary>
 		/// Runs a filter from the specified PluginData
 		/// </summary>
 		/// <param name="pdata">The PluginData to run</param>
@@ -926,7 +829,7 @@ namespace PSFilterLoad.PSApi
             {
                 DrawCheckerBoardBitmap();
             }
-            else // otherwise if ignoreAlpha is true make the "dest" image 24-bit RGB.
+            else // otherwise if ignoreAlpha is true make the "destFileName" image 24-bit RGB.
             {
                 dest.Dispose();
                 dest = new Bitmap(source.Width, source.Height, PixelFormat.Format24bppRgb);
@@ -947,16 +850,13 @@ namespace PSFilterLoad.PSApi
 			setup_delegates();
 			setup_suites();
 			setup_filter_record();
-
-			if (!this.isRepeatEffect)
+			
+            if (!plugin_parms(pdata))
 			{
-				if (!plugin_parms(pdata))
-				{
 #if DEBUG
-					Ping(DebugFlags.Error, "plugin_parms failed"); 
+				Ping(DebugFlags.Error, "plugin_parms failed"); 
 #endif
-					return false;
-				}
+				return false;
 			}
 
 			if (!plugin_prepare(pdata))
@@ -1049,11 +949,7 @@ namespace PSFilterLoad.PSApi
 #endif
 
                 }
-                catch (FilterLoadException)
-                {
-                    throw;
-                }
-				finally
+                finally
 				{
 					gch.Free();
 					dll.Dispose();
@@ -1262,126 +1158,136 @@ namespace PSFilterLoad.PSApi
                 Bitmap temp = null;
                 Rectangle lockRect = Rectangle.Empty;
 
-                if ((filterRecord.inputRate >> 16) > 1) // Filter preview?
-                {
-                    temp = new Bitmap(bmpw, bmph, source.PixelFormat);
-
-                    using (Graphics gr = Graphics.FromImage(temp))
-                    {
-                        gr.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                        gr.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                        gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                        gr.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-
-                        if ((filterCase == FilterCase.filterCaseEditableTransparencyWithSelection
-                             || filterCase == FilterCase.filterCaseFlatImageWithSelection))
-                        {
-                            gr.DrawImage(source, Rectangle.FromLTRB(0, 0, bmpw, bmph), roi, GraphicsUnit.Pixel); // draw the requested portion of the image
-                        }
-                        else
-                        {
-                            gr.DrawImage(source, Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom));
-                        }
-                    }
-
-                    lockRect = new Rectangle(0, 0, bmpw, bmph);
-                }
-                else
-                {
-                    temp = (Bitmap)source.Clone();
-                    lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
-                }
-
-                BitmapData data = temp.LockBits(lockRect, ImageLockMode.ReadOnly, source.PixelFormat);
                 try
                 {
-
-
-
-                    if (!fillOutData)
+                    if ((filterRecord.inputRate >> 16) > 1) // Filter preview?
                     {
-                        int outLen = (h * (w * nplanes));
+                        temp = new Bitmap(bmpw, bmph, source.PixelFormat);
 
-                        filterRecord.outData = Marshal.AllocHGlobal(outLen);
-                        filterRecord.outRowBytes = (w * nplanes);
-                    }
-
-                    if (bpp == nplanes && bmpw == w)
-                    {
-                        int stride = (bmpw * 4);
-                        int len = stride * data.Height;
-
-                        inData = Marshal.AllocHGlobal(len);
-                        inRowBytes = stride;
-
-                        /* the stride for the source image and destination buffer will almost never match
-                         * so copy the data manually swapping the pixel order along the way
-                         */
-                        for (int y = 0; y < data.Height; y++)
+                        using (Graphics gr = Graphics.FromImage(temp))
                         {
-                            byte* srcRow = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
-                            byte* dstRow = (byte*)inData.ToPointer() + (y * stride);
-                            for (int x = 0; x < data.Width; x++)
-                            {
-                                dstRow[0] = srcRow[2];
-                                dstRow[1] = srcRow[1];
-                                dstRow[2] = srcRow[0];
-                                dstRow[3] = srcRow[3];
+                            gr.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                            gr.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                            gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                            gr.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
 
-                                srcRow += 4;
-                                dstRow += 4;
+                            if ((filterCase == FilterCase.filterCaseEditableTransparencyWithSelection
+                                 || filterCase == FilterCase.filterCaseFlatImageWithSelection))
+                            {
+                                gr.DrawImage(source, Rectangle.FromLTRB(0, 0, bmpw, bmph), roi, GraphicsUnit.Pixel); // draw the requested portion of the image
+                            }
+                            else
+                            {
+                                gr.DrawImage(source, Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom));
                             }
                         }
+
+                        lockRect = new Rectangle(0, 0, bmpw, bmph);
                     }
                     else
                     {
-                        int dl = nplanes * w * h;
+                        temp = (Bitmap)source.Clone();
+                        lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
+                    }
 
-                        inData = Marshal.AllocHGlobal(dl);
+                    BitmapData data = temp.LockBits(lockRect, ImageLockMode.ReadOnly, source.PixelFormat);
+                    try
+                    {
 
-                        inRowBytes = nplanes * w;
-                        for (int y = 0; y < data.Height; y++)
+
+
+                        if (!fillOutData)
                         {
-                            byte* row = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
-                            for (int i = loplane; i <= hiplane; i++)
+                            int outLen = (h * (w * nplanes));
+
+                            filterRecord.outData = Marshal.AllocHGlobal(outLen);
+                            filterRecord.outRowBytes = (w * nplanes);
+                        }
+
+                        if (bpp == nplanes && bmpw == w)
+                        {
+                            int stride = (bmpw * 4);
+                            int len = stride * data.Height;
+
+                            inData = Marshal.AllocHGlobal(len);
+                            inRowBytes = stride;
+
+                            /* the stride for the source image and destination buffer will almost never match
+                             * so copy the data manually swapping the pixel order along the way
+                             */
+                            for (int y = 0; y < data.Height; y++)
                             {
-                                int ofs = i;
-                                switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
-                                {
-                                    case 0:
-                                        ofs = 2;
-                                        break;
-                                    case 2:
-                                        ofs = 0;
-                                        break;
-                                }
-
-                                /*byte *src = row + ofs;
-                                byte *q = (byte*)inData.ToPointer() + (y - rect.top) * inRowBytes + (i - loplane);*/
-
-#if DEBUG
-                                //                              Debug.WriteLine("y = " + y.ToString());
-#endif
+                                byte* srcRow = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                                byte* dstRow = (byte*)inData.ToPointer() + (y * stride);
                                 for (int x = 0; x < data.Width; x++)
                                 {
-                                    byte* p = row + (x * bpp) + ofs; // the target color channel of the target pixel
-                                    byte* q = (byte*)inData.ToPointer() + (y * inRowBytes) + (x * nplanes) + (i - loplane);
+                                    dstRow[0] = srcRow[2];
+                                    dstRow[1] = srcRow[1];
+                                    dstRow[2] = srcRow[0];
+                                    dstRow[3] = srcRow[3];
 
-                                    *q = *p;
-
+                                    srcRow += 4;
+                                    dstRow += 4;
                                 }
                             }
                         }
+                        else
+                        {
+                            int dl = nplanes * w * h;
+
+                            inData = Marshal.AllocHGlobal(dl);
+
+                            inRowBytes = nplanes * w;
+                            for (int y = 0; y < data.Height; y++)
+                            {
+                                byte* row = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                                for (int i = loplane; i <= hiplane; i++)
+                                {
+                                    int ofs = i;
+                                    switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
+                                    {
+                                        case 0:
+                                            ofs = 2;
+                                            break;
+                                        case 2:
+                                            ofs = 0;
+                                            break;
+                                    }
+
+                                    /*byte *src = row + ofs;
+                                    byte *q = (byte*)inData.ToPointer() + (y - rect.top) * inRowBytes + (i - loplane);*/
+
+#if DEBUG
+                                    //                              Debug.WriteLine("y = " + y.ToString());
+#endif
+                                    for (int x = 0; x < data.Width; x++)
+                                    {
+                                        byte* p = row + (x * bpp) + ofs; // the target color channel of the target pixel
+                                        byte* q = (byte*)inData.ToPointer() + (y * inRowBytes) + (x * nplanes) + (i - loplane);
+
+                                        *q = *p;
+
+                                    }
+                                }
+                            }
 
 
+                        }
+                    }
+                    finally
+                    {
+                        temp.UnlockBits(data);
                     }
                 }
                 finally
                 {
-                    temp.UnlockBits(data);
-                    temp.Dispose();
-                    temp = null;
+                    if (temp != null)
+                    {
+                        temp.Dispose();
+                        temp = null;
+                    }
                 }
+
 
             }
         }
@@ -2201,7 +2107,7 @@ namespace PSFilterLoad.PSApi
 				filterRecord.filterRect.right = (short)roi.Right;
 				filterRecord.filterRect.bottom = (short)roi.Bottom;
 
-				//dest = (Bitmap)source.Clone();
+				//destFileName = (Bitmap)source.Clone();
 			}
 			else
 			{
