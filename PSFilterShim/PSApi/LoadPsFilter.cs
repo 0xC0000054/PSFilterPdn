@@ -929,126 +929,136 @@ namespace PSFilterLoad.PSApi
 				Bitmap temp = null;
 				Rectangle lockRect = Rectangle.Empty;
 
-				if ((filterRecord.inputRate >> 16) > 1) // Filter preview?
-				{
-					temp = new Bitmap(bmpw, bmph, source.PixelFormat);
+                try
+                {
+                    if ((filterRecord.inputRate >> 16) > 1) // Filter preview?
+                    {
+                        temp = new Bitmap(bmpw, bmph, source.PixelFormat);
 
-					using (Graphics gr = Graphics.FromImage(temp))
-					{
-						gr.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-						gr.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-						gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-						gr.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                        using (Graphics gr = Graphics.FromImage(temp))
+                        {
+                            gr.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                            gr.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                            gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                            gr.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
 
-						if ((filterCase == FilterCase.filterCaseEditableTransparencyWithSelection
-							 || filterCase == FilterCase.filterCaseFlatImageWithSelection))
-						{
-							gr.DrawImage(source, Rectangle.FromLTRB(0, 0, bmpw, bmph), roi, GraphicsUnit.Pixel); // draw the requested portion of the image
-						}
-						else
-						{
-							gr.DrawImage(source, Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom));
-						}
-					}
+                            if ((filterCase == FilterCase.filterCaseEditableTransparencyWithSelection
+                                 || filterCase == FilterCase.filterCaseFlatImageWithSelection))
+                            {
+                                gr.DrawImage(source, Rectangle.FromLTRB(0, 0, bmpw, bmph), roi, GraphicsUnit.Pixel); // draw the requested portion of the image
+                            }
+                            else
+                            {
+                                gr.DrawImage(source, Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom));
+                            }
+                        }
 
-					lockRect = new Rectangle(0, 0, bmpw, bmph);
-				}
-				else
-				{
-					temp = (Bitmap)source.Clone();
-					lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
-				}
+                        lockRect = new Rectangle(0, 0, bmpw, bmph);
+                    }
+                    else
+                    {
+                        temp = (Bitmap)source.Clone();
+                        lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
+                    }
 
-				BitmapData data = temp.LockBits(lockRect, ImageLockMode.ReadOnly, source.PixelFormat);
-				try
-				{
+                    BitmapData data = temp.LockBits(lockRect, ImageLockMode.ReadOnly, source.PixelFormat);
+                    try
+                    {
 
 
 
-					if (!fillOutData)
-					{
-						int outLen = (h * (w * nplanes));
+                        if (!fillOutData)
+                        {
+                            int outLen = (h * (w * nplanes));
 
-						filterRecord.outData = Marshal.AllocHGlobal(outLen);
-						filterRecord.outRowBytes = (w * nplanes);
-					}
+                            filterRecord.outData = Marshal.AllocHGlobal(outLen);
+                            filterRecord.outRowBytes = (w * nplanes);
+                        }
 
-					if (bpp == nplanes && bmpw == w)
-					{
-						int stride = (bmpw * 4);
-						int len = stride * data.Height;
+                        if (bpp == nplanes && bmpw == w)
+                        {
+                            int stride = (bmpw * 4);
+                            int len = stride * data.Height;
 
-						inData = Marshal.AllocHGlobal(len);
-						inRowBytes = stride;
+                            inData = Marshal.AllocHGlobal(len);
+                            inRowBytes = stride;
 
-						/* the stride for the source image and destination buffer will almost never match
-						 * so copy the data manually swapping the pixel order along the way
-						 */
-						for (int y = 0; y < data.Height; y++)
-						{
-							byte* srcRow = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
-							byte* dstRow = (byte*)inData.ToPointer() + (y * stride);
-							for (int x = 0; x < data.Width; x++)
-							{
-								dstRow[0] = srcRow[2];
-								dstRow[1] = srcRow[1];
-								dstRow[2] = srcRow[0];
-								dstRow[3] = srcRow[3];
+                            /* the stride for the source image and destination buffer will almost never match
+                             * so copy the data manually swapping the pixel order along the way
+                             */
+                            for (int y = 0; y < data.Height; y++)
+                            {
+                                byte* srcRow = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                                byte* dstRow = (byte*)inData.ToPointer() + (y * stride);
+                                for (int x = 0; x < data.Width; x++)
+                                {
+                                    dstRow[0] = srcRow[2];
+                                    dstRow[1] = srcRow[1];
+                                    dstRow[2] = srcRow[0];
+                                    dstRow[3] = srcRow[3];
 
-								srcRow += 4;
-								dstRow += 4;
-							}
-						}
-					}
-					else
-					{
-						int dl = nplanes * w * h;
+                                    srcRow += 4;
+                                    dstRow += 4;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            int dl = nplanes * w * h;
 
-						inData = Marshal.AllocHGlobal(dl);
+                            inData = Marshal.AllocHGlobal(dl);
 
-						inRowBytes = nplanes * w;
-						for (int y = 0; y < data.Height; y++)
-						{
-							byte* row = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
-							for (int i = loplane; i <= hiplane; i++)
-							{
-								int ofs = i;
-								switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
-								{
-									case 0:
-										ofs = 2;
-										break;
-									case 2:
-										ofs = 0;
-										break;
-								}
+                            inRowBytes = nplanes * w;
+                            for (int y = 0; y < data.Height; y++)
+                            {
+                                byte* row = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                                for (int i = loplane; i <= hiplane; i++)
+                                {
+                                    int ofs = i;
+                                    switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
+                                    {
+                                        case 0:
+                                            ofs = 2;
+                                            break;
+                                        case 2:
+                                            ofs = 0;
+                                            break;
+                                    }
 
-								/*byte *src = row + ofs;
-								byte *q = (byte*)inData.ToPointer() + (y - rect.top) * inRowBytes + (i - loplane);*/
+                                    /*byte *src = row + ofs;
+                                    byte *q = (byte*)inData.ToPointer() + (y - rect.top) * inRowBytes + (i - loplane);*/
 
 #if DEBUG
-								//                              Debug.WriteLine("y = " + y.ToString());
+                                    //                              Debug.WriteLine("y = " + y.ToString());
 #endif
-								for (int x = 0; x < data.Width; x++)
-								{
-									byte* p = row + (x * bpp) + ofs; // the target color channel of the target pixel
-									byte* q = (byte*)inData.ToPointer() + (y * inRowBytes) + (x * nplanes) + (i - loplane);
+                                    for (int x = 0; x < data.Width; x++)
+                                    {
+                                        byte* p = row + (x * bpp) + ofs; // the target color channel of the target pixel
+                                        byte* q = (byte*)inData.ToPointer() + (y * inRowBytes) + (x * nplanes) + (i - loplane);
 
-									*q = *p;
+                                        *q = *p;
 
-								}
-							}
-						}
+                                    }
+                                }
+                            }
 
 
-					}
-				}
-				finally
-				{
-					temp.UnlockBits(data);
-					temp.Dispose();
-					temp = null;
-				}
+                        }
+                    }
+                    finally
+                    {
+                        temp.UnlockBits(data);
+                       
+                    }
+                }
+                finally
+                {
+                    if (temp != null)
+                    {
+                        temp.Dispose();
+                        temp = null; 
+                    }
+                }
 
 			}
 		}
