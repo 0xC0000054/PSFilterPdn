@@ -56,7 +56,6 @@ namespace PSFilterPdn
 
 		private static class NativeMethods
 		{
-			
 			/// Return Type: BOOL->int
 			///hProcess: HANDLE->void*
 			///lpFlags: LPDWORD->DWORD*
@@ -641,7 +640,7 @@ namespace PSFilterPdn
             }
 		}
 
-		private void SetProxyResultData(string dest, PluginData data)
+		private void SetProxyResultData(string destFileName, PluginData data)
 		{ 
 			if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && !showAboutBoxcb.Checked)
 			{
@@ -651,7 +650,7 @@ namespace PSFilterPdn
 				this.filterCaseInfo = GetFilterCaseInfoString(data);
 				try
 				{
-					using (Bitmap dst = new Bitmap(dest))
+					using (Bitmap dst = new Bitmap(destFileName))
 					{
 						this.destSurface = Surface.CopyFromBitmap(dst);
 					}
@@ -1289,7 +1288,7 @@ namespace PSFilterPdn
 				{
 					TreeNode child = item.Key;
 					string title = child.Text;
-					if ((string.IsNullOrEmpty(filtertext)) || title.ToLowerInvariant().Contains(filtertext.ToLowerInvariant()))
+					if ((string.IsNullOrEmpty(filtertext)) || title.ToUpperInvariant().Contains(filtertext.ToUpperInvariant()))
 					{
 						if (nodes.ContainsKey(item.Value))
 						{
