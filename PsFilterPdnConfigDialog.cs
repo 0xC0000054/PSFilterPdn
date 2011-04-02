@@ -52,6 +52,7 @@ namespace PSFilterPdn
             proxyProcess = new Process();
 			destSurface = null;
 			proxyThread = null;
+            formatExecptionShown = false;
 		}
 
 		private static class NativeMethods
@@ -442,20 +443,32 @@ namespace PSFilterPdn
 
 		
 		delegate void SetProxyErrorResultDelegate(string data);
-		delegate void UpdateProxyProgressDelegate(int value); 
+		delegate void UpdateProxyProgressDelegate(int value);
 
+        private static bool formatExecptionShown;
 		private void UpdateProxyProgress(object sender, DataReceivedEventArgs e)
 		{
 			if (!string.IsNullOrEmpty(e.Data))
 			{
-				if (this.InvokeRequired)
-				{
-					this.Invoke(new UpdateProxyProgressDelegate(UpdateProgress), new object[] {int.Parse(e.Data, CultureInfo.InvariantCulture)});
-				}
-				else
-				{
-					filterProgressBar.Value = int.Parse(e.Data, CultureInfo.InvariantCulture).Clamp(0, 100);
-				}
+                try
+                {
+                    if (this.InvokeRequired)
+                    {
+                        this.Invoke(new UpdateProxyProgressDelegate(UpdateProgress), new object[] { int.Parse(e.Data, CultureInfo.InvariantCulture) });
+                    }
+                    else
+                    {
+                        filterProgressBar.Value = int.Parse(e.Data, CultureInfo.InvariantCulture).Clamp(0, 100);
+                    }
+                }
+                catch (FormatException fex)
+                {
+                    if (!formatExecptionShown)
+                    {
+                        MessageBox.Show(fex.Message + Environment.NewLine + fex.StackTrace, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        formatExecptionShown = true; // suppress the other ones
+                    }
+                }
 			}
 		}
 
@@ -573,6 +586,7 @@ namespace PSFilterPdn
 
                 proxyResult = true; // assume the filter succeded this will be set to false if it failed
                 proxyErrorMessage = string.Empty;
+                formatExecptionShown = false;
 
                 proxyProcess = new Process();
 
