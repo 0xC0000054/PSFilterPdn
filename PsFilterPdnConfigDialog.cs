@@ -461,11 +461,11 @@ namespace PSFilterPdn
                         filterProgressBar.Value = int.Parse(e.Data, CultureInfo.InvariantCulture).Clamp(0, 100);
                     }
                 }
-                catch (FormatException fex)
+                catch (FormatException)
                 {
                     if (!formatExecptionShown)
                     {
-                        MessageBox.Show(fex.Message + Environment.NewLine + fex.StackTrace, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Resources.ProxyProgressError_FormatException, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         formatExecptionShown = true; // suppress the other ones
                     }
                 }
