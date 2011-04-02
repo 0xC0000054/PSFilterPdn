@@ -349,6 +349,15 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A FormatException was thrown when updating the filter&apos;s progress. .
+        /// </summary>
+        internal static string ProxyProgressError_FormatException {
+            get {
+                return ResourceManager.GetString("ProxyProgressError_FormatException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to PSFilterShim.exe is not in the Effects folder..
         /// </summary>
         internal static string PSFilterShimNotFound {
