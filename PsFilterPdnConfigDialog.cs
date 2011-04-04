@@ -874,7 +874,7 @@ namespace PSFilterPdn
 					fldrLoadProgBar.Maximum = searchDirListView.Items.Count;
 					fldrLoadProgBar.Step = 1;
 					fltrLoadProressPanel.Visible = true;
-					fldrLoadCountLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_fldrLoadCountLbl_Format, searchDirListView.Items.Count);
+					fldrLoadCountLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_fldrLoadCountLbl_Format, "0", searchDirListView.Items.Count);
 					updateFilterListbw_Done = false;
 
 					updateFilterListBw.RunWorkerAsync(uflp);
