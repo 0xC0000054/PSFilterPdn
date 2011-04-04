@@ -18,11 +18,6 @@ namespace PSFilterLoad.PSApi
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void DisposePIHandleProc(System.IntPtr h);
 
-    /// Return Type: void
-    ///h: Handle->LPSTR*
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate void DisposeRegularHandlePIHandleProc(System.IntPtr h);
-
     /// Return Type: int32->int
     ///h: Handle->LPSTR*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -73,9 +68,6 @@ namespace PSFilterLoad.PSApi
 
         /// RecoverSpaceProc
         public IntPtr recoverSpaceProc;
-
-        /// DisposeRegularHandlePIHandleProc
-        public IntPtr disposeRegularHandleProc;
     }
 
 }
