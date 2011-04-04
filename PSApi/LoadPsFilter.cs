@@ -267,7 +267,6 @@ namespace PSFilterLoad.PSApi
 		static LockPIHandleProc handleLockProc;
 		static UnlockPIHandleProc handleUnlockProc;
 		static RecoverSpaceProc handleRecoverSpaceProc;
-		static DisposeRegularHandlePIHandleProc handleDisposeRegularProc;
 		// ImageServicesProc
 #if PSSDK_3_0_4
 		static PIResampleProc resample1DProc;
@@ -430,6 +429,9 @@ namespace PSFilterLoad.PSApi
 			platformData = new PlatformData();
 			platformData.hwnd = owner;
 			platFormDataPtr = GCHandle.Alloc(platformData, GCHandleType.Pinned);
+            outRect.left = outRect.top = outRect.right = outRect.bottom = 0;
+            inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
+
 
             inDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "inData").ToInt32();
             outDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "outData").ToInt32();
@@ -1766,33 +1768,6 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		static void handle_dispose_regular_proc(IntPtr h)
-		{
-#if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
-#endif
-			if (!handle_valid(h))
-			{
-				if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
-				{
-					NativeMethods.GlobalFree(h);
-					return;
-				}
-				else if (!NativeMethods.IsBadReadPtr(h, new UIntPtr((uint)IntPtr.Size))
-					&& NativeMethods.GlobalSize(h).ToInt64() > 0L)
-				{
-					NativeMethods.GlobalFree(h);
-					return;
-				}
-				else
-				{
-					return;
-				}
-			}
-
-
-		}
-
 		static void handle_dispose_proc(IntPtr h)
 		{
 			if (!handle_valid(h))
@@ -2151,7 +2126,6 @@ namespace PSFilterLoad.PSApi
 			handleLockProc = new LockPIHandleProc(handle_lock_proc);
 			handleRecoverSpaceProc = new RecoverSpaceProc(handle_recover_space_proc);
 			handleUnlockProc = new UnlockPIHandleProc(handle_unlock_proc);
-			handleDisposeRegularProc = new DisposeRegularHandlePIHandleProc(handle_dispose_regular_proc);
 			
 			// ImageServicesProc
 #if PSSDK_3_0_4
@@ -2196,7 +2170,6 @@ namespace PSFilterLoad.PSApi
 			handle_procs.numHandleProcs = PSConstants.kCurrentHandleProcsCount;
 			handle_procs.newProc = Marshal.GetFunctionPointerForDelegate(handleNewProc);
 			handle_procs.disposeProc = Marshal.GetFunctionPointerForDelegate(handleDisposeProc);
-			handle_procs.disposeRegularHandleProc = Marshal.GetFunctionPointerForDelegate(handleDisposeRegularProc);
 			handle_procs.getSizeProc = Marshal.GetFunctionPointerForDelegate(handleGetSizeProc);
 			handle_procs.lockProc = Marshal.GetFunctionPointerForDelegate(handleLockProc);
 			handle_procs.setSizeProc = Marshal.GetFunctionPointerForDelegate(handleSetSizeProc);
