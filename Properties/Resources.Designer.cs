@@ -142,7 +142,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to (0 of {0}).
+        ///   Looks up a localized string similar to ({0} of {1}).
         /// </summary>
         internal static string ConfigDialog_fldrLoadCountLbl_Format {
             get {
