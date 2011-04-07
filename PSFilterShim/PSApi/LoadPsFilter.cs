@@ -930,9 +930,12 @@ namespace PSFilterLoad.PSApi
 
                 try
                 {
-                    if ((filterRecord.inputRate >> 16) > 1) // Filter preview?
+                    int scale = (filterRecord.inputRate >> 16);
+                    if (scale > 1) // Filter preview?
                     {
-                        temp = new Bitmap(bmpw, bmph, source.PixelFormat);
+                        int scalew = source.Width / scale;
+                        int scaleh = source.Height / scale;
+                        temp = new Bitmap(scalew, scaleh, source.PixelFormat);
 
                         using (Graphics gr = Graphics.FromImage(temp))
                         {
@@ -941,18 +944,9 @@ namespace PSFilterLoad.PSApi
                             gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                             gr.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
 
-                            if ((filterCase == FilterCase.filterCaseEditableTransparencyWithSelection
-                                 || filterCase == FilterCase.filterCaseFlatImageWithSelection))
-                            {
-                                gr.DrawImage(source, Rectangle.FromLTRB(0, 0, bmpw, bmph), roi, GraphicsUnit.Pixel); // draw the requested portion of the image
-                            }
-                            else
-                            {
-                                gr.DrawImage(source, Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom));
-                            }
+                            gr.DrawImage(source, new Rectangle(0, 0, scalew, scaleh));
                         }
-
-                        lockRect = new Rectangle(0, 0, bmpw, bmph);
+                        lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
                     }
                     else
                     {
