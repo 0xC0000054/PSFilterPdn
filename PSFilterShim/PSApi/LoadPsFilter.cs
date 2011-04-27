@@ -171,6 +171,7 @@ namespace PSFilterLoad.PSApi
 		static float dpiY;
 
 		static Rectangle roi;
+        static Region selectedRegion;
 
 		/// <summary>
 		/// Loads and runs Photoshop Filters
@@ -184,7 +185,7 @@ namespace PSFilterLoad.PSApi
 		/// <exception cref="System.ArgumentNullException">The primary color is null.</exception>
 		/// <exception cref="System.ArgumentNullException">The secondary color is null.</exception>
 		/// <exception cref="System.ArgumentNullException">The selection is null.</exception>
-		public LoadPsFilter(string sourceImage, Color primary, Color secondary, Rectangle selection, IntPtr owner)
+		public LoadPsFilter(string sourceImage, Color primary, Color secondary, Rectangle selection, Region selectionRegion, IntPtr owner)
 		{
 			if (String.IsNullOrEmpty(sourceImage))
 				throw new ArgumentException("sourceImage", "sourceImage is null or empty.");
@@ -215,6 +216,7 @@ namespace PSFilterLoad.PSApi
 			platFormDataPtr = GCHandle.Alloc(platformData, GCHandleType.Pinned);
             outRect.left = outRect.top = outRect.right = outRect.bottom = 0;
             inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
+            maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
 
 			using (Bitmap bmp = new Bitmap(sourceImage))
 			{
@@ -250,6 +252,8 @@ namespace PSFilterLoad.PSApi
 			outDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "outData").ToInt32();
 			inRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "inRowBytes").ToInt32();
 			outRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "outRowBytes").ToInt32();
+            maskDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "maskData").ToInt32();
+            maskRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "maskRowBytes").ToInt32();
 
 			dest = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
 
@@ -264,6 +268,16 @@ namespace PSFilterLoad.PSApi
 			}
 
 			roi = selection;
+
+            if (selectionRegion != null)
+            {
+                selectedRegion = selectionRegion.Clone();
+            }
+            else
+            {
+                selectionRegion = null;
+            }
+            
 
 			if (selection == Rectangle.FromLTRB(0, 0, source.Width, source.Height))
 			{
@@ -573,8 +587,19 @@ namespace PSFilterLoad.PSApi
             frValuesSetup = true;
 
             filterRecord.isFloating = 0;
-            filterRecord.haveMask = 0;
-            filterRecord.autoMask = 0;
+
+            if (filterCase == FilterCase.filterCaseEditableTransparencyWithSelection
+            || filterCase == FilterCase.filterCaseFlatImageWithSelection)
+            {
+                DrawMaskBitmap();
+                filterRecord.haveMask = 1;
+                filterRecord.autoMask = 1;
+            }
+            else
+            {
+                filterRecord.haveMask = 0;
+                filterRecord.autoMask = 0;
+            }
             // maskRect
             filterRecord.maskData = IntPtr.Zero;
             filterRecord.maskRowBytes = 0;
@@ -806,18 +831,23 @@ namespace PSFilterLoad.PSApi
 
 		static int inDataOfs;
 		static int outDataOfs;
+        static int maskDataOfs;
 		static int inRowBytesOfs;
 		static int outRowBytesOfs;
+        static int maskRowBytesOfs;
+
 
 		static Rect16 outRect;
 		static int outRowBytes;
 		static int outLoPlane;
 		static int outHiPlane;
         static Rect16 inRect;
-		/// <summary>
-		/// Fill the output buffer with data, some plugins set this to false if they modify all the image data
-		/// </summary>
-		static bool fillOutData;
+        static Rect16 maskRect;
+
+        /// <summary>
+        /// Fill the output buffer with data, some plugins set this to false if they modify all the image data
+        /// </summary>
+        static bool fillOutData = true;
 
         static short advance_state_proc()
         {
@@ -829,8 +859,33 @@ namespace PSFilterLoad.PSApi
             }
 
 #if DEBUG
-            Ping(DebugFlags.AdvanceState, string.Format("Inrect = {0}, Outrect = {1}", Utility.RectToString(filterRecord.inRect), Utility.RectToString(filterRecord.outRect)));
+            Ping(DebugFlags.AdvanceState, string.Format("Inrect = {0}, Outrect = {1}", filterRecord.inRect.ToString(), filterRecord.outRect.ToString()));
 #endif
+            if (filterRecord.haveMask == 1 && RectNonEmpty(filterRecord.maskRect))
+            {
+                if (!maskRect.Equals(filterRecord.maskRect))
+                {
+                    if (filterRecord.maskData != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(filterRecord.maskData);
+                        filterRecord.maskData = IntPtr.Zero;
+                    }
+
+                    fill_mask(ref filterRecord.maskData, ref filterRecord.maskRowBytes, filterRecord.maskRect);
+                    maskRect = filterRecord.maskRect;
+                }
+            }
+            else
+            {
+                if (filterRecord.maskData != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(filterRecord.maskData);
+                    filterRecord.maskData = IntPtr.Zero;
+                }
+                filterRecord.maskRowBytes = 0;
+                maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
+            }
+           
 
             if (RectNonEmpty(filterRecord.inRect))
             {
@@ -845,9 +900,19 @@ namespace PSFilterLoad.PSApi
 
                     fill_buf(ref filterRecord.inData, ref filterRecord.inRowBytes, filterRecord.inRect, filterRecord.inLoPlane, filterRecord.inHiPlane);
                     inRect = filterRecord.inRect;
-                    filterRecord.inColumnBytes = (filterRecord.inHiPlane - filterRecord.inLoPlane) + 1;
                     src_valid = true;
                 }
+            }
+            else
+            {
+                if (src_valid)
+                {
+                    Marshal.FreeHGlobal(filterRecord.inData);
+                    filterRecord.inData = IntPtr.Zero;
+                    src_valid = false;
+                }
+                filterRecord.inRowBytes = 0;    
+                inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
             }
 
             if (RectNonEmpty(filterRecord.outRect))
@@ -862,7 +927,6 @@ namespace PSFilterLoad.PSApi
                     }
 
                     fill_buf(ref filterRecord.outData, ref filterRecord.outRowBytes, filterRecord.outRect, filterRecord.outLoPlane, filterRecord.outHiPlane);
-                    filterRecord.outColumnBytes = (filterRecord.outHiPlane - filterRecord.outLoPlane) + 1;
                     dst_valid = true;
                 }
 #if DEBUG
@@ -873,9 +937,25 @@ namespace PSFilterLoad.PSApi
                 outRect = filterRecord.outRect;
                 outLoPlane = filterRecord.outLoPlane;
                 outHiPlane = filterRecord.outHiPlane;
-
+            }
+            else
+            {
+                if (dst_valid)
+                {
+                    Marshal.FreeHGlobal(filterRecord.outData);
+                    filterRecord.outData = IntPtr.Zero;
+                    dst_valid = false;
+                }
+                filterRecord.outRowBytes = 0;
+                outRowBytes = 0;
+                outRect.left = outRect.top = outRect.right = outRect.bottom = 0;
+                outLoPlane = 0;
+                outHiPlane = 0;
 
             }
+
+            Marshal.WriteIntPtr(filterRecordPtr.AddrOfPinnedObject(), maskDataOfs, filterRecord.maskData);
+            Marshal.WriteInt32(filterRecordPtr.AddrOfPinnedObject(), maskRowBytesOfs, filterRecord.maskRowBytes);
 
             Marshal.WriteIntPtr(filterRecordPtr.AddrOfPinnedObject(), inDataOfs, filterRecord.inData);
             Marshal.WriteInt32(filterRecordPtr.AddrOfPinnedObject(), inRowBytesOfs, filterRecord.inRowBytes);
@@ -935,6 +1015,17 @@ namespace PSFilterLoad.PSApi
                     {
                         int scalew = source.Width / scale;
                         int scaleh = source.Height / scale;
+                        
+                        if (lockRect.Width > scalew)
+                        {
+                            scalew = lockRect.Width;
+                        }
+
+                        if (lockRect.Height > scaleh)
+                        {
+                            scaleh = lockRect.Height;
+                        }
+
                         temp = new Bitmap(scalew, scaleh, source.PixelFormat);
 
                         using (Graphics gr = Graphics.FromImage(temp))
@@ -1055,6 +1146,120 @@ namespace PSFilterLoad.PSApi
 
 			}
 		}
+
+        /// <summary>
+        /// Fills the input buffer with data from the source image.
+        /// </summary>
+        /// <param name="maskData">The input buffer to fill.</param>
+        /// <param name="maskRowBytes">The stride of the input buffer.</param>
+        /// <param name="rect">The rectangle of interest within the image.</param>
+        /// <param name="loplane">The input loPlane.</param>
+        /// <param name="hiplane">The input hiPlane.</param>
+        static unsafe void fill_mask(ref IntPtr maskData, ref int maskRowBytes, Rect16 rect)
+        {
+#if DEBUG
+            Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes = {0}, Rect = {1}", new object[] { maskRowBytes.ToString(), rect.ToString() }));
+            Ping(DebugFlags.AdvanceState, string.Format("maskRate = {0}", (filterRecord.maskRate >> 16)));
+#endif
+            int w = (rect.right - rect.left);
+            int h = (rect.bottom - rect.top);
+
+            if (rect.left < source.Width && rect.top < source.Height)
+            {
+                int bmpw = w;
+                int bmph = h;
+                if ((rect.left + w) > source.Width)
+                    bmpw = (source.Width - rect.left);
+
+                if ((rect.top + h) > source.Height)
+                    bmph = (source.Height - rect.top);
+
+#if DEBUG
+                if (bmpw != w || bmph != h)
+                {
+                    Ping(DebugFlags.AdvanceState, string.Format("bmpw = {0}, bpmh = {1}", bmpw, bmph));
+                }
+#endif
+                Bitmap temp = null;
+                Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
+
+                try
+                {
+                    int scale = (filterRecord.maskRate >> 16);
+                    if (scale > 1) // Filter preview?
+                    {
+                        int width = source.Width / scale;
+                        int height = source.Height / scale;
+
+                        if (lockRect.Width > width)
+                        {
+                            width = lockRect.Width;
+                        }
+
+                        if (lockRect.Height > height)
+                        {
+                            height = lockRect.Height;
+                        }
+
+                        temp = new Bitmap(width, height, maskBitmap.PixelFormat);
+
+                        using (Graphics gr = Graphics.FromImage(temp))
+                        {
+                            gr.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                            gr.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                            gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                            gr.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+
+                            gr.DrawImage(maskBitmap, Rectangle.FromLTRB(0, 0, width, height));
+                        }
+
+                    }
+                    else
+                    {
+                        temp = (Bitmap)maskBitmap.Clone();
+                    }
+
+                    BitmapData data = temp.LockBits(lockRect, ImageLockMode.ReadOnly, maskBitmap.PixelFormat);
+                    try
+                    {
+
+
+                        int len = bmpw * bmph;
+
+                        maskData = Marshal.AllocHGlobal(len);
+                        maskRowBytes = bmpw;
+
+                        /* the stride for the source image and destination buffer will almost never match
+                         * so copy the data manually swapping the pixel order along the way
+                         */
+                        for (int y = 0; y < data.Height; y++)
+                        {
+                            byte* srcRow = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                            byte* dstRow = (byte*)maskData.ToPointer() + (y * bmpw);
+                            for (int x = 0; x < data.Width; x++)
+                            {
+                                *dstRow = *srcRow;
+
+                                srcRow += 3;
+                                dstRow++;
+                            }
+                        }
+
+                    }
+                    finally
+                    {
+                        temp.UnlockBits(data);
+                    }
+                }
+                finally
+                {
+                    temp.Dispose();
+                    temp = null;
+                }
+
+            }
+        }
+
 		/// <summary>
 		/// Stores the output buffer to the destination image.
 		/// </summary>
@@ -1484,6 +1689,38 @@ namespace PSFilterLoad.PSApi
 
 		}
 
+        static Bitmap maskBitmap;
+        static unsafe void DrawMaskBitmap()
+        {
+            maskBitmap = new Bitmap(source.Width, source.Height, PixelFormat.Format24bppRgb);
+
+            BitmapData bd = maskBitmap.LockBits(new Rectangle(0, 0, maskBitmap.Width, maskBitmap.Height), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+            try
+            {
+                for (int y = 0; y < maskBitmap.Height; y++)
+                {
+                    byte* p = (byte*)bd.Scan0.ToPointer() + (y * bd.Stride);
+                    for (int x = 0; x < maskBitmap.Width; x++)
+                    {
+
+                        if (selectedRegion.IsVisible(x, y))
+                        {
+                            p[0] = p[1] = p[2] = 255;
+                        }
+                        else
+                        {
+                            p[0] = p[1] = p[2] = 0;
+                        }
+
+                        p += 3;
+                    }
+                }
+            }
+            finally
+            {
+                maskBitmap.UnlockBits(bd);
+            }
+        }
 
 		static bool handle_valid(IntPtr h)
 		{
@@ -1825,30 +2062,14 @@ namespace PSFilterLoad.PSApi
 			{
 				filterRecord.planes = (short)4;
 			}
-
-			if (filterCase == FilterCase.filterCaseEditableTransparencyWithSelection
-				|| filterCase == FilterCase.filterCaseFlatImageWithSelection)
-			{
-				filterRecord.floatCoord.h = (short)roi.Left;
-				filterRecord.floatCoord.v = (short)roi.Top;
-				filterRecord.filterRect.left = (short)roi.Left;
-				filterRecord.filterRect.top = (short)roi.Top;
-				filterRecord.filterRect.right = (short)roi.Right;
-				filterRecord.filterRect.bottom = (short)roi.Bottom;
-
-				//dest = (Bitmap)source.Clone();
-			}
-			else
-			{
-				filterRecord.floatCoord.h = (short)0;
-				filterRecord.floatCoord.v = (short)0;
-				filterRecord.filterRect.left = (short)0;
-				filterRecord.filterRect.top = (short)0;
-				filterRecord.filterRect.right = (short)source.Width;
-				filterRecord.filterRect.bottom = (short)source.Height;
-			}
-
-
+	
+            filterRecord.floatCoord.h = (short)0;
+			filterRecord.floatCoord.v = (short)0;
+			filterRecord.filterRect.left = (short)0;
+			filterRecord.filterRect.top = (short)0;
+			filterRecord.filterRect.right = (short)source.Width;
+			filterRecord.filterRect.bottom = (short)source.Height;
+		
 			filterRecord.imageHRes = long2fixed((long)(dpiX + 0.5));
 			filterRecord.imageVRes = long2fixed((long)(dpiY + 0.5));
 
@@ -2124,21 +2345,7 @@ namespace PSFilterLoad.PSApi
 
                     }
 
-                    if (src_valid)
-                    {
-                        Marshal.FreeHGlobal(filterRecord.inData);
-                        filterRecord.inData = IntPtr.Zero;
-                        src_valid = false;
-                    }
-
-                    if (dst_valid)
-                    {
-                        Marshal.FreeHGlobal(filterRecord.outData);
-                        filterRecord.outData = IntPtr.Zero;
-                        dst_valid = false;
-                    }
-
-					if (filterRecordPtr.IsAllocated)
+                    if (filterRecordPtr.IsAllocated)
 					{
 						filterRecordPtr.Free();
 					}
@@ -2183,6 +2390,17 @@ namespace PSFilterLoad.PSApi
 						checkerBoardBitmap.Dispose();
 						checkerBoardBitmap = null;
 					}
+
+                    if (maskBitmap != null)
+                    {
+                        maskBitmap.Dispose();
+                        maskBitmap = null;
+                    }
+                    if (selectedRegion != null)
+                    {
+                        selectedRegion.Dispose();
+                        selectedRegion = null;
+                    }
 
 					disposed = true;
 				}
