@@ -574,6 +574,18 @@ namespace PSFilterPdn
 
                 string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
 
+                string rdwPath = string.Empty;
+
+                if (sRect != eep.SourceSurface.Bounds)
+                {
+                    rdwPath = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "selection.dat");
+                    using (FileStream fs = new FileStream(rdwPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                        RegionDataWrapper rdw = new RegionDataWrapper(eep.GetSelection(eep.SourceSurface.Bounds).GetRegionData());
+                        bf.Serialize(fs, rdw);
+                    } 
+                }
 #if DEBUG
                 Debug.WriteLine(pArgs);
 #endif
@@ -601,6 +613,7 @@ namespace PSFilterPdn
 
                     bool st = proxyProcess.Start();
                     proxyProcess.StandardInput.WriteLine(pd);
+                    proxyProcess.StandardInput.WriteLine(rdwPath);
                     proxyProcess.BeginErrorReadLine();
                     proxyProcess.BeginOutputReadLine();
 #if DEBUG
@@ -633,6 +646,10 @@ namespace PSFilterPdn
                     if (File.Exists(dest))
                     {
                         File.Delete(dest);
+                    }
+                    if (!string.IsNullOrEmpty(rdwPath))
+                    {
+                        File.Delete(rdwPath);
                     }
 
                     proxyThread.Abort();
