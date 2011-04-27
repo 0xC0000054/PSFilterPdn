@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using PSFilterLoad.PSApi;
+using PSFilterPdn;
 
 namespace PSFilterShim
 {
@@ -59,36 +62,72 @@ namespace PSFilterShim
 				pdata.category = plugData[3];
 				pdata.filterInfo = string.IsNullOrEmpty(plugData[4]) ? null : GetFilterCaseInfoFromString(plugData[4]);
 
+                Region selectionRegion = null;
+
                 try
                 {
-                    using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, owner))
+                    string rgnFileName = Console.ReadLine();
+                    if (!string.IsNullOrEmpty(rgnFileName))
                     {
-                        lps.ProgressFunc = new ProgressProc(UpdateProgress);
-
-
-                        bool result = lps.RunPlugin(pdata, showAbout);
-
-                        if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
+                        RegionDataWrapper rdw = null;
+                        using (FileStream fs = new FileStream(rgnFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
                         {
-                            lps.Dest.Save(dstImg, ImageFormat.Png);
+                            BinaryFormatter bf = new BinaryFormatter();
+                            rdw = (RegionDataWrapper)bf.Deserialize(fs);
                         }
-                        else
+
+                        if (rdw != null)
                         {
-                            Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "Proxy{0},{1}", result.ToString(), lps.ErrorMessage));
+                            using (Region region = new Region())
+                            {
+                                RegionData rd = region.GetRegionData();
+                                rd.Data = rdw.Data;
+
+                                selectionRegion = new Region(rd);
+                            }
                         }
                     }
+
+
+                    try
+                    {
+                        using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, selectionRegion, owner))
+                        {
+                            lps.ProgressFunc = new ProgressProc(UpdateProgress);
+
+
+                            bool result = lps.RunPlugin(pdata, showAbout);
+
+                            if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
+                            {
+                                lps.Dest.Save(dstImg, ImageFormat.Png);
+                            }
+                            else
+                            {
+                                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "Proxy{0},{1}", result.ToString(), lps.ErrorMessage));
+                            }
+                        }
+                    }
+                    catch (FileNotFoundException fx)
+                    {
+                        Console.Error.WriteLine(fx.Message);
+                    }
+                    catch (EntryPointNotFoundException epnf)
+                    {
+                        Console.Error.WriteLine(epnf.Message);
+                    }
+                    catch (ImageSizeTooLargeException ex)
+                    {
+                        Console.Error.WriteLine(ex.Message);
+                    }
                 }
-                catch (FileNotFoundException fx)
+                finally
                 {
-                    Console.Error.WriteLine(fx.Message);
-                }
-                catch (EntryPointNotFoundException epnf)
-                {
-                    Console.Error.WriteLine(epnf.Message);
-                }
-                catch (ImageSizeTooLargeException ex)
-                {
-                    Console.Error.WriteLine(ex.Message);
+                    if (selectionRegion != null)
+                    {
+                        selectionRegion.Dispose();
+                        selectionRegion = null;
+                    }
                 }
 
 
