@@ -147,6 +147,7 @@
     <Compile Include="PSApi\Utility.cs" />
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
+    <Compile Include="RegionDataWrapper.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="StringLogicalComparer.cs" />
     <Compile Include="TreeNodeItemComparer.cs" />
