@@ -2576,21 +2576,6 @@ namespace PSFilterLoad.PSApi
                         filterRecord.parameters = IntPtr.Zero;
                     }
 
-                    if (src_valid)
-                    {
-                        Marshal.FreeHGlobal(filterRecord.inData);
-                        filterRecord.inData = IntPtr.Zero;
-                        src_valid = false;
-                    }
-
-                    if (dst_valid)
-                    {
-                        Marshal.FreeHGlobal(filterRecord.outData);
-                        filterRecord.outData = IntPtr.Zero;
-                        dst_valid = false;
-                    }
-
-
 					if (filterRecordPtr.IsAllocated)
 					{
 						filterRecordPtr.Free();
