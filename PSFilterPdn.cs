@@ -111,7 +111,9 @@ namespace PSFilterPdn
             }
 
             string src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
-            
+            string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
+            string rdwPath = string.Empty;
+
             try
             {
                 using (FileStream fs = new FileStream(src, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -122,7 +124,6 @@ namespace PSFilterPdn
                     }
                 }
             
-                string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
 
                 string pColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", base.EnvironmentParameters.PrimaryColor.R, base.EnvironmentParameters.PrimaryColor.G, base.EnvironmentParameters.PrimaryColor.B);
                 string sColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", base.EnvironmentParameters.SecondaryColor.R, base.EnvironmentParameters.SecondaryColor.G, base.EnvironmentParameters.SecondaryColor.B);
@@ -137,6 +138,18 @@ namespace PSFilterPdn
                 string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0}", bool.FalseString);
 
                 string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
+
+
+                if (sRect != base.EnvironmentParameters.SourceSurface.Bounds)
+                {
+                    rdwPath = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "selection.dat");
+                    using (FileStream fs = new FileStream(rdwPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                        RegionDataWrapper rdw = new RegionDataWrapper(base.EnvironmentParameters.GetSelection(base.EnvironmentParameters.SourceSurface.Bounds).GetRegionData());
+                        bf.Serialize(fs, rdw);
+                    }
+                }
 
 #if DEBUG
                 Debug.WriteLine(pArgs);
@@ -163,6 +176,7 @@ namespace PSFilterPdn
 
                 proxyProcess.Start();
                 proxyProcess.StandardInput.WriteLine(pd);
+                proxyProcess.StandardInput.WriteLine(rdwPath);
                 proxyProcess.BeginErrorReadLine();
                 proxyProcess.BeginOutputReadLine();
 
@@ -214,6 +228,14 @@ namespace PSFilterPdn
                     proxyProcess.Dispose();
                     proxyProcess = null; 
                 }
+
+                File.Delete(src);
+                File.Delete(dest);
+                if (!string.IsNullOrEmpty(rdwPath))
+                {
+                    File.Delete(rdwPath);
+                }
+
             }
            
         }
