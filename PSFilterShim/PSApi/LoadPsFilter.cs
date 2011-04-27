@@ -170,7 +170,6 @@ namespace PSFilterLoad.PSApi
 		static float dpiX;
 		static float dpiY;
 
-		static Rectangle roi;
         static Region selectedRegion;
 
 		/// <summary>
@@ -267,8 +266,6 @@ namespace PSFilterLoad.PSApi
 				dpiY = gr.DpiY;
 			}
 
-			roi = selection;
-
             if (selectionRegion != null)
             {
                 selectedRegion = selectionRegion.Clone();
@@ -278,10 +275,8 @@ namespace PSFilterLoad.PSApi
                 selectionRegion = null;
             }
             
-
 			if (selection == Rectangle.FromLTRB(0, 0, source.Width, source.Height))
 			{
-
 				filterCase = FilterCase.filterCaseEditableTransparencyNoSelection;
 			}
 			else
