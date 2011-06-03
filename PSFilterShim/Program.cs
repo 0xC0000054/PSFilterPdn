@@ -7,6 +7,8 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using PSFilterLoad.PSApi;
 using PSFilterPdn;
+using System.Threading;
+using System.Runtime.Serialization;
 
 namespace PSFilterShim
 {
@@ -23,6 +25,8 @@ namespace PSFilterShim
 
 		}
 
+        static bool filterDone;
+
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
@@ -31,109 +35,124 @@ namespace PSFilterShim
 		{
 #if DEBUG
 			System.Diagnostics.Debugger.Launch();
-#endif          
 			bool res = NativeMethods.SetProcessDEPPolicy(0U);
-#if DEBUG
 			System.Diagnostics.Debug.WriteLine(string.Format("SetProcessDEPPolicy returned {0}", res));
-#endif 
-			if (args.Length > 0 && args.Length == 7)
+#else
+            NativeMethods.SetProcessDEPPolicy(0U);
+#endif
+            filterDone = false;
+            if (args.Length > 0 && args.Length == 7)
 			{
-				string src = args[0]; // the filename of the source image
-				string dstImg = args[1]; // the filename of the destiniation image
+                Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
 
-				string[] pClr = args[2].Split(new char[] { ',' });
-				Color primary = Color.FromArgb(int.Parse(pClr[0]), int.Parse(pClr[1]), int.Parse(pClr[2]));
+                filterThread.Start(args);
 
-				string[] sClr = args[3].Split(new char[] { ',' });
-				Color secondary = Color.FromArgb(int.Parse(sClr[0]), int.Parse(sClr[1]), int.Parse(sClr[2]));
-
-				string[] roiSplit = args[4].Split(new char[] { ',' });
-				Rectangle selection = new Rectangle(int.Parse(roiSplit[0]), int.Parse(roiSplit[1]), int.Parse(roiSplit[2]), int.Parse(roiSplit[3]));
-
-				IntPtr owner = new IntPtr(long.Parse(args[5]));
-
-				bool showAbout = bool.Parse(args[6]);
-
-				string[] plugData = Console.ReadLine().Split(new char[] { ',' }); 
-				PluginData pdata = new PluginData();
-				pdata.fileName = plugData[0];
-				pdata.entryPoint = plugData[1];
-				pdata.title = plugData[2];
-				pdata.category = plugData[3];
-				pdata.filterInfo = string.IsNullOrEmpty(plugData[4]) ? null : GetFilterCaseInfoFromString(plugData[4]);
-
-                Region selectionRegion = null;
-
-                try
+                while (!filterDone)
                 {
-                    string rgnFileName = Console.ReadLine();
-                    if (!string.IsNullOrEmpty(rgnFileName))
-                    {
-                        RegionDataWrapper rdw = null;
-                        using (FileStream fs = new FileStream(rgnFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
-                        {
-                            BinaryFormatter bf = new BinaryFormatter();
-                            rdw = (RegionDataWrapper)bf.Deserialize(fs);
-                        }
-
-                        if (rdw != null)
-                        {
-                            using (Region region = new Region())
-                            {
-                                RegionData rd = region.GetRegionData();
-                                rd.Data = rdw.Data;
-
-                                selectionRegion = new Region(rd);
-                            }
-                        }
-                    }
-
-
-                    try
-                    {
-                        using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, selectionRegion, owner))
-                        {
-                            lps.ProgressFunc = new ProgressProc(UpdateProgress);
-
-
-                            bool result = lps.RunPlugin(pdata, showAbout);
-
-                            if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
-                            {
-                                lps.Dest.Save(dstImg, ImageFormat.Png);
-                            }
-                            else
-                            {
-                                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "Proxy{0},{1}", result.ToString(), lps.ErrorMessage));
-                            }
-                        }
-                    }
-                    catch (FileNotFoundException fx)
-                    {
-                        Console.Error.WriteLine(fx.Message);
-                    }
-                    catch (EntryPointNotFoundException epnf)
-                    {
-                        Console.Error.WriteLine(epnf.Message);
-                    }
-                    catch (ImageSizeTooLargeException ex)
-                    {
-                        Console.Error.WriteLine(ex.Message);
-                    }
-                }
-                finally
-                {
-                    if (selectionRegion != null)
-                    {
-                        selectionRegion.Dispose();
-                        selectionRegion = null;
-                    }
+                    Thread.Sleep(250);
                 }
 
-
+                filterThread.Join();
 			}
 			
 		}
+
+        static void RunFilterThread(object argsObj)
+        {
+            string[] args = (string[])argsObj;
+
+            string src = args[0]; // the filename of the source image
+            string dstImg = args[1]; // the filename of the destiniation image
+
+            string[] pClr = args[2].Split(new char[] { ',' });
+            Color primary = Color.FromArgb(int.Parse(pClr[0]), int.Parse(pClr[1]), int.Parse(pClr[2]));
+
+            string[] sClr = args[3].Split(new char[] { ',' });
+            Color secondary = Color.FromArgb(int.Parse(sClr[0]), int.Parse(sClr[1]), int.Parse(sClr[2]));
+
+            string[] roiSplit = args[4].Split(new char[] { ',' });
+            Rectangle selection = new Rectangle(int.Parse(roiSplit[0]), int.Parse(roiSplit[1]), int.Parse(roiSplit[2]), int.Parse(roiSplit[3]));
+
+            IntPtr owner = new IntPtr(long.Parse(args[5]));
+
+            bool showAbout = bool.Parse(args[6]);
+
+            string[] plugData = Console.ReadLine().Split(new char[] { ',' });
+            PluginData pdata = new PluginData();
+            pdata.fileName = plugData[0];
+            pdata.entryPoint = plugData[1];
+            pdata.title = plugData[2];
+            pdata.category = plugData[3];
+            pdata.filterInfo = string.IsNullOrEmpty(plugData[4]) ? null : GetFilterCaseInfoFromString(plugData[4]);
+
+            Region selectionRegion = null;
+
+            try
+            {
+                string rgnFileName = Console.ReadLine();
+                if (!string.IsNullOrEmpty(rgnFileName))
+                {
+                    RegionDataWrapper rdw = null;
+                    using (FileStream fs = new FileStream(rgnFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+                    {
+                        BinaryFormatter bf = new BinaryFormatter();
+                        rdw = (RegionDataWrapper)bf.Deserialize(fs);
+                    }
+
+                    if (rdw != null)
+                    {
+                        using (Region region = new Region())
+                        {
+                            RegionData rd = region.GetRegionData();
+                            rd.Data = rdw.Data;
+
+                            selectionRegion = new Region(rd);
+                        }
+                    }
+                }
+
+                try
+                {
+                    using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, selectionRegion, owner))
+                    {
+                        lps.ProgressFunc = new ProgressProc(UpdateProgress);
+
+                        bool result = lps.RunPlugin(pdata, showAbout);
+
+                        if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
+                        {
+                            lps.Dest.Save(dstImg, ImageFormat.Png);
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "Proxy{0},{1}", result.ToString(CultureInfo.InvariantCulture), lps.ErrorMessage));
+                        }
+                    }
+                }
+                catch (FileNotFoundException fx)
+                {
+                    Console.Error.WriteLine(fx.Message);
+                }
+                catch (EntryPointNotFoundException epnf)
+                {
+                    Console.Error.WriteLine(epnf.Message);
+                }
+                catch (ImageSizeTooLargeException ex)
+                {
+                    Console.Error.WriteLine(ex.Message);
+                }
+            }
+            finally
+            {
+                if (selectionRegion != null)
+                {
+                    selectionRegion.Dispose();
+                    selectionRegion = null;
+                }
+            }
+
+            filterDone = true;
+        }
 
 		static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
 		{
