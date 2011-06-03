@@ -138,6 +138,7 @@ namespace PSFilterLoad.PSApi
 			}
 
 		}
+  
 
 
 
@@ -650,7 +651,7 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			setup_sizes();
+			setup_sizes();          
             SetFilterRecordValues();
 
 			result = PSError.noErr;
@@ -727,13 +728,15 @@ namespace PSFilterLoad.PSApi
 			setup_suites();
 			setup_filter_record();
 
-			if (!plugin_parms(pdata))
-			{
+          
+            if (!plugin_parms(pdata))
+            {
 #if DEBUG
-				Ping(DebugFlags.Error, "plugin_parms failed");
+                Ping(DebugFlags.Error, "plugin_parms failed");
 #endif
-				return false;
-			}
+                return false;
+            } 
+            
 
 			if (!plugin_prepare(pdata))
 			{
@@ -1001,7 +1004,7 @@ namespace PSFilterLoad.PSApi
 				}
 #endif
 				Bitmap temp = null;
-				Rectangle lockRect = Rectangle.Empty;
+                Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
 
                 try
                 {
@@ -1032,12 +1035,11 @@ namespace PSFilterLoad.PSApi
 
                             gr.DrawImage(source, new Rectangle(0, 0, scalew, scaleh));
                         }
-                        lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
+                        
                     }
                     else
                     {
                         temp = (Bitmap)source.Clone();
-                        lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
                     }
 
                     BitmapData data = temp.LockBits(lockRect, ImageLockMode.ReadOnly, source.PixelFormat);
@@ -1090,7 +1092,8 @@ namespace PSFilterLoad.PSApi
                             inRowBytes = nplanes * w;
                             for (int y = 0; y < data.Height; y++)
                             {
-                                byte* row = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                                byte* srcRow = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                                byte* dstRow = (byte*)inData.ToPointer() + (y * inRowBytes);
                                 for (int i = loplane; i <= hiplane; i++)
                                 {
                                     int ofs = i;
@@ -1110,13 +1113,14 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                                     //                              Debug.WriteLine("y = " + y.ToString());
 #endif
+                                    byte* p = srcRow + ofs;
+                                    byte* q = dstRow + (i - loplane);
                                     for (int x = 0; x < data.Width; x++)
                                     {
-                                        byte* p = row + (x * bpp) + ofs; // the target color channel of the target pixel
-                                        byte* q = (byte*)inData.ToPointer() + (y * inRowBytes) + (x * nplanes) + (i - loplane);
-
                                         *q = *p;
 
+                                        p += bpp;
+                                        q += nplanes;
                                     }
                                 }
                             }
@@ -1127,7 +1131,6 @@ namespace PSFilterLoad.PSApi
                     finally
                     {
                         temp.UnlockBits(data);
-                       
                     }
                 }
                 finally
