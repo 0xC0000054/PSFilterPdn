@@ -6,11 +6,12 @@ namespace PSFilterLoad.PSApi
     /// <summary>
     /// The struct that holds the saved filter parameter data.
     /// </summary>
-    public sealed class ParameterData
+    [Serializable]
+    public sealed class ParameterData : ISerializable
     {
 
         private long parmDataSize;
-        private byte[] paramDataBytes;
+        private byte[] parmDataBytes;
         private bool parmDataIsPSHandle;
         private long pluginDataSize;
         private byte[] pluginDataBytes;
@@ -21,11 +22,11 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return paramDataBytes;
+                return parmDataBytes;
             }
-            internal set
+            set
             {
-                paramDataBytes = value;
+                parmDataBytes = value;
             }
         }
 
@@ -35,7 +36,7 @@ namespace PSFilterLoad.PSApi
             {
                 return parmDataSize;
             }
-            internal set
+            set
             {
                 parmDataSize = value;
             }
@@ -50,7 +51,7 @@ namespace PSFilterLoad.PSApi
             {
                 return parmDataIsPSHandle;
             }
-            internal set
+            set
             {
                 parmDataIsPSHandle = value;
             }
@@ -62,7 +63,7 @@ namespace PSFilterLoad.PSApi
             {
                 return pluginDataBytes;
             }
-            internal set
+            set
             {
                 pluginDataBytes = value;
             }
@@ -74,7 +75,7 @@ namespace PSFilterLoad.PSApi
             {
                 return pluginDataSize;
             }
-            internal set
+            set
             {
                 pluginDataSize = value;
             }
@@ -89,7 +90,7 @@ namespace PSFilterLoad.PSApi
             {
                 return pluginDataIsPSHandle;
             }
-            internal set
+            set
             {
                 pluginDataIsPSHandle = value;
             }
@@ -101,7 +102,7 @@ namespace PSFilterLoad.PSApi
             {
                 return storeMethod;
             }
-            internal set
+            set
             {
                 storeMethod = value;
             }
@@ -112,6 +113,26 @@ namespace PSFilterLoad.PSApi
         public ParameterData()
         {
         }
-       
+        private ParameterData(SerializationInfo info, StreamingContext context)
+        {
+            this.parmDataSize = info.GetInt64("parmDataSize");
+            this.parmDataBytes = (byte[])info.GetValue("parmDataBytes", typeof(byte[]));
+            this.parmDataIsPSHandle = info.GetBoolean("parmDataIsPSHandle");
+            this.pluginDataSize = info.GetInt64("pluginDataSize");
+            this.pluginDataBytes = (byte[])info.GetValue("pluginDataBytes", typeof(byte[]));
+            this.pluginDataIsPSHandle = info.GetBoolean("pluginDataIsPSHandle");
+            this.storeMethod = info.GetInt32("storeMethod");
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("parmDataSize", this.parmDataSize);
+            info.AddValue("parmDataBytes", this.parmDataBytes, typeof(byte[]));
+            info.AddValue("parmDataIsPSHandle", this.parmDataIsPSHandle);
+            info.AddValue("pluginDataSize", this.pluginDataSize);
+            info.AddValue("pluginDataBytes", this.pluginDataBytes, typeof(byte[]));
+            info.AddValue("pluginDataIsPSHandle", this.pluginDataIsPSHandle);
+            info.AddValue("storeMethod", this.storeMethod);
+        }
     }
 }
