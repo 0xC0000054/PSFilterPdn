@@ -822,9 +822,10 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         static void restore_parm()
         {
+#if DEBUG
             if (phase == PluginPhase.Parameters)
                 return;
-
+#endif
             byte[] sig = new byte[4] { (byte)'O', (byte)'T', (byte)'O', (byte)'F' };
             int ParmDataSize = IntPtr.Size + 4;
 
