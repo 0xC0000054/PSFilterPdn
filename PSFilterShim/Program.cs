@@ -111,17 +111,49 @@ namespace PSFilterShim
                     }
                 }
 
+                ParameterData parmData = null;
+                string parmDataFileName = Console.ReadLine();
+                if (!string.IsNullOrEmpty(parmDataFileName) && File.Exists(parmDataFileName))
+                {
+                    using (FileStream fs = new FileStream(parmDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+                    {
+                        BinaryFormatter bf = new BinaryFormatter();
+                        parmData = (ParameterData)bf.Deserialize(fs);
+                    }
+                }
+
                 try
                 {
                     using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, selectionRegion, owner))
                     {
                         lps.ProgressFunc = new ProgressProc(UpdateProgress);
 
+                        if (parmData != null)
+                        {
+
+                            if ((parmData.ParmDataBytes != null && parmData.PluginDataBytes != null) ||
+                                (parmData.ParmDataBytes != null && parmData.PluginDataBytes == null))
+                            {
+                                lps.ParmData = parmData;
+                                lps.IsRepeatEffect = true;
+
+                            }
+                        }
+
                         bool result = lps.RunPlugin(pdata, showAbout);
 
                         if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
                         {
                             lps.Dest.Save(dstImg, ImageFormat.Png);
+
+                            if (!lps.IsRepeatEffect)
+                            {
+                                using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                                {
+                                    BinaryFormatter bf = new BinaryFormatter();
+                                    bf.Serialize(fs, lps.ParmData);
+                                } 
+                            }
                         }
                         else
                         {
