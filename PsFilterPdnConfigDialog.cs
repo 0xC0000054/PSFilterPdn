@@ -1406,8 +1406,8 @@ namespace PSFilterPdn
 				for (int i = 0; i < 7; i++)
 				{
 					FilterCaseInfo info = data.filterInfo[i];
-					string inputHandling = info.inputHandling.ToString("G", CultureInfo.InvariantCulture);
-                    string outputHandling = info.inputHandling.ToString("G", CultureInfo.InvariantCulture);
+					string inputHandling = info.inputHandling.ToString("G");
+                    string outputHandling = info.inputHandling.ToString("G");
 
 
 					fici += string.Format(CultureInfo.InvariantCulture, "{0}_{1}_{2}", new object[] { inputHandling, outputHandling, info.flags1.ToString(CultureInfo.InvariantCulture) });
