@@ -1005,7 +1005,6 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "After FilterSelectorStart");
 #endif
 			filterRecord = (FilterRecord)filterRecordPtr.Target;
-            short startResult = result;
 
 			if (result != PSError.noErr)
 			{
@@ -1066,21 +1065,23 @@ namespace PSFilterLoad.PSApi
 			}
 			advance_state_proc();
 
-            if (startResult == PSError.noErr) // call the finish command if start returned noErr
+#if DEBUG
+            Ping(DebugFlags.Call, "Before FilterSelectorFinish");
+#endif
+            if (!isRepeatEffect)
             {
-#if DEBUG
-                Ping(DebugFlags.Call, "Before FilterSelectorFinish");
-#endif
-                if (!isRepeatEffect)
-                {
-                    save_parm();
-                }
-                pdata.entry.entry(FilterSelector.filterSelectorFinish, filterRecordPtr.AddrOfPinnedObject(), ref data, ref result);
+                save_parm();
+            }
+            pdata.entry.entry(FilterSelector.filterSelectorFinish, filterRecordPtr.AddrOfPinnedObject(), ref data, ref result);
 
 
 #if DEBUG
-                Ping(DebugFlags.Call, "After FilterSelectorFinish");
+            Ping(DebugFlags.Call, "After FilterSelectorFinish");
 #endif
+
+            if (!isRepeatEffect)
+            {
+                save_parm(); // save the filter parameters again
             }
 
 			return true;
