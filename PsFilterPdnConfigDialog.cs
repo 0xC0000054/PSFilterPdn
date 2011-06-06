@@ -47,8 +47,6 @@ namespace PSFilterPdn
 			InitializeComponent();
 			filterTreeItems = null;
 			proxyProcess = null;
-			src = string.Empty;
-			dest = string.Empty;
             proxyProcess = new Process();
 			destSurface = null;
 			proxyThread = null;
@@ -68,7 +66,7 @@ namespace PSFilterPdn
 
 		protected override void InitialInitToken()
 		{
-			theEffectToken = new PSFilterPdnConfigToken(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, null, false);
+			theEffectToken = new PSFilterPdnConfigToken(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, null, false, ParameterData.Empty);
 		}
 
 		protected override void InitTokenFromDialog()
@@ -80,6 +78,7 @@ namespace PSFilterPdn
 			((PSFilterPdnConfigToken)EffectToken).FilterCaseInfo = this.filterCaseInfo;
 			((PSFilterPdnConfigToken)EffectToken).Title = this.title;
 			((PSFilterPdnConfigToken)EffectToken).RunWith32BitShim = this.runWith32BitShim;
+            ((PSFilterPdnConfigToken)EffectToken).ParmData = this.parmData;
 		}
 
 		protected override void InitDialogFromToken(EffectConfigToken effectToken)
@@ -411,11 +410,22 @@ namespace PSFilterPdn
 		{
 			this.Close();
 		}
+
+
+        private class SB : System.Runtime.Serialization.SerializationBinder
+        {
+            public override Type BindToType(string assemblyName, string typeName)
+            {
+                return Type.GetType(string.Format("{0},{1}", typeName, assemblyName));
+            }
+        }
+
 		private string category;
 		private string fileName;
 		private string entryPoint;
 		private string title;
 		private string filterCaseInfo;
+        private ParameterData parmData;
 
 		private abort abortFunc = null;
 
@@ -487,8 +497,8 @@ namespace PSFilterPdn
 			}
 		}
 
-		bool proxyResult; 
-		string proxyErrorMessage;
+		private bool proxyResult; 
+		private string proxyErrorMessage;
 
 		private void ProxyErrorDataReceived(object sender, DataReceivedEventArgs e)
 		{
@@ -523,13 +533,11 @@ namespace PSFilterPdn
 			return this.Handle.ToInt64().ToString(CultureInfo.InvariantCulture);
 		}
 
-		delegate void SetProxyResultDelegate(string dest, PluginData data);
+		delegate void SetProxyResultDelegate(string dest, string parmDataFileName, PluginData data);
 		delegate bool GetShowAboutCheckedDelegate();
 		delegate string GetHandleStringDelegate();
-		Process proxyProcess;
-		string src;
-		string dest;
-        bool proxyRunning;
+		private Process proxyProcess;
+        private bool proxyRunning;
 
         private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
 		{
@@ -542,7 +550,10 @@ namespace PSFilterPdn
                 return;
             }
 
-			src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
+			string src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
+            string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
+
+            string parmDataFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "parmData.dat");
 
             try
             {
@@ -554,10 +565,6 @@ namespace PSFilterPdn
                         bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
                     }
                 }
-
-
-
-                dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
 
                 string pColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", eep.PrimaryColor.R, eep.PrimaryColor.G, eep.PrimaryColor.B);
                 string sColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", eep.SecondaryColor.R, eep.SecondaryColor.G, eep.SecondaryColor.B);
@@ -614,6 +621,7 @@ namespace PSFilterPdn
                     bool st = proxyProcess.Start();
                     proxyProcess.StandardInput.WriteLine(pd);
                     proxyProcess.StandardInput.WriteLine(rdwPath);
+                    proxyProcess.StandardInput.WriteLine(parmDataFileName);
                     proxyProcess.BeginErrorReadLine();
                     proxyProcess.BeginOutputReadLine();
 #if DEBUG
@@ -627,7 +635,7 @@ namespace PSFilterPdn
                     }
 
 
-                    this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, data });
+                    this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, parmDataFileName, data });
                 }
                 catch (Win32Exception wx)
                 {
@@ -651,6 +659,7 @@ namespace PSFilterPdn
                     {
                         File.Delete(rdwPath);
                     }
+                    File.Delete(parmDataFileName);
 
                     proxyThread.Abort();
                     proxyThread = null;
@@ -671,7 +680,7 @@ namespace PSFilterPdn
             }
 		}
 
-		private void SetProxyResultData(string destFileName, PluginData data)
+		private void SetProxyResultData(string destFileName, string parmDataFileName, PluginData data)
 		{ 
 			if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && !showAboutBoxcb.Checked)
 			{
@@ -679,6 +688,13 @@ namespace PSFilterPdn
 				this.title = data.title;
 				this.category = data.category;
 				this.filterCaseInfo = GetFilterCaseInfoString(data);
+
+                using (FileStream fs = new FileStream(parmDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+                {
+                    System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter() { Binder = new SB() };
+                    this.parmData = (ParameterData)bf.Deserialize(fs);
+                }
+
 				try
 				{
 					using (Bitmap dst = new Bitmap(destFileName))
@@ -719,7 +735,7 @@ namespace PSFilterPdn
 
 		private Surface destSurface;
 		private bool runWith32BitShim;
-		Thread proxyThread;
+		private Thread proxyThread;
 		private void runFilterBtn_Click(object sender, EventArgs e)
 		{
 			try
@@ -764,6 +780,8 @@ namespace PSFilterPdn
 								this.title = data.title;
 								this.category = data.category;
 								this.filterCaseInfo = GetFilterCaseInfoString(data);
+                                this.parmData = lps.ParmData;
+
 
 								if (filterProgressBar.Value < filterProgressBar.Maximum)
 								{
@@ -777,6 +795,7 @@ namespace PSFilterPdn
 									destSurface.Dispose();
 									destSurface = null;
 								}
+                                
 
 							}
 
@@ -1387,8 +1406,8 @@ namespace PSFilterPdn
 				for (int i = 0; i < 7; i++)
 				{
 					FilterCaseInfo info = data.filterInfo[i];
-					string inputHandling = info.inputHandling.ToString("G");
-					string outputHandling = info.inputHandling.ToString("G");
+					string inputHandling = info.inputHandling.ToString("G", CultureInfo.InvariantCulture);
+                    string outputHandling = info.inputHandling.ToString("G", CultureInfo.InvariantCulture);
 
 
 					fici += string.Format(CultureInfo.InvariantCulture, "{0}_{1}_{2}", new object[] { inputHandling, outputHandling, info.flags1.ToString(CultureInfo.InvariantCulture) });
