@@ -113,6 +113,8 @@ namespace PSFilterPdn
             string src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
             string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
             string rdwPath = string.Empty;
+            string parmDataFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "parmData.dat");
+
 
             try
             {
@@ -150,6 +152,12 @@ namespace PSFilterPdn
                         bf.Serialize(fs, rdw);
                     }
                 }
+                using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                    bf.Serialize(fs, token.ParmData);
+                } 
+
 
 #if DEBUG
                 Debug.WriteLine(pArgs);
@@ -177,6 +185,7 @@ namespace PSFilterPdn
                 proxyProcess.Start();
                 proxyProcess.StandardInput.WriteLine(pd);
                 proxyProcess.StandardInput.WriteLine(rdwPath);
+                proxyProcess.StandardInput.WriteLine(parmDataFileName);
                 proxyProcess.BeginErrorReadLine();
                 proxyProcess.BeginOutputReadLine();
 
@@ -207,6 +216,7 @@ namespace PSFilterPdn
                 {
                     File.Delete(dest);
                 }
+
 
             }
             catch (ArgumentException ax)
@@ -268,6 +278,9 @@ namespace PSFilterPdn
                             FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
                             PluginData pdata = new PluginData(){ fileName = token.FileName, entryPoint= token.EntryPoint, title = token.Title,
                              category = token.Category, filterInfo = fci};
+
+                            lps.ParmData = token.ParmData;
+                            lps.IsRepeatEffect = true;
 
                             bool result = lps.RunPlugin(pdata, false);
 
