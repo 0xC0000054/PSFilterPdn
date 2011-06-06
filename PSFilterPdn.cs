@@ -38,6 +38,8 @@ namespace PSFilterPdn
         {
             dlg = null;
             proxyResult = false;
+            filterDone = false;
+            filterThread = null;
             proxyProcess = null;
             proxyErrorMessage = string.Empty;
         }
@@ -249,6 +251,58 @@ namespace PSFilterPdn
             }
            
         }
+
+        private static bool filterDone;
+        private Thread filterThread;
+        private void RunRepeatFilter(ref PSFilterPdnConfigToken token)
+        {
+            try
+            {
+                using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, Process.GetCurrentProcess().MainWindowHandle))
+                {
+                    lps.AbortFunc = new abort(AbortFunc);
+
+                    FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
+                    PluginData pdata = new PluginData()
+                    {
+                        fileName = token.FileName,
+                        entryPoint = token.EntryPoint,
+                        title = token.Title,
+                        category = token.Category,
+                        filterInfo = fci
+                    };
+
+                    lps.ParmData = token.ParmData;
+                    lps.IsRepeatEffect = true;
+
+                    bool result = lps.RunPlugin(pdata, false);
+
+                    if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
+                    {
+                        MessageBox.Show(lps.ErrorMessage, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                    if (result && string.IsNullOrEmpty(lps.ErrorMessage))
+                    {
+                        token.Dest = Surface.CopyFromBitmap(lps.Dest);
+                    }
+                }
+
+            }
+            catch (FilterLoadException flex)
+            {
+                MessageBox.Show(flex.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (ImageSizeTooLargeException ex)
+            {
+                MessageBox.Show(ex.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                filterDone = true;
+            }
+                    
+        }
         
 
         protected override void OnSetRenderInfo(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs)
@@ -262,50 +316,32 @@ namespace PSFilterPdn
                     token.Dest.Dispose();
                     token.Dest = null; 
                 }
-                try
+
+
+                if (token.RunWith32BitShim)
                 {
+                    Run32BitFilterProxy(ref token);
+                }
+                else
+                {
+                    filterDone = false;
 
-                    if (token.RunWith32BitShim)
+                    filterThread = new Thread(() => RunRepeatFilter(ref token)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+                    filterThread.Start();
+
+                    while (!filterDone)
                     {
-                        Run32BitFilterProxy(ref token);
-                    }
-                    else
-                    {
-                        using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, Process.GetCurrentProcess().MainWindowHandle))
-                        {
-                            lps.AbortFunc = new abort(AbortFunc);
-
-                            FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
-                            PluginData pdata = new PluginData(){ fileName = token.FileName, entryPoint= token.EntryPoint, title = token.Title,
-                             category = token.Category, filterInfo = fci};
-
-                            lps.ParmData = token.ParmData;
-                            lps.IsRepeatEffect = true;
-
-                            bool result = lps.RunPlugin(pdata, false);
-
-                            if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
-                            {
-                                MessageBox.Show(lps.ErrorMessage, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
-
-                            if (result && string.IsNullOrEmpty(lps.ErrorMessage))
-                            {
-                                token.Dest = Surface.CopyFromBitmap(lps.Dest);
-                            }
-                        }
+                        Application.DoEvents();
+                        Thread.Sleep(250);
                     }
 
-                    
+                    filterThread.Join();
+                    filterThread = null;
+
+
                 }
-                catch (FilterLoadException flex)
-                {
-                    MessageBox.Show(flex.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error); 
-                }
-                catch (ImageSizeTooLargeException ex)
-                {
-                    MessageBox.Show(ex.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error); 
-                }
+
+             
             }
 
             base.OnSetRenderInfo(parameters, dstArgs, srcArgs);
