@@ -301,9 +301,27 @@ namespace PSFilterLoad.PSApi
         /// Point
         public Point16 maskTileOrigin;
 
-#if PSSDK_3_0_4
+#if PSSDK_3_0_4 && !PSSDK4
         public fixed byte reserved[98];
 #endif
+#endif
+#if PSSDK4
+
+        /*New in 4.0*/
+
+        /// PIDescriptorParameters*
+        public System.IntPtr descriptorParameters;
+
+        /// Str255*
+        public System.IntPtr errorString;
+
+        /// ChannelPortProcs*
+        public System.IntPtr channelPortProcs;
+
+        /// ReadImageDocumentDesc*
+        public System.IntPtr documentInfo;
+
+        public fixed byte reserved[78];
 #endif
 
     }
