@@ -21,12 +21,30 @@ namespace PSFilterLoad.PSApi
 #if PSSDK_3_0_4
         /// kCurrentImageServicesProcsVersion -> 1
         public const int kCurrentImageServicesProcsVersion = 1;
-        public const short kCurrentImageServicesProcsCount = 4; 
+        public const short kCurrentImageServicesProcsCount = 2; 
 
 
         /// kCurrentPropertyProcsVersion -> 1
         public const int kCurrentPropertyProcsVersion = 1;
         public const short kCurrentPropertyProcsCount = 2;
+#endif
+#if PSSDK4
+        /// kCurrentDescriptorParametersVersion -> 0
+        public const int kCurrentDescriptorParametersVersion = 0;
+
+        /// kCurrentReadDescriptorProcsVersion -> 0
+        public const int kCurrentReadDescriptorProcsVersion = 0;
+        public const short kCurrentReadDescriptorProcsCount = 18;
+
+        /// kCurrentWriteDescriptorProcsVersion -> 0
+        public const int kCurrentWriteDescriptorProcsVersion = 0;
+        public const short kCurrentWriteDescriptorProcsCount = 16;
+
+        /// kCurrentMinVersReadImageDocDesc -> 0
+        public const int kCurrentMinVersReadImageDocDesc = 0;
+
+        /// kCurrentMaxVersReadImageDocDesc -> 1
+        public const int kCurrentMaxVersReadImageDocDesc = 1; 
 #endif
         /// kCurrentResourceProcsVersion -> 3
         public const int kCurrentResourceProcsVersion = 3;
