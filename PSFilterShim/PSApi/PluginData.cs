@@ -17,7 +17,8 @@ namespace PSFilterLoad.PSApi
         public string entryPoint;
         public string category;
         public string title;
-        public FilterCaseInfo[] filterInfo;        
+        public FilterCaseInfo[] filterInfo;
+        public AETEData aete;
         /// <summary>
         /// The structure containing the dll entrypoint
         /// </summary>
