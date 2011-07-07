@@ -26,6 +26,7 @@ namespace PSFilterLoad.PSApi
         /// Used to run 32-bit plugins in 64-bit Paint.NET
         /// </summary>
         public bool runWith32BitShim;
+        public AETEData aete;
     }
 
     internal struct PIEntrypoint
