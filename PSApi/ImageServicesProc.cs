@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
-#if PSSDK_3_0_4
+#if PSSDK_3_0_4 && USEIMAGESERVICES
 
     /// Return Type: OSErr->short
     ///source: PSImagePlane*
