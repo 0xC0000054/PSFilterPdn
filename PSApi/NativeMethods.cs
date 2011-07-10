@@ -55,12 +55,6 @@ namespace PSFilterLoad.PSApi
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetWindowText(IntPtr hWnd, string lpString);
 
-        /// Return Type: BOOL->int
-        ///lpBuffer: LPMEMORYSTATUSEX->_MEMORYSTATUSEX*
-        [DllImport("kernel32.dll", EntryPoint = "GlobalMemoryStatusEx")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool GlobalMemoryStatusEx([In, Out] NativeStructs.MEMORYSTATUSEX lpBuffer);
-
         [DllImport("kernel32.dll", EntryPoint = "LocalSize")]
         public static extern UIntPtr LocalSize([In()] System.IntPtr hMem);
 
