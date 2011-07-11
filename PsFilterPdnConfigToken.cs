@@ -14,6 +14,7 @@ namespace PSFilterPdn
         private string filterCaseInfo;
         private bool runWith32BitShim;
         private ParameterData parmData;
+        private AETEData aeteData;
         
         
         public string Category
@@ -112,7 +113,19 @@ namespace PSFilterPdn
             }
         }
 
-        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, string filterCaseInfo, Surface dest, bool useShim, ParameterData pdata)
+        public AETEData AETE
+        {
+            get
+            {
+                return aeteData;
+            }
+            internal set
+            {
+                aeteData = value;
+            }
+        }
+
+        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, string filterCaseInfo, Surface dest, bool useShim, ParameterData pdata, AETEData aete)
             : base()
         {
             this.category = category;
@@ -123,6 +136,7 @@ namespace PSFilterPdn
             this.title = title;
             this.runWith32BitShim = useShim;
             this.parmData = pdata;
+            this.aeteData = aete;
         }
 
 #pragma warning disable 628
@@ -137,6 +151,7 @@ namespace PSFilterPdn
             this.title = copyMe.title;
             this.runWith32BitShim = copyMe.runWith32BitShim;
             this.parmData = copyMe.parmData;
+            this.aeteData = copyMe.aeteData;
         }
 #pragma warning disable 628
 
