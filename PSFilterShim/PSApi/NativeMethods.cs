@@ -40,9 +40,6 @@ namespace PSFilterLoad.PSApi
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetWindowText(IntPtr hWnd, string lpString);
 
-        [DllImport("ntdll.dll", EntryPoint = "memcpy", CharSet = CharSet.Unicode)]
-        public static extern void memcpy(IntPtr Destination, IntPtr Source, UIntPtr Length);
-
         [DllImport("kernel32.dll", EntryPoint = "LocalSize")]
         public static extern UIntPtr LocalSize([In()] System.IntPtr hMem);
 
@@ -53,5 +50,7 @@ namespace PSFilterLoad.PSApi
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern unsafe IntPtr VirtualQuery(IntPtr address, ref NativeStructs.MEMORY_BASIC_INFORMATION buffer, IntPtr sizeOfBuffer);
 
+        [DllImport("msvcrt.dll", EntryPoint = "memset", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
+        public static extern IntPtr MemSet(IntPtr dest, int c, UIntPtr count);
      }
 }
