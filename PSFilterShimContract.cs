@@ -42,6 +42,10 @@ namespace PSFilterPdn
         private static PSFilterShimService _service = null;
         private static ServiceHost _host = null;
 
+        /// <summary>
+        /// Starts the WCF server service.
+        /// </summary>
+        /// <param name="service">The service instance to use.</param>
         public static void Start(PSFilterShimService service)
         {
             _service = service;
@@ -51,6 +55,9 @@ namespace PSFilterPdn
             _host.Open();
         }
 
+        /// <summary>
+        /// Stops the WCF server instance.
+        /// </summary>
         public static void Stop()
         {
             if ((_host != null) && (_host.State != CommunicationState.Closed)) 
