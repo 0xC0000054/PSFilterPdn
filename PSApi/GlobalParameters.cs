@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace PSFilterLoad.PSApi
 {
     /// <summary>
-    /// The struct that holds the saved filter parameter data.
+    /// The struct that holds the saved filter global parameter data.
     /// </summary>
     [Serializable]
     public sealed class GlobalParameters : ISerializable
@@ -108,10 +108,15 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public static readonly GlobalParameters Empty = new GlobalParameters();
-
         public GlobalParameters()
         {
+            this.parmDataSize = 0;
+            this.parmDataBytes = null;
+            this.parmDataIsPSHandle = false;
+            this.pluginDataSize = 0;
+            this.pluginDataBytes = null;
+            this.pluginDataIsPSHandle = false;
+            this.storeMethod = 0;
         }
         private GlobalParameters(SerializationInfo info, StreamingContext context)
         {
