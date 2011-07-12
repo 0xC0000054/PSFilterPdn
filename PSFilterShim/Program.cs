@@ -31,7 +31,7 @@ namespace PSFilterShim
 
         static bool abortFilter()
         {
-            bool abort = ServiceProxy.abortFilter();
+            bool abort = ServiceProxy.AbortFilter();
 
 #if DEBUG
             System.Diagnostics.Debug.WriteLine(string.Format("abortFilter returned: {0}", abort));
@@ -108,15 +108,15 @@ namespace PSFilterShim
             string dstImg = args[1]; // the filename of the destiniation image
 
             string[] pClr = args[2].Split(new char[] { ',' });
-            Color primary = Color.FromArgb(int.Parse(pClr[0]), int.Parse(pClr[1]), int.Parse(pClr[2]));
+            Color primary = Color.FromArgb(int.Parse(pClr[0], CultureInfo.InvariantCulture), int.Parse(pClr[1], CultureInfo.InvariantCulture), int.Parse(pClr[2], CultureInfo.InvariantCulture));
 
             string[] sClr = args[3].Split(new char[] { ',' });
-            Color secondary = Color.FromArgb(int.Parse(sClr[0]), int.Parse(sClr[1]), int.Parse(sClr[2]));
+            Color secondary = Color.FromArgb(int.Parse(sClr[0], CultureInfo.InvariantCulture), int.Parse(sClr[1], CultureInfo.InvariantCulture), int.Parse(sClr[2], CultureInfo.InvariantCulture));
 
             string[] roiSplit = args[4].Split(new char[] { ',' });
-            Rectangle selection = new Rectangle(int.Parse(roiSplit[0]), int.Parse(roiSplit[1]), int.Parse(roiSplit[2]), int.Parse(roiSplit[3]));
+            Rectangle selection = new Rectangle(int.Parse(roiSplit[0], CultureInfo.InvariantCulture), int.Parse(roiSplit[1], CultureInfo.InvariantCulture), int.Parse(roiSplit[2], CultureInfo.InvariantCulture), int.Parse(roiSplit[3], CultureInfo.InvariantCulture));
 
-            IntPtr owner = new IntPtr(long.Parse(args[5]));
+            IntPtr owner = new IntPtr(long.Parse(args[5], CultureInfo.InvariantCulture));
 
             bool showAbout = bool.Parse(args[6]);
 
