@@ -20,13 +20,17 @@ namespace PSFilterLoad.PSApi
             if (obj is Rect16)
             {
                 Rect16 rect = (Rect16)obj;
-                return (this.left == rect.left && this.top == rect.top && this.right == rect.right && this.bottom == rect.bottom);
+                return Equals(rect);
             }
             else
             { 
                 return false;
             }
             
+        }
+        public bool Equals(Rect16 rect)
+        {
+            return (this.left == rect.left && this.top == rect.top && this.right == rect.right && this.bottom == rect.bottom);
         }
 
     }
