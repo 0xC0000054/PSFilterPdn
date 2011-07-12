@@ -20,7 +20,7 @@ namespace PSFilterPdn
             this.abortFunc = abort;
         }
 
-        public bool abortFilter()
+        public bool AbortFilter()
         {
             if (abortFunc != null)
             {
