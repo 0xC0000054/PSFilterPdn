@@ -9,6 +9,7 @@ using PSFilterLoad.PSApi;
 using PSFilterPdn;
 using System.Threading;
 using System.Runtime.Serialization;
+using System.ServiceModel;
 
 namespace PSFilterShim
 {
@@ -26,6 +27,17 @@ namespace PSFilterShim
 		}
 
         static bool filterDone;
+        static IPSFilterShim ServiceProxy = null;
+
+        static bool abortFilter()
+        {
+            bool abort = ServiceProxy.abortFilter();
+
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine(string.Format("abortFilter returned: {0}", abort));
+#endif
+            return abort;
+        }
 
 		/// <summary>
 		/// The main entry point for the application.
@@ -34,7 +46,7 @@ namespace PSFilterShim
 		static void Main(string[] args)
 		{
 #if DEBUG
-			System.Diagnostics.Debugger.Launch();
+			//System.Diagnostics.Debugger.Launch();
 			bool res = NativeMethods.SetProcessDEPPolicy(0U);
 			System.Diagnostics.Debug.WriteLine(string.Format("SetProcessDEPPolicy returned {0}", res));
 #else
@@ -57,9 +69,40 @@ namespace PSFilterShim
 			
 		}
 
+        /// <summary>
+        /// Blocks the repeat effect command on incompatible filters.
+        /// </summary>
+        /// <param name="data">The plugin data th check.</param>
+        /// <returns>true if the plugin is incompatible with the repeat effect command; otherwise false</returns>
+        static bool BlockRepeatEffect(PluginData data)
+        {
+            string[] blockList = new string[1] { "L'amico Perry,Luce..." };
+
+            foreach (var item in blockList)
+            {
+                string[] split = item.Split(new char[] { ',' });
+
+                if (data.category.Equals(split[0], StringComparison.OrdinalIgnoreCase) && 
+                    data.title.Equals(split[1], StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         static void RunFilterThread(object argsObj)
         {
             string[] args = (string[])argsObj;
+
+            string endpointName = Console.ReadLine();
+
+            if (!string.IsNullOrEmpty(endpointName))
+            {
+                EndpointAddress address = new EndpointAddress(endpointName);
+                ServiceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(new NetNamedPipeBinding(), address);
+            }
 
             string src = args[0]; // the filename of the source image
             string dstImg = args[1]; // the filename of the destiniation image
@@ -84,6 +127,16 @@ namespace PSFilterShim
             pdata.title = plugData[2];
             pdata.category = plugData[3];
             pdata.filterInfo = string.IsNullOrEmpty(plugData[4]) ? null : GetFilterCaseInfoFromString(plugData[4]);
+
+            string aeteFileName = Console.ReadLine();
+            if (!string.IsNullOrEmpty(aeteFileName))
+            {
+                using (FileStream fs = new FileStream(aeteFileName, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                    pdata.aete = (AETEData)bf.Deserialize(fs);
+                } 
+            }
 
             Region selectionRegion = null;
 
@@ -126,17 +179,22 @@ namespace PSFilterShim
                 {
                     using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, selectionRegion, owner))
                     {
+                        if (ServiceProxy != null)
+                        {
+                            lps.AbortFunc = new abort(abortFilter);
+                        }
+
                         lps.ProgressFunc = new ProgressProc(UpdateProgress);
 
-                        if (parmData != null)
+                        if (parmData != null && !BlockRepeatEffect(pdata))
                         {
 
-                            if ((parmData.ParmDataBytes != null && parmData.PluginDataBytes != null) ||
-                                (parmData.ParmDataBytes != null && parmData.PluginDataBytes == null))
+                            if (((parmData.GlobalParms.ParmDataBytes != null && parmData.GlobalParms.PluginDataBytes != null) ||
+                                (parmData.GlobalParms.ParmDataBytes != null && parmData.GlobalParms.PluginDataBytes == null)) || 
+                                pdata.aete != null)
                             {
                                 lps.ParmData = parmData;
                                 lps.IsRepeatEffect = true;
-
                             }
                         }
 
