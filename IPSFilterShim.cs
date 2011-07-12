@@ -4,5 +4,5 @@
 internal interface IPSFilterShim
 {
     [OperationContract]
-    bool abortFilter();
+    bool AbortFilter();
 }
