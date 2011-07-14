@@ -417,7 +417,7 @@ namespace PSFilterLoad.PSApi
     }
 
 
-    public enum RecordInfo : short
+    internal enum RecordInfo : short
     {
 
         plugInDialogOptional,
@@ -427,7 +427,7 @@ namespace PSFilterLoad.PSApi
         plugInDialogNone,
     }
 
-    public enum PlayInfo : short
+    internal enum PlayInfo : short
     {
 
         plugInDialogDontDisplay,
