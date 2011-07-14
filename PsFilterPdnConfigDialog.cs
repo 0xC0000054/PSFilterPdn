@@ -66,7 +66,7 @@ namespace PSFilterPdn
 
 		protected override void InitialInitToken()
 		{
-			theEffectToken = new PSFilterPdnConfigToken(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, null, false, ParameterData.Empty);
+			theEffectToken = new PSFilterPdnConfigToken(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, null, false, null, null);
 		}
 
 		protected override void InitTokenFromDialog()
@@ -79,6 +79,7 @@ namespace PSFilterPdn
 			((PSFilterPdnConfigToken)EffectToken).Title = this.title;
 			((PSFilterPdnConfigToken)EffectToken).RunWith32BitShim = this.runWith32BitShim;
             ((PSFilterPdnConfigToken)EffectToken).ParmData = this.parmData;
+            ((PSFilterPdnConfigToken)EffectToken).AETE = this.aeteData;
 		}
 
 		protected override void InitDialogFromToken(EffectConfigToken effectToken)
@@ -416,7 +417,7 @@ namespace PSFilterPdn
         {
             public override Type BindToType(string assemblyName, string typeName)
             {
-                return Type.GetType(string.Format("{0},{1}", typeName, assemblyName));
+                return Type.GetType(string.Format(CultureInfo.InvariantCulture, "{0},{1}", typeName, assemblyName));
             }
         }
 
@@ -426,6 +427,7 @@ namespace PSFilterPdn
 		private string title;
 		private string filterCaseInfo;
         private ParameterData parmData;
+        private AETEData aeteData;
 
 		private abort abortFunc = null;
 
@@ -576,6 +578,17 @@ namespace PSFilterPdn
 
                 string filterInfo = (string)this.Invoke(new GetFilterCaseInfoStringDelegate(GetFilterCaseInfoString), new object[] { data });
                 string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { data.fileName, data.entryPoint, data.title, data.category, filterInfo });
+                string aeteFileName = string.Empty;
+
+                if (data.aete != null)
+                {
+                    aeteFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "aete.dat");
+                    using (FileStream fs = new FileStream(aeteFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                        bf.Serialize(fs, data.aete);
+                    } 
+                }
 
                 string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0}", this.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked)));
 
@@ -619,7 +632,9 @@ namespace PSFilterPdn
 
 
                     bool st = proxyProcess.Start();
+                    proxyProcess.StandardInput.WriteLine(string.Empty); // proxy cancel callback
                     proxyProcess.StandardInput.WriteLine(pd);
+                    proxyProcess.StandardInput.WriteLine(aeteFileName);
                     proxyProcess.StandardInput.WriteLine(rdwPath);
                     proxyProcess.StandardInput.WriteLine(parmDataFileName);
                     proxyProcess.BeginErrorReadLine();
@@ -661,6 +676,11 @@ namespace PSFilterPdn
                     }
                     File.Delete(parmDataFileName);
 
+                    if (!string.IsNullOrEmpty(aeteFileName))
+                    {
+                        File.Delete(aeteFileName);
+                    }
+
                     proxyThread.Abort();
                     proxyThread = null;
                 }
@@ -688,11 +708,19 @@ namespace PSFilterPdn
 				this.title = data.title;
 				this.category = data.category;
 				this.filterCaseInfo = GetFilterCaseInfoString(data);
+                this.aeteData = data.aete;
 
-                using (FileStream fs = new FileStream(parmDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+                if (File.Exists(parmDataFileName))
                 {
-                    System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter() { Binder = new SB() };
-                    this.parmData = (ParameterData)bf.Deserialize(fs);
+                    using (FileStream fs = new FileStream(parmDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+                    {
+                        System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter() { Binder = new SB() };
+                        this.parmData = (ParameterData)bf.Deserialize(fs);
+                    } 
+                }
+                else
+                {
+                    this.parmData = null;
                 }
 
 				try
@@ -781,6 +809,7 @@ namespace PSFilterPdn
 								this.category = data.category;
 								this.filterCaseInfo = GetFilterCaseInfoString(data);
                                 this.parmData = lps.ParmData;
+                                this.aeteData = data.aete;
 
 
 								if (filterProgressBar.Value < filterProgressBar.Maximum)
@@ -876,7 +905,6 @@ namespace PSFilterPdn
 		{
 			public TreeNode[] items;
 			public string[] dirlist;
-			public int count;
 			public List<FilterLoadException> exceptions; 
 			public SearchOption options;
 		}
@@ -925,7 +953,6 @@ namespace PSFilterPdn
 			UpdateFilterListParm parm = (UpdateFilterListParm)e.Argument;
 			parm.exceptions = new List<FilterLoadException>();
 			Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>();
-			int count = 0;
 			for (int i = 0; i < parm.dirlist.Length; i++)
 			{
 				DirectoryInfo di = new DirectoryInfo(parm.dirlist[i]);
@@ -953,8 +980,6 @@ namespace PSFilterPdn
                             {
                                 foreach (var item in pd)
                                 {
-                                    count++;
-
                                     if (nodes.ContainsKey(item.category))
                                     {
                                         TreeNode node = nodes[item.category];
@@ -986,8 +1011,6 @@ namespace PSFilterPdn
 			parm.items = new TreeNode[nodes.Values.Count];
 			nodes.Values.CopyTo(parm.items, 0);
 
-			parm.count = count;
-
 			e.Result = parm;
 		}
 		/// <summary>
@@ -1006,7 +1029,9 @@ namespace PSFilterPdn
 					TreeNode node = parent.Nodes[child.Text];
 					PluginData pd = (PluginData)node.Tag;
 
-					if (pd.runWith32BitShim && !data.runWith32BitShim) 
+                    // The 64-bit Flaming Pear plugins crash so force the 32-bit versions to be used instead.
+					if ((pd.runWith32BitShim && !data.runWith32BitShim && pd.category != "Flaming Pear") 
+                        || (!pd.runWith32BitShim && pd.category == "Flaming Pear")) // LunarCell loads the 64-bit filters first
 					{
 						parent.Nodes.Remove(node); // if the new plugin is 64-bit and the old one is not remove the old one and use the 64-bit one.
 
