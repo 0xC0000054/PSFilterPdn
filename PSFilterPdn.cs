@@ -48,7 +48,7 @@ namespace PSFilterPdn
         /// The function that the Photoshop filters can poll to check if to abort
         /// </summary>
         /// <returns>The effect's IsCancelRequested property</returns>
-        internal bool AbortFunc()
+        private bool AbortFunc()
         {
             return base.IsCancelRequested;
         }
@@ -57,12 +57,11 @@ namespace PSFilterPdn
         public override EffectConfigDialog CreateConfigDialog()
         {
             dlg = new PsFilterPdnConfigDialog();
-            dlg.AbortFunc = new abort(AbortFunc);
             return dlg;
         }
 
-        bool proxyResult;
-        string proxyErrorMessage;
+        private bool proxyResult;
+        private string proxyErrorMessage;
 
         private void ProxyErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
@@ -100,6 +99,7 @@ namespace PSFilterPdn
             return info;
         }
 
+        private const string endpointName = "net.pipe://localhost/PSFilterShim/AbortFilter";
         private Process proxyProcess;
         private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token)
         {
@@ -116,7 +116,9 @@ namespace PSFilterPdn
             string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
             string rdwPath = string.Empty;
             string parmDataFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "parmData.dat");
-
+            PSFilterShimService service = new PSFilterShimService(() => base.IsCancelRequested);
+            
+            PSFilterShimServer.Start(service);
 
             try
             {
@@ -127,6 +129,7 @@ namespace PSFilterPdn
                         bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
                     }
                 }
+
             
 
                 string pColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", base.EnvironmentParameters.PrimaryColor.R, base.EnvironmentParameters.PrimaryColor.G, base.EnvironmentParameters.PrimaryColor.B);
@@ -138,6 +141,17 @@ namespace PSFilterPdn
                 string owner = Process.GetCurrentProcess().MainWindowHandle.ToInt64().ToString(CultureInfo.InvariantCulture);
 
                 string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { token.FileName, token.EntryPoint, token.Title, token.Category, token.FilterCaseInfo });
+                string aeteFileName = string.Empty;
+
+                if (token.AETE != null)
+                {
+                    aeteFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "aete.dat");
+                    using (FileStream fs = new FileStream(aeteFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                        bf.Serialize(fs, token.AETE);
+                    }
+                }
 
                 string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0}", bool.FalseString);
 
@@ -165,59 +179,73 @@ namespace PSFilterPdn
                 Debug.WriteLine(pArgs);
 #endif
 
-                ProcessStartInfo psi = new ProcessStartInfo(shimPath, pArgs);
-                psi.RedirectStandardInput = true;
-                psi.RedirectStandardError = true;
-                psi.RedirectStandardOutput = true;
-                psi.CreateNoWindow = true;
-                psi.UseShellExecute = false;
-
-                proxyResult = true; // assume the filter succeded this will be set to false if it failed
-                proxyErrorMessage = string.Empty;
-
-                proxyProcess = new Process();
-
-                proxyProcess.EnableRaisingEvents = true;
-                proxyProcess.ErrorDataReceived += new DataReceivedEventHandler(ProxyErrorDataReceived);
-
-
-                proxyProcess.StartInfo = psi;
-
-
-                proxyProcess.Start();
-                proxyProcess.StandardInput.WriteLine(pd);
-                proxyProcess.StandardInput.WriteLine(rdwPath);
-                proxyProcess.StandardInput.WriteLine(parmDataFileName);
-                proxyProcess.BeginErrorReadLine();
-                proxyProcess.BeginOutputReadLine();
-
-                while (!proxyProcess.HasExited)
+                try
                 {
-                    Application.DoEvents(); // Keep the message pump running while we wait for the proxy to exit
-                    Thread.Sleep(250);
-                }
+                    ProcessStartInfo psi = new ProcessStartInfo(shimPath, pArgs);
+                    psi.RedirectStandardInput = true;
+                    psi.RedirectStandardError = true;
+                    psi.RedirectStandardOutput = true;
+                    psi.CreateNoWindow = true;
+                    psi.UseShellExecute = false;
 
-                if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage) && proxyErrorMessage != Resources.UserCanceledError)
-                {
-                    MessageBox.Show(proxyErrorMessage, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                    proxyResult = true; // assume the filter succeded this will be set to false if it failed
+                    proxyErrorMessage = string.Empty;
 
-                if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage))
-                {
-                    using (Bitmap bmp = new Bitmap(dest))
+                    proxyProcess = new Process();
+
+                    proxyProcess.EnableRaisingEvents = true;
+                    proxyProcess.ErrorDataReceived += new DataReceivedEventHandler(ProxyErrorDataReceived);
+
+
+                    proxyProcess.StartInfo = psi;
+
+
+                    proxyProcess.Start();
+                    proxyProcess.StandardInput.WriteLine(endpointName);
+                    proxyProcess.StandardInput.WriteLine(pd);
+                    proxyProcess.StandardInput.WriteLine(aeteFileName);
+                    proxyProcess.StandardInput.WriteLine(rdwPath);
+                    proxyProcess.StandardInput.WriteLine(parmDataFileName);
+                    proxyProcess.BeginErrorReadLine();
+                    proxyProcess.BeginOutputReadLine();
+
+                    while (!proxyProcess.HasExited)
                     {
-                        token.Dest = Surface.CopyFromBitmap(bmp);
+                        Application.DoEvents(); // Keep the message pump running while we wait for the proxy to exit
+                        Thread.Sleep(250);
+                    }
+
+                    if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage) && proxyErrorMessage != Resources.UserCanceledError)
+                    {
+                        MessageBox.Show(proxyErrorMessage, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                    if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage))
+                    {
+                        using (Bitmap bmp = new Bitmap(dest))
+                        {
+                            token.Dest = Surface.CopyFromBitmap(bmp);
+                        }
+                    }
+                }
+                finally
+                {
+
+                    if (File.Exists(src))
+                    {
+                        File.Delete(src);
+                    }
+                    if (File.Exists(dest))
+                    {
+                        File.Delete(dest);
+                    }
+
+                    if (!string.IsNullOrEmpty(aeteFileName))
+                    {
+                        File.Delete(aeteFileName);
                     }
                 }
 
-                if (File.Exists(src))
-                {
-                    File.Delete(src);
-                }
-                if (File.Exists(dest))
-                {
-                    File.Delete(dest);
-                }
 
 
             }
@@ -247,6 +275,7 @@ namespace PSFilterPdn
                 {
                     File.Delete(rdwPath);
                 }
+                PSFilterShimServer.Stop();
 
             }
            
@@ -269,7 +298,8 @@ namespace PSFilterPdn
                         entryPoint = token.EntryPoint,
                         title = token.Title,
                         category = token.Category,
-                        filterInfo = fci
+                        filterInfo = fci,
+                        aete = token.AETE
                     };
 
                     lps.ParmData = token.ParmData;
