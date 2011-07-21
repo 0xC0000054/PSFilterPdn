@@ -215,21 +215,21 @@ namespace PSFilterShim
                         }
                         else
                         {
-                            Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "Proxy{0},{1}", result.ToString(CultureInfo.InvariantCulture), lps.ErrorMessage));
+                            Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyResult{0},{1}", result.ToString(CultureInfo.InvariantCulture), lps.ErrorMessage));
                         }
                     }
                 }
                 catch (FileNotFoundException fx)
                 {
-                    Console.Error.WriteLine(fx.Message);
+                    Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", fx.Message));
                 }
                 catch (EntryPointNotFoundException epnf)
                 {
-                    Console.Error.WriteLine(epnf.Message);
+                    Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", epnf.Message));
                 }
                 catch (ImageSizeTooLargeException ex)
                 {
-                    Console.Error.WriteLine(ex.Message);
+                    Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", ex.Message));
                 }
             }
             finally
