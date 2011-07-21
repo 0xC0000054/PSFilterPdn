@@ -1023,36 +1023,7 @@ namespace PSFilterLoad.PSApi
                     globalParms.StoreMethod = 1;
                     //NativeMethods.GlobalUnlock(filterRecord.parameters);
                 }
-                else if (!IsBadReadPtr(filterRecord.parameters)
-                    && (size = NativeMethods.GlobalSize(filterRecord.parameters).ToInt64()) > 0L)
-                {
-
-                    if (size == ParmDataSize && Marshal.ReadInt32(filterRecord.parameters, IntPtr.Size) == 0x464f544f)
-                    {
-                        IntPtr ptr = Marshal.ReadIntPtr(filterRecord.parameters);
-                        long ps = 0;
-                        if ((ps = NativeMethods.GlobalSize(ptr).ToInt64()) > 0L)
-                        {
-                            Byte[] buf = new byte[ps];
-                            Marshal.Copy(ptr, buf, 0, (int)ps);
-                            globalParms.ParmDataBytes = buf;
-                            globalParms.ParmDataIsPSHandle = true;
-                        }
-
-                    }
-                    else
-                    {
-                        Byte[] buf = new byte[(int)size];
-                        IntPtr ptr = NativeMethods.GlobalLock(filterRecord.parameters);
-                        Marshal.Copy(filterRecord.parameters, buf, 0, (int)size);
-                        NativeMethods.GlobalUnlock(filterRecord.parameters);
-                        globalParms.ParmDataBytes = buf;
-                    }
-
-                    globalParms.ParmDataSize = size;
-                    globalParms.StoreMethod = 2;
-                    //NativeMethods.GlobalUnlock(filterRecord.parameters);
-                }
+                
             }
             if (data != IntPtr.Zero)
             {
@@ -1116,8 +1087,9 @@ namespace PSFilterLoad.PSApi
             if (phase == PluginPhase.Parameters)
                 return;
 #endif
+
             byte[] sig = new byte[4] { (byte)'O', (byte)'T', (byte)'O', (byte)'F' };
-            int ParmDataSize = IntPtr.Size + 4;
+            int handleSize = IntPtr.Size + 4;
 
             if (globalParms.ParmDataBytes != null)
             {
@@ -1126,10 +1098,7 @@ namespace PSFilterLoad.PSApi
                 {
                     case 0:
 
-
-
-
-                        if (globalParms.ParmDataSize == ParmDataSize && globalParms.ParmDataIsPSHandle)
+                        if (globalParms.ParmDataSize == handleSize && globalParms.ParmDataIsPSHandle)
                         {
                             filterRecord.parameters = handle_new_proc((int)globalParms.ParmDataSize);
 
@@ -1143,32 +1112,33 @@ namespace PSFilterLoad.PSApi
                         }
                         else
                         {
-                            int extraSize = globalParms.ParmDataIsPSHandle ? IntPtr.Size : 0;
-                            filterRecord.parameters = handle_new_proc(globalParms.ParmDataBytes.Length + extraSize);
-                            if (filterRecord.parameters != IntPtr.Zero)
+                            if (globalParms.ParmDataIsPSHandle)
                             {
-                                if (globalParms.ParmDataIsPSHandle)
-                                {
-                                    IntPtr ptr = new IntPtr(filterRecord.parameters.ToInt64() + (long)IntPtr.Size);
-                                    Marshal.WriteIntPtr(filterRecord.parameters, ptr);
-                                    Marshal.Copy(globalParms.ParmDataBytes, 0, ptr, globalParms.ParmDataBytes.Length);
+                                filterRecord.parameters = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParmDataSize));
 
-                                }
-                                else
-                                {
-                                    Marshal.Copy(globalParms.ParmDataBytes, 0, filterRecord.parameters, globalParms.ParmDataBytes.Length);
-                                }
+                                filterParametersHandle = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParmDataBytes.Length));
+
+                                Marshal.Copy(globalParms.ParmDataBytes, 0, filterParametersHandle, globalParms.ParmDataBytes.Length);
+
+
+                                Marshal.WriteIntPtr(filterRecord.parameters, filterParametersHandle);
+                                Marshal.Copy(sig, 0, new IntPtr(filterRecord.parameters.ToInt64() + IntPtr.Size), 4);
+
                             }
+                            else
+                            {
+                                filterRecord.parameters = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParmDataBytes.Length));
+                                Marshal.Copy(globalParms.ParmDataBytes, 0, filterRecord.parameters, globalParms.ParmDataBytes.Length);
+                            }
+
                         }
 
                         break;
                     case 1:
-                    case 2:
-
 
                         // lock the parameters 
 
-                        if (globalParms.ParmDataSize == ParmDataSize && globalParms.ParmDataIsPSHandle)
+                        if (globalParms.ParmDataSize == handleSize && globalParms.ParmDataIsPSHandle)
                         {
                             filterRecord.parameters = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParmDataSize));
 
@@ -1186,10 +1156,15 @@ namespace PSFilterLoad.PSApi
 
                             if (globalParms.ParmDataIsPSHandle)
                             {
-                                filterRecord.parameters = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((ulong)(globalParms.ParmDataBytes.Length + IntPtr.Size)));
-                                IntPtr ptr = new IntPtr(filterRecord.parameters.ToInt64() + IntPtr.Size);
-                                Marshal.WriteIntPtr(filterRecord.parameters, ptr);
-                                Marshal.Copy(globalParms.ParmDataBytes, 0, ptr, globalParms.ParmDataBytes.Length);
+                                filterRecord.parameters = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParmDataSize));
+
+                                filterParametersHandle = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParmDataBytes.Length));
+
+                                Marshal.Copy(globalParms.ParmDataBytes, 0, filterParametersHandle, globalParms.ParmDataBytes.Length);
+
+
+                                Marshal.WriteIntPtr(filterRecord.parameters, filterParametersHandle);
+                                Marshal.Copy(sig, 0, new IntPtr(filterRecord.parameters.ToInt64() + IntPtr.Size), 4);
                             }
                             else
                             {
@@ -1209,15 +1184,11 @@ namespace PSFilterLoad.PSApi
 
             if (globalParms.PluginDataBytes != null)
             {
-                if (globalParms.PluginDataSize == ParmDataSize && globalParms.PluginDataIsPSHandle)
+                if (globalParms.PluginDataSize == handleSize && globalParms.PluginDataIsPSHandle)
                 {
                     data = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.PluginDataSize));
 
-                    //data = NativeMethods.GlobalLock(data);
-
                     parmDataHandle = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.PluginDataBytes.Length));
-
-                    // parmDataHandle = NativeMethods.GlobalLock(parmDataHandle);
 
                     Marshal.Copy(globalParms.PluginDataBytes, 0, parmDataHandle, globalParms.PluginDataBytes.Length);
 
@@ -1231,9 +1202,14 @@ namespace PSFilterLoad.PSApi
 
                     if (globalParms.PluginDataIsPSHandle)
                     {
-                        IntPtr ptr = new IntPtr(data.ToInt64() + IntPtr.Size);
-                        Marshal.WriteIntPtr(filterRecord.parameters, ptr);
-                        Marshal.Copy(globalParms.ParmDataBytes, 0, ptr, globalParms.ParmDataBytes.Length);
+                        data = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.PluginDataSize));
+
+                        parmDataHandle = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.PluginDataBytes.Length));
+
+                        Marshal.Copy(globalParms.PluginDataBytes, 0, parmDataHandle, globalParms.PluginDataBytes.Length);
+
+                        Marshal.WriteIntPtr(data, parmDataHandle);
+                        Marshal.Copy(sig, 0, new IntPtr(parmDataHandle.ToInt64() + IntPtr.Size), 4);
                     }
                     else
                     {
@@ -1370,7 +1346,7 @@ namespace PSFilterLoad.PSApi
             Ping(DebugFlags.Call, "After FilterSelectorFinish");
 #endif
 
-            if (!isRepeatEffect)
+            if (!isRepeatEffect && result == PSError.noErr)
             {
                 save_parm(); // save the filter parameters again
             }
@@ -2125,7 +2101,7 @@ namespace PSFilterLoad.PSApi
         static unsafe void fill_mask(ref IntPtr maskData, ref int maskRowBytes, Rect16 rect)
         {
 #if DEBUG
-            Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes = {0}, Rect = {1}", new object[] { maskRowBytes.ToString(), rect.ToString() }));
+            Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes = {0}, Rect = {1}", new object[] { maskRowBytes.ToString(), Utility.RectToString(rect) }));
             Ping(DebugFlags.AdvanceState, string.Format("maskRate = {0}", (filterRecord.maskRate >> 16)));
 #endif
             int w = (rect.right - rect.left);
@@ -2205,8 +2181,14 @@ namespace PSFilterLoad.PSApi
                             byte* dstRow = (byte*)maskData.ToPointer() + (y * bmpw);
                             for (int x = 0; x < data.Width; x++)
                             {
-                                *dstRow = *srcRow;
-
+                                if (*srcRow > 0)
+                                {
+                                	*dstRow = 255;
+                                }
+                                else
+	                            {
+	                                *dstRow = 0;
+	                            }
                                 srcRow += 3;
                                 dstRow++;
                             }
