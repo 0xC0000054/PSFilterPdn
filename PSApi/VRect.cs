@@ -16,5 +16,12 @@ namespace PSFilterLoad.PSApi
 
         /// int32->int
         public int right;
+
+#if DEBUG
+        public override string ToString()
+        {
+            return ("Top=" + this.top.ToString() + ",Bottom=" + this.bottom.ToString() + ",Left=" + this.left.ToString() + ",Right=" + this.right.ToString());
+        }
+#endif
     }
 }
