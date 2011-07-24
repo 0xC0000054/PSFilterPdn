@@ -33,6 +33,13 @@ namespace PSFilterLoad.PSApi
             return (this.left == rect.left && this.top == rect.top && this.right == rect.right && this.bottom == rect.bottom);
         }
 
+#if DEBUG
+        public override string ToString()
+        {
+            return ("Top=" + this.top.ToString() + ",Bottom=" + this.bottom.ToString() + ",Left=" + this.left.ToString() + ",Right=" + this.right.ToString());
+        }
+#endif
+
     }
 #pragma warning restore 0659
 
