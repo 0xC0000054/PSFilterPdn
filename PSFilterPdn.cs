@@ -287,8 +287,10 @@ namespace PSFilterPdn
                         aete = token.AETE
                     };
 
-                    pdata.aete.DisplayDialog = false;
-
+                    if (pdata.aete != null)
+                    {
+                        pdata.aete.DisplayDialog = false;
+                    }
                     lps.ParmData = token.ParmData;
                     lps.IsRepeatEffect = true;
 
