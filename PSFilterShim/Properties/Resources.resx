@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BadParameters" xml:space="preserve">
     <value>Bad parameters.</value>
@@ -187,5 +187,17 @@
   <data name="UserCanceledError" xml:space="preserve">
     <value>User canceled</value>
     <comment>UserCanceledError description</comment>
+  </data>
+  <data name="AlphaChannelName" xml:space="preserve">
+    <value>Alpha</value>
+  </data>
+  <data name="BlueChannelName" xml:space="preserve">
+    <value>Blue</value>
+  </data>
+  <data name="GreenChannelName" xml:space="preserve">
+    <value>Green</value>
+  </data>
+  <data name="RedChannelName" xml:space="preserve">
+    <value>Red</value>
   </data>
 </root>
