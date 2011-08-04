@@ -131,7 +131,7 @@ namespace PSFilterPdn
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 1;
-            this.buttonCancel.Text = Resources.ConfigDialog_buttonCancel_Text;
+            this.buttonCancel.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_buttonCancel_Text;
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
@@ -141,7 +141,7 @@ namespace PSFilterPdn
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(75, 23);
             this.buttonOK.TabIndex = 2;
-            this.buttonOK.Text = Resources.ConfigDialog_buttonOK_Text;
+            this.buttonOK.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_buttonOK_Text;
             this.buttonOK.UseVisualStyleBackColor = true;
             this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
             // 
@@ -171,7 +171,7 @@ namespace PSFilterPdn
             this.filterTab.Padding = new System.Windows.Forms.Padding(3);
             this.filterTab.Size = new System.Drawing.Size(452, 324);
             this.filterTab.TabIndex = 0;
-            this.filterTab.Text = Resources.ConfigDialog_filterTab_Text;
+            this.filterTab.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_filterTab_Text;
             // 
             // filterProgressBar
             // 
@@ -211,7 +211,7 @@ namespace PSFilterPdn
             this.showAboutBoxcb.Name = "showAboutBoxcb";
             this.showAboutBoxcb.Size = new System.Drawing.Size(104, 17);
             this.showAboutBoxcb.TabIndex = 3;
-            this.showAboutBoxcb.Text = Resources.ConfigDialog_showAboutBoxcb_Text;
+            this.showAboutBoxcb.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_showAboutBoxcb_Text;
             this.showAboutBoxcb.UseVisualStyleBackColor = true;
             // 
             // fltrLoadProressPanel
@@ -266,7 +266,7 @@ namespace PSFilterPdn
             this.runFilterBtn.Name = "runFilterBtn";
             this.runFilterBtn.Size = new System.Drawing.Size(75, 23);
             this.runFilterBtn.TabIndex = 1;
-            this.runFilterBtn.Text = Resources.ConfigDialog_runFilterBtn_Text;
+            this.runFilterBtn.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_runFilterBtn_Text;
             this.runFilterBtn.UseVisualStyleBackColor = true;
             this.runFilterBtn.Click += new System.EventHandler(this.runFilterBtn_Click);
             // 
@@ -278,6 +278,7 @@ namespace PSFilterPdn
             this.filterTree.Size = new System.Drawing.Size(230, 260);
             this.filterTree.TabIndex = 0;
             this.filterTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.filterTree_AfterSelect);
+            this.filterTree.DoubleClick += new System.EventHandler(this.filterTree_DoubleClick);
             // 
             // dirTab
             // 
@@ -290,7 +291,7 @@ namespace PSFilterPdn
             this.dirTab.Padding = new System.Windows.Forms.Padding(3);
             this.dirTab.Size = new System.Drawing.Size(452, 324);
             this.dirTab.TabIndex = 1;
-            this.dirTab.Text = Resources.ConfigDialog_dirTab_Text;
+            this.dirTab.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_dirTab_Text;
             this.dirTab.UseVisualStyleBackColor = true;
             // 
             // subDirSearchCb
@@ -302,7 +303,7 @@ namespace PSFilterPdn
             this.subDirSearchCb.Name = "subDirSearchCb";
             this.subDirSearchCb.Size = new System.Drawing.Size(130, 17);
             this.subDirSearchCb.TabIndex = 3;
-            this.subDirSearchCb.Text = Resources.ConfigDialog_subDirSearchCb_Text;
+            this.subDirSearchCb.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_subDirSearchCb_Text;
             this.subDirSearchCb.UseVisualStyleBackColor = true;
             this.subDirSearchCb.CheckedChanged += new System.EventHandler(this.subDirSearchCb_CheckedChanged);
             // 
@@ -312,7 +313,7 @@ namespace PSFilterPdn
             this.remDirBtn.Name = "remDirBtn";
             this.remDirBtn.Size = new System.Drawing.Size(75, 23);
             this.remDirBtn.TabIndex = 2;
-            this.remDirBtn.Text = Resources.ConfigDialog_remDirBtn_Text;
+            this.remDirBtn.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_remDirBtn_Text;
             this.remDirBtn.UseVisualStyleBackColor = true;
             this.remDirBtn.Click += new System.EventHandler(this.remDirBtn_Click);
             // 
@@ -322,7 +323,7 @@ namespace PSFilterPdn
             this.addDirBtn.Name = "addDirBtn";
             this.addDirBtn.Size = new System.Drawing.Size(75, 23);
             this.addDirBtn.TabIndex = 1;
-            this.addDirBtn.Text = Resources.ConfigDialog_addDirBtn_Text;
+            this.addDirBtn.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_addDirBtn_Text;
             this.addDirBtn.UseVisualStyleBackColor = true;
             this.addDirBtn.Click += new System.EventHandler(this.addDirBtn_Click);
             // 
@@ -341,7 +342,7 @@ namespace PSFilterPdn
             // 
             // dirHeader
             // 
-            this.dirHeader.Text = Resources.ConfigDialog_dirHeader_Text;
+            this.dirHeader.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_dirHeader_Text;
             this.dirHeader.Width = 417;
             // 
             // logTab
@@ -352,7 +353,7 @@ namespace PSFilterPdn
             this.logTab.Padding = new System.Windows.Forms.Padding(3);
             this.logTab.Size = new System.Drawing.Size(452, 324);
             this.logTab.TabIndex = 2;
-            this.logTab.Text = Resources.ConfigDialog_logTab_Text;
+            this.logTab.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_logTab_Text;
             this.logTab.UseVisualStyleBackColor = true;
             // 
             // errorTextBox
@@ -406,12 +407,10 @@ namespace PSFilterPdn
 			this.Close();
 		}
 
-
 		private void buttonCancel_Click(object sender, EventArgs e)
 		{
 			this.Close();
 		}
-
 
         private class SB : System.Runtime.Serialization.SerializationBinder
         {
@@ -428,19 +427,6 @@ namespace PSFilterPdn
 		private string filterCaseInfo;
         private ParameterData parmData;
         private AETEData aeteData;
-
-		private abort abortFunc = null;
-
-		internal abort AbortFunc
-		{
-			set
-			{
-				if (value == null)
-					throw new ArgumentNullException("value", "value is null.");
-
-				abortFunc = value;
-			}
-		}
 
 		private void UpdateProgress(int done, int total)
 		{
@@ -486,17 +472,17 @@ namespace PSFilterPdn
 
 		private void SetProxyErrorResult(string data)
 		{
-			if (data.StartsWith("Proxy", StringComparison.Ordinal))
-			{
-				string[] status = data.Substring(5).Split(new char[] { ',' });
+            if (data.StartsWith("ProxyResult", StringComparison.Ordinal))
+            {
+                string[] status = data.Substring(11).Split(new char[] { ',' });
 
-				proxyResult = bool.Parse(status[0]);
-				proxyErrorMessage = status[1];
-			}
-			else
-			{
-				proxyErrorMessage = data;
-			}
+                proxyResult = bool.Parse(status[0]);
+                proxyErrorMessage = status[1];
+            }
+            else if (data.StartsWith("ProxyError", StringComparison.Ordinal))
+            {
+                proxyErrorMessage = data;
+            }
 		}
 
 		private bool proxyResult; 
@@ -512,14 +498,14 @@ namespace PSFilterPdn
 				}
 				else
 				{
-					if (e.Data.StartsWith("Proxy", StringComparison.Ordinal))
+					if (e.Data.StartsWith("ProxyResult", StringComparison.Ordinal))
 					{
-						string[] status = e.Data.Substring(5).Split(new char[] { ',' });
+						string[] status = e.Data.Substring(11).Split(new char[] { ',' });
 
 						proxyResult = bool.Parse(status[0]);
 						proxyErrorMessage = status[1];
 					}
-					else
+					else if (e.Data.StartsWith("ProxyError", StringComparison.Ordinal))
 					{
 						proxyErrorMessage = e.Data;
 					}
@@ -556,6 +542,8 @@ namespace PSFilterPdn
             string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
 
             string parmDataFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "parmData.dat");
+            string rdwPath = string.Empty;
+            string aeteFileName = string.Empty;
 
             try
             {
@@ -578,10 +566,10 @@ namespace PSFilterPdn
 
                 string filterInfo = (string)this.Invoke(new GetFilterCaseInfoStringDelegate(GetFilterCaseInfoString), new object[] { data });
                 string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { data.fileName, data.entryPoint, data.title, data.category, filterInfo });
-                string aeteFileName = string.Empty;
 
                 if (data.aete != null)
                 {
+                    data.aete.DisplayDialog = true;
                     aeteFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "aete.dat");
                     using (FileStream fs = new FileStream(aeteFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
@@ -594,7 +582,6 @@ namespace PSFilterPdn
 
                 string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
 
-                string rdwPath = string.Empty;
 
                 if (sRect != eep.SourceSurface.Bounds)
                 {
@@ -627,64 +614,31 @@ namespace PSFilterPdn
                 proxyProcess.ErrorDataReceived += new DataReceivedEventHandler(ProxyErrorDataReceived);
 
                 proxyProcess.StartInfo = psi;
-                try
-                {
-
-
-                    bool st = proxyProcess.Start();
-                    proxyProcess.StandardInput.WriteLine(string.Empty); // proxy cancel callback
-                    proxyProcess.StandardInput.WriteLine(pd);
-                    proxyProcess.StandardInput.WriteLine(aeteFileName);
-                    proxyProcess.StandardInput.WriteLine(rdwPath);
-                    proxyProcess.StandardInput.WriteLine(parmDataFileName);
-                    proxyProcess.BeginErrorReadLine();
-                    proxyProcess.BeginOutputReadLine();
+                
+                
 #if DEBUG
-                    Debug.WriteLine("Started = " + st.ToString());
+                bool st = proxyProcess.Start();
+                Debug.WriteLine("Started = " + st.ToString());
+#else
+                proxyProcess.Start();
 #endif
-                    proxyRunning = true;
-                    while (!proxyProcess.HasExited)
-                    {
-                        Application.DoEvents();
-                        Thread.Sleep(250);
-                    }
+                proxyProcess.StandardInput.WriteLine(string.Empty); // proxy cancel callback
+                proxyProcess.StandardInput.WriteLine(pd);
+                proxyProcess.StandardInput.WriteLine(aeteFileName);
+                proxyProcess.StandardInput.WriteLine(rdwPath);
+                proxyProcess.StandardInput.WriteLine(parmDataFileName);
+                proxyProcess.BeginErrorReadLine();
+                proxyProcess.BeginOutputReadLine();
 
-
-                    this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, parmDataFileName, data });
-                }
-                catch (Win32Exception wx)
+                proxyRunning = true;
+                while (!proxyProcess.HasExited)
                 {
-                    MessageBox.Show(wx.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    proxyRunning = false;
-                    proxyProcess.Dispose();
-                    proxyProcess = null;
-
-                    if (File.Exists(src))
-                    {
-                        File.Delete(src);
-                    }
-                    if (File.Exists(dest))
-                    {
-                        File.Delete(dest);
-                    }
-                    if (!string.IsNullOrEmpty(rdwPath))
-                    {
-                        File.Delete(rdwPath);
-                    }
-                    File.Delete(parmDataFileName);
-
-                    if (!string.IsNullOrEmpty(aeteFileName))
-                    {
-                        File.Delete(aeteFileName);
-                    }
-
-                    proxyThread.Abort();
-                    proxyThread = null;
+                    Application.DoEvents();
+                    Thread.Sleep(250);
                 }
 
+
+                this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, parmDataFileName, data });
             }
             catch (ArgumentException ax)
             {
@@ -697,6 +651,35 @@ namespace PSFilterPdn
             catch (Win32Exception wx)
             {
                 MessageBox.Show(wx.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            } 
+            finally
+            {
+                proxyRunning = false;
+                proxyProcess.Dispose();
+                proxyProcess = null;
+
+                if (File.Exists(src))
+                {
+                    File.Delete(src);
+                }
+                if (File.Exists(dest))
+                {
+                    File.Delete(dest);
+                }
+                if (!string.IsNullOrEmpty(rdwPath))
+                {
+                    File.Delete(rdwPath);
+                }
+                File.Delete(parmDataFileName);
+
+                if (!string.IsNullOrEmpty(aeteFileName))
+                {
+                    File.Delete(aeteFileName);
+                }
+
+                proxyThread.Abort();
+                proxyThread.Join();
+                proxyThread = null;
             }
 		}
 
@@ -764,6 +747,8 @@ namespace PSFilterPdn
 		private Surface destSurface;
 		private bool runWith32BitShim;
 		private Thread proxyThread;
+        private static bool filterRunning;
+
 		private void runFilterBtn_Click(object sender, EventArgs e)
 		{
 			try
@@ -788,51 +773,66 @@ namespace PSFilterPdn
 					else
 					{
 						this.runWith32BitShim = false;
-						using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, this.Handle))
-						{
-							lps.AbortFunc = abortFunc;
-							lps.ProgressFunc = new ProgressProc(UpdateProgress);
 
-							bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
-							bool userCanceled = (result && lps.ErrorMessage == Resources.UserCanceledError);
+                        filterRunning = true;
 
-							if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
-							{
-								MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-							}
+                        try
+                        {
+                            using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, this.Handle))
+                            {
+                                lps.ProgressFunc = new ProgressProc(UpdateProgress);
 
-							if (!showAboutBoxcb.Checked && result && !userCanceled)
-							{
-								this.destSurface = Surface.CopyFromBitmap(lps.Dest);
-								this.entryPoint = data.entryPoint;
-								this.title = data.title;
-								this.category = data.category;
-								this.filterCaseInfo = GetFilterCaseInfoString(data);
-                                this.parmData = lps.ParmData;
-                                this.aeteData = data.aete;
+                                if (data.aete != null)
+                                {
+                                    data.aete.DisplayDialog = true;
+                                }
+
+                                bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
+                                bool userCanceled = (result && lps.ErrorMessage == Resources.UserCanceledError);
+
+                                if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
+                                {
+                                    MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
+
+                                if (!showAboutBoxcb.Checked && result && !userCanceled)
+                                {
+                                    this.destSurface = Surface.CopyFromBitmap(lps.Dest);
+                                    this.entryPoint = data.entryPoint;
+                                    this.title = data.title;
+                                    this.category = data.category;
+                                    this.filterCaseInfo = GetFilterCaseInfoString(data);
+                                    this.parmData = lps.ParmData;
+                                    this.aeteData = data.aete;
 
 
-								if (filterProgressBar.Value < filterProgressBar.Maximum)
-								{
-									filterProgressBar.Value = filterProgressBar.Maximum;
-								}
-							}
-							else
-							{
-								if (destSurface != null)
-								{
-									destSurface.Dispose();
-									destSurface = null;
-								}
-                                
+                                    if (filterProgressBar.Value < filterProgressBar.Maximum)
+                                    {
+                                        filterProgressBar.Value = filterProgressBar.Maximum;
+                                    }
+                                }
+                                else
+                                {
+                                    if (destSurface != null)
+                                    {
+                                        destSurface.Dispose();
+                                        destSurface = null;
+                                    }
 
-							}
 
-							filterProgressBar.Value = 0;
+                                }
 
-						} 
+                                filterProgressBar.Value = 0;
+
+                            }
+                        }
+                        finally
+                        {
+                            FinishTokenUpdate();
+                            filterRunning = false;
+                        }
 						
-						FinishTokenUpdate();
+						
 					}
 
 				}
@@ -909,6 +909,9 @@ namespace PSFilterPdn
 			public SearchOption options;
 		}
 
+        /// <summary>
+        /// Updates the filter list.
+        /// </summary>
 		private void UpdateFilterList()
 		{
 			if (searchDirListView.Items.Count > 0)
@@ -946,6 +949,11 @@ namespace PSFilterPdn
 			}
 		}
 
+        /// <summary>
+        /// Gets the filter items list.
+        /// </summary>
+        /// <param name="worker">The background worker.</param>
+        /// <param name="e">The <see cref="System.ComponentModel.DoWorkEventArgs"/> instance containing the event data.</param>
 		private static void GetFilterItemsList(BackgroundWorker worker, DoWorkEventArgs e)
 		{
 			List<PluginData> pd;
@@ -1348,8 +1356,6 @@ namespace PSFilterPdn
 			}
 		}
 
-
-
 		/// <summary>
 		/// Filters the filtertreeview Items by the specified text
 		/// </summary>
@@ -1365,7 +1371,7 @@ namespace PSFilterPdn
 					string title = child.Text;
 					if ((string.IsNullOrEmpty(filtertext)) || title.ToUpperInvariant().Contains(filtertext.ToUpperInvariant()))
 					{
-						if (nodes.ContainsKey(item.Value))
+						if (nodes.ContainsKey(item.Value)) 
 						{
 							TreeNode node = nodes[item.Value];
 							TreeNode subnode = new TreeNode(title) { Name = child.Name, Tag = child.Tag }; // title
@@ -1373,7 +1379,7 @@ namespace PSFilterPdn
 						}
 						else
 						{
-							TreeNode node = new TreeNode(item.Value);
+							TreeNode node = new TreeNode(item.Value); // the parent category
 							TreeNode subnode = new TreeNode(title) { Name = child.Name, Tag = child.Tag }; // title
 							node.Nodes.Add(subnode);
 
@@ -1447,5 +1453,14 @@ namespace PSFilterPdn
 
 			return string.Empty;
 		}
+
+        private void filterTree_DoubleClick(object sender, EventArgs e)
+        {
+            // make shure a filter is not alredy running
+            if ((filterTree.SelectedNode != null) && filterTree.SelectedNode.Tag != null && (!proxyRunning && !filterRunning))
+            {
+                runFilterBtn.PerformClick();
+            }
+        }
 	}
 }
