@@ -46,8 +46,6 @@ namespace PaintDotNet.SystemLayer
             {
                 // If that method isn't available, like on Win2K, don't worry about it.
             }                    
-            
-            Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
         }
 
         /// <summary>
@@ -71,16 +69,14 @@ namespace PaintDotNet.SystemLayer
             }
         }
 
-        private static void DestroyHeap()
+        public static void DestroyHeap()
         {
-            IntPtr hHeap2 = hHeap;
-            hHeap = IntPtr.Zero;
-            SafeNativeMethods.HeapDestroy(hHeap2);
-        }
-
-        private static void Application_ApplicationExit(object sender, EventArgs e)
-        {
-            DestroyHeap();
+            if (hHeap != IntPtr.Zero)
+            {
+                IntPtr hHeap2 = hHeap;
+                hHeap = IntPtr.Zero;
+                SafeNativeMethods.HeapDestroy(hHeap2); 
+            }
         }
 
         /// <summary>
