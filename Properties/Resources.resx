@@ -119,7 +119,7 @@
   </resheader>
   <data name="UserCanceledError" xml:space="preserve">
     <value>User canceled</value>
-    <comment>UserCanceledError description</comment>
+    <comment>Thrown when the user cancels the filter, this error message is never shown.</comment>
   </data>
   <data name="FileReadError" xml:space="preserve">
     <value>File read error.</value>
