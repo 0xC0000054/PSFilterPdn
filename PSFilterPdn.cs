@@ -303,7 +303,7 @@ namespace PSFilterPdn
 
                     if (result && string.IsNullOrEmpty(lps.ErrorMessage))
                     {
-                        token.Dest = Surface.CopyFromBitmap(lps.Dest);
+                        token.Dest = lps.Dest.Clone();
                     }
                 }
 
