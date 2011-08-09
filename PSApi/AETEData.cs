@@ -84,7 +84,10 @@ namespace PSFilterLoad.PSApi
                 for (int f = 0; f < item.parms.Length; f++)
                 {
                     AETEParm parm = item.parms[f];
-                    flagList.Add(parm.key, parm.flags);
+                    if (!flagList.ContainsKey(parm.key))
+                    {
+                        flagList.Add(parm.key, parm.flags);
+                    }
                 }
             }
             this.displayDialog = false;
