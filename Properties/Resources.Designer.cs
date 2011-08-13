@@ -412,6 +412,15 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to error code = {0}.
+        /// </summary>
+        internal static string UnknownErrorCodeFormat {
+            get {
+                return ResourceManager.GetString("UnknownErrorCodeFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unsupported image mode..
         /// </summary>
         internal static string UnsupportedImageMode {
