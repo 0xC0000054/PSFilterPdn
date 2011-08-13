@@ -4,12 +4,12 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.ServiceModel;
+using System.Threading;
 using PSFilterLoad.PSApi;
 using PSFilterPdn;
-using System.Threading;
-using System.Runtime.Serialization;
-using System.ServiceModel;
 
 namespace PSFilterShim
 {
@@ -20,14 +20,13 @@ namespace PSFilterShim
 
 			/// Return Type: BOOL->int
 			///dwFlags: DWORD->unsigned int
-			[System.Runtime.InteropServices.DllImportAttribute("kernel32.dll", EntryPoint = "SetProcessDEPPolicy")]
-			[return: System.Runtime.InteropServices.MarshalAsAttribute(System.Runtime.InteropServices.UnmanagedType.Bool)]
+			[DllImport("kernel32.dll", EntryPoint = "SetProcessDEPPolicy")]
+			[return: MarshalAs(UnmanagedType.Bool)]
 			public static extern bool SetProcessDEPPolicy(uint dwFlags);
-
 		}
 
         static bool filterDone;
-        static IPSFilterShim ServiceProxy = null;
+        static IPSFilterShim ServiceProxy;
 
         static bool abortFilter()
         {
@@ -46,51 +45,38 @@ namespace PSFilterShim
 		static void Main(string[] args)
 		{
 #if DEBUG
-			//System.Diagnostics.Debugger.Launch();
+			System.Diagnostics.Debugger.Launch();
 			bool res = NativeMethods.SetProcessDEPPolicy(0U);
 			System.Diagnostics.Debug.WriteLine(string.Format("SetProcessDEPPolicy returned {0}", res));
 #else
-            NativeMethods.SetProcessDEPPolicy(0U);
+            NativeMethods.SetProcessDEPPolicy(0U); // Kill DEP
 #endif
             filterDone = false;
-            if (args.Length > 0 && args.Length == 7)
-			{
-                Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+            ServiceProxy = null;
 
-                filterThread.Start(args);
-
-                while (!filterDone)
-                {
-                    Thread.Sleep(250);
-                }
-
-                filterThread.Join();
-			}
-			
-		}
-
-        /// <summary>
-        /// Blocks the repeat effect command on incompatible filters.
-        /// </summary>
-        /// <param name="data">The plugin data th check.</param>
-        /// <returns>true if the plugin is incompatible with the repeat effect command; otherwise false</returns>
-        static bool BlockRepeatEffect(PluginData data)
-        {
-            string[] blockList = new string[1] { "L'amico Perry,Luce..." };
-
-            foreach (var item in blockList)
+            try
             {
-                string[] split = item.Split(new char[] { ',' });
-
-                if (data.category.Equals(split[0], StringComparison.OrdinalIgnoreCase) && 
-                    data.title.Equals(split[1], StringComparison.OrdinalIgnoreCase))
+                if (args.Length > 0 && args.Length == 7)
                 {
-                    return true;
+                    Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+
+                    filterThread.Start(args);
+
+                    while (!filterDone)
+                    {
+                        Thread.Sleep(250);
+                    }
+
+                    filterThread.Join();
                 }
             }
+            finally
+            {
+                PaintDotNet.SystemLayer.Memory.DestroyHeap();
+            }
 
-            return false;
-        }
+			
+		}
 
         static void RunFilterThread(object argsObj)
         {
@@ -129,7 +115,7 @@ namespace PSFilterShim
             pdata.filterInfo = string.IsNullOrEmpty(plugData[4]) ? null : GetFilterCaseInfoFromString(plugData[4]);
 
             string aeteFileName = Console.ReadLine();
-            if (!string.IsNullOrEmpty(aeteFileName))
+            if (!string.IsNullOrEmpty(aeteFileName) && File.Exists(aeteFileName))
             {
                 using (FileStream fs = new FileStream(aeteFileName, FileMode.Open, FileAccess.Read, FileShare.None))
                 {
@@ -175,62 +161,70 @@ namespace PSFilterShim
                     }
                 }
 
-                try
+
+                using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, selectionRegion, owner))
                 {
-                    using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, selectionRegion, owner))
+                    if (ServiceProxy != null)
                     {
-                        if (ServiceProxy != null)
+                        lps.AbortFunc = new abort(abortFilter);
+                    }
+
+                    lps.ProgressFunc = new ProgressProc(UpdateProgress);
+
+                    if (parmData != null)
+                    {
+                        // ignote the filters that only use the data handle, e.g. Filter Factory  
+                        if (((parmData.GlobalParms.ParmDataBytes != null && parmData.GlobalParms.PluginDataBytes != null) ||
+                            (parmData.GlobalParms.ParmDataBytes != null && parmData.GlobalParms.PluginDataBytes == null)) ||
+                            parmData.AETEDict != null)
                         {
-                            lps.AbortFunc = new abort(abortFilter);
-                        }
-
-                        lps.ProgressFunc = new ProgressProc(UpdateProgress);
-
-                        if (parmData != null && !BlockRepeatEffect(pdata))
-                        {
-
-                            if (((parmData.GlobalParms.ParmDataBytes != null && parmData.GlobalParms.PluginDataBytes != null) ||
-                                (parmData.GlobalParms.ParmDataBytes != null && parmData.GlobalParms.PluginDataBytes == null)) || 
-                                pdata.aete != null)
-                            {
-                                lps.ParmData = parmData;
-                                lps.IsRepeatEffect = true;
-                            }
-                        }
-
-                        bool result = lps.RunPlugin(pdata, showAbout);
-
-                        if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
-                        {
-                            lps.Dest.Save(dstImg, ImageFormat.Png);
-
-                            if (!lps.IsRepeatEffect)
-                            {
-                                using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                                {
-                                    BinaryFormatter bf = new BinaryFormatter();
-                                    bf.Serialize(fs, lps.ParmData);
-                                } 
-                            }
-                        }
-                        else
-                        {
-                            Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyResult{0},{1}", result.ToString(CultureInfo.InvariantCulture), lps.ErrorMessage));
+                            lps.ParmData = parmData;
+                            lps.IsRepeatEffect = true;
                         }
                     }
+
+                    bool result = lps.RunPlugin(pdata, showAbout);
+
+                    if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
+                    {
+                        lps.Dest.CreateAliasedBitmap().Save(dstImg, ImageFormat.Png);
+
+                        if (!lps.IsRepeatEffect)
+                        {
+                            using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                            {
+                                BinaryFormatter bf = new BinaryFormatter();
+                                bf.Serialize(fs, lps.ParmData);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyResult{0},{1}", result.ToString(CultureInfo.InvariantCulture), lps.ErrorMessage));
+                    }
                 }
-                catch (FileNotFoundException fx)
-                {
-                    Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", fx.Message));
-                }
-                catch (EntryPointNotFoundException epnf)
-                {
-                    Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", epnf.Message));
-                }
-                catch (ImageSizeTooLargeException ex)
-                {
-                    Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", ex.Message));
-                }
+
+
+            }
+            catch (BadImageFormatException ex)
+            {
+                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", ex.Message));
+            }
+            catch (EntryPointNotFoundException epnf)
+            {
+                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", epnf.Message));
+            }
+            catch (FileNotFoundException fx)
+            {
+                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", fx.Message));
+            }
+            catch (ImageSizeTooLargeException ex)
+            {
+                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", ex.Message));
+            }
+            catch (NullReferenceException ex)
+            {
+                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", ex.Message));
             }
             finally
             {
@@ -239,9 +233,10 @@ namespace PSFilterShim
                     selectionRegion.Dispose();
                     selectionRegion = null;
                 }
+                filterDone = true;
             }
 
-            filterDone = true;
+           
         }
 
 		static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
