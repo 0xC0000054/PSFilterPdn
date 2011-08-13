@@ -200,4 +200,7 @@
   <data name="RedChannelName" xml:space="preserve">
     <value>Red</value>
   </data>
+  <data name="UnknownErrorCodeFormat" xml:space="preserve">
+    <value>error code = {0}</value>
+  </data>
 </root>
