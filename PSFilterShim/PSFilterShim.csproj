@@ -31,6 +31,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -38,20 +39,23 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;PSSDK_3_0</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;PSSDK_3_0_4 PSSDK4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
-    <DebugType>none</DebugType>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;PSSDK_3_0</DefineConstants>
+    <DefineConstants>TRACE;PSSDK_3_0_4 PSSDK4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugSymbols>true</DebugSymbols>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -63,24 +67,52 @@
     <ApplicationManifest>PSFilterShim.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PaintDotNet.Base, Version=3.58.4081.24574, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\Refrences\PaintDotNet.Base.dll</HintPath>
-    </Reference>
-    <Reference Include="PaintDotNet.Core, Version=3.58.4081.24581, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\Refrences\PaintDotNet.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="PaintDotNet.Effects, Version=3.58.4081.24585, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\Refrences\PaintDotNet.Effects.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IPSFilterShim.cs" />
+    <Compile Include="PaintDotNet\BitVector2D.cs" />
+    <Compile Include="PaintDotNet\ColorBgra.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\HsvColor.cs" />
+    <Compile Include="PaintDotNet\IBitVector2D.cs" />
+    <Compile Include="PaintDotNet\IPixelOp.cs" />
+    <Compile Include="PaintDotNet\Memory.cs" />
+    <Compile Include="PaintDotNet\MemoryBlock.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\NativeConstants.cs" />
+    <Compile Include="PaintDotNet\NativeMethods.cs" />
+    <Compile Include="PaintDotNet\NativeStructs.cs" />
+    <Compile Include="PaintDotNet\NullGraphics.cs" />
+    <Compile Include="PaintDotNet\PdnRegion.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\PixelOp.cs" />
+    <Compile Include="PaintDotNet\ResamplingAlgorithm.cs" />
+    <Compile Include="PaintDotNet\RgbColor.cs" />
+    <Compile Include="PaintDotNet\SafeNativeMethods.cs" />
+    <Compile Include="PaintDotNet\Scanline.cs" />
+    <Compile Include="PaintDotNet\Surface.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\UnaryPixelOp.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\UnaryPixelOps.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\Utility.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PSApi\AbortFunc.cs" />
     <Compile Include="PSApi\AboutRecord.cs" />
     <Compile Include="PSApi\AdvanceStateProc.cs" />
     <Compile Include="PSApi\BufferProcs.cs" />
@@ -93,10 +125,10 @@
     <Compile Include="PSApi\ColorServicesProc.cs" />
     <Compile Include="PSApi\ColorServicesSelector.cs" />
     <Compile Include="PSApi\DebugFlags.cs" />
+    <Compile Include="PSApi\DescriptorTypes.cs" />
     <Compile Include="PSApi\DisplayPixelsProc.cs" />
     <Compile Include="PSApi\FilterCase.cs" />
     <Compile Include="PSApi\FilterCaseInfo.cs" />
-    <Compile Include="PSApi\FilterLoadException.cs" />
     <Compile Include="PSApi\FilterRecord.cs" />
     <Compile Include="PSApi\FilterSelector.cs" />
     <Compile Include="PSApi\GetPropertyProc.cs" />
@@ -110,9 +142,12 @@
     <Compile Include="PSApi\NativeConstants.cs" />
     <Compile Include="PSApi\NativeMethods.cs" />
     <Compile Include="PSApi\NativeStructs.cs" />
+    <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\PIProperty.cs" />
     <Compile Include="PSApi\PlatformData.cs" />
-    <Compile Include="PSApi\PluginData.cs" />
+    <Compile Include="PSApi\PluginData.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PSApi\PlugInMonitor.cs" />
     <Compile Include="PSApi\PluginPhase.cs" />
     <Compile Include="PSApi\Point.cs" />
@@ -127,8 +162,9 @@
     <Compile Include="PSApi\Rect.cs" />
     <Compile Include="PSApi\ResourceProc.cs" />
     <Compile Include="PSApi\RGBColor.cs" />
-    <Compile Include="PSApi\SafeLibraryHandle.cs" />
-    <Compile Include="PSApi\Utility.cs" />
+    <Compile Include="PSApi\SafeLibraryHandle.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -168,6 +204,7 @@
       <Name>PSFilterPdn</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>call "$(DevEnvDir)..\tools\vsvars32.bat"
