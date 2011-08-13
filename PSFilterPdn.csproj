@@ -43,20 +43,20 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;PSSDK_3_0</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;PSSDK_3_0_4 PSSDK4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;PSSDK_3_0</DefineConstants>
+    <DefineConstants>TRACE;PSSDK_3_0_4 PSSDK4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -82,14 +82,23 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IPSFilterShim.cs" />
+    <Compile Include="PSApi\AETEData.cs" />
+    <Compile Include="PSApi\AETEValue.cs" />
+    <Compile Include="PSApi\DescriptorTypes.cs" />
+    <Compile Include="PSApi\DictonaryExtensions.cs" />
+    <Compile Include="PSApi\GlobalParameters.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
     <Compile Include="PSApi\LoadPsFilter.cs" />
+    <Compile Include="PSApi\NativeMethods.cs" />
     <Compile Include="PSApi\ParameterData.cs" />
+    <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\ProgressFunc.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\SafeLibraryHandle.cs" />
@@ -128,7 +137,6 @@
     <Compile Include="PSApi\ImageModes.cs" />
     <Compile Include="PSApi\ImageSizeTooLargeException.cs" />
     <Compile Include="PSApi\NativeConstants.cs" />
-    <Compile Include="PSApi\NativeMethods.cs" />
     <Compile Include="PSApi\NativeStructs.cs" />
     <Compile Include="PSApi\PIProperty.cs" />
     <Compile Include="PSApi\PlatformData.cs" />
@@ -145,9 +153,9 @@
     <Compile Include="PSApi\Rect.cs" />
     <Compile Include="PSApi\ResourceProc.cs" />
     <Compile Include="PSApi\RGBColor.cs" />
-    <Compile Include="PSApi\Utility.cs" />
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
+    <Compile Include="PSFilterShimContract.cs" />
     <Compile Include="RegionDataWrapper.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="StringLogicalComparer.cs" />
@@ -183,6 +191,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PSFilterPdn.xml" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "C:\Program Files\Paint.NET\Effects" /y
 if "$(ConfigurationName)" == "Debug" copy "$(TargetDir)$(TargetName).pdb" "C:\Program Files\Paint.NET\Effects" /y</PostBuildEvent>
