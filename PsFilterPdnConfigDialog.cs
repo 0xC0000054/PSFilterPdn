@@ -688,7 +688,7 @@ namespace PSFilterPdn
 					File.Delete(aeteFileName);
 				}
 
-				proxyThread.Abort();
+				//proxyThread.Abort();
 				proxyThread.Join();
 				proxyThread = null;
 			}
