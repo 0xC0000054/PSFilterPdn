@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace PSFilterLoad.PSApi
 {
@@ -128,7 +129,7 @@ namespace PSFilterLoad.PSApi
             this.pluginDataIsPSHandle = info.GetBoolean("pluginDataIsPSHandle");
             this.storeMethod = info.GetInt32("storeMethod");
         }
-
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("parmDataSize", this.parmDataSize);
