@@ -1,6 +1,7 @@
 using System.Drawing;
 using PSFilterLoad.PSApi;
 using PaintDotNet;
+using System.Collections.Generic;
 
 namespace PSFilterPdn
 {
@@ -15,6 +16,7 @@ namespace PSFilterPdn
         private bool runWith32BitShim;
         private ParameterData parmData;
         private AETEData aeteData;
+        private List<string> expandedNodes;
         
         
         public string Category
@@ -125,7 +127,19 @@ namespace PSFilterPdn
             }
         }
 
-        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, string filterCaseInfo, Surface dest, bool useShim, ParameterData pdata, AETEData aete)
+        public List<string> ExpandedNodes
+        {
+            get
+            {
+                return expandedNodes;
+            }
+            internal set
+            {
+                expandedNodes = value;
+            }
+        }
+
+        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, string filterCaseInfo, Surface dest, bool useShim, ParameterData pdata, AETEData aete, List<string> nodes)
             : base()
         {
             this.category = category;
@@ -137,6 +151,7 @@ namespace PSFilterPdn
             this.runWith32BitShim = useShim;
             this.parmData = pdata;
             this.aeteData = aete;
+            this.expandedNodes = nodes;
         }
 
 #pragma warning disable 628
@@ -152,6 +167,7 @@ namespace PSFilterPdn
             this.runWith32BitShim = copyMe.runWith32BitShim;
             this.parmData = copyMe.parmData;
             this.aeteData = copyMe.aeteData;
+            this.expandedNodes = copyMe.expandedNodes;
         }
 #pragma warning disable 628
 
