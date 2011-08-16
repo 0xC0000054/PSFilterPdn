@@ -1,4 +1,10 @@
-﻿namespace PSFilterLoad.PSApi
+﻿/* Adapted from PIFilter.h
+ * Copyright (c) 1992-6, Adobe Systems Incorporated.
+ * All rights reserved.
+*/
+
+
+namespace PSFilterLoad.PSApi
 {
     static class FilterSelector
     {

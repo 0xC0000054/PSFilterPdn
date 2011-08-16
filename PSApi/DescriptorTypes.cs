@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿/* Adapted from PIActions.h
+ * Copyright (c) 1992-6, Adobe Systems Incorporated.
+ * All rights reserved.
+*/
 
 namespace PSFilterLoad.PSApi
 {

@@ -1,4 +1,10 @@
-﻿using System;
+﻿/* Adapted from PIActions.h
+ * Copyright (c) 1992-6, Adobe Systems Incorporated.
+ * All rights reserved.
+*/
+
+
+using System;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi

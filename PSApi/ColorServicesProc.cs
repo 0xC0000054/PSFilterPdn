@@ -1,4 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿/* Adapted from PIGeneral.h
+ * Copyright (c) 1992-6, Adobe Systems Incorporated.
+ * All rights reserved.
+*/
+
+using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
 
