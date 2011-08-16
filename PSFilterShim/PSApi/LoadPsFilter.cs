@@ -2998,8 +2998,9 @@ namespace PSFilterLoad.PSApi
 			int w = srcRect.right - srcRect.left;
 			int h = srcRect.bottom - srcRect.top;
 			int planes = filterRecord.planes;
-
-			PixelFormat format = (source.colBytes == 4 || (planes == 4 && source.colBytes == 1)) ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
+            // if we have a mask make the source image 32-bit.
+			PixelFormat format = ((source.colBytes == 4  || source.version >= 1 && planes == 3 && source.masks != IntPtr.Zero)
+                || (planes == 4 && source.colBytes == 1)) ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
 			int bpp = (Bitmap.GetPixelFormatSize(format) / 8);
 
 			using (Bitmap bmp = new Bitmap(w, h, format))
@@ -3098,51 +3099,45 @@ namespace PSFilterLoad.PSApi
 
 							using(Bitmap temp = new Bitmap(w, h, PixelFormat.Format32bppArgb))
 							{
-								using (Bitmap msk = new Bitmap(w, h, PixelFormat.Format32bppArgb))
-								{
+								
 									Rectangle rect = new Rectangle(0, 0, w, h);
 
-									BitmapData sd = bmp.LockBits(rect, ImageLockMode.ReadOnly, bmp.PixelFormat);
-									BitmapData bd = msk.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+									BitmapData bd = bmp.LockBits(rect, ImageLockMode.ReadOnly, bmp.PixelFormat);
 
 									try
 									{
 
 										for (int y = 0; y < bd.Height; y++)
 										{
-											byte* src = (byte*)sd.Scan0.ToPointer() + (y * sd.Stride);
 											byte* p = (byte*)bd.Scan0.ToPointer() + (y * bd.Stride);
 											byte* q = (byte*)mask.maskData.ToPointer() + (mask.rowBytes * y);
 											for (int x = 0; x < bd.Width; x++)
 											{
-												p[0] = src[0];
-												p[1] = src[1];
-												p[2] = src[2];
 												p[3] = q[0];
 
-												p += 4;
-												src += bpp;
+												p += bpp;
 												q += mask.colBytes;
 											}
 										}
 									}
 									finally
 									{
-										bmp.UnlockBits(sd);
-										msk.UnlockBits(bd);
+										bmp.UnlockBits(bd);
 									}
 
 									using (Graphics tempGr = Graphics.FromImage(temp))
 									{
 										tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
-										tempGr.DrawImageUnscaled(msk, rect);
+										tempGr.DrawImageUnscaled(bmp, rect);
 									}
+
+                                    gr.DrawImageUnscaled(temp, dstCol, dstRow);
 								}
 
-								gr.DrawImageUnscaled(temp, dstCol, dstRow);
+								
 
  
-							}
+							
 						
 
 						}
