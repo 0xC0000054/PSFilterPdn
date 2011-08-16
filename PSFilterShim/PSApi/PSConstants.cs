@@ -1,4 +1,10 @@
-﻿using System;
+﻿/* Adapted from PIGeneral.h
+ * Copyright (c) 1992-6, Adobe Systems Incorporated.
+ * All rights reserved.
+*/
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -28,7 +34,6 @@ namespace PSFilterLoad.PSApi
         public const int kCurrentPropertyProcsVersion = 1;
         public const short kCurrentPropertyProcsCount = 2;
 #endif
-
 #if PSSDK4
         /// kCurrentDescriptorParametersVersion -> 0
         public const int kCurrentDescriptorParametersVersion = 0;
@@ -45,9 +50,8 @@ namespace PSFilterLoad.PSApi
         public const int kCurrentMinVersReadImageDocDesc = 0;
 
         /// kCurrentMaxVersReadImageDocDesc -> 1
-        public const int kCurrentMaxVersReadImageDocDesc = 1;
+        public const int kCurrentMaxVersReadImageDocDesc = 1; 
 #endif
-
         /// kCurrentResourceProcsVersion -> 3
         public const int kCurrentResourceProcsVersion = 3;
         public const short kCurrentResourceProcsCount = 4;
@@ -74,9 +78,12 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public const uint propInterpolationMethod = 0x696E7470U;
         /// <summary>
-        /// The fourth bit in the first byte is RGB.
+        /// PiPL FlagSet, the fourth bit in the first byte is RGB.
         /// </summary>
         public const int flagSupportsRGBColor = 16;
-       
+        /// <summary>
+        /// PiMI resource, the third bit in the imageModes short is RGB. 
+        /// </summary>
+        public const int supportsRGBColor = 8;
     }
 }

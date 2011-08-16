@@ -1,9 +1,14 @@
+/* Adapted from PITypes.h
+ * Copyright (c) 1992-6, Adobe Systems Incorporated.
+ * All rights reserved.
+*/
+
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
 #pragma warning disable 0659
-    [StructLayout(LayoutKind.Sequential)]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2218:OverrideGetHashCodeOnOverridingEquals"), StructLayout(LayoutKind.Sequential)]
     internal struct Rect16
     {
         /// short
@@ -23,10 +28,10 @@ namespace PSFilterLoad.PSApi
                 return Equals(rect);
             }
             else
-            { 
+            {
                 return false;
             }
-            
+
         }
         public bool Equals(Rect16 rect)
         {
@@ -36,11 +41,10 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
         public override string ToString()
         {
-            return ("Top=" + this.top.ToString() + ",Bottom=" + this.bottom.ToString() + ",Left=" + this.left.ToString() + ",Right=" + this.right.ToString());
+            return ("Top=" + this.top.ToString() + ",Bottom=" + this.bottom.ToString() + ",Left=" + this.left.ToString() + ",Right=" + this.right.ToString()); 
         }
 #endif
 
     }
 #pragma warning restore 0659
-
 }

@@ -1,4 +1,8 @@
-﻿using System;
+﻿/* Adapted from PIGeneral.h
+ * Copyright (c) 1992-6, Adobe Systems Incorporated.
+ * All rights reserved.
+*/
+using System;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
@@ -27,7 +31,7 @@ namespace PSFilterLoad.PSApi
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short AddPIResourceProc(uint type, ref System.IntPtr data);
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     internal struct ResourceProcs
     {
         /// int16->short

@@ -1,6 +1,10 @@
-﻿namespace PSFilterLoad.PSApi
-{
+﻿/* Adapted from PIGeneral.h
+ * Copyright (c) 1992-6, Adobe Systems Incorporated.
+ * All rights reserved.
+*/
 
+namespace PSFilterLoad.PSApi
+{
 
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     internal struct PSPixelMask

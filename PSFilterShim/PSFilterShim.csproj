@@ -119,7 +119,6 @@
     <Compile Include="PSApi\ColorPicker.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="PSApi\ColorServicesCallbacks.cs" />
     <Compile Include="PSApi\ColorServicesConstants.cs" />
     <Compile Include="PSApi\ColorServicesConvert.cs" />
     <Compile Include="PSApi\ColorServicesProc.cs" />
@@ -137,13 +136,11 @@
     <Compile Include="PSApi\ImageModes.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
     <Compile Include="PSApi\ImageSizeTooLargeException.cs" />
-    <Compile Include="PSApi\Int32Extensions.cs" />
     <Compile Include="PSApi\LoadPsFilter.cs" />
     <Compile Include="PSApi\NativeConstants.cs" />
     <Compile Include="PSApi\NativeMethods.cs" />
     <Compile Include="PSApi\NativeStructs.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
-    <Compile Include="PSApi\PIProperty.cs" />
     <Compile Include="PSApi\PlatformData.cs" />
     <Compile Include="PSApi\PluginData.cs">
       <SubType>Code</SubType>
