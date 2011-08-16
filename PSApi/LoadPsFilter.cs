@@ -1002,8 +1002,34 @@ namespace PSFilterLoad.PSApi
 		/// The Primary (foreground) color in PDN
 		/// </summary>
 		static byte[] primaryColor;
+        
+        /// <summary>
+        /// Determines whether the source image has transparent pixels.
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if the source image has transparent pixels; otherwise, <c>false</c>.
+        /// </returns>
+        static unsafe bool HasTransparentAlpha()
+        {
+            for (int y = 0; y < source.Height; y++)
+            {
+                ColorBgra* src = source.GetRowAddressUnchecked(y);
+                for (int x = 0; x < source.Width; x++)
+                {
+                    if (src->A < 255)
+                    {
+                        return true;
+                    }
 
-		static bool ignoreAlpha;
+                    src++;
+                }
+            }
+
+            return false;
+        }
+
+        static bool ignoreAlpha;
+        static bool hasTransparency;
 
 		static bool IgnoreAlphaChannel(PluginData data)
 		{
@@ -1023,19 +1049,42 @@ namespace PSFilterLoad.PSApi
 
 			if (data.filterInfo != null)
 			{
-				if (data.filterInfo[(filterCase - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
-				{ 
-					switch (filterCase)
-					{
-						case FilterCase.filterCaseEditableTransparencyNoSelection:
-							filterCase = FilterCase.filterCaseFlatImageNoSelection;
-							break;
-						case FilterCase.filterCaseEditableTransparencyWithSelection:
-							filterCase = FilterCase.filterCaseFlatImageWithSelection;
-							break;
-					}
-					return true;
-				} 
+                if (data.filterInfo[(filterCase - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
+                {
+                    /* use the flatImage modes if the filter dosen't support the protectedTransparency cases 
+                     * or image does not have any transparency */
+                    hasTransparency = HasTransparentAlpha();
+
+                    if (data.filterInfo[((filterCase + 2) - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter ||
+                        (data.filterInfo[((filterCase + 2) - 1)].inputHandling != FilterDataHandling.filterDataHandlingCantFilter && !hasTransparency))
+                    {
+                        switch (filterCase)
+                        {
+                            case FilterCase.filterCaseEditableTransparencyNoSelection:
+                                filterCase = FilterCase.filterCaseFlatImageNoSelection;
+                                break;
+                            case FilterCase.filterCaseEditableTransparencyWithSelection:
+                                filterCase = FilterCase.filterCaseFlatImageWithSelection;
+                                break;
+                        }
+                        return true;
+                    }
+                    else
+                    {
+                        switch (filterCase)
+                        {
+                            case FilterCase.filterCaseEditableTransparencyNoSelection:
+                                filterCase = FilterCase.filterCaseProtectedTransparencyNoSelection;
+                                break;
+                            case FilterCase.filterCaseEditableTransparencyWithSelection:
+                                filterCase = FilterCase.filterCaseProtectedTransparencyWithSelection;
+                                break;
+                        }
+
+
+                    }
+
+                }
 			}
 
 			return false;
@@ -1611,11 +1660,29 @@ namespace PSFilterLoad.PSApi
 			filterRecord.inLayerMasks = 0;
 			filterRecord.inInvertedLayerMasks = 0;
 
-			filterRecord.outLayerPlanes = filterRecord.inLayerPlanes;
-			filterRecord.outTransparencyMask = filterRecord.inTransparencyMask;
+            filterRecord.inColumnBytes = ignoreAlpha ? 3 : 4;
+
+            if (filterCase == FilterCase.filterCaseProtectedTransparencyNoSelection ||
+                filterCase == FilterCase.filterCaseProtectedTransparencyWithSelection)
+            {
+                filterRecord.planes = 3;
+                filterRecord.outLayerPlanes = 0;
+                filterRecord.outTransparencyMask = 0;
+                filterRecord.outNonLayerPlanes = 3;
+                filterRecord.outColumnBytes = 3;
+
+                ClearDestAlpha();
+            }
+            else
+            {
+                filterRecord.outLayerPlanes = filterRecord.inLayerPlanes;
+                filterRecord.outTransparencyMask = filterRecord.inTransparencyMask;
+                filterRecord.outNonLayerPlanes = filterRecord.inNonLayerPlanes;
+                filterRecord.outColumnBytes = filterRecord.inColumnBytes;
+            }
+
 			filterRecord.outLayerMasks = filterRecord.inLayerMasks;
 			filterRecord.outInvertedLayerMasks = filterRecord.inInvertedLayerMasks;
-			filterRecord.outNonLayerPlanes = filterRecord.inNonLayerPlanes;
 
 			filterRecord.absLayerPlanes = filterRecord.inLayerPlanes;
 			filterRecord.absTransparencyMask = filterRecord.inTransparencyMask;
@@ -1628,9 +1695,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord.outPreDummyPlanes = 0;
 			filterRecord.outPostDummyPlanes = 0;
 
-			filterRecord.inColumnBytes = ignoreAlpha ? 3 : 4;
 			filterRecord.inPlaneBytes = 1;
-			filterRecord.outColumnBytes = filterRecord.inColumnBytes;
 			filterRecord.outPlaneBytes = 1;
 
 			filterRecordPtr.Target = filterRecord;
@@ -3120,108 +3185,151 @@ namespace PSFilterLoad.PSApi
 			int h = srcRect.bottom - srcRect.top;
 			int planes = filterRecord.planes;
 
-			PixelFormat format = (source.colBytes == 4 || (planes == 4 && source.colBytes == 1)) ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
-			int bpp = (Bitmap.GetPixelFormatSize(format) / 8);
+            // if we have a mask make the source image 32-bit.
+            PixelFormat format = ((source.colBytes == 4 || source.version >= 1 && planes == 3 && source.masks != IntPtr.Zero)
+                || (planes == 4 && source.colBytes == 1)) ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
+            int bpp = (Bitmap.GetPixelFormatSize(format) / 8);
 
-			using (Bitmap bmp = new Bitmap(w, h, format))
-			{
-				BitmapData data = bmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, bmp.PixelFormat);
+            using (Bitmap bmp = new Bitmap(w, h, format))
+            {
+                BitmapData data = bmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, bmp.PixelFormat);
 
-				try
-				{
-					for (int y = 0; y < data.Height; y++)
-					{
+                try
+                {
+                    for (int y = 0; y < data.Height; y++)
+                    {
 
-						if (source.colBytes == 1)
-						{
+                        if (source.colBytes == 1)
+                        {
+                            for (int i = 0; i < planes; i++)
+                            {
+                                int ofs = i;
+                                switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
+                                {
+                                    case 0:
+                                        ofs = 2;
+                                        break;
+                                    case 2:
+                                        ofs = 0;
+                                        break;
+                                }
+                                byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + ofs;
+                                byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (i * source.planeBytes);
 
-							if (planes == 4 && source.colBytes == 1)
-							{
-								for (int x = 0; x < data.Width; x++)
-								{
-									byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + (x * 4);
-									p[3] = 255;
-								}
-							}
+                                for (int x = 0; x < data.Width; x++)
+                                {
+                                    *p = *q;
 
-							for (int i = 0; i < planes; i++)
-							{
-								int ofs = i;
-								switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
-								{
-									case 0:
-										ofs = 2;
-										break;
-									case 2:
-										ofs = 0;
-										break;
-								}
-								byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + ofs;
-								byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (i * source.planeBytes);
+                                    p += bpp;
+                                    q += source.colBytes;
+                                }
+                            }
 
-								for (int x = 0; x < data.Width; x++)
-								{
-									*p = *q;
+                        }
+                        else
+                        {
 
-									p += bpp;
-									q += source.colBytes;
-								}
-							}
+                            byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
+                            byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y);
+                            for (int x = 0; x < data.Width; x++)
+                            {
+                                p[0] = q[2];
+                                p[1] = q[1];
+                                p[2] = q[0];
+                                if (source.colBytes == 4)
+                                {
+                                    p[3] = q[3];
+                                }
 
-						}
-						else
-						{
-
-							byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
-							byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y);
-							for (int x = 0; x < data.Width; x++)
-							{
-								p[0] = q[2];
-								p[1] = q[1];
-								p[2] = q[0];
-								if (source.colBytes == 4)
-								{
-									p[3] = q[3];
-								}
-
-								p += bpp;
-								q += source.colBytes;
-							}
-						}
-					}
+                                p += bpp;
+                                q += source.colBytes;
+                            }
+                        }
+                    }
 
 
-				}
-				finally
-				{
-					bmp.UnlockBits(data);
-				}
+                }
+                finally
+                {
+                    bmp.UnlockBits(data);
 
-				using (Graphics gr = Graphics.FromHdc(platformContext))
-				{
-					if (source.colBytes == 4)
-					{
-						using (Bitmap temp = new Bitmap(w, h, PixelFormat.Format32bppArgb))
-						{
-							Rectangle rect = new Rectangle(0, 0, w, h);
+#if DEBUG
+					//bmp.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "dp.png"), ImageFormat.Png);
+#endif
+                }
 
-							using (Graphics tempGr = Graphics.FromImage(temp))
-							{
-								tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
-								tempGr.DrawImageUnscaled(bmp, rect);
-							}
-							// temp.Save(Path.Combine(Application.StartupPath, "masktemp.png"), ImageFormat.Png);
+                using (Graphics gr = Graphics.FromHdc(platformContext))
+                {
 
-							gr.DrawImageUnscaled(temp, dstCol, dstRow);
-						}
+                    if (source.colBytes == 4)
+                    {
+                        using (Bitmap temp = new Bitmap(w, h, PixelFormat.Format32bppArgb))
+                        {
+                            Rectangle rect = new Rectangle(0, 0, w, h);
 
-					}
-					else
-					{
-						gr.DrawImage(bmp, dstCol, dstRow);
-					}
-				}
-			}
+                            using (Graphics tempGr = Graphics.FromImage(temp))
+                            {
+                                tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
+                                tempGr.DrawImageUnscaled(bmp, rect);
+                            }
+                            // temp.Save(Path.Combine(Application.StartupPath, "masktemp.png"), ImageFormat.Png);
+
+                            gr.DrawImageUnscaled(temp, dstCol, dstRow);
+                        }
+
+                    }
+                    else
+                    {
+                        if ((source.version >= 1) && source.masks != IntPtr.Zero && planes == 3)
+                        {
+                            PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
+
+                            using (Bitmap temp = new Bitmap(w, h, PixelFormat.Format32bppArgb))
+                            {
+
+                                Rectangle rect = new Rectangle(0, 0, w, h);
+
+                                BitmapData bd = bmp.LockBits(rect, ImageLockMode.ReadOnly, bmp.PixelFormat);
+
+                                try
+                                {
+
+                                    for (int y = 0; y < bd.Height; y++)
+                                    {
+                                        byte* p = (byte*)bd.Scan0.ToPointer() + (y * bd.Stride);
+                                        byte* q = (byte*)mask.maskData.ToPointer() + (mask.rowBytes * y);
+                                        for (int x = 0; x < bd.Width; x++)
+                                        {
+                                            p[3] = q[0];
+
+                                            p += bpp;
+                                            q += mask.colBytes;
+                                        }
+                                    }
+                                }
+                                finally
+                                {
+                                    bmp.UnlockBits(bd);
+                                }
+
+                                using (Graphics tempGr = Graphics.FromImage(temp))
+                                {
+                                    tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
+                                    tempGr.DrawImageUnscaled(bmp, rect);
+                                }
+
+                                gr.DrawImageUnscaled(temp, dstCol, dstRow);
+                            }
+
+                        }
+                        else
+                        {
+                            gr.DrawImage(bmp, dstCol, dstRow);
+                        }
+
+                    }
+                }
+            }
 
 
 
