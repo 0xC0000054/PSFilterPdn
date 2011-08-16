@@ -942,6 +942,7 @@ namespace PSFilterLoad.PSApi
 			platformData.hwnd = owner;
 			platFormDataPtr = GCHandle.Alloc(platformData, GCHandleType.Pinned);
 			outRect.left = outRect.top = outRect.right = outRect.bottom = 0;
+            lastOutRect.left = lastOutRect.top = lastOutRect.right = lastOutRect.bottom = 0;
 			inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
 			maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
 
@@ -2000,6 +2001,7 @@ namespace PSFilterLoad.PSApi
 
 
 		static Rect16 outRect;
+        static Rect16 lastOutRect;
 		static int outRowBytes;
 		static int outLoPlane;
 		static int lastStoredPlane;
@@ -2022,10 +2024,16 @@ namespace PSFilterLoad.PSApi
 		{
 			filterRecord = (FilterRecord)filterRecordPtr.Target;
 
-			if (dst_valid && RectNonEmpty(outRect) && (!IsSinglePlane() ||
+			if (dst_valid && RectNonEmpty(outRect) && (!outRect.Equals(lastOutRect) ||
 				(IsSinglePlane() && outLoPlane != lastStoredPlane)))
 			{
 				store_buf(filterRecord.outData, outRowBytes, outRect, outLoPlane, outHiPlane);
+                
+                lastOutRect = outRect;
+                if (IsSinglePlane())
+                {
+                    lastStoredPlane = outLoPlane;
+                }
 			}
 
 #if DEBUG
