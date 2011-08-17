@@ -1472,7 +1472,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord = (FilterRecord)filterRecordPtr.Target;
 
 			if (dst_valid && RectNonEmpty(outRect) && (!outRect.Equals(lastOutRect) ||
-                (IsSinglePlane() && lastStoredPlane != outLoPlane)))
+                (IsSinglePlane() && lastStoredPlane != outLoPlane) || !IsSinglePlane()))
 			{
 				store_buf(filterRecord.outData, outRowBytes, outRect, outLoPlane, outHiPlane);
 
