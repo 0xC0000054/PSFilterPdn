@@ -206,7 +206,7 @@ namespace PSFilterPdn
             this.filterSearchBox.Name = "filterSearchBox";
             this.filterSearchBox.Size = new System.Drawing.Size(230, 20);
             this.filterSearchBox.TabIndex = 15;
-            this.filterSearchBox.Text = Resources.ConfigDialog_FilterSearchBox_BackText;
+            this.filterSearchBox.Text = "Search Filters";
             this.filterSearchBox.TextChanged += new System.EventHandler(this.filterSearchBox_TextChanged);
             this.filterSearchBox.Enter += new System.EventHandler(this.filterSearchBox_Enter);
             this.filterSearchBox.Leave += new System.EventHandler(this.filterSearchBox_Leave);
@@ -258,7 +258,7 @@ namespace PSFilterPdn
             this.fldrLoadProgLbl.Name = "fldrLoadProgLbl";
             this.fldrLoadProgLbl.Size = new System.Drawing.Size(105, 13);
             this.fldrLoadProgLbl.TabIndex = 1;
-            this.fldrLoadProgLbl.Text = Resources.ConfigDialog_fldrLoadProgLbl_Text;
+            this.fldrLoadProgLbl.Text = "Folder load progress:";
             // 
             // fldrLoadProgBar
             // 
@@ -288,6 +288,7 @@ namespace PSFilterPdn
             this.filterTree.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.filterTree_AfterExpand);
             this.filterTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.filterTree_AfterSelect);
             this.filterTree.DoubleClick += new System.EventHandler(this.filterTree_DoubleClick);
+            this.filterTree.KeyDown += new System.Windows.Forms.KeyEventHandler(this.filterTree_KeyDown);
             // 
             // dirTab
             // 
@@ -392,7 +393,7 @@ namespace PSFilterPdn
             this.Controls.Add(this.buttonCancel);
             this.Location = new System.Drawing.Point(0, 0);
             this.Name = "PsFilterPdnConfigDialog";
-            this.Text = PSFilterPdn_Effect.StaticName;
+            this.Text = "8bf Filter";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PSFilterPdnConfigDialog_FormClosing);
             this.Controls.SetChildIndex(this.buttonCancel, 0);
             this.Controls.SetChildIndex(this.buttonOK, 0);
@@ -1145,6 +1146,7 @@ namespace PSFilterPdn
                                 if (!string.IsNullOrEmpty(lastSelectedFilterTitle) && node.Nodes.ContainsKey(lastSelectedFilterTitle))
                                 {
                                     filterTree.SelectedNode = node.Nodes[lastSelectedFilterTitle];
+                                    node.EnsureVisible();
                                 }
                             }
                         }
@@ -1491,6 +1493,20 @@ namespace PSFilterPdn
                 {
                     expandedNodes.Add(e.Node.Text);
                 }
+            }
+        }
+
+        private void filterTree_KeyDown(object sender, KeyEventArgs e)
+        {
+            // if the selectedNode is a filter run it when the Enter key is pressed
+            if ((filterTree.SelectedNode != null) && filterTree.SelectedNode.Tag != null && e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                runFilterBtn.PerformClick();
+            }
+            else
+            {
+                e.Handled = false;
             }
         }
 	}
