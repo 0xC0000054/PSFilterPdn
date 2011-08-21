@@ -1422,11 +1422,6 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			if (!applyfilter)
-			{
-				applyfilter = true;
-			}
-
 			if (abortFunc != null)
 			{
 				return abortFunc();
@@ -1434,8 +1429,6 @@ namespace PSFilterLoad.PSApi
 
 			return false;
 		}
-
-		static bool applyfilter;
 
 		static bool src_valid;
 		static bool dst_valid;
@@ -2043,318 +2036,310 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		static unsafe void fillOutBuf(ref IntPtr inData, ref int inRowBytes, Rect16 rect, int loplane, int hiplane)
+		static unsafe void fillOutBuf(ref IntPtr outData, ref int outRowBytes, Rect16 rect, int loplane, int hiplane)
 		{
 
-            if (applyfilter)
+#if DEBUG
+            Ping(DebugFlags.AdvanceState, string.Format("outRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { outRowBytes.ToString(), rect.ToString(), loplane.ToString(), hiplane.ToString() }));
+            Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", (filterRecord.inputRate >> 16)));
+#endif
+
+
+#if DEBUG
+            using (Bitmap dst = dest.CreateAliasedBitmap())
+            {
+
+            }
+#endif
+
+            int nplanes = hiplane - loplane + 1;
+            int w = (rect.right - rect.left);
+            int h = (rect.bottom - rect.top);
+
+            if (rect.left < source.Width && rect.top < source.Height)
             {
 #if DEBUG
-                Ping(DebugFlags.AdvanceState, string.Format("inRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { inRowBytes.ToString(), rect.ToString(), loplane.ToString(), hiplane.ToString() }));
-                Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", (filterRecord.inputRate >> 16)));
-#endif
+                int bmpw = w;
+                int bmph = h;
+                if ((rect.left + w) > source.Width)
+                    bmpw = (source.Width - rect.left);
+
+                if ((rect.top + h) > source.Height)
+                    bmph = (source.Height - rect.top);
 
 
-#if DEBUG
-                using (Bitmap dst = dest.CreateAliasedBitmap())
+                if (bmpw != w || bmph != h)
                 {
-
+                    Ping(DebugFlags.AdvanceState, string.Format("bmpw = {0}, bmph = {1}", bmpw, bmph));
                 }
 #endif
+                Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
 
-                int nplanes = hiplane - loplane + 1;
-                int w = (rect.right - rect.left);
-                int h = (rect.bottom - rect.top);
 
-                if (rect.left < source.Width && rect.top < source.Height)
+                int stride = (w * nplanes);
+                int len = stride * h;
+
+                outData = Marshal.AllocHGlobal(len);
+                outRowBytes = stride;
+
+                bool padBuffer = false;
+                if (lockRect.Left < 0 || lockRect.Top < 0)
                 {
-#if DEBUG
-                    int bmpw = w;
-                    int bmph = h;
-                    if ((rect.left + w) > source.Width)
-                        bmpw = (source.Width - rect.left);
-
-                    if ((rect.top + h) > source.Height)
-                        bmph = (source.Height - rect.top);
-
-
-                    if (bmpw != w || bmph != h)
+                    if (lockRect.Left < 0 && lockRect.Top < 0)
                     {
-                        Ping(DebugFlags.AdvanceState, string.Format("bmpw = {0}, bmph = {1}", bmpw, bmph));
+                        lockRect.X = lockRect.Y = 0;
+                        lockRect.Width -= -rect.left;
+                        lockRect.Height -= -rect.top;
                     }
-#endif
-                    Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
-
-
-                    int stride = (w * nplanes);
-                    int len = stride * h;
-
-                    inData = Marshal.AllocHGlobal(len);
-                    inRowBytes = stride;
-
-                    bool padBuffer = false;
-                    if (lockRect.Left < 0 || lockRect.Top < 0)
+                    else if (lockRect.Left < 0)
                     {
-                        if (lockRect.Left < 0 && lockRect.Top < 0)
-                        {
-                            lockRect.X = lockRect.Y = 0;
-                            lockRect.Width -= -rect.left;
-                            lockRect.Height -= -rect.top;
-                        }
-                        else if (lockRect.Left < 0)
-                        {
-                            lockRect.X = 0;
-                            lockRect.Width -= -rect.left;
-                        }
-                        else if (lockRect.Top < 0)
-                        {
-                            lockRect.Y = 0;
-                            lockRect.Height -= -rect.top;
-                        }
-                        padBuffer = true;
+                        lockRect.X = 0;
+                        lockRect.Width -= -rect.left;
                     }
-
-                    int ofs = loplane;
-                    switch (loplane) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
+                    else if (lockRect.Top < 0)
                     {
-                        case 0:
-                            ofs = 2;
-                            break;
-                        case 2:
-                            ofs = 0;
-                            break;
+                        lockRect.Y = 0;
+                        lockRect.Height -= -rect.top;
                     }
+                    padBuffer = true;
+                }
 
-                    if ((lockRect.Right > dest.Width || lockRect.Bottom > dest.Height) || padBuffer)
+                int ofs = loplane;
+                switch (loplane) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
+                {
+                    case 0:
+                        ofs = 2;
+                        break;
+                    case 2:
+                        ofs = 0;
+                        break;
+                }
+
+                if ((lockRect.Right > dest.Width || lockRect.Bottom > dest.Height) || padBuffer)
+                {
+                    switch (filterRecord.inputPadding)
                     {
-                        switch (filterRecord.inputPadding)
-                        {
-                            case -1:
+                        case -1:
 
-                                int top = rect.top;
-                                int left = rect.left;
-                                int right = lockRect.Right - dest.Width;
-                                int bottom = lockRect.Bottom - dest.Height;
+                            int top = rect.top;
+                            int left = rect.left;
+                            int right = lockRect.Right - dest.Width;
+                            int bottom = lockRect.Bottom - dest.Height;
 
 
-                                while (top < 0)
-                                {
-                                    for (int y = 0; y < h; y++)
-                                    {
-
-                                        int row = (y < dest.Height) ? y : (dest.Height - 1);
-                                        ColorBgra p = dest.GetPointUnchecked(0, row);
-                                        byte* q = (byte*)inData.ToPointer() + (y * inRowBytes);
-
-                                        switch (nplanes)
-                                        {
-                                            case 1:
-                                                *q = p[ofs];
-                                                break;
-                                            case 2:
-                                                q[0] = p[ofs];
-                                                q[1] = p[ofs + 1];
-                                                break;
-                                            case 3:
-                                                q[0] = p[2];
-                                                q[1] = p[1];
-                                                q[2] = p[0];
-                                                break;
-                                            case 4:
-                                                q[0] = p[2];
-                                                q[1] = p[1];
-                                                q[2] = p[0];
-                                                q[3] = p[3];
-                                                break;
-                                        }
-                                    }
-
-                                    top++;
-                                }
-
-                                if (left < 0)
-                                {
-                                    for (int y = 0; y < h; y++)
-                                    {
-                                        if (left == 0)
-                                            break;
-
-                                        byte* q = (byte*)inData.ToPointer() + (y * inRowBytes);
-
-                                        for (int x = lockRect.Left; x < lockRect.Right; x++)
-                                        {
-                                            int col = (x < dest.Width) ? x : (dest.Width - 1);
-                                            ColorBgra p = dest.GetPointUnchecked(col, 0);
-
-                                            switch (nplanes)
-                                            {
-                                                case 1:
-                                                    *q = p[ofs];
-                                                    break;
-                                                case 2:
-                                                    q[0] = p[ofs];
-                                                    q[1] = p[ofs + 1];
-                                                    break;
-                                                case 3:
-                                                    q[0] = p[2];
-                                                    q[1] = p[1];
-                                                    q[2] = p[0];
-                                                    break;
-                                                case 4:
-                                                    q[0] = p[2];
-                                                    q[1] = p[1];
-                                                    q[2] = p[0];
-                                                    q[3] = p[3];
-                                                    break;
-                                            }
-                                            q += nplanes;
-                                        }
-                                        left++;
-                                    }
-                                }
-
-
-
-                                while (bottom > 0)
-                                {
-                                    for (int y = lockRect.Top; y < lockRect.Bottom; y++)
-                                    {
-                                        int row = (y < dest.Height) ? y : (dest.Height - 1);
-                                        ColorBgra p = dest.GetPointUnchecked((dest.Width - 1), row);
-                                        byte* q = (byte*)inData.ToPointer() + ((y - lockRect.Top) * inRowBytes);
-
-                                        switch (nplanes)
-                                        {
-                                            case 1:
-                                                *q = p[ofs];
-                                                break;
-                                            case 2:
-                                                q[0] = p[ofs];
-                                                q[1] = p[ofs + 1];
-                                                break;
-                                            case 3:
-                                                q[0] = p[2];
-                                                q[1] = p[1];
-                                                q[2] = p[0];
-                                                break;
-                                            case 4:
-                                                q[0] = p[2];
-                                                q[1] = p[1];
-                                                q[2] = p[0];
-                                                q[3] = p[3];
-                                                break;
-                                        }
-
-                                    }
-                                    bottom--;
-
-                                }
-
-                                if (right > 0)
-                                {
-                                    for (int y = lockRect.Top; y < lockRect.Bottom; y++)
-                                    {
-                                        if (right == 0)
-                                            break;
-
-                                        byte* q = (byte*)inData.ToPointer() + ((y - rect.top) * inRowBytes);
-
-                                        for (int x = lockRect.Left; x < lockRect.Right; x++)
-                                        {
-                                            int col = (x < dest.Width) ? x : (dest.Width - 1);
-                                            ColorBgra p = dest.GetPointUnchecked(col, (dest.Height - 1));
-
-                                            switch (nplanes)
-                                            {
-                                                case 1:
-                                                    *q = p[ofs];
-                                                    break;
-                                                case 2:
-                                                    q[0] = p[ofs];
-                                                    q[1] = p[ofs + 1];
-                                                    break;
-                                                case 3:
-                                                    q[0] = p[2];
-                                                    q[1] = p[1];
-                                                    q[2] = p[0];
-                                                    break;
-                                                case 4:
-                                                    q[0] = p[2];
-                                                    q[1] = p[1];
-                                                    q[2] = p[0];
-                                                    q[3] = p[3];
-                                                    break;
-                                            }
-                                            q += nplanes;
-                                        }
-                                        right--;
-                                    }
-                                }
-
-
-                                break;
-                            case -2:
-                                break;
-                            case -3:
-                                break;
-                            default:
-                                NativeMethods.MemSet(inData, filterRecord.inputPadding, new UIntPtr((uint)len));
-                                break;
-                        }
-
-                    }
-
-                    /* the stride for the source image and destination buffer will almost never match
-                    * so copy the data manually swapping the pixel order along the way
-                    */
-                    for (int y = lockRect.Top; y < lockRect.Bottom; y++)
-                    {
-                        if (y >= dest.Height)
-                            break;
-
-                        byte* p = (byte*)dest.GetPointAddressUnchecked(lockRect.Left, y);
-                        byte* q = (byte*)inData.ToPointer() + ((y - lockRect.Top) * stride);
-                        for (int x = lockRect.Left; x < lockRect.Right; x++)
-                        {
-                            if (x >= dest.Width)
-                                break;
-
-                            switch (nplanes)
+                            while (top < 0)
                             {
-                                case 1:
-                                    *q = p[ofs];
-                                    break;
-                                case 2:
-                                    q[0] = p[ofs];
-                                    q[1] = p[ofs + 1];
-                                    break;
-                                case 3:
-                                    q[0] = p[2];
-                                    q[1] = p[1];
-                                    q[2] = p[0];
-                                    break;
-                                case 4:
-                                    q[0] = p[2];
-                                    q[1] = p[1];
-                                    q[2] = p[0];
-                                    q[3] = p[3];
-                                    break;
+                                for (int y = 0; y < h; y++)
+                                {
 
+                                    int row = (y < dest.Height) ? y : (dest.Height - 1);
+                                    ColorBgra p = dest.GetPointUnchecked(0, row);
+                                    byte* q = (byte*)outData.ToPointer() + (y * outRowBytes);
+
+                                    switch (nplanes)
+                                    {
+                                        case 1:
+                                            *q = p[ofs];
+                                            break;
+                                        case 2:
+                                            q[0] = p[ofs];
+                                            q[1] = p[ofs + 1];
+                                            break;
+                                        case 3:
+                                            q[0] = p[2];
+                                            q[1] = p[1];
+                                            q[2] = p[0];
+                                            break;
+                                        case 4:
+                                            q[0] = p[2];
+                                            q[1] = p[1];
+                                            q[2] = p[0];
+                                            q[3] = p[3];
+                                            break;
+                                    }
+                                }
+
+                                top++;
+                            }
+
+                            if (left < 0)
+                            {
+                                for (int y = 0; y < h; y++)
+                                {
+                                    if (left == 0)
+                                        break;
+
+                                    byte* q = (byte*)outData.ToPointer() + (y * outRowBytes);
+
+                                    for (int x = lockRect.Left; x < lockRect.Right; x++)
+                                    {
+                                        int col = (x < dest.Width) ? x : (dest.Width - 1);
+                                        ColorBgra p = dest.GetPointUnchecked(col, 0);
+
+                                        switch (nplanes)
+                                        {
+                                            case 1:
+                                                *q = p[ofs];
+                                                break;
+                                            case 2:
+                                                q[0] = p[ofs];
+                                                q[1] = p[ofs + 1];
+                                                break;
+                                            case 3:
+                                                q[0] = p[2];
+                                                q[1] = p[1];
+                                                q[2] = p[0];
+                                                break;
+                                            case 4:
+                                                q[0] = p[2];
+                                                q[1] = p[1];
+                                                q[2] = p[0];
+                                                q[3] = p[3];
+                                                break;
+                                        }
+                                        q += nplanes;
+                                    }
+                                    left++;
+                                }
                             }
 
 
 
-                            p += ColorBgra.SizeOf;
-                            q += nplanes;
-                        }
+                            while (bottom > 0)
+                            {
+                                for (int y = lockRect.Top; y < lockRect.Bottom; y++)
+                                {
+                                    int row = (y < dest.Height) ? y : (dest.Height - 1);
+                                    ColorBgra p = dest.GetPointUnchecked((dest.Width - 1), row);
+                                    byte* q = (byte*)outData.ToPointer() + ((y - lockRect.Top) * outRowBytes);
+
+                                    switch (nplanes)
+                                    {
+                                        case 1:
+                                            *q = p[ofs];
+                                            break;
+                                        case 2:
+                                            q[0] = p[ofs];
+                                            q[1] = p[ofs + 1];
+                                            break;
+                                        case 3:
+                                            q[0] = p[2];
+                                            q[1] = p[1];
+                                            q[2] = p[0];
+                                            break;
+                                        case 4:
+                                            q[0] = p[2];
+                                            q[1] = p[1];
+                                            q[2] = p[0];
+                                            q[3] = p[3];
+                                            break;
+                                    }
+
+                                }
+                                bottom--;
+
+                            }
+
+                            if (right > 0)
+                            {
+                                for (int y = lockRect.Top; y < lockRect.Bottom; y++)
+                                {
+                                    if (right == 0)
+                                        break;
+
+                                    byte* q = (byte*)outData.ToPointer() + ((y - rect.top) * outRowBytes);
+
+                                    for (int x = lockRect.Left; x < lockRect.Right; x++)
+                                    {
+                                        int col = (x < dest.Width) ? x : (dest.Width - 1);
+                                        ColorBgra p = dest.GetPointUnchecked(col, (dest.Height - 1));
+
+                                        switch (nplanes)
+                                        {
+                                            case 1:
+                                                *q = p[ofs];
+                                                break;
+                                            case 2:
+                                                q[0] = p[ofs];
+                                                q[1] = p[ofs + 1];
+                                                break;
+                                            case 3:
+                                                q[0] = p[2];
+                                                q[1] = p[1];
+                                                q[2] = p[0];
+                                                break;
+                                            case 4:
+                                                q[0] = p[2];
+                                                q[1] = p[1];
+                                                q[2] = p[0];
+                                                q[3] = p[3];
+                                                break;
+                                        }
+                                        q += nplanes;
+                                    }
+                                    right--;
+                                }
+                            }
+
+
+                            break;
+                        case -2:
+                            break;
+                        case -3:
+                            break;
+                        default:
+                            NativeMethods.MemSet(outData, filterRecord.inputPadding, new UIntPtr((uint)len));
+                            break;
                     }
 
                 }
 
+                /* the stride for the source image and destination buffer will almost never match
+                * so copy the data manually swapping the pixel order along the way
+                */
+                for (int y = lockRect.Top; y < lockRect.Bottom; y++)
+                {
+                    if (y >= dest.Height)
+                        break;
+
+                    byte* p = (byte*)dest.GetPointAddressUnchecked(lockRect.Left, y);
+                    byte* q = (byte*)outData.ToPointer() + ((y - lockRect.Top) * stride);
+                    for (int x = lockRect.Left; x < lockRect.Right; x++)
+                    {
+                        if (x >= dest.Width)
+                            break;
+
+                        switch (nplanes)
+                        {
+                            case 1:
+                                *q = p[ofs];
+                                break;
+                            case 2:
+                                q[0] = p[ofs];
+                                q[1] = p[ofs + 1];
+                                break;
+                            case 3:
+                                q[0] = p[2];
+                                q[1] = p[1];
+                                q[2] = p[0];
+                                break;
+                            case 4:
+                                q[0] = p[2];
+                                q[1] = p[1];
+                                q[2] = p[0];
+                                q[3] = p[3];
+                                break;
+
+                        }
+
+
+
+                        p += ColorBgra.SizeOf;
+                        q += nplanes;
+                    }
+                }
+
             }
-            else
-            {
-                fill_buf(ref inData, ref inRowBytes, rect, loplane, hiplane);
-            } 
 		}
 
 		static Surface tempMask;
@@ -2394,13 +2379,11 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		/// Fills the input buffer with data from the source image.
+		/// Fills the mask buffer with data from the mask image.
 		/// </summary>
 		/// <param name="maskData">The input buffer to fill.</param>
 		/// <param name="maskRowBytes">The stride of the input buffer.</param>
 		/// <param name="rect">The rectangle of interest within the image.</param>
-		/// <param name="loplane">The input loPlane.</param>
-		/// <param name="hiplane">The input hiPlane.</param>
 		static unsafe void fill_mask(ref IntPtr maskData, ref int maskRowBytes, Rect16 rect)
 		{
 #if DEBUG
@@ -4115,18 +4098,18 @@ namespace PSFilterLoad.PSApi
 		}
 
 #if PSSDK_3_0_4 && USEIMAGESERVICES
-		static short image_services_interpolate_1d_proc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, ref int coords, short method)
+		static short image_services_interpolate_1d_proc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
 		{
 			return PSError.memFullErr;
 		}
 
-		static short image_services_interpolate_2d_proc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, ref int coords, short method)
+		static short image_services_interpolate_2d_proc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
 		{
 			return PSError.memFullErr;
 		} 
 #endif
 
-		static void process_event_proc(IntPtr @event)
+        static void process_event_proc(IntPtr @event)
 		{
 		}
 		static void progress_proc(int done, int total)
