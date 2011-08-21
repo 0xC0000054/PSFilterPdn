@@ -465,16 +465,17 @@ namespace PSFilterLoad.PSApi
 
 		static bool IgnoreAlphaChannel(PluginData data)
 		{
-			if (data.category == "DCE Tools" || data.category == "L'amico Perry")
+			if (data.filterInfo == null || data.category == "L'amico Perry")
 			{
 #if USEMATTING
                 if (data.filterInfo != null)
                 {
                     inputHandling = data.filterInfo[(filterCase - 1)].inputHandling;
                     outputHandling = data.filterInfo[(filterCase - 1)].outputHandling;
-                } 
-#endif
+                }  
                 hasTransparency = HasTransparentAlpha();
+
+#endif
 
 				switch (filterCase)
 				{
@@ -488,49 +489,48 @@ namespace PSFilterLoad.PSApi
 				return true;
 			}
 
-			if (data.filterInfo != null)
-			{			
+						
 #if USEMATTING
-				inputHandling = data.filterInfo[(filterCase - 1)].inputHandling;
-				outputHandling = data.filterInfo[(filterCase - 1)].outputHandling;
+			inputHandling = data.filterInfo[(filterCase - 1)].inputHandling;
+			outputHandling = data.filterInfo[(filterCase - 1)].outputHandling;
 #endif				
-                if (data.filterInfo[(filterCase - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
+            if (data.filterInfo[(filterCase - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
+			{
+				/* use the flatImage modes if the filter dosen't support the protectedTransparency cases 
+				* or image does not have any transparency */
+                hasTransparency = HasTransparentAlpha();
+
+				if (data.filterInfo[((filterCase + 2)- 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter || 
+					(data.filterInfo[((filterCase + 2)- 1)].inputHandling != FilterDataHandling.filterDataHandlingCantFilter && !hasTransparency))
 				{
-					/* use the flatImage modes if the filter dosen't support the protectedTransparency cases 
-					 * or image does not have any transparency */
-                    hasTransparency = HasTransparentAlpha();
-
-					if (data.filterInfo[((filterCase + 2)- 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter || 
-						(data.filterInfo[((filterCase + 2)- 1)].inputHandling != FilterDataHandling.filterDataHandlingCantFilter && !hasTransparency))
+					switch (filterCase)
 					{
-						switch (filterCase)
-						{
-							case FilterCase.filterCaseEditableTransparencyNoSelection:
-								filterCase = FilterCase.filterCaseFlatImageNoSelection;
-								break;
-							case FilterCase.filterCaseEditableTransparencyWithSelection:
-								filterCase = FilterCase.filterCaseFlatImageWithSelection;
-								break;
-						}
-						return true;
+						case FilterCase.filterCaseEditableTransparencyNoSelection:
+							filterCase = FilterCase.filterCaseFlatImageNoSelection;
+							break;
+						case FilterCase.filterCaseEditableTransparencyWithSelection:
+							filterCase = FilterCase.filterCaseFlatImageWithSelection;
+							break;
 					}
-					else
-					{
-						switch (filterCase)
-						{
-							case FilterCase.filterCaseEditableTransparencyNoSelection:
-								filterCase = FilterCase.filterCaseProtectedTransparencyNoSelection;
-								break;
-							case FilterCase.filterCaseEditableTransparencyWithSelection:
-								filterCase = FilterCase.filterCaseProtectedTransparencyWithSelection;
-								break;
-						}
-
-
-					}
-					
+					return true;
 				}
+				else
+				{
+					switch (filterCase)
+					{
+						case FilterCase.filterCaseEditableTransparencyNoSelection:
+							filterCase = FilterCase.filterCaseProtectedTransparencyNoSelection;
+							break;
+						case FilterCase.filterCaseEditableTransparencyWithSelection:
+							filterCase = FilterCase.filterCaseProtectedTransparencyWithSelection;
+							break;
+					}
+
+
+				}
+					
 			}
+			
 
 			return false;
 		}
@@ -1631,7 +1631,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="lockRect">The rectangle to clamp the size to.</param>
 		static void ScaleTempSurface(Rectangle lockRect) 
 		{
-			int scale = (filterRecord.inputRate >> 16);
+			int scale = fixed2int(filterRecord.inputRate);
 			if (scale == 0)
 			{
 				scale = 1;
@@ -1683,7 +1683,7 @@ namespace PSFilterLoad.PSApi
 		{
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("inRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { inRowBytes.ToString(), rect.ToString(), loplane.ToString(), hiplane.ToString() }));
-			Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", (filterRecord.inputRate >> 16)));
+			Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", fixed2int(filterRecord.inputRate)));
 #endif
 
 			int nplanes = hiplane - loplane + 1;
@@ -2346,7 +2346,7 @@ namespace PSFilterLoad.PSApi
 
 		static void ScaleTempMask(Rectangle lockRect)
 		{
-			int scale = (filterRecord.maskRate >> 16);
+			int scale = fixed2int(filterRecord.maskRate);
 
 			if (scale == 0)
 				scale = 1;
@@ -2388,7 +2388,7 @@ namespace PSFilterLoad.PSApi
 		{
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes = {0}, Rect = {1}", new object[] { maskRowBytes.ToString(), rect.ToString() }));
-			Ping(DebugFlags.AdvanceState, string.Format("maskRate = {0}", (filterRecord.maskRate >> 16)));
+			Ping(DebugFlags.AdvanceState, string.Format("maskRate = {0}", fixed2int(filterRecord.maskRate)));
 #endif
 			int w = (rect.right - rect.left);
 			int h = (rect.bottom - rect.top);
@@ -4241,15 +4241,25 @@ namespace PSFilterLoad.PSApi
 #endif
 			return IntPtr.Zero;
 		}
-		/// <summary>
-		/// Converts a long value to Photoshop's 'Fixed' type.
-		/// </summary>
-		/// <param name="value">The value to convert.</param>
-		/// <returns>The converted value</returns>
-		static int long2fixed(long value)
-		{
-			return (int)(value << 16);
-		}
+        /// <summary>
+        /// Converts an Int32 to Photoshop's 'Fixed' type.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>The converted value</returns>
+        static int int2fixed(int value)
+        {
+            return (value << 16);
+        }
+
+        /// <summary>
+        /// Converts Photoshop's 'Fixed' type to an Int32.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>The converted value</returns>
+        static int fixed2int(int value)
+        {
+            return (value >> 16);
+        }
 
 		static bool sizesSetup; 
 		static void setup_sizes()
@@ -4278,8 +4288,8 @@ namespace PSFilterLoad.PSApi
 			filterRecord.filterRect.right = (short)source.Width;
 			filterRecord.filterRect.bottom = (short)source.Height;
 		
-			filterRecord.imageHRes = long2fixed((long)(dpiX + 0.5));
-			filterRecord.imageVRes = long2fixed((long)(dpiY + 0.5));
+			filterRecord.imageHRes = int2fixed((int)(dpiX + 0.5));
+			filterRecord.imageVRes = int2fixed((int)(dpiY + 0.5));
 
 			filterRecord.wholeSize.h = (short)source.Width;
 			filterRecord.wholeSize.v = (short)source.Height;
