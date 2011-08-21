@@ -16,7 +16,7 @@ namespace PSFilterLoad.PSApi
     ///coords: Fixed*
     ///method: int16->short
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PIResampleProc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, ref int coords, short method);
+    internal delegate short PIResampleProc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method);
 
     [StructLayoutAttribute(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     internal struct ImageServicesProcs
