@@ -85,7 +85,7 @@ namespace PSFilterPdn
             {
                 return title;
             }
-            set
+            internal set
             {
                 title = value;
             }
