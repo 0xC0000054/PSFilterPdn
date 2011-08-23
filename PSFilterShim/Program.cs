@@ -173,7 +173,7 @@ namespace PSFilterShim
 
                     if (parmData != null)
                     {
-                        // ignote the filters that only use the data handle, e.g. Filter Factory  
+                        // ignore the filters that only use the data handle, e.g. Filter Factory  
                         if (((parmData.GlobalParms.ParmDataBytes != null && parmData.GlobalParms.PluginDataBytes != null) ||
                             (parmData.GlobalParms.ParmDataBytes != null && parmData.GlobalParms.PluginDataBytes == null)) ||
                             parmData.AETEDict != null)
@@ -187,7 +187,10 @@ namespace PSFilterShim
 
                     if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
                     {
-                        lps.Dest.CreateAliasedBitmap().Save(dstImg, ImageFormat.Png);
+                        using (Bitmap dst = lps.Dest.CreateAliasedBitmap())
+                        {
+                            dst.Save(dstImg, ImageFormat.Png);
+                        }
 
                         if (!lps.IsRepeatEffect)
                         {
