@@ -169,7 +169,7 @@ namespace PSFilterPdn
             this.aeteData = copyMe.aeteData;
             this.expandedNodes = copyMe.expandedNodes;
         }
-#pragma warning disable 628
+#pragma warning restore 628
 
         public override object Clone()
         {
