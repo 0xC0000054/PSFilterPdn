@@ -34,7 +34,7 @@ namespace PSFilterPdn
         }
 
         public PSFilterPdn_Effect()
-            : base(PSFilterPdn_Effect.StaticName, PSFilterPdn_Effect.StaticIcon, EffectFlags.Configurable | EffectFlags.SingleThreaded)
+            : base(PSFilterPdn_Effect.StaticName, PSFilterPdn_Effect.StaticIcon, EffectFlags.Configurable)
         {
             dlg = null;
             proxyResult = false;
