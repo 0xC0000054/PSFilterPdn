@@ -3474,109 +3474,148 @@ namespace PSFilterLoad.PSApi
 		} 
 #endif
 
-		static unsafe short display_pixels_proc(ref PSPixelMap source, ref VRect srcRect, int dstRow, int dstCol, System.IntPtr platformContext)
-		{
+        static Surface tempDisplaySurface;
+        static void SetupTempDisplaySurface(int width, int height, bool haveMask)
+        {
+            if ((tempDisplaySurface == null) || width != tempDisplaySurface.Width || height != tempDisplaySurface.Height)
+            {
+                if (tempDisplaySurface != null)
+                {
+                    tempDisplaySurface.Dispose();
+                    tempDisplaySurface = null;
+                }
+
+                tempDisplaySurface = new Surface(width, height);
+
+                if (ignoreAlpha || !haveMask)
+                {
+                    new UnaryPixelOps.SetAlphaChannelTo255().Apply(tempDisplaySurface, tempDisplaySurface.Bounds);
+                }
+            }
+        }
+
+        static unsafe short display_pixels_proc(ref PSPixelMap source, ref VRect srcRect, int dstRow, int dstCol, System.IntPtr platformContext)
+        {
 #if DEBUG
 			Ping(DebugFlags.DisplayPixels, string.Format("source: bounds = {0}, ImageMode = {1}, colBytes = {2}, rowBytes = {3},planeBytes = {4}, BaseAddress = {5}", new object[]{source.bounds.ToString(), ((ImageModes)source.imageMode).ToString("G"),
 			source.colBytes.ToString(), source.rowBytes.ToString(), source.planeBytes.ToString(), source.baseAddr.ToString("X8")}));
-			Ping(DebugFlags.DisplayPixels, string.Format("dstCol (x, width) = {0}, dstRow (y, height) = {1}", dstCol, dstRow));
+			Ping(DebugFlags.DisplayPixels, string.Format("srcRect = {0} dstCol (x, width) = {1}, dstRow (y, height) = {2}", srcRect.ToString(), dstCol, dstRow));
 #endif
 
-			if (platformContext == IntPtr.Zero || source.rowBytes == 0 || source.baseAddr == IntPtr.Zero)
-				return PSError.filterBadParameters;
+            if (platformContext == IntPtr.Zero || source.rowBytes == 0 || source.baseAddr == IntPtr.Zero)
+                return PSError.filterBadParameters;
 
-			int w = srcRect.right - srcRect.left;
-			int h = srcRect.bottom - srcRect.top;
-			int planes = filterRecord.planes;
+            int width = srcRect.right - srcRect.left;
+            int height = srcRect.bottom - srcRect.top;
+            int nplanes = filterRecord.planes;
 
-            // if we have a mask make the source image 32-bit.
-            PixelFormat format = ((source.colBytes == 4 || source.version >= 1 && planes == 3 && source.masks != IntPtr.Zero)
-                || (planes == 4 && source.colBytes == 1)) ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
-            int bpp = (Bitmap.GetPixelFormatSize(format) / 8);
+            SetupTempDisplaySurface(width, height, (source.version >= 1 && nplanes == 3 && source.masks != IntPtr.Zero));
 
-            using (Bitmap bmp = new Bitmap(w, h, format))
+            for (int y = 0; y < tempDisplaySurface.Height; y++)
             {
-                BitmapData data = bmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, bmp.PixelFormat);
 
-                try
+                if (source.colBytes == 1)
                 {
-                    for (int y = 0; y < data.Height; y++)
+                    for (int i = 0; i < nplanes; i++)
                     {
-
-                        if (source.colBytes == 1)
+                        int ofs = i;
+                        switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
                         {
-                            for (int i = 0; i < planes; i++)
-                            {
-                                int ofs = i;
-                                switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
-                                {
-                                    case 0:
-                                        ofs = 2;
-                                        break;
-                                    case 2:
-                                        ofs = 0;
-                                        break;
-                                }
-                                byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride) + ofs;
-                                byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (i * source.planeBytes);
-
-                                for (int x = 0; x < data.Width; x++)
-                                {
-                                    *p = *q;
-
-                                    p += bpp;
-                                    q += source.colBytes;
-                                }
-                            }
-
+                            case 0:
+                                ofs = 2;
+                                break;
+                            case 2:
+                                ofs = 0;
+                                break;
                         }
-                        else
+                        byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y) + ofs;
+                        byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y) + (i * source.planeBytes);
+
+                        for (int x = 0; x < tempDisplaySurface.Width; x++)
                         {
+                            *p = *q;
 
-                            byte* p = (byte*)data.Scan0.ToPointer() + (y * data.Stride);
-                            byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y);
-                            for (int x = 0; x < data.Width; x++)
-                            {
-                                p[0] = q[2];
-                                p[1] = q[1];
-                                p[2] = q[0];
-                                if (source.colBytes == 4)
-                                {
-                                    p[3] = q[3];
-                                }
-
-                                p += bpp;
-                                q += source.colBytes;
-                            }
+                            p += ColorBgra.SizeOf;
+                            q += source.colBytes;
                         }
                     }
 
-
                 }
-                finally
-                {
-                    bmp.UnlockBits(data);
-
-#if DEBUG
-					//bmp.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "dp.png"), ImageFormat.Png);
-#endif
-                }
-
-                using (Graphics gr = Graphics.FromHdc(platformContext))
+                else
                 {
 
-                    if (source.colBytes == 4)
+                    byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y);
+                    byte* q = (byte*)source.baseAddr.ToPointer() + (source.rowBytes * y);
+                    for (int x = 0; x < tempDisplaySurface.Width; x++)
                     {
-                        using (Bitmap temp = new Bitmap(w, h, PixelFormat.Format32bppArgb))
+                        p[0] = q[2];
+                        p[1] = q[1];
+                        p[2] = q[0];
+                        if (source.colBytes == 4)
                         {
-                            Rectangle rect = new Rectangle(0, 0, w, h);
+                            p[3] = q[3];
+                        }
+
+                        p += ColorBgra.SizeOf;
+                        q += source.colBytes;
+                    }
+                }
+            }
+
+            using (Graphics gr = Graphics.FromHdc(platformContext))
+            {
+                if (source.colBytes == 4)
+                {
+                    using (Bitmap temp = new Bitmap(width, height, PixelFormat.Format32bppArgb))
+                    {
+                        Rectangle rect = new Rectangle(0, 0, width, height);
+
+                        using (Graphics tempGr = Graphics.FromImage(temp))
+                        {
+                            tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
+                            tempGr.CompositingMode = CompositingMode.SourceOver;
+                            using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
+                            {
+                                tempGr.DrawImageUnscaled(bmp, rect);
+                            }
+                        }
+
+                        gr.DrawImageUnscaled(temp, dstCol, dstRow);
+                    }
+
+                }
+                else
+                {
+                    if ((source.version >= 1) && source.masks != IntPtr.Zero && nplanes == 3) // use the mask for the Protected Transaprency cases 
+                    {
+                        PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
+
+                        for (int y = 0; y < tempDisplaySurface.Height; y++)
+                        {
+                            ColorBgra* p = tempDisplaySurface.GetRowAddressUnchecked(y);
+                            byte* q = (byte*)mask.maskData.ToPointer() + (mask.rowBytes * y);
+                            for (int x = 0; x < tempDisplaySurface.Width; x++)
+                            {
+                                p->A = q[0];
+
+                                p++;
+                                q += mask.colBytes;
+                            }
+                        }
+
+                        using (Bitmap temp = new Bitmap(width, height, PixelFormat.Format32bppArgb))
+                        {
+                            Rectangle rect = new Rectangle(0, 0, width, height);
 
                             using (Graphics tempGr = Graphics.FromImage(temp))
                             {
                                 tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
-                                tempGr.DrawImageUnscaled(bmp, rect);
+                                tempGr.CompositingMode = CompositingMode.SourceOver;
+                                using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
+                                {
+                                    tempGr.DrawImageUnscaled(bmp, rect);
+                                }
                             }
-                            // temp.Save(Path.Combine(Application.StartupPath, "masktemp.png"), ImageFormat.Png);
 
                             gr.DrawImageUnscaled(temp, dstCol, dstRow);
                         }
@@ -3584,61 +3623,18 @@ namespace PSFilterLoad.PSApi
                     }
                     else
                     {
-                        if ((source.version >= 1) && source.masks != IntPtr.Zero && planes == 3)
+                        using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
                         {
-                            PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
-
-                            using (Bitmap temp = new Bitmap(w, h, PixelFormat.Format32bppArgb))
-                            {
-
-                                Rectangle rect = new Rectangle(0, 0, w, h);
-
-                                BitmapData bd = bmp.LockBits(rect, ImageLockMode.ReadOnly, bmp.PixelFormat);
-
-                                try
-                                {
-
-                                    for (int y = 0; y < bd.Height; y++)
-                                    {
-                                        byte* p = (byte*)bd.Scan0.ToPointer() + (y * bd.Stride);
-                                        byte* q = (byte*)mask.maskData.ToPointer() + (mask.rowBytes * y);
-                                        for (int x = 0; x < bd.Width; x++)
-                                        {
-                                            p[3] = q[0];
-
-                                            p += bpp;
-                                            q += mask.colBytes;
-                                        }
-                                    }
-                                }
-                                finally
-                                {
-                                    bmp.UnlockBits(bd);
-                                }
-
-                                using (Graphics tempGr = Graphics.FromImage(temp))
-                                {
-                                    tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
-                                    tempGr.DrawImageUnscaled(bmp, rect);
-                                }
-
-                                gr.DrawImageUnscaled(temp, dstCol, dstRow);
-                            }
-
+                            gr.DrawImageUnscaled(bmp, dstCol, dstRow);
                         }
-                        else
-                        {
-                            gr.DrawImage(bmp, dstCol, dstRow);
-                        }
-
                     }
+
+
                 }
             }
 
-
-
-			return PSError.noErr;
-		}
+            return PSError.noErr;
+        }
 
 		static Bitmap checkerBoardBitmap;
 		static unsafe void DrawCheckerBoardBitmap()
@@ -5359,6 +5355,11 @@ namespace PSFilterLoad.PSApi
 						tempMask = null;
 					}
 
+                    if (tempDisplaySurface != null)
+                    {
+                        tempDisplaySurface.Dispose();
+                        tempDisplaySurface = null;
+                    }
 
 					disposed = true;
 				}
