@@ -3065,7 +3065,6 @@ namespace PSFilterLoad.PSApi
                         using (Graphics tempGr = Graphics.FromImage(temp))
                         {
                             tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
-                            tempGr.CompositingMode = CompositingMode.SourceOver;
                             using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
                             {
                                 tempGr.DrawImageUnscaled(bmp, rect);
@@ -3102,7 +3101,6 @@ namespace PSFilterLoad.PSApi
                             using (Graphics tempGr = Graphics.FromImage(temp))
                             {
                                 tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
-                                tempGr.CompositingMode = CompositingMode.SourceOver;
                                 using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
                                 {
                                     tempGr.DrawImageUnscaled(bmp, rect);
