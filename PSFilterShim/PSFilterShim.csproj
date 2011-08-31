@@ -156,6 +156,7 @@
     <Compile Include="PSApi\PSError.cs" />
     <Compile Include="PSApi\PSImagePlane.cs" />
     <Compile Include="PSApi\PSPixelMap.cs" />
+    <Compile Include="PSApi\PSProperties.cs" />
     <Compile Include="PSApi\Rect.cs" />
     <Compile Include="PSApi\ResourceProc.cs" />
     <Compile Include="PSApi\RGBColor.cs" />
