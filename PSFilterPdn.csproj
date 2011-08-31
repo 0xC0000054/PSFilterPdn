@@ -101,6 +101,7 @@
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\ProgressFunc.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
+    <Compile Include="PSApi\PSProperties.cs" />
     <Compile Include="PSApi\SafeLibraryHandle.cs" />
     <Compile Include="PsFilterPdnConfigToken.cs" />
     <Compile Include="PSFilterPdn.cs" />
