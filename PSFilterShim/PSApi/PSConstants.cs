@@ -60,23 +60,7 @@ namespace PSFilterLoad.PSApi
         public const int latestFilterSubVersion = 0;
 
         public const int plugInModeRGBColor = 3;
-        /// <summary>
-        /// Number of channels - 'nuch'
-        /// </summary>
-        public const uint propNumberOfChannels = 0x6e756368U;
-        /// <summary>
-        /// Channel Name - 'nmch'
-        /// </summary>
-        public const uint propChannelName = 0x6e6d6368U;
-        /// <summary>
-        /// Image mode - 'mode'
-        /// </summary>
-        public const uint propImageMode = 0x6d6f6465U;
-        /// <summary>
-        /// Interplolation Mode - 'intp',
-        /// The current interpolation method: 1 = point sample, 2 = bilinear, 3 = bicubic
-        /// </summary>
-        public const uint propInterpolationMethod = 0x696E7470U;
+        
         /// <summary>
         /// PiPL FlagSet, the fourth bit in the first byte is RGB.
         /// </summary>
