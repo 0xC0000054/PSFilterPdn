@@ -2137,41 +2137,69 @@ namespace PSFilterLoad.PSApi
 				{
 					if (src_valid)
 					{
-						Marshal.FreeHGlobal(filterRecord.inData);
-						filterRecord.inData = IntPtr.Zero;
-						src_valid = false;
+                        try
+                        {
+                            Marshal.FreeHGlobal(filterRecord.inData);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                        finally
+                        {
+                            filterRecord.inData = IntPtr.Zero;
+                        }
 					}
 
 					fill_buf(ref filterRecord.inData, ref filterRecord.inRowBytes, filterRecord.inRect, filterRecord.inLoPlane, filterRecord.inHiPlane);
 					inRect = filterRecord.inRect;
-					src_valid = true;
-				}
-			}
-			else
-			{
-				if (src_valid)
-				{
-					Marshal.FreeHGlobal(filterRecord.inData);
-					filterRecord.inData = IntPtr.Zero;
-					src_valid = false;
-				}
-				filterRecord.inRowBytes = 0;
-				inRect = filterRecord.inRect;
-			}
-		 
-			if (RectNonEmpty(filterRecord.outRect))
-			{
-				if (!outRect.Equals(filterRecord.outRect) || IsSinglePlane())
-				{
-					if (dst_valid)
-					{
-						Marshal.FreeHGlobal(filterRecord.outData);
-						filterRecord.outData = IntPtr.Zero;
-						dst_valid = false;
-					}
+                    filterRecord.inColumnBytes = (filterRecord.inHiPlane - filterRecord.inLoPlane) + 1;
+                    src_valid = true;
+                }
+            }
+            else
+            {
+                if (src_valid)
+                {
+                    try
+                    {
+                        Marshal.FreeHGlobal(filterRecord.inData);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    finally
+                    {
+                        filterRecord.inData = IntPtr.Zero;
+                    }
+                    src_valid = false;
+                }
+                filterRecord.inRowBytes = 0;
+                inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
+            }
 
-					fillOutBuf(ref filterRecord.outData, ref filterRecord.outRowBytes, filterRecord.outRect, filterRecord.outLoPlane, filterRecord.outHiPlane);
-					dst_valid = true;
+            if (RectNonEmpty(filterRecord.outRect))
+            {
+                if (!outRect.Equals(filterRecord.outRect) || IsSinglePlane())
+                {
+                    if (dst_valid)
+                    {
+                        try
+                        {
+                            Marshal.FreeHGlobal(filterRecord.outData);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                        finally
+                        {
+                            filterRecord.outData = IntPtr.Zero;
+                        }
+                        dst_valid = false;
+                    }
+
+                    fillOutBuf(ref filterRecord.outData, ref filterRecord.outRowBytes, filterRecord.outRect, filterRecord.outLoPlane, filterRecord.outHiPlane);
+                    filterRecord.outColumnBytes = (filterRecord.outHiPlane - filterRecord.outLoPlane) + 1;
+                    dst_valid = true;
 				}
 #if DEBUG
 				Debug.WriteLine(string.Format("outRowBytes = {0}", filterRecord.outRowBytes));
@@ -2186,8 +2214,17 @@ namespace PSFilterLoad.PSApi
 			{
 				if (dst_valid)
 				{
-					Marshal.FreeHGlobal(filterRecord.outData);
-					filterRecord.outData = IntPtr.Zero;
+                    try
+                    {
+                        Marshal.FreeHGlobal(filterRecord.outData);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    finally
+                    {
+                        filterRecord.outData = IntPtr.Zero;
+                    }
 					dst_valid = false;
 				}
 				filterRecord.outRowBytes = 0;
@@ -2219,14 +2256,14 @@ namespace PSFilterLoad.PSApi
 		/// <param name="lockRect">The rectangle to clamp the size to.</param>
 		static void ScaleTempSurface(Rectangle lockRect)
 		{
-			int scale = fixed2int(filterRecord.inputRate);
-			if (scale == 0)
+			int scaleFactor = fixed2int(filterRecord.inputRate);
+			if (scaleFactor == 0)
 			{
-				scale = 1;
+				scaleFactor = 1;
 			}
 
-			int scalew = source.Width / scale;
-			int scaleh = source.Height / scale;
+			int scalew = source.Width / scaleFactor;
+			int scaleh = source.Height / scaleFactor;
 
 			if (lockRect.Width > scalew)
 			{
@@ -2246,7 +2283,7 @@ namespace PSFilterLoad.PSApi
 					tempSurface = null;
 				}
 
-				if (scale > 1) // Filter preview?
+				if (scaleFactor > 1) // Filter preview?
 				{
 					tempSurface = new Surface(scalew, scaleh);
 					tempSurface.FitSurface(ResamplingAlgorithm.SuperSampling, source);
@@ -2873,13 +2910,13 @@ namespace PSFilterLoad.PSApi
 
 		static void ScaleTempMask(Rectangle lockRect)
 		{
-			int scale = fixed2int(filterRecord.maskRate);
+			int scaleFactor = fixed2int(filterRecord.maskRate);
 
-			if (scale == 0)
-				scale = 1;
+			if (scaleFactor == 0)
+				scaleFactor = 1;
 
-			int scalew = source.Width / scale;
-			int scaleh = source.Height / scale;
+			int scalew = source.Width / scaleFactor;
+			int scaleh = source.Height / scaleFactor;
 
 			if (lockRect.Width > scalew)
 			{
@@ -2892,7 +2929,7 @@ namespace PSFilterLoad.PSApi
 			}
 			if ((tempMask == null) || scalew != tempMask.Width && scaleh != tempMask.Height)
 			{
-				if (scale > 1) // Filter preview?
+				if (scaleFactor > 1) // Filter preview?
 				{
 					tempMask = new Surface(scalew, scaleh);
 					tempMask.FitSurface(ResamplingAlgorithm.SuperSampling, mask);
@@ -4681,93 +4718,149 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		static short property_get_proc(uint signature, uint key, int index, ref int simpleProperty, ref System.IntPtr complexProperty)
-		{
+        static short property_get_proc(uint signature, uint key, int index, ref int simpleProperty, ref System.IntPtr complexProperty)
+        {
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Format("Sig: {0}, Key: {1}, Index: {2}", PropToString(signature), PropToString(key), index.ToString()));
 #endif
-			if (signature != PSConstants.kPhotoshopSignature)
-				return PSError.errPlugInHostInsufficient;
+            if (signature != PSConstants.kPhotoshopSignature)
+                return PSError.errPlugInHostInsufficient;
 
-			if (key == PSConstants.propNumberOfChannels)
-			{
-				simpleProperty = ignoreAlpha ? 3 : 4;
-			}
-			else if (key == PSConstants.propChannelName)
-			{
-				int maxChannelIndex = ignoreAlpha ? 2 : 3; // zero indexed
-				if (index < 0 || index > maxChannelIndex)
-				{
-					return PSError.errPlugInPropertyUndefined;
-				}
-				string name = string.Empty;
-				switch (index)
-				{
-					case 0:
-						name = Resources.RedChannelName;
-						break;
-					case 1:
-						name = Resources.GreenChannelName;
-						break;
-					case 2:
-						name = Resources.BlueChannelName;
-						break;
-					case 3:
-						name = Resources.AlphaChannelName;
-						break;
-				}
+            byte[] bytes = null;
 
-				byte[] bytes = Encoding.ASCII.GetBytes(name);
+            switch (((PSProperties)key))
+            {
+                case PSProperties.propBigNudgeH:
+                case PSProperties.propBigNudgeV:
+                    simpleProperty = int2fixed(10);
+                    break;
+                case PSProperties.propCaption:
+                    complexProperty = handle_new_proc(0);
+                    break;
+                case PSProperties.propChannelName:
+                    int maxChannelIndex = ignoreAlpha ? 2 : 3; // zero indexed
+                    if (index < 0 || index > maxChannelIndex)
+                    {
+                        return PSError.errPlugInPropertyUndefined;
+                    }
+                    string name = string.Empty;
+                    switch (index)
+                    {
+                        case 0:
+                            name = Resources.RedChannelName;
+                            break;
+                        case 1:
+                            name = Resources.GreenChannelName;
+                            break;
+                        case 2:
+                            name = Resources.BlueChannelName;
+                            break;
+                        case 3:
+                            name = Resources.AlphaChannelName;
+                            break;
+                    }
 
-				complexProperty = handle_new_proc(bytes.Length);
-				Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
-				handle_unlock_proc(complexProperty); // this is really not needed as the handle is fixed 
+                    bytes = Encoding.ASCII.GetBytes(name);
 
-			}
-			else if (key == PSConstants.propImageMode)
-			{
-				simpleProperty = PSConstants.plugInModeRGBColor;
-			}
-			else if (key == PSConstants.propInterpolationMethod)
-			{
-				simpleProperty = 1; // point sample
-			}
-			else
-			{
-				return PSError.errPlugInHostInsufficient;
-			}
+                    complexProperty = handle_new_proc(bytes.Length);
+                    Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
+                    handle_unlock_proc(complexProperty); // this is really not needed as the handle is fixed
+                    break;
+                case PSProperties.propCopyright:
+                    simpleProperty = 0;  // no copyright
+                    break;
+                case PSProperties.propEXIFData:
+                    complexProperty = handle_new_proc(0);
+                    break;
+                case PSProperties.propGridMajor:
+                    simpleProperty = int2fixed(1);
+                    break;
+                case PSProperties.propGridMinor:
+                    simpleProperty = 4;
+                    break;
+                case PSProperties.propImageMode:
+                    simpleProperty = PSConstants.plugInModeRGBColor;
+                    break;
+                case PSProperties.propInterpolationMethod:
+                    simpleProperty = 1;
+                    break;
+                case PSProperties.propNumberOfChannels:
+                    simpleProperty = filterRecord.planes;
+                    break;
+                case PSProperties.propNumberOfPaths:
+                    simpleProperty = 0;
+                    break;
+                case PSProperties.propRulerUnits:
+                    simpleProperty = 0; // pixels
+                    break;
+                case PSProperties.propRulerOriginH:
+                case PSProperties.propRulerOriginV:
+                    simpleProperty = int2fixed(2);
+                    break;
+                case PSProperties.propSerialString:
 
-			return PSError.noErr;
-		}
+                    bytes = Encoding.ASCII.GetBytes(filterRecord.serial.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    complexProperty = handle_new_proc(bytes.Length);
+                    Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
+                    handle_unlock_proc(complexProperty); // this is really not needed as the handle is fixed
+
+                    break;
+                case PSProperties.propURL:
+                    complexProperty = handle_new_proc(0);
+                    break;
+                case PSProperties.propTitle:
+                    complexProperty = handle_new_proc(0);
+                    break;
+                case PSProperties.propWatchSuspension:
+                    simpleProperty = 0;
+                    break;
+                default:
+                    return PSError.errPlugInHostInsufficient;
+            }
+
+            return PSError.noErr;
+        }
 
 #if PSSDK_3_0_4
-		static short property_set_proc(uint signature, uint key, int index, int simpleProperty, ref System.IntPtr complexProperty)
-		{
+        static short property_set_proc(uint signature, uint key, int index, int simpleProperty, ref System.IntPtr complexProperty)
+        {
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Format("Sig: {0}, Key: {1}, Index: {2}", PropToString(signature), PropToString(key), index.ToString()));
 #endif
-			if (signature != PSConstants.kPhotoshopSignature)
-				return PSError.errPlugInHostInsufficient;
+            if (signature != PSConstants.kPhotoshopSignature)
+                return PSError.errPlugInHostInsufficient;
 
-			if (key == PSConstants.propNumberOfChannels)
-			{
-			}
-			else if (key == PSConstants.propChannelName)
-			{
-			}
-			else if (key == PSConstants.propImageMode)
-			{
-			}
-			else
-			{
-				return PSError.errPlugInHostInsufficient;
-			}
-
-			return PSError.noErr;
-		}
+            switch (((PSProperties)key))
+            {
+                case PSProperties.propBigNudgeH:
+                case PSProperties.propBigNudgeV:
+                case PSProperties.propCaption:
+                case PSProperties.propChannelName:
+                case PSProperties.propCopyright:
+                case PSProperties.propEXIFData:
+                case PSProperties.propGridMajor:
+                case PSProperties.propGridMinor:
+                case PSProperties.propImageMode:
+                case PSProperties.propInterpolationMethod:
+                case PSProperties.propNumberOfChannels:
+                case PSProperties.propNumberOfPaths:
+                case PSProperties.propRulerUnits:
+                case PSProperties.propRulerOriginH:
+                case PSProperties.propRulerOriginV:
+                case PSProperties.propSerialString:
+                case PSProperties.propURL:
+                case PSProperties.propTitle:
+                case PSProperties.propWatchSuspension:
+                    break;
+                default:
+                    return PSError.errPlugInHostInsufficient;
+            }
+            
+            return PSError.noErr;
+        }
 #endif
 
-		static short resource_add_proc(uint ofType, ref IntPtr data)
+        static short resource_add_proc(uint ofType, ref IntPtr data)
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Empty);
