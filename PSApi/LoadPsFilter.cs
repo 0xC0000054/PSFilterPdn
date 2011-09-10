@@ -820,8 +820,6 @@ namespace PSFilterLoad.PSApi
 		static IntPtr data;
 		static short result;
 
-		const int bpp = 4;
-
 		static abort abortFunc;
  
 		public abort AbortFunc
@@ -949,7 +947,6 @@ namespace PSFilterLoad.PSApi
 			outRowBytes = 0;
 			outHiPlane = 0;
 			outLoPlane = 0;
-			lastStoredPlane = -1;
 
 			inDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "inData").ToInt32();
 			outDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "outData").ToInt32();
@@ -2067,7 +2064,6 @@ namespace PSFilterLoad.PSApi
         static Rect16 lastOutRect;
 		static int outRowBytes;
 		static int outLoPlane;
-		static int lastStoredPlane;
 		static int outHiPlane;
 		static Rect16 inRect;
 		static Rect16 maskRect;
@@ -2087,16 +2083,11 @@ namespace PSFilterLoad.PSApi
 		{
 			filterRecord = (FilterRecord)filterRecordPtr.Target;
 
-            if (dst_valid && RectNonEmpty(outRect) && (!outRect.Equals(lastOutRect) ||
-                (IsSinglePlane() && lastStoredPlane != outLoPlane) || !IsSinglePlane()))
+            if (dst_valid && RectNonEmpty(outRect))
 			{
 				store_buf(filterRecord.outData, outRowBytes, outRect, outLoPlane, outHiPlane);
                 
                 lastOutRect = outRect;
-                if (IsSinglePlane())
-                {
-                    lastStoredPlane = outLoPlane;
-                }
 			}
 
 #if DEBUG
@@ -2593,7 +2584,7 @@ namespace PSFilterLoad.PSApi
 
 						}
 
-						p += bpp;
+						p += ColorBgra.SizeOf;
 						q += nplanes;
 					}
 				}
@@ -3333,8 +3324,8 @@ namespace PSFilterLoad.PSApi
 
 							}
 
-							p += bpp;
-							q += nplanes;
+							p += nplanes;
+							q += ColorBgra.SizeOf;
 						}
 					}
 
