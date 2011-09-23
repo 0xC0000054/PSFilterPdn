@@ -6,35 +6,25 @@ namespace PSFilterLoad.PSApi
 {
     internal sealed class ColorPicker : ColorDialog
     {
-
         private string title = string.Empty;
-        private bool titleSet = false;
-
-        public string Title
-        {
-            set
-            {
-                if (!string.IsNullOrEmpty(title) && value != title)
-                {
-                    title = value;
-                    titleSet = false;
-                }
-            }
-        }
+        private const int WM_INITDIALOG = 0x0110;
 
         protected override IntPtr HookProc(IntPtr hWnd, int msg, IntPtr wparam, IntPtr lparam)
         {
-            if (!titleSet)
+            if (msg == WM_INITDIALOG)
             {
                 if (!string.IsNullOrEmpty(title))
                 {
-                    NativeMethods.SetWindowText(hWnd, title); // make sure the title is not an empty string
+                    NativeMethods.SetWindowText(hWnd, this.title); // make sure the title is not an empty string
                 }
-                
-                titleSet = true;
             }
 
             return base.HookProc(hWnd, msg, wparam, lparam);
+        }
+
+        public ColorPicker(string title)
+        {
+            this.title = title;
         }
 
     }
