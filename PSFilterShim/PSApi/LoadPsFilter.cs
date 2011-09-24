@@ -2972,7 +2972,6 @@ namespace PSFilterLoad.PSApi
                     for (int x = 0; x < tempDisplaySurface.Width; x++)
                     {
                         p[0] = q[2];
-
                         p[1] = q[1];
                         p[2] = q[0];
                         if (source.colBytes == 4)
@@ -3016,7 +3015,7 @@ namespace PSFilterLoad.PSApi
                         for (int y = 0; y < tempDisplaySurface.Height; y++)
                         {
                             ColorBgra* p = tempDisplaySurface.GetRowAddressUnchecked(y);
-                            byte* q = (byte*)mask.maskData.ToPointer() + (mask.rowBytes * y);
+                            byte* q = (byte*)mask.maskData.ToPointer() + (y * mask.rowBytes);
                             for (int x = 0; x < tempDisplaySurface.Width; x++)
                             {
                                 p->A = q[0];
@@ -4270,7 +4269,7 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		/// Setup_delegateses this instance.
+		/// Setup the delegates for this instance.
 		/// </summary>
 		static void setup_delegates()
 		{
