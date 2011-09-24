@@ -3205,7 +3205,6 @@ namespace PSFilterLoad.PSApi
 					}
 					Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
 
-					bool padBuffer = false;
 					if (lockRect.Left < 0 || lockRect.Top < 0)
 					{
 						if (lockRect.Left < 0 && lockRect.Top < 0)
@@ -3224,7 +3223,6 @@ namespace PSFilterLoad.PSApi
 							lockRect.Y = 0;
 							lockRect.Height -= -rect.top;
 						}
-						padBuffer = true;
 					}
 
 					/* the stride for the source image and destination buffer will almost never match
