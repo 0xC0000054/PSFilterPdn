@@ -4,12 +4,8 @@
     {
         public const int GPTR = 64;
 
-        /// GMEM_MOVEABLE -> 0x0002
-        public const int GMEM_MOVEABLE = 2;
         /// LOAD_LIBRARY_AS_DATAFILE -> 0x00000002
         public const int LOAD_LIBRARY_AS_DATAFILE = 2;
-        public const int RT_DIALOG = 5;
-
 
         /// PAGE_NOACCESS -> 0x01
         public const int PAGE_NOACCESS = 1;
