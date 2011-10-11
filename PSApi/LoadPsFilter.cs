@@ -5069,7 +5069,7 @@ namespace PSFilterLoad.PSApi
 			descriptor_parameters.recordInfo = (short)RecordInfo.plugInDialogOptional;
 			if (aeteDict.Count > 0)
 			{
-				if (aete.DisplayDialog)
+				if (isRepeatEffect)
 				{
 					descriptor_parameters.playInfo = (short)PlayInfo.plugInDialogDisplay;
 				}
