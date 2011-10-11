@@ -145,7 +145,6 @@ namespace PSFilterPdn
 
                 if (token.AETE != null)
                 {
-                    token.AETE.DisplayDialog = false;
                     aeteFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "aete.dat");
                     using (FileStream fs = new FileStream(aeteFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
@@ -287,10 +286,6 @@ namespace PSFilterPdn
                         aete = token.AETE
                     };
 
-                    if (pdata.aete != null)
-                    {
-                        pdata.aete.DisplayDialog = false;
-                    }
                     lps.ParmData = token.ParmData;
                     lps.IsRepeatEffect = true;
 
