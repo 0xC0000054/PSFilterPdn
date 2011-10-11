@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PSFilterPdn.PSApi
+namespace PSFilterLoad.PSApi
 {
 #if PSSDK4
     internal struct AETEParm
