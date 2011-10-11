@@ -3,53 +3,6 @@ namespace PSFilterLoad.PSApi
 {
 
 #if PSSDK4
-    internal struct AETEParm
-    {
-        public string name;
-        public uint key;
-        public uint type;
-        public string desc;
-        public short flags;
-    }
-
-    internal struct AETEEnums
-    {
-        public uint type;
-        public short count;
-        public AETEEnum[] enums;
-    }
-
-    internal struct AETEEnum
-    {
-        public string name;
-        public uint type;
-        public string desc;
-    }
-
-    internal struct AETEEvent
-    {
-        public string vendor;
-        public string desc;
-        public int evntClass;
-        public int type;
-        public uint replyType;
-        public uint parmType;
-        public short flags;
-        public AETEParm[] parms;
-        public AETEEnums[] enums;
-    }
-
-    internal sealed class PluginAETE
-    {
-        public short version;
-        public short lang;
-        public string suiteID;
-        public short suiteLevel;
-        public short suiteVersion;
-
-        public AETEEvent[] events;
-    }
-
     [System.Serializable()]
     public sealed class AETEData
     {
