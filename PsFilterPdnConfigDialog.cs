@@ -581,7 +581,6 @@ namespace PSFilterPdn
 
 				if (data.aete != null)
 				{
-					data.aete.DisplayDialog = true;
 					aeteFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "aete.dat");
 					using (FileStream fs = new FileStream(aeteFileName, FileMode.Create, FileAccess.Write, FileShare.None))
 					{
@@ -795,11 +794,6 @@ namespace PSFilterPdn
                                 using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, this.Handle))
                                 {
                                     lps.ProgressFunc = new ProgressProc(UpdateProgress);
-
-                                    if (data.aete != null)
-                                    {
-                                        data.aete.DisplayDialog = true;
-                                    }
 
                                     bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
                                     bool userCanceled = (result && lps.ErrorMessage == Resources.UserCanceledError);
