@@ -99,6 +99,7 @@
     <Compile Include="PSApi\NativeMethods.cs" />
     <Compile Include="PSApi\ParameterData.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
+    <Compile Include="PSApi\PluginAETE.cs" />
     <Compile Include="PSApi\ProgressFunc.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
