@@ -54,25 +54,12 @@ namespace PSFilterLoad.PSApi
     public sealed class AETEData
     {
         private Dictionary<uint, short> flagList;
-        private bool displayDialog;
 
         public Dictionary<uint, short> FlagList
         {
             get
             {
                 return flagList;
-            }
-        }
-
-        public bool DisplayDialog
-        {
-            get
-            {
-                return displayDialog;
-            }
-            internal set
-            {
-                displayDialog = value;
             }
         }
 
@@ -90,7 +77,6 @@ namespace PSFilterLoad.PSApi
                     }
                 }
             }
-            this.displayDialog = false;
         }
     } 
 #endif
