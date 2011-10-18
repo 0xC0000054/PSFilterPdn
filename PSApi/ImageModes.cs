@@ -19,11 +19,7 @@ namespace PSFilterLoad.PSApi
         plugInModeDuotone = 8,
         plugInModeLabColor = 9,
         plugInModeGray16 = 10,
-        plugInModeRGB48 = 11,
-        plugInModeLab48 = 12,
-        plugInModeCMYK64 = 13,
-        plugInModeDeepMultichannel = 14,
-        plugInModeDuotone16 = 15
+        plugInModeRGB48 = 11
     }
 #endif
 }
