@@ -2934,6 +2934,7 @@ namespace PSFilterLoad.PSApi
 
             SetupTempDisplaySurface(width, height, (source.version >= 1 && nplanes == 3 && source.masks != IntPtr.Zero));
 
+
             for (int y = 0; y < tempDisplaySurface.Height; y++)
             {
 
@@ -3098,11 +3099,11 @@ namespace PSFilterLoad.PSApi
 
 					if (selectedRegion.IsVisible(x, y))
 					{
-						p->Bgra |= 0xffffffff; // Solid white in 0xaarrggbb format
+						p->Bgra |= 0xffffffff; // 0xaarrggbb format 
 					}
 					else
 					{
-						p->Bgra |= 0xff000000; // Solid black in 0xaarrggbb format
+						p->Bgra |= 0xff000000; 
 					}
 
 					p++;
@@ -3133,31 +3134,37 @@ namespace PSFilterLoad.PSApi
 			{
 				keys = new List<uint>();
 				int index = 0;
-				while (true)
-				{
-					uint key = (uint)Marshal.ReadInt32(param1, index);
-					if (key == 0)
-					{
-						break;
-					}
-					keys.Add(key);
-					index += 4;
-				}
+                if (param1 != IntPtr.Zero) // check if the pointer is valid
+                {
+                    while (true)
+                    {
+                        uint key = (uint)Marshal.ReadInt32(param1, index);
+                        if (key == 0)
+                        {
+                            break;
+                        }
+                        keys.Add(key);
+                        index += 4;
+                    } 
+                }
 			}
 			else
 			{
 				subKeys = new List<uint>();
 				int index = 0;
-				while (true)
-				{
-					uint key = (uint)Marshal.ReadInt32(param1, index);
-					if (key == 0)
-					{
-						break;
-					}
-					subKeys.Add(key);
-					index += 4;
-				}
+                if (param1 != IntPtr.Zero)
+                {
+                    while (true)
+                    {
+                        uint key = (uint)Marshal.ReadInt32(param1, index);
+                        if (key == 0)
+                        {
+                            break;
+                        }
+                        subKeys.Add(key);
+                        index += 4;
+                    } 
+                }
 				isSubKey = true;
 
 			}
@@ -3191,7 +3198,7 @@ namespace PSFilterLoad.PSApi
 		{
 			if (descErr != PSError.noErr)
 			{
-				descErrValue = descErr;
+				descErrValue = descErr;            
 			}
 
 			if (aeteDict.Count > 0)
@@ -3237,41 +3244,34 @@ namespace PSFilterLoad.PSApi
 		}
 		static short GetFloatProc(System.IntPtr param0, ref double param1)
 		{
-			descErr = PSError.noErr;
-
 			param1 = (double)aeteDict[getKey].Value;
 
-			return descErr;
+            return PSError.noErr;
 		}
 		static short GetUnitFloatProc(System.IntPtr param0, ref uint param1, ref double param2)
 		{
-			descErr = PSError.noErr;
 			param1 = aeteDict[getKey].Type;
 			param2 = (double)aeteDict[getKey].Value;
-			return descErr;
+            return PSError.noErr;
 		}
 		static short GetBooleanProc(System.IntPtr param0, ref byte param1)
 		{
-			descErr = PSError.noErr;
-
 			param1 = (byte)aeteDict[getKey].Value;
 
-			return descErr;
+            return PSError.noErr;
 		}
 		static short GetTextProc(System.IntPtr param0, ref System.IntPtr param1)
 		{
-			descErr = PSError.noErr;
 			int size = aeteDict[getKey].Size;
 			param1 = handle_new_proc(size);
 			IntPtr hPtr = Marshal.ReadIntPtr(param1);
 			Marshal.Copy((byte[])aeteDict[getKey].Value, 0, hPtr, size);
 
 
-			return descErr;
+            return PSError.noErr;
 		}
 		static short GetAliasProc(System.IntPtr param0, ref System.IntPtr param1)
 		{
-			descErr = PSError.noErr;
 
 			int size = aeteDict[getKey].Size;
 			param1 = handle_new_proc(size);
@@ -3279,21 +3279,18 @@ namespace PSFilterLoad.PSApi
 			Marshal.Copy((byte[])aeteDict[getKey].Value, 0, hPtr, size);
 
 
-			return descErr;
+            return PSError.noErr;
 		}
 		static short GetEnumeratedProc(System.IntPtr param0, ref uint param1)
 		{
-			descErr = PSError.noErr;
-
 			param1 = (uint)aeteDict[getKey].Value;
 
-			return descErr;
+            return PSError.noErr;
 		}
 		static short GetClassProc(System.IntPtr param0, ref uint param1)
 		{
 			return PSError.errPlugInHostInsufficient;
 		}
-
 
 		static short GetSimpleReferenceProc(System.IntPtr param0, ref PIDescriptorSimpleReference param1)
 		{
@@ -3370,16 +3367,14 @@ namespace PSFilterLoad.PSApi
 		}
 		static short GetCountProc(System.IntPtr param0, ref uint param1)
 		{
-			descErr = PSError.noErr;
 			param1 = (uint)aeteDict.Count;
-			return descErr;
+            return PSError.noErr;
 		}
 		static short GetStringProc(System.IntPtr param0, System.IntPtr param1)
 		{
-			descErr = PSError.noErr;
 			int size = aeteDict[getKey].Size;
 			Marshal.Copy((byte[])aeteDict[getKey].Value, 0, param1, size);
-			return descErr;
+            return PSError.noErr;
 		}
 		static short GetPinnedIntegerProc(System.IntPtr param0, int param1, int param2, ref int param3)
 		{
