@@ -68,13 +68,13 @@
   </Target>
   -->
   <ItemGroup>
-    <Reference Include="PaintDotNet.Base, Version=3.58.4081.24574, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="PaintDotNet.Base">
       <HintPath>Refrences\PaintDotNet.Base.dll</HintPath>
     </Reference>
-    <Reference Include="PaintDotNet.Core, Version=3.58.4081.24581, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="PaintDotNet.Core">
       <HintPath>Refrences\PaintDotNet.Core.dll</HintPath>
     </Reference>
-    <Reference Include="PaintDotNet.Effects, Version=3.58.4081.24585, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="PaintDotNet.Effects">
       <HintPath>Refrences\PaintDotNet.Effects.dll</HintPath>
     </Reference>
     <Reference Include="PaintDotNet.SystemLayer">
