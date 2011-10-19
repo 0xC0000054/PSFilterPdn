@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
     [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    internal delegate int filterep(short selector, [In, Out]IntPtr fpb, ref IntPtr pluginData, ref short result);
+    internal delegate int filterep(short selector, IntPtr pluginParamBlock, ref IntPtr pluginData, ref short result);
     /// <summary>
     /// The class that encapsulates a Photoshop Filter plugin
     /// </summary>
