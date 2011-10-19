@@ -5,7 +5,7 @@ using System.Security.Permissions;
 namespace PSFilterLoad.PSApi
 {
     /// <summary>
-    /// The struct that holds the saved filter global parameter data.
+    /// The class that holds the saved filter global parameter data.
     /// </summary>
     [Serializable]
     public sealed class GlobalParameters : ISerializable
@@ -44,7 +44,7 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
-        /// Is the parm data a PS Handle (OTOF signature).
+        /// Is the parm data a PS Handle.
         /// </summary>
         public bool ParmDataIsPSHandle
         {
@@ -83,7 +83,7 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
-        /// Is the plugin data a PS Handle (OTOF signature).
+        /// Is the plugin data a PS Handle.
         /// </summary>
         public bool PluginDataIsPSHandle
         {
