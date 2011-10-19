@@ -1,30 +1,10 @@
-﻿/******************************** Module Header ********************************\
-* Module Name:  UnmanagedLibrary.cs
-* Project:      CSLoadLibrary
-* Copyright (c) Microsoft Corporation.
-* 
-* The source code of UnmanagedLibrary is quoted from Mike Stall's article:
-* 
-* Type-safe Managed wrappers for kernel32!GetProcAddress
-* http://blogs.msdn.com/jmstall/archive/2007/01/06/Typesafe-GetProcAddress.aspx
-* 
-* This source is subject to the Microsoft Public License.
-* See http://www.microsoft.com/opensource/licenses.mspx#Ms-PL.
-* All other rights reserved.
-* 
-* THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, 
-* EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED 
-* WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
-\*******************************************************************************/
-
-#region Using directives
+﻿using System.Security.Permissions;
 using Microsoft.Win32.SafeHandles;
-using System;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
-#endregion
 
+/* The following code is quoted from Mike Stall's blog 
+ * Type-safe Managed wrappers for kernel32!GetProcAddress
+ * http://blogs.msdn.com/b/jmstall/archive/2007/01/06/typesafe-getprocaddress.aspx
+ */
 
 namespace PSFilterLoad.PSApi
 {  
