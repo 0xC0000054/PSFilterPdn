@@ -4097,7 +4097,7 @@ namespace PSFilterLoad.PSApi
                         break;
                     case PSProperties.propSerialString:
 
-                        bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
+                        bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(System.Globalization.CultureInfo.InvariantCulture));
                         complexProperty = handle_new_proc(bytes.Length);
                         Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
                         handle_unlock_proc(complexProperty); // this is really not needed as the handle is fixed
