@@ -321,7 +321,6 @@ namespace PSFilterLoad.PSApi
 
 
 			outRect.left = outRect.top = outRect.right = outRect.bottom = 0;
-            lastOutRect.left = lastOutRect.top = lastOutRect.right = lastOutRect.bottom = 0;
 			inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
 			maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
 
@@ -1063,8 +1062,10 @@ namespace PSFilterLoad.PSApi
 
 			pdata.entry.entry(FilterSelector.filterSelectorParameters, filterRecordPtr, ref data, ref result);
 #if DEBUG
-			Ping(DebugFlags.Call, string.Format("data = {0:X},  parameters = {1:X}", data, ((FilterRecord)filterRecordPtr.Target).parameters));
-
+            unsafe
+            {
+                Ping(DebugFlags.Call, string.Format("data = {0:X},  parameters = {1:X}", data, ((FilterRecord*)filterRecordPtr)->parameters));
+            }
 
 			Ping(DebugFlags.Call, "After filterSelectorParameters");
 #endif
@@ -1433,7 +1434,6 @@ namespace PSFilterLoad.PSApi
 		static int outRowBytesOfs;
 		static int maskRowBytesOfs;
 
-        static Rect16 lastOutRect;
 		static Rect16 outRect;
 		static int outRowBytes;
 		static int outLoPlane;
@@ -1454,68 +1454,65 @@ namespace PSFilterLoad.PSApi
 
         static unsafe short advance_state_proc()
         {
-            FilterRecord* fr = (FilterRecord*)filterRecordPtr.ToPointer();
+            FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
             if (dst_valid && RectNonEmpty(outRect))
             {
-                store_buf(fr->outData, outRowBytes, outRect, outLoPlane, outHiPlane);
-
-                lastOutRect = outRect;
+                store_buf(filterRecord->outData, outRowBytes, outRect, outLoPlane, outHiPlane);
             }
 
-
 #if DEBUG
-			Ping(DebugFlags.AdvanceState, string.Format("Inrect = {0}, Outrect = {1}, maskRect = {2}", fr->inRect.ToString(), fr->outRect.ToString(), fr->maskRect.ToString()));
+			Ping(DebugFlags.AdvanceState, string.Format("Inrect = {0}, Outrect = {1}, maskRect = {2}", filterRecord->inRect.ToString(), filterRecord->outRect.ToString(), filterRecord->maskRect.ToString()));
 #endif
-            if (fr->haveMask == 1 && RectNonEmpty(fr->maskRect))
+            if (filterRecord->haveMask == 1 && RectNonEmpty(filterRecord->maskRect))
             {
-                if (!maskRect.Equals(fr->maskRect))
+                if (!maskRect.Equals(filterRecord->maskRect))
                 {
-                    if (fr->maskData != IntPtr.Zero)
+                    if (filterRecord->maskData != IntPtr.Zero)
                     {
-                        Marshal.FreeHGlobal(fr->maskData);
-                        fr->maskData = IntPtr.Zero;
+                        Marshal.FreeHGlobal(filterRecord->maskData);
+                        filterRecord->maskData = IntPtr.Zero;
                     }
 
-                    fill_mask(ref fr->maskData, ref fr->maskRowBytes, fr->maskRect, fr->maskRate, fr->maskPadding);
-                    maskRect = fr->maskRect;
+                    fill_mask(ref filterRecord->maskData, ref filterRecord->maskRowBytes, filterRecord->maskRect, filterRecord->maskRate, filterRecord->maskPadding);
+                    maskRect = filterRecord->maskRect;
                 }
             }
             else
             {
-                if (fr->maskData != IntPtr.Zero)
+                if (filterRecord->maskData != IntPtr.Zero)
                 {
-                    Marshal.FreeHGlobal(fr->maskData);
-                    fr->maskData = IntPtr.Zero;
+                    Marshal.FreeHGlobal(filterRecord->maskData);
+                    filterRecord->maskData = IntPtr.Zero;
                 }
-                fr->maskRowBytes = 0;
+                filterRecord->maskRowBytes = 0;
                 maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
             }
 
 
-            if (RectNonEmpty(fr->inRect))
+            if (RectNonEmpty(filterRecord->inRect))
             {
-                if (!inRect.Equals(fr->inRect) || IsSinglePlane(fr))
+                if (!inRect.Equals(filterRecord->inRect) || IsSinglePlane(filterRecord))
                 {
                     if (src_valid)
                     {
                         try
                         {
-                            Marshal.FreeHGlobal(fr->inData);
+                            Marshal.FreeHGlobal(filterRecord->inData);
                         }
                         catch (Exception)
                         {
                         }
                         finally
                         {
-                            fr->inData = IntPtr.Zero;
+                            filterRecord->inData = IntPtr.Zero;
                         }
                         src_valid = false;
                     }
 
-                    fill_buf(ref fr->inData, ref fr->inRowBytes, fr->inRect, fr->inLoPlane, fr->inHiPlane, fr->inputRate, fr->inputPadding);
-                    inRect = fr->inRect;
-                    fr->inColumnBytes = (fr->inHiPlane - fr->inLoPlane) + 1;
+                    fill_buf(ref filterRecord->inData, ref filterRecord->inRowBytes, filterRecord->inRect, filterRecord->inLoPlane, filterRecord->inHiPlane, filterRecord->inputRate, filterRecord->inputPadding);
+                    inRect = filterRecord->inRect;
+                    filterRecord->inColumnBytes = (filterRecord->inHiPlane - filterRecord->inLoPlane) + 1;
                     src_valid = true;
                 }
             }
@@ -1525,53 +1522,53 @@ namespace PSFilterLoad.PSApi
                 {
                     try
                     {
-                        Marshal.FreeHGlobal(fr->inData);
+                        Marshal.FreeHGlobal(filterRecord->inData);
                     }
                     catch (Exception)
                     {
                     }
                     finally
                     {
-                        fr->inData = IntPtr.Zero;
+                        filterRecord->inData = IntPtr.Zero;
                     }
                     src_valid = false;
                 }
-                fr->inRowBytes = 0;
+                filterRecord->inRowBytes = 0;
                 inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
             }
 
-            if (RectNonEmpty(fr->outRect))
+            if (RectNonEmpty(filterRecord->outRect))
             {
-                if (!outRect.Equals(fr->outRect) || IsSinglePlane(fr))
+                if (!outRect.Equals(filterRecord->outRect) || IsSinglePlane(filterRecord))
                 {
                     if (dst_valid)
                     {
                         try
                         {
-                            Marshal.FreeHGlobal(fr->outData);
+                            Marshal.FreeHGlobal(filterRecord->outData);
                         }
                         catch (Exception)
                         {
                         }
                         finally
                         {
-                            fr->outData = IntPtr.Zero;
+                            filterRecord->outData = IntPtr.Zero;
                         }
                         dst_valid = false;
                     }
 
-                    fillOutBuf(ref fr->outData, ref fr->outRowBytes, fr->outRect, fr->outLoPlane, fr->outHiPlane, fr->outputPadding);
-                    fr->outColumnBytes = (fr->outHiPlane - fr->outLoPlane) + 1;
+                    fillOutBuf(ref filterRecord->outData, ref filterRecord->outRowBytes, filterRecord->outRect, filterRecord->outLoPlane, filterRecord->outHiPlane, filterRecord->outputPadding);
+                    filterRecord->outColumnBytes = (filterRecord->outHiPlane - filterRecord->outLoPlane) + 1;
                     dst_valid = true;
                 }
 #if DEBUG
-				Debug.WriteLine(string.Format("outRowBytes = {0}", fr->outRowBytes));
+				Debug.WriteLine(string.Format("outRowBytes = {0}", filterRecord->outRowBytes));
 #endif
                 // store previous values
-                outRowBytes = fr->outRowBytes;
-                outRect = fr->outRect;
-                outLoPlane = fr->outLoPlane;
-                outHiPlane = fr->outHiPlane;
+                outRowBytes = filterRecord->outRowBytes;
+                outRect = filterRecord->outRect;
+                outLoPlane = filterRecord->outLoPlane;
+                outHiPlane = filterRecord->outHiPlane;
             }
             else
             {
@@ -1579,18 +1576,18 @@ namespace PSFilterLoad.PSApi
                 {
                     try
                     {
-                        Marshal.FreeHGlobal(fr->outData);
+                        Marshal.FreeHGlobal(filterRecord->outData);
                     }
                     catch (Exception)
                     {
                     }
                     finally
                     {
-                        fr->outData = IntPtr.Zero;
+                        filterRecord->outData = IntPtr.Zero;
                     }
                     dst_valid = false;
                 }
-                fr->outRowBytes = 0;
+                filterRecord->outRowBytes = 0;
                 outRowBytes = 0;
                 outRect.left = outRect.top = outRect.right = outRect.bottom = 0;
                 outLoPlane = 0;
@@ -1660,7 +1657,7 @@ namespace PSFilterLoad.PSApi
 		{
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("inRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { inRowBytes.ToString(), rect.ToString(), loplane.ToString(), hiplane.ToString() }));
-			Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", fixed2int(filterRecord.inputRate)));
+			Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", fixed2int(inputRate)));
 #endif
 
 			int nplanes = hiplane - loplane + 1;
@@ -2011,7 +2008,6 @@ namespace PSFilterLoad.PSApi
 
 #if DEBUG
             Ping(DebugFlags.AdvanceState, string.Format("outRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { outRowBytes.ToString(), rect.ToString(), loplane.ToString(), hiplane.ToString() }));
-            Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", (filterRecord.inputRate >> 16)));
 #endif
 
 
@@ -2357,7 +2353,7 @@ namespace PSFilterLoad.PSApi
 		{
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes = {0}, Rect = {1}", new object[] { maskRowBytes.ToString(), rect.ToString() }));
-			Ping(DebugFlags.AdvanceState, string.Format("maskRate = {0}", fixed2int(filterRecord.maskRate)));
+			Ping(DebugFlags.AdvanceState, string.Format("maskRate = {0}", fixed2int(maskRate)));
 #endif
 			int w = (rect.right - rect.left);
 			int h = (rect.bottom - rect.top);
@@ -4101,7 +4097,7 @@ namespace PSFilterLoad.PSApi
                         break;
                     case PSProperties.propSerialString:
 
-                        bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                        bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
                         complexProperty = handle_new_proc(bytes.Length);
                         Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
                         handle_unlock_proc(complexProperty); // this is really not needed as the handle is fixed
@@ -4628,7 +4624,7 @@ namespace PSFilterLoad.PSApi
                         resource_procsPtr = IntPtr.Zero;
                     }
 
-
+                    FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 #if PSSDK4
 					if (descriptorParametersPtr != IntPtr.Zero)
 					{
@@ -4649,7 +4645,6 @@ namespace PSFilterLoad.PSApi
                     
 
 
-                    FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 					if (filterRecord->errorString != IntPtr.Zero)
 					{
 						NativeMethods.LocalFree(filterRecord->errorString); 
@@ -4706,13 +4701,6 @@ namespace PSFilterLoad.PSApi
 						}
 						data = IntPtr.Zero;
 					}
-
-					
-
-
-					suitesSetup = false;
-					frsetup = false;
-
 
 					if (source != null)
 					{
