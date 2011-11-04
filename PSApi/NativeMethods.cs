@@ -55,6 +55,12 @@ namespace PSFilterLoad.PSApi
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetWindowText(IntPtr hWnd, string lpString);
 
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern IntPtr LocalAlloc([In] uint uFlags, [In] IntPtr sizetdwBytes);
+
+        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        public static extern IntPtr LocalFree(IntPtr hMem);
+
         [DllImport("kernel32.dll", EntryPoint = "LocalSize")]
         public static extern UIntPtr LocalSize([In()] System.IntPtr hMem);
 
