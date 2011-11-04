@@ -3,6 +3,7 @@
     static class NativeConstants
     {
         public const int GPTR = 64;
+        public const uint LPTR = GPTR;
 
         /// LOAD_LIBRARY_AS_DATAFILE -> 0x00000002
         public const int LOAD_LIBRARY_AS_DATAFILE = 2;
