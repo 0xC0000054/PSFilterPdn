@@ -1262,6 +1262,12 @@ namespace PSFilterLoad.PSApi
 #endif
 				return false;
 			}
+
+            if (showAbout)
+            {
+                return plugin_about(pdata);
+            }
+
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
 			
 			if (pdata.filterInfo != null)
@@ -1288,10 +1294,6 @@ namespace PSFilterLoad.PSApi
 				aete = pdata.aete;
 			}
 
-			if (showAbout)
-			{
-				return plugin_about(pdata);
-			}
 
 
 			setup_delegates();
