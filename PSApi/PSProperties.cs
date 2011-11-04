@@ -8,11 +8,13 @@ namespace PSFilterLoad.PSApi
     internal enum PSProperties : uint
     {
         /// <summary>
-        /// The big nudge distance Horizontal, 10 pixels default.
+        /// The big nudge distance Horizontal - 'bndH',
+        /// 10 pixels default.
         /// </summary>
         propBigNudgeH = 0x626e6448U,
         /// <summary>
-        /// The big nudge distance Vertical, 10 pixels default.
+        /// The big nudge distance Vertical - 'bndV',
+        /// 10 pixels default.
         /// </summary>
         propBigNudgeV = 0x626e6456U,
         /// <summary>
@@ -53,7 +55,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         propNumberOfChannels = 0x6e756368U,
         /// <summary>
-        /// The number of paths = 'nmpa'
+        /// The number of paths - 'nmpa'
         /// </summary>
         propNumberOfPaths = 0x6e6d7061U,
         /// <summary>
@@ -62,11 +64,11 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         propRulerUnits = 0x72756c72U,
         /// <summary>
-        /// Ruler origin horizontal
+        /// Ruler origin horizontal - 'rorH'
         /// </summary>
         propRulerOriginH = 0x726f7248U,
         /// <summary>
-        /// Ruler origin vertical
+        /// Ruler origin vertical - 'rorV'
         /// </summary>
         propRulerOriginV = 0x726f7256U,
         /// <summary>
