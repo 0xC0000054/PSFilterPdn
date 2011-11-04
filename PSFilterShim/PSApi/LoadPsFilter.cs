@@ -720,7 +720,6 @@ namespace PSFilterLoad.PSApi
 
                     globalParms.ParmDataSize = size;
                     globalParms.StoreMethod = 1;
-                    //NativeMethods.GlobalUnlock(filterRecord->parameters);
                 }
 
             }
@@ -820,8 +819,6 @@ namespace PSFilterLoad.PSApi
 
                         break;
                     case 1:
-
-                        // lock the parameters 
 
                         if (globalParms.ParmDataSize == handleSize && globalParms.ParmDataIsPSHandle)
                         {
