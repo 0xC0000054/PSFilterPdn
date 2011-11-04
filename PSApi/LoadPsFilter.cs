@@ -923,7 +923,6 @@ namespace PSFilterLoad.PSApi
 	        }
 
 			outRect.left = outRect.top = outRect.right = outRect.bottom = 0;
-            lastOutRect.left = lastOutRect.top = lastOutRect.right = lastOutRect.bottom = 0;
 			inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
 			maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
 
@@ -1579,8 +1578,10 @@ namespace PSFilterLoad.PSApi
 
 			pdata.entry.entry(FilterSelector.filterSelectorParameters, filterRecordPtr, ref data, ref result);
 #if DEBUG            
-			Ping(DebugFlags.Call, string.Format("data = {0:X},  parameters = {1:X}", data, ((FilterRecord)filterRecordPtr.Target).parameters));
-
+            unsafe
+            {
+                Ping(DebugFlags.Call, string.Format("data = {0:X},  parameters = {1:X}", data, ((FilterRecord*)filterRecordPtr)->parameters));
+            }
 
 			Ping(DebugFlags.Call, "After filterSelectorParameters"); 
 #endif
@@ -2058,7 +2059,6 @@ namespace PSFilterLoad.PSApi
 
 
 		static Rect16 outRect;
-        static Rect16 lastOutRect;
 		static int outRowBytes;
 		static int outLoPlane;
 		static int outHiPlane;
@@ -2083,13 +2083,11 @@ namespace PSFilterLoad.PSApi
             if (dst_valid && RectNonEmpty(outRect))
             {
                 store_buf(filterRecord->outData, outRowBytes, outRect, outLoPlane, outHiPlane);
-
-                lastOutRect = outRect;
             }
 
 
 #if DEBUG
-			Ping(DebugFlags.AdvanceState, string.Format("Inrect = {0}, Outrect = {1}, maskRect = {2}", fr->inRect.ToString(), fr->outRect.ToString(), fr->maskRect.ToString()));
+            Ping(DebugFlags.AdvanceState, string.Format("Inrect = {0}, Outrect = {1}, maskRect = {2}", filterRecord->inRect.ToString(), filterRecord->outRect.ToString(), filterRecord->maskRect.ToString()));
 #endif
             if (filterRecord->haveMask == 1 && RectNonEmpty(filterRecord->maskRect))
             {
@@ -2189,7 +2187,7 @@ namespace PSFilterLoad.PSApi
                     dst_valid = true;
                 }
 #if DEBUG
-				Debug.WriteLine(string.Format("outRowBytes = {0}", fr->outRowBytes));
+                Debug.WriteLine(string.Format("outRowBytes = {0}", filterRecord->outRowBytes));
 #endif
                 // store previous values
                 outRowBytes = filterRecord->outRowBytes;
@@ -2284,7 +2282,7 @@ namespace PSFilterLoad.PSApi
         {
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("inRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { inRowBytes.ToString(), rect.ToString(), loplane.ToString(), hiplane.ToString() }));
-			Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", fixed2int(filterRecord.inputRate)));
+			Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", fixed2int(inputRate)));
 #endif
 
             int nplanes = hiplane - loplane + 1;
@@ -2580,7 +2578,6 @@ namespace PSFilterLoad.PSApi
 
 #if DEBUG
             Ping(DebugFlags.AdvanceState, string.Format("outRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { outRowBytes.ToString(), rect.ToString(), loplane.ToString(), hiplane.ToString() }));
-            Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", (filterRecord.inputRate >> 16)));
 #endif
 
             int nplanes = hiplane - loplane + 1;
@@ -2918,7 +2915,7 @@ namespace PSFilterLoad.PSApi
         {
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes = {0}, Rect = {1}", new object[] { maskRowBytes.ToString(), rect.ToString() }));
-			Ping(DebugFlags.AdvanceState, string.Format("maskRate = {0}", fixed2int(filterRecord.maskRate)));
+			Ping(DebugFlags.AdvanceState, string.Format("maskRate = {0}", fixed2int(maskRate)));
 #endif
             int w = (rect.right - rect.left);
             int h = (rect.bottom - rect.top);
@@ -4696,7 +4693,7 @@ namespace PSFilterLoad.PSApi
                         break;
                     case PSProperties.propSerialString:
 
-                        bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                        bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
                         complexProperty = handle_new_proc(bytes.Length);
                         Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
                         handle_unlock_proc(complexProperty); // this is really not needed as the handle is fixed
