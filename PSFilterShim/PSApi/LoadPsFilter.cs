@@ -10,6 +10,7 @@ using PSFilterShim.Properties;
 using System.IO;
 using System.Drawing.Drawing2D;
 using PaintDotNet;
+using System.Globalization;
 
 namespace PSFilterLoad.PSApi
 {
@@ -315,7 +316,7 @@ namespace PSFilterLoad.PSApi
 #endif
             unsafe
             {
-                platFormDataPtr = NativeMethods.LocalAlloc(NativeConstants.LPTR, new IntPtr(Marshal.SizeOf(typeof(PlatformData))));
+                platFormDataPtr = Memory.Allocate(Marshal.SizeOf(typeof(PlatformData)), true);
                 ((PlatformData*)platFormDataPtr)->hwnd = owner; 
             }
 
@@ -1352,7 +1353,7 @@ namespace PSFilterLoad.PSApi
 				{
                     unsafe
                     {
-                        error = StringFromPString(((FilterRecord*)filterRecordPtr)->errorString);
+                        error = StringFromPString(((FilterRecord*)filterRecordPtr.ToPointer())->errorString);
                     }
                 }
 				else
@@ -1399,7 +1400,7 @@ namespace PSFilterLoad.PSApi
 							error = Resources.InvalidSamplePoint;
 							break;
 						default:
-							error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.UnknownErrorCodeFormat, result);
+							error = string.Format(CultureInfo.CurrentCulture, Resources.UnknownErrorCodeFormat, result);
 							break;
 					} 
 				}
@@ -1467,7 +1468,7 @@ namespace PSFilterLoad.PSApi
                 {
                     if (filterRecord->maskData != IntPtr.Zero)
                     {
-                        Marshal.FreeHGlobal(filterRecord->maskData);
+                        Memory.Free(filterRecord->maskData);
                         filterRecord->maskData = IntPtr.Zero;
                     }
 
@@ -1479,7 +1480,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (filterRecord->maskData != IntPtr.Zero)
                 {
-                    Marshal.FreeHGlobal(filterRecord->maskData);
+                    Memory.Free(filterRecord->maskData);
                     filterRecord->maskData = IntPtr.Zero;
                 }
                 filterRecord->maskRowBytes = 0;
@@ -1495,7 +1496,7 @@ namespace PSFilterLoad.PSApi
                     {
                         try
                         {
-                            Marshal.FreeHGlobal(filterRecord->inData);
+                            Memory.Free(filterRecord->inData);
                         }
                         catch (Exception)
                         {
@@ -1519,7 +1520,7 @@ namespace PSFilterLoad.PSApi
                 {
                     try
                     {
-                        Marshal.FreeHGlobal(filterRecord->inData);
+                        Memory.Free(filterRecord->inData);
                     }
                     catch (Exception)
                     {
@@ -1542,7 +1543,7 @@ namespace PSFilterLoad.PSApi
                     {
                         try
                         {
-                            Marshal.FreeHGlobal(filterRecord->outData);
+                            Memory.Free(filterRecord->outData);
                         }
                         catch (Exception)
                         {
@@ -1573,7 +1574,7 @@ namespace PSFilterLoad.PSApi
                 {
                     try
                     {
-                        Marshal.FreeHGlobal(filterRecord->outData);
+                        Memory.Free(filterRecord->outData);
                     }
                     catch (Exception)
                     {
@@ -1684,7 +1685,7 @@ namespace PSFilterLoad.PSApi
 				int stride = (w * nplanes);
 				int len = stride * h;
 
-				inData = Marshal.AllocHGlobal(len);
+				inData = Memory.Allocate(len, false);
 				inRowBytes = stride;
 
 				bool padBuffer = false;
@@ -2042,7 +2043,7 @@ namespace PSFilterLoad.PSApi
                 int stride = (w * nplanes);
                 int len = stride * h;
 
-                outData = Marshal.AllocHGlobal(len);
+                outData = Memory.Allocate(len, false);
                 outRowBytes = stride;
 
                 bool padBuffer = false;
@@ -2400,7 +2401,7 @@ namespace PSFilterLoad.PSApi
 
 				int len = w * h;
 
-				maskData = Marshal.AllocHGlobal(len);
+				maskData = Memory.Allocate(len, false);
 				maskRowBytes = w;
 
 				if ((lockRect.Right > tempMask.Width || lockRect.Bottom > tempMask.Height) || padBuffer)
@@ -2709,40 +2710,33 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		static short allocate_buffer_proc(int size, ref System.IntPtr bufferID)
-		{
+        static short allocate_buffer_proc(int size, ref System.IntPtr bufferID)
+        {
 #if DEBUG
-			Ping(DebugFlags.BufferSuite, string.Format("Size = {0}", size));
+            Ping(DebugFlags.BufferSuite, string.Format("Size = {0}", size));
 #endif
-			short err = PSError.noErr;
-			try
-			{
-				bufferID = Marshal.AllocHGlobal(size);
-				if (size > 0)
-				{
-					GC.AddMemoryPressure(size);
-				}
-			}
-			catch (OutOfMemoryException)
-			{
-				err = PSError.memFullErr;
-			}
+            short err = PSError.noErr;
+            try
+            {
+                bufferID = Memory.Allocate(size, false);
+            }
+            catch (OutOfMemoryException)
+            {
+                err = PSError.memFullErr;
+            }
 
-			return err;
-		}
-		static void buffer_free_proc(System.IntPtr bufferID)
-		{
-			long size = (long)NativeMethods.LocalSize(bufferID).ToUInt64();
+            return err;
+        }
+        static void buffer_free_proc(System.IntPtr bufferID)
+        {
+
 #if DEBUG
-			Ping(DebugFlags.BufferSuite, string.Format("Buffer address = {0:X8}, Size = {1}", bufferID.ToInt64(), size));
+            long size = Memory.Size(bufferID);
+            Ping(DebugFlags.BufferSuite, string.Format("Buffer address = {0:X8}, Size = {1}", bufferID.ToInt64(), size));
 #endif
-			if (size > 0L)
-			{
-				GC.RemoveMemoryPressure(size);
-			}
-			Marshal.FreeHGlobal(bufferID);
+            Memory.Free(bufferID);
 
-		}
+        }
 		static IntPtr buffer_lock_proc(System.IntPtr bufferID, byte moveHigh)
 		{
 #if DEBUG
@@ -2843,7 +2837,7 @@ namespace PSFilterLoad.PSApi
 						
 					if (IsInSourceBounds(point))
 					{
-						ColorBgra pixel = source.GetPoint(point.h, point.v);
+						ColorBgra pixel = source.GetPointUnchecked(point.h, point.v);
 						info.colorComponents = new short[4] { (short)pixel.R, (short)pixel.G, (short)pixel.B, 0 };
 					}
 					else
@@ -2862,7 +2856,7 @@ namespace PSFilterLoad.PSApi
 #if PSSDK_3_0_4
 		static bool IsInSourceBounds(Point16 point)
 		{
-			if (source == null) // Bitmap Disposed?
+			if (source == null) // Surface Disposed?
 				return false;
 
 			return ((point.h >= 0 && point.h < (source.Width - 1)) && (point.v >= 0 && point.v < (source.Height - 1)));
@@ -3755,76 +3749,80 @@ namespace PSFilterLoad.PSApi
 			return ((handles != null) && handles.ContainsKey(h.ToInt64()));
 		}
 
-		static unsafe IntPtr handle_new_proc(int size)
-		{
-			try
-			{
-				IntPtr ptr = Marshal.AllocHGlobal(size);
+        static unsafe IntPtr handle_new_proc(int size)
+        {
+            try
+            {
+                IntPtr handle = Memory.Allocate(Marshal.SizeOf(typeof(PSHandle)), true);
 
-				PSHandle hand = new PSHandle() { pointer = ptr, size = size };
+                PSHandle* hand = (PSHandle*)handle.ToPointer();
+                hand->pointer = Memory.Allocate(size, true);
+                hand->size = size;
 
-				IntPtr handle = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(PSHandle)));
 
-				Marshal.StructureToPtr(hand, handle, false);
+                if (handles == null)
+                    handles = new Dictionary<long, PSHandle>();
 
-				if (handles == null)
-					handles = new Dictionary<long, PSHandle>();
-
-				handles.Add(handle.ToInt64(), hand);
-
-				if (size > 0)
-				{
-					GC.AddMemoryPressure(size);
-				}
-
+                handles.Add(handle.ToInt64(), *hand);
 #if DEBUG
-				Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}, size = {1}", ptr.ToInt64(), size));
+                Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}, size = {1}", hand->pointer.ToInt64(), size));
 #endif
-				return handle;
-			}
-			catch (OutOfMemoryException)
-			{
-				return IntPtr.Zero;
-			}
-		}
+                return handle;
+            }
+            catch (OutOfMemoryException)
+            {
+                return IntPtr.Zero;
+            }
+        }
 
-		static void handle_dispose_proc(IntPtr h)
-		{
-			if (h != IntPtr.Zero)
-			{
-				if (!handle_valid(h))
-				{
-					if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
-					{
-						IntPtr hPtr = Marshal.ReadIntPtr(h);
+        static unsafe void handle_dispose_proc(IntPtr h)
+        {
+            if (h != IntPtr.Zero)
+            {
+                if (!handle_valid(h))
+                {
+                    if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
+                    {
+                        IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-						if (!IsBadReadPtr(hPtr))
-						{
-							NativeMethods.GlobalFree(hPtr);
-						}
+                        if (!IsBadReadPtr(hPtr))
+                        {
+                            NativeMethods.GlobalFree(hPtr);
+                        }
 
-						NativeMethods.GlobalFree(h);
-						return;
-					}
-					else
-					{
-						return;
-					}
-				}
+
+                        NativeMethods.GlobalFree(h);
+                        return;
+                    }
+                    else if (!IsBadReadPtr(h)
+                        && NativeMethods.GlobalSize(h).ToInt64() > 0L)
+                    {
+                        IntPtr hPtr = Marshal.ReadIntPtr(h);
+
+                        if (!IsBadReadPtr(hPtr))
+                        {
+                            NativeMethods.GlobalFree(hPtr);
+                        }
+                        NativeMethods.GlobalFree(h);
+                        return;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
 #if DEBUG
-				Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h));
-				Ping(DebugFlags.HandleSuite, string.Format("Handle pointer address = {0:X8}", handles[h.ToInt64()].pointer));
+                Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h));
+                Ping(DebugFlags.HandleSuite, string.Format("Handle pointer address = {0:X8}", handles[h.ToInt64()].pointer));
 #endif
-				Marshal.FreeHGlobal(handles[h.ToInt64()].pointer);
+                handles.Remove(h.ToInt64());
 
-				if (handles[h.ToInt64()].size > 0)
-				{
-					GC.RemoveMemoryPressure((long)handles[h.ToInt64()].size);
-				}
-				handles.Remove(h.ToInt64());
-				Marshal.FreeHGlobal(h); 
-			}
-		}
+                PSHandle* handle = (PSHandle*)h.ToPointer();
+
+                Memory.Free(handle->pointer);
+                Memory.Free(h);
+            }
+        }
 
 		static IntPtr handle_lock_proc(IntPtr h, byte moveHigh)
 		{
@@ -3890,65 +3888,79 @@ namespace PSFilterLoad.PSApi
 #endif
 		}
 
-		static short handle_set_size(IntPtr h, int newSize)
-		{
+        static unsafe short handle_set_size(IntPtr h, int newSize)
+        {
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
+            Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
 #endif
-			if (!handle_valid(h))
-			{
-				if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
-				{
-					IntPtr hPtr = Marshal.ReadIntPtr(h);
+            if (!handle_valid(h))
+            {
+                if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
+                {
+                    IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-					if (!IsBadReadPtr(hPtr))
-					{
-						hPtr = NativeMethods.GlobalReAlloc(hPtr, new UIntPtr((uint)newSize), NativeConstants.GPTR);
-						if (hPtr == IntPtr.Zero)
-						{
-							return PSError.nilHandleErr;
-						}
-						Marshal.WriteIntPtr(h, hPtr);
-					}
-					else
-					{
-						if ((h = NativeMethods.GlobalReAlloc(h, new UIntPtr((uint)newSize), NativeConstants.GPTR)) == IntPtr.Zero)
-							return PSError.nilHandleErr;
-					}
+                    if (!IsBadReadPtr(hPtr))
+                    {
+                        hPtr = NativeMethods.GlobalReAlloc(hPtr, new UIntPtr((uint)newSize), NativeConstants.GPTR);
+                        if (hPtr == IntPtr.Zero)
+                        {
+                            return PSError.nilHandleErr;
+                        }
+                        Marshal.WriteIntPtr(h, hPtr);
+                    }
+                    else
+                    {
+                        if ((h = NativeMethods.GlobalReAlloc(h, new UIntPtr((uint)newSize), NativeConstants.GPTR)) == IntPtr.Zero)
+                            return PSError.nilHandleErr;
+                    }
 
-					return PSError.noErr;
-				}
-				else
-				{
-					return PSError.nilHandleErr;
-				}
-			}
+                    return PSError.noErr;
+                }
+                else if (!IsBadReadPtr(h)
+                    && NativeMethods.GlobalSize(h).ToInt64() > 0L)
+                {
+                    IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-			try
-			{
-				IntPtr hPtr = Marshal.ReadIntPtr(h);
-				PSHandle handle = new PSHandle() { pointer = Marshal.ReAllocHGlobal(hPtr, new IntPtr(newSize)), size = newSize };
+                    if (!IsBadReadPtr(hPtr))
+                    {
+                        hPtr = NativeMethods.GlobalReAlloc(hPtr, new UIntPtr((uint)newSize), NativeConstants.GPTR);
+                        if (hPtr == IntPtr.Zero)
+                        {
+                            return PSError.nilHandleErr;
+                        }
+                        Marshal.WriteIntPtr(h, hPtr);
 
-				if (handles[h.ToInt64()].size > 0)
-				{
-					GC.RemoveMemoryPressure((long)handles[h.ToInt64()].size);
-				}
+                    }
+                    else
+                    {
+                        if ((h = NativeMethods.GlobalReAlloc(h, new UIntPtr((uint)newSize), NativeConstants.GPTR)) == IntPtr.Zero)
+                            return PSError.nilHandleErr;
+                    }
+                    return PSError.noErr;
 
-				if (newSize > 0)
-				{
-					GC.AddMemoryPressure(newSize);
-				}
-				Marshal.WriteIntPtr(h, handle.pointer);
-				Marshal.WriteInt32(h, IntPtr.Size, handle.size);
+                }
+                else
+                {
+                    return PSError.nilHandleErr;
+                }
+            }
 
-				handles.AddOrUpdate(h.ToInt64(), handle);
-			}
-			catch (OutOfMemoryException)
-			{
-				return PSError.memFullErr;
-			} 
-			return PSError.noErr;
-		}
+            try
+            {
+                PSHandle* handle = (PSHandle*)h.ToPointer();
+                IntPtr ptr = Memory.ReAlloc(handle->pointer, newSize);
+                handle->pointer = ptr;
+                handle->size = newSize;
+
+
+                handles.AddOrUpdate(h.ToInt64(), *handle);
+            }
+            catch (OutOfMemoryException)
+            {
+                return PSError.memFullErr;
+            }
+            return PSError.noErr;
+        }
 		static void handle_unlock_proc(IntPtr h)
 		{
 #if DEBUG
@@ -3959,7 +3971,6 @@ namespace PSFilterLoad.PSApi
 				if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
 				{
 					NativeMethods.GlobalUnlock(h);
-					return;
 				}
 				else
 				{
@@ -4059,7 +4070,7 @@ namespace PSFilterLoad.PSApi
 
                         complexProperty = handle_new_proc(bytes.Length);
                         Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
-                        handle_unlock_proc(complexProperty); // this is really not needed as the handle is fixed
+                        handle_unlock_proc(complexProperty); 
                         break;
                     case PSProperties.propCopyright:
                         simpleProperty = 0;  // no copyright
@@ -4094,10 +4105,10 @@ namespace PSFilterLoad.PSApi
                         break;
                     case PSProperties.propSerialString:
 
-                        bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                        bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
                         complexProperty = handle_new_proc(bytes.Length);
                         Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
-                        handle_unlock_proc(complexProperty); // this is really not needed as the handle is fixed
+                        handle_unlock_proc(complexProperty);
 
                         break;
                     case PSProperties.propURL:
@@ -4234,7 +4245,7 @@ namespace PSFilterLoad.PSApi
             filterRecord->filterRect.right = (short)source.Width;
             filterRecord->filterRect.bottom = (short)source.Height;
 
-            filterRecord->imageHRes = int2fixed((int)(dpiX + 0.5));
+            filterRecord->imageHRes = int2fixed((int)(dpiX + 0.5)); // add 0.5 to achieve rounding
             filterRecord->imageVRes = int2fixed((int)(dpiY + 0.5));
 
             filterRecord->wholeSize.h = (short)source.Width;
@@ -4336,29 +4347,29 @@ namespace PSFilterLoad.PSApi
 
 			suitesSetup = true;
 
-			// BufferProcs
-            buffer_procPtr = NativeMethods.LocalAlloc(NativeConstants.LPTR, new IntPtr(Marshal.SizeOf(typeof(BufferProcs))));
-			BufferProcs* bufferProcs = (BufferProcs*)buffer_procPtr.ToPointer();
+            // BufferProcs
+            buffer_procPtr = Memory.Allocate(Marshal.SizeOf(typeof(BufferProcs)), true);
+            BufferProcs* bufferProcs = (BufferProcs*)buffer_procPtr.ToPointer();
             bufferProcs->bufferProcsVersion = PSConstants.kCurrentBufferProcsVersion;
-			bufferProcs->numBufferProcs = PSConstants.kCurrentBufferProcsCount;
-			bufferProcs->allocateProc = Marshal.GetFunctionPointerForDelegate(allocProc);
-			bufferProcs->freeProc = Marshal.GetFunctionPointerForDelegate(freeProc);
-			bufferProcs->lockProc = Marshal.GetFunctionPointerForDelegate(lockProc);
-			bufferProcs->unlockProc = Marshal.GetFunctionPointerForDelegate(unlockProc);
-			bufferProcs->spaceProc = Marshal.GetFunctionPointerForDelegate(spaceProc);
-			// HandleProc
-            handle_procPtr = NativeMethods.LocalAlloc(NativeConstants.LPTR, new IntPtr(Marshal.SizeOf(typeof(HandleProcs))));
-			HandleProcs* handleProcs = (HandleProcs*)handle_procPtr.ToPointer();
+            bufferProcs->numBufferProcs = PSConstants.kCurrentBufferProcsCount;
+            bufferProcs->allocateProc = Marshal.GetFunctionPointerForDelegate(allocProc);
+            bufferProcs->freeProc = Marshal.GetFunctionPointerForDelegate(freeProc);
+            bufferProcs->lockProc = Marshal.GetFunctionPointerForDelegate(lockProc);
+            bufferProcs->unlockProc = Marshal.GetFunctionPointerForDelegate(unlockProc);
+            bufferProcs->spaceProc = Marshal.GetFunctionPointerForDelegate(spaceProc);
+            // HandleProc
+            handle_procPtr = Memory.Allocate(Marshal.SizeOf(typeof(HandleProcs)), true);
+            HandleProcs* handleProcs = (HandleProcs*)handle_procPtr.ToPointer();
             handleProcs->handleProcsVersion = PSConstants.kCurrentHandleProcsVersion;
-			handleProcs->numHandleProcs = PSConstants.kCurrentHandleProcsCount;
-			handleProcs->newProc = Marshal.GetFunctionPointerForDelegate(handleNewProc);
-			handleProcs->disposeProc = Marshal.GetFunctionPointerForDelegate(handleDisposeProc);
-			handleProcs->getSizeProc = Marshal.GetFunctionPointerForDelegate(handleGetSizeProc);
-			handleProcs->lockProc = Marshal.GetFunctionPointerForDelegate(handleLockProc);
-			handleProcs->setSizeProc = Marshal.GetFunctionPointerForDelegate(handleSetSizeProc);
-			handleProcs->recoverSpaceProc = Marshal.GetFunctionPointerForDelegate(handleRecoverSpaceProc);
-			handleProcs->unlockProc = Marshal.GetFunctionPointerForDelegate(handleUnlockProc);
-			// ImageServicesProc
+            handleProcs->numHandleProcs = PSConstants.kCurrentHandleProcsCount;
+            handleProcs->newProc = Marshal.GetFunctionPointerForDelegate(handleNewProc);
+            handleProcs->disposeProc = Marshal.GetFunctionPointerForDelegate(handleDisposeProc);
+            handleProcs->getSizeProc = Marshal.GetFunctionPointerForDelegate(handleGetSizeProc);
+            handleProcs->lockProc = Marshal.GetFunctionPointerForDelegate(handleLockProc);
+            handleProcs->setSizeProc = Marshal.GetFunctionPointerForDelegate(handleSetSizeProc);
+            handleProcs->recoverSpaceProc = Marshal.GetFunctionPointerForDelegate(handleRecoverSpaceProc);
+            handleProcs->unlockProc = Marshal.GetFunctionPointerForDelegate(handleUnlockProc);
+            // ImageServicesProc
 
 #if PSSDK_3_0_4 && USEIMAGESERVICES
 
@@ -4371,17 +4382,17 @@ namespace PSFilterLoad.PSApi
 			image_services_procsPtr = GCHandle.Alloc(image_services_procs, GCHandleType.Pinned); 
 #endif
 
-			// PropertyProcs
+            // PropertyProcs
 #if PSSDK_3_0_4
-            property_procsPtr = NativeMethods.LocalAlloc(NativeConstants.LPTR, new IntPtr(Marshal.SizeOf(typeof(PropertyProcs))));
+            property_procsPtr = Memory.Allocate(Marshal.SizeOf(typeof(PropertyProcs)), true);
             PropertyProcs* propertyProcs = (PropertyProcs*)property_procsPtr.ToPointer();
             propertyProcs->propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion;
             propertyProcs->numPropertyProcs = PSConstants.kCurrentPropertyProcsCount;
             propertyProcs->getPropertyProc = Marshal.GetFunctionPointerForDelegate(getPropertyProc);
             propertyProcs->setPropertyProc = Marshal.GetFunctionPointerForDelegate(setPropertyProc);
 #endif
-			// ResourceProcs
-            resource_procsPtr = NativeMethods.LocalAlloc(NativeConstants.LPTR, new IntPtr(Marshal.SizeOf(typeof(ResourceProcs))));
+            // ResourceProcs
+            resource_procsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ResourceProcs)), true);
             ResourceProcs* resourceProcs = (ResourceProcs*)resource_procsPtr.ToPointer();
             resourceProcs->resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion;
             resourceProcs->numResourceProcs = PSConstants.kCurrentResourceProcsCount;
@@ -4390,9 +4401,9 @@ namespace PSFilterLoad.PSApi
             resourceProcs->deleteProc = Marshal.GetFunctionPointerForDelegate(deleteResourceProc);
             resourceProcs->getProc = Marshal.GetFunctionPointerForDelegate(getResourceProc);
 
-#if PSSDK4			
-            readDescriptorPtr = NativeMethods.LocalAlloc(NativeConstants.LPTR, new IntPtr(Marshal.SizeOf(typeof(ReadDescriptorProcs))));
-            ReadDescriptorProcs* readDescriptor = (ReadDescriptorProcs*)readDescriptorPtr.ToPointer(); 
+#if PSSDK4
+            readDescriptorPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadDescriptorProcs)), true);
+            ReadDescriptorProcs* readDescriptor = (ReadDescriptorProcs*)readDescriptorPtr.ToPointer();
             readDescriptor->readDescriptorProcsVersion = PSConstants.kCurrentReadDescriptorProcsVersion;
             readDescriptor->numReadDescriptorProcs = PSConstants.kCurrentReadDescriptorProcsCount;
             readDescriptor->openReadDescriptorProc = Marshal.GetFunctionPointerForDelegate(openReadDescriptorProc);
@@ -4414,8 +4425,8 @@ namespace PSFilterLoad.PSApi
             readDescriptor->getTextProc = Marshal.GetFunctionPointerForDelegate(getTextProc);
             readDescriptor->getUnitFloatProc = Marshal.GetFunctionPointerForDelegate(getUnitFloatProc);
 
-			// WriteDescriptorProcs		
-            writeDescriptorPtr = NativeMethods.LocalAlloc(NativeConstants.LPTR, new IntPtr(Marshal.SizeOf(typeof(WriteDescriptorProcs))));
+            // WriteDescriptorProcs		
+            writeDescriptorPtr = Memory.Allocate(Marshal.SizeOf(typeof(WriteDescriptorProcs)), true);
             WriteDescriptorProcs* writeDescriptor = (WriteDescriptorProcs*)writeDescriptorPtr.ToPointer();
             writeDescriptor->writeDescriptorProcsVersion = PSConstants.kCurrentWriteDescriptorProcsVersion;
             writeDescriptor->numWriteDescriptorProcs = PSConstants.kCurrentWriteDescriptorProcsCount;
@@ -4436,8 +4447,8 @@ namespace PSFilterLoad.PSApi
             writeDescriptor->putTextProc = Marshal.GetFunctionPointerForDelegate(putTextProc);
             writeDescriptor->putUnitFloatProc = Marshal.GetFunctionPointerForDelegate(putUnitFloatProc);
 
-            descriptorParametersPtr = NativeMethods.LocalAlloc(NativeConstants.LPTR, new IntPtr(Marshal.SizeOf(typeof(PIDescriptorParameters))));
-            PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer(); 
+            descriptorParametersPtr = Memory.Allocate(Marshal.SizeOf(typeof(PIDescriptorParameters)), true);
+            PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
             descriptorParameters->descriptorParametersVersion = PSConstants.kCurrentDescriptorParametersVersion;
             descriptorParameters->readDescriptorProcs = readDescriptorPtr;
             descriptorParameters->writeDescriptorProcs = writeDescriptorPtr;
@@ -4477,7 +4488,7 @@ namespace PSFilterLoad.PSApi
             frsetup = true;
 
 
-            filterRecordPtr = NativeMethods.LocalAlloc(NativeConstants.LPTR, new IntPtr(Marshal.SizeOf(typeof(FilterRecord))));
+            filterRecordPtr =Memory.Allocate(Marshal.SizeOf(typeof(FilterRecord)), true);
             FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
             filterRecord->serial = 0;
@@ -4563,7 +4574,7 @@ namespace PSFilterLoad.PSApi
 #endif
 #if PSSDK4
             filterRecord->descriptorParameters = descriptorParametersPtr;
-            filterRecord->errorString = NativeMethods.LocalAlloc(NativeConstants.LPTR, new IntPtr(256));
+            filterRecord->errorString = Memory.Allocate(256, true);
             filterRecord->channelPortProcs = IntPtr.Zero;
             filterRecord->documentInfo = IntPtr.Zero;
 #endif
@@ -4585,21 +4596,21 @@ namespace PSFilterLoad.PSApi
 				{
                     if (platFormDataPtr != IntPtr.Zero)
                     {
-                        NativeMethods.LocalFree(platFormDataPtr);
+                        Memory.Free(platFormDataPtr);
                         platFormDataPtr = IntPtr.Zero;
                     }
-					 
 
-					if (buffer_procPtr != IntPtr.Zero)
-					{
-                        NativeMethods.LocalFree(buffer_procPtr);
-						buffer_procPtr = IntPtr.Zero;
-					}
-					if (handle_procPtr != IntPtr.Zero)
-					{
-                        NativeMethods.LocalFree(handle_procPtr);
+
+                    if (buffer_procPtr != IntPtr.Zero)
+                    {
+                        Memory.Free(buffer_procPtr);
+                        buffer_procPtr = IntPtr.Zero;
+                    }
+                    if (handle_procPtr != IntPtr.Zero)
+                    {
+                        Memory.Free(handle_procPtr);
                         handle_procPtr = IntPtr.Zero;
-					}
+                    }
 
 #if PSSDK_3_0_4
 #if USEIMAGESERVICES
@@ -4608,67 +4619,66 @@ namespace PSFilterLoad.PSApi
 						image_services_procsPtr.Free();
 					} 
 #endif
-					if (property_procsPtr != IntPtr.Zero)
-					{
-                        NativeMethods.LocalFree(property_procsPtr);
+                    if (property_procsPtr != IntPtr.Zero)
+                    {
+                        Memory.Free(property_procsPtr);
                         property_procsPtr = IntPtr.Zero;
-					} 
+                    }
 #endif
 
-					if (resource_procsPtr != IntPtr.Zero)
-					{
-                        NativeMethods.LocalFree(resource_procsPtr);
+                    if (resource_procsPtr != IntPtr.Zero)
+                    {
+                        Memory.Free(resource_procsPtr);
                         resource_procsPtr = IntPtr.Zero;
                     }
 
                     FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 #if PSSDK4
-					if (descriptorParametersPtr != IntPtr.Zero)
-					{
-                        NativeMethods.LocalFree(descriptorParametersPtr);
+                    if (descriptorParametersPtr != IntPtr.Zero)
+                    {
+                        Memory.Free(descriptorParametersPtr);
                         descriptorParametersPtr = IntPtr.Zero;
-					}
-					if (readDescriptorPtr != IntPtr.Zero)
-					{
-                        NativeMethods.LocalFree(property_procsPtr);
+                    }
+                    if (readDescriptorPtr != IntPtr.Zero)
+                    {
+                        Memory.Free(readDescriptorPtr);
                         property_procsPtr = IntPtr.Zero;
-					}
-					if (writeDescriptorPtr != IntPtr.Zero)
-					{
-                        NativeMethods.LocalFree(writeDescriptorPtr);
+                    }
+                    if (writeDescriptorPtr != IntPtr.Zero)
+                    {
+                        Memory.Free(writeDescriptorPtr);
                         writeDescriptorPtr = IntPtr.Zero;
-					}
+                    }
 
-                    
-
-
-					if (filterRecord->errorString != IntPtr.Zero)
-					{
-						NativeMethods.LocalFree(filterRecord->errorString); 
-					}
+                    if (filterRecord->errorString != IntPtr.Zero)
+                    {
+                        Memory.Free(filterRecord->errorString);
+                    }
 #endif
 
 
-					if (filterRecord->parameters != IntPtr.Zero)
-					{
-						if (handle_valid(filterRecord->parameters))
-						{
-							handle_unlock_proc(filterRecord->parameters);
-							handle_dispose_proc(filterRecord->parameters);
-						}
-						else
-						{
-							NativeMethods.GlobalUnlock(filterRecord->parameters);
-							NativeMethods.GlobalFree(filterRecord->parameters);
-						}
-						filterRecord->parameters = IntPtr.Zero;
-					}
+                    if (filterRecord->parameters != IntPtr.Zero)
+                    {
+                        if (handle_valid(filterRecord->parameters))
+                        {
+                            handle_unlock_proc(filterRecord->parameters);
+                            handle_dispose_proc(filterRecord->parameters);
+                        }
+                        else
+                        {
+                            NativeMethods.GlobalUnlock(filterRecord->parameters);
+                            NativeMethods.GlobalFree(filterRecord->parameters);
+                        }
+                        filterRecord->parameters = IntPtr.Zero;
+                    }
 
-					if (filterRecordPtr != IntPtr.Zero)
-					{
-                        NativeMethods.LocalFree(filterRecordPtr);
+                    if (filterRecordPtr != IntPtr.Zero)
+                    {
+                        Memory.Free(filterRecordPtr);
                         filterRecordPtr = IntPtr.Zero;
-					}
+                    }
+
+
 
 					if (parmDataHandle != IntPtr.Zero)
 					{
