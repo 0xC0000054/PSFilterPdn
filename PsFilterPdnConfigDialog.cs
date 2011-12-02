@@ -1127,7 +1127,9 @@ namespace PSFilterPdn
 
 					filterTree.Nodes.AddRange(parm.items);
 					filterTree.TreeViewNodeSorter = new TreeNodeItemComparer();
-					
+                   
+					filterTree.EndUpdate();
+                    
                     if (expandedNodes.Count > 0)
                     {
                         foreach (var item in expandedNodes)
@@ -1139,14 +1141,12 @@ namespace PSFilterPdn
 
                                 if (!string.IsNullOrEmpty(lastSelectedFilterTitle) && node.Nodes.ContainsKey(lastSelectedFilterTitle))
                                 {
-                                    filterTree.SelectedNode = node.Nodes[lastSelectedFilterTitle];
-                                    node.EnsureVisible();
+                                    node.EnsureVisible(); // make shure the last used category is visible
                                 }
                             }
                         }
                     }
 
-					filterTree.EndUpdate();
 					
 					if (fldrLoadProgBar.Value == fldrLoadProgBar.Maximum)
 					{
