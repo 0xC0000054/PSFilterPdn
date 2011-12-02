@@ -55,14 +55,26 @@ namespace PSFilterLoad.PSApi
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetWindowText(IntPtr hWnd, string lpString);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern IntPtr LocalAlloc([In] uint uFlags, [In] IntPtr sizetdwBytes);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern IntPtr HeapCreate(uint flOptions, IntPtr dwInitialsize, IntPtr dwMaximumSize);
 
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        public static extern IntPtr LocalFree(IntPtr hMem);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool HeapDestroy(IntPtr hHeap);
 
-        [DllImport("kernel32.dll", EntryPoint = "LocalSize")]
-        public static extern UIntPtr LocalSize([In()] System.IntPtr hMem);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern IntPtr HeapAlloc(IntPtr hHeap, uint dwFlags, UIntPtr dwSize);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool HeapFree(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
+        
+        [DllImport("kernel32.dll")]
+        internal static extern IntPtr HeapReAlloc(IntPtr hHeap, uint dwFlags, IntPtr lpMem, UIntPtr dwBytes);
+        
+        [DllImport("kernel32.dll")]
+        internal static extern UIntPtr HeapSize(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern unsafe uint HeapSetInformation(IntPtr HeapHandle, int HeapInformationClass, void* HeapInformation, uint HeapInformationLength);
 
         /// Return Type: SIZE_T->ULONG_PTR->unsigned int
         ///lpAddress: LPCVOID->void*
