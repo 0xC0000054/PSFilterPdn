@@ -20,12 +20,6 @@ namespace PSFilterPdn
             catch { xmlDocument.LoadXml("<settings></settings>"); }
         }
 
-        public int GetSetting(string xPath, int defaultValue)
-        { return Convert.ToInt16(GetSetting(xPath, Convert.ToString(defaultValue, CultureInfo.InvariantCulture))); }
-
-        public void PutSetting(string xPath, int value)
-        { PutSetting(xPath, Convert.ToString(value, CultureInfo.InvariantCulture)); }
-
         public string GetSetting(string xPath, string defaultValue)
         {
             XmlNode xmlNode = xmlDocument.SelectSingleNode("settings/" + xPath);
