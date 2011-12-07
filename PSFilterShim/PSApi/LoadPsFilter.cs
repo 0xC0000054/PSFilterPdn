@@ -4642,7 +4642,7 @@ namespace PSFilterLoad.PSApi
                     if (readDescriptorPtr != IntPtr.Zero)
                     {
                         Memory.Free(readDescriptorPtr);
-                        property_procsPtr = IntPtr.Zero;
+                        readDescriptorPtr = IntPtr.Zero;
                     }
                     if (writeDescriptorPtr != IntPtr.Zero)
                     {
