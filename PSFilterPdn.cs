@@ -67,16 +67,9 @@ namespace PSFilterPdn
         {
             if (!string.IsNullOrEmpty(e.Data))
             {
-                if (e.Data.StartsWith("ProxyResult", StringComparison.Ordinal))
+                if (e.Data.StartsWith("ProxyError", StringComparison.Ordinal))
                 {
-                    string[] status = e.Data.Substring(11).Split(new char[] { ',' });
-
-                    proxyResult = bool.Parse(status[0]);
-                    proxyErrorMessage = status[1];
-                }
-                else if (e.Data.StartsWith("ProxyError", StringComparison.Ordinal))
-                {
-                    proxyErrorMessage = e.Data;
+                    proxyErrorMessage = e.Data.Substring(10);
                 }
             }
         }
