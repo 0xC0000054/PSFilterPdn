@@ -27,6 +27,7 @@ namespace PSFilterShim
 
         static bool filterDone;
         static IPSFilterShim ServiceProxy;
+        const string proxyErrorFormat = "ProxyError{0}";
 
         static bool abortFilter()
         {
@@ -203,7 +204,10 @@ namespace PSFilterShim
                     }
                     else
                     {
-                        Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyResult{0},{1}", result.ToString(CultureInfo.InvariantCulture), lps.ErrorMessage));
+                        if (!showAbout)
+                        {
+                            Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, proxyErrorFormat, lps.ErrorMessage));
+                        }
                     }
                 }
 
@@ -211,23 +215,23 @@ namespace PSFilterShim
             }
             catch (BadImageFormatException ex)
             {
-                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", ex.Message));
+                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, proxyErrorFormat, ex.Message));
             }
             catch (EntryPointNotFoundException epnf)
             {
-                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", epnf.Message));
+                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, proxyErrorFormat, epnf.Message));
             }
             catch (FileNotFoundException fx)
             {
-                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", fx.Message));
+                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, proxyErrorFormat, fx.Message));
             }
             catch (ImageSizeTooLargeException ex)
             {
-                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", ex.Message));
+                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, proxyErrorFormat, ex.Message));
             }
             catch (NullReferenceException ex)
             {
-                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, "ProxyError{0}", ex.Message));
+                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, proxyErrorFormat, ex.Message));
             }
             finally
             {
