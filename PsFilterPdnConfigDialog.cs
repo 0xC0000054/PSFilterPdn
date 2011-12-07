@@ -482,14 +482,7 @@ namespace PSFilterPdn
 
 		private void SetProxyErrorResult(string data)
 		{
-			if (data.StartsWith("ProxyResult", StringComparison.Ordinal))
-			{
-				string[] status = data.Substring(11).Split(new char[] { ',' });
-
-				proxyResult = bool.Parse(status[0]);
-				proxyErrorMessage = status[1];
-			}
-			else if (data.StartsWith("ProxyError", StringComparison.Ordinal))
+			if (data.StartsWith("ProxyError", StringComparison.Ordinal))
 			{
                 proxyResult = false;
 				proxyErrorMessage = data.Substring(10);
@@ -509,14 +502,7 @@ namespace PSFilterPdn
 				}
 				else
 				{
-					if (e.Data.StartsWith("ProxyResult", StringComparison.Ordinal))
-					{
-						string[] status = e.Data.Substring(11).Split(new char[] { ',' });
-
-						proxyResult = bool.Parse(status[0]);
-						proxyErrorMessage = status[1];
-					}
-					else if (e.Data.StartsWith("ProxyError", StringComparison.Ordinal))
+					if (e.Data.StartsWith("ProxyError", StringComparison.Ordinal))
 					{
                         proxyResult = false;
                         proxyErrorMessage = e.Data.Substring(10);
@@ -688,7 +674,6 @@ namespace PSFilterPdn
 					File.Delete(aeteFileName);
 				}
 
-				//proxyThread.Abort();
 				proxyThread.Join();
 				proxyThread = null;
 			}
