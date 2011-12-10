@@ -34,7 +34,11 @@ namespace PSFilterLoad.PSApi
 			return Marshal.PtrToStringUni(value);
 		} 
 #endif
-
+        /// <summary>
+        /// The Windows-1252 Western European encoding for StringFromPString(IntPtr)
+        /// </summary>
+        private static readonly Encoding windows1252Encoding = Encoding.GetEncoding(1252);
+        private static readonly char[] trimChars = new char[] { ' ', '\0' };
 		/// <summary>
 		/// Reads a Pascal String into a string.
 		/// </summary>
@@ -52,10 +56,9 @@ namespace PSFilterLoad.PSApi
 			byte[] bytes = new byte[length];
 			Marshal.Copy(PString, bytes, 0, length);
 
-			// using Windows-1252 Western European encoding 
-			string data = Encoding.GetEncoding(1252).GetString(bytes);
+			string data = windows1252Encoding.GetString(bytes);
 
-			return data.Trim(new char[] { ' ', '\0' });
+			return data.Trim(trimChars);
 		}
 
 		/// <summary>
@@ -216,7 +219,7 @@ namespace PSFilterLoad.PSApi
 						index += 2;
 						if (enumCount > 0)
 						{
-							List<AETEEnums> enums = new List<AETEEnums>(enumCount);
+							AETEEnums[] enums = new AETEEnums[enumCount];
 							for (int enc = 0; enc < enumCount; enc++)
 							{
 								AETEEnums en = new AETEEnums();
@@ -235,10 +238,10 @@ namespace PSFilterLoad.PSApi
 									en.enums[e].desc = StringFromPString(propPtr, index, out stringLength);
 									index += (stringLength + 1);
 								}
-								enums.Add(en);
+								enums[enc] = en;
 
 							}
-							evnt.enums = enums.ToArray();
+							evnt.enums = enums;
 						}
 						enumAETE.events[eventc] = evnt;
 
@@ -400,7 +403,7 @@ namespace PSFilterLoad.PSApi
 						ofs++;
 						if (b == 0)
 						{
-							aeteName = sb.ToString().TrimEnd(new char[] { '\0' });
+							aeteName = sb.ToString().TrimEnd('\0');
 							break;
 						}
 					}
@@ -472,7 +475,7 @@ namespace PSFilterLoad.PSApi
 			}
 			length = offset;
 
-			return sb.ToString().Trim(new char[] { ' ', '\0' });
+			return sb.ToString().Trim(trimChars);
 		}
 
 		private static bool EnumPiMI(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
