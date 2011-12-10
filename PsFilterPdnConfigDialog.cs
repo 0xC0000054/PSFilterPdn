@@ -45,13 +45,14 @@ namespace PSFilterPdn
 		public PsFilterPdnConfigDialog()
 		{
 			InitializeComponent();
-			filterTreeItems = null;
-			proxyProcess = null;
-			proxyProcess = new Process();
-			destSurface = null;
-			proxyThread = null;
-			formatExecptionShown = false;
-            expandedNodes = new List<string>();
+            this.filterTreeItems = null;
+            this.proxyProcess = null;
+            this.proxyProcess = new Process();
+            this.destSurface = null;
+            this.proxyThread = null;
+            formatExecptionShown = false;
+            this.expandedNodes = new List<string>();
+            this.fileNameLbl.Text = string.Empty;
 		}
 
 		private static class NativeMethods
