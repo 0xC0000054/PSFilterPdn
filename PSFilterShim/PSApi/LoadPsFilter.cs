@@ -899,13 +899,10 @@ namespace PSFilterLoad.PSApi
 			}
 			int length = (int)Marshal.ReadByte(PString);
 			PString = new IntPtr(PString.ToInt64() + 1L);
-			char[] data = new char[length];
-			for (int i = 0; i < length; i++)
-			{
-				data[i] = (char)Marshal.ReadByte(PString, i);
-			}
+			byte[] data = new byte[length];
+            Marshal.Copy(PString, data, 0, length);
 
-			return new string(data).Trim(new char[] { ' ', '\0' });
+			return Encoding.GetEncoding(1252).GetString(data).Trim(new char[] { ' ', '\0' });
 		}
 
 		static bool plugin_about(PluginData pdata)
