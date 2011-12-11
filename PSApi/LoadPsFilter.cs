@@ -1245,7 +1245,6 @@ namespace PSFilterLoad.PSApi
 
                     globalParms.ParmDataSize = size;
                     globalParms.StoreMethod = 1;
-                    //NativeMethods.GlobalUnlock(filterRecord->parameters);
                 }
 
             }
@@ -1276,25 +1275,17 @@ namespace PSFilterLoad.PSApi
 
                         try
                         {
-                            IntPtr hPtr = Marshal.ReadIntPtr(ptr);
-
-                            if (!IsBadReadPtr(hPtr))
+                            if (handle_valid(ptr))
                             {
-                                long ps = NativeMethods.GlobalSize(hPtr).ToInt32();
-                                long dataSize = ps;
+                                int ps = handle_get_size_proc(ptr);
+                                byte[] dataBuf = new byte[ps];
 
-                                if (ps == 0)
-                                {
-                                    ps = pluginDataSize - IntPtr.Size;
-                                    dataSize = pluginDataSize;
-                                }
-
-                                Byte[] dataBuf = new byte[ps];
-                                Marshal.Copy(hPtr, dataBuf, 0, (int)ps);
+                                IntPtr hPtr = handle_lock_proc(ptr, 0);
+                                Marshal.Copy(hPtr, dataBuf, 0, ps);
+                                handle_unlock_proc(ptr);
                                 globalParms.PluginDataBytes = dataBuf;
+                                globalParms.PluginDataSize = ps;
                                 globalParms.PluginDataIsPSHandle = true;
-                                globalParms.PluginDataSize = dataSize;
-
                             }
                             else
                             {
@@ -3434,30 +3425,30 @@ namespace PSFilterLoad.PSApi
 
 #if PSSDK4
 
-		#region DescriptorParameters
+        #region DescriptorParameters
 
-		static short descErr;
-		static short descErrValue;
-		static uint getKey;
-		static int getKeyIndex;
-		static List<uint> keys;
-		static List<uint> subKeys;
-		static bool isSubKey;
-		static int subKeyIndex;
-        static IntPtr OpenReadDescriptorProc(ref System.IntPtr param0, IntPtr param1)
+        static short descErr;
+        static short descErrValue;
+        static uint getKey;
+        static int getKeyIndex;
+        static List<uint> keys;
+        static List<uint> subKeys;
+        static bool isSubKey;
+        static int subKeyIndex;
+        static IntPtr OpenReadDescriptorProc(ref System.IntPtr descriptor, IntPtr keyArray)
         {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
             if (keys == null)
             {
                 keys = new List<uint>();
                 int index = 0;
-                if (param1 != IntPtr.Zero) // check if the pointer is valid
+                if (keyArray != IntPtr.Zero) // check if the pointer is valid
                 {
                     while (true)
                     {
-                        uint key = (uint)Marshal.ReadInt32(param1, index);
+                        uint key = (uint)Marshal.ReadInt32(keyArray, index);
                         if (key == 0)
                         {
                             break;
@@ -3471,11 +3462,11 @@ namespace PSFilterLoad.PSApi
             {
                 subKeys = new List<uint>();
                 int index = 0;
-                if (param1 != IntPtr.Zero)
+                if (keyArray != IntPtr.Zero)
                 {
                     while (true)
                     {
-                        uint key = (uint)Marshal.ReadInt32(param1, index);
+                        uint key = (uint)Marshal.ReadInt32(keyArray, index);
                         if (key == 0)
                         {
                             break;
@@ -3500,20 +3491,20 @@ namespace PSFilterLoad.PSApi
 
             return IntPtr.Zero;
         }
-        static short CloseReadDescriptorProc(System.IntPtr param0)
+        static short CloseReadDescriptorProc(System.IntPtr descriptor)
         {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
             if (isSubKey)
             {
                 isSubKey = false;
             }
 
-            param0 = IntPtr.Zero;
+            descriptor = IntPtr.Zero;
             return descErrValue;
         }
-        static byte GetKeyProc(System.IntPtr param0, ref uint key, ref uint type, ref int flags)
+        static byte GetKeyProc(System.IntPtr descriptor, ref uint key, ref uint type, ref int flags)
         {
             if (descErr != PSError.noErr)
             {
@@ -3555,78 +3546,76 @@ namespace PSFilterLoad.PSApi
 
             return 0;
         }
-        static short GetIntegerProc(System.IntPtr param0, ref int param1)
+        static short GetIntegerProc(System.IntPtr descriptor, ref int data)
         {
-            param1 = (int)aeteDict[getKey].Value;
+            data = (int)aeteDict[getKey].Value;
 
             return PSError.noErr;
         }
-        static short GetFloatProc(System.IntPtr param0, ref double param1)
+        static short GetFloatProc(System.IntPtr descriptor, ref double param1)
         {
             param1 = (double)aeteDict[getKey].Value;
 
             return PSError.noErr;
         }
-        static short GetUnitFloatProc(System.IntPtr param0, ref uint param1, ref double param2)
+        static short GetUnitFloatProc(System.IntPtr descriptor, ref uint type, ref double data)
         {
-            param1 = aeteDict[getKey].Type;
-            param2 = (double)aeteDict[getKey].Value;
+            type = aeteDict[getKey].Type;
+            data = (double)aeteDict[getKey].Value;
             return PSError.noErr;
         }
-        static short GetBooleanProc(System.IntPtr param0, ref byte param1)
+        static short GetBooleanProc(System.IntPtr descriptor, ref byte data)
         {
-            param1 = (byte)aeteDict[getKey].Value;
+            data = (byte)aeteDict[getKey].Value;
 
             return PSError.noErr;
         }
-        static short GetTextProc(System.IntPtr param0, ref System.IntPtr param1)
+        static short GetTextProc(System.IntPtr descriptor, ref System.IntPtr data)
         {
             int size = aeteDict[getKey].Size;
-            param1 = handle_new_proc(size);
-            IntPtr hPtr = Marshal.ReadIntPtr(param1);
+            data = handle_new_proc(size);
+            IntPtr hPtr = Marshal.ReadIntPtr(data);
             Marshal.Copy((byte[])aeteDict[getKey].Value, 0, hPtr, size);
 
 
             return PSError.noErr;
         }
-        static short GetAliasProc(System.IntPtr param0, ref System.IntPtr param1)
+        static short GetAliasProc(System.IntPtr descriptor, ref System.IntPtr data)
         {
-
             int size = aeteDict[getKey].Size;
-            param1 = handle_new_proc(size);
-            IntPtr hPtr = Marshal.ReadIntPtr(param1);
+            data = handle_new_proc(size);
+            IntPtr hPtr = Marshal.ReadIntPtr(data);
             Marshal.Copy((byte[])aeteDict[getKey].Value, 0, hPtr, size);
 
-
             return PSError.noErr;
         }
-        static short GetEnumeratedProc(System.IntPtr param0, ref uint param1)
+        static short GetEnumeratedProc(System.IntPtr descriptor, ref uint type)
         {
-            param1 = (uint)aeteDict[getKey].Value;
+            type = (uint)aeteDict[getKey].Value;
 
             return PSError.noErr;
         }
-        static short GetClassProc(System.IntPtr param0, ref uint param1)
+        static short GetClassProc(System.IntPtr descriptor, ref uint type)
         {
             return PSError.errPlugInHostInsufficient;
         }
 
-        static short GetSimpleReferenceProc(System.IntPtr param0, ref PIDescriptorSimpleReference param1)
+        static short GetSimpleReferenceProc(System.IntPtr descriptor, ref PIDescriptorSimpleReference data)
         {
             if (aeteDict.ContainsKey(getKey))
             {
-                param1 = (PIDescriptorSimpleReference)aeteDict[getKey].Value;
+                data = (PIDescriptorSimpleReference)aeteDict[getKey].Value;
                 return PSError.noErr;
             }
             return PSError.errPlugInHostInsufficient;
         }
-        static short GetObjectProc(System.IntPtr param0, ref uint param1, ref System.IntPtr param2)
+        static short GetObjectProc(System.IntPtr descriptor, ref uint retType, ref System.IntPtr data)
         {
             uint type = aeteDict[getKey].Type;
 
             try
             {
-                param1 = type;
+                retType = type;
             }
             catch (NullReferenceException)
             {
@@ -3643,7 +3632,7 @@ namespace PSFilterLoad.PSApi
                 case DescriptorTypes.classGrayscale:
                 case DescriptorTypes.classLabColor:
                 case DescriptorTypes.classHSBColor:
-                    param2 = handle_new_proc(1); // just assign a handle that is only one byte to allow it to work correctly. 
+                    data = handle_new_proc(1); // just assign a handle that is only one byte to allow it to work correctly. 
                     break;
 
                 case DescriptorTypes.typeAlias:
@@ -3651,28 +3640,28 @@ namespace PSFilterLoad.PSApi
                 case DescriptorTypes.typeChar:
 
                     int size = aeteDict[getKey].Size;
-                    param2 = handle_new_proc(size);
-                    hPtr = Marshal.ReadIntPtr(param2);
+                    data = handle_new_proc(size);
+                    hPtr = Marshal.ReadIntPtr(data);
                     Marshal.Copy((byte[])aeteDict[getKey].Value, 0, hPtr, size);
                     break;
                 case DescriptorTypes.typeBoolean:
-                    param2 = handle_new_proc(1);
-                    hPtr = Marshal.ReadIntPtr(param2);
+                    data = handle_new_proc(1);
+                    hPtr = Marshal.ReadIntPtr(data);
 
                     bytes = new byte[1] { (byte)aeteDict[getKey].Value };
 
                     Marshal.Copy(bytes, 0, hPtr, bytes.Length);
                     break;
                 case DescriptorTypes.typeInteger:
-                    param2 = handle_new_proc(Marshal.SizeOf(typeof(Int32)));
-                    hPtr = Marshal.ReadIntPtr(param2);
+                    data = handle_new_proc(Marshal.SizeOf(typeof(Int32)));
+                    hPtr = Marshal.ReadIntPtr(data);
                     bytes = BitConverter.GetBytes((int)aeteDict[getKey].Value);
                     Marshal.Copy(bytes, 0, hPtr, bytes.Length);
                     break;
                 case DescriptorTypes.typeFloat:
                 case DescriptorTypes.typeUintFloat:
-                    param2 = handle_new_proc(Marshal.SizeOf(typeof(double)));
-                    hPtr = Marshal.ReadIntPtr(param2);
+                    data = handle_new_proc(Marshal.SizeOf(typeof(double)));
+                    hPtr = Marshal.ReadIntPtr(data);
 
                     bytes = BitConverter.GetBytes((double)aeteDict[getKey].Value);
                     Marshal.Copy(bytes, 0, hPtr, bytes.Length);
@@ -3684,415 +3673,381 @@ namespace PSFilterLoad.PSApi
 
             return PSError.noErr;
         }
-        static short GetCountProc(System.IntPtr param0, ref uint param1)
+        static short GetCountProc(System.IntPtr descriptor, ref uint count)
         {
-            param1 = (uint)aeteDict.Count;
+            count = (uint)aeteDict.Count;
             return PSError.noErr;
         }
-        static short GetStringProc(System.IntPtr param0, System.IntPtr param1)
+        static short GetStringProc(System.IntPtr descriptor, System.IntPtr data)
         {
             int size = aeteDict[getKey].Size;
-            Marshal.Copy((byte[])aeteDict[getKey].Value, 0, param1, size);
+            Marshal.Copy((byte[])aeteDict[getKey].Value, 0, data, size);
             return PSError.noErr;
         }
-		static short GetPinnedIntegerProc(System.IntPtr param0, int param1, int param2, ref int param3)
-		{
-			descErr = PSError.noErr;
-			int amount = (int)aeteDict[getKey].Value;
-			if (amount < param1)
-			{
-				amount = param1;
-				descErr = PSError.coercedParamErr;
-			}
-			else if (amount > param2)
-			{
-				amount = param2;
-				descErr = PSError.coercedParamErr;
-			}
-			param3 = amount;
+        static short GetPinnedIntegerProc(System.IntPtr descriptor, int min, int max, ref int intNumber)
+        {
+            descErr = PSError.noErr;
+            int amount = (int)aeteDict[getKey].Value;
+            if (amount < min)
+            {
+                amount = min;
+                descErr = PSError.coercedParamErr;
+            }
+            else if (amount > max)
+            {
+                amount = max;
+                descErr = PSError.coercedParamErr;
+            }
+            intNumber = amount;
 
-			return descErr;
-		}
-		static short GetPinnedFloatProc(System.IntPtr param0, ref double param1, ref double param2, ref double param3)
-		{
-			descErr = PSError.noErr;
-			double amount = (double)aeteDict[getKey].Value;
-			if (amount < param1)
-			{
-				amount = param1;
-				descErr = PSError.coercedParamErr;
-			}
-			else if (amount > param2)
-			{
-				amount = param2;
-				descErr = PSError.coercedParamErr;
-			}
-			param3 = amount;
+            return descErr;
+        }
+        static short GetPinnedFloatProc(System.IntPtr descriptor, ref double min, ref double max, ref double floatNumber)
+        {
+            descErr = PSError.noErr;
+            double amount = (double)aeteDict[getKey].Value;
+            if (amount < min)
+            {
+                amount = min;
+                descErr = PSError.coercedParamErr;
+            }
+            else if (amount > max)
+            {
+                amount = max;
+                descErr = PSError.coercedParamErr;
+            }
+            floatNumber = amount;
 
-			return descErr;
-		}
-		static short GetPinnedUnitFloatProc(System.IntPtr param0, ref double param1, ref double param2, ref uint param3, ref double param4)
-		{
-			descErr = PSError.noErr;
+            return descErr;
+        }
+        static short GetPinnedUnitFloatProc(System.IntPtr descriptor, ref double min, ref double max, ref uint units, ref double floatNumber)
+        {
+            descErr = PSError.noErr;
 
-			double amount = (double)aeteDict[getKey].Value;
-			if (amount < param1)
-			{
-				amount = param1;
-				descErr = PSError.coercedParamErr;
-			}
-			else if (amount > param2)
-			{
-				amount = param2;
-				descErr = PSError.coercedParamErr;
-			}
-			param4 = amount;
+            double amount = (double)aeteDict[getKey].Value;
+            if (amount < min)
+            {
+                amount = min;
+                descErr = PSError.coercedParamErr;
+            }
+            else if (amount > max)
+            {
+                amount = max;
+                descErr = PSError.coercedParamErr;
+            }
+            floatNumber = amount;
 
-			return descErr;
-		}
-		// WriteDescriptorProcs
+            return descErr;
+        }
+        // WriteDescriptorProcs
 
-		static IntPtr OpenWriteDescriptorProc()
-		{
+        static IntPtr OpenWriteDescriptorProc()
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			return writeDescriptorPtr;
-		}
-		static short CloseWriteDescriptorProc(System.IntPtr param0, ref System.IntPtr param1)
-		{
+            return writeDescriptorPtr;
+        }
+        static short CloseWriteDescriptorProc(System.IntPtr descriptor, ref System.IntPtr descriptorHandle)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			if (isSubKey)
-			{
-				isSubKey = false;
-			}
+            if (isSubKey)
+            {
+                isSubKey = false;
+            }
 
-#if true
-			param1 = new IntPtr(1);
-#else          
-			AETEKeys kvd = new AETEKeys() { count = aeteDict.Count, values = new AETEValue[aeteDict.Count] };
-			aeteDict.Values.CopyTo(kvd.values, 0);
+            descriptorHandle = new IntPtr(1);
 
-			int size = 4;
-			foreach (var item in kvd.values)
-			{
-				size += (12 + item.value.Length);
-			}
+            return PSError.noErr;
+        }
 
-			param1 = Marshal.AllocHGlobal(size);
-			Marshal.WriteInt32(param1, kvd.count);
-			int offset = 0;
-			unsafe
-			{
-				foreach (var item in kvd.values)
-				{
-					IntPtr ptr = new IntPtr((param1.ToInt64() + 4L) + (long)offset);
-					Marshal.WriteInt32(ptr, (int)item.type);
-					Marshal.WriteInt32(ptr, 4, item.flags);
-					Marshal.WriteInt32(ptr, 8, item.size);
-					offset += 12;
-					fixed (void* p = item.value)
-					{
-						NativeMethods.MemCopy(new IntPtr(ptr.ToInt64() + 12L), (IntPtr)p, new UIntPtr((uint)item.value.Length));
-					}
-					offset += item.value.Length;
+        static int GetAETEParmFlags(uint key)
+        {
+            if (aete != null)
+            {
+                foreach (var item in aete.FlagList)
+                {
+                    if (item.Key == key)
+                    {
+                        return item.Value;
+                    }
+                }
+            }
 
+            return 0;
+        }
 
-				}
-			} 
-#endif
-
-
-			return PSError.noErr;
-		}
-
-		static int GetAETEParmFlags(uint key)
-		{
-			if (aete != null)
-			{
-				foreach (var item in aete.FlagList)
-				{
-					if (item.Key == key)
-					{
-						return item.Value;
-					}
-				} 
-			}
-
-			return 0;
-		}
-
-		static short PutIntegerProc(System.IntPtr param0, uint param1, int param2)
-		{
+        static short PutIntegerProc(System.IntPtr descriptor, uint key, int param2)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			aeteDict.AddOrUpdate(param1, new AETEValue(DescriptorTypes.typeInteger, GetAETEParmFlags(param1), 0, param2));
-			return PSError.noErr;
-		}
+            aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeInteger, GetAETEParmFlags(key), 0, param2));
+            return PSError.noErr;
+        }
 
-		static short PutFloatProc(System.IntPtr param0, uint param1, ref double param2)
-		{
+        static short PutFloatProc(System.IntPtr descriptor, uint key, ref double data)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			aeteDict.AddOrUpdate(param1, new AETEValue(DescriptorTypes.typeFloat, GetAETEParmFlags(param1), 0, param2));
-			return PSError.noErr;
+            aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeFloat, GetAETEParmFlags(key), 0, data));
+            return PSError.noErr;
 
-		}
+        }
 
-		static short PutUnitFloatProc(System.IntPtr param0, uint param1, uint param2, ref double param3)
-		{
+        static short PutUnitFloatProc(System.IntPtr descriptor, uint key, uint unit, ref double data)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			aeteDict.AddOrUpdate(param1, new AETEValue(DescriptorTypes.typeUintFloat, GetAETEParmFlags(param1), 0, param3));
-			return PSError.noErr;
-		}
+            aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeUintFloat, GetAETEParmFlags(key), 0, data));
+            return PSError.noErr;
+        }
 
-		static short PutBooleanProc(System.IntPtr param0, uint param1, byte param2)
-		{
+        static short PutBooleanProc(System.IntPtr descriptor, uint key, byte data)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			aeteDict.AddOrUpdate(param1, new AETEValue(DescriptorTypes.typeBoolean, GetAETEParmFlags(param1), 0, param2));
-			return PSError.noErr;
-		}
+            aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeBoolean, GetAETEParmFlags(key), 0, data));
+            return PSError.noErr;
+        }
 
-		static short PutTextProc(System.IntPtr param0, uint param1, IntPtr param2)
-		{
+        static short PutTextProc(System.IntPtr descriptor, uint key, IntPtr textHandle)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
 
-			if (param2 != IntPtr.Zero)
-			{
-				IntPtr hPtr = Marshal.ReadIntPtr(param2);
+            if (textHandle != IntPtr.Zero)
+            {
+                IntPtr hPtr = Marshal.ReadIntPtr(textHandle);
 
-				Debug.WriteLine("ptr: " + param2.ToInt64().ToString("X8"));
-				if (handle_valid(param2))
-				{
+                Debug.WriteLine("ptr: " + textHandle.ToInt64().ToString("X8"));
+                if (handle_valid(textHandle))
+                {
 
-					int size = handle_get_size_proc(param2);
-					byte[] data = new byte[size];
-					Marshal.Copy(hPtr, data, 0, size);
+                    int size = handle_get_size_proc(textHandle);
+                    byte[] data = new byte[size];
+                    Marshal.Copy(hPtr, data, 0, size);
 
-					aeteDict.AddOrUpdate(param1, new AETEValue(DescriptorTypes.typeChar, GetAETEParmFlags(param1), size, data));
-				}
-				else
-				{
-					byte[] data = null;
-					int size = 0;
-					if (!IsBadReadPtr(hPtr))
-					{
-						size = NativeMethods.GlobalSize(hPtr).ToInt32();
-						data = new byte[size];
-						Marshal.Copy(hPtr, data, 0, size);
-					}
-					else
-					{
-						size = NativeMethods.GlobalSize(param2).ToInt32();
-						data = new byte[size];
-						Marshal.Copy(param2, data, 0, size);
-					}
+                    aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParmFlags(key), size, data));
+                }
+                else
+                {
+                    byte[] data = null;
+                    int size = 0;
+                    if (!IsBadReadPtr(hPtr))
+                    {
+                        size = NativeMethods.GlobalSize(hPtr).ToInt32();
+                        data = new byte[size];
+                        Marshal.Copy(hPtr, data, 0, size);
+                    }
+                    else
+                    {
+                        size = NativeMethods.GlobalSize(textHandle).ToInt32();
+                        data = new byte[size];
+                        Marshal.Copy(textHandle, data, 0, size);
+                    }
 
-					aeteDict.AddOrUpdate(param1, new AETEValue(DescriptorTypes.typeChar, GetAETEParmFlags(param1), size, data));
+                    aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParmFlags(key), size, data));
 
-				}
-			}
+                }
+            }
 
-			return PSError.noErr;
-		}
+            return PSError.noErr;
+        }
 
-		static short PutAliasProc(System.IntPtr param0, uint param1, System.IntPtr param2)
-		{
+        static short PutAliasProc(System.IntPtr descriptor, uint key, System.IntPtr aliasHandle)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			if (handle_valid(param2))
-			{
-				int size = handle_get_size_proc(param2);
-				byte[] data = new byte[size];
-				IntPtr hPtr = Marshal.ReadIntPtr(param2);
-				Marshal.Copy(hPtr, data, 0, size);
+            if (handle_valid(aliasHandle))
+            {
+                int size = handle_get_size_proc(aliasHandle);
+                byte[] data = new byte[size];
+                IntPtr hPtr = Marshal.ReadIntPtr(aliasHandle);
+                Marshal.Copy(hPtr, data, 0, size);
 
-				aeteDict.AddOrUpdate(param1, new AETEValue(DescriptorTypes.typeAlias, GetAETEParmFlags(param1), size, data));
-			}
-			else
-			{
-				int size = NativeMethods.GlobalSize(param2).ToInt32();
-				byte[] data = new byte[size];
-				IntPtr hPtr = Marshal.ReadIntPtr(param2);
-				if (!IsBadReadPtr(hPtr))
-				{
-					size = NativeMethods.GlobalSize(hPtr).ToInt32();
-					data = new byte[size];
-					Marshal.Copy(hPtr, data, 0, size);
-				}
-				else
-				{
-					size = NativeMethods.GlobalSize(param2).ToInt32();
-					data = new byte[size];
-					Marshal.Copy(param2, data, 0, size);
-				}
-				aeteDict.AddOrUpdate(param1, new AETEValue(DescriptorTypes.typeAlias, GetAETEParmFlags(param1), size, data));
+                aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeAlias, GetAETEParmFlags(key), size, data));
+            }
+            else
+            {
+                int size = NativeMethods.GlobalSize(aliasHandle).ToInt32();
+                byte[] data = new byte[size];
+                IntPtr hPtr = Marshal.ReadIntPtr(aliasHandle);
+                if (!IsBadReadPtr(hPtr))
+                {
+                    size = NativeMethods.GlobalSize(hPtr).ToInt32();
+                    data = new byte[size];
+                    Marshal.Copy(hPtr, data, 0, size);
+                }
+                else
+                {
+                    size = NativeMethods.GlobalSize(aliasHandle).ToInt32();
+                    data = new byte[size];
+                    Marshal.Copy(aliasHandle, data, 0, size);
+                }
+                aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeAlias, GetAETEParmFlags(key), size, data));
 
-			}
-			return PSError.noErr;
-		}
+            }
+            return PSError.noErr;
+        }
 
-		static short PutEnumeratedProc(System.IntPtr param0, uint key, uint type, uint value)
-		{
+        static short PutEnumeratedProc(System.IntPtr descriptor, uint key, uint type, uint data)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), 0, value));
-			return PSError.noErr;
-		}
+            aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), 0, data));
+            return PSError.noErr;
+        }
 
-		static short PutClassProc(System.IntPtr param0, uint param1, uint param2)
-		{
+        static short PutClassProc(System.IntPtr descriptor, uint key, uint data)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
 
-			// TODO: What does the PutClassProc function do?
-			return PSError.errPlugInHostInsufficient;
-		}
+            // TODO: What does the PutClassProc function do?
+            return PSError.errPlugInHostInsufficient;
+        }
 
-		static short PutSimpleReferenceProc(System.IntPtr param0, uint param1, ref PIDescriptorSimpleReference param2)
-		{
+        static short PutSimpleReferenceProc(System.IntPtr descriptor, uint key, ref PIDescriptorSimpleReference data)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			aeteDict.AddOrUpdate(param1, new AETEValue(DescriptorTypes.typeObjectRefrence, GetAETEParmFlags(param1), 0, param2));
-			return PSError.noErr;
-		}
+            aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeObjectRefrence, GetAETEParmFlags(key), 0, data));
+            return PSError.noErr;
+        }
 
-		static short PutObjectProc(System.IntPtr param0, uint param1, uint param2, System.IntPtr param3)
-		{
+        static short PutObjectProc(System.IntPtr descriptor, uint key, uint type, System.IntPtr handle)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			byte[] data = null;
+            byte[] data = null;
 
-			switch (param2)
-			{
-				case DescriptorTypes.classRGBColor:
-				case DescriptorTypes.classCMYKColor:
-				case DescriptorTypes.classGrayscale:
-				case DescriptorTypes.classLabColor:
-				case DescriptorTypes.classHSBColor:
-					aeteDict.AddOrUpdate(param1, new AETEValue(param2, GetAETEParmFlags(param1), 0, null));
-					break;
+            switch (type)
+            {
+                case DescriptorTypes.classRGBColor:
+                case DescriptorTypes.classCMYKColor:
+                case DescriptorTypes.classGrayscale:
+                case DescriptorTypes.classLabColor:
+                case DescriptorTypes.classHSBColor:
+                    aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), 0, null));
+                    break;
 
-				default:
-					IntPtr hPtr = Marshal.ReadIntPtr(param3);
+                default:
+                    IntPtr hPtr = Marshal.ReadIntPtr(handle);
 
-					if (handle_valid(param3))
-					{
-						int size = handle_get_size_proc(param3);
-						data = new byte[size];
-						Marshal.Copy(hPtr, data, 0, size);
+                    if (handle_valid(handle))
+                    {
+                        int size = handle_get_size_proc(handle);
+                        data = new byte[size];
+                        Marshal.Copy(hPtr, data, 0, size);
 
-						aeteDict.AddOrUpdate(param1, new AETEValue(param2, GetAETEParmFlags(param1), size, data));
-					}
-					else
-					{
-						int size = 0;
-						if (!IsBadReadPtr(hPtr))
-						{
-							size = NativeMethods.GlobalSize(hPtr).ToInt32();
-							data = new byte[size];
-							Marshal.Copy(hPtr, data, 0, size);
-						}
-						else
-						{
-							size = NativeMethods.GlobalSize(param3).ToInt32();
-							data = new byte[size];
-							Marshal.Copy(param3, data, 0, size);
-						}
+                        aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), size, data));
+                    }
+                    else
+                    {
+                        int size = 0;
+                        if (!IsBadReadPtr(hPtr))
+                        {
+                            size = NativeMethods.GlobalSize(hPtr).ToInt32();
+                            data = new byte[size];
+                            Marshal.Copy(hPtr, data, 0, size);
+                        }
+                        else
+                        {
+                            size = NativeMethods.GlobalSize(handle).ToInt32();
+                            data = new byte[size];
+                            Marshal.Copy(handle, data, 0, size);
+                        }
 
-						aeteDict.AddOrUpdate(param1, new AETEValue(param2, GetAETEParmFlags(param1), size, data));
-					}
-					break;
-			}
+                        aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), size, data));
+                    }
+                    break;
+            }
 
 
 
-			return PSError.noErr;
-		}
+            return PSError.noErr;
+        }
 
-		static short PutCountProc(System.IntPtr param0, uint param1, uint count)
-		{
+        static short PutCountProc(System.IntPtr descriptor, uint key, uint count)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			return PSError.noErr;
-		}
+            return PSError.noErr;
+        }
 
-		static short PutStringProc(System.IntPtr param0, uint param1, IntPtr param2)
-		{
+        static short PutStringProc(System.IntPtr descriptor, uint key, IntPtr stringHandle)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			int size = (int)Marshal.ReadByte(param2);
-			byte[] data = new byte[size];
-			Marshal.Copy(new IntPtr(param2.ToInt64() + 1L), data, 0, size);
+            int size = (int)Marshal.ReadByte(stringHandle);
+            byte[] data = new byte[size];
+            Marshal.Copy(new IntPtr(stringHandle.ToInt64() + 1L), data, 0, size);
 
-			aeteDict.AddOrUpdate(param1, new AETEValue(DescriptorTypes.typeChar, GetAETEParmFlags(param1), size, data));
+            aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParmFlags(key), size, data));
 
-			return PSError.noErr;
-		}
+            return PSError.noErr;
+        }
 
-		static short PutScopedClassProc(System.IntPtr param0, uint param1, uint param2)
-		{
+        static short PutScopedClassProc(System.IntPtr descriptor, uint key, uint data)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			return PSError.errPlugInHostInsufficient;
-		}
-		static short PutScopedObjectProc(System.IntPtr param0, uint param1, uint param2, ref System.IntPtr param3)
-		{
+            return PSError.errPlugInHostInsufficient;
+        }
+        static short PutScopedObjectProc(System.IntPtr descriptor, uint key, uint type, ref System.IntPtr handle)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
-			IntPtr hPtr = Marshal.ReadIntPtr(param3);
+            IntPtr hPtr = Marshal.ReadIntPtr(handle);
 
-			if (handle_valid(param3))
-			{
-				int size = handle_get_size_proc(param3);
-				byte[] data = new byte[size];
-				Marshal.Copy(hPtr, data, 0, size);
+            if (handle_valid(handle))
+            {
+                int size = handle_get_size_proc(handle);
+                byte[] data = new byte[size];
+                Marshal.Copy(hPtr, data, 0, size);
 
-				aeteDict.AddOrUpdate(param1, new AETEValue(param2, GetAETEParmFlags(param1), size, data));
-			}
-			else
-			{
-				byte[] data = null;
-				int size = 0;
-				if (!IsBadReadPtr(hPtr))
-				{
-					size = NativeMethods.GlobalSize(param3).ToInt32();
-					data = new byte[size];
-					Marshal.Copy(hPtr, data, 0, size);
-				}
-				else
-				{
-					size = NativeMethods.GlobalSize(param3).ToInt32();
-					data = new byte[size];
-					Marshal.Copy(param3, data, 0, size);
-				}
+                aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), size, data));
+            }
+            else
+            {
+                byte[] data = null;
+                int size = 0;
+                if (!IsBadReadPtr(hPtr))
+                {
+                    size = NativeMethods.GlobalSize(handle).ToInt32();
+                    data = new byte[size];
+                    Marshal.Copy(hPtr, data, 0, size);
+                }
+                else
+                {
+                    size = NativeMethods.GlobalSize(handle).ToInt32();
+                    data = new byte[size];
+                    Marshal.Copy(handle, data, 0, size);
+                }
 
 
-				aeteDict.AddOrUpdate(param1, new AETEValue(param2, GetAETEParmFlags(param1), size, data));
-			}
-			return PSError.noErr;
-		}
+                aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), size, data));
+            }
+            return PSError.noErr;
+        }
 
-		#endregion
+        #endregion
 
 #endif
 
