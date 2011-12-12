@@ -1074,7 +1074,9 @@ namespace PSFilterLoad.PSApi
 			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
 			int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
 
-			IntPtr res = NativeMethods.VirtualQuery(ptr, ref mbi, new IntPtr(mbiSize));
+            if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new IntPtr(mbiSize)) == IntPtr.Zero)
+                return true;
+
 			result = ((mbi.Protect & NativeConstants.PAGE_READONLY) != 0 || (mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 ||
 			(mbi.Protect & NativeConstants.PAGE_WRITECOPY) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_READ) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_READWRITE) != 0 ||
 			(mbi.Protect & NativeConstants.PAGE_EXECUTE_WRITECOPY) != 0);
@@ -1098,8 +1100,10 @@ namespace PSFilterLoad.PSApi
 			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
 			int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
 
-			IntPtr res = NativeMethods.VirtualQuery(ptr, ref mbi, new IntPtr(mbiSize));
-			result = ((mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 || (mbi.Protect & NativeConstants.PAGE_WRITECOPY) != 0 ||
+            if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new IntPtr(mbiSize)) == IntPtr.Zero)
+                return true;
+
+            result = ((mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 || (mbi.Protect & NativeConstants.PAGE_WRITECOPY) != 0 ||
 				(mbi.Protect & NativeConstants.PAGE_EXECUTE_READWRITE) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_WRITECOPY) != 0);
 
 			if ((mbi.Protect & NativeConstants.PAGE_GUARD) != 0 || (mbi.Protect & NativeConstants.PAGE_NOACCESS) != 0)
@@ -1885,6 +1889,7 @@ namespace PSFilterLoad.PSApi
 					GCHandle gch = GCHandle.Alloc(pdata);
 					enumResList = null;
 					enumErrorList = new List<FilterLoadException>();
+                    bool needsRelease = false;
 					try
 					{
 						if (!queryPlugin)
@@ -1892,12 +1897,13 @@ namespace PSFilterLoad.PSApi
 							queryPlugin = true;
 						}
 
+                        dll.DangerousAddRef(ref needsRelease);
 						if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiPl", new EnumResNameDelegate(EnumPiPL), GCHandle.ToIntPtr(gch)))
 						{
 							loadErrors.AddRange(enumErrorList);
 							foreach (PluginData data in enumResList)
 							{
-								if (data.entryPoint != null) // Was the entrypoint found for the plugin.
+								if (!string.IsNullOrEmpty(data.entryPoint)) // Was the entrypoint found for the plugin.
 								{
 									pluginData.Add(data);
 									if (!result)
@@ -1906,12 +1912,12 @@ namespace PSFilterLoad.PSApi
 									}
 								}
 							}
-						}// if there are no PiPL resources scan for Photshop 2.5's PiMI resources. 
+						}// if there are no PiPL resources scan for Photoshop 2.5's PiMI resources. 
 						else if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiMI", new EnumResNameDelegate(EnumPiMI), GCHandle.ToIntPtr(gch)))
 						{
 							foreach (PluginData data in enumResList)
 							{
-								if (data.entryPoint != null) // Was the entrypoint found for the plugin.
+								if (!string.IsNullOrEmpty(data.entryPoint)) // Was the entrypoint found for the plugin.
 								{
 									pluginData.Add(data);
 									if (!result)
@@ -1922,7 +1928,6 @@ namespace PSFilterLoad.PSApi
 							}
 						}
 #if DEBUG
-
 						else
 						{
 							Ping(DebugFlags.Error, string.Format("EnumResourceNames(PiPL, PiMI) failed for {0}", fileName));
@@ -1933,6 +1938,10 @@ namespace PSFilterLoad.PSApi
 					finally
 					{
 						gch.Free();
+                        if (needsRelease)
+                        {
+                            dll.DangerousRelease();
+                        }
 					}
 
 				}
@@ -2384,8 +2393,8 @@ namespace PSFilterLoad.PSApi
                         break;
                     case -3:
                         break;
-                    default: 
-                        NativeMethods.MemSet(inData, inputPadding, new UIntPtr((ulong)(surface.Stride * surface.Height)));
+                    default:
+                        SafeNativeMethods.MemSet(inData, inputPadding, new UIntPtr((ulong)(surface.Stride * surface.Height)));
                         break;
                 }
 
@@ -2898,7 +2907,7 @@ namespace PSFilterLoad.PSApi
                         case -3:
                             break;
                         default:
-                            NativeMethods.MemSet(maskData, maskPadding, new UIntPtr((uint)len));
+                            SafeNativeMethods.MemSet(maskData, maskPadding, new UIntPtr((uint)len));
                             break;
                     }
                 }
