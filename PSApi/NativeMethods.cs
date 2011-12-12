@@ -50,40 +50,5 @@ namespace PSFilterLoad.PSApi
         [DllImport("kernel32.dll", EntryPoint = "GlobalUnlock")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GlobalUnlock([In()] System.IntPtr hMem);
-
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool SetWindowText(IntPtr hWnd, string lpString);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern IntPtr HeapCreate(uint flOptions, IntPtr dwInitialsize, IntPtr dwMaximumSize);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern bool HeapDestroy(IntPtr hHeap);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern IntPtr HeapAlloc(IntPtr hHeap, uint dwFlags, UIntPtr dwSize);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern bool HeapFree(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
-        
-        [DllImport("kernel32.dll")]
-        internal static extern IntPtr HeapReAlloc(IntPtr hHeap, uint dwFlags, IntPtr lpMem, UIntPtr dwBytes);
-        
-        [DllImport("kernel32.dll")]
-        internal static extern UIntPtr HeapSize(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern unsafe uint HeapSetInformation(IntPtr HeapHandle, int HeapInformationClass, void* HeapInformation, uint HeapInformationLength);
-
-        /// Return Type: SIZE_T->ULONG_PTR->unsigned int
-        ///lpAddress: LPCVOID->void*
-        ///lpBuffer: PMEMORY_BASIC_INFORMATION->_MEMORY_BASIC_INFORMATION*
-        ///dwLength: SIZE_T->ULONG_PTR->unsigned int
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern unsafe IntPtr VirtualQuery(IntPtr address, ref NativeStructs.MEMORY_BASIC_INFORMATION buffer, IntPtr sizeOfBuffer);
-
-        [DllImport("msvcrt.dll", EntryPoint = "memset", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-        public static extern IntPtr MemSet(IntPtr dest, int c, UIntPtr count);
     }
 }
