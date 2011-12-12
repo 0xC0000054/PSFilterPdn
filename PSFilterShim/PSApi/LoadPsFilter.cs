@@ -536,7 +536,9 @@ namespace PSFilterLoad.PSApi
 			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
 			int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
 
-			IntPtr res = NativeMethods.VirtualQuery(ptr, ref mbi, new IntPtr(mbiSize));
+            if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new IntPtr(mbiSize)) == IntPtr.Zero)
+                return true;
+
 			result = ((mbi.Protect & NativeConstants.PAGE_READONLY) != 0 || (mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 ||
 			(mbi.Protect & NativeConstants.PAGE_WRITECOPY) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_READ) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_READWRITE) != 0 ||
 			(mbi.Protect & NativeConstants.PAGE_EXECUTE_WRITECOPY) != 0);
@@ -560,8 +562,10 @@ namespace PSFilterLoad.PSApi
 			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
 			int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
 
-			IntPtr res = NativeMethods.VirtualQuery(ptr, ref mbi, new IntPtr(mbiSize));
-			result = ((mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 || (mbi.Protect & NativeConstants.PAGE_WRITECOPY) != 0 ||
+            if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new IntPtr(mbiSize)) == IntPtr.Zero)
+                return true;
+
+            result = ((mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 || (mbi.Protect & NativeConstants.PAGE_WRITECOPY) != 0 ||
 				(mbi.Protect & NativeConstants.PAGE_EXECUTE_READWRITE) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_WRITECOPY) != 0);
 
 			if ((mbi.Protect & NativeConstants.PAGE_GUARD) != 0 || (mbi.Protect & NativeConstants.PAGE_NOACCESS) != 0)
@@ -2152,7 +2156,7 @@ namespace PSFilterLoad.PSApi
                         case -3:
                             break;
                         default:
-                            NativeMethods.MemSet(maskData, maskPadding, new UIntPtr((uint)len));
+                            SafeNativeMethods.MemSet(maskData, maskPadding, new UIntPtr((uint)len));
                             break;
                     }
                 }
@@ -2659,7 +2663,7 @@ namespace PSFilterLoad.PSApi
                     case -3:
                         break;
                     default:
-                        NativeMethods.MemSet(inData, inputPadding, new UIntPtr((ulong)(surface.Stride * surface.Height)));
+                        SafeNativeMethods.MemSet(inData, inputPadding, new UIntPtr((ulong)(surface.Stride * surface.Height)));
                         break;
                 }
 
