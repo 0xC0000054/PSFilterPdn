@@ -15,14 +15,14 @@ namespace PSFilterLoad.PSApi
         {
             if (hHeap == IntPtr.Zero)
             {
-                NativeMethods.HeapSetInformation(IntPtr.Zero, 1, null, 0);
-                hHeap = NativeMethods.HeapCreate(0, IntPtr.Zero, IntPtr.Zero);
+                SafeNativeMethods.HeapSetInformation(IntPtr.Zero, 1, null, 0);
+                hHeap = SafeNativeMethods.HeapCreate(0, IntPtr.Zero, IntPtr.Zero);
                 uint info = 2; // low fragmentation heap
 #if DEBUG
-                uint res = NativeMethods.HeapSetInformation(hHeap, 0, (void*)&info, 4);
+                uint res = SafeNativeMethods.HeapSetInformation(hHeap, 0, (void*)&info, 4);
                 System.Diagnostics.Debug.WriteLine(res);
 #else
-                NativeMethods.HeapSetInformation(hHeap, 0, (void*)&info, 4); 
+                SafeNativeMethods.HeapSetInformation(hHeap, 0, (void*)&info, 4); 
 #endif       
             }
         }
@@ -38,7 +38,7 @@ namespace PSFilterLoad.PSApi
 			try
 			{
 				UIntPtr bytes = new UIntPtr((ulong)size);
-				block = NativeMethods.HeapAlloc(hHeap, zeroMemory ? 8U : 0U, bytes);
+				block = SafeNativeMethods.HeapAlloc(hHeap, zeroMemory ? 8U : 0U, bytes);
 			}
 			catch (OverflowException ex)
 			{
@@ -62,8 +62,8 @@ namespace PSFilterLoad.PSApi
 		{
 			if (hHeap != IntPtr.Zero)
 			{
-				long size = (long)NativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
-				if (!NativeMethods.HeapFree(hHeap, 0, hMem))
+				long size = (long)Size(hMem);
+                if (!SafeNativeMethods.HeapFree(hHeap, 0, hMem))
 				{
 					int error = Marshal.GetLastWin32Error();
 
@@ -90,7 +90,7 @@ namespace PSFilterLoad.PSApi
             try
             {
                 UIntPtr bytes = new UIntPtr((ulong)newSize);
-                block = NativeMethods.HeapReAlloc(hHeap, 0U, pv, bytes);
+                block = SafeNativeMethods.HeapReAlloc(hHeap, 0U, pv, bytes);
             }
             catch (OverflowException ex)
             {
@@ -119,7 +119,7 @@ namespace PSFilterLoad.PSApi
 
             if (hHeap != IntPtr.Zero)
             {
-                long size = (long)NativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
+                long size = (long)SafeNativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
 
                 return size;
             }
@@ -131,7 +131,7 @@ namespace PSFilterLoad.PSApi
         {
             if (hHeap != IntPtr.Zero)
             {
-                NativeMethods.HeapDestroy(hHeap);
+                SafeNativeMethods.HeapDestroy(hHeap);
                 hHeap = IntPtr.Zero;
             }
         }
