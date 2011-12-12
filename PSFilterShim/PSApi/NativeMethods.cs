@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace PSFilterLoad.PSApi
 {
@@ -35,30 +36,5 @@ namespace PSFilterLoad.PSApi
         [DllImport("kernel32.dll", EntryPoint = "GlobalUnlock")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GlobalUnlock([In()] System.IntPtr hMem);
-
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool SetWindowText(IntPtr hWnd, string lpString);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern IntPtr GetProcessHeap();
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern IntPtr HeapAlloc(IntPtr hHeap, uint dwFlags, UIntPtr dwSize);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern bool HeapFree(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
-
-        [DllImport("kernel32.dll")]
-        internal static extern IntPtr HeapReAlloc(IntPtr hHeap, uint dwFlags, IntPtr lpMem, UIntPtr dwBytes);
-
-        [DllImport("kernel32.dll")]
-        internal static extern UIntPtr HeapSize(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern unsafe IntPtr VirtualQuery(IntPtr address, ref NativeStructs.MEMORY_BASIC_INFORMATION buffer, IntPtr sizeOfBuffer);
-
-        [DllImport("msvcrt.dll", EntryPoint = "memset", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-        public static extern IntPtr MemSet(IntPtr dest, int c, UIntPtr count);
      }
 }
