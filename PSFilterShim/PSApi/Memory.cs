@@ -13,7 +13,7 @@ namespace PSFilterLoad.PSApi
 
         static Memory()
         {
-            hHeap = NativeMethods.GetProcessHeap();
+            hHeap = SafeNativeMethods.GetProcessHeap();
         }
 
 
@@ -28,7 +28,7 @@ namespace PSFilterLoad.PSApi
 			try
 			{
 				UIntPtr bytes = new UIntPtr((ulong)size);
-				block = NativeMethods.HeapAlloc(hHeap, zeroMemory ? 8U : 0U, bytes);
+                block = SafeNativeMethods.HeapAlloc(hHeap, zeroMemory ? 8U : 0U, bytes);
 			}
 			catch (OverflowException ex)
 			{
@@ -52,8 +52,8 @@ namespace PSFilterLoad.PSApi
 		{
 			if (hHeap != IntPtr.Zero)
 			{
-				long size = (long)NativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
-				if (!NativeMethods.HeapFree(hHeap, 0, hMem))
+                long size = (long)SafeNativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
+                if (!SafeNativeMethods.HeapFree(hHeap, 0, hMem))
 				{
 					int error = Marshal.GetLastWin32Error();
 
@@ -80,7 +80,7 @@ namespace PSFilterLoad.PSApi
             try
             {
                 UIntPtr bytes = new UIntPtr((ulong)newSize);
-                block = NativeMethods.HeapReAlloc(hHeap, 0U, pv, bytes);
+                block = SafeNativeMethods.HeapReAlloc(hHeap, 0U, pv, bytes);
             }
             catch (OverflowException ex)
             {
@@ -109,7 +109,7 @@ namespace PSFilterLoad.PSApi
 
             if (hHeap != IntPtr.Zero)
             {
-                long size = (long)NativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
+                long size = (long)SafeNativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
 
                 return size;
             }
