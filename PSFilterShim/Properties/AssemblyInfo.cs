@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Shim program to run 32-bit filters on a 64-bit OS.")]
+[assembly: AssemblyTitle("Shim program to run 32-bit Photoshop® filters on a 64-bit OS.")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("null54")]
