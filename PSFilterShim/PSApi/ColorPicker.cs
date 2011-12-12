@@ -15,7 +15,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (!string.IsNullOrEmpty(title))
                 {
-                    NativeMethods.SetWindowText(hWnd, this.title); // make sure the title is not an empty string
+                    SafeNativeMethods.SetWindowText(hWnd, this.title); // make sure the title is not an empty string
                 }
             }
 
