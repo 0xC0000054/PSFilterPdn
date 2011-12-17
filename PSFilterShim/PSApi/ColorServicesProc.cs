@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
 
-#if PSSDK_3_0_4
 
     [StructLayoutAttribute(LayoutKind.Explicit)]
     internal struct SelectorParameters
@@ -25,7 +24,6 @@ namespace PSFilterLoad.PSApi
         [FieldOffsetAttribute(0)]
         public int specialColorID;
     }
-#endif
     /// Return Type: OSErr->short
     ///info: ColorServicesInfo*
     [UnmanagedFunctionPointer(System.Runtime.InteropServices.CallingConvention.Cdecl)]
@@ -66,12 +64,8 @@ namespace PSFilterLoad.PSApi
         /// void*
         public System.IntPtr reserved;
 
-#if PSSDK_3_0_4
         /// SelectorParameters
         public SelectorParameters selectorParameter;
-#else
-        public System.IntPtr pickerPrompt;
-#endif
     }
 
 }

@@ -39,7 +39,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;PSSDK_3_0_4 PSSDK4</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -138,14 +138,13 @@
     <Compile Include="PSApi\ImageSizeTooLargeException.cs" />
     <Compile Include="PSApi\Int32Extensions.cs" />
     <Compile Include="PSApi\LoadPsFilter.cs" />
+    <Compile Include="PSApi\Memory.cs" />
     <Compile Include="PSApi\NativeConstants.cs" />
     <Compile Include="PSApi\NativeMethods.cs" />
     <Compile Include="PSApi\NativeStructs.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\PlatformData.cs" />
-    <Compile Include="PSApi\PluginData.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="PSApi\PluginData.cs" />
     <Compile Include="PSApi\PlugInMonitor.cs" />
     <Compile Include="PSApi\PluginPhase.cs" />
     <Compile Include="PSApi\Point.cs" />
@@ -164,6 +163,7 @@
     <Compile Include="PSApi\SafeLibraryHandle.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PSApi\SafeNativeMethods.cs" />
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
