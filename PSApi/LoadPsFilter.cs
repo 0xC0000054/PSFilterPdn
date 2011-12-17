@@ -89,8 +89,10 @@ namespace PSFilterLoad.PSApi
 			IntPtr hRes = NativeMethods.FindResource(hModule, lpszName, lpszType);
 			if (hRes == IntPtr.Zero)
 			{
+#if DEBUG
 				Debug.WriteLine(Marshal.GetLastWin32Error().ToString());
-				return true;
+#endif				
+                return true;
 			}
 
 			if (lpszName == lParam) // is the resource id the one we want
@@ -3811,7 +3813,9 @@ namespace PSFilterLoad.PSApi
             {
                 IntPtr hPtr = Marshal.ReadIntPtr(textHandle);
 
-                Debug.WriteLine("ptr: " + textHandle.ToInt64().ToString("X8"));
+#if DEBUG
+		                Debug.WriteLine("ptr: " + textHandle.ToInt64().ToString("X8"));
+#endif              
                 if (handle_valid(textHandle))
                 {
 
@@ -4083,18 +4087,6 @@ namespace PSFilterLoad.PSApi
 						}
 
 
-						NativeMethods.GlobalFree(h);
-						return;
-					}
-					else if (!IsBadReadPtr(h)
-						&& NativeMethods.GlobalSize(h).ToInt64() > 0L)
-					{
-						IntPtr hPtr = Marshal.ReadIntPtr(h);
-
-						if (!IsBadReadPtr(hPtr))
-						{
-							NativeMethods.GlobalFree(hPtr);
-						}
 						NativeMethods.GlobalFree(h);
 						return;
 					}
