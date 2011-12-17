@@ -31,12 +31,10 @@ namespace PSFilterLoad.PSApi
         /// plugIncolorServicesChosenSpace -> -1
         public const short plugIncolorServicesChosenSpace = -1;
 
-#if PSSDK_3_0_4
         /// plugIncolorServicesForegroundColor -> 0
         public const int plugIncolorServicesForegroundColor = 0;
 
         /// plugIncolorServicesBackgroundColor -> 1
         public const int plugIncolorServicesBackgroundColor = 1;
-#endif
     }
 }

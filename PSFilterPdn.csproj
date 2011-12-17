@@ -53,11 +53,12 @@
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;PSSDK_3_0_4 PSSDK4</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -96,6 +97,7 @@
     <Compile Include="PSApi\GlobalParameters.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
     <Compile Include="PSApi\LoadPsFilter.cs" />
+    <Compile Include="PSApi\Memory.cs" />
     <Compile Include="PSApi\NativeMethods.cs" />
     <Compile Include="PSApi\ParameterData.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
@@ -104,6 +106,7 @@
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
     <Compile Include="PSApi\SafeLibraryHandle.cs" />
+    <Compile Include="PSApi\SafeNativeMethods.cs" />
     <Compile Include="PsFilterPdnConfigToken.cs" />
     <Compile Include="PSFilterPdn.cs" />
     <Compile Include="PsFilterPdnConfigDialog.cs">

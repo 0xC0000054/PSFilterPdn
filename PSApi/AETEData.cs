@@ -2,7 +2,6 @@
 namespace PSFilterLoad.PSApi
 {
 
-#if PSSDK4
     [System.Serializable()]
     public sealed class AETEData
     {
@@ -32,7 +31,6 @@ namespace PSFilterLoad.PSApi
             }
         }
     } 
-#endif
     
 
 }

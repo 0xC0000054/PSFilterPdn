@@ -385,7 +385,6 @@ namespace PSFilterLoad.PSApi
 					}
 
 				}
-#if PSSDK4
 				else if (propKey == PIPropertyID.PIHasTerminologyProperty)
 				{
 					int vers = Marshal.ReadInt32(dataPtr);
@@ -428,7 +427,6 @@ namespace PSFilterLoad.PSApi
 
 				}
 
-#endif
 
 				int propertyDataPaddedLength = (pipp.propertyLength + 3) & ~3;
 #if DEBUG
@@ -688,22 +686,19 @@ namespace PSFilterLoad.PSApi
 		static UnlockPIHandleProc handleUnlockProc;
 		static RecoverSpaceProc handleRecoverSpaceProc;
 		// ImageServicesProc
-#if PSSDK_3_0_4 && USEIMAGESERVICES
+#if USEIMAGESERVICES
 		static PIResampleProc resample1DProc;
 		static PIResampleProc resample2DProc; 
 #endif
 		// PropertyProcs
 		static GetPropertyProc getPropertyProc;
-#if PSSDK_3_0_4
 		static SetPropertyProc setPropertyProc;
-#endif		
 		// ResourceProcs
 		static CountPIResourcesProc countResourceProc;
 		static GetPIResourceProc getResourceProc;
 		static DeletePIResourceProc deleteResourceProc;
 		static AddPIResourceProc addResourceProc;
 
-#if PSSDK4
 		// ReadDescriptorProcs
 		static OpenReadDescriptorProc openReadDescriptorProc;
 		static CloseReadDescriptorProc closeReadDescriptorProc;
@@ -740,7 +735,6 @@ namespace PSFilterLoad.PSApi
 		static PutStringProc putStringProc;
 		static PutScopedClassProc putScopedClassProc;
 		static PutScopedObjectProc putScopedObjectProc; 
-#endif
 		#endregion
 
 		static Dictionary<long, PSHandle> handles = null; 
@@ -755,24 +749,21 @@ namespace PSFilterLoad.PSApi
 		static IntPtr buffer_procPtr;
 
 		static IntPtr handle_procPtr;
-#if PSSDK_3_0_4
 #if USEIMAGESERVICES
 		static IntPtr image_services_procsPtr;
 #endif	
 		static IntPtr property_procsPtr; 
-#endif
 		static IntPtr resource_procsPtr;
 
 
-#if PSSDK4
 		static IntPtr descriptorParametersPtr;
 		static IntPtr readDescriptorPtr;
 		static IntPtr writeDescriptorPtr;
 
 		static AETEData aete;
 		static Dictionary<uint, AETEValue> aeteDict;
-#endif
-		public Surface Dest
+
+        public Surface Dest
 		{ 
 			get
 			{
@@ -892,7 +883,6 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
-#if PSSDK4
 			keys = null;
 			aete = null;
 			aeteDict = new Dictionary<uint,AETEValue>();
@@ -902,7 +892,7 @@ namespace PSFilterLoad.PSApi
 			subKeys = null;
 			subKeyIndex = 0;
 			isSubKey = false;
-#endif
+
 			copyToDest = false;
 
 			data = IntPtr.Zero;
@@ -3090,11 +3080,9 @@ namespace PSFilterLoad.PSApi
 			switch (info.selector)
 			{
 				case ColorServicesSelector.plugIncolorServicesChooseColor:
-#if PSSDK_3_0_4
-					string name = StringFromPString(info.selectorParameter.pickerPrompt);
-#else
-					string name = StringFromPString(info.pickerPrompt);
-#endif
+					
+                    string name = StringFromPString(info.selectorParameter.pickerPrompt);
+
 					using (ColorPicker picker = new ColorPicker(name))
 					{
 						picker.AllowFullOpen = true;
@@ -3125,7 +3113,6 @@ namespace PSFilterLoad.PSApi
 					err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
 					
 					break;
-#if PSSDK_3_0_4
 				case ColorServicesSelector.plugIncolorServicesGetSpecialColor:
 					
 					unsafe
@@ -3172,13 +3159,11 @@ namespace PSFilterLoad.PSApi
 					}
 
 					break;
-#endif
 
 			}
 			return err;
 		}
 
-#if PSSDK_3_0_4
 		static bool IsInSourceBounds(Point16 point)
 		{
 			if (source == null) // Bitmap Disposed?
@@ -3189,7 +3174,6 @@ namespace PSFilterLoad.PSApi
 
 			return (inh && inv);
 		} 
-#endif
 
         static Surface tempDisplaySurface;
         static void SetupTempDisplaySurface(int width, int height, bool haveMask)
@@ -3410,7 +3394,6 @@ namespace PSFilterLoad.PSApi
 		}
 
 
-#if PSSDK4
 
         #region DescriptorParameters
 
@@ -4038,8 +4021,6 @@ namespace PSFilterLoad.PSApi
 
         #endregion
 
-#endif
-
 		static bool handle_valid(IntPtr h)
 		{
 			return ((handles != null) && handles.ContainsKey(h.ToInt64()));
@@ -4302,7 +4283,7 @@ namespace PSFilterLoad.PSApi
 #endif
 		}
 
-#if PSSDK_3_0_4 && USEIMAGESERVICES
+#if USEIMAGESERVICES
 		static short image_services_interpolate_1d_proc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
 		{
 			return PSError.memFullErr;
@@ -4437,7 +4418,6 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-#if PSSDK_3_0_4
         static short property_set_proc(uint signature, uint key, int index, int simpleProperty, ref System.IntPtr complexProperty)
         {
 #if DEBUG
@@ -4474,7 +4454,6 @@ namespace PSFilterLoad.PSApi
             
             return PSError.noErr;
         }
-#endif
 
         static short resource_add_proc(uint ofType, ref IntPtr data)
 		{
@@ -4588,7 +4567,7 @@ namespace PSFilterLoad.PSApi
 			handleUnlockProc = new UnlockPIHandleProc(handle_unlock_proc);
 			
 			// ImageServicesProc
-#if PSSDK_3_0_4 && USEIMAGESERVICES
+#if USEIMAGESERVICES
 			resample1DProc = new PIResampleProc(image_services_interpolate_1d_proc);
 			resample2DProc = new PIResampleProc(image_services_interpolate_2d_proc); 
 #endif
@@ -4596,16 +4575,13 @@ namespace PSFilterLoad.PSApi
 			// PropertyProc
 			getPropertyProc = new GetPropertyProc(property_get_proc);
 
-#if PSSDK_3_0_4
 			setPropertyProc = new SetPropertyProc(property_set_proc);
-#endif		
 			// ResourceProcs
 			countResourceProc = new CountPIResourcesProc(resource_count_proc);
 			getResourceProc = new GetPIResourceProc(resource_get_proc);
 			deleteResourceProc = new DeletePIResourceProc(resource_delete_proc);
 			addResourceProc = new AddPIResourceProc(resource_add_proc);
 
-#if PSSDK4
 			// ReadDescriptorProcs
 			openReadDescriptorProc = new OpenReadDescriptorProc(OpenReadDescriptorProc);
 			closeReadDescriptorProc = new CloseReadDescriptorProc(CloseReadDescriptorProc);
@@ -4642,7 +4618,6 @@ namespace PSFilterLoad.PSApi
 			putStringProc = new PutStringProc(PutStringProc);
 			putTextProc = new PutTextProc(PutTextProc);
 			putUnitFloatProc = new PutUnitFloatProc(PutUnitFloatProc);
-#endif
 		}
 
         static bool suitesSetup;
@@ -4677,7 +4652,7 @@ namespace PSFilterLoad.PSApi
             handleProcs->unlockProc = Marshal.GetFunctionPointerForDelegate(handleUnlockProc);
             // ImageServicesProc
 
-#if PSSDK_3_0_4 && USEIMAGESERVICES
+#if USEIMAGESERVICES
 
 			image_services_procs = new ImageServicesProcs();
 			image_services_procs.imageServicesProcsVersion = PSConstants.kCurrentImageServicesProcsVersion;
@@ -4689,14 +4664,12 @@ namespace PSFilterLoad.PSApi
 #endif
 
             // PropertyProcs
-#if PSSDK_3_0_4
             property_procsPtr = Memory.Allocate(Marshal.SizeOf(typeof(PropertyProcs)), true);
             PropertyProcs* propertyProcs = (PropertyProcs*)property_procsPtr.ToPointer();
             propertyProcs->propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion;
             propertyProcs->numPropertyProcs = PSConstants.kCurrentPropertyProcsCount;
             propertyProcs->getPropertyProc = Marshal.GetFunctionPointerForDelegate(getPropertyProc);
             propertyProcs->setPropertyProc = Marshal.GetFunctionPointerForDelegate(setPropertyProc);
-#endif
             // ResourceProcs
             resource_procsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ResourceProcs)), true);
             ResourceProcs* resourceProcs = (ResourceProcs*)resource_procsPtr.ToPointer();
@@ -4707,7 +4680,6 @@ namespace PSFilterLoad.PSApi
             resourceProcs->deleteProc = Marshal.GetFunctionPointerForDelegate(deleteResourceProc);
             resourceProcs->getProc = Marshal.GetFunctionPointerForDelegate(getResourceProc);
 
-#if PSSDK4
             readDescriptorPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadDescriptorProcs)), true);
             ReadDescriptorProcs* readDescriptor = (ReadDescriptorProcs*)readDescriptorPtr.ToPointer();
             readDescriptor->readDescriptorProcsVersion = PSConstants.kCurrentReadDescriptorProcsVersion;
@@ -4783,7 +4755,6 @@ namespace PSFilterLoad.PSApi
             {
                 descriptorParameters->playInfo = (short)PlayInfo.plugInDialogDisplay;
             }
-#endif
         }
         static bool frsetup;
         static unsafe void setup_filter_record()
@@ -4854,7 +4825,6 @@ namespace PSFilterLoad.PSApi
             /* maskRate */
             filterRecord->colorServices = Marshal.GetFunctionPointerForDelegate(colorProc);
 
-#if PSSDK_3_0_4
 #if USEIMAGESERVICES
 			filterRecord->imageServicesProcs = image_services_procsPtr.AddrOfPinnedObject();
 #else
@@ -4877,13 +4847,11 @@ namespace PSFilterLoad.PSApi
             filterRecord->maskTileWidth = 0;
             filterRecord->maskTileOrigin.h = 0;
             filterRecord->maskTileOrigin.v = 0;
-#endif
-#if PSSDK4
+            
             filterRecord->descriptorParameters = descriptorParametersPtr;
             filterRecord->errorString = Memory.Allocate(256, true);
             filterRecord->channelPortProcs = IntPtr.Zero;
             filterRecord->documentInfo = IntPtr.Zero;
-#endif
         }
 
 		#region IDisposable Members
@@ -4918,7 +4886,6 @@ namespace PSFilterLoad.PSApi
                         handle_procPtr = IntPtr.Zero;
                     }
 
-#if PSSDK_3_0_4
 #if USEIMAGESERVICES
 					if (image_services_procsPtr.IsAllocated)
 					{
@@ -4930,7 +4897,6 @@ namespace PSFilterLoad.PSApi
                         Memory.Free(property_procsPtr);
                         property_procsPtr = IntPtr.Zero;
                     }
-#endif
 
                     if (resource_procsPtr != IntPtr.Zero)
                     {
@@ -4938,8 +4904,7 @@ namespace PSFilterLoad.PSApi
                         resource_procsPtr = IntPtr.Zero;
                     }
 
-                    FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-#if PSSDK4
+                    
                     if (descriptorParametersPtr != IntPtr.Zero)
                     {
                         Memory.Free(descriptorParametersPtr);
@@ -4956,11 +4921,11 @@ namespace PSFilterLoad.PSApi
                         writeDescriptorPtr = IntPtr.Zero;
                     }
 
+                    FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
                     if (filterRecord->errorString != IntPtr.Zero)
                     {
                         Memory.Free(filterRecord->errorString);
                     }
-#endif
 
 
                     if (filterRecord->parameters != IntPtr.Zero)

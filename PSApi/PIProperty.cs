@@ -51,12 +51,10 @@ namespace PSFilterLoad.PSApi
         /// Menu name
         /// </summary>
         PINameProperty = 0x6e616d65U,
-#if PSSDK4
         /// <summary>
         /// Has Terminology Property
         /// </summary>
         PIHasTerminologyProperty = 0x6873746DU,
-#endif
         /// <summary>
         /// FilterCaseInfo Property
         /// </summary>

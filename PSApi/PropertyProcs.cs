@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-#if PSSDK_3_0_4
     [StructLayout(LayoutKind.Sequential)]
     internal struct PropertyProcs
     {
@@ -25,5 +24,4 @@ namespace PSFilterLoad.PSApi
         /// SetPropertyProc
         public IntPtr setPropertyProc;
     } 
-#endif
 }

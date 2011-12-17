@@ -5,7 +5,6 @@ using System.Text;
 
 namespace PSFilterLoad.PSApi
 {
-#if PSSDK4
     internal struct AETEParm
     {
         public string name;
@@ -52,5 +51,4 @@ namespace PSFilterLoad.PSApi
 
         public AETEEvent[] events;
     } 
-#endif
 }

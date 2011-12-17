@@ -2,7 +2,6 @@
 
 namespace PSFilterLoad.PSApi
 {
-#if PSSDK4
     [Serializable]
 	public struct AETEValue
     {
@@ -52,5 +51,4 @@ namespace PSFilterLoad.PSApi
         }
     } 
   
-#endif
 }

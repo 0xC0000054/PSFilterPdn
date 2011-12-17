@@ -259,10 +259,7 @@ namespace PSFilterLoad.PSApi
 
         /// int32->int
         public int outPlaneBytes;
-#if PSSDK_3_0 
-        public fixed byte reserved[134];
-#endif
-#if PSSDK_3_0_4
+        
         /* New in 3.0.4. */
     
         /// ImageServicesProcs*
@@ -307,12 +304,6 @@ namespace PSFilterLoad.PSApi
         /// Point
         public Point16 maskTileOrigin;
 
-#if PSSDK_3_0_4 && !PSSDK4
-        public fixed byte reserved[98];
-#endif
-#endif
-#if PSSDK4
-
         /*New in 4.0*/
 
         /// PIDescriptorParameters*
@@ -328,7 +319,5 @@ namespace PSFilterLoad.PSApi
         public System.IntPtr documentInfo;
 
         public fixed byte reserved[78];
-#endif
-
     }
 }

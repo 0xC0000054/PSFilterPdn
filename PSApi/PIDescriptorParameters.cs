@@ -10,7 +10,6 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
 
-#if PSSDK4
     /// Return Type: PIWriteDescriptor->PIOpaqueWriteDescriptor*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate System.IntPtr OpenWriteDescriptorProc();
@@ -440,7 +439,6 @@ namespace PSFilterLoad.PSApi
         plugInDialogSilent,
     }
 
-#endif
 
 
 }
