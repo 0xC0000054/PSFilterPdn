@@ -6,6 +6,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
 {
@@ -68,18 +69,23 @@ namespace PSFilterLoad.PSApi
     }
 
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 1)]
+    [DataContract()]
     struct FilterCaseInfo
     {
         /// char
+        [DataMember]       
         public FilterDataHandling inputHandling;
     
         /// char
+        [DataMember]
         public FilterDataHandling outputHandling;
     
         /// char
+        [DataMember]
         public byte flags1;
     
         /// char
+        [DataMember]       
         public byte flags2;
     }
 
