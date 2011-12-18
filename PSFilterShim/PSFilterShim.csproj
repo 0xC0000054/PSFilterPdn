@@ -70,6 +70,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -77,39 +78,27 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IPSFilterShim.cs" />
-    <Compile Include="PaintDotNet\BitVector2D.cs" />
     <Compile Include="PaintDotNet\ColorBgra.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PaintDotNet\HsvColor.cs" />
-    <Compile Include="PaintDotNet\IBitVector2D.cs" />
-    <Compile Include="PaintDotNet\IPixelOp.cs" />
-    <Compile Include="PaintDotNet\Memory.cs" />
+    <Compile Include="PaintDotNet\Memory.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PaintDotNet\MemoryBlock.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PaintDotNet\NativeConstants.cs" />
-    <Compile Include="PaintDotNet\NativeMethods.cs" />
-    <Compile Include="PaintDotNet\NativeStructs.cs" />
-    <Compile Include="PaintDotNet\NullGraphics.cs" />
-    <Compile Include="PaintDotNet\PdnRegion.cs">
+    <Compile Include="PaintDotNet\NativeConstants.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PaintDotNet\PixelOp.cs" />
-    <Compile Include="PaintDotNet\ResamplingAlgorithm.cs" />
-    <Compile Include="PaintDotNet\RgbColor.cs" />
-    <Compile Include="PaintDotNet\SafeNativeMethods.cs" />
-    <Compile Include="PaintDotNet\Scanline.cs" />
+    <Compile Include="PaintDotNet\NativeStructs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\SafeNativeMethods.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PaintDotNet\Surface.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PaintDotNet\UnaryPixelOp.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="PaintDotNet\UnaryPixelOps.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="PaintDotNet\Utility.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PSApi\AbortFunc.cs" />

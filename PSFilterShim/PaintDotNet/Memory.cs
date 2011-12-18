@@ -48,27 +48,6 @@ namespace PaintDotNet.SystemLayer
             }                    
         }
 
-        /// <summary>
-        /// Gets the total amount of physical memory (RAM) in the system.
-        /// </summary>
-        public static ulong TotalPhysicalBytes
-        {
-            get
-            {
-                NativeStructs.MEMORYSTATUSEX mse = new NativeStructs.MEMORYSTATUSEX();
-                mse.dwLength = (uint)sizeof(NativeStructs.MEMORYSTATUSEX);
-
-                bool result = NativeMethods.GlobalMemoryStatusEx(ref mse);
-
-                if (!result)
-                {
-                    NativeMethods.ThrowOnWin32Error("GlobalMemoryStatusEx");
-                }
-
-                return mse.ullTotalPhys;
-            }
-        }
-
         public static void DestroyHeap()
         {
             if (hHeap != IntPtr.Zero)
@@ -137,87 +116,6 @@ namespace PaintDotNet.SystemLayer
             return block;
         }
 
-        /// <summary>
-        /// Allocates a bitmap of the given height and width. Pixel data may be read/written directly, 
-        /// and it may be drawn to the screen using PdnGraphics.DrawBitmap().
-        /// </summary>
-        /// <param name="width">The width of the bitmap to allocate.</param>
-        /// <param name="height">The height of the bitmap to allocate.</param>
-        /// <param name="handle">Receives a handle to the bitmap.</param>
-        /// <returns>A pointer to the bitmap's pixel data.</returns>
-        /// <remarks>
-        /// The following invariants may be useful for implementors:
-        /// * The bitmap is always 32-bits per pixel, BGRA.
-        /// * Stride for the bitmap is always width * 4.
-        /// * The upper-left pixel of the bitmap (0,0) is located at the first memory location pointed to by the returned pointer.
-        /// * The bitmap is top-down ("memory correct" ordering).
-        /// * The 'handle' may be any type of data you want, but must be unique for the lifetime of the bitmap, and must not be IntPtr.Zero.
-        /// * The handle's value must be understanded by PdnGraphics.DrawBitmap().
-        /// * The bitmap is always modified by directly reading and writing to the memory pointed to by the return value.
-        /// * PdnGraphics.DrawBitmap() must always render from this memory location (i.e. it must treat the memory as 'volatile')
-        /// </remarks>
-        public static IntPtr AllocateBitmap(int width, int height, out IntPtr handle)
-        {
-            NativeStructs.BITMAPINFO bmi = new NativeStructs.BITMAPINFO();
-            bmi.bmiHeader.biSize = (uint)sizeof(NativeStructs.BITMAPINFOHEADER);
-            bmi.bmiHeader.biWidth = width;
-            bmi.bmiHeader.biHeight = -height;
-            bmi.bmiHeader.biPlanes = 1;
-            bmi.bmiHeader.biBitCount = 32;
-            bmi.bmiHeader.biCompression = NativeConstants.BI_RGB;
-            bmi.bmiHeader.biSizeImage = 0;
-            bmi.bmiHeader.biXPelsPerMeter = 96;
-            bmi.bmiHeader.biYPelsPerMeter = 96;
-            bmi.bmiHeader.biClrUsed = 0;
-            bmi.bmiHeader.biClrImportant = 0;
-
-            IntPtr pvBits;
-            IntPtr hBitmap = SafeNativeMethods.CreateDIBSection(
-                IntPtr.Zero,
-                ref bmi,
-                NativeConstants.DIB_RGB_COLORS,
-                out pvBits,
-                IntPtr.Zero,
-                0);
-
-            if (hBitmap == IntPtr.Zero)
-            {
-                throw new OutOfMemoryException("CreateDIBSection returned NULL (" + Marshal.GetLastWin32Error().ToString() + ") while attempting to allocate " + width + "x" + height + " bitmap");
-            }
-
-            handle = hBitmap;
-            long bytes = (long)width * (long)height * 4;
-
-            if (bytes > 0)
-            {
-                GC.AddMemoryPressure(bytes);
-            }
-
-            return pvBits;
-        }
-
-        /// <summary>
-        /// Frees a bitmap previously allocated with AllocateBitmap.
-        /// </summary>
-        /// <param name="handle">The handle that was returned from a previous call to AllocateBitmap.</param>
-        /// <param name="width">The width of the bitmap, as specified in the original call to AllocateBitmap.</param>
-        /// <param name="height">The height of the bitmap, as specified in the original call to AllocateBitmap.</param>
-        public static void FreeBitmap(IntPtr handle, int width, int height)
-        {
-            long bytes = (long)width * (long)height * 4;
-
-            bool bResult = SafeNativeMethods.DeleteObject(handle);
-
-            if (!bResult)
-            {
-                NativeMethods.ThrowOnWin32Error("DeleteObject returned false");
-            }
-
-            if (bytes > 0)
-            {
-                GC.RemoveMemoryPressure(bytes);
-            }
-        }
 
         /// <summary>
         /// Frees a block of memory previously allocated with Allocate().

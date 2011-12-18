@@ -55,26 +55,20 @@ namespace PSFilterShim
             filterDone = false;
             ServiceProxy = null;
 
-            try
+            if (args.Length > 0 && args.Length == 2)
             {
-                if (args.Length > 0 && args.Length == 7)
+                Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+
+                filterThread.Start(args);
+
+                while (!filterDone)
                 {
-                    Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
-
-                    filterThread.Start(args);
-
-                    while (!filterDone)
-                    {
-                        Thread.Sleep(250);
-                    }
-
-                    filterThread.Join();
+                    Thread.Sleep(250);
                 }
+
+                filterThread.Join();
             }
-            finally
-            {
-                PaintDotNet.SystemLayer.Memory.DestroyHeap();
-            }
+            
 
 			
 		}
@@ -94,62 +88,36 @@ namespace PSFilterShim
             string src = args[0]; // the filename of the source image
             string dstImg = args[1]; // the filename of the destiniation image
 
-            string[] pClr = args[2].Split(new char[] { ',' });
-            Color primary = Color.FromArgb(int.Parse(pClr[0], CultureInfo.InvariantCulture), int.Parse(pClr[1], CultureInfo.InvariantCulture), int.Parse(pClr[2], CultureInfo.InvariantCulture));
+            
+            Color primary = ServiceProxy.GetPrimaryColor();
 
-            string[] sClr = args[3].Split(new char[] { ',' });
-            Color secondary = Color.FromArgb(int.Parse(sClr[0], CultureInfo.InvariantCulture), int.Parse(sClr[1], CultureInfo.InvariantCulture), int.Parse(sClr[2], CultureInfo.InvariantCulture));
+            Color secondary = ServiceProxy.GetSecondaryColor();
 
-            string[] roiSplit = args[4].Split(new char[] { ',' });
-            Rectangle selection = new Rectangle(int.Parse(roiSplit[0], CultureInfo.InvariantCulture), int.Parse(roiSplit[1], CultureInfo.InvariantCulture), int.Parse(roiSplit[2], CultureInfo.InvariantCulture), int.Parse(roiSplit[3], CultureInfo.InvariantCulture));
+            Rectangle selection = ServiceProxy.GetFilterRect();
 
-            IntPtr owner = new IntPtr(long.Parse(args[5], CultureInfo.InvariantCulture));
+            IntPtr owner = ServiceProxy.GetWindowHandle();
 
-            bool showAbout = bool.Parse(args[6]);
+            bool repeatEffect = ServiceProxy.IsRepeatEffect();
+            bool showAbout = ServiceProxy.ShowAboutDialog();
 
-            string[] plugData = Console.ReadLine().Split(new char[] { ',' });
-            PluginData pdata = new PluginData();
-            pdata.fileName = plugData[0];
-            pdata.entryPoint = plugData[1];
-            pdata.title = plugData[2];
-            pdata.category = plugData[3];
-            pdata.filterInfo = string.IsNullOrEmpty(plugData[4]) ? null : GetFilterCaseInfoFromString(plugData[4]);
-
-            string aeteFileName = Console.ReadLine();
-            if (!string.IsNullOrEmpty(aeteFileName) && File.Exists(aeteFileName))
-            {
-                using (FileStream fs = new FileStream(aeteFileName, FileMode.Open, FileAccess.Read, FileShare.None))
-                {
-                    System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-                    pdata.aete = (AETEData)bf.Deserialize(fs);
-                } 
-            }
+            PluginData pdata = ServiceProxy.GetPluginData();
 
             Region selectionRegion = null;
 
+            RegionDataWrapper wrap = ServiceProxy.GetSelectedRegion();
+            if (wrap != null)
+            {
+                using (Region temp = new Region())
+                {
+                    RegionData rgnData = temp.GetRegionData();
+                    rgnData.Data = wrap.Data;
+
+                    selectionRegion = new Region(rgnData);
+                }
+            }
             try
             {
-                string rgnFileName = Console.ReadLine();
-                if (!string.IsNullOrEmpty(rgnFileName))
-                {
-                    RegionDataWrapper rdw = null;
-                    using (FileStream fs = new FileStream(rgnFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
-                    {
-                        BinaryFormatter bf = new BinaryFormatter();
-                        rdw = (RegionDataWrapper)bf.Deserialize(fs);
-                    }
-
-                    if (rdw != null)
-                    {
-                        using (Region region = new Region())
-                        {
-                            RegionData rd = region.GetRegionData();
-                            rd.Data = rdw.Data;
-
-                            selectionRegion = new Region(rd);
-                        }
-                    }
-                }
+                
 
                 ParameterData parmData = null;
                 string parmDataFileName = Console.ReadLine();
@@ -165,7 +133,7 @@ namespace PSFilterShim
 
                 using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, selectionRegion, owner))
                 {
-                    if (ServiceProxy != null)
+                    if (repeatEffect)
                     {
                         lps.AbortFunc = new abort(abortFilter);
                     }
@@ -180,7 +148,7 @@ namespace PSFilterShim
                             parmData.AETEDict != null)
                         {
                             lps.ParmData = parmData;
-                            lps.IsRepeatEffect = true;
+                            lps.IsRepeatEffect = repeatEffect;
                         }
                     }
 

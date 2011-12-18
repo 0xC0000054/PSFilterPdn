@@ -64,24 +64,5 @@ namespace PaintDotNet.SystemLayer
             UIntPtr dwSize,
             uint flNewProtect,
             out uint lpflOldProtect);
-       
-        [DllImport("Gdi32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal extern static bool DeleteObject(IntPtr hObject);
-
-        [DllImport("Gdi32.dll", SetLastError = true)]
-        internal extern static uint DeleteDC(IntPtr hdc);
-
-        [DllImport("Gdi32.Dll", SetLastError = true)]
-        internal extern static IntPtr CreateCompatibleDC(IntPtr hdc);
-
-        [DllImport("gdi32.dll", SetLastError = true)]
-        internal static extern IntPtr CreateDIBSection(
-            IntPtr hdc,
-            ref NativeStructs.BITMAPINFO pbmi,
-            uint iUsage,
-            out IntPtr ppvBits,
-            IntPtr hSection,
-            uint dwOffset);
     }
 }
