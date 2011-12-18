@@ -94,6 +94,12 @@ namespace PSFilterPdn
 				lastSelectedFilterTitle = token.Title;
 			}
 
+            if (!string.IsNullOrEmpty(token.FileName) && token.ParmData != null)
+            {
+                this.fileName = token.FileName; 
+                this.parmData = token.ParmData;
+            }
+            
             if ((token.ExpandedNodes != null) && token.ExpandedNodes.Count > 0)
             {
                 this.expandedNodes = token.ExpandedNodes;
@@ -515,16 +521,17 @@ namespace PSFilterPdn
 		{
 			return showAboutBoxcb.Checked;
 		}
-		private string GetHandleString()
+		private IntPtr GetHandle()
 		{
-			return this.Handle.ToInt64().ToString(CultureInfo.InvariantCulture);
+			return this.Handle;
 		}
 
 		delegate void SetProxyResultDelegate(string dest, string parmDataFileName, PluginData data);
 		delegate bool GetShowAboutCheckedDelegate();
-		delegate string GetHandleStringDelegate();
+		delegate IntPtr GetHandleDelegate();
 		private Process proxyProcess;
 		private bool proxyRunning;
+        private const string endpointName = "net.pipe://localhost/PSFilterShim/ShimData";
 
 		private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
 		{
@@ -544,6 +551,27 @@ namespace PSFilterPdn
 			string rdwPath = string.Empty;
 			string aeteFileName = string.Empty;
 
+
+            Rectangle sourceBounds = eep.SourceSurface.Bounds;
+
+            Rectangle selection = eep.GetSelection(sourceBounds).GetBoundsInt();
+            RegionDataWrapper selectedRegion = null;
+
+            if (selection != sourceBounds)
+            {
+                selectedRegion = new RegionDataWrapper(eep.GetSelection(sourceBounds).GetRegionData());
+            }
+
+            bool showAbout = (bool)base.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked));
+            IntPtr owner = (IntPtr)base.Invoke(new GetHandleDelegate(GetHandle));
+
+            PSFilterShimService service = new PSFilterShimService(null,
+               false, showAbout, data, owner,
+               selection, eep.PrimaryColor.ToColor(),
+               eep.SecondaryColor.ToColor(), selectedRegion);
+
+            PSFilterShimServer.Start(service);
+
 			try
 			{
 
@@ -555,42 +583,19 @@ namespace PSFilterPdn
 					}
 				}
 
-				string pColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", eep.PrimaryColor.R, eep.PrimaryColor.G, eep.PrimaryColor.B);
-				string sColor = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", eep.SecondaryColor.R, eep.SecondaryColor.G, eep.SecondaryColor.B);
+				
+                if ((parmData != null) && parmData.AETEDict.Count > 0
+                                       && data.fileName == fileName)
+                {
+                    using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                        bf.Serialize(fs, this.parmData);
+                    } 
+                }
 
-				Rectangle sRect = eep.GetSelection(base.EffectSourceSurface.Bounds).GetBoundsInt();
-				string rect = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3}", new object[] { sRect.X, sRect.Y, sRect.Width, sRect.Height });
+				string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\"", new object[] { src, dest});
 
-				string owner = (string)this.Invoke(new GetHandleStringDelegate(GetHandleString));
-
-				string filterInfo = (string)this.Invoke(new GetFilterCaseInfoStringDelegate(GetFilterCaseInfoString), new object[] { data });
-				string pd = String.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4}", new object[] { data.fileName, data.entryPoint, data.title, data.category, filterInfo });
-
-				if (data.aete != null)
-				{
-					aeteFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "aete.dat");
-					using (FileStream fs = new FileStream(aeteFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-					{
-						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-						bf.Serialize(fs, data.aete);
-					} 
-				}
-
-				string lpsArgs = String.Format(CultureInfo.InvariantCulture, "{0}", this.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked)));
-
-				string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\" {2} {3} {4} {5} {6} ", new object[] { src, dest, pColor, sColor, rect, owner, lpsArgs });
-
-
-				if (sRect != eep.SourceSurface.Bounds)
-				{
-					rdwPath = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "selection.dat");
-					using (FileStream fs = new FileStream(rdwPath, FileMode.Create, FileAccess.Write, FileShare.None))
-					{
-						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-						RegionDataWrapper rdw = new RegionDataWrapper(eep.GetSelection(eep.SourceSurface.Bounds).GetRegionData());
-						bf.Serialize(fs, rdw);
-					} 
-				}
 #if DEBUG
 				Debug.WriteLine(pArgs);
 #endif
@@ -620,10 +625,7 @@ namespace PSFilterPdn
 #else
 				proxyProcess.Start();
 #endif
-				proxyProcess.StandardInput.WriteLine(string.Empty); // proxy cancel callback
-				proxyProcess.StandardInput.WriteLine(pd);
-				proxyProcess.StandardInput.WriteLine(aeteFileName);
-				proxyProcess.StandardInput.WriteLine(rdwPath);
+				proxyProcess.StandardInput.WriteLine(endpointName); // proxy cancel callback
 				proxyProcess.StandardInput.WriteLine(parmDataFileName);
 				proxyProcess.BeginErrorReadLine();
 				proxyProcess.BeginOutputReadLine();
@@ -652,7 +654,6 @@ namespace PSFilterPdn
 			} 
 			finally
 			{
-				proxyRunning = false;
 				proxyProcess.Dispose();
 				proxyProcess = null;
 
@@ -675,6 +676,10 @@ namespace PSFilterPdn
 					File.Delete(aeteFileName);
 				}
 
+                PSFilterShimServer.Stop();
+
+				proxyRunning = false;
+
 				proxyThread.Join();
 				proxyThread = null;
 			}
@@ -684,6 +689,7 @@ namespace PSFilterPdn
 		{ 
 			if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && !showAboutBoxcb.Checked)
 			{
+                this.fileName = data.fileName;
 				this.entryPoint = data.entryPoint;
 				this.title = data.title;
 				this.category = data.category;
@@ -754,7 +760,6 @@ namespace PSFilterPdn
 				if (filterTree.SelectedNode != null && filterTree.SelectedNode.Tag != null)
 				{
 					PluginData data = (PluginData)filterTree.SelectedNode.Tag;
-					this.fileName = data.fileName;
 
 					if (useDEPProxy)
 					{
@@ -781,6 +786,12 @@ namespace PSFilterPdn
                                 {
                                     lps.ProgressFunc = new ProgressProc(UpdateProgress);
 
+                                    if ((parmData != null) && parmData.AETEDict.Count > 0
+                                        && data.fileName == fileName)
+                                    {
+                                        lps.ParmData = this.parmData;
+                                    }
+
                                     bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
                                     bool userCanceled = (result && lps.ErrorMessage == Resources.UserCanceledError);
 
@@ -792,6 +803,7 @@ namespace PSFilterPdn
                                     if (!showAboutBoxcb.Checked && result && !userCanceled)
                                     {
                                         this.destSurface = lps.Dest.Clone();
+                                        this.fileName = data.fileName;
                                         this.entryPoint = data.entryPoint;
                                         this.title = data.title;
                                         this.category = data.category;
@@ -812,7 +824,6 @@ namespace PSFilterPdn
                                             destSurface.Dispose();
                                             destSurface = null;
                                         }
-
 
                                     }
 
