@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using PSFilterShim.Properties;
-using System.IO;
-using System.Drawing.Drawing2D;
 using PaintDotNet;
-using System.Globalization;
-
+using PSFilterShim.Properties;
+#if DEBUG
+using System.Diagnostics;
+#endif
 namespace PSFilterLoad.PSApi
 {
 
@@ -1589,7 +1588,7 @@ namespace PSFilterLoad.PSApi
 				if (scaleFactor > 1) // Filter preview?
 				{
 					tempSurface = new Surface(scalew, scaleh);
-					tempSurface.FitSurface(ResamplingAlgorithm.SuperSampling, source);
+					tempSurface.FitSurface(source);
 				}
 				else
 				{
@@ -1925,7 +1924,7 @@ namespace PSFilterLoad.PSApi
 				if (scaleFactor > 1) // Filter preview?
 				{
 					tempMask = new Surface(scalew, scaleh);
-					tempMask.FitSurface(ResamplingAlgorithm.SuperSampling, mask);
+					tempMask.FitSurface(mask);
 				}
 				else
 				{
@@ -2120,7 +2119,7 @@ namespace PSFilterLoad.PSApi
 						case -3:
 							break;
 						default:
-							SafeNativeMethods.MemSet(maskData, maskPadding, new UIntPtr((uint)len));
+							SafeNativeMethods.memset(maskData, maskPadding, new UIntPtr((uint)len));
 							break;
 					}
 				}
@@ -2630,7 +2629,7 @@ namespace PSFilterLoad.PSApi
 					case -3:
 						break;
 					default:
-						SafeNativeMethods.MemSet(inData, inputPadding, new UIntPtr((ulong)(surface.Stride * surface.Height)));
+						SafeNativeMethods.memset(inData, inputPadding, new UIntPtr((ulong)(surface.Stride * surface.Height)));
 						break;
 				}
 
@@ -2652,7 +2651,7 @@ namespace PSFilterLoad.PSApi
 
 				if (ignoreAlpha || !haveMask)
 				{
-					new UnaryPixelOps.SetAlphaChannelTo255().Apply(tempDisplaySurface, tempDisplaySurface.Bounds);
+					tempDisplaySurface.SetAlphaTo255();
 				}
 			}
 		}
@@ -2864,17 +2863,30 @@ namespace PSFilterLoad.PSApi
 		static List<uint> subKeys;
 		static bool isSubKey;
 		static int subKeyIndex;
+        static IntPtr keyArrayPtr;
+        static IntPtr subKeyArrayPtr;
 		static IntPtr OpenReadDescriptorProc(ref System.IntPtr descriptor, IntPtr keyArray)
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Empty);
+
+    try 
+	{	        
+		    long size = NativeMethods.GlobalSize(descriptor).ToInt64();
+	}
+	catch (NullReferenceException)
+	{
+	}
 #endif
+
+
 			if (keys == null)
 			{
 				keys = new List<uint>();
 				int index = 0;
 				if (keyArray != IntPtr.Zero) // check if the pointer is valid
 				{
+                    keyArrayPtr = keyArray;
 					while (true)
 					{
 						uint key = (uint)Marshal.ReadInt32(keyArray, index);
@@ -2882,8 +2894,8 @@ namespace PSFilterLoad.PSApi
 						{
 							break;
 						}
-						keys.Add(key);
-						index += 4;
+                        keys.Add(key);
+                        index += 4;
 					}
 				}
 			}
@@ -2928,13 +2940,22 @@ namespace PSFilterLoad.PSApi
 			if (isSubKey)
 			{
 				isSubKey = false;
+                subKeyArrayPtr = IntPtr.Zero;
 			}
+            else
+            {
+                keyArrayPtr = IntPtr.Zero;
+            }
 
 			descriptor = IntPtr.Zero;
 			return descErrValue;
 		}
-		static byte GetKeyProc(System.IntPtr descriptor, ref uint key, ref uint type, ref int flags)
+		static unsafe byte GetKeyProc(System.IntPtr descriptor, ref uint key, ref uint type, ref int flags)
 		{
+#if DEBUG
+            Ping(DebugFlags.MiscCallbacks, string.Format("key = {0}", key.ToString()));
+#endif
+
 			if (descErr != PSError.noErr)
 			{
 				descErrValue = descErr;
@@ -2942,31 +2963,46 @@ namespace PSFilterLoad.PSApi
 
 			if (aeteDict.Count > 0)
 			{
-				if (isSubKey)
-				{
-					if (subKeyIndex > (subKeys.Count - 1))
-					{
-						return 0;
-					}
+              
 
-					getKey = key = subKeys[subKeyIndex];
-					type = aeteDict[key].Type;
-					flags = aeteDict[key].Flags;
+                if (isSubKey)
+                {
+                    if (subKeyIndex > (subKeys.Count - 1))
+                    {
+                        return 0;
+                    }
 
-					subKeyIndex++;
-				}
-				else
-				{
-					if (getKeyIndex > (keys.Count - 1))
-					{
-						return 0;
-					}
-					getKey = key = keys[getKeyIndex];
-					type = aeteDict[key].Type;
-					flags = aeteDict[key].Flags;
+                    getKey = key = subKeys[subKeyIndex];
+                    type = aeteDict[key].Type;
+                    flags = aeteDict[key].Flags;
 
-					getKeyIndex++;
-				}
+                    if (subKeyArrayPtr != IntPtr.Zero)
+	                {
+                        Marshal.WriteInt32(subKeyArrayPtr, (subKeyIndex * 4));
+	                }
+
+                    subKeyIndex++;
+                }
+                else
+                {
+                    if (getKeyIndex > (keys.Count - 1))
+                    {
+                        return 0;
+                    }
+
+                    if (keyArrayPtr != IntPtr.Zero)
+                    {
+                        Marshal.WriteInt32(keyArrayPtr, (getKeyIndex * 4), 0);
+                    }
+
+
+                    getKey = key = keys[getKeyIndex];
+                    type = aeteDict[key].Type;
+                    flags = aeteDict[key].Flags;
+
+                    getKeyIndex++;
+                } 
+                
 
 
 
@@ -2975,6 +3011,9 @@ namespace PSFilterLoad.PSApi
 
 			return 0;
 		}
+
+
+
 		static short GetIntegerProc(System.IntPtr descriptor, ref int data)
 		{
 			data = (int)aeteDict[getKey].Value;
@@ -3864,7 +3903,6 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-#if PSSDK_3_0_4
 		static short property_set_proc(uint signature, uint key, int index, int simpleProperty, ref System.IntPtr complexProperty)
 		{
 #if DEBUG
@@ -3901,7 +3939,6 @@ namespace PSFilterLoad.PSApi
 
 			return PSError.noErr;
 		}
-#endif
 
 		static short resource_add_proc(uint ofType, ref IntPtr data)
 		{
@@ -4017,7 +4054,7 @@ namespace PSFilterLoad.PSApi
 			handleUnlockProc = new UnlockPIHandleProc(handle_unlock_proc);
 
 			// ImageServicesProc
-#if PSSDK_3_0_4 && USEIMAGESERVICES
+#if USEIMAGESERVICES
 			resample1DProc = new PIResampleProc(image_services_interpolate_1d_proc);
 			resample2DProc = new PIResampleProc(image_services_interpolate_2d_proc); 
 #endif
@@ -4025,9 +4062,7 @@ namespace PSFilterLoad.PSApi
 			// PropertyProc
 			getPropertyProc = new GetPropertyProc(property_get_proc);
 
-#if PSSDK_3_0_4
 			setPropertyProc = new SetPropertyProc(property_set_proc);
-#endif
 			// ResourceProcs
 			countResourceProc = new CountPIResourcesProc(resource_count_proc);
 			getResourceProc = new GetPIResourceProc(resource_get_proc);
@@ -4035,7 +4070,6 @@ namespace PSFilterLoad.PSApi
 			addResourceProc = new AddPIResourceProc(resource_add_proc);
 
 
-#if PSSDK4
 			// ReadDescriptorProcs
 			openReadDescriptorProc = new OpenReadDescriptorProc(OpenReadDescriptorProc);
 			closeReadDescriptorProc = new CloseReadDescriptorProc(CloseReadDescriptorProc);
@@ -4072,7 +4106,6 @@ namespace PSFilterLoad.PSApi
 			putStringProc = new PutStringProc(PutStringProc);
 			putTextProc = new PutTextProc(PutTextProc);
 			putUnitFloatProc = new PutUnitFloatProc(PutUnitFloatProc);
-#endif
 		}
 
 		static bool suitesSetup;
@@ -4282,7 +4315,6 @@ namespace PSFilterLoad.PSApi
 			/* maskRate */
 			filterRecord->colorServices = Marshal.GetFunctionPointerForDelegate(colorProc);
 
-#if PSSDK_3_0_4
 #if USEIMAGESERVICES
 			filterRecord->imageServicesProcs = image_services_procsPtr.AddrOfPinnedObject();
 #else
@@ -4305,13 +4337,11 @@ namespace PSFilterLoad.PSApi
 			filterRecord->maskTileWidth = 0;
 			filterRecord->maskTileOrigin.h = 0;
 			filterRecord->maskTileOrigin.v = 0;
-#endif
-#if PSSDK4
-			filterRecord->descriptorParameters = descriptorParametersPtr;
+			
+            filterRecord->descriptorParameters = descriptorParametersPtr;
 			filterRecord->errorString = Memory.Allocate(256, true);
 			filterRecord->channelPortProcs = IntPtr.Zero;
 			filterRecord->documentInfo = IntPtr.Zero;
-#endif
 		}
 
 		#region IDisposable Members
