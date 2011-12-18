@@ -27,8 +27,8 @@ namespace PSFilterLoad.PSApi
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern unsafe IntPtr VirtualQuery(IntPtr address, ref NativeStructs.MEMORY_BASIC_INFORMATION buffer, IntPtr sizeOfBuffer);
 
-        [DllImport("msvcrt.dll", EntryPoint = "memset", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-        internal static extern IntPtr MemSet(IntPtr dest, int c, UIntPtr count);
+        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
+        internal static extern IntPtr memset(IntPtr dest, int c, UIntPtr count);
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
