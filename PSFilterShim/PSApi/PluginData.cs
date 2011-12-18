@@ -10,6 +10,8 @@ namespace PSFilterLoad.PSApi
     /// The class that encapsulates a Photoshop Filter plugin
     /// </summary>
     [DataContract()]
+#pragma warning disable 0649
+
     internal sealed class PluginData
     {
         [DataMember]
@@ -34,6 +36,7 @@ namespace PSFilterLoad.PSApi
         [DataMember]
         public AETEData aete;
     }
+#pragma warning restore
 
     internal struct PIEntrypoint
     {
