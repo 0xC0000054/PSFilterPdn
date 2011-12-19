@@ -2909,6 +2909,12 @@ namespace PSFilterLoad.PSApi
 
 			}
 
+            if ((keys != null) && keys.Count > 0 && aeteDict.Count > 0 &&
+                !aete.FlagList.ContainsKey(keys[0])) // some filters may hand us a list of bogus keys.
+            {
+                return IntPtr.Zero;
+            }
+
 			if ((keys != null) && keys.Count == 0 && aeteDict.Count > 0)
 			{
 				keys.AddRange(aeteDict.Keys); // if the keys are not passed to us grab them from the aeteDict.
@@ -2942,7 +2948,7 @@ namespace PSFilterLoad.PSApi
 		static unsafe byte GetKeyProc(System.IntPtr descriptor, ref uint key, ref uint type, ref int flags)
 		{
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Format("key = {0}", key.ToString()));
+            Ping(DebugFlags.MiscCallbacks, string.Format("key = {0}", "0x" + key.ToString("X8")));
 #endif
 
 			if (descErr != PSError.noErr)
@@ -2978,13 +2984,12 @@ namespace PSFilterLoad.PSApi
                     {
                         return 0;
                     }
-
+                    
                     if (keyArrayPtr != IntPtr.Zero)
                     {
                         Marshal.WriteInt32(keyArrayPtr, (getKeyIndex * 4), 0);
                     }
-
-
+                    
                     getKey = key = keys[getKeyIndex];
                     type = aeteDict[key].Type;
                     flags = aeteDict[key].Flags;
@@ -3254,7 +3259,6 @@ namespace PSFilterLoad.PSApi
 #endif
 			aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeFloat, GetAETEParmFlags(key), 0, data));
 			return PSError.noErr;
-
 		}
 
 		static short PutUnitFloatProc(System.IntPtr descriptor, uint key, uint unit, ref double data)
