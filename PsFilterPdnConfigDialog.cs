@@ -758,14 +758,10 @@ namespace PSFilterPdn
 			{
 				PluginData data = (PluginData)filterTree.SelectedNode.Tag;
 
-				if (useDEPProxy)
-				{
-					data.runWith32BitShim = true;
-				}
                 if (!proxyRunning && !filterRunning)
                 {
 
-                    if (data.runWith32BitShim)
+                    if (data.runWith32BitShim || useDEPProxy)
                     {
                         this.runWith32BitShim = true;
                         proxyThread = new Thread(() => Run32BitFilterProxy(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, data)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
@@ -1179,9 +1175,12 @@ namespace PSFilterPdn
 		}
 
 
-		string lastSelectedFilterTitle;
-		bool foundEffectsDir;
-		bool useDEPProxy;
+		private string lastSelectedFilterTitle;
+		private bool foundEffectsDir;
+        /// <summary>
+        /// If DEP is enabled on a 32-bit OS use the shim process.
+        /// </summary>
+		private bool useDEPProxy;
 		protected override void OnLoad(EventArgs e)
 		{ 
 			base.OnLoad(e);
