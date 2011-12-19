@@ -1108,20 +1108,19 @@ namespace PSFilterLoad.PSApi
 		{
 			bool loaded = false;
 
-			if ((pdata.entry.dll != null) && !pdata.entry.dll.IsInvalid)
-				return true;     
-			
 			if (!string.IsNullOrEmpty(pdata.entryPoint)) // The filter has already been queried so take a shortcut.
 			{
 				pdata.entry.dll = NativeMethods.LoadLibraryEx(pdata.fileName, IntPtr.Zero, 0U);
+                if (!pdata.entry.dll.IsInvalid)
+                {
+                    IntPtr entry = NativeMethods.GetProcAddress(pdata.entry.dll, pdata.entryPoint);
 
-				IntPtr entry = NativeMethods.GetProcAddress(pdata.entry.dll, pdata.entryPoint);
-
-				if (entry != IntPtr.Zero)
-				{
-					pdata.entry.entry = (filterep)Marshal.GetDelegateForFunctionPointer(entry, typeof(filterep));
-					loaded = true;
-				}
+                    if (entry != IntPtr.Zero)
+                    {
+                        pdata.entry.entry = (filterep)Marshal.GetDelegateForFunctionPointer(entry, typeof(filterep));
+                        loaded = true;
+                    } 
+                }
 			}
 
 			return loaded;
@@ -1646,15 +1645,6 @@ namespace PSFilterLoad.PSApi
 
 		static bool plugin_prepare(PluginData pdata)
 		{
-			if (!LoadFilter(ref pdata))
-			{
-#if DEBUG
-				Ping(DebugFlags.Error, "LoadFilter failed"); 
-#endif
-				return false;
-			}
-
-		   
 			setup_sizes();
 			restore_parm(); 
 			SetFilterRecordValues();
@@ -1731,7 +1721,8 @@ namespace PSFilterLoad.PSApi
 			if (!LoadFilter(ref pdata))
 			{
 #if DEBUG
-				Debug.WriteLine("LoadFilter failed"); 
+				Debug.WriteLine(string.Format("LoadFilter failed GetLastError() returned: {0}", Marshal.GetLastWin32Error().ToString("X8"))); 
+
 #endif
 				return false;
 			}				
@@ -3728,7 +3719,7 @@ namespace PSFilterLoad.PSApi
                 isSubKey = false;
             }
 
-            descriptorHandle = new IntPtr(1);
+            descriptorHandle = handle_new_proc(1);
 
             return PSError.noErr;
         }
@@ -4742,6 +4733,7 @@ namespace PSFilterLoad.PSApi
 
             if (aeteDict.Count > 0)
             {
+                descriptorParameters->descriptor = handle_new_proc(1);
                 if (!isRepeatEffect)
                 {
                     descriptorParameters->playInfo = (short)PlayInfo.plugInDialogDisplay;
@@ -4907,6 +4899,14 @@ namespace PSFilterLoad.PSApi
                     
                     if (descriptorParametersPtr != IntPtr.Zero)
                     {
+                        PIDescriptorParameters* descParams = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
+                        if (descParams->descriptor != IntPtr.Zero)
+                        {
+                            handle_dispose_proc(descParams->descriptor);
+                            descParams->descriptor = IntPtr.Zero;
+                        }
+
+
                         Memory.Free(descriptorParametersPtr);
                         descriptorParametersPtr = IntPtr.Zero;
                     }
@@ -4921,30 +4921,31 @@ namespace PSFilterLoad.PSApi
                         writeDescriptorPtr = IntPtr.Zero;
                     }
 
-                    FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-                    if (filterRecord->errorString != IntPtr.Zero)
-                    {
-                        Memory.Free(filterRecord->errorString);
-                    }
-
-
-                    if (filterRecord->parameters != IntPtr.Zero)
-                    {
-                        if (handle_valid(filterRecord->parameters))
-                        {
-                            handle_unlock_proc(filterRecord->parameters);
-                            handle_dispose_proc(filterRecord->parameters);
-                        }
-                        else
-                        {
-                            NativeMethods.GlobalUnlock(filterRecord->parameters);
-                            NativeMethods.GlobalFree(filterRecord->parameters);
-                        }
-                        filterRecord->parameters = IntPtr.Zero;
-                    }
-
                     if (filterRecordPtr != IntPtr.Zero)
                     {
+                        FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
+                        if (filterRecord->errorString != IntPtr.Zero)
+                        {
+                            Memory.Free(filterRecord->errorString);
+                        }
+
+
+                        if (filterRecord->parameters != IntPtr.Zero)
+                        {
+                            if (handle_valid(filterRecord->parameters))
+                            {
+                                handle_unlock_proc(filterRecord->parameters);
+                                handle_dispose_proc(filterRecord->parameters);
+                            }
+                            else
+                            {
+                                NativeMethods.GlobalUnlock(filterRecord->parameters);
+                                NativeMethods.GlobalFree(filterRecord->parameters);
+                            }
+                            filterRecord->parameters = IntPtr.Zero;
+                        }
+
+
                         Memory.Free(filterRecordPtr);
                         filterRecordPtr = IntPtr.Zero;
                     }
