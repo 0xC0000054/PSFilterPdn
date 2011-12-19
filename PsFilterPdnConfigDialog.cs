@@ -754,127 +754,103 @@ namespace PSFilterPdn
 
 		private void runFilterBtn_Click(object sender, EventArgs e)
 		{
-			try
+			if (filterTree.SelectedNode != null && filterTree.SelectedNode.Tag != null)
 			{
+				PluginData data = (PluginData)filterTree.SelectedNode.Tag;
 
-				if (filterTree.SelectedNode != null && filterTree.SelectedNode.Tag != null)
+				if (useDEPProxy)
 				{
-					PluginData data = (PluginData)filterTree.SelectedNode.Tag;
+					data.runWith32BitShim = true;
+				}
+                if (!proxyRunning && !filterRunning)
+                {
 
-					if (useDEPProxy)
-					{
-						data.runWith32BitShim = true;
-					}
-                    if (!proxyRunning && !filterRunning)
+                    if (data.runWith32BitShim)
                     {
+                        this.runWith32BitShim = true;
+                        proxyThread = new Thread(() => Run32BitFilterProxy(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, data)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+                        proxyThread.Start();
+                    }
+                    else
+                    {
+                        this.runWith32BitShim = false;
 
-                        if (data.runWith32BitShim)
+                        filterRunning = true;
+
+                        try
                         {
-                            this.runWith32BitShim = true;
-                            proxyThread = new Thread(() => Run32BitFilterProxy(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, data)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
-                            proxyThread.Start();
-                        }
-                        else
-                        {
-                            this.runWith32BitShim = false;
-
-                            filterRunning = true;
-
-                            try
+                            using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, this.Handle))
                             {
-                                using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, this.Handle))
+                                lps.ProgressFunc = new ProgressProc(UpdateProgress);
+
+                                if ((parmData != null) && parmData.AETEDict.Count > 0
+                                    && data.fileName == fileName)
                                 {
-                                    lps.ProgressFunc = new ProgressProc(UpdateProgress);
+                                    lps.ParmData = this.parmData;
+                                }
 
-                                    if ((parmData != null) && parmData.AETEDict.Count > 0
-                                        && data.fileName == fileName)
+                                bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
+                                bool userCanceled = (result && lps.ErrorMessage == Resources.UserCanceledError);
+
+                                if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
+                                {
+                                    MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
+
+                                if (!showAboutBoxcb.Checked && result && !userCanceled)
+                                {
+                                    this.destSurface = lps.Dest.Clone();
+                                    this.fileName = data.fileName;
+                                    this.entryPoint = data.entryPoint;
+                                    this.title = data.title;
+                                    this.category = data.category;
+                                    this.filterCaseInfo = GetFilterCaseInfoString(data);
+                                    this.parmData = lps.ParmData;
+                                    this.aeteData = data.aete;
+
+
+                                    if (filterProgressBar.Value < filterProgressBar.Maximum)
                                     {
-                                        lps.ParmData = this.parmData;
+                                        filterProgressBar.Value = filterProgressBar.Maximum;
                                     }
-
-                                    bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
-                                    bool userCanceled = (result && lps.ErrorMessage == Resources.UserCanceledError);
-
-                                    if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
+                                }
+                                else
+                                {
+                                    if (destSurface != null)
                                     {
-                                        MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        destSurface.Dispose();
+                                        destSurface = null;
                                     }
-
-                                    if (!showAboutBoxcb.Checked && result && !userCanceled)
-                                    {
-                                        this.destSurface = lps.Dest.Clone();
-                                        this.fileName = data.fileName;
-                                        this.entryPoint = data.entryPoint;
-                                        this.title = data.title;
-                                        this.category = data.category;
-                                        this.filterCaseInfo = GetFilterCaseInfoString(data);
-                                        this.parmData = lps.ParmData;
-                                        this.aeteData = data.aete;
-
-
-                                        if (filterProgressBar.Value < filterProgressBar.Maximum)
-                                        {
-                                            filterProgressBar.Value = filterProgressBar.Maximum;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (destSurface != null)
-                                        {
-                                            destSurface.Dispose();
-                                            destSurface = null;
-                                        }
-
-                                    }
-
-                                    filterProgressBar.Value = 0;
 
                                 }
-                            }
-                            finally
-                            {
-                                FinishTokenUpdate();
-                                filterRunning = false;
-                            }
 
+                                filterProgressBar.Value = 0;
+
+                            }
+                        }
+                        catch (FilterLoadException flex)
+                        {
+                            MessageBox.Show(this, flex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        catch (ImageSizeTooLargeException ex)
+                        {
+                            if (MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error) == DialogResult.OK)
+                            {
+                                this.Close();
+                            }
 
                         }
+                        finally
+                        {
+                            FinishTokenUpdate();
+                            filterRunning = false;
+                        }
 
-                    } 
-                }
-			   
 
-			}
-			catch (FilterLoadException flex)
-			{
-				MessageBox.Show(this, flex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-			}
-			catch (ImageSizeTooLargeException ex)
-			{
-				if (MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error) == DialogResult.OK)
-				{
-					this.Close();
-				}
-				
-			}
-			catch (ArgumentOutOfRangeException ex)
-			{
-#if DEBUG
-				Debug.WriteLine(ex.Message);
-				Debug.Write(ex.StackTrace); 
-#else
-				MessageBox.Show(this, ex.Message + Environment.NewLine + ex.StackTrace, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-#endif
-			}
-#if DEBUG
-			catch (Exception ex)
-			{
+                    }
 
-				Debug.WriteLine(ex.Message);
-				Debug.Write(ex.StackTrace);
-
-			}
-#endif			
+                } 
+            }
 		}
 		
 		private void addDirBtn_Click(object sender, EventArgs e)
