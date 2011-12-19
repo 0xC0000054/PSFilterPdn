@@ -840,6 +840,13 @@ namespace PSFilterPdn
                             }
 
                         }
+                        catch (NullReferenceException nrex)
+                        { 
+                            /* the filter probably tried to access an unimplemeted callback function 
+                             * without checking if it is valid.
+                            */
+                            MessageBox.Show(this, nrex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                         finally
                         {
                             FinishTokenUpdate();
