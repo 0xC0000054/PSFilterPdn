@@ -4848,11 +4848,24 @@ namespace PSFilterLoad.PSApi
 
 		#region IDisposable Members
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
+
+        /// <summary>
+        /// Releases unmanaged resources and performs other cleanup operations before the
+        /// <see cref="LoadPsFilter"/> is reclaimed by garbage collection.
+        /// </summary>
+        ~LoadPsFilter()
+        {
+            Dispose(false);
+        }
+
 		private bool disposed;
         private unsafe void Dispose(bool disposing)
         {
@@ -4860,23 +4873,68 @@ namespace PSFilterLoad.PSApi
             {
                 if (disposing)
                 {
-                    if (platFormDataPtr != IntPtr.Zero)
+                    if (source != null)
                     {
-                        Memory.Free(platFormDataPtr);
-                        platFormDataPtr = IntPtr.Zero;
+                        source.Dispose();
+                        source = null;
+                    }
+                    if (dest != null)
+                    {
+                        dest.Dispose();
+                        dest = null;
+                    }
+                    if (checkerBoardBitmap != null)
+                    {
+                        checkerBoardBitmap.Dispose();
+                        checkerBoardBitmap = null;
+                    }
+                    if (tempSurface != null)
+                    {
+                        tempSurface.Dispose();
+                        tempSurface = null;
                     }
 
+                    if (mask != null)
+                    {
+                        mask.Dispose();
+                        mask = null;
+                    }
 
-                    if (buffer_procPtr != IntPtr.Zero)
+                    if (tempMask != null)
                     {
-                        Memory.Free(buffer_procPtr);
-                        buffer_procPtr = IntPtr.Zero;
+                        tempMask.Dispose();
+                        tempMask = null;
                     }
-                    if (handle_procPtr != IntPtr.Zero)
+
+                    if (selectedRegion != null)
                     {
-                        Memory.Free(handle_procPtr);
-                        handle_procPtr = IntPtr.Zero;
+                        selectedRegion.Dispose();
+                        selectedRegion = null;
                     }
+
+                    if (tempDisplaySurface != null)
+                    {
+                        tempDisplaySurface.Dispose();
+                        tempDisplaySurface = null;
+                    }
+                }
+
+                if (platFormDataPtr != IntPtr.Zero)
+                {
+                    Memory.Free(platFormDataPtr);
+                    platFormDataPtr = IntPtr.Zero;
+                }
+
+                if (buffer_procPtr != IntPtr.Zero)
+                {
+                    Memory.Free(buffer_procPtr);
+                    buffer_procPtr = IntPtr.Zero;
+                }
+                if (handle_procPtr != IntPtr.Zero)
+                {
+                    Memory.Free(handle_procPtr);
+                    handle_procPtr = IntPtr.Zero;
+                }
 
 #if USEIMAGESERVICES
 					if (image_services_procsPtr.IsAllocated)
@@ -4884,158 +4942,101 @@ namespace PSFilterLoad.PSApi
 						image_services_procsPtr.Free();
 					} 
 #endif
-                    if (property_procsPtr != IntPtr.Zero)
+                if (property_procsPtr != IntPtr.Zero)
+                {
+                    Memory.Free(property_procsPtr);
+                    property_procsPtr = IntPtr.Zero;
+                }
+
+                if (resource_procsPtr != IntPtr.Zero)
+                {
+                    Memory.Free(resource_procsPtr);
+                    resource_procsPtr = IntPtr.Zero;
+                }
+                if (descriptorParametersPtr != IntPtr.Zero)
+                {
+                    PIDescriptorParameters* descParam = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
+
+                    if (descParam->descriptor != IntPtr.Zero)
                     {
-                        Memory.Free(property_procsPtr);
-                        property_procsPtr = IntPtr.Zero;
+                        handle_dispose_proc(descParam->descriptor);
                     }
 
-                    if (resource_procsPtr != IntPtr.Zero)
+
+                    Memory.Free(descriptorParametersPtr);
+                    descriptorParametersPtr = IntPtr.Zero;
+                }
+                if (readDescriptorPtr != IntPtr.Zero)
+                {
+                    Memory.Free(readDescriptorPtr);
+                    readDescriptorPtr = IntPtr.Zero;
+                }
+                if (writeDescriptorPtr != IntPtr.Zero)
+                {
+                    Memory.Free(writeDescriptorPtr);
+                    writeDescriptorPtr = IntPtr.Zero;
+                }
+                if (filterRecordPtr != IntPtr.Zero)
+                {
+                    FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
+
+
+                    if (filterRecord->errorString != IntPtr.Zero)
                     {
-                        Memory.Free(resource_procsPtr);
-                        resource_procsPtr = IntPtr.Zero;
+                        Memory.Free(filterRecord->errorString);
                     }
 
-                    
-                    if (descriptorParametersPtr != IntPtr.Zero)
+
+                    if (filterRecord->parameters != IntPtr.Zero)
                     {
-                        PIDescriptorParameters* descParams = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
-                        if (descParams->descriptor != IntPtr.Zero)
+                        if (handle_valid(filterRecord->parameters))
                         {
-                            handle_dispose_proc(descParams->descriptor);
-                            descParams->descriptor = IntPtr.Zero;
+                            handle_unlock_proc(filterRecord->parameters);
+                            handle_dispose_proc(filterRecord->parameters);
                         }
-
-
-                        Memory.Free(descriptorParametersPtr);
-                        descriptorParametersPtr = IntPtr.Zero;
-                    }
-                    if (readDescriptorPtr != IntPtr.Zero)
-                    {
-                        Memory.Free(readDescriptorPtr);
-                        readDescriptorPtr = IntPtr.Zero;
-                    }
-                    if (writeDescriptorPtr != IntPtr.Zero)
-                    {
-                        Memory.Free(writeDescriptorPtr);
-                        writeDescriptorPtr = IntPtr.Zero;
-                    }
-
-                    if (filterRecordPtr != IntPtr.Zero)
-                    {
-                        FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-                        if (filterRecord->errorString != IntPtr.Zero)
+                        else
                         {
-                            Memory.Free(filterRecord->errorString);
+                            NativeMethods.GlobalUnlock(filterRecord->parameters);
+                            NativeMethods.GlobalFree(filterRecord->parameters);
                         }
-
-
-                        if (filterRecord->parameters != IntPtr.Zero)
-                        {
-                            if (handle_valid(filterRecord->parameters))
-                            {
-                                handle_unlock_proc(filterRecord->parameters);
-                                handle_dispose_proc(filterRecord->parameters);
-                            }
-                            else
-                            {
-                                NativeMethods.GlobalUnlock(filterRecord->parameters);
-                                NativeMethods.GlobalFree(filterRecord->parameters);
-                            }
-                            filterRecord->parameters = IntPtr.Zero;
-                        }
-
-
-                        Memory.Free(filterRecordPtr);
-                        filterRecordPtr = IntPtr.Zero;
+                        filterRecord->parameters = IntPtr.Zero;
                     }
 
-                    Memory.DestroyHeap();
 
-					progressFunc = null;
+                    Memory.Free(filterRecordPtr);
+                    filterRecordPtr = IntPtr.Zero;
+                }
 
-					if (parmDataHandle != IntPtr.Zero)
-					{
+                if (parmDataHandle != IntPtr.Zero)
+                {
 
-						try
-						{
-							NativeMethods.GlobalUnlock(parmDataHandle);
-							NativeMethods.GlobalFree(parmDataHandle);
-						}
-						finally
-						{
-							parmDataHandle = IntPtr.Zero;
-						}
-					}
-
-					if (data != IntPtr.Zero)
-					{
-						if (handle_valid(data))
-						{
-							handle_unlock_proc(data);
-							handle_dispose_proc(data);
-						}
-						else if (NativeMethods.GlobalSize(data).ToInt64() > 0L)
-						{
-							NativeMethods.GlobalUnlock(data);
-							NativeMethods.GlobalFree(data);
-						} 		
-						data = IntPtr.Zero;
-					}
-
-					suitesSetup = false;
-					frsetup = false;
-
-
-					if (source != null)
-					{
-						source.Dispose();
-						source = null;
-					}
-					if (dest != null)
-					{
-						dest.Dispose();
-						dest = null;
-					}
-
-					if (checkerBoardBitmap != null)
-					{
-						checkerBoardBitmap.Dispose();
-						checkerBoardBitmap = null;
-					}
-
-					if (selectedRegion != null)
-					{
-						selectedRegion.Dispose();
-						selectedRegion = null;
-					}
-
-					if (mask != null)
-					{
-						mask.Dispose();
-						mask = null;
-					}
-
-					if (tempSurface != null)
-					{
-						tempSurface.Dispose();
-						tempSurface = null;
-					}
-
-					if (tempMask != null)
-					{
-						tempMask.Dispose();
-						tempMask = null;
-					}
-
-                    if (tempDisplaySurface != null)
+                    try
                     {
-                        tempDisplaySurface.Dispose();
-                        tempDisplaySurface = null;
+                        NativeMethods.GlobalUnlock(parmDataHandle);
+                        NativeMethods.GlobalFree(parmDataHandle);
                     }
+                    finally
+                    {
+                        parmDataHandle = IntPtr.Zero;
+                    }
+                }
 
-					disposed = true;
-				}
+                if (data != IntPtr.Zero)
+                {
+                    if (handle_valid(data))
+                    {
+                        handle_unlock_proc(data);
+                        handle_dispose_proc(data);
+                    }
+                    else if (NativeMethods.GlobalSize(data).ToInt64() > 0L)
+                    {
+                        NativeMethods.GlobalUnlock(data);
+                        NativeMethods.GlobalFree(data);
+                    }
+                    data = IntPtr.Zero;
+                }
+
+                disposed = true;
 			}
 		}
 
