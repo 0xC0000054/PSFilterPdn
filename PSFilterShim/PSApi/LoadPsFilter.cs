@@ -569,9 +569,6 @@ namespace PSFilterLoad.PSApi
 		{
 			bool loaded = false;
 
-			if ((pdata.entry.dll != null) && !pdata.entry.dll.IsInvalid)
-				return true;
-
 			if (!string.IsNullOrEmpty(pdata.entryPoint)) // The filter has already been queried so take a shortcut.
 			{
 				pdata.entry.dll = NativeMethods.LoadLibraryEx(pdata.fileName, IntPtr.Zero, 0U);
@@ -1126,14 +1123,6 @@ namespace PSFilterLoad.PSApi
 
 		static bool plugin_prepare(PluginData pdata)
 		{
-			if (!LoadFilter(ref pdata))
-			{
-#if DEBUG
-				Ping(DebugFlags.Error, "LoadFilter failed");
-#endif
-				return false;
-			}
-
 			setup_sizes();
 			restore_parm();
 			SetFilterRecordValues(); 
@@ -1172,6 +1161,9 @@ namespace PSFilterLoad.PSApi
 		/// True if the source image is copied to the dest image, otherwise false.
 		/// </summary>
 		static bool copyToDest;
+        /// <summary>
+        /// Clears the dest alpha to match the source alpha.
+        /// </summary>
 		static unsafe void ClearDestAlpha()
 		{
 			if (!copyToDest)
@@ -1238,7 +1230,7 @@ namespace PSFilterLoad.PSApi
 			{
 				DrawCheckerBoardBitmap();
 			}
-			else // otherwise if ignoreAlpha is true make the "dest" image 24-bit RGB.
+			else 
 			{
 				ClearDestAlpha();
 			}
@@ -1248,12 +1240,9 @@ namespace PSFilterLoad.PSApi
 				aete = pdata.aete;
 			}
 
-
-
 			setup_delegates();
 			setup_suites();
 			setup_filter_record();
-
 
 			if (!isRepeatEffect)
 			{
@@ -4346,11 +4335,24 @@ namespace PSFilterLoad.PSApi
 
 		#region IDisposable Members
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
+
+        /// <summary>
+        /// Releases unmanaged resources and performs other cleanup operations before the
+        /// <see cref="LoadPsFilter"/> is reclaimed by garbage collection.
+        /// </summary>
+        ~LoadPsFilter()
+        {
+            Dispose(false);
+        }
+
 		private bool disposed;
 		private unsafe void Dispose(bool disposing)
 		{
@@ -4358,126 +4360,6 @@ namespace PSFilterLoad.PSApi
 			{
 				if (disposing)
 				{
-					if (platFormDataPtr != IntPtr.Zero)
-					{
-						Memory.Free(platFormDataPtr);
-						platFormDataPtr = IntPtr.Zero;
-					}
-
-
-					if (buffer_procPtr != IntPtr.Zero)
-					{
-						Memory.Free(buffer_procPtr);
-						buffer_procPtr = IntPtr.Zero;
-					}
-					if (handle_procPtr != IntPtr.Zero)
-					{
-						Memory.Free(handle_procPtr);
-						handle_procPtr = IntPtr.Zero;
-					}
-
-#if USEIMAGESERVICES
-					if (image_services_procsPtr.IsAllocated)
-					{
-						image_services_procsPtr.Free();
-					} 
-#endif
-					if (property_procsPtr != IntPtr.Zero)
-					{
-						Memory.Free(property_procsPtr);
-						property_procsPtr = IntPtr.Zero;
-					}
-
-					if (resource_procsPtr != IntPtr.Zero)
-					{
-						Memory.Free(resource_procsPtr);
-						resource_procsPtr = IntPtr.Zero;
-					}
-
-                    PIDescriptorParameters* descParam = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
-
-                    if (descParam->descriptor != IntPtr.Zero)
-                    {
-                        handle_dispose_proc(descParam->descriptor);
-                    }
-
-					if (descriptorParametersPtr != IntPtr.Zero)
-					{
-						Memory.Free(descriptorParametersPtr);
-						descriptorParametersPtr = IntPtr.Zero;
-					}
-					if (readDescriptorPtr != IntPtr.Zero)
-					{
-						Memory.Free(readDescriptorPtr);
-						readDescriptorPtr = IntPtr.Zero;
-					}
-					if (writeDescriptorPtr != IntPtr.Zero)
-					{
-						Memory.Free(writeDescriptorPtr);
-						writeDescriptorPtr = IntPtr.Zero;
-					}					
-                    
-                    FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-
-
-					if (filterRecord->errorString != IntPtr.Zero)
-					{
-						Memory.Free(filterRecord->errorString);
-					}
-
-
-					if (filterRecord->parameters != IntPtr.Zero)
-					{
-						if (handle_valid(filterRecord->parameters))
-						{
-							handle_unlock_proc(filterRecord->parameters);
-							handle_dispose_proc(filterRecord->parameters);
-						}
-						else
-						{
-							NativeMethods.GlobalUnlock(filterRecord->parameters);
-							NativeMethods.GlobalFree(filterRecord->parameters);
-						}
-						filterRecord->parameters = IntPtr.Zero;
-					}
-
-					if (filterRecordPtr != IntPtr.Zero)
-					{
-						Memory.Free(filterRecordPtr);
-						filterRecordPtr = IntPtr.Zero;
-					}
-
-
-
-					if (parmDataHandle != IntPtr.Zero)
-					{
-
-						try
-						{
-							NativeMethods.GlobalUnlock(parmDataHandle);
-							NativeMethods.GlobalFree(parmDataHandle);
-						}
-						finally
-						{
-							parmDataHandle = IntPtr.Zero;
-						}
-					}
-
-					if (data != IntPtr.Zero)
-					{
-						if (handle_valid(data))
-						{
-							handle_unlock_proc(data);
-							handle_dispose_proc(data);
-						}
-						else if (NativeMethods.GlobalSize(data).ToInt64() > 0L)
-						{
-							NativeMethods.GlobalUnlock(data);
-							NativeMethods.GlobalFree(data);
-						}
-						data = IntPtr.Zero;
-					}
-
 					if (source != null)
 					{
 						source.Dispose();
@@ -4522,9 +4404,127 @@ namespace PSFilterLoad.PSApi
 						tempDisplaySurface.Dispose();
 						tempDisplaySurface = null;
 					}
-
-					disposed = true;
 				}
+
+                if (platFormDataPtr != IntPtr.Zero)
+                {
+                    Memory.Free(platFormDataPtr);
+                    platFormDataPtr = IntPtr.Zero;
+                }
+
+
+                if (buffer_procPtr != IntPtr.Zero)
+                {
+                    Memory.Free(buffer_procPtr);
+                    buffer_procPtr = IntPtr.Zero;
+                }
+                if (handle_procPtr != IntPtr.Zero)
+                {
+                    Memory.Free(handle_procPtr);
+                    handle_procPtr = IntPtr.Zero;
+                }
+
+#if USEIMAGESERVICES
+					if (image_services_procsPtr.IsAllocated)
+					{
+						image_services_procsPtr.Free();
+					} 
+#endif
+                if (property_procsPtr != IntPtr.Zero)
+                {
+                    Memory.Free(property_procsPtr);
+                    property_procsPtr = IntPtr.Zero;
+                }
+
+                if (resource_procsPtr != IntPtr.Zero)
+                {
+                    Memory.Free(resource_procsPtr);
+                    resource_procsPtr = IntPtr.Zero;
+                }
+                if (descriptorParametersPtr != IntPtr.Zero)
+                {
+                    PIDescriptorParameters* descParam = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
+
+                    if (descParam->descriptor != IntPtr.Zero)
+                    {
+                        handle_dispose_proc(descParam->descriptor);
+                    }
+
+
+                    Memory.Free(descriptorParametersPtr);
+                    descriptorParametersPtr = IntPtr.Zero;
+                }
+                if (readDescriptorPtr != IntPtr.Zero)
+                {
+                    Memory.Free(readDescriptorPtr);
+                    readDescriptorPtr = IntPtr.Zero;
+                }
+                if (writeDescriptorPtr != IntPtr.Zero)
+                {
+                    Memory.Free(writeDescriptorPtr);
+                    writeDescriptorPtr = IntPtr.Zero;
+                }
+                if (filterRecordPtr != IntPtr.Zero)
+                {
+                    FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
+
+
+                    if (filterRecord->errorString != IntPtr.Zero)
+                    {
+                        Memory.Free(filterRecord->errorString);
+                    }
+
+
+                    if (filterRecord->parameters != IntPtr.Zero)
+                    {
+                        if (handle_valid(filterRecord->parameters))
+                        {
+                            handle_unlock_proc(filterRecord->parameters);
+                            handle_dispose_proc(filterRecord->parameters);
+                        }
+                        else
+                        {
+                            NativeMethods.GlobalUnlock(filterRecord->parameters);
+                            NativeMethods.GlobalFree(filterRecord->parameters);
+                        }
+                        filterRecord->parameters = IntPtr.Zero;
+                    }
+
+
+                    Memory.Free(filterRecordPtr);
+                    filterRecordPtr = IntPtr.Zero;
+                }
+
+                if (parmDataHandle != IntPtr.Zero)
+                {
+
+                    try
+                    {
+                        NativeMethods.GlobalUnlock(parmDataHandle);
+                        NativeMethods.GlobalFree(parmDataHandle);
+                    }
+                    finally
+                    {
+                        parmDataHandle = IntPtr.Zero;
+                    }
+                }
+
+                if (data != IntPtr.Zero)
+                {
+                    if (handle_valid(data))
+                    {
+                        handle_unlock_proc(data);
+                        handle_dispose_proc(data);
+                    }
+                    else if (NativeMethods.GlobalSize(data).ToInt64() > 0L)
+                    {
+                        NativeMethods.GlobalUnlock(data);
+                        NativeMethods.GlobalFree(data);
+                    }
+                    data = IntPtr.Zero;
+                }
+
+                disposed = true;
 			}
 		}
 
