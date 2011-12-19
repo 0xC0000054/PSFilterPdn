@@ -3439,6 +3439,12 @@ namespace PSFilterLoad.PSApi
                 isSubKey = true;
 
             }
+            
+            if ((keys != null) && keys.Count > 0 && aeteDict.Count > 0 &&
+              !aete.FlagList.ContainsKey(keys[0])) // some filters may hand us a list of bogus keys.
+            {
+                return IntPtr.Zero;
+            }
 
             if ((keys != null) && keys.Count == 0 && aeteDict.Count > 0)
             {
