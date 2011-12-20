@@ -38,6 +38,7 @@ namespace PSFilterLoad.PSApi
         public uint parmType;
         public short flags;
         public AETEParm[] parms;
+        public short classCount;
         public AETEEnums[] enums;
     }
 
