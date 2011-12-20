@@ -1161,9 +1161,9 @@ namespace PSFilterLoad.PSApi
 		/// True if the source image is copied to the dest image, otherwise false.
 		/// </summary>
 		static bool copyToDest;
-        /// <summary>
-        /// Clears the dest alpha to match the source alpha.
-        /// </summary>
+		/// <summary>
+		/// Clears the dest alpha to match the source alpha.
+		/// </summary>
 		static unsafe void ClearDestAlpha()
 		{
 			if (!copyToDest)
@@ -2341,7 +2341,7 @@ namespace PSFilterLoad.PSApi
 			{
 				case ColorServicesSelector.plugIncolorServicesChooseColor:
 					
-                    string name = StringFromPString(info.selectorParameter.pickerPrompt);
+					string name = StringFromPString(info.selectorParameter.pickerPrompt);
 
 					using (ColorPicker picker = new ColorPicker(name))
 					{
@@ -2431,7 +2431,7 @@ namespace PSFilterLoad.PSApi
 			return ((point.h >= 0 && point.h < (source.Width - 1)) && (point.v >= 0 && point.v < (source.Height - 1)));
 		} 
 
-        /// <summary>
+		/// <summary>
 		/// Sets the filter padding.
 		/// </summary>
 		/// <param name="inData">The input data.</param>
@@ -2852,16 +2852,16 @@ namespace PSFilterLoad.PSApi
 		static List<uint> subKeys;
 		static bool isSubKey;
 		static int subKeyIndex;
-        static IntPtr keyArrayPtr;
-        static IntPtr subKeyArrayPtr;
+		static IntPtr keyArrayPtr;
+		static IntPtr subKeyArrayPtr;
 		static IntPtr OpenReadDescriptorProc(ref System.IntPtr descriptor, IntPtr keyArray)
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Empty);
 
-    try 
+	try 
 	{	        
-		    long size = NativeMethods.GlobalSize(descriptor).ToInt64();
+			long size = NativeMethods.GlobalSize(descriptor).ToInt64();
 	}
 	catch (NullReferenceException)
 	{
@@ -2875,7 +2875,7 @@ namespace PSFilterLoad.PSApi
 				int index = 0;
 				if (keyArray != IntPtr.Zero) // check if the pointer is valid
 				{
-                    keyArrayPtr = keyArray;
+					keyArrayPtr = keyArray;
 					while (true)
 					{
 						uint key = (uint)Marshal.ReadInt32(keyArray, index);
@@ -2883,8 +2883,8 @@ namespace PSFilterLoad.PSApi
 						{
 							break;
 						}
-                        keys.Add(key);
-                        index += 4;
+						keys.Add(key);
+						index += 4;
 					}
 				}
 			}
@@ -2909,11 +2909,11 @@ namespace PSFilterLoad.PSApi
 
 			}
 
-            if ((keys != null) && keys.Count > 0 && aeteDict.Count > 0 &&
-                !aete.FlagList.ContainsKey(keys[0])) // some filters may hand us a list of bogus keys.
-            {
-                return IntPtr.Zero;
-            }
+			if ((keys != null) && keys.Count > 0 && aeteDict.Count > 0 &&
+				!aete.FlagList.ContainsKey(keys[0])) // some filters may hand us a list of bogus keys.
+			{
+				return IntPtr.Zero;
+			}
 
 			if ((keys != null) && keys.Count == 0 && aeteDict.Count > 0)
 			{
@@ -2935,12 +2935,12 @@ namespace PSFilterLoad.PSApi
 			if (isSubKey)
 			{
 				isSubKey = false;
-                subKeyArrayPtr = IntPtr.Zero;
+				subKeyArrayPtr = IntPtr.Zero;
 			}
-            else
-            {
-                keyArrayPtr = IntPtr.Zero;
-            }
+			else
+			{
+				keyArrayPtr = IntPtr.Zero;
+			}
 
 			descriptor = IntPtr.Zero;
 			return descErrValue;
@@ -2948,7 +2948,7 @@ namespace PSFilterLoad.PSApi
 		static unsafe byte GetKeyProc(System.IntPtr descriptor, ref uint key, ref uint type, ref int flags)
 		{
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Format("key = {0}", "0x" + key.ToString("X8")));
+			Ping(DebugFlags.MiscCallbacks, string.Format("key = {0}", "0x" + key.ToString("X8")));
 #endif
 
 			if (descErr != PSError.noErr)
@@ -2958,45 +2958,45 @@ namespace PSFilterLoad.PSApi
 
 			if (aeteDict.Count > 0)
 			{
-              
+			  
 
-                if (isSubKey)
-                {
-                    if (subKeyIndex > (subKeys.Count - 1))
-                    {
-                        return 0;
-                    }
+				if (isSubKey)
+				{
+					if (subKeyIndex > (subKeys.Count - 1))
+					{
+						return 0;
+					}
 
-                    getKey = key = subKeys[subKeyIndex];
-                    type = aeteDict[key].Type;
-                    flags = aeteDict[key].Flags;
+					getKey = key = subKeys[subKeyIndex];
+					type = aeteDict[key].Type;
+					flags = aeteDict[key].Flags;
 
-                    if (subKeyArrayPtr != IntPtr.Zero)
-	                {
-                        Marshal.WriteInt32(subKeyArrayPtr, (subKeyIndex * 4));
-	                }
+					if (subKeyArrayPtr != IntPtr.Zero)
+					{
+						Marshal.WriteInt32(subKeyArrayPtr, (subKeyIndex * 4));
+					}
 
-                    subKeyIndex++;
-                }
-                else
-                {
-                    if (getKeyIndex > (keys.Count - 1))
-                    {
-                        return 0;
-                    }
-                    
-                    if (keyArrayPtr != IntPtr.Zero)
-                    {
-                        Marshal.WriteInt32(keyArrayPtr, (getKeyIndex * 4), 0);
-                    }
-                    
-                    getKey = key = keys[getKeyIndex];
-                    type = aeteDict[key].Type;
-                    flags = aeteDict[key].Flags;
+					subKeyIndex++;
+				}
+				else
+				{
+					if (getKeyIndex > (keys.Count - 1))
+					{
+						return 0;
+					}
+					
+					if (keyArrayPtr != IntPtr.Zero)
+					{
+						Marshal.WriteInt32(keyArrayPtr, (getKeyIndex * 4), 0);
+					}
+					
+					getKey = key = keys[getKeyIndex];
+					type = aeteDict[key].Type;
+					flags = aeteDict[key].Flags;
 
-                    getKeyIndex++;
-                } 
-                
+					getKeyIndex++;
+				} 
+				
 
 
 
@@ -3292,7 +3292,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 				Debug.WriteLine("ptr: " + textHandle.ToInt64().ToString("X8"));
 #endif				
-                if (handle_valid(textHandle))
+				if (handle_valid(textHandle))
 				{
 
 					int size = handle_get_size_proc(textHandle);
@@ -4223,7 +4223,7 @@ namespace PSFilterLoad.PSApi
 
 			if (aeteDict.Count > 0)
 			{                    
-                descriptorParameters->descriptor = handle_new_proc(1);
+				descriptorParameters->descriptor = handle_new_proc(1);
 
 				if (!isRepeatEffect)
 				{
@@ -4331,7 +4331,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->maskTileOrigin.h = 0;
 			filterRecord->maskTileOrigin.v = 0;
 			
-            filterRecord->descriptorParameters = descriptorParametersPtr;
+			filterRecord->descriptorParameters = descriptorParametersPtr;
 			filterRecord->errorString = Memory.Allocate(256, true);
 			filterRecord->channelPortProcs = IntPtr.Zero;
 			filterRecord->documentInfo = IntPtr.Zero;
@@ -4339,23 +4339,23 @@ namespace PSFilterLoad.PSApi
 
 		#region IDisposable Members
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
+		/// <summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
-        /// <summary>
-        /// Releases unmanaged resources and performs other cleanup operations before the
-        /// <see cref="LoadPsFilter"/> is reclaimed by garbage collection.
-        /// </summary>
-        ~LoadPsFilter()
-        {
-            Dispose(false);
-        }
+		/// <summary>
+		/// Releases unmanaged resources and performs other cleanup operations before the
+		/// <see cref="LoadPsFilter"/> is reclaimed by garbage collection.
+		/// </summary>
+		~LoadPsFilter()
+		{
+			Dispose(false);
+		}
 
 		private bool disposed;
 		private unsafe void Dispose(bool disposing)
@@ -4410,23 +4410,23 @@ namespace PSFilterLoad.PSApi
 					}
 				}
 
-                if (platFormDataPtr != IntPtr.Zero)
-                {
-                    Memory.Free(platFormDataPtr);
-                    platFormDataPtr = IntPtr.Zero;
-                }
+				if (platFormDataPtr != IntPtr.Zero)
+				{
+					Memory.Free(platFormDataPtr);
+					platFormDataPtr = IntPtr.Zero;
+				}
 
 
-                if (buffer_procPtr != IntPtr.Zero)
-                {
-                    Memory.Free(buffer_procPtr);
-                    buffer_procPtr = IntPtr.Zero;
-                }
-                if (handle_procPtr != IntPtr.Zero)
-                {
-                    Memory.Free(handle_procPtr);
-                    handle_procPtr = IntPtr.Zero;
-                }
+				if (buffer_procPtr != IntPtr.Zero)
+				{
+					Memory.Free(buffer_procPtr);
+					buffer_procPtr = IntPtr.Zero;
+				}
+				if (handle_procPtr != IntPtr.Zero)
+				{
+					Memory.Free(handle_procPtr);
+					handle_procPtr = IntPtr.Zero;
+				}
 
 #if USEIMAGESERVICES
 					if (image_services_procsPtr.IsAllocated)
@@ -4434,101 +4434,101 @@ namespace PSFilterLoad.PSApi
 						image_services_procsPtr.Free();
 					} 
 #endif
-                if (property_procsPtr != IntPtr.Zero)
-                {
-                    Memory.Free(property_procsPtr);
-                    property_procsPtr = IntPtr.Zero;
-                }
+				if (property_procsPtr != IntPtr.Zero)
+				{
+					Memory.Free(property_procsPtr);
+					property_procsPtr = IntPtr.Zero;
+				}
 
-                if (resource_procsPtr != IntPtr.Zero)
-                {
-                    Memory.Free(resource_procsPtr);
-                    resource_procsPtr = IntPtr.Zero;
-                }
-                if (descriptorParametersPtr != IntPtr.Zero)
-                {
-                    PIDescriptorParameters* descParam = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
+				if (resource_procsPtr != IntPtr.Zero)
+				{
+					Memory.Free(resource_procsPtr);
+					resource_procsPtr = IntPtr.Zero;
+				}
+				if (descriptorParametersPtr != IntPtr.Zero)
+				{
+					PIDescriptorParameters* descParam = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
 
-                    if (descParam->descriptor != IntPtr.Zero)
-                    {
-                        handle_dispose_proc(descParam->descriptor);
-                    }
-
-
-                    Memory.Free(descriptorParametersPtr);
-                    descriptorParametersPtr = IntPtr.Zero;
-                }
-                if (readDescriptorPtr != IntPtr.Zero)
-                {
-                    Memory.Free(readDescriptorPtr);
-                    readDescriptorPtr = IntPtr.Zero;
-                }
-                if (writeDescriptorPtr != IntPtr.Zero)
-                {
-                    Memory.Free(writeDescriptorPtr);
-                    writeDescriptorPtr = IntPtr.Zero;
-                }
-                if (filterRecordPtr != IntPtr.Zero)
-                {
-                    FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
+					if (descParam->descriptor != IntPtr.Zero)
+					{
+						handle_dispose_proc(descParam->descriptor);
+					}
 
 
-                    if (filterRecord->errorString != IntPtr.Zero)
-                    {
-                        Memory.Free(filterRecord->errorString);
-                    }
+					Memory.Free(descriptorParametersPtr);
+					descriptorParametersPtr = IntPtr.Zero;
+				}
+				if (readDescriptorPtr != IntPtr.Zero)
+				{
+					Memory.Free(readDescriptorPtr);
+					readDescriptorPtr = IntPtr.Zero;
+				}
+				if (writeDescriptorPtr != IntPtr.Zero)
+				{
+					Memory.Free(writeDescriptorPtr);
+					writeDescriptorPtr = IntPtr.Zero;
+				}
+				if (filterRecordPtr != IntPtr.Zero)
+				{
+					FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
 
-                    if (filterRecord->parameters != IntPtr.Zero)
-                    {
-                        if (handle_valid(filterRecord->parameters))
-                        {
-                            handle_unlock_proc(filterRecord->parameters);
-                            handle_dispose_proc(filterRecord->parameters);
-                        }
-                        else
-                        {
-                            NativeMethods.GlobalUnlock(filterRecord->parameters);
-                            NativeMethods.GlobalFree(filterRecord->parameters);
-                        }
-                        filterRecord->parameters = IntPtr.Zero;
-                    }
+					if (filterRecord->errorString != IntPtr.Zero)
+					{
+						Memory.Free(filterRecord->errorString);
+					}
 
 
-                    Memory.Free(filterRecordPtr);
-                    filterRecordPtr = IntPtr.Zero;
-                }
+					if (filterRecord->parameters != IntPtr.Zero)
+					{
+						if (handle_valid(filterRecord->parameters))
+						{
+							handle_unlock_proc(filterRecord->parameters);
+							handle_dispose_proc(filterRecord->parameters);
+						}
+						else
+						{
+							NativeMethods.GlobalUnlock(filterRecord->parameters);
+							NativeMethods.GlobalFree(filterRecord->parameters);
+						}
+						filterRecord->parameters = IntPtr.Zero;
+					}
 
-                if (parmDataHandle != IntPtr.Zero)
-                {
 
-                    try
-                    {
-                        NativeMethods.GlobalUnlock(parmDataHandle);
-                        NativeMethods.GlobalFree(parmDataHandle);
-                    }
-                    finally
-                    {
-                        parmDataHandle = IntPtr.Zero;
-                    }
-                }
+					Memory.Free(filterRecordPtr);
+					filterRecordPtr = IntPtr.Zero;
+				}
 
-                if (data != IntPtr.Zero)
-                {
-                    if (handle_valid(data))
-                    {
-                        handle_unlock_proc(data);
-                        handle_dispose_proc(data);
-                    }
-                    else if (NativeMethods.GlobalSize(data).ToInt64() > 0L)
-                    {
-                        NativeMethods.GlobalUnlock(data);
-                        NativeMethods.GlobalFree(data);
-                    }
-                    data = IntPtr.Zero;
-                }
+				if (parmDataHandle != IntPtr.Zero)
+				{
 
-                disposed = true;
+					try
+					{
+						NativeMethods.GlobalUnlock(parmDataHandle);
+						NativeMethods.GlobalFree(parmDataHandle);
+					}
+					finally
+					{
+						parmDataHandle = IntPtr.Zero;
+					}
+				}
+
+				if (data != IntPtr.Zero)
+				{
+					if (handle_valid(data))
+					{
+						handle_unlock_proc(data);
+						handle_dispose_proc(data);
+					}
+					else if (NativeMethods.GlobalSize(data).ToInt64() > 0L)
+					{
+						NativeMethods.GlobalUnlock(data);
+						NativeMethods.GlobalFree(data);
+					}
+					data = IntPtr.Zero;
+				}
+
+				disposed = true;
 			}
 		}
 
