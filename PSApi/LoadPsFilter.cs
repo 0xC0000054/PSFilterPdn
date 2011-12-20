@@ -213,39 +213,42 @@ namespace PSFilterLoad.PSApi
 						}
 						evnt.parms = parms;
 
-						short classCount = Marshal.ReadInt16(propPtr, index);
+						evnt.classCount = Marshal.ReadInt16(propPtr, index);
 						index += 2;
-						short compOps = Marshal.ReadInt16(propPtr, index);
-						index += 2;
-						short enumCount = Marshal.ReadInt16(propPtr, index);
-						index += 2;
-						if (enumCount > 0)
-						{
-							AETEEnums[] enums = new AETEEnums[enumCount];
-							for (int enc = 0; enc < enumCount; enc++)
-							{
-								AETEEnums en = new AETEEnums();
-								en.type = (uint)Marshal.ReadInt32(propPtr, index);
-								index += 4;
-								en.count = Marshal.ReadInt16(propPtr, index);
-								index += 2;
-								en.enums = new AETEEnum[en.count];
+                        if (evnt.classCount == 0)
+                        {
+                            short compOps = Marshal.ReadInt16(propPtr, index);
+                            index += 2;
+                            short enumCount = Marshal.ReadInt16(propPtr, index);
+                            index += 2;
+                            if (enumCount > 0)
+                            {
+                                AETEEnums[] enums = new AETEEnums[enumCount];
+                                for (int enc = 0; enc < enumCount; enc++)
+                                {
+                                    AETEEnums en = new AETEEnums();
+                                    en.type = (uint)Marshal.ReadInt32(propPtr, index);
+                                    index += 4;
+                                    en.count = Marshal.ReadInt16(propPtr, index);
+                                    index += 2;
+                                    en.enums = new AETEEnum[en.count];
 
-								for (int e = 0; e < en.count; e++)
-								{
-									en.enums[e].name = StringFromPString(propPtr, index, out stringLength);
-									index += (stringLength + 1);
-									en.enums[e].type = (uint)Marshal.ReadInt32(propPtr, index);
-									index += 4;
-									en.enums[e].desc = StringFromPString(propPtr, index, out stringLength);
-									index += (stringLength + 1);
-								}
-								enums[enc] = en;
+                                    for (int e = 0; e < en.count; e++)
+                                    {
+                                        en.enums[e].name = StringFromPString(propPtr, index, out stringLength);
+                                        index += (stringLength + 1);
+                                        en.enums[e].type = (uint)Marshal.ReadInt32(propPtr, index);
+                                        index += 4;
+                                        en.enums[e].desc = StringFromPString(propPtr, index, out stringLength);
+                                        index += (stringLength + 1);
+                                    }
+                                    enums[enc] = en;
 
-							}
-							evnt.enums = enums;
-						}
-						enumAETE.events[eventc] = evnt;
+                                }
+                                evnt.enums = enums;
+                            }
+                        }
+                        enumAETE.events[eventc] = evnt; 
 
 
 					}
@@ -415,7 +418,7 @@ namespace PSFilterLoad.PSApi
 
 
 					if (((HiWord(enumAETE.version) > 1) || (HiWord(enumAETE.version) == 1 && LoWord(enumAETE.version) > 0)) ||
-						(enumAETE.suiteLevel > 1 || enumAETE.suiteVersion > 1))
+						(enumAETE.suiteLevel > 1 || enumAETE.suiteVersion > 1 || enumAETE.events[0].classCount > 0))
 					{
 						enumAETE = null; // ignore it if it is a newer version.
 					}
