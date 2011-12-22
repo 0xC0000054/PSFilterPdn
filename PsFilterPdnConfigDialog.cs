@@ -773,76 +773,80 @@ namespace PSFilterPdn
 
 						filterRunning = true;
 
-						try
-						{
-							using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, this.Handle))
-							{
-								lps.ProgressFunc = new ProgressProc(UpdateProgress);
+                        try
+                        {
+                            using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, this.Handle))
+                            {
+                                lps.ProgressFunc = new ProgressProc(UpdateProgress);
 
-								if ((parmData != null) && parmData.AETEDict.Count > 0
-									&& data.fileName == fileName)
-								{
-									lps.ParmData = this.parmData;
-								}
+                                if ((parmData != null) && parmData.AETEDict.Count > 0
+                                    && data.fileName == fileName)
+                                {
+                                    lps.ParmData = this.parmData;
+                                }
 
-								bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
-								bool userCanceled = (result && lps.ErrorMessage == Resources.UserCanceledError);
+                                bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
+                                bool userCanceled = (result && lps.ErrorMessage == Resources.UserCanceledError);
 
-								if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
-								{
-									MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-								}
+                                if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
+                                {
+                                    MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
 
-								if (!showAboutBoxcb.Checked && result && !userCanceled)
-								{
-									this.destSurface = lps.Dest.Clone();
-									this.fileName = data.fileName;
-									this.entryPoint = data.entryPoint;
-									this.title = data.title;
-									this.category = data.category;
-									this.filterCaseInfo = GetFilterCaseInfoString(data);
-									this.parmData = lps.ParmData;
-									this.aeteData = data.aete;
+                                if (!showAboutBoxcb.Checked && result && !userCanceled)
+                                {
+                                    this.destSurface = lps.Dest.Clone();
+                                    this.fileName = data.fileName;
+                                    this.entryPoint = data.entryPoint;
+                                    this.title = data.title;
+                                    this.category = data.category;
+                                    this.filterCaseInfo = GetFilterCaseInfoString(data);
+                                    this.parmData = lps.ParmData;
+                                    this.aeteData = data.aete;
 
 
-									if (filterProgressBar.Value < filterProgressBar.Maximum)
-									{
-										filterProgressBar.Value = filterProgressBar.Maximum;
-									}
-								}
-								else
-								{
-									if (destSurface != null)
-									{
-										destSurface.Dispose();
-										destSurface = null;
-									}
+                                    if (filterProgressBar.Value < filterProgressBar.Maximum)
+                                    {
+                                        filterProgressBar.Value = filterProgressBar.Maximum;
+                                    }
+                                }
+                                else
+                                {
+                                    if (destSurface != null)
+                                    {
+                                        destSurface.Dispose();
+                                        destSurface = null;
+                                    }
 
-								}
+                                }
 
-								filterProgressBar.Value = 0;
+                                filterProgressBar.Value = 0;
 
-							}
-						}
-						catch (FilterLoadException flex)
-						{
-							MessageBox.Show(this, flex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-						}
-						catch (ImageSizeTooLargeException ex)
-						{
-							if (MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error) == DialogResult.OK)
-							{
-								this.Close();
-							}
+                            }
+                        }
+                        catch (BadImageFormatException bifex)
+                        {
+                            MessageBox.Show(this, bifex.Message + Environment.NewLine + bifex.FileName, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        catch (FilterLoadException flex)
+                        {
+                            MessageBox.Show(this, flex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        catch (ImageSizeTooLargeException ex)
+                        {
+                            if (MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error) == DialogResult.OK)
+                            {
+                                this.Close();
+                            }
 
-						}
-						catch (NullReferenceException nrex)
-						{ 
-							/* the filter probably tried to access an unimplemeted callback function 
-							 * without checking if it is valid.
-							*/
-							MessageBox.Show(this, nrex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-						}
+                        }
+                        catch (NullReferenceException nrex)
+                        {
+                            /* the filter probably tried to access an unimplemeted callback function 
+                             * without checking if it is valid.
+                            */
+                            MessageBox.Show(this, nrex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
 						finally
 						{
 							FinishTokenUpdate();
