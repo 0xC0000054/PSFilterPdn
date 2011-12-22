@@ -109,16 +109,18 @@ namespace PSFilterPdn
             string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
             string rdwPath = string.Empty;
             string parmDataFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "parmData.dat");
-            string aeteFileName = string.Empty;
-            
-            PluginData data = new PluginData();
-            data.fileName = token.FileName;
-            data.filterInfo = GetFilterCaseInfoFromString(token.FilterCaseInfo);
-            data.category = token.Category;
-            data.entryPoint = token.EntryPoint;
-            data.title = token.Title;
-            data.runWith32BitShim = token.RunWith32BitShim;
-            data.aete = token.AETE;
+
+            FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
+            PluginData pluginData = new PluginData()
+            {
+                fileName = token.FileName,
+                entryPoint = token.EntryPoint,
+                title = token.Title,
+                category = token.Category,
+                filterInfo = fci,
+                aete = token.AETE
+            };
+
             
             Rectangle sourceBounds = base.EnvironmentParameters.SourceSurface.Bounds;
 
@@ -131,7 +133,7 @@ namespace PSFilterPdn
             }
             
             PSFilterShimService service = new PSFilterShimService(() => base.IsCancelRequested, 
-                true, false, data, Process.GetCurrentProcess().MainWindowHandle, 
+                true, false, pluginData, Process.GetCurrentProcess().MainWindowHandle, 
                 selection, base.EnvironmentParameters.PrimaryColor.ToColor(),
                 base.EnvironmentParameters.SecondaryColor.ToColor(), selectedRegion);
             
@@ -229,10 +231,6 @@ namespace PSFilterPdn
                 if (!string.IsNullOrEmpty(rdwPath))
                 {
                     File.Delete(rdwPath);
-                }
-                if (!string.IsNullOrEmpty(aeteFileName))
-                {
-                    File.Delete(aeteFileName);
                 }
 
                 PSFilterShimServer.Stop();
