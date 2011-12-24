@@ -312,30 +312,27 @@ namespace PSFilterLoad.PSApi
 
 			using (Bitmap bmp = new Bitmap(sourceImage))
 			{
-				if (bmp.Width > 32000 || bmp.Height > 32000)
-				{
-					if (bmp.Width > 32000 || bmp.Height > 32000)
-					{
-						string message = string.Empty;
-						if (bmp.Width > 32000 && bmp.Height > 32000)
-						{
-							message = Resources.ImageSizeTooLarge;
-						}
-						else
-						{
-							if (bmp.Width > 32000)
-							{
-								message = Resources.ImageWidthTooLarge;
-							}
-							else
-							{
-								message = Resources.ImageHeightTooLarge;
-							}
-						}
+			    if (bmp.Width > 32000 || bmp.Height > 32000)
+			    {
+				    string message = string.Empty;
+				    if (bmp.Width > 32000 && bmp.Height > 32000)
+				    {
+					    message = Resources.ImageSizeTooLarge;
+				    }
+				    else
+				    {
+					    if (bmp.Width > 32000)
+					    {
+						    message = Resources.ImageWidthTooLarge;
+					    }
+					    else
+					    {
+						    message = Resources.ImageHeightTooLarge;
+					    }
+				    }
 
-						throw new ImageSizeTooLargeException(message);
-					}
-				}
+				    throw new ImageSizeTooLargeException(message);
+			    }
 
 				source = Surface.CopyFromBitmap(bmp);
 
