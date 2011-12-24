@@ -56,15 +56,13 @@ namespace PSFilterLoad.PSApi
 			byte[] bytes = new byte[length];
 			Marshal.Copy(PString, bytes, 0, length);
 
-			string data = windows1252Encoding.GetString(bytes);
-
-			return data.Trim(trimChars);
+			return windows1252Encoding.GetString(bytes, 0, length).Trim(trimChars);
 		}
 
 		/// <summary>
 		/// Reads a Pascal String into a string.
 		/// </summary>
-		/// <param name="ptr">The pointyer to read from.</param>
+		/// <param name="ptr">The pointer to read from.</param>
 		/// <param name="offset">The offset to start reading at.</param>
 		/// <param name="length">The length of the resulting Pascal String.</param>
 		/// <returns>The resuting string</returns>
