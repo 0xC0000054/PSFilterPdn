@@ -1,5 +1,5 @@
 ﻿/* Adapted from PIActions.h
- * Copyright (c) 1992-6, Adobe Systems Incorporated.
+ * Copyright (c) 1996, Adobe Systems Incorporated.
  * All rights reserved.
 */
 
