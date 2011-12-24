@@ -861,27 +861,24 @@ namespace PSFilterLoad.PSApi
 
 			if (eep.SourceSurface.Width > 32000 || eep.SourceSurface.Height > 32000)
 			{
-				if (eep.SourceSurface.Width > 32000 || eep.SourceSurface.Height > 32000)
+				string message = string.Empty;
+				if (eep.SourceSurface.Width > 32000 && eep.SourceSurface.Height > 32000)
 				{
-					string message = string.Empty;
-					if (eep.SourceSurface.Width > 32000 && eep.SourceSurface.Height > 32000)
+					message = Resources.ImageSizeTooLarge;
+				}
+				else
+				{
+					if (eep.SourceSurface.Width > 32000)
 					{
-						message = Resources.ImageSizeTooLarge;
+						message = Resources.ImageWidthTooLarge;
 					}
 					else
 					{
-						if (eep.SourceSurface.Width > 32000)
-						{
-							message = Resources.ImageWidthTooLarge;
-						}
-						else
-						{
-							message = Resources.ImageHeightTooLarge;
-						}
+						message = Resources.ImageHeightTooLarge;
 					}
-
-					throw new ImageSizeTooLargeException(message);
 				}
+
+				throw new ImageSizeTooLargeException(message);
 			}
 
 			keys = null;
