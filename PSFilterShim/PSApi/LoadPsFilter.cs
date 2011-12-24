@@ -25,7 +25,7 @@ namespace PSFilterLoad.PSApi
 			{
 				StackFrame sf = new StackFrame(1);
 				string name = sf.GetMethod().Name;
-				Debug.WriteLine(string.Format("Function: {0} {1}\r\n", name, ", " + message));
+				Debug.WriteLine(string.Format("Function: {0}, {1}\r\n", name, message));
 			}
 		}
 
@@ -125,7 +125,7 @@ namespace PSFilterLoad.PSApi
 		static PutScopedObjectProc putScopedObjectProc; 
 		#endregion
 
-		static Dictionary<long, PSHandle> handles = null;
+		static Dictionary<IntPtr, PSHandle> handles = null;
 
 		// static PluginData enumData;  
 		static IntPtr filterRecordPtr;
@@ -643,9 +643,9 @@ namespace PSFilterLoad.PSApi
 
 					try
 					{                           
-						IntPtr hPtr = Marshal.ReadIntPtr(filterRecord->parameters);
+						IntPtr hPtr = Marshal.ReadIntPtr(ptr);
 
-						if (size == ParmDataSize && Marshal.ReadInt32(filterRecord->parameters, IntPtr.Size) == 0x464f544f)
+						if (size == ParmDataSize && Marshal.ReadInt32(ptr, IntPtr.Size) == 0x464f544f)
 						{
 							long ps = 0;
 							if ((ps = NativeMethods.GlobalSize(hPtr).ToInt64()) > 0L)
@@ -3526,7 +3526,7 @@ namespace PSFilterLoad.PSApi
 
 		static bool handle_valid(IntPtr h)
 		{
-			return ((handles != null) && handles.ContainsKey(h.ToInt64()));
+			return ((handles != null) && handles.ContainsKey(h));
 		}
 
 		static unsafe IntPtr handle_new_proc(int size)
@@ -3541,9 +3541,9 @@ namespace PSFilterLoad.PSApi
 
 
 				if (handles == null)
-					handles = new Dictionary<long, PSHandle>();
+					handles = new Dictionary<IntPtr, PSHandle>();
 
-				handles.Add(handle.ToInt64(), *hand);
+				handles.Add(handle, *hand);
 #if DEBUG
 				Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}, size = {1}", hand->pointer.ToInt64(), size));
 #endif
@@ -3555,42 +3555,35 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		static unsafe void handle_dispose_proc(IntPtr h)
-		{
-			if (h != IntPtr.Zero)
-			{
-				if (!handle_valid(h))
-				{
-					if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
-					{
-						IntPtr hPtr = Marshal.ReadIntPtr(h);
+        static unsafe void handle_dispose_proc(IntPtr h)
+        {
+            if (h != IntPtr.Zero)
+            {
+                if (!handle_valid(h))
+                {
+                    if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
+                    {
+                        IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-						if (!IsBadReadPtr(hPtr))
-						{
-							NativeMethods.GlobalFree(hPtr);
-						}
+                        if (!IsBadReadPtr(hPtr) && NativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+                        {
+                            NativeMethods.GlobalFree(hPtr);
+                        }
 
-
-						NativeMethods.GlobalFree(h);
-						return;
-					}
-					else
-					{
-						return;
-					}
-				}
+                        NativeMethods.GlobalFree(h);
+                    }
+                    return;
+                }
 #if DEBUG
-				Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h));
-				Ping(DebugFlags.HandleSuite, string.Format("Handle pointer address = {0:X8}", handles[h.ToInt64()].pointer));
+                Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h));
+                Ping(DebugFlags.HandleSuite, string.Format("Handle pointer address = {0:X8}", handles[h].pointer));
 #endif
-				handles.Remove(h.ToInt64());
-
-				PSHandle* handle = (PSHandle*)h.ToPointer();
-
-				Memory.Free(handle->pointer);
-				Memory.Free(h);
-			}
-		}
+                handles.Remove(h);
+                PSHandle* handle = (PSHandle*)h.ToPointer();
+                Memory.Free(handle->pointer);
+                Memory.Free(h);
+            }
+        }
 
 		static IntPtr handle_lock_proc(IntPtr h, byte moveHigh)
 		{
@@ -3601,23 +3594,26 @@ namespace PSFilterLoad.PSApi
 			{
 				if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
 				{
-					return NativeMethods.GlobalLock(h);
-				}
-				else
-				{
-					if (!IsBadReadPtr(h) && IsBadWritePtr(h))
-					{
-						return h;
-					}
-					else
-						return IntPtr.Zero;
-				}
+                    IntPtr hPtr = Marshal.ReadIntPtr(h);
+
+                    if (!IsBadReadPtr(hPtr) && NativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+                    {
+                        return NativeMethods.GlobalLock(hPtr);
+                    }
+                    return NativeMethods.GlobalLock(h);
+                }
+                else if (!IsBadReadPtr(h) && !IsBadWritePtr(h))
+                {
+                    return h;
+                }
+                else
+                    return IntPtr.Zero;
 			}
 
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, String.Format("Handle Pointer Address = 0x{0:X}", handles[h.ToInt64()].pointer));
+			Ping(DebugFlags.HandleSuite, String.Format("Handle Pointer Address = 0x{0:X}", handles[h].pointer));
 #endif
-			return handles[h.ToInt64()].pointer;
+			return handles[h].pointer;
 		}
 
 		static int handle_get_size_proc(IntPtr h)
@@ -3631,10 +3627,11 @@ namespace PSFilterLoad.PSApi
 				{
 					IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-					if (!IsBadReadPtr(hPtr))
-					{
-						return NativeMethods.GlobalSize(hPtr).ToInt32();
-					}
+                    int size = 0;
+                    if (!IsBadReadPtr(hPtr) && (size = NativeMethods.GlobalSize(hPtr).ToInt32()) > 0)
+                    {
+                        return size;
+                    }
 					else
 					{
 						return NativeMethods.GlobalSize(h).ToInt32();
@@ -3646,7 +3643,7 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
-			return handles[h.ToInt64()].size;
+			return handles[h].size;
 		}
 
 		static void handle_recover_space_proc(int size)
@@ -3656,79 +3653,50 @@ namespace PSFilterLoad.PSApi
 #endif
 		}
 
-		static unsafe short handle_set_size(IntPtr h, int newSize)
-		{
+        static unsafe short handle_set_size(IntPtr h, int newSize)
+        {
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
+            Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
 #endif
-			if (!handle_valid(h))
-			{
-				if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
-				{
-					IntPtr hPtr = Marshal.ReadIntPtr(h);
+            if (!handle_valid(h))
+            {
+                if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
+                {
+                    IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-					if (!IsBadReadPtr(hPtr))
-					{
-						hPtr = NativeMethods.GlobalReAlloc(hPtr, new UIntPtr((uint)newSize), NativeConstants.GPTR);
-						if (hPtr == IntPtr.Zero)
-						{
-							return PSError.nilHandleErr;
-						}
-						Marshal.WriteIntPtr(h, hPtr);
-					}
-					else
-					{
-						if ((h = NativeMethods.GlobalReAlloc(h, new UIntPtr((uint)newSize), NativeConstants.GPTR)) == IntPtr.Zero)
-							return PSError.nilHandleErr;
-					}
+                    if (!IsBadReadPtr(hPtr) && NativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+                    {
+                        hPtr = NativeMethods.GlobalReAlloc(hPtr, new UIntPtr((uint)newSize), NativeConstants.GPTR);
+                        if (hPtr == IntPtr.Zero)
+                        {
+                            return PSError.nilHandleErr;
+                        }
+                        Marshal.WriteIntPtr(h, hPtr);
+                    }
+                    else if ((h = NativeMethods.GlobalReAlloc(h, new UIntPtr((uint)newSize), NativeConstants.GPTR)) == IntPtr.Zero)
+                        return PSError.nilHandleErr;
 
-					return PSError.noErr;
-				}
-				else if (!IsBadReadPtr(h)
-					&& NativeMethods.GlobalSize(h).ToInt64() > 0L)
-				{
-					IntPtr hPtr = Marshal.ReadIntPtr(h);
+                    return PSError.noErr;
+                }
+                return PSError.nilHandleErr;
+            }
 
-					if (!IsBadReadPtr(hPtr))
-					{
-						hPtr = NativeMethods.GlobalReAlloc(hPtr, new UIntPtr((uint)newSize), NativeConstants.GPTR);
-						if (hPtr == IntPtr.Zero)
-						{
-							return PSError.nilHandleErr;
-						}
-						Marshal.WriteIntPtr(h, hPtr);
-
-					}
-					else
-					{
-						if ((h = NativeMethods.GlobalReAlloc(h, new UIntPtr((uint)newSize), NativeConstants.GPTR)) == IntPtr.Zero)
-							return PSError.nilHandleErr;
-					}
-					return PSError.noErr;
-
-				}
-				else
-				{
-					return PSError.nilHandleErr;
-				}
-			}
-
-			try
-			{
-				PSHandle* handle = (PSHandle*)h.ToPointer();
-				IntPtr ptr = Memory.ReAlloc(handle->pointer, newSize);
-				handle->pointer = ptr;
-				handle->size = newSize;
+            try
+            {
+                PSHandle* handle = (PSHandle*)h.ToPointer();
+                IntPtr ptr = Memory.ReAlloc(handle->pointer, newSize);
+                handle->pointer = ptr;
+                handle->size = newSize;
 
 
-				handles.AddOrUpdate(h.ToInt64(), *handle);
-			}
-			catch (OutOfMemoryException)
-			{
-				return PSError.memFullErr;
-			}
-			return PSError.noErr;
-		}
+                handles.AddOrUpdate(h, *handle);
+            }
+            catch (OutOfMemoryException)
+            {
+                return PSError.memFullErr;
+            }
+            return PSError.noErr;
+        }
 		static void handle_unlock_proc(IntPtr h)
 		{
 #if DEBUG
@@ -3738,15 +3706,18 @@ namespace PSFilterLoad.PSApi
 			{
 				if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
 				{
-					NativeMethods.GlobalUnlock(h);
-				}
-				else
-				{
-					if (!IsBadReadPtr(h) && IsBadWritePtr(h))
-					{
-						return;
-					}
-				}
+                    IntPtr hPtr = Marshal.ReadIntPtr(h);
+
+                    if (!IsBadReadPtr(hPtr) && NativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+                    {
+                        NativeMethods.GlobalUnlock(hPtr);
+                    }
+                    else
+                    {
+                        NativeMethods.GlobalUnlock(h);
+                    }
+                }
+				
 			}
 
 			
