@@ -954,6 +954,7 @@ namespace PSFilterLoad.PSApi
 			dbgFlags = DebugFlags.AdvanceState;
 			dbgFlags |= DebugFlags.Call;
 			dbgFlags |= DebugFlags.ColorServices;
+            dbgFlags |= DebugFlags.DescriptorParameters;
 			dbgFlags |= DebugFlags.DisplayPixels;
 			dbgFlags |= DebugFlags.Error;
 			dbgFlags |= DebugFlags.HandleSuite;
@@ -3400,7 +3401,7 @@ namespace PSFilterLoad.PSApi
         static IntPtr OpenReadDescriptorProc(ref System.IntPtr descriptor, IntPtr keyArray)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             if (keys == null)
             {
@@ -3440,7 +3441,7 @@ namespace PSFilterLoad.PSApi
                 isSubKey = true;
 
             }
-            
+
             if ((keys != null) && keys.Count > 0 && aeteDict.Count > 0 &&
               !aete.FlagList.ContainsKey(keys[0])) // some filters may hand us a list of bogus keys.
             {
@@ -3462,7 +3463,7 @@ namespace PSFilterLoad.PSApi
         static short CloseReadDescriptorProc(System.IntPtr descriptor)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             if (isSubKey)
             {
@@ -3712,14 +3713,14 @@ namespace PSFilterLoad.PSApi
         static IntPtr OpenWriteDescriptorProc()
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             return writeDescriptorPtr;
         }
         static short CloseWriteDescriptorProc(System.IntPtr descriptor, ref System.IntPtr descriptorHandle)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             if (isSubKey)
             {
@@ -3750,7 +3751,7 @@ namespace PSFilterLoad.PSApi
         static short PutIntegerProc(System.IntPtr descriptor, uint key, int param2)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeInteger, GetAETEParmFlags(key), 0, param2));
             return PSError.noErr;
@@ -3759,7 +3760,7 @@ namespace PSFilterLoad.PSApi
         static short PutFloatProc(System.IntPtr descriptor, uint key, ref double data)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeFloat, GetAETEParmFlags(key), 0, data));
             return PSError.noErr;
@@ -3769,7 +3770,7 @@ namespace PSFilterLoad.PSApi
         static short PutUnitFloatProc(System.IntPtr descriptor, uint key, uint unit, ref double data)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeUintFloat, GetAETEParmFlags(key), 0, data));
             return PSError.noErr;
@@ -3778,7 +3779,7 @@ namespace PSFilterLoad.PSApi
         static short PutBooleanProc(System.IntPtr descriptor, uint key, byte data)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeBoolean, GetAETEParmFlags(key), 0, data));
             return PSError.noErr;
@@ -3787,7 +3788,7 @@ namespace PSFilterLoad.PSApi
         static short PutTextProc(System.IntPtr descriptor, uint key, IntPtr textHandle)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
 
             if (textHandle != IntPtr.Zero)
@@ -3795,8 +3796,8 @@ namespace PSFilterLoad.PSApi
                 IntPtr hPtr = Marshal.ReadIntPtr(textHandle);
 
 #if DEBUG
-		                Debug.WriteLine("ptr: " + textHandle.ToInt64().ToString("X8"));
-#endif              
+                Debug.WriteLine("ptr: " + textHandle.ToInt64().ToString("X8"));
+#endif
                 if (handle_valid(textHandle))
                 {
 
@@ -3834,7 +3835,7 @@ namespace PSFilterLoad.PSApi
         static short PutAliasProc(System.IntPtr descriptor, uint key, System.IntPtr aliasHandle)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             if (handle_valid(aliasHandle))
             {
@@ -3871,7 +3872,7 @@ namespace PSFilterLoad.PSApi
         static short PutEnumeratedProc(System.IntPtr descriptor, uint key, uint type, uint data)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), 0, data));
             return PSError.noErr;
@@ -3880,7 +3881,7 @@ namespace PSFilterLoad.PSApi
         static short PutClassProc(System.IntPtr descriptor, uint key, uint data)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
 
             // TODO: What does the PutClassProc function do?
@@ -3890,7 +3891,7 @@ namespace PSFilterLoad.PSApi
         static short PutSimpleReferenceProc(System.IntPtr descriptor, uint key, ref PIDescriptorSimpleReference data)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeObjectRefrence, GetAETEParmFlags(key), 0, data));
             return PSError.noErr;
@@ -3899,7 +3900,7 @@ namespace PSFilterLoad.PSApi
         static short PutObjectProc(System.IntPtr descriptor, uint key, uint type, System.IntPtr handle)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             byte[] data = null;
 
@@ -3953,7 +3954,7 @@ namespace PSFilterLoad.PSApi
         static short PutCountProc(System.IntPtr descriptor, uint key, uint count)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             return PSError.noErr;
         }
@@ -3961,7 +3962,7 @@ namespace PSFilterLoad.PSApi
         static short PutStringProc(System.IntPtr descriptor, uint key, IntPtr stringHandle)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             int size = (int)Marshal.ReadByte(stringHandle);
             byte[] data = new byte[size];
@@ -3975,14 +3976,14 @@ namespace PSFilterLoad.PSApi
         static short PutScopedClassProc(System.IntPtr descriptor, uint key, uint data)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             return PSError.errPlugInHostInsufficient;
         }
         static short PutScopedObjectProc(System.IntPtr descriptor, uint key, uint type, ref System.IntPtr handle)
         {
 #if DEBUG
-            Ping(DebugFlags.MiscCallbacks, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             IntPtr hPtr = Marshal.ReadIntPtr(handle);
 
