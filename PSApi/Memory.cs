@@ -11,20 +11,9 @@ namespace PSFilterLoad.PSApi
 	{
 		private static IntPtr hHeap;
 
-        public static unsafe void CreateHeap()
+        static Memory()
         {
-            if (hHeap == IntPtr.Zero)
-            {
-                SafeNativeMethods.HeapSetInformation(IntPtr.Zero, 1, null, 0);
-                hHeap = SafeNativeMethods.HeapCreate(0, IntPtr.Zero, IntPtr.Zero);
-                uint info = 2; // low fragmentation heap
-#if DEBUG
-                uint res = SafeNativeMethods.HeapSetInformation(hHeap, 0, (void*)&info, 4);
-                System.Diagnostics.Debug.WriteLine(res);
-#else
-                SafeNativeMethods.HeapSetInformation(hHeap, 0, (void*)&info, 4); 
-#endif       
-            }
+            hHeap = SafeNativeMethods.GetProcessHeap();
         }
 
 		public static IntPtr Allocate(int size, bool zeroMemory)
@@ -125,15 +114,6 @@ namespace PSFilterLoad.PSApi
             }
 
             return 0L;
-        }
-
-        public static void DestroyHeap()
-        {
-            if (hHeap != IntPtr.Zero)
-            {
-                SafeNativeMethods.HeapDestroy(hHeap);
-                hHeap = IntPtr.Zero;
-            }
         }
 	}
 }
