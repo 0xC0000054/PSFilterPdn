@@ -11,12 +11,12 @@ namespace PSFilterLoad.PSApi
         BufferSuite = 4,
         Call = 6,
         ColorServices = 8,
-        DisplayPixels = 10,
-        Error = 12,
-        HandleSuite = 14,
-        MiscCallbacks = 16,
-        PiPL = 18,
-
+        DescriptorParameters = 10,
+        DisplayPixels = 12,
+        Error = 14,
+        HandleSuite = 16,
+        MiscCallbacks = 18,
+        PiPL = 20,
     }
 #endif
 }
