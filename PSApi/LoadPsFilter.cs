@@ -998,6 +998,11 @@ namespace PSFilterLoad.PSApi
         static bool ignoreAlpha;
         static bool hasTransparency;
 
+        /// <summary>
+        ///Checks if the host should ignore tha alpha channel for the plugin.
+        /// </summary>
+        /// <param name="data">The plugin to check.</param>
+        /// <returns><c>true</c> if the alpha chennel should be ignored; otherwise <c>false</c>.</returns>
 		static bool IgnoreAlphaChannel(PluginData data)
 		{
             if (data.filterInfo == null)
@@ -1017,7 +1022,7 @@ namespace PSFilterLoad.PSApi
             if (data.filterInfo[(filterCase - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
             {
                 /* use the flatImage modes if the filter dosen't support the protectedTransparency cases 
-                    * or image does not have any transparency */
+                 * or image does not have any transparency */
                 hasTransparency = HasTransparentAlpha();
 
                 if (data.filterInfo[((filterCase + 2) - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter ||
@@ -1106,6 +1111,11 @@ namespace PSFilterLoad.PSApi
 			return !result;
 		}
 
+        /// <summary>
+        /// Loads the filter into memory.
+        /// </summary>
+        /// <param name="pdata">The <see cref="PluginData"/> of the filter to load.</param>
+        /// <returns><c>true</c> if the filter is loaded sucessfully; otherwise <c>false</c>.</returns>
 		static bool LoadFilter(ref PluginData pdata)
 		{
 			bool loaded = false;
@@ -1131,7 +1141,7 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Free the loaded PluginData.
 		/// </summary>
-		/// <param name="pdata">The PluginData to  free/</param>
+		/// <param name="pdata">The PluginData to  free</param>
 		static void FreeLibrary(ref PluginData pdata)
 		{
 			if (!pdata.entry.dll.IsInvalid)
@@ -1142,7 +1152,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
         /// <summary>
-        /// Save the filter parameters for repeat runs.
+        /// Saves the filter parameters for repeat runs.
         /// </summary>
         static unsafe void save_parm()
         {
@@ -1283,7 +1293,7 @@ namespace PSFilterLoad.PSApi
         static IntPtr parmDataHandle;
         static IntPtr filterParametersHandle;
         /// <summary>
-        /// Restore the filter parameters for repeat runs.
+        /// Restores the filter parameters for repeat runs.
         /// </summary>
         static unsafe void restore_parm()
         {
