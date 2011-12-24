@@ -1,4 +1,5 @@
 ﻿/* Adapted from PIFilter.h
+ * Copyright (c) 1990-1, Thomas Knoll.
  * Copyright (c) 1992-6, Adobe Systems Incorporated.
  * All rights reserved.
 */
