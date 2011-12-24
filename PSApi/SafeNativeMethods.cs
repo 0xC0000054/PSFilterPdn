@@ -13,11 +13,8 @@ namespace PSFilterLoad.PSApi
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool SetWindowText(IntPtr hWnd, string lpString);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern IntPtr HeapCreate(uint flOptions, IntPtr dwInitialsize, IntPtr dwMaximumSize);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern bool HeapDestroy(IntPtr hHeap);
+        [DllImport("kernel32.dll", SetLastError = false)]
+        internal static extern IntPtr GetProcessHeap();
 
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern IntPtr HeapAlloc(IntPtr hHeap, uint dwFlags, UIntPtr dwSize);
