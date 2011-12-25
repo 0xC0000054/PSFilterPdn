@@ -6,12 +6,13 @@ namespace PSFilterLoad.PSApi
 {
     [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl, CharSet = CharSet.Ansi), System.Security.SuppressUnmanagedCodeSecurity]
     internal delegate int filterep(short selector, IntPtr pluginParamBlock, ref IntPtr pluginData, ref short result);
+ 
+#pragma warning disable 0649
+   
     /// <summary>
     /// The class that encapsulates a Photoshop Filter plugin
     /// </summary>
     [DataContract()]
-#pragma warning disable 0649
-
     internal sealed class PluginData
     {
         [DataMember]
@@ -31,7 +32,6 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Used to run 32-bit plugins in 64-bit Paint.NET
         /// </summary>
-        [DataMember]
         public bool runWith32BitShim;
         [DataMember]
         public AETEData aete;
