@@ -3495,9 +3495,21 @@ namespace PSFilterLoad.PSApi
                     }
 
                     getKey = key = subKeys[subKeyIndex];
-                    type = aeteDict[key].Type;
-                    flags = aeteDict[key].Flags;
-
+                    AETEValue data = aeteDict[key];
+                    try
+                    {
+                        type = data.Type;
+                    }
+                    catch (NullReferenceException)
+                    {
+                    }
+                    try
+                    {
+                        flags = data.Flags;
+                    }
+                    catch (NullReferenceException)
+                    {
+                    }
                     subKeyIndex++;
                 }
                 else
@@ -3507,9 +3519,21 @@ namespace PSFilterLoad.PSApi
                         return 0;
                     }
                     getKey = key = keys[getKeyIndex];
-                    type = aeteDict[key].Type;
-                    flags = aeteDict[key].Flags;
-
+                    AETEValue data = aeteDict[key];
+                    try
+                    {
+                        type = data.Type; // the type or flags parameters may be null if the filter does not use them.
+                    }
+                    catch (NullReferenceException)
+                    {
+                    }
+                    try
+                    {
+                        flags = data.Flags;
+                    }
+                    catch (NullReferenceException)
+                    {
+                    }
                     getKeyIndex++;
                 }
 
