@@ -29,7 +29,6 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Used to run 32-bit plugins in 64-bit Paint.NET
         /// </summary>
-        [DataMember]
         public bool runWith32BitShim;
         [DataMember]
         public AETEData aete;
