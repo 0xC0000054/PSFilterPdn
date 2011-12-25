@@ -171,59 +171,6 @@ namespace PaintDotNet.SystemLayer
         }
 
         /// <summary>
-        /// Sets protection on a block previously allocated with AllocateLarge.
-        /// </summary>
-        /// <param name="block">The starting memory address to set protection for.</param>
-        /// <param name="size">The size of the block.</param>
-        /// <param name="readAccess">Whether to allow read access.</param>
-        /// <param name="writeAccess">Whether to allow write access.</param>
-        /// <remarks>
-        /// You may not specify false for read access without also specifying false for write access.
-        /// Note to implementors: This method is not guaranteed to actually set read/write-ability 
-        /// on a block of memory, and may instead be implemented as a no-op after parameter validation.
-        /// </remarks>
-        public static void ProtectBlockLarge(IntPtr block, ulong size, bool readAccess, bool writeAccess)
-        {
-            uint flOldProtect;
-            uint flNewProtect;
-
-            if (readAccess && writeAccess)
-            {
-                flNewProtect = NativeConstants.PAGE_READWRITE;
-            }
-            else if (readAccess && !writeAccess)
-            {
-                flNewProtect = NativeConstants.PAGE_READONLY;
-            }
-            else if (!readAccess && !writeAccess)
-            {
-                flNewProtect = NativeConstants.PAGE_NOACCESS;
-            }
-            else
-            {
-                throw new InvalidOperationException("May not specify a page to be write-only");
-            }
-
-#if DEBUGSPEW
-            Tracing.Ping("ProtectBlockLarge: block #" + block.ToString() + ", read: " + readAccess + ", write: " + writeAccess);
-#endif
-
-            SafeNativeMethods.VirtualProtect(block, new UIntPtr(size), flNewProtect, out flOldProtect);
-        }
-
-        /// <summary>
-        /// Copies bytes from one area of memory to another. Since this function only
-        /// takes pointers, it can not do any bounds checking.
-        /// </summary>
-        /// <param name="dst">The starting address of where to copy bytes to.</param>
-        /// <param name="src">The starting address of where to copy bytes from.</param>
-        /// <param name="length">The number of bytes to copy</param>
-        public static void Copy(IntPtr dst, IntPtr src, ulong length)
-        {
-            Copy(dst.ToPointer(), src.ToPointer(), length);
-        }
-
-        /// <summary>
         /// Copies bytes from one area of memory to another. Since this function only
         /// takes pointers, it can not do any bounds checking.
         /// </summary>
@@ -233,16 +180,6 @@ namespace PaintDotNet.SystemLayer
         public static void Copy(void *dst, void *src, ulong length)
         {
             SafeNativeMethods.memcpy(dst, src, new UIntPtr(length));
-        }
-
-        public static void SetToZero(IntPtr dst, ulong length)
-        {
-            SetToZero(dst.ToPointer(), length);
-        }
-
-        public static void SetToZero(void *dst, ulong length)
-        {
-            SafeNativeMethods.memset(dst, 0, new UIntPtr(length));
         }
     }
 }
