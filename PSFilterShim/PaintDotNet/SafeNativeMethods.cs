@@ -40,9 +40,6 @@ namespace PaintDotNet.SystemLayer
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
         internal static extern unsafe void memcpy(void* dst, void* src, UIntPtr length);
 
-        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-        internal static extern unsafe void memset(void* dst, int c, UIntPtr length);
-
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern IntPtr VirtualAlloc(
             IntPtr lpAddress,
@@ -56,13 +53,5 @@ namespace PaintDotNet.SystemLayer
             IntPtr lpAddress,
             UIntPtr dwSize,
             uint dwFreeType);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool VirtualProtect(
-            IntPtr lpAddress,
-            UIntPtr dwSize,
-            uint flNewProtect,
-            out uint lpflOldProtect);
     }
 }
