@@ -18,111 +18,111 @@ namespace PSFilterLoad.PSApi
     ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
     ///param1: PIDescriptorHandle*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short CloseWriteDescriptorProc(System.IntPtr param0, ref System.IntPtr param1);
+    internal delegate short CloseWriteDescriptorProc(System.IntPtr descriptor, ref System.IntPtr descriptorHandle);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///param2: int32->int
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutIntegerProc([In()]System.IntPtr param0, [In()]uint param1, [In()]int param2);
+    internal delegate short PutIntegerProc([In()]System.IntPtr descriptor, [In()]uint key, [In()]int data);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///param2: double*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutFloatProc(System.IntPtr param0, uint param1, ref double param2);
+    internal delegate short PutFloatProc(System.IntPtr descriptor, uint key, ref double data);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///param2: DescriptorUnitID->unsigned int
     ///param3: double*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutUnitFloatProc([In()]System.IntPtr param0, uint param1, uint param2, ref double param3);
+    internal delegate short PutUnitFloatProc([In()]System.IntPtr descriptor, uint key, uint type, ref double data);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///param2: Boolean->BYTE->unsigned char
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutBooleanProc([In()]System.IntPtr param0, uint param1, [In()]byte param2);
+    internal delegate short PutBooleanProc([In()]System.IntPtr descriptor, uint key, [In()]byte data);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///param2: Handle->LPSTR*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutTextProc([In()]System.IntPtr param0, [In()]uint param1, [In(), MarshalAs(UnmanagedType.SysInt)]IntPtr param2);
+    internal delegate short PutTextProc([In()]System.IntPtr descriptor, [In()]uint key, [In()]IntPtr handle);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///param2: Handle->LPSTR*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutAliasProc(System.IntPtr param0, uint param1, [In()]System.IntPtr param2);
+    internal delegate short PutAliasProc(System.IntPtr descriptor, uint key, [In()]System.IntPtr aliasHandle);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
     ///key: DescriptorKeyID->unsigned int
     ///type: DescriptorTypeID->unsigned int
     ///value: DescriptorEnumID->unsigned int
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutEnumeratedProc(System.IntPtr param0, uint key, uint type, uint value);
+    internal delegate short PutEnumeratedProc(System.IntPtr descriptor, uint key, uint type, uint value);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///param2: DescriptorTypeID->unsigned int
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutClassProc(System.IntPtr param0, uint param1, uint param2);
+    internal delegate short PutClassProc(System.IntPtr descriptor, uint key, uint type);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///param2: PIDescriptorSimpleReference*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutSimpleReferenceProc(System.IntPtr param0, uint param1, ref PIDescriptorSimpleReference param2);
+    internal delegate short PutSimpleReferenceProc(System.IntPtr descriptor, uint key, ref PIDescriptorSimpleReference data);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///param2: DescriptorTypeID->unsigned int
     ///param3: PIDescriptorHandle->Handle->LPSTR*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutObjectProc(System.IntPtr param0, uint param1, uint param2, System.IntPtr param3);
+    internal delegate short PutObjectProc(System.IntPtr descriptor, uint key, uint type, System.IntPtr handle);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///count: uint32->unsigned int
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutCountProc(System.IntPtr param0, uint param1, uint count);
+    internal delegate short PutCountProc(System.IntPtr descriptor, uint key, uint count);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///param2: ConstStr255Param->char*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutStringProc(System.IntPtr param0, uint param1, IntPtr param2);
+    internal delegate short PutStringProc(System.IntPtr descriptor, uint key, IntPtr handle);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///param2: DescriptorTypeID->unsigned int
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutScopedClassProc(System.IntPtr param0, uint param1, uint param2);
+    internal delegate short PutScopedClassProc(System.IntPtr descriptor, uint key, uint type);
 
     /// Return Type: OSErr->short
-    ///param0: PIWriteDescriptor->PIOpaqueWriteDescriptor*
-    ///param1: DescriptorKeyID->unsigned int
+    ///descriptor: PIWriteDescriptor->PIOpaqueWriteDescriptor*
+    ///key: DescriptorKeyID->unsigned int
     ///param2: DescriptorTypeID->unsigned int
     ///param3: PIDescriptorHandle->Handle->LPSTR*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutScopedObjectProc(System.IntPtr param0, uint param1, uint param2, ref System.IntPtr param3);
+    internal delegate short PutScopedObjectProc(System.IntPtr descriptor, uint key, uint type, ref System.IntPtr handle);
 
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential, CharSet = System.Runtime.InteropServices.CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     internal unsafe struct PIDescriptorSimpleReference__keyData
     {
 
@@ -139,7 +139,7 @@ namespace PSFilterLoad.PSApi
         public uint value;
     }
 
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential)]
     internal struct PIDescriptorSimpleReference
     {
 
@@ -154,124 +154,124 @@ namespace PSFilterLoad.PSApi
     }
 
     /// Return Type: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param0: PIDescriptorHandle->Handle->LPSTR*
-    ///param1: DescriptorKeyIDArray->DescriptorKeyID[]
+    ///descriptor: PIDescriptorHandle->Handle->LPSTR*
+    ///data: DescriptorKeyIDArray->DescriptorKeyID[]
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate System.IntPtr OpenReadDescriptorProc(ref System.IntPtr param0, IntPtr param1);
+    internal delegate System.IntPtr OpenReadDescriptorProc(ref System.IntPtr descriptorHandle, IntPtr keyArray);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short CloseReadDescriptorProc(System.IntPtr param0);
+    internal delegate short CloseReadDescriptorProc(System.IntPtr descriptor);
 
     /// Return Type: Boolean->BYTE->unsigned char
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
     ///key: DescriptorKeyID*
     ///type: DescriptorTypeID*
     ///flags: int32*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate byte GetKeyProc(System.IntPtr param0, ref uint key, ref uint type, ref int flags);
+    internal delegate byte GetKeyProc(System.IntPtr descriptor, ref uint key, ref uint type, ref int flags);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: int32*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: int32*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetIntegerProc(System.IntPtr param0, ref int param1);
+    internal delegate short GetIntegerProc(System.IntPtr descriptor, ref int data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: double*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: double*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetFloatProc(System.IntPtr param0, ref double param1);
+    internal delegate short GetFloatProc(System.IntPtr descriptor, ref double data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: DescriptorUnitID*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: DescriptorUnitID*
     ///param2: double*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetUnitFloatProc(System.IntPtr param0, ref uint param1, ref double param2);
+    internal delegate short GetUnitFloatProc(System.IntPtr descriptor, ref uint unit, ref double data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: Boolean*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: Boolean*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetBooleanProc(System.IntPtr param0, ref byte param1);
+    internal delegate short GetBooleanProc(System.IntPtr descriptor, ref byte data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: Handle*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: Handle*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetTextProc(System.IntPtr param0, ref System.IntPtr param1);
+    internal delegate short GetTextProc(System.IntPtr descriptor, ref System.IntPtr data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: Handle*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: Handle*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetAliasProc(System.IntPtr param0, ref System.IntPtr param1);
+    internal delegate short GetAliasProc(System.IntPtr descriptor, ref System.IntPtr data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: DescriptorEnumID*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: DescriptorEnumID*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetEnumeratedProc(System.IntPtr param0, ref uint param1);
+    internal delegate short GetEnumeratedProc(System.IntPtr descriptor, ref uint data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: DescriptorTypeID*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: DescriptorTypeID*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetClassProc(System.IntPtr param0, ref uint param1);
+    internal delegate short GetClassProc(System.IntPtr descriptor, ref uint data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: PIDescriptorSimpleReference*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: PIDescriptorSimpleReference*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetSimpleReferenceProc(System.IntPtr param0, ref PIDescriptorSimpleReference param1);
+    internal delegate short GetSimpleReferenceProc(System.IntPtr descriptor, ref PIDescriptorSimpleReference data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: DescriptorTypeID*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: DescriptorTypeID*
     ///param2: PIDescriptorHandle*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetObjectProc(System.IntPtr param0, ref uint param1, ref System.IntPtr param2);
+    internal delegate short GetObjectProc(System.IntPtr descriptor, ref uint type, ref System.IntPtr data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: uint32*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: uint32*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetCountProc(System.IntPtr param0, ref uint param1);
+    internal delegate short GetCountProc(System.IntPtr descriptor, ref uint data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: Str255*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: Str255*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetStringProc(System.IntPtr param0, System.IntPtr param1);
+    internal delegate short GetStringProc(System.IntPtr descriptor, System.IntPtr data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: int32->int
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: int32->int
     ///param2: int32->int
     ///param3: int32*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetPinnedIntegerProc(System.IntPtr param0, int param1, int param2, ref int param3);
+    internal delegate short GetPinnedIntegerProc(System.IntPtr descriptor, int min, int max, ref int data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: double*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: double*
     ///param2: double*
     ///param3: double*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetPinnedFloatProc(System.IntPtr param0, ref double param1, ref double param2, ref double param3);
+    internal delegate short GetPinnedFloatProc(System.IntPtr descriptor, ref double max, ref double min, ref double data);
 
     /// Return Type: OSErr->short
-    ///param0: PIReadDescriptor->PIOpaqueReadDescriptor*
-    ///param1: double*
+    ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
+    ///data: double*
     ///param2: double*
     ///param3: DescriptorUnitID*
     ///param4: double*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetPinnedUnitFloatProc(System.IntPtr param0, ref double param1, ref double param2, ref uint param3, ref double param4);
+    internal delegate short GetPinnedUnitFloatProc(System.IntPtr descriptor, ref double min, ref double max, ref uint unit, ref double data);
 
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayout(LayoutKind.Sequential)]
     internal struct WriteDescriptorProcs
     {
 
@@ -330,7 +330,7 @@ namespace PSFilterLoad.PSApi
         public IntPtr putScopedObjectProc;
     }
 
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayout(LayoutKind.Sequential)]
     internal struct ReadDescriptorProcs
     {
 
@@ -395,7 +395,7 @@ namespace PSFilterLoad.PSApi
         public IntPtr getPinnedUnitFloatProc;
     }
 
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential)]
     internal struct PIDescriptorParameters
     {
 
