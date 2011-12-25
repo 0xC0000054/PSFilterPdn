@@ -2991,7 +2991,7 @@ namespace PSFilterLoad.PSApi
                     AETEValue data = aeteDict[key];
                     try
                     {
-                        type = data.Type; // the type or flags values may be null if the filter does not use them.
+                        type = data.Type; // the type or flags parameters may be null if the filter does not use them.
                     }
                     catch (NullReferenceException)
                     {
