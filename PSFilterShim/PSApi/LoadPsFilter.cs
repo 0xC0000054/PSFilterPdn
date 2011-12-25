@@ -343,13 +343,6 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
-			inDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "inData").ToInt32();
-			outDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "outData").ToInt32();
-			inRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "inRowBytes").ToInt32();
-			outRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "outRowBytes").ToInt32();
-			maskDataOfs = Marshal.OffsetOf(typeof(FilterRecord), "maskData").ToInt32();
-			maskRowBytesOfs = Marshal.OffsetOf(typeof(FilterRecord), "maskRowBytes").ToInt32();
-
 			outRowBytes = 0;
 			outHiPlane = 0;
 			outLoPlane = 0;
@@ -1366,13 +1359,6 @@ namespace PSFilterLoad.PSApi
 
 		static bool src_valid;
 		static bool dst_valid;
-
-		static int inDataOfs;
-		static int outDataOfs;
-		static int maskDataOfs;
-		static int inRowBytesOfs;
-		static int outRowBytesOfs;
-		static int maskRowBytesOfs;
 
 		static Rect16 outRect;
 		static int outRowBytes;
