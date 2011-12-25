@@ -55,18 +55,25 @@ namespace PSFilterShim
             filterDone = false;
             ServiceProxy = null;
 
-            if (args.Length > 0 && args.Length == 2)
+            try
             {
-                Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
-
-                filterThread.Start(args);
-
-                while (!filterDone)
+                if (args.Length > 0 && args.Length == 2)
                 {
-                    Thread.Sleep(250);
-                }
+                    Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
 
-                filterThread.Join();
+                    filterThread.Start(args);
+
+                    while (!filterDone)
+                    {
+                        Thread.Sleep(250);
+                    }
+
+                    filterThread.Join();
+                }
+            }
+            finally
+            {
+                PaintDotNet.SystemLayer.Memory.DestroyHeap();
             }
             
 
@@ -213,24 +220,6 @@ namespace PSFilterShim
 
            
         }
-
-		static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
-		{
-			FilterCaseInfo[] info = new FilterCaseInfo[7];
-			string[] split = input.Split(new char[] { ':' });
-
-			for (int i = 0; i < split.Length; i++)
-			{
-				string[] data = split[i].Split(new char[] { '_' });
-
-				info[i].inputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[0]);
-				info[i].outputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[1]);
-				info[i].flags1 = byte.Parse(data[2], NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-				info[i].flags2 = 0;
-			}
-
-			return info;
-		}
 
 		static void UpdateProgress(int done, int total)
 		{
