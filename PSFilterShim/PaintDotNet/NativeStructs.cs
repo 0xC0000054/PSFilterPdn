@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace PaintDotNet.SystemLayer
 {
-    class NativeStructs
+    internal static class NativeStructs
     {
         [StructLayout(LayoutKind.Sequential)]
         internal struct MEMORYSTATUSEX

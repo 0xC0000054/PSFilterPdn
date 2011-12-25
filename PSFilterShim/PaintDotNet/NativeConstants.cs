@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PaintDotNet.SystemLayer
 {
-    class NativeConstants
+    internal static class NativeConstants
     {
         /// PAGE_NOACCESS -> 0x01
         public const int PAGE_NOACCESS = 1;
