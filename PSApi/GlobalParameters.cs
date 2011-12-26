@@ -11,50 +11,50 @@ namespace PSFilterLoad.PSApi
     public sealed class GlobalParameters : ISerializable
     {
 
-        private long parmDataSize;
-        private byte[] parmDataBytes;
-        private bool parmDataIsPSHandle;
+        private long parameterDataSize;
+        private byte[] parameterDataBytes;
+        private bool parameterDataIsPSHandle;
         private long pluginDataSize;
         private byte[] pluginDataBytes;
         private bool pluginDataIsPSHandle;
         private int storeMethod;
 
-        public byte[] ParmDataBytes
+        public byte[] ParameterDataBytes
         {
             get
             {
-                return parmDataBytes;
+                return parameterDataBytes;
             }
             set
             {
-                parmDataBytes = value;
+                parameterDataBytes = value;
             }
         }
 
-        public long ParmDataSize
+        public long ParameterDataSize
         {
             get
             {
-                return parmDataSize;
+                return parameterDataSize;
             }
             set
             {
-                parmDataSize = value;
+                parameterDataSize = value;
             }
         }
 
         /// <summary>
         /// Is the parm data a PS Handle.
         /// </summary>
-        public bool ParmDataIsPSHandle
+        public bool ParameterDataIsPSHandle
         {
             get
             {
-                return parmDataIsPSHandle;
+                return parameterDataIsPSHandle;
             }
             set
             {
-                parmDataIsPSHandle = value;
+                parameterDataIsPSHandle = value;
             }
         }
 
@@ -111,9 +111,9 @@ namespace PSFilterLoad.PSApi
 
         public GlobalParameters()
         {
-            this.parmDataSize = 0;
-            this.parmDataBytes = null;
-            this.parmDataIsPSHandle = false;
+            this.parameterDataSize = 0;
+            this.parameterDataBytes = null;
+            this.parameterDataIsPSHandle = false;
             this.pluginDataSize = 0;
             this.pluginDataBytes = null;
             this.pluginDataIsPSHandle = false;
@@ -121,9 +121,9 @@ namespace PSFilterLoad.PSApi
         }
         private GlobalParameters(SerializationInfo info, StreamingContext context)
         {
-            this.parmDataSize = info.GetInt64("parmDataSize");
-            this.parmDataBytes = (byte[])info.GetValue("parmDataBytes", typeof(byte[]));
-            this.parmDataIsPSHandle = info.GetBoolean("parmDataIsPSHandle");
+            this.parameterDataSize = info.GetInt64("parameterDataSize");
+            this.parameterDataBytes = (byte[])info.GetValue("parameterDataBytes", typeof(byte[]));
+            this.parameterDataIsPSHandle = info.GetBoolean("parameterDataIsPSHandle");
             this.pluginDataSize = info.GetInt64("pluginDataSize");
             this.pluginDataBytes = (byte[])info.GetValue("pluginDataBytes", typeof(byte[]));
             this.pluginDataIsPSHandle = info.GetBoolean("pluginDataIsPSHandle");
@@ -132,9 +132,9 @@ namespace PSFilterLoad.PSApi
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("parmDataSize", this.parmDataSize);
-            info.AddValue("parmDataBytes", this.parmDataBytes, typeof(byte[]));
-            info.AddValue("parmDataIsPSHandle", this.parmDataIsPSHandle);
+            info.AddValue("parameterDataSize", this.parameterDataSize);
+            info.AddValue("parameterDataBytes", this.parameterDataBytes, typeof(byte[]));
+            info.AddValue("parameterDataIsPSHandle", this.parameterDataIsPSHandle);
             info.AddValue("pluginDataSize", this.pluginDataSize);
             info.AddValue("pluginDataBytes", this.pluginDataBytes, typeof(byte[]));
             info.AddValue("pluginDataIsPSHandle", this.pluginDataIsPSHandle);
