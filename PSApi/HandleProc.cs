@@ -45,7 +45,7 @@ namespace PSFilterLoad.PSApi
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void UnlockPIHandleProc(System.IntPtr h);
 
-    [StructLayoutAttribute(LayoutKind.Sequential)]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayoutAttribute(LayoutKind.Sequential)]
     internal struct HandleProcs
     {
         /// int16->short

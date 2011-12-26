@@ -31,7 +31,7 @@ namespace PSFilterLoad.PSApi
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short AddPIResourceProc(uint type, ref System.IntPtr data);
 
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     internal struct ResourceProcs
     {
         /// int16->short

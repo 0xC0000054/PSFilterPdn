@@ -13,7 +13,7 @@ namespace PSFilterLoad.PSApi
     [return: MarshalAs(UnmanagedType.I1)]
     internal delegate bool TestAbortProc();
 
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayout(LayoutKind.Sequential, Pack = 4)]
     internal unsafe struct FilterRecord
     {
         public int serial;
