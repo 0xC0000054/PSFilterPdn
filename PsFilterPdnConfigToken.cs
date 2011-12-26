@@ -14,7 +14,7 @@ namespace PSFilterPdn
         private string title;
         private string filterCaseInfo;
         private bool runWith32BitShim;
-        private ParameterData parmData;
+        private ParameterData filterParameters;
         private AETEData aeteData;
         private List<string> expandedNodes;
         
@@ -103,15 +103,15 @@ namespace PSFilterPdn
             }
         }
 
-        public ParameterData ParmData
+        public ParameterData FilterParameters
         {
             get
             {
-                return parmData;
+                return filterParameters;
             }
             internal set
             {
-                parmData = value;
+                filterParameters = value;
             }
         }
 
@@ -149,7 +149,7 @@ namespace PSFilterPdn
             this.fileName = fileName;
             this.title = title;
             this.runWith32BitShim = useShim;
-            this.parmData = pdata;
+            this.filterParameters = pdata;
             this.aeteData = aete;
             this.expandedNodes = nodes;
         }
@@ -165,7 +165,7 @@ namespace PSFilterPdn
             this.filterCaseInfo= copyMe.filterCaseInfo;
             this.title = copyMe.title;
             this.runWith32BitShim = copyMe.runWith32BitShim;
-            this.parmData = copyMe.parmData;
+            this.filterParameters = copyMe.filterParameters;
             this.aeteData = copyMe.aeteData;
             this.expandedNodes = copyMe.expandedNodes;
         }

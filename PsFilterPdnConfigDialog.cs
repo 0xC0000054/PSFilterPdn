@@ -80,7 +80,7 @@ namespace PSFilterPdn
 			((PSFilterPdnConfigToken)EffectToken).FilterCaseInfo = this.filterCaseInfo;
 			((PSFilterPdnConfigToken)EffectToken).Title = this.title;
 			((PSFilterPdnConfigToken)EffectToken).RunWith32BitShim = this.runWith32BitShim;
-			((PSFilterPdnConfigToken)EffectToken).ParmData = this.parmData;
+			((PSFilterPdnConfigToken)EffectToken).FilterParameters = this.filterParameters;
 			((PSFilterPdnConfigToken)EffectToken).AETE = this.aeteData;
 			((PSFilterPdnConfigToken)EffectToken).ExpandedNodes = this.expandedNodes;
 		}
@@ -94,10 +94,10 @@ namespace PSFilterPdn
 				lastSelectedFilterTitle = token.Title;
 			}
 
-			if (!string.IsNullOrEmpty(token.FileName) && token.ParmData != null)
+			if (!string.IsNullOrEmpty(token.FileName) && token.FilterParameters != null)
 			{
 				this.fileName = token.FileName; 
-				this.parmData = token.ParmData;
+				this.filterParameters = token.FilterParameters;
 			}
 			
 			if ((token.ExpandedNodes != null) && token.ExpandedNodes.Count > 0)
@@ -442,7 +442,7 @@ namespace PSFilterPdn
 		private string entryPoint;
 		private string title;
 		private string filterCaseInfo;
-		private ParameterData parmData;
+		private ParameterData filterParameters;
 		private AETEData aeteData;
 
 		private void UpdateProgress(int done, int total)
@@ -547,7 +547,7 @@ namespace PSFilterPdn
 			string src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
 			string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
 
-			string parmDataFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "parmData.dat");
+			string parmDataFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParameters.dat");
 			string rdwPath = string.Empty;
 			string aeteFileName = string.Empty;
 
@@ -584,13 +584,13 @@ namespace PSFilterPdn
 				}
 
 				
-				if ((parmData != null) && parmData.AETEDict.Count > 0
+				if ((filterParameters != null) && filterParameters.AETEDict.Count > 0
 									   && data.fileName == fileName)
 				{
 					using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
 					{
 						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-						bf.Serialize(fs, this.parmData);
+						bf.Serialize(fs, this.filterParameters);
 					} 
 				}
 
@@ -701,12 +701,12 @@ namespace PSFilterPdn
 					using (FileStream fs = new FileStream(parmDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
 					{
 						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter() { Binder = new SB() };
-						this.parmData = (ParameterData)bf.Deserialize(fs);
+						this.filterParameters = (ParameterData)bf.Deserialize(fs);
 					} 
 				}
 				else
 				{
-					this.parmData = null;
+					this.filterParameters = null;
 				}
 
 				try
@@ -779,10 +779,10 @@ namespace PSFilterPdn
                             {
                                 lps.ProgressFunc = new ProgressProc(UpdateProgress);
 
-                                if ((parmData != null) && parmData.AETEDict.Count > 0
+                                if ((filterParameters != null) && filterParameters.AETEDict.Count > 0
                                     && data.fileName == fileName)
                                 {
-                                    lps.ParmData = this.parmData;
+                                    lps.FilterParameters = this.filterParameters;
                                 }
 
                                 bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
@@ -801,7 +801,7 @@ namespace PSFilterPdn
                                     this.title = data.title;
                                     this.category = data.category;
                                     this.filterCaseInfo = GetFilterCaseInfoString(data);
-                                    this.parmData = lps.ParmData;
+                                    this.filterParameters = lps.FilterParameters;
                                     this.aeteData = data.aete;
 
 

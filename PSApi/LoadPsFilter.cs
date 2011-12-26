@@ -818,7 +818,7 @@ namespace PSFilterLoad.PSApi
 		static GlobalParameters globalParms;
 		static bool isRepeatEffect;
 
-		public ParameterData ParmData
+		public ParameterData FilterParameters
 		{
 			get
 			{
@@ -826,7 +826,7 @@ namespace PSFilterLoad.PSApi
 			}
 			set
 			{
-				globalParms = value.GlobalParms;
+				globalParms = value.GlobalParameters;
 				aeteDict = value.AETEDict;
 			}
 		}
@@ -1158,18 +1158,18 @@ namespace PSFilterLoad.PSApi
             if (filterRecord->parameters != IntPtr.Zero)
             {
                 long size = 0;
-                globalParms.ParmDataIsPSHandle = false;
+                globalParms.ParameterDataIsPSHandle = false;
                 if (handle_valid(filterRecord->parameters))
                 {
-                    globalParms.ParmDataSize = handle_get_size_proc(filterRecord->parameters);
+                    globalParms.ParameterDataSize = handle_get_size_proc(filterRecord->parameters);
 
                    
                     IntPtr ptr = handle_lock_proc(filterRecord->parameters, 0);
 
-                    Byte[] buf = new byte[globalParms.ParmDataSize];
+                    Byte[] buf = new byte[globalParms.ParameterDataSize];
                     Marshal.Copy(ptr, buf, 0, buf.Length);
-                    globalParms.ParmDataBytes = buf;
-                    globalParms.ParmDataIsPSHandle = true;
+                    globalParms.ParameterDataBytes = buf;
+                    globalParms.ParameterDataIsPSHandle = true;
 
                     handle_unlock_proc(filterRecord->parameters);
 
@@ -1191,8 +1191,8 @@ namespace PSFilterLoad.PSApi
                             {
                                 Byte[] buf = new byte[ps];
                                 Marshal.Copy(hPtr, buf, 0, (int)ps);
-                                globalParms.ParmDataBytes = buf;
-                                globalParms.ParmDataIsPSHandle = true;
+                                globalParms.ParameterDataBytes = buf;
+                                globalParms.ParameterDataIsPSHandle = true;
                             }
 
                         }
@@ -1209,15 +1209,15 @@ namespace PSFilterLoad.PSApi
                                 Byte[] buf = new byte[ps];
 
                                 Marshal.Copy(hPtr, buf, 0, ps);
-                                globalParms.ParmDataBytes = buf;
-                                globalParms.ParmDataIsPSHandle = true;
+                                globalParms.ParameterDataBytes = buf;
+                                globalParms.ParameterDataIsPSHandle = true;
                             }
                             else
                             {
                                 Byte[] buf = new byte[(int)size];
 
                                 Marshal.Copy(filterRecord->parameters, buf, 0, (int)size);
-                                globalParms.ParmDataBytes = buf;
+                                globalParms.ParameterDataBytes = buf;
                             }
 
                         }
@@ -1227,7 +1227,7 @@ namespace PSFilterLoad.PSApi
                         NativeMethods.GlobalUnlock(filterRecord->parameters);
                     }
 
-                    globalParms.ParmDataSize = size;
+                    globalParms.ParameterDataSize = size;
                     globalParms.StoreMethod = 1;
                 }
 
@@ -1300,30 +1300,30 @@ namespace PSFilterLoad.PSApi
 
             FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
-            if (globalParms.ParmDataBytes != null)
+            if (globalParms.ParameterDataBytes != null)
             {
 
                 switch (globalParms.StoreMethod)
                 {
                     case 0:
 
-                        filterRecord->parameters = handle_new_proc((int)globalParms.ParmDataSize);
+                        filterRecord->parameters = handle_new_proc((int)globalParms.ParameterDataSize);
                         IntPtr hPtr = Marshal.ReadIntPtr(filterRecord->parameters);
 
-                        Marshal.Copy(globalParms.ParmDataBytes, 0, hPtr, globalParms.ParmDataBytes.Length);
+                        Marshal.Copy(globalParms.ParameterDataBytes, 0, hPtr, globalParms.ParameterDataBytes.Length);
 
                         break;
                     case 1:
 
                         // lock the parameters 
 
-                        if (globalParms.ParmDataSize == handleSize && globalParms.ParmDataIsPSHandle)
+                        if (globalParms.ParameterDataSize == handleSize && globalParms.ParameterDataIsPSHandle)
                         {
-                            filterRecord->parameters = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParmDataSize));
+                            filterRecord->parameters = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParameterDataSize));
 
-                            filterParametersHandle = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParmDataBytes.Length));
+                            filterParametersHandle = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParameterDataBytes.Length));
 
-                            Marshal.Copy(globalParms.ParmDataBytes, 0, filterParametersHandle, globalParms.ParmDataBytes.Length);
+                            Marshal.Copy(globalParms.ParameterDataBytes, 0, filterParametersHandle, globalParms.ParameterDataBytes.Length);
 
 
                             Marshal.WriteIntPtr(filterRecord->parameters, filterParametersHandle);
@@ -1333,23 +1333,23 @@ namespace PSFilterLoad.PSApi
                         else
                         {
 
-                            if (globalParms.ParmDataIsPSHandle)
+                            if (globalParms.ParameterDataIsPSHandle)
                             {
 #if DEBUG
 								Debug.Assert((globalParms.ParmDataSize == (globalParms.ParmDataBytes.Length + IntPtr.Size)));
 #endif
-                                filterRecord->parameters = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParmDataSize));
+                                filterRecord->parameters = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParameterDataSize));
 
                                 IntPtr ptr = new IntPtr(filterRecord->parameters.ToInt64() + (long)IntPtr.Size);
 
-                                Marshal.Copy(globalParms.ParmDataBytes, 0, ptr, globalParms.ParmDataBytes.Length);
+                                Marshal.Copy(globalParms.ParameterDataBytes, 0, ptr, globalParms.ParameterDataBytes.Length);
 
                                 Marshal.WriteIntPtr(filterRecord->parameters, ptr);
                             }
                             else
                             {
-                                filterRecord->parameters = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((ulong)globalParms.ParmDataBytes.Length));
-                                Marshal.Copy(globalParms.ParmDataBytes, 0, filterRecord->parameters, globalParms.ParmDataBytes.Length);
+                                filterRecord->parameters = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((ulong)globalParms.ParameterDataBytes.Length));
+                                Marshal.Copy(globalParms.ParameterDataBytes, 0, filterRecord->parameters, globalParms.ParameterDataBytes.Length);
                             }
 
                         }

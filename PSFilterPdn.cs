@@ -99,7 +99,7 @@ namespace PSFilterPdn
             // check that PSFilterShim exists first thing and abort if it does not.
             string shimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
 
-            if (!File.Exists(shimPath)) // this should never happen
+            if (!File.Exists(shimPath)) 
             {
                 MessageBox.Show(Resources.PSFilterShimNotFound, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -108,7 +108,7 @@ namespace PSFilterPdn
             string src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
             string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
             string rdwPath = string.Empty;
-            string parmDataFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "parmData.dat");
+            string parmDataFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParameters.dat");
 
             FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
             PluginData pluginData = new PluginData()
@@ -152,7 +152,7 @@ namespace PSFilterPdn
                 using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-                    bf.Serialize(fs, token.ParmData);
+                    bf.Serialize(fs, token.FilterParameters);
                 }
 
                 string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\"", src, dest);
@@ -260,7 +260,7 @@ namespace PSFilterPdn
                         aete = token.AETE
                     };
 
-                    lps.ParmData = token.ParmData;
+                    lps.FilterParameters = token.FilterParameters;
                     lps.IsRepeatEffect = true;
 
                     bool result = lps.RunPlugin(pdata, false);
