@@ -150,11 +150,11 @@ namespace PSFilterShim
                     if (parmData != null)
                     {
                         // ignore the filters that only use the data handle, e.g. Filter Factory  
-                        if (((parmData.GlobalParms.ParmDataBytes != null && parmData.GlobalParms.PluginDataBytes != null) ||
-                            (parmData.GlobalParms.ParmDataBytes != null && parmData.GlobalParms.PluginDataBytes == null)) ||
+                        if (((parmData.GlobalParameters.ParameterDataBytes != null && parmData.GlobalParameters.PluginDataBytes != null) ||
+                            (parmData.GlobalParameters.ParameterDataBytes != null && parmData.GlobalParameters.PluginDataBytes == null)) ||
                             parmData.AETEDict != null)
                         {
-                            lps.ParmData = parmData;
+                            lps.FilterParameters = parmData;
                             lps.IsRepeatEffect = repeatEffect;
                         }
                     }
@@ -173,7 +173,7 @@ namespace PSFilterShim
                             using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                             {
                                 BinaryFormatter bf = new BinaryFormatter();
-                                bf.Serialize(fs, lps.ParmData);
+                                bf.Serialize(fs, lps.FilterParameters);
                             }
                         }
                     }
