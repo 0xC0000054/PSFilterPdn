@@ -10,14 +10,14 @@ namespace PSFilterLoad.PSApi
     [Serializable]
     public sealed class ParameterData 
     {
-        private GlobalParameters globalParms;
+        private GlobalParameters globalParameters;
         private Dictionary<uint, AETEValue> aeteDict;
 
-        public GlobalParameters GlobalParms
+        public GlobalParameters GlobalParameters
         {
             get 
             {
-                return globalParms;
+                return globalParameters;
             }
         }
 
@@ -31,7 +31,7 @@ namespace PSFilterLoad.PSApi
 
         public ParameterData(GlobalParameters globals, Dictionary<uint, AETEValue> aete)
         {
-            this.globalParms = globals;
+            this.globalParameters = globals;
 
             if (aete != null)
             {
