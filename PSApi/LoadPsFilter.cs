@@ -1336,7 +1336,7 @@ namespace PSFilterLoad.PSApi
                             if (globalParms.ParameterDataIsPSHandle)
                             {
 #if DEBUG
-								Debug.Assert((globalParms.ParmDataSize == (globalParms.ParmDataBytes.Length + IntPtr.Size)));
+								Debug.Assert((globalParms.ParameterDataSize == (globalParms.PluginDataBytes.Length + IntPtr.Size)));
 #endif
                                 filterRecord->parameters = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParameterDataSize));
 
@@ -1765,11 +1765,6 @@ namespace PSFilterLoad.PSApi
 			if (pdata.aete != null)
 			{
 				aete = pdata.aete;
-
-				if (!isRepeatEffect)
-				{
-					aeteDict = new Dictionary<uint, AETEValue>();
-				}
 			}
 
 
