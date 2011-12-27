@@ -39,6 +39,12 @@ namespace PSFilterShim
             return abort;
         }
 
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        { 
+            Exception ex = (Exception)e.ExceptionObject;
+            Console.Error.Write(ex.ToString());
+        }
+
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
@@ -54,7 +60,7 @@ namespace PSFilterShim
 #endif
             filterDone = false;
             ServiceProxy = null;
-
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             try
             {
                 if (args.Length > 0 && args.Length == 2)
