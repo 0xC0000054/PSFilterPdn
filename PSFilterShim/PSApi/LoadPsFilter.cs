@@ -429,7 +429,9 @@ namespace PSFilterLoad.PSApi
 
 		static bool IgnoreAlphaChannel(PluginData data)
 		{
-			if (data.filterInfo == null || data.category == "L'amico Perry")
+            // some filters do not handle the alpha channel correctly despite what their filterInfo says.
+			if (data.filterInfo == null || data.category == "L'amico Perry" ||
+                data.category == "Imagenomic")
 			{
 #if USEMATTING
 				if (data.filterInfo != null)
