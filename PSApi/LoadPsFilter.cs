@@ -107,7 +107,7 @@ namespace PSFilterLoad.PSApi
 					return true;
 				}
 
-				enumAETE = new PluginAETE();
+                enumAETE = new PluginAETE();
 
 				enumAETE.version = Marshal.ReadInt16(lockRes, 2); ;
 
@@ -415,15 +415,18 @@ namespace PSFilterLoad.PSApi
 					}
 
 
-					if (((HiWord(enumAETE.version) > 1) || (HiWord(enumAETE.version) == 1 && LoWord(enumAETE.version) > 0)) ||
-						(enumAETE.suiteLevel > 1 || enumAETE.suiteVersion > 1 || enumAETE.events[0].classCount > 0))
-					{
-						enumAETE = null; // ignore it if it is a newer version.
-					}
-					else
-					{
-						enumData.aete = new AETEData(enumAETE);
-					}
+                    if (enumAETE != null)
+                    {
+                        if (((HiWord(enumAETE.version) > 1) || (HiWord(enumAETE.version) == 1 && LoWord(enumAETE.version) > 0)) ||
+                                        (enumAETE.suiteLevel > 1 || enumAETE.suiteVersion > 1 || enumAETE.events[0].classCount > 0))
+                        {
+                            enumAETE = null; // ignore it if it is a newer version.
+                        }
+                        else
+                        {
+                            enumData.aete = new AETEData(enumAETE);
+                        } 
+                    }
 
 
 				}
@@ -1751,7 +1754,8 @@ namespace PSFilterLoad.PSApi
 				}
 
 			}
-			if (!ignoreAlpha)
+			
+            if (!ignoreAlpha)
 			{
 				DrawCheckerBoardBitmap();
 			}
@@ -1760,15 +1764,10 @@ namespace PSFilterLoad.PSApi
 				ClearDestAlpha();
 			}
 
-		
-
 			if (pdata.aete != null)
 			{
 				aete = pdata.aete;
 			}
-
-
-
 
 			setup_delegates();
 			setup_suites();
