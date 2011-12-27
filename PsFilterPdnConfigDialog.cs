@@ -847,6 +847,11 @@ namespace PSFilterPdn
                             */
                             MessageBox.Show(this, nrex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
+                        catch (System.Runtime.InteropServices.ExternalException eex)
+                        {
+                            MessageBox.Show(this, eex.Message + "0x" + eex.ErrorCode.ToString("X8", CultureInfo.CurrentCulture), this.Text,
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
 						finally
 						{
 							FinishTokenUpdate();
