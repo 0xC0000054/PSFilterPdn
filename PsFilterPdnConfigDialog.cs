@@ -492,11 +492,11 @@ namespace PSFilterPdn
 			proxyErrorMessage = data;
 		}
 
-        private void SetProxyFilterParameters(ParameterData parameters)
-        {
-            this.filterParameters = parameters;
-        }
- 		private bool proxyResult; 
+		private void SetProxyFilterParameters(ParameterData parameters)
+		{
+			this.filterParameters = parameters;
+		}
+		private bool proxyResult; 
 		private string proxyErrorMessage;
 
 		private bool GetShowAboutChecked()
@@ -547,29 +547,29 @@ namespace PSFilterPdn
 			bool showAbout = (bool)base.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked));
 			IntPtr owner = (IntPtr)base.Invoke(new GetHandleDelegate(GetHandle));
 
-            ProxyErrorDelegate errorDelegate = new ProxyErrorDelegate(SetProxyErrorResult);
+			ProxyErrorDelegate errorDelegate = new ProxyErrorDelegate(SetProxyErrorResult);
 
-            ParameterData filterParams = null;
-            if ((filterParameters != null) && filterParameters.AETEDict.Count > 0
+			ParameterData filterParams = null;
+			if ((filterParameters != null) && filterParameters.AETEDict.Count > 0
 									   && data.fileName == fileName)
 			{
 				filterParams = this.filterParameters;
 			}
 
 			PSFilterShimService service = new PSFilterShimService()
-            {
-                isRepeatEffect = false,
-                showAboutDialog = showAbout,
-                pluginData = data,
-                filterRect = selection,
-                parentHandle = owner,
-                primary = eep.PrimaryColor.ToColor(),
-                secondary = eep.SecondaryColor.ToColor(),
-                selectedRegion = selectedRegion,
-                errorCallback = errorDelegate,
-                filterParameters = filterParams,
-                setFilterParametersDelegate = new SetProxyFilterParameters(SetProxyFilterParameters)
-            }; 
+			{
+				isRepeatEffect = false,
+				showAboutDialog = showAbout,
+				pluginData = data,
+				filterRect = selection,
+				parentHandle = owner,
+				primary = eep.PrimaryColor.ToColor(),
+				secondary = eep.SecondaryColor.ToColor(),
+				selectedRegion = selectedRegion,
+				errorCallback = errorDelegate,
+				filterParameters = filterParams,
+				setFilterParametersDelegate = new SetProxyFilterParameters(SetProxyFilterParameters)
+			}; 
 
 			PSFilterShimServer.Start(service);
 
@@ -751,85 +751,85 @@ namespace PSFilterPdn
 
 						filterRunning = true;
 
-                        try
-                        {
-                            using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, this.Handle))
-                            {
-                                lps.ProgressFunc = new ProgressProc(UpdateProgress);
+						try
+						{
+							using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, this.Handle))
+							{
+								lps.ProgressFunc = new ProgressProc(UpdateProgress);
 
-                                if ((filterParameters != null) && filterParameters.AETEDict.Count > 0
-                                    && data.fileName == fileName)
-                                {
-                                    lps.FilterParameters = this.filterParameters;
-                                }
+								if ((filterParameters != null) && filterParameters.AETEDict.Count > 0
+									&& data.fileName == fileName)
+								{
+									lps.FilterParameters = this.filterParameters;
+								}
 
-                                bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
-                                bool userCanceled = (result && lps.ErrorMessage == Resources.UserCanceledError);
+								bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
+								bool userCanceled = (result && lps.ErrorMessage == Resources.UserCanceledError);
 
-                                if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
-                                {
-                                    MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                }
+								if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
+								{
+									MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+								}
 
-                                if (!showAboutBoxcb.Checked && result && !userCanceled)
-                                {
-                                    this.destSurface = lps.Dest.Clone();
-                                    this.fileName = data.fileName;
-                                    this.entryPoint = data.entryPoint;
-                                    this.title = data.title;
-                                    this.category = data.category;
-                                    this.filterCaseInfo = GetFilterCaseInfoString(data);
-                                    this.filterParameters = lps.FilterParameters;
-                                    this.aeteData = data.aete;
+								if (!showAboutBoxcb.Checked && result && !userCanceled)
+								{
+									this.destSurface = lps.Dest.Clone();
+									this.fileName = data.fileName;
+									this.entryPoint = data.entryPoint;
+									this.title = data.title;
+									this.category = data.category;
+									this.filterCaseInfo = GetFilterCaseInfoString(data);
+									this.filterParameters = lps.FilterParameters;
+									this.aeteData = data.aete;
 
 
-                                    if (filterProgressBar.Value < filterProgressBar.Maximum)
-                                    {
-                                        filterProgressBar.Value = filterProgressBar.Maximum;
-                                    }
-                                }
-                                else
-                                {
-                                    if (destSurface != null)
-                                    {
-                                        destSurface.Dispose();
-                                        destSurface = null;
-                                    }
+									if (filterProgressBar.Value < filterProgressBar.Maximum)
+									{
+										filterProgressBar.Value = filterProgressBar.Maximum;
+									}
+								}
+								else
+								{
+									if (destSurface != null)
+									{
+										destSurface.Dispose();
+										destSurface = null;
+									}
 
-                                }
+								}
 
-                                filterProgressBar.Value = 0;
+								filterProgressBar.Value = 0;
 
-                            }
-                        }
-                        catch (BadImageFormatException bifex)
-                        {
-                            MessageBox.Show(this, bifex.Message + Environment.NewLine + bifex.FileName, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                        catch (FilterLoadException flex)
-                        {
-                            MessageBox.Show(this, flex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                        catch (ImageSizeTooLargeException ex)
-                        {
-                            if (MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error) == DialogResult.OK)
-                            {
-                                this.Close();
-                            }
+							}
+						}
+						catch (BadImageFormatException bifex)
+						{
+							MessageBox.Show(this, bifex.Message + Environment.NewLine + bifex.FileName, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+						}
+						catch (FilterLoadException flex)
+						{
+							MessageBox.Show(this, flex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+						}
+						catch (ImageSizeTooLargeException ex)
+						{
+							if (MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error) == DialogResult.OK)
+							{
+								this.Close();
+							}
 
-                        }
-                        catch (NullReferenceException nrex)
-                        {
-                            /* the filter probably tried to access an unimplemeted callback function 
-                             * without checking if it is valid.
-                            */
-                            MessageBox.Show(this, nrex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                        catch (System.Runtime.InteropServices.ExternalException eex)
-                        {
-                            MessageBox.Show(this, eex.Message + "0x" + eex.ErrorCode.ToString("X8", CultureInfo.CurrentCulture), this.Text,
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
+						}
+						catch (NullReferenceException nrex)
+						{
+							/* the filter probably tried to access an unimplemeted callback function 
+							 * without checking if it is valid.
+							*/
+							MessageBox.Show(this, nrex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+						}
+						catch (System.Runtime.InteropServices.ExternalException eex)
+						{
+							MessageBox.Show(this, eex.Message + "0x" + eex.ErrorCode.ToString("X8", CultureInfo.CurrentCulture), this.Text,
+								MessageBoxButtons.OK, MessageBoxIcon.Error);
+						}
 						finally
 						{
 							FinishTokenUpdate();
