@@ -12,6 +12,7 @@ using PaintDotNet;
 using PaintDotNet.Effects;
 using PSFilterLoad.PSApi;
 using PSFilterPdn.Properties;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace PSFilterPdn
 {
@@ -429,7 +430,10 @@ namespace PSFilterPdn
 			this.Close();
 		}
 
-		private class SB : System.Runtime.Serialization.SerializationBinder
+        /// <summary>
+        /// Binds the serialzation to types in the currently loaded assembly. 
+        /// </summary>
+		private class SelfBinder : System.Runtime.Serialization.SerializationBinder
 		{
 			public override Type BindToType(string assemblyName, string typeName)
 			{
@@ -492,10 +496,6 @@ namespace PSFilterPdn
 			proxyErrorMessage = data;
 		}
 
-		private void SetProxyFilterParameters(ParameterData parameters)
-		{
-			this.filterParameters = parameters;
-		}
 		private bool proxyResult; 
 		private string proxyErrorMessage;
 
@@ -508,7 +508,7 @@ namespace PSFilterPdn
 			return this.Handle;
 		}
 
-		delegate void SetProxyResultDelegate(string destImageFileName, PluginData data);
+		delegate void SetProxyResultDelegate(string destImageFileName, string paramFileName, PluginData data);
 		delegate bool GetShowAboutCheckedDelegate();
 		delegate IntPtr GetHandleDelegate();
 		private Process proxyProcess;
@@ -549,13 +549,6 @@ namespace PSFilterPdn
 
 			ProxyErrorDelegate errorDelegate = new ProxyErrorDelegate(SetProxyErrorResult);
 
-			ParameterData filterParams = null;
-			if ((filterParameters != null) && filterParameters.AETEDict.Count > 0
-									   && data.fileName == fileName)
-			{
-				filterParams = this.filterParameters;
-			}
-
 			PSFilterShimService service = new PSFilterShimService()
 			{
 				isRepeatEffect = false,
@@ -567,8 +560,6 @@ namespace PSFilterPdn
 				secondary = eep.SecondaryColor.ToColor(),
 				selectedRegion = selectedRegion,
 				errorCallback = errorDelegate,
-				filterParameters = filterParams,
-				setFilterParametersDelegate = new SetProxyFilterParameters(SetProxyFilterParameters)
 			}; 
 
 			PSFilterShimServer.Start(service);
@@ -584,8 +575,15 @@ namespace PSFilterPdn
 					}
 				}
 
-				
-				
+				if ((filterParameters != null) && filterParameters.AETEDict.Count > 0
+									   && data.fileName == fileName)
+				{
+					using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+					{
+						BinaryFormatter bf = new BinaryFormatter();
+						bf.Serialize(fs, this.filterParameters);
+					}
+				}
 
 				string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\"", new object[] { src, dest});
 
@@ -629,7 +627,7 @@ namespace PSFilterPdn
 				}
 
 
-				this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, data });
+				this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, parmDataFileName, data });
 			}
 			catch (ArgumentException ax)
 			{
@@ -676,7 +674,7 @@ namespace PSFilterPdn
 			}
 		}
 
-		private void SetProxyResultData(string destFileName, PluginData data)
+		private void SetProxyResultData(string destFileName, string parameterDataPath, PluginData data)
 		{ 
 			if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && !showAboutBoxcb.Checked)
 			{
@@ -698,6 +696,17 @@ namespace PSFilterPdn
 				{
 					MessageBox.Show(fx.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error); 
 				}
+
+                if (!string.IsNullOrEmpty(parameterDataPath) && File.Exists(parameterDataPath))
+                {
+                    using (FileStream fs = new FileStream(parameterDataPath, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+                    {
+                        SelfBinder binder = new SelfBinder();
+                        BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
+                        this.filterParameters  = (ParameterData)bf.Deserialize(fs);
+                    }
+                }
+
 
 				if (filterProgressBar.Value < filterProgressBar.Maximum)
 				{

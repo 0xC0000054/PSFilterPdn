@@ -141,7 +141,6 @@ namespace PSFilterPdn
                 secondary = base.EnvironmentParameters.SecondaryColor.ToColor(),
                 selectedRegion = selectedRegion,
                 errorCallback = errorDelegate,
-                filterParameters = token.FilterParameters
             };
             
             PSFilterShimServer.Start(service);
@@ -155,6 +154,13 @@ namespace PSFilterPdn
                         bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
                     }
                 }
+                
+                using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                    bf.Serialize(fs, token.FilterParameters);
+                }
+
 
                 string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\"", src, dest);
 #if DEBUG

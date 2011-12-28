@@ -131,8 +131,16 @@ namespace PSFilterShim
 			{
 				
 
-				ParameterData parmData = serviceProxy.GetFilterParameters();
-				
+				ParameterData parmData = null;
+				string parmDataFileName = Console.ReadLine();
+				if (!string.IsNullOrEmpty(parmDataFileName) && File.Exists(parmDataFileName))
+				{
+					using (FileStream fs = new FileStream(parmDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+					{
+						BinaryFormatter bf = new BinaryFormatter();
+						parmData = (ParameterData)bf.Deserialize(fs);
+					}
+				}
 
 
 				using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, selectionRegion, owner))
@@ -167,8 +175,12 @@ namespace PSFilterShim
 
 						if (!lps.IsRepeatEffect)
 						{
-							serviceProxy.SetProxyFilterParamters(lps.FilterParameters);
-						}
+                            using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                            {
+                                BinaryFormatter bf = new BinaryFormatter();
+                                bf.Serialize(fs, lps.FilterParameters);
+                            }
+                        }
 					}
 					else
 					{

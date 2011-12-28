@@ -33,12 +33,6 @@ internal interface IPSFilterShim
     [OperationContract]
     RegionDataWrapper GetSelectedRegion();
     
-    [OperationContract]
-    ParameterData GetFilterParameters();
-
     [OperationContract(IsOneWay = true)]
     void SetProxyErrorMessage(string errorMessage);
-
-    [OperationContract(IsOneWay = true)]
-    void SetProxyFilterParamters(ParameterData filterParameters);
 }

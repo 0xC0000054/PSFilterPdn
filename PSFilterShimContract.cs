@@ -23,8 +23,6 @@ namespace PSFilterPdn
         internal Color secondary;
         internal RegionDataWrapper selectedRegion;
         internal ProxyErrorDelegate errorCallback;
-        internal ParameterData filterParameters;
-        internal SetProxyFilterParameters setFilterParametersDelegate;
 
         public PSFilterShimService() : this(null)
         {
@@ -42,8 +40,6 @@ namespace PSFilterPdn
             this.secondary = Color.White;
             this.selectedRegion = null;
             this.errorCallback = null;
-            this.filterParameters = null;
-            this.setFilterParametersDelegate = null;
         }
 
         public bool AbortFilter()
@@ -99,19 +95,6 @@ namespace PSFilterPdn
         public void SetProxyErrorMessage(string errorMessage)
         {
             errorCallback.Invoke(errorMessage);
-        }
-
-        public ParameterData GetFilterParameters()
-        {
-            return filterParameters;
-        }
-
-        public void SetProxyFilterParamters(ParameterData filterParameters)
-        {
-            if (setFilterParametersDelegate != null)
-            {
-                setFilterParametersDelegate.Invoke(filterParameters);
-            }
         }
     }
 
