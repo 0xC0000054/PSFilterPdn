@@ -26,12 +26,12 @@ namespace PSFilterShim
 		}
 
         static bool filterDone;
-        static IPSFilterShim ServiceProxy;
+        static IPSFilterShim serviceProxy;
         const string proxyErrorFormat = "ProxyError{0}";
 
         static bool abortFilter()
         {
-            bool abort = ServiceProxy.AbortFilter();
+            bool abort = serviceProxy.AbortFilter();
 
 #if DEBUG
             System.Diagnostics.Debug.WriteLine(string.Format("abortFilter returned: {0}", abort));
@@ -42,7 +42,9 @@ namespace PSFilterShim
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         { 
             Exception ex = (Exception)e.ExceptionObject;
-            Console.Error.Write(ex.ToString());
+            serviceProxy.SetProxyErrorMessage(ex.ToString());
+
+            Environment.Exit(1);
         }
 
 		/// <summary>
@@ -59,7 +61,7 @@ namespace PSFilterShim
             NativeMethods.SetProcessDEPPolicy(0U); // Kill DEP
 #endif
             filterDone = false;
-            ServiceProxy = null;
+            serviceProxy = null;
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             try
             {
@@ -95,29 +97,29 @@ namespace PSFilterShim
             if (!string.IsNullOrEmpty(endpointName))
             {
                 EndpointAddress address = new EndpointAddress(endpointName);
-                ServiceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(new NetNamedPipeBinding(), address);
+                serviceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(new NetNamedPipeBinding(), address);
             }
 
             string src = args[0]; // the filename of the source image
             string dstImg = args[1]; // the filename of the destiniation image
 
             
-            Color primary = ServiceProxy.GetPrimaryColor();
+            Color primary = serviceProxy.GetPrimaryColor();
 
-            Color secondary = ServiceProxy.GetSecondaryColor();
+            Color secondary = serviceProxy.GetSecondaryColor();
 
-            Rectangle selection = ServiceProxy.GetFilterRect();
+            Rectangle selection = serviceProxy.GetFilterRect();
 
-            IntPtr owner = ServiceProxy.GetWindowHandle();
+            IntPtr owner = serviceProxy.GetWindowHandle();
 
-            bool repeatEffect = ServiceProxy.IsRepeatEffect();
-            bool showAbout = ServiceProxy.ShowAboutDialog();
+            bool repeatEffect = serviceProxy.IsRepeatEffect();
+            bool showAbout = serviceProxy.ShowAboutDialog();
 
-            PluginData pdata = ServiceProxy.GetPluginData();
+            PluginData pdata = serviceProxy.GetPluginData();
 
             Region selectionRegion = null;
 
-            RegionDataWrapper wrap = ServiceProxy.GetSelectedRegion();
+            RegionDataWrapper wrap = serviceProxy.GetSelectedRegion();
             if (wrap != null)
             {
                 using (Region temp = new Region())
@@ -132,16 +134,8 @@ namespace PSFilterShim
             {
                 
 
-                ParameterData parmData = null;
-                string parmDataFileName = Console.ReadLine();
-                if (!string.IsNullOrEmpty(parmDataFileName) && File.Exists(parmDataFileName))
-                {
-                    using (FileStream fs = new FileStream(parmDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
-                    {
-                        BinaryFormatter bf = new BinaryFormatter();
-                        parmData = (ParameterData)bf.Deserialize(fs);
-                    }
-                }
+                ParameterData parmData = serviceProxy.GetFilterParameters();
+                
 
 
                 using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, selectionRegion, owner))
@@ -176,18 +170,14 @@ namespace PSFilterShim
 
                         if (!lps.IsRepeatEffect)
                         {
-                            using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                            {
-                                BinaryFormatter bf = new BinaryFormatter();
-                                bf.Serialize(fs, lps.FilterParameters);
-                            }
+                            serviceProxy.SetProxyFilterParamters(lps.FilterParameters);
                         }
                     }
                     else
                     {
                         if (!showAbout)
                         {
-                            Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, proxyErrorFormat, lps.ErrorMessage));
+                            serviceProxy.SetProxyErrorMessage(lps.ErrorMessage);
                         }
                     }
                 }
@@ -196,23 +186,23 @@ namespace PSFilterShim
             }
             catch (BadImageFormatException ex)
             {
-                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, proxyErrorFormat, ex.Message));
+                serviceProxy.SetProxyErrorMessage(ex.Message);
             }
             catch (EntryPointNotFoundException epnf)
             {
-                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, proxyErrorFormat, epnf.Message));
+                serviceProxy.SetProxyErrorMessage(epnf.Message);
             }
             catch (FileNotFoundException fx)
             {
-                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, proxyErrorFormat, fx.Message));
+                serviceProxy.SetProxyErrorMessage(fx.Message);
             }
             catch (ImageSizeTooLargeException ex)
             {
-                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, proxyErrorFormat, ex.Message));
+                serviceProxy.SetProxyErrorMessage(ex.Message);
             }
             catch (NullReferenceException ex)
             {
-                Console.Error.WriteLine(string.Format(CultureInfo.InvariantCulture, proxyErrorFormat, ex.Message));
+                serviceProxy.SetProxyErrorMessage(ex.Message);
             }
             finally
             {

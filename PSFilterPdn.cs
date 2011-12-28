@@ -62,18 +62,13 @@ namespace PSFilterPdn
 
         private bool proxyResult;
         private string proxyErrorMessage;
-
-        private void ProxyErrorDataReceived(object sender, DataReceivedEventArgs e)
+        
+        private void SetProxyErrorResult(string data)
         {
-            if (!string.IsNullOrEmpty(e.Data))
-            {
-                if (e.Data.StartsWith("ProxyError", StringComparison.Ordinal))
-                {
-                    proxyErrorMessage = e.Data.Substring(10);
-                }
-            }
+            proxyResult = false;
+            proxyErrorMessage = data;
         }
-       
+
         private static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
         {
             FilterCaseInfo[] info = new FilterCaseInfo[7];
@@ -131,11 +126,23 @@ namespace PSFilterPdn
             {
                 selectedRegion = new RegionDataWrapper(base.EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
             }
-            
-            PSFilterShimService service = new PSFilterShimService(() => base.IsCancelRequested, 
-                true, false, pluginData, Process.GetCurrentProcess().MainWindowHandle, 
-                selection, base.EnvironmentParameters.PrimaryColor.ToColor(),
-                base.EnvironmentParameters.SecondaryColor.ToColor(), selectedRegion);
+
+            ProxyErrorDelegate errorDelegate = new ProxyErrorDelegate(SetProxyErrorResult);
+
+
+            PSFilterShimService service = new PSFilterShimService(() => base.IsCancelRequested) 
+            {
+                isRepeatEffect = true,
+                showAboutDialog = false,
+                pluginData = pluginData,   
+                filterRect = selection,
+                parentHandle = Process.GetCurrentProcess().MainWindowHandle,
+                primary = base.EnvironmentParameters.PrimaryColor.ToColor(),
+                secondary = base.EnvironmentParameters.SecondaryColor.ToColor(),
+                selectedRegion = selectedRegion,
+                errorCallback = errorDelegate,
+                filterParameters = token.FilterParameters
+            };
             
             PSFilterShimServer.Start(service);
 
@@ -147,12 +154,6 @@ namespace PSFilterPdn
                     {
                         bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
                     }
-                }
-            
-                using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-                    bf.Serialize(fs, token.FilterParameters);
                 }
 
                 string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\"", src, dest);
@@ -172,10 +173,6 @@ namespace PSFilterPdn
                 proxyErrorMessage = string.Empty;
 
                 proxyProcess = new Process();
-
-                proxyProcess.EnableRaisingEvents = true;
-                proxyProcess.ErrorDataReceived += new DataReceivedEventHandler(ProxyErrorDataReceived);
-
 
                 proxyProcess.StartInfo = psi;
 

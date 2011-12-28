@@ -457,7 +457,6 @@ namespace PSFilterPdn
 		}
 
 		
-		delegate void SetProxyErrorResultDelegate(string data);
 		delegate void UpdateProxyProgressDelegate(int value);
 
 		private static bool formatExecptionShown;
@@ -489,34 +488,17 @@ namespace PSFilterPdn
 
 		private void SetProxyErrorResult(string data)
 		{
-			if (data.StartsWith("ProxyError", StringComparison.Ordinal))
-			{
-				proxyResult = false;
-				proxyErrorMessage = data.Substring(10);
-			}
+			proxyResult = false;
+			proxyErrorMessage = data;
 		}
 
-		private bool proxyResult; 
+        private void SetProxyFilterParameters(ParameterData parameters)
+        {
+            this.filterParameters = parameters;
+        }
+ 		private bool proxyResult; 
 		private string proxyErrorMessage;
 
-		private void ProxyErrorDataReceived(object sender, DataReceivedEventArgs e)
-		{
-			if (!string.IsNullOrEmpty(e.Data))
-			{
-				if (this.InvokeRequired)
-				{
-					this.Invoke(new SetProxyErrorResultDelegate(SetProxyErrorResult), new object[] { e.Data });
-				}
-				else
-				{
-					if (e.Data.StartsWith("ProxyError", StringComparison.Ordinal))
-					{
-						proxyResult = false;
-						proxyErrorMessage = e.Data.Substring(10);
-					}
-				}
-			}
-		}
 		private bool GetShowAboutChecked()
 		{
 			return showAboutBoxcb.Checked;
@@ -526,7 +508,7 @@ namespace PSFilterPdn
 			return this.Handle;
 		}
 
-		delegate void SetProxyResultDelegate(string dest, string parmDataFileName, PluginData data);
+		delegate void SetProxyResultDelegate(string destImageFileName, PluginData data);
 		delegate bool GetShowAboutCheckedDelegate();
 		delegate IntPtr GetHandleDelegate();
 		private Process proxyProcess;
@@ -565,10 +547,29 @@ namespace PSFilterPdn
 			bool showAbout = (bool)base.Invoke(new GetShowAboutCheckedDelegate(GetShowAboutChecked));
 			IntPtr owner = (IntPtr)base.Invoke(new GetHandleDelegate(GetHandle));
 
-			PSFilterShimService service = new PSFilterShimService(null,
-			   false, showAbout, data, owner,
-			   selection, eep.PrimaryColor.ToColor(),
-			   eep.SecondaryColor.ToColor(), selectedRegion);
+            ProxyErrorDelegate errorDelegate = new ProxyErrorDelegate(SetProxyErrorResult);
+
+            ParameterData filterParams = null;
+            if ((filterParameters != null) && filterParameters.AETEDict.Count > 0
+									   && data.fileName == fileName)
+			{
+				filterParams = this.filterParameters;
+			}
+
+			PSFilterShimService service = new PSFilterShimService()
+            {
+                isRepeatEffect = false,
+                showAboutDialog = showAbout,
+                pluginData = data,
+                filterRect = selection,
+                parentHandle = owner,
+                primary = eep.PrimaryColor.ToColor(),
+                secondary = eep.SecondaryColor.ToColor(),
+                selectedRegion = selectedRegion,
+                errorCallback = errorDelegate,
+                filterParameters = filterParams,
+                setFilterParametersDelegate = new SetProxyFilterParameters(SetProxyFilterParameters)
+            }; 
 
 			PSFilterShimServer.Start(service);
 
@@ -584,15 +585,7 @@ namespace PSFilterPdn
 				}
 
 				
-				if ((filterParameters != null) && filterParameters.AETEDict.Count > 0
-									   && data.fileName == fileName)
-				{
-					using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-					{
-						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-						bf.Serialize(fs, this.filterParameters);
-					} 
-				}
+				
 
 				string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\"", new object[] { src, dest});
 
@@ -614,10 +607,8 @@ namespace PSFilterPdn
 
 				proxyProcess.EnableRaisingEvents = true;
 				proxyProcess.OutputDataReceived += new DataReceivedEventHandler(UpdateProxyProgress);
-				proxyProcess.ErrorDataReceived += new DataReceivedEventHandler(ProxyErrorDataReceived);
 
 				proxyProcess.StartInfo = psi;
-				
 				
 #if DEBUG
 				bool st = proxyProcess.Start();
@@ -638,7 +629,7 @@ namespace PSFilterPdn
 				}
 
 
-				this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, parmDataFileName, data });
+				this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, data });
 			}
 			catch (ArgumentException ax)
 			{
@@ -685,7 +676,7 @@ namespace PSFilterPdn
 			}
 		}
 
-		private void SetProxyResultData(string destFileName, string parmDataFileName, PluginData data)
+		private void SetProxyResultData(string destFileName, PluginData data)
 		{ 
 			if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && !showAboutBoxcb.Checked)
 			{
@@ -695,19 +686,6 @@ namespace PSFilterPdn
 				this.category = data.category;
 				this.filterCaseInfo = GetFilterCaseInfoString(data);
 				this.aeteData = data.aete;
-
-				if (File.Exists(parmDataFileName))
-				{
-					using (FileStream fs = new FileStream(parmDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
-					{
-						System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter() { Binder = new SB() };
-						this.filterParameters = (ParameterData)bf.Deserialize(fs);
-					} 
-				}
-				else
-				{
-					this.filterParameters = null;
-				}
 
 				try
 				{

@@ -7,37 +7,43 @@ using System.Drawing;
 
 namespace PSFilterPdn
 {
+    internal delegate void ProxyErrorDelegate(string message);
+    internal delegate void SetProxyFilterParameters(ParameterData parameters);
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     internal sealed class PSFilterShimService : IPSFilterShim
     {
         private Func<bool> abortFunc;
-        private bool isRepeatEffect;
-        private bool showAboutDialog;
-        private PluginData pluginData;
-        private IntPtr parentHandle;
-        private Rectangle filterRect;
-        private Color primary;
-        private Color secondary;
-        private RegionDataWrapper selectedRegion;
+        internal bool isRepeatEffect;
+        internal bool showAboutDialog;
+        internal PluginData pluginData;
+        internal IntPtr parentHandle;
+        internal Rectangle filterRect;
+        internal Color primary;
+        internal Color secondary;
+        internal RegionDataWrapper selectedRegion;
+        internal ProxyErrorDelegate errorCallback;
+        internal ParameterData filterParameters;
+        internal SetProxyFilterParameters setFilterParametersDelegate;
 
-        public PSFilterShimService() : this(null, false, false, null, IntPtr.Zero, Rectangle.Empty, Color.Black,
-            Color.White, null)
+        public PSFilterShimService() : this(null)
         {
         }
 
-        public PSFilterShimService(Func<bool> abort, bool repeatEffect, bool showAbout, PluginData data, IntPtr owner, 
-            Rectangle filterRect, Color primary, Color secondary, RegionDataWrapper regionData)
+        public PSFilterShimService(Func<bool> abort)
         {
             this.abortFunc = abort;
-            this.isRepeatEffect = repeatEffect;
-            this.showAboutDialog = showAbout;
-            this.pluginData = data;
-            this.parentHandle = owner;
-            this.filterRect = filterRect;
-            this.primary = primary;
-            this.secondary = secondary;
-            this.selectedRegion = regionData;
+            this.isRepeatEffect = false;
+            this.showAboutDialog = false;
+            this.pluginData = null;
+            this.parentHandle = IntPtr.Zero;
+            this.filterRect = Rectangle.Empty;
+            this.primary = Color.Black;
+            this.secondary = Color.White;
+            this.selectedRegion = null;
+            this.errorCallback = null;
+            this.filterParameters = null;
+            this.setFilterParametersDelegate = null;
         }
 
         public bool AbortFilter()
@@ -88,9 +94,25 @@ namespace PSFilterPdn
         public RegionDataWrapper GetSelectedRegion()
         {
             return selectedRegion;
+        }  
+        
+        public void SetProxyErrorMessage(string errorMessage)
+        {
+            errorCallback.Invoke(errorMessage);
         }
 
+        public ParameterData GetFilterParameters()
+        {
+            return filterParameters;
+        }
 
+        public void SetProxyFilterParamters(ParameterData filterParameters)
+        {
+            if (setFilterParametersDelegate != null)
+            {
+                setFilterParametersDelegate.Invoke(filterParameters);
+            }
+        }
     }
 
     // Adapted from: http://www.jmedved.com/2010/03/named-pipes-in-wcf/ 

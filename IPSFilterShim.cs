@@ -1,5 +1,6 @@
 ﻿using System.ServiceModel;
 using System.Drawing;
+using PSFilterLoad.PSApi;
 
 [ServiceContract(Namespace = "http://PSFilterPdn.shimData")]
 internal interface IPSFilterShim
@@ -17,7 +18,7 @@ internal interface IPSFilterShim
     Rectangle GetFilterRect();
     
     [OperationContract]
-    PSFilterLoad.PSApi.PluginData GetPluginData();
+    PluginData GetPluginData();
        
     [OperationContract]
     System.IntPtr GetWindowHandle();
@@ -30,4 +31,15 @@ internal interface IPSFilterShim
 
     [OperationContract]
     PSFilterPdn.RegionDataWrapper GetSelectedRegion();
+
+    [OperationContract]
+    ParameterData GetFilterParameters();
+
+    [OperationContract(IsOneWay = true)]
+    void SetProxyErrorMessage(string errorMessage);
+
+    [OperationContract(IsOneWay = true)]
+    void SetProxyFilterParamters(ParameterData filterParameters);
+
+
 }
