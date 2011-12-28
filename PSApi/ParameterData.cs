@@ -8,12 +8,9 @@ namespace PSFilterLoad.PSApi
     /// The struct that holds the saved filter global parameter data.
     /// </summary>
     [Serializable]
-    [DataContract]
     public sealed class ParameterData 
     {
-        [DataMember]
         private GlobalParameters globalParameters;
-        [DataMember]
         private Dictionary<uint, AETEValue> aeteDict;
 
         public GlobalParameters GlobalParameters
