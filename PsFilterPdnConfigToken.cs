@@ -154,8 +154,7 @@ namespace PSFilterPdn
             this.expandedNodes = nodes;
         }
 
-#pragma warning disable 628
-        protected PSFilterPdnConfigToken(PSFilterPdnConfigToken copyMe)
+        private PSFilterPdnConfigToken(PSFilterPdnConfigToken copyMe)
             : base(copyMe)
         {
             this.category = copyMe.category;
@@ -169,7 +168,6 @@ namespace PSFilterPdn
             this.aeteData = copyMe.aeteData;
             this.expandedNodes = copyMe.expandedNodes;
         }
-#pragma warning restore 628
 
         public override object Clone()
         {
