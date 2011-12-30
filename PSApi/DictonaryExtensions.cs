@@ -7,15 +7,15 @@ namespace PSFilterLoad.PSApi
 {
     public static class DictonaryExtensions
     {
-        public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, TValue value)
+        public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictonary, TKey key, TValue value)
         {
-            if (!dict.ContainsKey(key))
+            if (!dictonary.ContainsKey(key))
             {
-                dict.Add(key, value);
+                dictonary.Add(key, value);
             }
             else
             {
-                dict[key] = value;
+                dictonary[key] = value;
             }
         }
     }
