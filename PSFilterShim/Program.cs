@@ -22,7 +22,7 @@ namespace PSFilterShim
 			public static extern bool SetProcessDEPPolicy(uint dwFlags);
 		}
 
-		static bool filterDone;
+		static ManualResetEvent resetEvent;
 		static IPSFilterShim serviceProxy;
 		const string proxyErrorFormat = "ProxyError{0}";
 
@@ -57,29 +57,28 @@ namespace PSFilterShim
 #else
 			NativeMethods.SetProcessDEPPolicy(0U); // Kill DEP
 #endif
-			filterDone = false;
+			resetEvent = new ManualResetEvent(false);
 			serviceProxy = null;
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-			try
-			{
-				if (args.Length > 0 && args.Length == 2)
-				{
-					Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
 
-					filterThread.Start(args);
+            if (args.Length > 0 && args.Length == 2)
+            {
+                try
+                {
+                    Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
 
-					while (!filterDone)
-					{
-						Thread.Sleep(250);
-					}
+                    filterThread.Start(args);
 
-					filterThread.Join();
-				}
-			}
-			finally
-			{
-				PaintDotNet.SystemLayer.Memory.DestroyHeap();
-			}
+                    resetEvent.WaitOne();
+
+                    filterThread.Join();
+                }
+                finally
+                {
+                    PaintDotNet.SystemLayer.Memory.DestroyHeap();
+                }
+            }
+			
 			
 
 			
@@ -220,10 +219,8 @@ namespace PSFilterShim
 					selectionRegion.Dispose();
 					selectionRegion = null;
 				}
-				filterDone = true;
+				resetEvent.Set();
 			}
-
-		   
 		}
 
 		static void UpdateProgress(int done, int total)
