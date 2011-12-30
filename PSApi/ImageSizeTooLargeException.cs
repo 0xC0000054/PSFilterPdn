@@ -7,7 +7,7 @@ namespace PSFilterLoad.PSApi
     /// The exception that occurs when the image size exceeds 32000 pixels.
     /// </summary>
     [Serializable]
-    class ImageSizeTooLargeException : Exception, ISerializable
+    public sealed class ImageSizeTooLargeException : Exception, ISerializable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageSizeTooLargeException"/> class.
@@ -24,7 +24,7 @@ namespace PSFilterLoad.PSApi
             : base(message)
         {
         }
-        protected ImageSizeTooLargeException(SerializationInfo info, StreamingContext context)
+        private ImageSizeTooLargeException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
