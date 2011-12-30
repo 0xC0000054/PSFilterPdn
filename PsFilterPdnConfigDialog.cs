@@ -51,7 +51,6 @@ namespace PSFilterPdn
 			this.proxyProcess = new Process();
 			this.destSurface = null;
 			this.proxyThread = null;
-			formatExecptionShown = false;
 			this.expandedNodes = new List<string>();
 			this.fileNameLbl.Text = string.Empty;
 		}
@@ -455,38 +454,15 @@ namespace PSFilterPdn
 			filterProgressBar.Value = (int)progress.Clamp(0d, 100d); // clamp to range of 0 to 100 percent
 		}
 
-		private void UpdateProgress(int value)
+		private void UpdateProxyProgress(int done, int total)
 		{
-			filterProgressBar.Value = value.Clamp(0, 100);
-		}
-
-		
-		delegate void UpdateProxyProgressDelegate(int value);
-
-		private static bool formatExecptionShown;
-		private void UpdateProxyProgress(object sender, DataReceivedEventArgs e)
-		{
-			if (!string.IsNullOrEmpty(e.Data))
+			if (this.InvokeRequired)
 			{
-				try
-				{
-					if (this.InvokeRequired)
-					{
-						this.Invoke(new UpdateProxyProgressDelegate(UpdateProgress), new object[] { int.Parse(e.Data, CultureInfo.InvariantCulture) });
-					}
-					else
-					{
-						filterProgressBar.Value = int.Parse(e.Data, CultureInfo.InvariantCulture).Clamp(0, 100);
-					}
-				}
-				catch (FormatException)
-				{
-					if (!formatExecptionShown)
-					{
-						MessageBox.Show(Resources.ProxyProgressError_FormatException, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-						formatExecptionShown = true; // suppress the other ones
-					}
-				}
+				this.Invoke(new ProgressFunc(UpdateProgress), new object[] { done, total });
+			}
+			else
+			{
+                UpdateProgress(done, total);
 			}
 		}
 
@@ -548,6 +524,7 @@ namespace PSFilterPdn
 			IntPtr owner = (IntPtr)base.Invoke(new GetHandleDelegate(GetHandle));
 
 			ProxyErrorDelegate errorDelegate = new ProxyErrorDelegate(SetProxyErrorResult);
+            ProgressFunc progressDelegate = new ProgressFunc(UpdateProxyProgress);
 
 			PSFilterShimService service = new PSFilterShimService()
 			{
@@ -560,6 +537,7 @@ namespace PSFilterPdn
 				secondary = eep.SecondaryColor.ToColor(),
 				selectedRegion = selectedRegion,
 				errorCallback = errorDelegate,
+                progressCallback = progressDelegate
 			}; 
 
 			PSFilterShimServer.Start(service);
@@ -592,20 +570,13 @@ namespace PSFilterPdn
 #endif
 				ProcessStartInfo psi = new ProcessStartInfo(shimPath, pArgs);
 				psi.RedirectStandardInput = true;
-				psi.RedirectStandardError = true;
-				psi.RedirectStandardOutput = true;
 				psi.CreateNoWindow = true;
 				psi.UseShellExecute = false;
 
 				proxyResult = true; // assume the filter succeded this will be set to false if it failed
 				proxyErrorMessage = string.Empty;
-				formatExecptionShown = false;
 
 				proxyProcess = new Process();
-
-				proxyProcess.EnableRaisingEvents = true;
-				proxyProcess.OutputDataReceived += new DataReceivedEventHandler(UpdateProxyProgress);
-
 				proxyProcess.StartInfo = psi;
 				
 #if DEBUG
@@ -614,10 +585,8 @@ namespace PSFilterPdn
 #else
 				proxyProcess.Start();
 #endif
-				proxyProcess.StandardInput.WriteLine(endpointName); // proxy cancel callback
+				proxyProcess.StandardInput.WriteLine(endpointName); // proxy WCF service
 				proxyProcess.StandardInput.WriteLine(parmDataFileName);
-				proxyProcess.BeginErrorReadLine();
-				proxyProcess.BeginOutputReadLine();
 
 				proxyRunning = true;
 				while (!proxyProcess.HasExited)
@@ -625,7 +594,6 @@ namespace PSFilterPdn
 					Application.DoEvents();
 					Thread.Sleep(250);
 				}
-
 
 				this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, parmDataFileName, data });
 			}
@@ -721,7 +689,7 @@ namespace PSFilterPdn
 				}
 
 
-				if (destSurface != null)
+				if (!showAboutBoxcb.Checked && destSurface != null)
 				{
 					destSurface.Dispose();
 					destSurface = null;
@@ -764,23 +732,17 @@ namespace PSFilterPdn
 						{
 							using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, this.Handle))
 							{
-								lps.ProgressFunc = new ProgressProc(UpdateProgress);
+								lps.SetProgressCallback(new ProgressFunc(UpdateProgress));
 
 								if ((filterParameters != null) && filterParameters.AETEDict.Count > 0
 									&& data.fileName == fileName)
 								{
 									lps.FilterParameters = this.filterParameters;
 								}
+                                bool showAboutDialog =  showAboutBoxcb.Checked;
+								bool result = lps.RunPlugin(data, showAboutDialog);
 
-								bool result = lps.RunPlugin(data, showAboutBoxcb.Checked);
-								bool userCanceled = (result && lps.ErrorMessage == Resources.UserCanceledError);
-
-								if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
-								{
-									MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-								}
-
-								if (!showAboutBoxcb.Checked && result && !userCanceled)
+								if (!showAboutDialog && result)
 								{
 									this.destSurface = lps.Dest.Clone();
 									this.fileName = data.fileName;
@@ -791,15 +753,18 @@ namespace PSFilterPdn
 									this.filterParameters = lps.FilterParameters;
 									this.aeteData = data.aete;
 
-
 									if (filterProgressBar.Value < filterProgressBar.Maximum)
 									{
 										filterProgressBar.Value = filterProgressBar.Maximum;
 									}
 								}
+                                else if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
+								{
+									MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+								}
 								else
 								{
-									if (destSurface != null)
+									if (!showAboutDialog && destSurface != null)
 									{
 										destSurface.Dispose();
 										destSurface = null;
@@ -910,8 +875,9 @@ namespace PSFilterPdn
 				if (!updateFilterListBw.IsBusy)
 				{
 					UpdateFilterListParm uflp = new UpdateFilterListParm();
-					uflp.dirlist = new string[searchDirListView.Items.Count];
-					for (int i = 0; i < searchDirListView.Items.Count; i++)
+                    int count = searchDirListView.Items.Count;
+					uflp.dirlist = new string[count];
+					for (int i = 0; i < count; i++)
 					{
 						uflp.dirlist[i] = searchDirListView.Items[i].Text;
 					}
