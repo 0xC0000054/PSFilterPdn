@@ -18,18 +18,16 @@ namespace PSFilterLoad.PSApi
         private byte[] pluginDataBytes;
         private bool pluginDataIsPSHandle;
         private int storeMethod;
-
-        public byte[] ParameterDataBytes
+       
+        public byte[] GetParameterDataBytes()
         {
-            get
-            {
-                return parameterDataBytes;
-            }
-            set
-            {
-                parameterDataBytes = value;
-            }
+            return parameterDataBytes;
         }
+        public void SetParameterDataBytes(byte[] value)
+        {
+            parameterDataBytes = value;
+        }
+ 
 
         public long ParameterDataSize
         {
@@ -58,17 +56,15 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public byte[] PluginDataBytes
+        public byte[] GetPluginDataBytes()
         {
-            get
-            {
-                return pluginDataBytes;
-            }
-            set
-            {
-                pluginDataBytes = value;
-            }
+            return pluginDataBytes;
         }
+        public void SetPluginDataBytes(byte[] value)
+        {
+            pluginDataBytes = value;
+        }
+        
 
         public long PluginDataSize
         {
