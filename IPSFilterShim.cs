@@ -34,4 +34,7 @@ internal interface IPSFilterShim
 
     [OperationContract(IsOneWay = true)]
     void SetProxyErrorMessage(string errorMessage);
+
+    [OperationContract(IsOneWay = true)]
+    void UpdateFilterProgress(int done, int total);
 }

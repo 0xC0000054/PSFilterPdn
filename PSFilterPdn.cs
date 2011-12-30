@@ -38,7 +38,7 @@ namespace PSFilterPdn
         {
             dlg = null;
             proxyResult = false;
-            filterDone = false;
+            filterDone = null;
             filterThread = null;
             proxyProcess = null;
             proxyErrorMessage = string.Empty;
@@ -170,8 +170,6 @@ namespace PSFilterPdn
 
                 ProcessStartInfo psi = new ProcessStartInfo(shimPath, pArgs);
                 psi.RedirectStandardInput = true;
-                psi.RedirectStandardError = true;
-                psi.RedirectStandardOutput = true;
                 psi.CreateNoWindow = true;
                 psi.UseShellExecute = false;
 
@@ -186,26 +184,23 @@ namespace PSFilterPdn
                 proxyProcess.Start();
                 proxyProcess.StandardInput.WriteLine(endpointName);
                 proxyProcess.StandardInput.WriteLine(parmDataFileName);
-                proxyProcess.BeginErrorReadLine();
-                proxyProcess.BeginOutputReadLine();
 
                 while (!proxyProcess.HasExited)
                 {
                     Application.DoEvents(); // Keep the message pump running while we wait for the proxy to exit
                     Thread.Sleep(250);
                 }
-
-                if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage) && proxyErrorMessage != Resources.UserCanceledError)
-                {
-                    MessageBox.Show(proxyErrorMessage, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
+  
                 if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage))
                 {
                     using (Bitmap bmp = new Bitmap(dest))
                     {
                         token.Dest = Surface.CopyFromBitmap(bmp);
                     }
+                }
+                else if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage) && proxyErrorMessage != Resources.UserCanceledError)
+                {
+                    MessageBox.Show(proxyErrorMessage, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
             }
@@ -242,7 +237,7 @@ namespace PSFilterPdn
            
         }
 
-        private static bool filterDone;
+        private static ManualResetEvent filterDone;
         private Thread filterThread;
         private void RunRepeatFilter(ref PSFilterPdnConfigToken token)
         {
@@ -250,7 +245,7 @@ namespace PSFilterPdn
             {
                 using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, Process.GetCurrentProcess().MainWindowHandle))
                 {
-                    lps.AbortFunc = new abort(AbortFunc);
+                    lps.SetAbortCallback(new abort(AbortFunc));
 
                     FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
                     PluginData pdata = new PluginData()
@@ -264,19 +259,20 @@ namespace PSFilterPdn
                     };
 
                     lps.FilterParameters = token.FilterParameters;
-                    lps.IsRepeatEffect = true;
+                    lps.SetIsRepeatEffect(true);
 
                     bool result = lps.RunPlugin(pdata, false);
-
-                    if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
-                    {
-                        MessageBox.Show(lps.ErrorMessage, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
 
                     if (result && string.IsNullOrEmpty(lps.ErrorMessage))
                     {
                         token.Dest = lps.Dest.Clone();
                     }
+                    else if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
+                    {
+                        MessageBox.Show(lps.ErrorMessage, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                    
                 }
 
             }
@@ -290,7 +286,7 @@ namespace PSFilterPdn
             }
             finally
             {
-                filterDone = true;
+                filterDone.Set();
             }
                     
         }
@@ -315,23 +311,16 @@ namespace PSFilterPdn
                 }
                 else
                 {
-                    filterDone = false;
+                    filterDone = new ManualResetEvent(false);
 
                     filterThread = new Thread(() => RunRepeatFilter(ref token)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
                     filterThread.Start();
 
-                    while (!filterDone)
-                    {
-                        Application.DoEvents();
-                        Thread.Sleep(250);
-                    }
+                    filterDone.WaitOne();
 
                     filterThread.Join();
                     filterThread = null;
-
-
                 }
-
              
             }
 

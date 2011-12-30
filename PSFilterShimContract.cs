@@ -8,7 +8,6 @@ using System.Drawing;
 namespace PSFilterPdn
 {
     internal delegate void ProxyErrorDelegate(string message);
-    internal delegate void SetProxyFilterParameters(ParameterData parameters);
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     internal sealed class PSFilterShimService : IPSFilterShim
@@ -23,6 +22,7 @@ namespace PSFilterPdn
         internal Color secondary;
         internal RegionDataWrapper selectedRegion;
         internal ProxyErrorDelegate errorCallback;
+        internal ProgressFunc progressCallback;
 
         public PSFilterShimService() : this(null)
         {
@@ -40,6 +40,7 @@ namespace PSFilterPdn
             this.secondary = Color.White;
             this.selectedRegion = null;
             this.errorCallback = null;
+            this.progressCallback = null;
         }
 
         public bool AbortFilter()
@@ -95,6 +96,14 @@ namespace PSFilterPdn
         public void SetProxyErrorMessage(string errorMessage)
         {
             errorCallback.Invoke(errorMessage);
+        }
+
+        public void UpdateFilterProgress(int done, int total)
+        {
+            if (progressCallback != null)
+            {
+                progressCallback.Invoke(done, total);
+            }
         }
     }
 

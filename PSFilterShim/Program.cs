@@ -24,7 +24,7 @@ namespace PSFilterShim
 
 		static ManualResetEvent resetEvent;
 		static IPSFilterShim serviceProxy;
-		const string proxyErrorFormat = "ProxyError{0}";
+        static ProgressFunc progressCallback = new ProgressFunc(UpdateProgress);
 
 		static bool abortFilter()
 		{
@@ -146,16 +146,15 @@ namespace PSFilterShim
 				{
 					if (repeatEffect)
 					{
-						lps.AbortFunc = new abort(abortFilter);
+						lps.SetAbortCallback(new abort(abortFilter));
 					}
-
-					lps.ProgressFunc = new ProgressProc(UpdateProgress);
+                    lps.SetProgressCallback(progressCallback);
 
 					if (parmData != null)
 					{
 						// ignore the filters that only use the data handle, e.g. Filter Factory  
-						if (((parmData.GlobalParameters.ParameterDataBytes != null && parmData.GlobalParameters.PluginDataBytes != null) ||
-							(parmData.GlobalParameters.ParameterDataBytes != null && parmData.GlobalParameters.PluginDataBytes == null)) ||
+                        if (((parmData.GlobalParameters.GetParameterDataBytes() != null && parmData.GlobalParameters.GetPluginDataBytes() != null) ||
+                            (parmData.GlobalParameters.GetParameterDataBytes() != null && parmData.GlobalParameters.GetPluginDataBytes() == null)) ||
 							parmData.AETEDict != null)
 						{
 							lps.FilterParameters = parmData;
@@ -225,8 +224,7 @@ namespace PSFilterShim
 
 		static void UpdateProgress(int done, int total)
 		{
-			double progress = ((double)done / (double)total) * 100d;
-			Console.WriteLine(((int)progress).ToString(CultureInfo.InvariantCulture));
+            serviceProxy.UpdateFilterProgress(done, total);
 		}
 
 
