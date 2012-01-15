@@ -82,7 +82,7 @@ namespace PSFilterPdn
 			((PSFilterPdnConfigToken)EffectToken).RunWith32BitShim = this.runWith32BitShim;
 			((PSFilterPdnConfigToken)EffectToken).FilterParameters = this.filterParameters;
 			((PSFilterPdnConfigToken)EffectToken).AETE = this.aeteData;
-			((PSFilterPdnConfigToken)EffectToken).ExpandedNodes = this.expandedNodes;
+			((PSFilterPdnConfigToken)EffectToken).ExpandedNodes = this.expandedNodes.AsReadOnly();
 		}
 
 		protected override void InitDialogFromToken(EffectConfigToken effectToken)
@@ -102,7 +102,7 @@ namespace PSFilterPdn
 			
 			if ((token.ExpandedNodes != null) && token.ExpandedNodes.Count > 0)
 			{
-				this.expandedNodes = token.ExpandedNodes;
+				this.expandedNodes = new List<string>(token.ExpandedNodes);
 			}
 		}
 
@@ -498,7 +498,7 @@ namespace PSFilterPdn
 
 			if (!File.Exists(shimPath))
 			{
-				MessageBox.Show(Resources.PSFilterShimNotFound, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(Resources.PSFilterShimNotFound, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 
@@ -599,15 +599,15 @@ namespace PSFilterPdn
 			}
 			catch (ArgumentException ax)
 			{
-				MessageBox.Show(ax.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(ax.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 			catch (UnauthorizedAccessException ex)
 			{
-				MessageBox.Show(ex.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 			catch (Win32Exception wx)
 			{
-				MessageBox.Show(wx.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(wx.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
 			} 
 			finally
 			{
@@ -662,7 +662,7 @@ namespace PSFilterPdn
 				}
 				catch (FileNotFoundException fx)
 				{
-					MessageBox.Show(fx.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error); 
+					MessageBox.Show(fx.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error); 
 				}
 
                 if (!string.IsNullOrEmpty(parameterDataPath) && File.Exists(parameterDataPath))
@@ -719,7 +719,7 @@ namespace PSFilterPdn
 					if (data.runWith32BitShim || useDEPProxy)
 					{
 						this.runWith32BitShim = true;
-						proxyThread = new Thread(() => Run32BitFilterProxy(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, data)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+						proxyThread = new Thread(() => Run32BitFilterProxy(((PSFilterPdnEffect)this.Effect).EnvironmentParameters, data)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
 						proxyThread.Start();
 					}
 					else
@@ -730,7 +730,7 @@ namespace PSFilterPdn
 
 						try
 						{
-							using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdn_Effect)this.Effect).EnvironmentParameters, this.Handle))
+							using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdnEffect)this.Effect).EnvironmentParameters, this.Handle))
 							{
 								lps.SetProgressCallback(new ProgressFunc(UpdateProgress));
 
@@ -1224,7 +1224,7 @@ namespace PSFilterPdn
 				}
 				else
 				{
-					using (Stream res = Assembly.GetAssembly(typeof(PSFilterPdn_Effect)).GetManifestResourceStream(@"PSFilterPdn.PSFilterPdn.xml"))
+					using (Stream res = Assembly.GetAssembly(typeof(PSFilterPdnEffect)).GetManifestResourceStream(@"PSFilterPdn.PSFilterPdn.xml"))
 					{
 						byte[] bytes = new byte[res.Length];
 						int numBytesToRead = (int)res.Length;
@@ -1372,7 +1372,7 @@ namespace PSFilterPdn
 			}
 		}
 		delegate string GetFilterCaseInfoStringDelegate(PluginData data); 
-		private string GetFilterCaseInfoString(PluginData data)
+		private static string GetFilterCaseInfoString(PluginData data)
 		{
 			if (data.filterInfo != null)
 			{
