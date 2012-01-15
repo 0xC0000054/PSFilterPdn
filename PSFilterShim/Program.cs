@@ -121,7 +121,7 @@ namespace PSFilterShim
 				using (Region temp = new Region())
 				{
 					RegionData rgnData = temp.GetRegionData();
-					rgnData.Data = wrap.Data;
+					rgnData.Data = wrap.GetData();
 
 					selectionRegion = new Region(rgnData);
 				}
