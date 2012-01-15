@@ -7,14 +7,13 @@ namespace PSFilterLoad.PSApi
     /// The exception thrown when loading the PiPL or PiMI resources fails.
     /// </summary>
     [Serializable]
-    class FilterLoadException : Exception, ISerializable
+    sealed class FilterLoadException : Exception, ISerializable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterLoadException"/> class.
         /// </summary>
-        public FilterLoadException() : base("A FilterLoadException has occured")
+        public FilterLoadException() : base()
         {
-            
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterLoadException"/> class.
@@ -22,16 +21,10 @@ namespace PSFilterLoad.PSApi
         /// <param name="message">The message to display.</param>
         public FilterLoadException(string message) : base(message)
         {
-            
         }
        
-        public FilterLoadException(string message, Exception inner) : base (message, inner)
-        {
-            
-        }
-
         // This constructor is needed for serialization.
-        protected FilterLoadException(SerializationInfo info, StreamingContext context) : base(info, context)
+        private FilterLoadException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             
         }
