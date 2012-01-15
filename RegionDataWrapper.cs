@@ -21,12 +21,9 @@ namespace PSFilterPdn
             this.rgnData = (byte[])info.GetValue("rgnData", typeof(byte[]));
         }
 
-        public byte[] Data
+        public byte[] GetData()
         {
-            get
-            {
-                return rgnData;
-            }
+            return rgnData;
         }
 
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
