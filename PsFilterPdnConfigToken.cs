@@ -2,6 +2,7 @@ using System.Drawing;
 using PSFilterLoad.PSApi;
 using PaintDotNet;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace PSFilterPdn
 {
@@ -16,7 +17,7 @@ namespace PSFilterPdn
         private bool runWith32BitShim;
         private ParameterData filterParameters;
         private AETEData aeteData;
-        private List<string> expandedNodes;
+        private ReadOnlyCollection<string> expandedNodes;
         
         
         public string Category
@@ -127,7 +128,7 @@ namespace PSFilterPdn
             }
         }
 
-        public List<string> ExpandedNodes
+        public ReadOnlyCollection<string> ExpandedNodes
         {
             get
             {
@@ -139,7 +140,7 @@ namespace PSFilterPdn
             }
         }
 
-        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, string filterCaseInfo, Surface dest, bool useShim, ParameterData pdata, AETEData aete, List<string> nodes)
+        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, string filterCaseInfo, Surface dest, bool useShim, ParameterData pdata, AETEData aete, ReadOnlyCollection<string> nodes)
             : base()
         {
             this.category = category;
