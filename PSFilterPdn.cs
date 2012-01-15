@@ -14,7 +14,7 @@ using PSFilterPdn.Properties;
 
 namespace PSFilterPdn
 {
-    public sealed class PSFilterPdn_Effect : PaintDotNet.Effects.Effect
+    public sealed class PSFilterPdnEffect : PaintDotNet.Effects.Effect
     {
 
         public static string StaticName
@@ -33,8 +33,8 @@ namespace PSFilterPdn
             }
         }
 
-        public PSFilterPdn_Effect()
-            : base(PSFilterPdn_Effect.StaticName, PSFilterPdn_Effect.StaticIcon, EffectFlags.Configurable)
+        public PSFilterPdnEffect()
+            : base(PSFilterPdnEffect.StaticName, PSFilterPdnEffect.StaticIcon, EffectFlags.Configurable)
         {
             dlg = null;
             proxyResult = false;
@@ -96,7 +96,7 @@ namespace PSFilterPdn
 
             if (!File.Exists(shimPath)) 
             {
-                MessageBox.Show(Resources.PSFilterShimNotFound, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(Resources.PSFilterShimNotFound, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -200,21 +200,21 @@ namespace PSFilterPdn
                 }
                 else if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage) && proxyErrorMessage != Resources.UserCanceledError)
                 {
-                    MessageBox.Show(proxyErrorMessage, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(proxyErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
             }
             catch (ArgumentException ax)
             {
-                MessageBox.Show(ax.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ax.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Win32Exception wx)
             {
-                MessageBox.Show(wx.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(wx.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -269,7 +269,7 @@ namespace PSFilterPdn
                     }
                     else if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
                     {
-                        MessageBox.Show(lps.ErrorMessage, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(lps.ErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
 
                     
@@ -278,11 +278,11 @@ namespace PSFilterPdn
             }
             catch (FilterLoadException flex)
             {
-                MessageBox.Show(flex.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(flex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (ImageSizeTooLargeException ex)
             {
-                MessageBox.Show(ex.Message, PSFilterPdn_Effect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -327,6 +327,7 @@ namespace PSFilterPdn
             base.OnSetRenderInfo(parameters, dstArgs, srcArgs);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "2")]
         public override void Render(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs, Rectangle[] rois, int startIndex, int length)
         {
             PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)parameters;
