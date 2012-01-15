@@ -11,6 +11,7 @@ namespace PSFilterLoad.PSApi
 	{
 		private static IntPtr hHeap;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static Memory()
         {
             hHeap = SafeNativeMethods.GetProcessHeap();
