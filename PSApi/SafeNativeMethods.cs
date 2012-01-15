@@ -22,7 +22,7 @@ namespace PSFilterLoad.PSApi
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern bool HeapFree(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
 
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern IntPtr HeapReAlloc(IntPtr hHeap, uint dwFlags, IntPtr lpMem, UIntPtr dwBytes);
 
         [DllImport("kernel32.dll")]
@@ -31,7 +31,7 @@ namespace PSFilterLoad.PSApi
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern unsafe IntPtr VirtualQuery(IntPtr address, ref NativeStructs.MEMORY_BASIC_INFORMATION buffer, IntPtr sizeOfBuffer);
 
-        [DllImport("msvcrt.dll", EntryPoint = "memset", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-        internal static extern IntPtr MemSet(IntPtr dest, int c, UIntPtr count);
+        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
+        internal static extern IntPtr memset(IntPtr dest, int c, UIntPtr count);
     }
 }
