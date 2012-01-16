@@ -863,6 +863,7 @@ namespace PSFilterLoad.PSApi
 			subKeys = null;
 			subKeyIndex = 0;
 			isSubKey = false;
+            outputHandling = FilterDataHandling.filterDataHandlingNone;
 
 			copyToDest = false;
 
@@ -965,6 +966,7 @@ namespace PSFilterLoad.PSApi
         }
 
         static bool ignoreAlpha;
+        static FilterDataHandling outputHandling;
 
         /// <summary>
         ///Checks if the host should ignore tha alpha channel for the plugin.
@@ -986,6 +988,8 @@ namespace PSFilterLoad.PSApi
 				}
 				return true;
 			}
+
+            outputHandling = data.filterInfo[filterCase - 1].outputHandling;
 
             if (data.filterInfo[(filterCase - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
             {
@@ -1021,7 +1025,7 @@ namespace PSFilterLoad.PSApi
                 }
 
             }
-			
+
 
 			return false;
 		}
@@ -2604,8 +2608,8 @@ namespace PSFilterLoad.PSApi
                 void* outDataPtr = outData.ToPointer();
                 int top = lockRect.Top;
                 int left = lockRect.Left;
-                int bottom = Math.Min(lockRect.Bottom, tempSurface.Height);
-                int right = Math.Min(lockRect.Right, tempSurface.Width);
+                int bottom = Math.Min(lockRect.Bottom, dest.Height);
+                int right = Math.Min(lockRect.Right, dest.Width);
                 for (int y = top; y < bottom; y++)
                 {
                     byte* p = (byte*)dest.GetPointAddressUnchecked(left, y);
@@ -2875,8 +2879,8 @@ namespace PSFilterLoad.PSApi
                             break;
                     }
                 }
-                int maskHeight = Math.Min(lockRect.Bottom, mask.Height);
-                int maskWidth = Math.Min(lockRect.Right, mask.Width);
+                int maskHeight = Math.Min(lockRect.Bottom, tempMask.Height);
+                int maskWidth = Math.Min(lockRect.Right, tempMask.Width);
 
                 for (int y = lockRect.Top; y < maskHeight; y++)
                 {
@@ -2923,23 +2927,26 @@ namespace PSFilterLoad.PSApi
 			}
 
 			int nplanes = hiplane - loplane + 1;
-			int w = (rect.right - rect.left);
-			int h = (rect.bottom - rect.top);
 
 			if (RectNonEmpty(rect))
 			{
 				if (rect.left < source.Width && rect.top < source.Height)
 				{
-					int bmpw = w;
-					int bmph = h;
-					if ((rect.left + w) > source.Width)
-						bmpw = (source.Width - rect.left);
+#if DEBUG			
+                    int width = (rect.right - rect.left);
+			        int height = (rect.bottom - rect.top);
 
-					if ((rect.top + h) > source.Height)
-						bmph = (source.Height - rect.top);
+                    int bmpw = width;
+                    int bmph = height;
+                    if ((rect.left + width) > source.Width)
+                        bmpw = (source.Width - rect.left);
+
+                    if ((rect.top + height) > source.Height)
+                        bmph = (source.Height - rect.top); 
+#endif
 
 
-					 int ofs = loplane;
+					int ofs = loplane;
 					switch (loplane)
 					{
 						case 0:
@@ -2971,22 +2978,19 @@ namespace PSFilterLoad.PSApi
 						}
 					}
 
-					/* the stride for the source image and destination buffer will almost never match
-					* so copy the data manually swapping the pixel order along the way
-					*/
+					void* outDataPtr = outData.ToPointer();
+                    int top = lockRect.Top;
+                    int left = lockRect.Left;
+                    int bottom = Math.Min(lockRect.Bottom, dest.Height);
+                    int right = Math.Min(lockRect.Right, dest.Width);
 
-					for (int y = lockRect.Top; y < lockRect.Bottom; y++)
+					for (int y = top; y < bottom; y++)
 					{
-						if (y >= dest.Height)
-							break;
+						byte* p = (byte*)outDataPtr + ((y - top) * outRowBytes);                            
+						byte *q = (byte*)dest.GetPointAddressUnchecked(left, y);
 
-						byte* p = (byte*)outData.ToPointer() + ((y - lockRect.Top) * outRowBytes);
-						byte* q = (byte*)dest.GetPointAddressUnchecked(lockRect.Left, y);
-						for (int x = lockRect.Left; x < lockRect.Right; x++)
+						for (int x = left; x < right; x++)
 						{
-							if (x >= dest.Width)
-								break;
-
 							switch (nplanes)
 							{
 								case 1:
@@ -3014,6 +3018,22 @@ namespace PSFilterLoad.PSApi
 							q += ColorBgra.SizeOf;
 						}
 					}
+
+                    // set tha alpha channel to 255 in the area affected by the filter if it needs it
+                    if ((filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection) &&
+                        outputHandling == FilterDataHandling.filterDataHandlingFillMask)
+                    {
+                        for (int y = top; y < bottom; y++)
+                        {
+                            ColorBgra* p = dest.GetPointAddressUnchecked(left, y);
+
+                            for (int x = left; x < right; x++)
+                            {
+                                p->A = 255;
+                                p++;
+                            }
+                        }
+                    }
 
 				}
 
