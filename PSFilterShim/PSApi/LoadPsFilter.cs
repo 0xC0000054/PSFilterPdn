@@ -412,8 +412,8 @@ namespace PSFilterLoad.PSApi
 		static bool hasTransparency;
 #if USEMATTING
 		static FilterDataHandling inputHandling;
-		static FilterDataHandling outputHandling; 
 #endif
+		static FilterDataHandling outputHandling; 
 
 		static bool IgnoreAlphaChannel(PluginData data)
 		{
@@ -446,8 +446,9 @@ namespace PSFilterLoad.PSApi
 						
 #if USEMATTING
 			inputHandling = data.filterInfo[(filterCase - 1)].inputHandling;
-			outputHandling = data.filterInfo[(filterCase - 1)].outputHandling;
-#endif				
+#endif						
+            outputHandling = data.filterInfo[(filterCase - 1)].outputHandling;
+	
 			if (data.filterInfo[(filterCase - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
 			{
 				/* use the flatImage modes if the filter dosen't support the protectedTransparency cases 
@@ -1867,8 +1868,8 @@ namespace PSFilterLoad.PSApi
                 void* outDataPtr = outData.ToPointer();
                 int top = lockRect.Top;
                 int left = lockRect.Left;
-				int bottom = Math.Min(lockRect.Bottom, tempSurface.Height);
-				int right = Math.Min(lockRect.Right, tempSurface.Width);
+				int bottom = Math.Min(lockRect.Bottom, dest.Height);
+				int right = Math.Min(lockRect.Right, dest.Width);
 				for (int y = top; y < bottom; y++)
 				{
 					byte* p = (byte*)dest.GetPointAddressUnchecked(left, y);
@@ -2135,8 +2136,8 @@ namespace PSFilterLoad.PSApi
 							break;
 					}
 				}
-				int maskHeight = Math.Min(lockRect.Bottom, mask.Height);
-				int maskWidth = Math.Min(lockRect.Right, mask.Width);
+                int maskHeight = Math.Min(lockRect.Bottom, tempMask.Height);
+                int maskWidth = Math.Min(lockRect.Right, tempMask.Width);
 
 				for (int y = lockRect.Top; y < maskHeight; y++)
 				{
@@ -2284,6 +2285,21 @@ namespace PSFilterLoad.PSApi
 							q += ColorBgra.SizeOf;
 						}
 					}
+                    // set tha alpha channel to 255 in the area affected by the filter if it needs it
+                    if ((filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection) &&
+                        outputHandling == FilterDataHandling.filterDataHandlingFillMask)
+                    {
+                        for (int y = top; y < bottom; y++)
+                        {
+                            ColorBgra* p = dest.GetPointAddressUnchecked(left, y);
+
+                            for (int x = left; x < right; x++)
+                            {
+                                p->A = 255;
+                                p++;
+                            }
+                        }
+                    }
 
 #if DEBUG
 					using (Bitmap bmp = dest.CreateAliasedBitmap())
