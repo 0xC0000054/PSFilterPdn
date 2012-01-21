@@ -91,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IPSFilterShim.cs" />
+    <Compile Include="PluginSupportInfo.cs" />
     <Compile Include="PSApi\AETEData.cs" />
     <Compile Include="PSApi\AETEValue.cs" />
     <Compile Include="PSApi\DescriptorTypes.cs" />
