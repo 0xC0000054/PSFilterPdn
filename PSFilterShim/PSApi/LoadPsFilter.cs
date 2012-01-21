@@ -2784,7 +2784,7 @@ namespace PSFilterLoad.PSApi
 							byte* q = (byte*)mask.maskData.ToPointer() + (y * mask.rowBytes);
 							for (int x = 0; x < width; x++)
 							{
-								p->A = q[0];
+								p->A = *q;
 
 								p++;
 								q += mask.colBytes;
