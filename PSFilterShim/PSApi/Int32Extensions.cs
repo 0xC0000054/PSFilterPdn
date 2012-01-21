@@ -12,12 +12,12 @@ namespace PSFilterLoad.PSApi
         {
             if (i < 0)
             {
-                i = 0;
+                return 0;
             }
 
             if (i > 255)
             {
-                i = 255;
+                return 255;
             }
 
             return (byte)i;
