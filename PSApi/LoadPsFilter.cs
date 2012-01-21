@@ -3316,13 +3316,13 @@ namespace PSFilterLoad.PSApi
                         PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
 
                         void* maskPtr = mask.maskData.ToPointer();
-                        for (int y = 0; y < tempDisplaySurface.Height; y++)
+                        for (int y = 0; y < height; y++)
                         {
                             ColorBgra* p = tempDisplaySurface.GetRowAddressUnchecked(y);
                             byte* q = (byte*)maskPtr + (y * mask.rowBytes);
-                            for (int x = 0; x < tempDisplaySurface.Width; x++)
+                            for (int x = 0; x < width; x++)
                             {
-                                p->A = q[0];
+                                p->A = *q;
 
                                 p++;
                                 q += mask.colBytes;
@@ -3391,11 +3391,11 @@ namespace PSFilterLoad.PSApi
 
 					if (selectedRegion.IsVisible(x, y))
 					{
-						p->Bgra |= 0xffffffff; // Solid white in 0xaarrggbb format
+						p->Bgra |= 0xffffffff; // 0xaarrggbb format
 					}
 					else
 					{
-						p->Bgra |= 0xff000000; // Solid black in 0xaarrggbb format
+						p->Bgra |= 0xff000000; 
 					}
 
 					p++;
