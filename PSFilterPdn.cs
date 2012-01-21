@@ -14,7 +14,8 @@ using PSFilterPdn.Properties;
 
 namespace PSFilterPdn
 {
-    public sealed class PSFilterPdnEffect : PaintDotNet.Effects.Effect
+    [PluginSupportInfo(typeof(PluginSupportInfo))]
+    public sealed class PSFilterPdnEffect : Effect
     {
 
         public static string StaticName
