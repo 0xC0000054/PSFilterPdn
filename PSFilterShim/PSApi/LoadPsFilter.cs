@@ -273,8 +273,9 @@ namespace PSFilterLoad.PSApi
 
 #if USEMATTING
 			inputHandling = FilterDataHandling.filterDataHandlingNone;
-			outputHandling = FilterDataHandling.filterDataHandlingNone; 
-#endif
+#endif			
+            outputHandling = FilterDataHandling.filterDataHandlingNone; 
+
 
 			abortFunc = null;
 			progressFunc = null;
@@ -2219,10 +2220,7 @@ namespace PSFilterLoad.PSApi
 							lockRect.Height -= -rect.top;
 						}
 					}
-	
-					/* the stride for the source image and destination buffer will almost never match
-					* so copy the data manually swapping the pixel order along the way
-					*/
+
                     void* outDataPtr = outData.ToPointer();
 
                     int top = lockRect.Top;
@@ -2717,7 +2715,8 @@ namespace PSFilterLoad.PSApi
 
             void* baseAddr = source.baseAddr.ToPointer();
 
-			for (int y = 0; y < tempDisplaySurface.Height; y++)
+
+			for (int y = 0; y < height; y++)
 			{
 
 				if (source.colBytes == 1)
@@ -2737,7 +2736,7 @@ namespace PSFilterLoad.PSApi
 						byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y) + ofs;
 						byte* q = (byte*)baseAddr + (y * source.rowBytes) + (i * source.planeBytes);
 
-						for (int x = 0; x < tempDisplaySurface.Width; x++)
+						for (int x = 0; x < width; x++)
 						{
 							*p = *q;
 
@@ -2751,7 +2750,7 @@ namespace PSFilterLoad.PSApi
 				{
 					byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y);
 					byte* q = (byte*)baseAddr + (y * source.rowBytes);
-					for (int x = 0; x < tempDisplaySurface.Width; x++)
+					for (int x = 0; x < width; x++)
 					{
 						p[0] = q[2];
 						p[1] = q[1];
@@ -2779,11 +2778,11 @@ namespace PSFilterLoad.PSApi
 					{
 						PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
 
-						for (int y = 0; y < tempDisplaySurface.Height; y++)
+						for (int y = 0; y < height; y++)
 						{
 							ColorBgra* p = tempDisplaySurface.GetRowAddressUnchecked(y);
 							byte* q = (byte*)mask.maskData.ToPointer() + (y * mask.rowBytes);
-							for (int x = 0; x < tempDisplaySurface.Width; x++)
+							for (int x = 0; x < width; x++)
 							{
 								p->A = q[0];
 
