@@ -1382,7 +1382,7 @@ namespace PSFilterPdn
 				{
 					FilterCaseInfo info = data.filterInfo[i];
 					string inputHandling = info.inputHandling.ToString("G");
-					string outputHandling = info.inputHandling.ToString("G");
+					string outputHandling = info.outputHandling.ToString("G");
 
 
 					fici += string.Format(CultureInfo.InvariantCulture, "{0}_{1}_{2}", new object[] { inputHandling, outputHandling, info.flags1.ToString(CultureInfo.InvariantCulture) });
