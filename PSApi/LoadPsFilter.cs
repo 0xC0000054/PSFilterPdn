@@ -3021,7 +3021,7 @@ namespace PSFilterLoad.PSApi
 
                     // set tha alpha channel to 255 in the area affected by the filter if it needs it
                     if ((filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection) &&
-                        outputHandling == FilterDataHandling.filterDataHandlingFillMask)
+                        outputHandling == FilterDataHandling.filterDataHandlingFillMask && (nplanes == 4 || loplane == 3))
                     {
                         for (int y = top; y < bottom; y++)
                         {
