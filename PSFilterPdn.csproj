@@ -90,6 +90,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BooleanExtensions.cs" />
     <Compile Include="IPSFilterShim.cs" />
     <Compile Include="PluginSupportInfo.cs" />
     <Compile Include="PSApi\AETEData.cs" />
@@ -138,7 +139,6 @@
     <Compile Include="PSApi\FilterLoadException.cs" />
     <Compile Include="PSApi\FilterRecord.cs" />
     <Compile Include="PSApi\FilterSelector.cs" />
-    <Compile Include="PSApi\GetPropertyProc.cs" />
     <Compile Include="PSApi\HandleProc.cs" />
     <Compile Include="PSApi\HostProcs.cs" />
     <Compile Include="PSApi\ImageModes.cs" />
