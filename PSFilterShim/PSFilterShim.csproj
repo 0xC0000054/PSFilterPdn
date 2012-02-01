@@ -119,7 +119,6 @@
     <Compile Include="PSApi\FilterCaseInfo.cs" />
     <Compile Include="PSApi\FilterRecord.cs" />
     <Compile Include="PSApi\FilterSelector.cs" />
-    <Compile Include="PSApi\GetPropertyProc.cs" />
     <Compile Include="PSApi\HandleProc.cs" />
     <Compile Include="PSApi\HostProcs.cs" />
     <Compile Include="PSApi\ImageModes.cs" />
