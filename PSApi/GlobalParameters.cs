@@ -128,6 +128,9 @@ namespace PSFilterLoad.PSApi
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
+            if (info == null)
+                throw new ArgumentNullException("info", "info is null.");
+
             info.AddValue("parameterDataSize", this.parameterDataSize);
             info.AddValue("parameterDataBytes", this.parameterDataBytes, typeof(byte[]));
             info.AddValue("parameterDataIsPSHandle", this.parameterDataIsPSHandle);
