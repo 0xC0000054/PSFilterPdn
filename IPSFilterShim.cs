@@ -6,7 +6,7 @@ using PSFilterLoad.PSApi;
 internal interface IPSFilterShim
 {
     [OperationContract]
-    bool AbortFilter();
+    byte AbortFilter();
     
     [OperationContract]
     bool IsRepeatEffect();

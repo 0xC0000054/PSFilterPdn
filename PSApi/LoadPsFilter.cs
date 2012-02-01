@@ -337,8 +337,7 @@ namespace PSFilterLoad.PSApi
 				}
                 else if ((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty) // the entrypoint for the current platform, this filters out incomptable processors architectures
 				{
-					String ep = Marshal.PtrToStringAnsi(dataPtr, pipp.propertyLength).TrimEnd('\0');
-					enumData.entryPoint = ep;
+					enumData.entryPoint = Marshal.PtrToStringAnsi(dataPtr, pipp.propertyLength).TrimEnd('\0');
 					// If it is a 32-bit plugin on a 64-bit OS run it with the 32-bit shim.
 					enumData.runWith32BitShim = (IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty);
 				}
@@ -370,14 +369,12 @@ namespace PSFilterLoad.PSApi
 				}
 				else if (propKey == PIPropertyID.PIFilterCaseInfoProperty)
 				{
-
 					enumData.filterInfo = new FilterCaseInfo[7];
 					for (int j = 0; j < 7; j++)
 					{
 						enumData.filterInfo[j] = (FilterCaseInfo)Marshal.PtrToStructure(dataPtr, typeof(FilterCaseInfo));
 						dataPtr = new IntPtr(dataPtr.ToInt64() + (long)Marshal.SizeOf(typeof(FilterCaseInfo)));
 					}
-
 				}
 				else if (propKey == PIPropertyID.PIHasTerminologyProperty)
 				{
@@ -769,9 +766,9 @@ namespace PSFilterLoad.PSApi
 		static IntPtr data;
 		static short result;
 
-		static abort abortFunc;
+		static AbortFunc abortFunc;
 
-        public void SetAbortCallback(abort abortCallback)
+        public void SetAbortCallback(AbortFunc abortCallback)
         {
             if (abortCallback == null)
                 throw new ArgumentNullException("abortCallback", "abortCallback is null.");
@@ -1962,7 +1959,7 @@ namespace PSFilterLoad.PSApi
 			return error;
 		}
 
-		static bool abort_proc()
+		static byte abort_proc()
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, "");
@@ -1972,7 +1969,7 @@ namespace PSFilterLoad.PSApi
 				return abortFunc();
 			}
 
-			return false;
+			return 0;
 		}
 
 		static bool src_valid;

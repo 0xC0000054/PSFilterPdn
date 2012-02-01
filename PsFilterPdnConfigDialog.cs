@@ -6,13 +6,13 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Windows.Forms;
 using PaintDotNet;
 using PaintDotNet.Effects;
 using PSFilterLoad.PSApi;
 using PSFilterPdn.Properties;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace PSFilterPdn
 {
@@ -790,7 +790,6 @@ namespace PSFilterPdn
 							{
 								this.Close();
 							}
-
 						}
 						catch (NullReferenceException nrex)
 						{

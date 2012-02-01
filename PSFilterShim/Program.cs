@@ -26,9 +26,9 @@ namespace PSFilterShim
 		static IPSFilterShim serviceProxy;
         static ProgressFunc progressCallback = new ProgressFunc(UpdateProgress);
 
-		static bool abortFilter()
+		static byte abortFilter()
 		{
-			bool abort = serviceProxy.AbortFilter();
+			byte abort = serviceProxy.AbortFilter();
 
 #if DEBUG
 			System.Diagnostics.Debug.WriteLine(string.Format("abortFilter returned: {0}", abort));
@@ -146,7 +146,7 @@ namespace PSFilterShim
 				{
 					if (repeatEffect)
 					{
-						lps.SetAbortCallback(new abort(abortFilter));
+						lps.SetAbortCallback(new AbortFunc(abortFilter));
 					}
                     lps.SetProgressCallback(progressCallback);
 
@@ -209,7 +209,11 @@ namespace PSFilterShim
 			}
 			catch (NullReferenceException ex)
 			{
-				serviceProxy.SetProxyErrorMessage(ex.Message);
+#if DEBUG
+                serviceProxy.SetProxyErrorMessage(ex.Message + Environment.NewLine + ex.StackTrace);
+#else				
+                serviceProxy.SetProxyErrorMessage(ex.Message);
+#endif
 			}
 			finally
 			{

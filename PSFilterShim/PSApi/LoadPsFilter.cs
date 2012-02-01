@@ -173,7 +173,7 @@ namespace PSFilterLoad.PSApi
             progressFunc = callback;
         }
 
-        public void SetAbortCallback(abort abortCallback)
+        public void SetAbortCallback(AbortFunc abortCallback)
         {
             if (abortCallback == null)
                 throw new ArgumentNullException("abortCallback", "abortCallback is null.");
@@ -181,7 +181,7 @@ namespace PSFilterLoad.PSApi
             abortFunc = abortCallback;
         }
 
-		static abort abortFunc;
+		static AbortFunc abortFunc;
 		static ProgressFunc progressFunc;
 
 
@@ -1341,7 +1341,7 @@ namespace PSFilterLoad.PSApi
 			return error;
 		}
 
-		static bool abort_proc()
+		static byte abort_proc()
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Empty);
@@ -1351,7 +1351,7 @@ namespace PSFilterLoad.PSApi
 				return abortFunc();
 			}
 
-			return false;
+			return 0;
 		}
 
 		static bool src_valid;
@@ -2931,8 +2931,8 @@ namespace PSFilterLoad.PSApi
 
             }
 
-            if ((keys != null) && keys.Count > 0 && aeteDict.Count > 0 &&
-                !aete.FlagList.ContainsKey(keys[0])) // some filters may hand us a list of bogus keys.
+            if ((keys != null) && keys.Count > 0 && aeteDict.Count > 0 && 
+                (aete != null) && !aete.FlagList.ContainsKey(keys[0])) // some filters may hand us a list of bogus keys.
             {
                 return IntPtr.Zero;
             }
@@ -3020,13 +3020,10 @@ namespace PSFilterLoad.PSApi
                         return 0;
                     }
 
-                    if (keyArrayPtr != IntPtr.Zero)
-                    {
-                        Marshal.WriteInt32(keyArrayPtr, (getKeyIndex * 4), 0);
-                    }
-
                     getKey = key = keys[getKeyIndex];
+                    
                     AETEValue data = aeteDict[key];
+                    
                     try
                     {
                         type = data.Type; // the type or flags parameters may be null if the filter does not use them.
@@ -3040,6 +3037,11 @@ namespace PSFilterLoad.PSApi
                     }
                     catch (NullReferenceException)
                     {
+                    }
+
+                    if (keyArrayPtr != IntPtr.Zero)
+                    {
+                        Marshal.WriteInt32(keyArrayPtr, (getKeyIndex * 4), 0);
                     }
 
                     getKeyIndex++;
@@ -4520,7 +4522,6 @@ namespace PSFilterLoad.PSApi
 
 				if (parmDataHandle != IntPtr.Zero)
 				{
-
 					try
 					{
 						NativeMethods.GlobalUnlock(parmDataHandle);

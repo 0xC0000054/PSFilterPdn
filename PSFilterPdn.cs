@@ -46,12 +46,12 @@ namespace PSFilterPdn
         }
        
         /// <summary>
-        /// The function that the Photoshop filters can poll to check if to abort
+        /// The function that the Photoshop filters can poll to check if to abort.
         /// </summary>
-        /// <returns>The effect's IsCancelRequested property</returns>
-        private bool AbortFunc()
+        /// <returns>The effect's IsCancelRequested property as a byte.</returns>
+        private byte AbortFunc()
         {
-            return base.IsCancelRequested;
+            return base.IsCancelRequested.ToByte();
         }
 
         PsFilterPdnConfigDialog dlg;
@@ -103,7 +103,6 @@ namespace PSFilterPdn
 
             string src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
             string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
-            string rdwPath = string.Empty;
             string parmDataFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParameters.dat");
 
             FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
@@ -131,7 +130,7 @@ namespace PSFilterPdn
             ProxyErrorDelegate errorDelegate = new ProxyErrorDelegate(SetProxyErrorResult);
 
 
-            PSFilterShimService service = new PSFilterShimService(() => base.IsCancelRequested) 
+            PSFilterShimService service = new PSFilterShimService(new Func<byte>(AbortFunc)) 
             {
                 isRepeatEffect = true,
                 showAboutDialog = false,
@@ -227,13 +226,8 @@ namespace PSFilterPdn
 
                 File.Delete(src);
                 File.Delete(dest);
-                if (!string.IsNullOrEmpty(rdwPath))
-                {
-                    File.Delete(rdwPath);
-                }
 
                 PSFilterShimServer.Stop();
-
             }
            
         }
@@ -246,7 +240,7 @@ namespace PSFilterPdn
             {
                 using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, Process.GetCurrentProcess().MainWindowHandle))
                 {
-                    lps.SetAbortCallback(new abort(AbortFunc));
+                    lps.SetAbortCallback(new AbortFunc(AbortFunc));
 
                     FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
                     PluginData pdata = new PluginData()

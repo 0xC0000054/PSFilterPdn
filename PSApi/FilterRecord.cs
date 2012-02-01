@@ -10,8 +10,8 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    [return: MarshalAs(UnmanagedType.I1)]
-    internal delegate bool TestAbortProc();
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate byte TestAbortProc();
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayout(LayoutKind.Sequential, Pack = 4)]
     internal unsafe struct FilterRecord

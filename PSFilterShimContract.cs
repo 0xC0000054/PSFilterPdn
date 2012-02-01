@@ -12,7 +12,7 @@ namespace PSFilterPdn
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     internal sealed class PSFilterShimService : IPSFilterShim
     {
-        private Func<bool> abortFunc;
+        private Func<byte> abortFunc;
         internal bool isRepeatEffect;
         internal bool showAboutDialog;
         internal PluginData pluginData;
@@ -28,7 +28,7 @@ namespace PSFilterPdn
         {
         }
 
-        public PSFilterShimService(Func<bool> abort)
+        public PSFilterShimService(Func<byte> abort)
         {
             this.abortFunc = abort;
             this.isRepeatEffect = false;
@@ -43,14 +43,14 @@ namespace PSFilterPdn
             this.progressCallback = null;
         }
 
-        public bool AbortFilter()
+        public byte AbortFilter()
         {
             if (abortFunc != null)
             {
                 return abortFunc();
             }
 
-            return false;
+            return 0;
         }
 
         public bool IsRepeatEffect()
