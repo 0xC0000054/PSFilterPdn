@@ -20,9 +20,8 @@ namespace PSFilterLoad.PSApi
             this.flagList = new Dictionary<uint, short>();
             foreach (var item in enumAETE.events)
             {
-                for (int f = 0; f < item.parms.Length; f++)
+                foreach (AETEParm parm in item.parms)
                 {
-                    AETEParm parm = item.parms[f];
                     if (!flagList.ContainsKey(parm.key))
                     {
                         flagList.Add(parm.key, parm.flags);
