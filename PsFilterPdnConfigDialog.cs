@@ -451,19 +451,22 @@ namespace PSFilterPdn
 		private void UpdateProgress(int done, int total)
 		{
 			double progress = ((double)done / (double)total) * 100d;
-			filterProgressBar.Value = (int)progress.Clamp(0d, 100d); // clamp to range of 0 to 100 percent
+            if (progress.IsFinite())
+            {
+                filterProgressBar.Value = (int)progress.Clamp(0d, 100d); // clamp to range of 0 to 100 percent
+            }
 		}
 
 		private void UpdateProxyProgress(int done, int total)
 		{
-			if (this.InvokeRequired)
-			{
-				this.Invoke(new ProgressFunc(UpdateProgress), new object[] { done, total });
-			}
-			else
-			{
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new ProgressFunc(UpdateProgress), new object[] { done, total });
+            }
+            else
+            {
                 UpdateProgress(done, total);
-			}
+            }
 		}
 
 		private void SetProxyErrorResult(string data)
