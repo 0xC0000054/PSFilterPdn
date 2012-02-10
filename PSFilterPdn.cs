@@ -37,7 +37,7 @@ namespace PSFilterPdn
         public PSFilterPdnEffect()
             : base(PSFilterPdnEffect.StaticName, PSFilterPdnEffect.StaticIcon, EffectFlags.Configurable)
         {
-            dlg = null;
+            configDialog = null;
             proxyResult = false;
             filterDone = null;
             filterThread = null;
@@ -54,11 +54,22 @@ namespace PSFilterPdn
             return base.IsCancelRequested.ToByte();
         }
 
-        PsFilterPdnConfigDialog dlg;
+        PsFilterPdnConfigDialog configDialog;
         public override EffectConfigDialog CreateConfigDialog()
         {
-            dlg = new PsFilterPdnConfigDialog();
-            return dlg;
+            this.configDialog = new PsFilterPdnConfigDialog();
+            return configDialog;
+        }
+
+        protected override void OnDispose(bool disposing)
+        {
+            if (disposing && configDialog != null)
+            {
+                configDialog.Dispose();
+                configDialog = null;
+            }
+            
+            base.OnDispose(disposing);
         }
 
         private bool proxyResult;
@@ -289,10 +300,10 @@ namespace PSFilterPdn
 
         protected override void OnSetRenderInfo(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs)
         {
-            PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)parameters;
+            if (configDialog == null) // repeat effect
+            {           
+                PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)parameters;
 
-            if (dlg == null) // repeat effect?
-            {
                 if (token.Dest != null)
                 {
                     token.Dest.Dispose();
