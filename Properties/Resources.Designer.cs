@@ -340,7 +340,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid PiPl version in {0}: {1},  Expected version 0..
+        ///   Looks up a localized string similar to Invalid PiPL version in {0}: {1},  Expected version 0..
         /// </summary>
         internal static string InvalidPiPLVersionFormat {
             get {

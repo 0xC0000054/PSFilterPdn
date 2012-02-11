@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BadParameters" xml:space="preserve">
     <value>Bad parameters.</value>
@@ -166,7 +166,7 @@
     <value>Image Width must be less than or equal to 32000 pixels.</value>
   </data>
   <data name="InvalidPiPLVersionFormat" xml:space="preserve">
-    <value>Invalid PiPl version in {0}: {1},  Expected version 0.</value>
+    <value>Invalid PiPL version in {0}: {1},  Expected version 0.</value>
   </data>
   <data name="InvalidSamplePoint" xml:space="preserve">
     <value>Invalid sample point.</value>
