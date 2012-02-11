@@ -247,9 +247,6 @@
   <data name="ConfigDialog_fldrLoadCountLbl_Format" xml:space="preserve">
     <value>({0} of {1})</value>
   </data>
-  <data name="ProxyProgressError_FormatException" xml:space="preserve">
-    <value>A FormatException was thrown when updating the filter's progress. </value>
-  </data>
   <data name="AlphaChannelName" xml:space="preserve">
     <value>Alpha</value>
   </data>
