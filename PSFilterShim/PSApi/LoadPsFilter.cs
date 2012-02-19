@@ -264,7 +264,7 @@ namespace PSFilterLoad.PSApi
 			errorMessage = String.Empty;
 			disposed = false;
 			frsetup = false;
-			copyToDest = false;
+			copyToDest = true;
 			suitesSetup = false;
 			sizesSetup = false;
 			frValuesSetup = false;
@@ -1208,10 +1208,11 @@ namespace PSFilterLoad.PSApi
 			{
 				// compensate for the fact that the FilterCaseInfo array is zero indexed.
 				copyToDest = ((pdata.filterInfo[(filterCase - 1)].flags1 & FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit) == 0);
-				if (copyToDest)
-				{
-					dest.CopySurface(source); // copy the source image to the dest image if the filter does not write to all the pixels.
-				}
+			}
+	
+            if (copyToDest)
+			{
+				dest.CopySurface(source); // copy the source image to the dest image if the filter does not write to all the pixels.
 			}
 
 			if (!ignoreAlpha)
