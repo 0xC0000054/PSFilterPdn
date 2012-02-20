@@ -602,7 +602,7 @@ namespace PSFilterPdn
 			}
 			catch (ArgumentException ax)
 			{
-				MessageBox.Show(ax.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(ax.ToString(), PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 			catch (UnauthorizedAccessException ex)
 			{
@@ -647,7 +647,8 @@ namespace PSFilterPdn
 
 		private void SetProxyResultData(string destFileName, string parameterDataPath, PluginData data)
 		{ 
-			if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && !showAboutBoxcb.Checked)
+			if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && !showAboutBoxcb.Checked 
+                && File.Exists(destFileName))
 			{
 				this.fileName = data.fileName;
 				this.entryPoint = data.entryPoint;
@@ -656,17 +657,10 @@ namespace PSFilterPdn
 				this.filterCaseInfo = GetFilterCaseInfoString(data);
 				this.aeteData = data.aete;
 
-				try
-				{
-					using (Bitmap dst = new Bitmap(destFileName))
-					{
-						this.destSurface = Surface.CopyFromBitmap(dst);
-					}
-				}
-				catch (FileNotFoundException fx)
-				{
-					MessageBox.Show(fx.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error); 
-				}
+                using (Bitmap dst = new Bitmap(destFileName))
+                {
+                    this.destSurface = Surface.CopyFromBitmap(dst);
+                } 
 
                 if (!string.IsNullOrEmpty(parameterDataPath) && File.Exists(parameterDataPath))
                 {
@@ -677,7 +671,6 @@ namespace PSFilterPdn
                         this.filterParameters  = (ParameterData)bf.Deserialize(fs);
                     }
                 }
-
 
 				if (filterProgressBar.Value < filterProgressBar.Maximum)
 				{
@@ -690,7 +683,6 @@ namespace PSFilterPdn
 				{
 					MessageBox.Show(this, proxyErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}
-
 
 				if (!showAboutBoxcb.Checked && destSurface != null)
 				{

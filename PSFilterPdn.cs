@@ -202,7 +202,7 @@ namespace PSFilterPdn
                     Thread.Sleep(250);
                 }
   
-                if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage))
+                if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && File.Exists(dest))
                 {
                     using (Bitmap bmp = new Bitmap(dest))
                     {
