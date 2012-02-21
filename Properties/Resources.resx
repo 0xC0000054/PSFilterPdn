@@ -210,9 +210,6 @@
   <data name="ConfigDialog_fldrLoadProgLbl_Text" xml:space="preserve">
     <value>Folder load progress:</value>
   </data>
-  <data name="ConfigDialog_logTab_Text" xml:space="preserve">
-    <value>Error Log</value>
-  </data>
   <data name="ConfigDialog_remDirBtn_Text" xml:space="preserve">
     <value>Remove</value>
   </data>

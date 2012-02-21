@@ -178,15 +178,6 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error Log.
-        /// </summary>
-        internal static string ConfigDialog_logTab_Text {
-            get {
-                return ResourceManager.GetString("ConfigDialog_logTab_Text", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Remove.
         /// </summary>
         internal static string ConfigDialog_remDirBtn_Text {
