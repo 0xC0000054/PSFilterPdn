@@ -331,24 +331,6 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is not a valid Photoshop Filter..
-        /// </summary>
-        internal static string InvalidPhotoshopFilterFormat {
-            get {
-                return ResourceManager.GetString("InvalidPhotoshopFilterFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid PiPL version in {0}: {1},  Expected version 0..
-        /// </summary>
-        internal static string InvalidPiPLVersionFormat {
-            get {
-                return ResourceManager.GetString("InvalidPiPLVersionFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Invalid sample point..
         /// </summary>
         internal static string InvalidSamplePoint {
@@ -403,15 +385,6 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} does not support the plugInModeRGBColor image mode..
-        /// </summary>
-        internal static string RGBColorUnsupportedModeFormat {
-            get {
-                return ResourceManager.GetString("RGBColorUnsupportedModeFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to error code = {0}.
         /// </summary>
         internal static string UnknownErrorCodeFormat {
@@ -426,15 +399,6 @@ namespace PSFilterPdn.Properties {
         internal static string UnsupportedImageMode {
             get {
                 return ResourceManager.GetString("UnsupportedImageMode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported.
-        /// </summary>
-        internal static string UnsupportedInterfaceVersionFormat {
-            get {
-                return ResourceManager.GetString("UnsupportedInterfaceVersionFormat", resourceCulture);
             }
         }
         
