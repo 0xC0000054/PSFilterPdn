@@ -136,7 +136,6 @@
     <Compile Include="PSApi\DisplayPixelsProc.cs" />
     <Compile Include="PSApi\FilterCase.cs" />
     <Compile Include="PSApi\FilterCaseInfo.cs" />
-    <Compile Include="PSApi\FilterLoadException.cs" />
     <Compile Include="PSApi\FilterRecord.cs" />
     <Compile Include="PSApi\FilterSelector.cs" />
     <Compile Include="PSApi\HandleProc.cs" />

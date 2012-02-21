@@ -305,7 +305,10 @@ namespace PSFilterLoad.PSApi
 
 			if (version != 0)
 			{
-				enumErrorList.Add(new FilterLoadException(string.Format(CultureInfo.CurrentUICulture, Resources.InvalidPiPLVersionFormat, enumData.fileName, version)));
+#if DEBUG
+                Debug.WriteLine(string.Format("Invalid PiPL version in {0}: {1},  Expected version 0", enumData.fileName, version));
+#endif
+                return true;
 			}
 
 			int count = Marshal.ReadInt32(lockRes, 6);
@@ -332,8 +335,11 @@ namespace PSFilterLoad.PSApi
 				{
 					if (PropToString((uint)pipp.propertyData.ToInt64()) != "8BFM")
 					{
-						enumErrorList.Add(new FilterLoadException(string.Format(CultureInfo.CurrentUICulture, Resources.InvalidPhotoshopFilterFormat, enumData.fileName)));
-					}
+#if DEBUG
+                        Debug.WriteLine(string.Format("{0} is not a valid Photoshop Filter.", enumData.fileName));
+#endif	
+				        return true;
+                    }
 				}
                 else if ((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty) // the entrypoint for the current platform, this filters out incomptable processors architectures
 				{
@@ -347,8 +353,11 @@ namespace PSFilterLoad.PSApi
 					if (HiWord(fltrVersion) > PSConstants.latestFilterVersion ||
 						(HiWord(fltrVersion) == PSConstants.latestFilterVersion && LoWord(fltrVersion) > PSConstants.latestFilterSubVersion))
 					{
-						enumErrorList.Add(new FilterLoadException(string.Format(CultureInfo.CurrentUICulture, Resources.UnsupportedInterfaceVersionFormat, new object[] { enumData.fileName, HiWord(fltrVersion).ToString(CultureInfo.CurrentCulture), LoWord(fltrVersion).ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) })));
-					}
+#if DEBUG
+						Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumData.fileName, HiWord(fltrVersion).ToString(CultureInfo.CurrentCulture), LoWord(fltrVersion).ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) }));
+#endif			
+                        return true;
+                    }
 				}
 				else if (propKey == PIPropertyID.PIImageModesProperty)
 				{
@@ -356,8 +365,11 @@ namespace PSFilterLoad.PSApi
 
 					if ((bytes[0] & PSConstants.flagSupportsRGBColor) != PSConstants.flagSupportsRGBColor)
 					{
-						enumErrorList.Add(new FilterLoadException(string.Format(CultureInfo.CurrentUICulture, Resources.RGBColorUnsupportedModeFormat, enumData.fileName)));
-					}
+#if DEBUG
+						Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", enumData.fileName));
+#endif					
+                        return true;
+                    }
 				}
 				else if (propKey == PIPropertyID.PICategoryProperty)
 				{
@@ -530,13 +542,19 @@ namespace PSFilterLoad.PSApi
 			if (major > PSConstants.latestFilterVersion ||
 			   (major == PSConstants.latestFilterVersion && minor > PSConstants.latestFilterSubVersion))
 			{
-				enumErrorList.Add(new FilterLoadException(string.Format(CultureInfo.CurrentUICulture, Resources.UnsupportedInterfaceVersionFormat, new object[] { enumData.fileName, major.ToString(CultureInfo.CurrentCulture), minor.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) })));
-			}
+#if DEBUG
+				Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumData.fileName, major.ToString(CultureInfo.CurrentCulture), minor.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) }));
+#endif			
+                return true;
+            }
 
 			if ((modes & PSConstants.supportsRGBColor) != PSConstants.supportsRGBColor)
 			{
-				enumErrorList.Add(new FilterLoadException(string.Format(CultureInfo.CurrentUICulture, Resources.RGBColorUnsupportedModeFormat, enumData.fileName)));
-			}
+#if DEBUG
+                Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", enumData.fileName));
+#endif
+                return true;
+            }
 			IntPtr filterRes = IntPtr.Zero;
 
 			IntPtr type = Marshal.StringToHGlobalUni("_8BFM");
@@ -872,7 +890,6 @@ namespace PSFilterLoad.PSApi
 			suitesSetup = false;
 			sizesSetup = false;
 			frValuesSetup = false;
-			enumErrorList = null;
 			enumResList = null;
 			isRepeatEffect = false;
 			globalParameters = new GlobalParameters();
@@ -1775,7 +1792,6 @@ namespace PSFilterLoad.PSApi
 		}
 
 		static List<PluginData> enumResList;
-		static List<FilterLoadException> enumErrorList;
 
         /// <summary>
         /// Adds the found plugin data to the list.
@@ -1797,13 +1813,12 @@ namespace PSFilterLoad.PSApi
 		/// <returns>
 		/// True if succssful otherwise false
 		/// </returns>
-		public static bool QueryPlugin(string fileName, out List<PluginData> pluginData, out List<FilterLoadException> loadErrors)
+		public static bool QueryPlugin(string fileName, out List<PluginData> pluginData)
 		{
 			if (String.IsNullOrEmpty(fileName))
 				throw new ArgumentException("fileName is null or empty.", "fileName");
 
 			pluginData = new List<PluginData>();
-			loadErrors = new List<FilterLoadException>();
 
 			bool result = false;
 
@@ -1818,7 +1833,6 @@ namespace PSFilterLoad.PSApi
 					PluginData pdata = new PluginData() { fileName = fileName };
 					GCHandle gch = GCHandle.Alloc(pdata);
 					enumResList = null;
-					enumErrorList = new List<FilterLoadException>();
                     bool needsRelease = false;
 					try
 					{
@@ -1830,7 +1844,6 @@ namespace PSFilterLoad.PSApi
                         dll.DangerousAddRef(ref needsRelease);
 						if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiPl", new EnumResNameDelegate(EnumPiPL), GCHandle.ToIntPtr(gch)))
 						{
-							loadErrors.AddRange(enumErrorList);
 							foreach (PluginData data in enumResList)
 							{
 								if (!string.IsNullOrEmpty(data.entryPoint)) // Was the entrypoint found for the plugin.

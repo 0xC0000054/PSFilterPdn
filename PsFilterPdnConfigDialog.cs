@@ -775,10 +775,6 @@ namespace PSFilterPdn
 						{
 							MessageBox.Show(this, bifex.Message + Environment.NewLine + bifex.FileName, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 						}
-						catch (FilterLoadException flex)
-						{
-							MessageBox.Show(this, flex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-						}
 						catch (ImageSizeTooLargeException ex)
 						{
 							if (MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error) == DialogResult.OK)
@@ -845,7 +841,6 @@ namespace PSFilterPdn
 		{
 			public TreeNode[] items;
 			public string[] dirlist;
-			public List<FilterLoadException> exceptions; 
 			public SearchOption options;
 		}
 
@@ -898,9 +893,7 @@ namespace PSFilterPdn
 		private static void GetFilterItemsList(BackgroundWorker worker, DoWorkEventArgs e)
 		{
 			List<PluginData> pd;
-			List<FilterLoadException> exceptions;
 			UpdateFilterListParm parm = (UpdateFilterListParm)e.Argument;
-			parm.exceptions = new List<FilterLoadException>();
 			Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>();
 			int length = parm.dirlist.Length;
 			for (int i = 0; i < length; i++)
@@ -920,38 +913,32 @@ namespace PSFilterPdn
 
 					if (fi.Exists)
 					{
-						if (LoadPsFilter.QueryPlugin(fi.FullName, out pd, out exceptions))
+						if (LoadPsFilter.QueryPlugin(fi.FullName, out pd))
 						{
-							if (exceptions.Count > 0)
+							foreach (var item in pd)
 							{
-								parm.exceptions.AddRange(exceptions);
-							}
-							else
-							{
-								foreach (var item in pd)
+								if (nodes.ContainsKey(item.category))
 								{
-									if (nodes.ContainsKey(item.category))
+									TreeNode node = nodes[item.category];
+									TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
+									if (IsNotDuplicateNode(ref node, subNode, item))
 									{
-										TreeNode node = nodes[item.category];
-										TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
-										if (IsNotDuplicateNode(ref node, subNode, item))
-										{
-											node.Nodes.Add(subNode);
-										}
-									}
-									else
-									{
-										TreeNode node = new TreeNode(item.category) { Name = item.category };
-
-
-										TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
-
 										node.Nodes.Add(subNode);
-
-										nodes.Add(item.category, node);
 									}
-								} 
-							}
+								}
+								else
+								{
+									TreeNode node = new TreeNode(item.category) { Name = item.category };
+
+
+									TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
+
+									node.Nodes.Add(subNode);
+
+									nodes.Add(item.category, node);
+								}
+							} 
+							
 						}
 						
 					}
@@ -1025,24 +1012,6 @@ namespace PSFilterPdn
 				if (!e.Cancelled)
 				{
 					UpdateFilterListParm parm = (UpdateFilterListParm)e.Result;
-
-					if (parm.exceptions.Count > 0)
-					{
-						if (parm.exceptions.Count > 1)
-						{
-							if (!tabControl1.TabPages.Contains(logTab))
-							{
-								tabControl1.TabPages.Add(logTab);
-							}
-							errorTextBox.Clear();
-							for (int i = 1; i < parm.exceptions.Count; i++)
-							{
-								errorTextBox.AppendText(parm.exceptions[i].Message);
-							}
-						}
-
-						MessageBox.Show(this, parm.exceptions[0].Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-					}
 
 					filterTreeItems = new Dictionary<TreeNode, string>();
 					foreach (var baseNode in parm.items)

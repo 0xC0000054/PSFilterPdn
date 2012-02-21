@@ -282,10 +282,6 @@ namespace PSFilterPdn
                 }
 
             }
-            catch (FilterLoadException flex)
-            {
-                MessageBox.Show(flex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
             catch (ImageSizeTooLargeException ex)
             {
                 MessageBox.Show(ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
