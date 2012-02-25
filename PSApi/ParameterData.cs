@@ -11,7 +11,7 @@ namespace PSFilterLoad.PSApi
     public sealed class ParameterData 
     {
         private GlobalParameters globalParameters;
-        private Dictionary<uint, AETEValue> aeteDict;
+        private Dictionary<uint, AETEValue> aeteDictonary;
 
         public GlobalParameters GlobalParameters
         {
@@ -21,11 +21,11 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public Dictionary<uint, AETEValue> AETEDict
+        public Dictionary<uint, AETEValue> AETEDictionary
         {
             get
             {
-                return aeteDict;
+                return aeteDictonary;
             }
         }
 
@@ -35,11 +35,11 @@ namespace PSFilterLoad.PSApi
 
             if (aete != null)
             {
-                this.aeteDict = new Dictionary<uint, AETEValue>(aete);
+                this.aeteDictonary = new Dictionary<uint, AETEValue>(aete);
             }
             else
             {
-                this.aeteDict = null;
+                this.aeteDictonary = null;
             }
         }
        
