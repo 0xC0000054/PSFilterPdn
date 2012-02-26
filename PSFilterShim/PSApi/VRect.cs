@@ -21,6 +21,11 @@ namespace PSFilterLoad.PSApi
         /// int32->int
         public int right;
 
+        public bool Equals(VRect rect)
+        {
+            return (this.left == rect.left && this.top == rect.top && this.right == rect.right && this.bottom == rect.bottom);
+        }
+
 #if DEBUG
         public override string ToString()
         {
