@@ -155,7 +155,7 @@ namespace PSFilterShim
 						// ignore the filters that only use the data handle, e.g. Filter Factory  
                         if (((parmData.GlobalParameters.GetParameterDataBytes() != null && parmData.GlobalParameters.GetPluginDataBytes() != null) ||
                             (parmData.GlobalParameters.GetParameterDataBytes() != null && parmData.GlobalParameters.GetPluginDataBytes() == null)) ||
-							parmData.AETEDict != null)
+							parmData.AETEDictionary != null)
 						{
 							lps.FilterParameters = parmData;
 							lps.IsRepeatEffect = repeatEffect;
