@@ -818,7 +818,7 @@ namespace PSFilterLoad.PSApi
 			set
 			{
 				globalParameters = value.GlobalParameters;
-				aeteDict = value.AETEDict;
+				aeteDict = value.AETEDictionary;
 			}
 		}
 		/// <summary>
@@ -989,7 +989,7 @@ namespace PSFilterLoad.PSApi
         /// <returns><c>true</c> if the alpha chennel should be ignored; otherwise <c>false</c>.</returns>
 		static bool IgnoreAlphaChannel(PluginData data)
 		{
-            if (data.filterInfo == null)
+            if (data.filterInfo == null || data.category == "PictureCode")
 			{
 				switch (filterCase)
 				{
@@ -1135,6 +1135,8 @@ namespace PSFilterLoad.PSApi
 				pdata.entry.entry = null;
 			}
 		}
+
+        static bool saveGlobalDataPointer;
         /// <summary>
         /// Saves the filter parameters for repeat runs.
         /// </summary>
@@ -1221,7 +1223,7 @@ namespace PSFilterLoad.PSApi
                 }
 
             }
-            if (filterRecord->parameters != IntPtr.Zero && data != IntPtr.Zero)
+            if (filterRecord->parameters != IntPtr.Zero && data != IntPtr.Zero && saveGlobalDataPointer)
             {
                 long pluginDataSize = NativeMethods.GlobalSize(data).ToInt64();
                 globalParameters.PluginDataIsPSHandle = false;
@@ -1728,7 +1730,11 @@ namespace PSFilterLoad.PSApi
             if (showAbout)
 			{
 				return plugin_about(pdata);
-			}		
+			}
+            /* Disable saving of the 'data' pointer for Noise Ninja 
+             * as it points to a memory mapped file.
+             */
+            saveGlobalDataPointer = pdata.category != "PictureCode";
 			
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
 	
@@ -2939,8 +2945,9 @@ namespace PSFilterLoad.PSApi
 
 			if (RectNonEmpty(rect))
 			{
-				if (rect.left < source.Width && rect.top < source.Height)
-				{
+                if (rect.left >= source.Width || rect.top >= source.Height)
+                    return;
+
 #if DEBUG			
                     int width = (rect.right - rect.left);
 			        int height = (rect.bottom - rect.top);
@@ -2955,96 +2962,94 @@ namespace PSFilterLoad.PSApi
 #endif
 
 
-					int ofs = loplane;
-					switch (loplane)
-					{
-						case 0:
-							ofs = 2;
-							break;
-						case 2:
-							ofs = 0;
-							break;
-					}
-					Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
+                int ofs = loplane;
+                switch (loplane)
+                {
+                    case 0:
+                        ofs = 2;
+                        break;
+                    case 2:
+                        ofs = 0;
+                        break;
+                }
+                Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
 
-					if (lockRect.Left < 0 || lockRect.Top < 0)
-					{
-						if (lockRect.Left < 0 && lockRect.Top < 0)
-						{
-							lockRect.X = lockRect.Y = 0;
-							lockRect.Width -= -rect.left;
-							lockRect.Height -= -rect.top;
-						}
-						else if (lockRect.Left < 0)
-						{
-							lockRect.X = 0;
-							lockRect.Width -= -rect.left;
-						}
-						else if (lockRect.Top < 0)
-						{
-							lockRect.Y = 0;
-							lockRect.Height -= -rect.top;
-						}
-					}
-
-					void* outDataPtr = outData.ToPointer();
-                    int top = lockRect.Top;
-                    int left = lockRect.Left;
-                    int bottom = Math.Min(lockRect.Bottom, dest.Height);
-                    int right = Math.Min(lockRect.Right, dest.Width);
-
-					for (int y = top; y < bottom; y++)
-					{
-						byte* p = (byte*)outDataPtr + ((y - top) * outRowBytes);                            
-						byte *q = (byte*)dest.GetPointAddressUnchecked(left, y);
-
-						for (int x = left; x < right; x++)
-						{
-							switch (nplanes)
-							{
-								case 1:
-									q[ofs] = *p;
-									break;
-								case 2:
-									q[ofs] = p[0];
-									q[ofs + 1] = p[1];
-									break;
-								case 3:
-									q[0] = p[2];
-									q[1] = p[1];
-									q[2] = p[0];
-									break;
-								case 4:
-									q[0] = p[2];
-									q[1] = p[1];
-									q[2] = p[0];
-									q[3] = p[3];
-									break;
-
-							}
-
-							p += nplanes;
-							q += ColorBgra.SizeOf;
-						}
-					}
-
-                    // set tha alpha channel to 255 in the area affected by the filter if it needs it
-                    if ((filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection) &&
-                        outputHandling == FilterDataHandling.filterDataHandlingFillMask && (nplanes == 4 || loplane == 3))
+                if (lockRect.Left < 0 || lockRect.Top < 0)
+                {
+                    if (lockRect.Left < 0 && lockRect.Top < 0)
                     {
-                        for (int y = top; y < bottom; y++)
-                        {
-                            ColorBgra* p = dest.GetPointAddressUnchecked(left, y);
+                        lockRect.X = lockRect.Y = 0;
+                        lockRect.Width -= -rect.left;
+                        lockRect.Height -= -rect.top;
+                    }
+                    else if (lockRect.Left < 0)
+                    {
+                        lockRect.X = 0;
+                        lockRect.Width -= -rect.left;
+                    }
+                    else if (lockRect.Top < 0)
+                    {
+                        lockRect.Y = 0;
+                        lockRect.Height -= -rect.top;
+                    }
+                }
 
-                            for (int x = left; x < right; x++)
-                            {
-                                p->A = 255;
-                                p++;
-                            }
+                void* outDataPtr = outData.ToPointer();
+                int top = lockRect.Top;
+                int left = lockRect.Left;
+                int bottom = Math.Min(lockRect.Bottom, dest.Height);
+                int right = Math.Min(lockRect.Right, dest.Width);
+
+                for (int y = top; y < bottom; y++)
+                {
+                    byte* p = (byte*)outDataPtr + ((y - top) * outRowBytes);
+                    byte* q = (byte*)dest.GetPointAddressUnchecked(left, y);
+
+                    for (int x = left; x < right; x++)
+                    {
+                        switch (nplanes)
+                        {
+                            case 1:
+                                q[ofs] = *p;
+                                break;
+                            case 2:
+                                q[ofs] = p[0];
+                                q[ofs + 1] = p[1];
+                                break;
+                            case 3:
+                                q[0] = p[2];
+                                q[1] = p[1];
+                                q[2] = p[0];
+                                break;
+                            case 4:
+                                q[0] = p[2];
+                                q[1] = p[1];
+                                q[2] = p[0];
+                                q[3] = p[3];
+                                break;
+
+                        }
+
+                        p += nplanes;
+                        q += ColorBgra.SizeOf;
+                    }
+                }
+
+                // set tha alpha channel to 255 in the area affected by the filter if it needs it
+                if ((filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection) &&
+                    outputHandling == FilterDataHandling.filterDataHandlingFillMask && (nplanes == 4 || loplane == 3))
+                {
+                    for (int y = top; y < bottom; y++)
+                    {
+                        ColorBgra* p = dest.GetPointAddressUnchecked(left, y);
+
+                        for (int x = left; x < right; x++)
+                        {
+                            p->A = 255;
+                            p++;
                         }
                     }
-
-				}
+                }
 
 				
 			}
@@ -3263,10 +3268,22 @@ namespace PSFilterLoad.PSApi
 
             void* baseAddr = source.baseAddr.ToPointer();
 
-            for (int y = 0; y < height; y++)
+            int top = srcRect.top;
+            int bottom = srcRect.bottom;
+            int left = srcRect.left;
+            if (source.bounds.Equals(srcRect) && top > 0)
             {
+                top = left = 0;
+                bottom = height;
+            }
+
+            for (int y = top; y < bottom; y++)
+            {
+                int surfaceY = y - top;
                 if (source.colBytes == 1)
                 {
+                    byte* row = (byte*)tempDisplaySurface.GetRowAddressUnchecked(surfaceY);
+                    int srcStride = y * source.rowBytes; // cache the destination row and source stride.
                     for (int i = 0; i < nplanes; i++)
                     {
                         int ofs = i;
@@ -3279,8 +3296,8 @@ namespace PSFilterLoad.PSApi
                                 ofs = 0;
                                 break;
                         }
-                        byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y) + ofs;
-                        byte* q = (byte*)baseAddr + (y * source.rowBytes) + (i * source.planeBytes);
+                        byte* p = row + ofs;
+                        byte* q = (byte*)baseAddr + srcStride + (i * source.planeBytes) + left;
 
                         for (int x = 0; x < width; x++)
                         {
@@ -3294,8 +3311,8 @@ namespace PSFilterLoad.PSApi
                 }
                 else
                 {
-                    byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y);
-                    byte* q = (byte*)baseAddr + (y * source.rowBytes);
+                    byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(surfaceY);
+                    byte* q = (byte*)baseAddr + (y * source.rowBytes) + left;
                     for (int x = 0; x < width; x++)
                     {
                         p[0] = q[2];

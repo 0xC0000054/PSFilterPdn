@@ -216,7 +216,7 @@ namespace PSFilterLoad.PSApi
 			set
 			{
 				globalParms = value.GlobalParameters;
-				aeteDict = value.AETEDict;
+				aeteDict = value.AETEDictionary;
 			}
 		}
 		/// <summary>
@@ -420,7 +420,7 @@ namespace PSFilterLoad.PSApi
 		{
             // some filters do not handle the alpha channel correctly despite what their filterInfo says.
 			if (data.filterInfo == null || data.category == "L'amico Perry" || data.category == "Imagenomic" || 
-                data.category.Contains("Vizros") && data.title.Contains("Lake"))
+                data.category.Contains("Vizros") && data.title.Contains("Lake") || data.category == "PictureCode")
 			{
 #if USEMATTING
 				if (data.filterInfo != null)
@@ -590,6 +590,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
+        static bool saveGlobalDataPointer;
 		/// <summary>
 		/// Save the filter parameters for repeat runs.
 		/// </summary>
@@ -676,7 +677,7 @@ namespace PSFilterLoad.PSApi
 				}
 
 			}
-			if (filterRecord->parameters != IntPtr.Zero && data != IntPtr.Zero)
+			if (filterRecord->parameters != IntPtr.Zero && data != IntPtr.Zero && saveGlobalDataPointer)
 			{
 				long pluginDataSize = NativeMethods.GlobalSize(data).ToInt64();
 				globalParms.PluginDataIsPSHandle = false;
@@ -1201,6 +1202,11 @@ namespace PSFilterLoad.PSApi
 			{
 				return plugin_about(pdata);
 			}
+
+            /* Disable saving of the 'data' pointer for Noise Ninja 
+             * as it points to a memory mapped file.
+             */
+            saveGlobalDataPointer = pdata.category != "PictureCode";
 
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
 			
@@ -2188,77 +2194,78 @@ namespace PSFilterLoad.PSApi
 
 			if (RectNonEmpty(rect))
 			{
-				if (rect.left < source.Width && rect.top < source.Height)
-				{
-					int ofs = loplane;
-					switch (loplane)
-					{
-						case 0:
-							ofs = 2;
-							break;
-						case 2:
-							ofs = 0;
-							break;
-					}
-					Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
+                if (rect.left >= source.Width || rect.top >= source.Height)
+                    return;
 
-					if (lockRect.Left < 0 || lockRect.Top < 0)
-					{
-						if (lockRect.Left < 0 && lockRect.Top < 0)
-						{
-							lockRect.X = lockRect.Y = 0;
-							lockRect.Width -= -rect.left;
-							lockRect.Height -= -rect.top;
-						}
-						else if (lockRect.Left < 0)
-						{
-							lockRect.X = 0;
-							lockRect.Width -= -rect.left;
-						}
-						else if (lockRect.Top < 0)
-						{
-							lockRect.Y = 0;
-							lockRect.Height -= -rect.top;
-						}
-					}
+                int ofs = loplane;
+                switch (loplane)
+                {
+                    case 0:
+                        ofs = 2;
+                        break;
+                    case 2:
+                        ofs = 0;
+                        break;
+                }
+                Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
 
-                    void* outDataPtr = outData.ToPointer();
+                if (lockRect.Left < 0 || lockRect.Top < 0)
+                {
+                    if (lockRect.Left < 0 && lockRect.Top < 0)
+                    {
+                        lockRect.X = lockRect.Y = 0;
+                        lockRect.Width -= -rect.left;
+                        lockRect.Height -= -rect.top;
+                    }
+                    else if (lockRect.Left < 0)
+                    {
+                        lockRect.X = 0;
+                        lockRect.Width -= -rect.left;
+                    }
+                    else if (lockRect.Top < 0)
+                    {
+                        lockRect.Y = 0;
+                        lockRect.Height -= -rect.top;
+                    }
+                }
 
-                    int top = lockRect.Top;
-                    int left = lockRect.Left;
-                    int bottom = Math.Min(lockRect.Bottom, dest.Height);
-                    int right = Math.Min(lockRect.Right, dest.Width);
+                void* outDataPtr = outData.ToPointer();
 
-					for (int y = top; y < bottom; y++)
-					{
-						byte* p = (byte*)outDataPtr + ((y - top) * outRowBytes);                            
-						byte *q = (byte*)dest.GetPointAddressUnchecked(left, y);
+                int top = lockRect.Top;
+                int left = lockRect.Left;
+                int bottom = Math.Min(lockRect.Bottom, dest.Height);
+                int right = Math.Min(lockRect.Right, dest.Width);
 
-						for (int x = left; x < right; x++)
-						{
+                for (int y = top; y < bottom; y++)
+                {
+                    byte* p = (byte*)outDataPtr + ((y - top) * outRowBytes);
+                    byte* q = (byte*)dest.GetPointAddressUnchecked(left, y);
 
-							switch (nplanes)
-							{
-								case 1:
-									q[ofs] = *p;
-									break;
-								case 2:
-									q[ofs] = p[0];
-									q[ofs + 1] = p[1];
-									break;
-								case 3:
-									q[0] = p[2];
-									q[1] = p[1];
-									q[2] = p[0];
-									break;
-								case 4:
-									q[0] = p[2];
-									q[1] = p[1];
-									q[2] = p[0];
-									q[3] = p[3];
-									break;
+                    for (int x = left; x < right; x++)
+                    {
 
-							}
+                        switch (nplanes)
+                        {
+                            case 1:
+                                q[ofs] = *p;
+                                break;
+                            case 2:
+                                q[ofs] = p[0];
+                                q[ofs + 1] = p[1];
+                                break;
+                            case 3:
+                                q[0] = p[2];
+                                q[1] = p[1];
+                                q[2] = p[0];
+                                break;
+                            case 4:
+                                q[0] = p[2];
+                                q[1] = p[1];
+                                q[2] = p[0];
+                                q[3] = p[3];
+                                break;
+
+                        }
 
 #if USEMATTING
 							if (hasTransparency && nplanes < 4 && outputHandling != FilterDataHandling.filterDataHandlingNone && copyToDest)
@@ -2280,33 +2287,31 @@ namespace PSFilterLoad.PSApi
 								}
 							} 
 #endif
-							p += nplanes;
-							q += ColorBgra.SizeOf;
-						}
-					}
-                    // set tha alpha channel to 255 in the area affected by the filter if it needs it
-                    if ((filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection) &&
-                        outputHandling == FilterDataHandling.filterDataHandlingFillMask && (nplanes == 4 || loplane == 3))
+                        p += nplanes;
+                        q += ColorBgra.SizeOf;
+                    }
+                }
+                // set tha alpha channel to 255 in the area affected by the filter if it needs it
+                if ((filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection) &&
+                    outputHandling == FilterDataHandling.filterDataHandlingFillMask && (nplanes == 4 || loplane == 3))
+                {
+                    for (int y = top; y < bottom; y++)
                     {
-                        for (int y = top; y < bottom; y++)
-                        {
-                            ColorBgra* p = dest.GetPointAddressUnchecked(left, y);
+                        ColorBgra* p = dest.GetPointAddressUnchecked(left, y);
 
-                            for (int x = left; x < right; x++)
-                            {
-                                p->A = 255;
-                                p++;
-                            }
+                        for (int x = left; x < right; x++)
+                        {
+                            p->A = 255;
+                            p++;
                         }
                     }
+                }
 
 #if DEBUG
 					using (Bitmap bmp = dest.CreateAliasedBitmap())
                     {
                     }
 #endif
-
-				}
 			}
 		}
 
@@ -2716,56 +2721,66 @@ namespace PSFilterLoad.PSApi
 
             void* baseAddr = source.baseAddr.ToPointer();
 
+            int top = srcRect.top;
+            int bottom = srcRect.bottom;
+            int left = srcRect.left;
+            if (source.bounds.Equals(srcRect) && top > 0)
+            {
+                top = left = 0;
+                bottom = height;
+            }
 
-			for (int y = 0; y < height; y++)
-			{
+            for (int y = top; y < bottom; y++)
+            {
+                int surfaceY = y - top;
+                if (source.colBytes == 1)
+                {
+                    byte* row = (byte*)tempDisplaySurface.GetRowAddressUnchecked(surfaceY);
+                    int srcStride = y * source.rowBytes; // cache the destination row and source stride.
+                    for (int i = 0; i < nplanes; i++)
+                    {
+                        int ofs = i;
+                        switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
+                        {
+                            case 0:
+                                ofs = 2;
+                                break;
+                            case 2:
+                                ofs = 0;
+                                break;
+                        }
+                        byte* p = row + ofs;
+                        byte* q = (byte*)baseAddr + srcStride + (i * source.planeBytes) + left;
 
-				if (source.colBytes == 1)
-				{
-					for (int i = 0; i < nplanes; i++)
-					{
-						int ofs = i;
-						switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
-						{
-							case 0:
-								ofs = 2;
-								break;
-							case 2:
-								ofs = 0;
-								break;
-						}
-						byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y) + ofs;
-						byte* q = (byte*)baseAddr + (y * source.rowBytes) + (i * source.planeBytes);
+                        for (int x = 0; x < width; x++)
+                        {
+                            *p = *q;
 
-						for (int x = 0; x < width; x++)
-						{
-							*p = *q;
+                            p += ColorBgra.SizeOf;
+                            q += source.colBytes;
+                        }
+                    }
 
-							p += ColorBgra.SizeOf;
-							q += source.colBytes;
-						}
-					}
+                }
+                else
+                {
+                    byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(surfaceY);
+                    byte* q = (byte*)baseAddr + (y * source.rowBytes) + left;
+                    for (int x = 0; x < width; x++)
+                    {
+                        p[0] = q[2];
+                        p[1] = q[1];
+                        p[2] = q[0];
+                        if (source.colBytes == 4)
+                        {
+                            p[3] = q[3];
+                        }
 
-				}
-				else
-				{
-					byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y);
-					byte* q = (byte*)baseAddr + (y * source.rowBytes);
-					for (int x = 0; x < width; x++)
-					{
-						p[0] = q[2];
-						p[1] = q[1];
-						p[2] = q[0];
-						if (source.colBytes == 4)
-						{
-							p[3] = q[3];
-						}
-
-						p += ColorBgra.SizeOf;
-						q += source.colBytes;
-					}
-				}
-			}
+                        p += ColorBgra.SizeOf;
+                        q += source.colBytes;
+                    }
+                }
+            }
 
 			using (Graphics gr = Graphics.FromHdc(platformContext))
 			{
@@ -4384,6 +4399,8 @@ namespace PSFilterLoad.PSApi
 		{
 			if (!disposed)
 			{
+                disposed = true;
+
 				if (disposing)
 				{
 					if (source != null)
@@ -4549,7 +4566,6 @@ namespace PSFilterLoad.PSApi
 					data = IntPtr.Zero;
 				}
 
-				disposed = true;
 			}
 		}
 
