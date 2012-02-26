@@ -29,6 +29,8 @@ namespace PSFilterPdn
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
+            if (info == null)
+                throw new ArgumentNullException("info", "info is null.");
             info.AddValue("rgnData", this.rgnData, typeof(byte[]));
         }
     }
