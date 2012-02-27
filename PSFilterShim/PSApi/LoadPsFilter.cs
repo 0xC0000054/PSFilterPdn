@@ -2724,7 +2724,7 @@ namespace PSFilterLoad.PSApi
             int top = srcRect.top;
             int bottom = srcRect.bottom;
             int left = srcRect.left;
-            if (source.bounds.Equals(srcRect) && top > 0)
+            if (source.bounds.Equals(srcRect) && (top > 0 || left > 0))
             {
                 top = left = 0;
                 bottom = height;
