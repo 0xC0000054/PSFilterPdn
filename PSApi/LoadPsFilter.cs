@@ -4370,7 +4370,7 @@ namespace PSFilterLoad.PSApi
 
                         complexProperty = handle_new_proc(bytes.Length);
                         Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
-                        handle_unlock_proc(complexProperty); // this is really not needed as the handle is fixed
+                        handle_unlock_proc(complexProperty); 
                         break;
                     case PSProperties.propCopyright:
                         simpleProperty = 0;  // no copyright
@@ -4408,7 +4408,7 @@ namespace PSFilterLoad.PSApi
                         bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
                         complexProperty = handle_new_proc(bytes.Length);
                         Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
-                        handle_unlock_proc(complexProperty); // this is really not needed as the handle is fixed
+                        handle_unlock_proc(complexProperty); 
 
                         break;
                     case PSProperties.propURL:
@@ -4421,7 +4421,7 @@ namespace PSFilterLoad.PSApi
                         simpleProperty = 0;
                         break;
                     default:
-                        return PSError.errPlugInHostInsufficient;
+                        return PSError.errPlugInPropertyUndefined;
                 } 
             }
 
@@ -4460,7 +4460,7 @@ namespace PSFilterLoad.PSApi
                 case PSProperties.propWatchSuspension:
                     break;
                 default:
-                    return PSError.errPlugInHostInsufficient;
+                    return PSError.errPlugInPropertyUndefined;
             }
             
             return PSError.noErr;

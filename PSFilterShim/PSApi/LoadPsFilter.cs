@@ -3926,7 +3926,7 @@ namespace PSFilterLoad.PSApi
 						simpleProperty = 0;
 						break;
 					default:
-						return PSError.errPlugInHostInsufficient;
+						return PSError.errPlugInPropertyUndefined;
 				} 
 			}
 
@@ -3964,7 +3964,7 @@ namespace PSFilterLoad.PSApi
 				case PSProperties.propWatchSuspension:
 					break;
 				default:
-					return PSError.errPlugInHostInsufficient;
+					return PSError.errPlugInPropertyUndefined;
 			}
 
 			return PSError.noErr;
