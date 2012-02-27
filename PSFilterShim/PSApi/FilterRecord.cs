@@ -318,6 +318,14 @@ namespace PSFilterLoad.PSApi
         /// ReadImageDocumentDesc*
         public System.IntPtr documentInfo;
 
-        public fixed byte reserved[78];
+        /* New in  5.0 */
+
+        public IntPtr sSpBasic;
+
+        public IntPtr plugInRef;
+
+        public int depth;
+
+        public fixed byte reserved[66];
     }
 }
