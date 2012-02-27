@@ -4864,6 +4864,10 @@ namespace PSFilterLoad.PSApi
             filterRecord->errorString = Memory.Allocate(256, true);
             filterRecord->channelPortProcs = IntPtr.Zero;
             filterRecord->documentInfo = IntPtr.Zero;
+
+            filterRecord->sSpBasic = IntPtr.Zero;
+            filterRecord->plugInRef = IntPtr.Zero;
+            filterRecord->depth = 8;
         }
 
 		#region IDisposable Members

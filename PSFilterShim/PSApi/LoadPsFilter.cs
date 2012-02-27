@@ -4285,7 +4285,7 @@ namespace PSFilterLoad.PSApi
 			frsetup = true;
 
 
-			filterRecordPtr =Memory.Allocate(Marshal.SizeOf(typeof(FilterRecord)), true);
+			filterRecordPtr = Memory.Allocate(Marshal.SizeOf(typeof(FilterRecord)), true);
 			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
 			filterRecord->serial = 0;
@@ -4372,6 +4372,10 @@ namespace PSFilterLoad.PSApi
 			filterRecord->errorString = Memory.Allocate(256, true);
 			filterRecord->channelPortProcs = IntPtr.Zero;
 			filterRecord->documentInfo = IntPtr.Zero;
+
+            filterRecord->sSpBasic = IntPtr.Zero;
+            filterRecord->plugInRef = IntPtr.Zero;
+            filterRecord->depth = 8;
 		}
 
 		#region IDisposable Members
