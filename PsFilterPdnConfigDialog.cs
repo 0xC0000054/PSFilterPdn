@@ -874,6 +874,34 @@ namespace PSFilterPdn
 
 				FileInfo[] files = di.GetFiles("*.8bf", parm.options);
 
+                FileInfo[] links = di.GetFiles("*.lnk", parm.options);
+                if (links.Length > 0)
+                {
+                    List<FileInfo> fileInfos = new List<FileInfo>();
+
+                    using (ShellLink link = new ShellLink())
+                    {
+                        foreach (var item in links)
+                        {
+                            link.Load(item.FullName);
+                            FileInfo info = new FileInfo(link.Path);
+                            if (info.Exists && info.Extension == ".8bf")
+                            {
+                                fileInfos.Add(info);
+                            }
+                        } 
+                    }
+
+                    if (fileInfos.Count > 0)
+                    {
+                        List<FileInfo> temp = new List<FileInfo>(files.Length + fileInfos.Count);
+                        temp.AddRange(files);
+                        temp.AddRange(fileInfos);
+
+                        files = temp.ToArray();
+                    }
+                }
+
 				worker.ReportProgress(i, di.Name);
 				foreach (FileInfo fi in files)
 				{
