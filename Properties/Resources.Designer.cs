@@ -392,14 +392,5 @@ namespace PSFilterPdn.Properties {
                 return ResourceManager.GetString("UnsupportedImageMode", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to User canceled.
-        /// </summary>
-        internal static string UserCanceledError {
-            get {
-                return ResourceManager.GetString("UserCanceledError", resourceCulture);
-            }
-        }
     }
 }

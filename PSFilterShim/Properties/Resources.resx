@@ -184,10 +184,6 @@
     <value>Unsupported image mode.</value>
     <comment>UnsupportedImageMode description</comment>
   </data>
-  <data name="UserCanceledError" xml:space="preserve">
-    <value>User canceled</value>
-    <comment>UserCanceledError description</comment>
-  </data>
   <data name="AlphaChannelName" xml:space="preserve">
     <value>Alpha</value>
   </data>

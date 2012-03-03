@@ -651,7 +651,7 @@ namespace PSFilterPdn
 			}
 			else
 			{
-				if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage) && proxyErrorMessage != Resources.UserCanceledError)
+				if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage))
 				{
 					MessageBox.Show(this, proxyErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}
@@ -725,7 +725,7 @@ namespace PSFilterPdn
 										filterProgressBar.Value = filterProgressBar.Maximum;
 									}
 								}
-                                else if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
+                                else if (!result && !string.IsNullOrEmpty(lps.ErrorMessage))
 								{
 									MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 								}
@@ -1331,7 +1331,7 @@ namespace PSFilterPdn
 		{
 			if (data.filterInfo != null)
 			{
-				string fici = string.Empty;
+				System.Text.StringBuilder fici = new System.Text.StringBuilder();
 
 				for (int i = 0; i < 7; i++)
 				{
@@ -1340,14 +1340,14 @@ namespace PSFilterPdn
 					string outputHandling = info.outputHandling.ToString("G");
 
 
-					fici += string.Format(CultureInfo.InvariantCulture, "{0}_{1}_{2}", new object[] { inputHandling, outputHandling, info.flags1.ToString(CultureInfo.InvariantCulture) });
+					fici.AppendFormat(CultureInfo.InvariantCulture, "{0}_{1}_{2}", new object[] { inputHandling, outputHandling, info.flags1.ToString(CultureInfo.InvariantCulture) });
 					if (i < 6)
 					{
-						fici += ":";
+						fici.Append(':');
 					}
 				}
 
-				return fici;
+				return fici.ToString();
 			}
 
 			return string.Empty;

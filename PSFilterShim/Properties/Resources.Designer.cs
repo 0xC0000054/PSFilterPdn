@@ -133,7 +133,7 @@ namespace PSFilterShim.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File I/O error..
+        ///   Looks up a localized string similar to File I/O message..
         /// </summary>
         internal static string FileIOError {
             get {
@@ -142,7 +142,7 @@ namespace PSFilterShim.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File open error..
+        ///   Looks up a localized string similar to File open message..
         /// </summary>
         internal static string FileOpenError {
             get {
@@ -151,7 +151,7 @@ namespace PSFilterShim.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File read error..
+        ///   Looks up a localized string similar to File read message..
         /// </summary>
         internal static string FileReadError {
             get {
@@ -160,7 +160,7 @@ namespace PSFilterShim.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File write error..
+        ///   Looks up a localized string similar to File write message..
         /// </summary>
         internal static string FileWriteError {
             get {
@@ -223,7 +223,7 @@ namespace PSFilterShim.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Null handle error..
+        ///   Looks up a localized string similar to Null handle message..
         /// </summary>
         internal static string NullHandleError {
             get {
@@ -250,7 +250,7 @@ namespace PSFilterShim.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to error code = {0}.
+        ///   Looks up a localized string similar to message code = {0}.
         /// </summary>
         internal static string UnknownErrorCodeFormat {
             get {
@@ -264,15 +264,6 @@ namespace PSFilterShim.Properties {
         internal static string UnsupportedImageMode {
             get {
                 return ResourceManager.GetString("UnsupportedImageMode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to User canceled.
-        /// </summary>
-        internal static string UserCanceledError {
-            get {
-                return ResourceManager.GetString("UserCanceledError", resourceCulture);
             }
         }
     }

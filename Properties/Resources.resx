@@ -117,10 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="UserCanceledError" xml:space="preserve">
-    <value>User canceled</value>
-    <comment>Thrown when the user cancels the filter, this error message is never shown.</comment>
-  </data>
   <data name="FileReadError" xml:space="preserve">
     <value>File read error.</value>
     <comment>FileReadError description</comment>

@@ -209,7 +209,7 @@ namespace PSFilterPdn
                         token.Dest = Surface.CopyFromBitmap(bmp);
                     }
                 }
-                else if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage) && proxyErrorMessage != Resources.UserCanceledError)
+                else if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage))
                 {
                     MessageBox.Show(proxyErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
@@ -273,7 +273,7 @@ namespace PSFilterPdn
                     {
                         token.Dest = lps.Dest.Clone();
                     }
-                    else if (!result && !string.IsNullOrEmpty(lps.ErrorMessage) && lps.ErrorMessage != Resources.UserCanceledError)
+                    else if (!result && !string.IsNullOrEmpty(lps.ErrorMessage))
                     {
                         MessageBox.Show(lps.ErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
