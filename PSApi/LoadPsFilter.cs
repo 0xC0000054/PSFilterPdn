@@ -1447,7 +1447,8 @@ namespace PSFilterLoad.PSApi
 				errorMessage = error_message(result);
 
 #if DEBUG
-				Ping(DebugFlags.Error, string.Format("filterSelectorStart returned result code: {0}({1})", errorMessage, result));
+                string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
+				Ping(DebugFlags.Error, string.Format("filterSelectorStart returned result code: {0}({1})", message, result));
 #endif                
 				return false;
 			}
@@ -1492,8 +1493,9 @@ namespace PSFilterLoad.PSApi
 
 					errorMessage = error_message(saved_result);
 
-#if DEBUG
-					Ping(DebugFlags.Error, string.Format("filterSelectorContinue returned result code: {0}({1})", errorMessage, saved_result)); 
+#if DEBUG                
+                    string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
+					Ping(DebugFlags.Error, string.Format("filterSelectorContinue returned result code: {0}({1})", message, saved_result));
 #endif
 
 					return false;
@@ -1549,7 +1551,8 @@ namespace PSFilterLoad.PSApi
 				FreeLibrary(ref pdata);
 				errorMessage = error_message(result);
 #if DEBUG
-				Ping(DebugFlags.Error, string.Format("filterSelectorParameters failed result code: {0}({1})", errorMessage, result)); 
+                string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
+				Ping(DebugFlags.Error, string.Format("filterSelectorParameters failed result code: {0}({1})", message, result)); 
 #endif
 				return false;
 			}
@@ -1666,7 +1669,8 @@ namespace PSFilterLoad.PSApi
 				FreeLibrary(ref pdata);
 				errorMessage = error_message(result);
 #if DEBUG
-				Ping(DebugFlags.Error, string.Format("filterSelectorParameters failed result code: {0}({1})", errorMessage, result)); 
+                string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
+				Ping(DebugFlags.Error, string.Format("filterSelectorParameters failed result code: {0}({1})", message, result)); 
 #endif
 				return false;
 			}
@@ -1913,67 +1917,63 @@ namespace PSFilterLoad.PSApi
 
 			if (result == PSError.userCanceledErr || result == 1) // Many plug-ins seem to return 1 to indicate Cancel
 			{
-				return Resources.UserCanceledError;
-			}
-			else
-			{
-				if (result == PSError.errReportString)
-				{
-                    unsafe
-                    {
-                        error = StringFromPString(((FilterRecord*)filterRecordPtr.ToPointer())->errorString);
-                    }
+				return string.Empty; // return an empty string as this message is never shown
+            }
+            else if (result == PSError.errReportString)
+            {
+                unsafe
+                {
+                    error = StringFromPString(((FilterRecord*)filterRecordPtr.ToPointer())->errorString);
                 }
-				else
-				{
-					switch (result)
-					{
-						case PSError.readErr:
-							error = Resources.FileReadError;
-							break;
-						case PSError.writErr:
-							error = Resources.FileWriteError;
-							break;
-						case PSError.openErr:
-							error = Resources.FileOpenError;
-							break;
-						case PSError.dskFulErr:
-							error = Resources.DiskFullError;
-							break;
-						case PSError.ioErr:
-							error = Resources.FileIOError;
-							break;
-						case PSError.memFullErr:
-							error = Resources.OutOfMemoryError;
-							break;
-						case PSError.nilHandleErr:
-							error = Resources.NullHandleError;
-							break;
-						case PSError.filterBadParameters:
-							error = Resources.BadParameters;
-							break;
-						case PSError.filterBadMode:
-							error = Resources.UnsupportedImageMode;
-							break;
-						case PSError.errPlugInHostInsufficient:
-							error = Resources.errPlugInHostInsufficient;
-							break;
-						case PSError.errPlugInPropertyUndefined:
-							error = Resources.errPlugInPropertyUndefined;
-							break;
-						case PSError.errHostDoesNotSupportColStep:
-							error = Resources.errHostDoesNotSupportColStep;
-							break;
-						case PSError.errInvalidSamplePoint:
-							error = Resources.InvalidSamplePoint;
-							break;
-						default:
-							error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.UnknownErrorCodeFormat, result);
-							break;
-					}
-				}
-
-			}
+            }
+            else
+            {
+                switch (result)
+                {
+                    case PSError.readErr:
+                        error = Resources.FileReadError;
+                        break;
+                    case PSError.writErr:
+                        error = Resources.FileWriteError;
+                        break;
+                    case PSError.openErr:
+                        error = Resources.FileOpenError;
+                        break;
+                    case PSError.dskFulErr:
+                        error = Resources.DiskFullError;
+                        break;
+                    case PSError.ioErr:
+                        error = Resources.FileIOError;
+                        break;
+                    case PSError.memFullErr:
+                        error = Resources.OutOfMemoryError;
+                        break;
+                    case PSError.nilHandleErr:
+                        error = Resources.NullHandleError;
+                        break;
+                    case PSError.filterBadParameters:
+                        error = Resources.BadParameters;
+                        break;
+                    case PSError.filterBadMode:
+                        error = Resources.UnsupportedImageMode;
+                        break;
+                    case PSError.errPlugInHostInsufficient:
+                        error = Resources.errPlugInHostInsufficient;
+                        break;
+                    case PSError.errPlugInPropertyUndefined:
+                        error = Resources.errPlugInPropertyUndefined;
+                        break;
+                    case PSError.errHostDoesNotSupportColStep:
+                        error = Resources.errHostDoesNotSupportColStep;
+                        break;
+                    case PSError.errInvalidSamplePoint:
+                        error = Resources.InvalidSamplePoint;
+                        break;
+                    default:
+                        error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.UnknownErrorCodeFormat, result);
+                        break;
+                }
+            }
 			return error;
 		}
 
@@ -1989,9 +1989,6 @@ namespace PSFilterLoad.PSApi
 
 			return 0;
 		}
-
-		static bool src_valid;
-		static bool dst_valid;
 
 		static Rect16 outRect;
 		static int outRowBytes;
@@ -2018,12 +2015,42 @@ namespace PSFilterLoad.PSApi
             return (((fr->inHiPlane - fr->inLoPlane) + 1) == 1);
         }
 
+        /// <summary>
+        /// Determines whether the data buffer nedds to be resized.
+        /// </summary>
+        /// <param name="inData">The buffer to check.</param>
+        /// <param name="inRect">The new source rectangle.</param>
+        /// <param name="loplane">The loplane.</param>
+        /// <param name="hiplane">The hiplane.</param>
+        /// <returns> <c>true</c> if a the buffer nedds to be resized; otherwise, <c>false</c></returns>
+        static unsafe bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loplane, int hiplane)
+        {
+            if (inData == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            long size = 0;
+            int width, height, nplanes, bufferSize;
+
+
+            size = Memory.Size(inData);
+
+            width = inRect.right - inRect.left;
+            height = inRect.bottom - inRect.top;
+            nplanes = hiplane - loplane + 1;
+
+            bufferSize = ((width * nplanes) * height);
+
+            return (bufferSize > size);
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         static unsafe short advance_state_proc()
         {
             FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
-            if (dst_valid && RectNonEmpty(outRect))
+            if (filterRecord->outData != IntPtr.Zero && RectNonEmpty(outRect))
             {
                 store_buf(filterRecord->outData, outRowBytes, outRect, outLoPlane, outHiPlane);
             }
@@ -2035,7 +2062,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (!maskRect.Equals(filterRecord->maskRect))
                 {
-                    if (filterRecord->maskData != IntPtr.Zero)
+                    if (filterRecord->maskData != IntPtr.Zero && ResizeBuffer(filterRecord->maskData, filterRecord->maskRect, 0, 0))
                     {
                         Memory.Free(filterRecord->maskData);
                         filterRecord->maskData = IntPtr.Zero;
@@ -2066,7 +2093,8 @@ namespace PSFilterLoad.PSApi
             {
                 if (!inRect.Equals(filterRecord->inRect) || IsSinglePlane(filterRecord, false))
                 {
-                    if (src_valid)
+                    if (filterRecord->inData != IntPtr.Zero && 
+                        ResizeBuffer(filterRecord->inData, filterRecord->inRect, filterRecord->inLoPlane, filterRecord->inHiPlane))
                     {
                         try
                         {
@@ -2079,7 +2107,6 @@ namespace PSFilterLoad.PSApi
                         {
                             filterRecord->inData = IntPtr.Zero;
                         }
-                        src_valid = false;
                     }
 
                     error = fill_buf(ref filterRecord->inData, ref filterRecord->inRowBytes, filterRecord->inRect, filterRecord->inLoPlane, filterRecord->inHiPlane, filterRecord->inputRate, filterRecord->inputPadding);
@@ -2090,12 +2117,11 @@ namespace PSFilterLoad.PSApi
                     
                     inRect = filterRecord->inRect;
                     filterRecord->inColumnBytes = (filterRecord->inHiPlane - filterRecord->inLoPlane) + 1;
-                    src_valid = true;
                 }
             }
             else
             {
-                if (src_valid)
+                if (filterRecord->inData != IntPtr.Zero)
                 {
                     try
                     {
@@ -2108,7 +2134,6 @@ namespace PSFilterLoad.PSApi
                     {
                         filterRecord->inData = IntPtr.Zero;
                     }
-                    src_valid = false;
                 }
                 filterRecord->inRowBytes = 0;
                 inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
@@ -2118,7 +2143,8 @@ namespace PSFilterLoad.PSApi
             {
                 if (!outRect.Equals(filterRecord->outRect) || IsSinglePlane(filterRecord, true))
                 {
-                    if (dst_valid)
+                    if (filterRecord->outData != IntPtr.Zero && 
+                        ResizeBuffer(filterRecord->outData, filterRecord->outRect, filterRecord->outLoPlane, filterRecord->outHiPlane))
                     {
                         try
                         {
@@ -2131,7 +2157,6 @@ namespace PSFilterLoad.PSApi
                         {
                             filterRecord->outData = IntPtr.Zero;
                         }
-                        dst_valid = false;
                     }
 
                     error = fillOutBuf(ref filterRecord->outData, ref filterRecord->outRowBytes, filterRecord->outRect, filterRecord->outLoPlane, filterRecord->outHiPlane, filterRecord->outputPadding);
@@ -2141,7 +2166,6 @@ namespace PSFilterLoad.PSApi
                     }
                     
                     filterRecord->outColumnBytes = (filterRecord->outHiPlane - filterRecord->outLoPlane) + 1;
-                    dst_valid = true;
                 }
 #if DEBUG
                 Debug.WriteLine(string.Format("outRowBytes = {0}", filterRecord->outRowBytes));
@@ -2154,7 +2178,7 @@ namespace PSFilterLoad.PSApi
             }
             else
             {
-                if (dst_valid)
+                if (filterRecord->outData != IntPtr.Zero)
                 {
                     try
                     {
@@ -2167,7 +2191,6 @@ namespace PSFilterLoad.PSApi
                     {
                         filterRecord->outData = IntPtr.Zero;
                     }
-                    dst_valid = false;
                 }
                 filterRecord->outRowBytes = 0;
                 outRowBytes = 0;
@@ -2459,9 +2482,11 @@ namespace PSFilterLoad.PSApi
 
 
                 int stride = (width * nplanes);
-                int len = stride * height;
-
-                inData = Memory.Allocate(len, false);
+                if (inData == IntPtr.Zero)
+                {
+                    int len = stride * height;
+                    inData = Memory.Allocate(len, false);
+                }
                 inRowBytes = stride;
 
                 if (lockRect.Left < 0 || lockRect.Top < 0)
@@ -2579,9 +2604,12 @@ namespace PSFilterLoad.PSApi
 
 
                 int stride = (width * nplanes);
-                int len = stride * height;
+                if (outData == IntPtr.Zero)
+                {
+                    int len = stride * height;
 
-                outData = Memory.Allocate(len, false);
+                    outData = Memory.Allocate(len, false);
+                }
                 outRowBytes = stride;
 
                 if (lockRect.Left < 0 || lockRect.Top < 0)
@@ -2763,7 +2791,10 @@ namespace PSFilterLoad.PSApi
 
                 int len = width * height;
 
-                maskData = Memory.Allocate(len, false);
+                if (maskData == IntPtr.Zero)
+                {
+                    maskData = Memory.Allocate(len, false); 
+                }
                 maskRowBytes = width;
 
                 void* maskDataPtr = maskData.ToPointer();
