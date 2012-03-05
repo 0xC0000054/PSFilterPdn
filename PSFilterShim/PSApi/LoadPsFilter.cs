@@ -1387,7 +1387,7 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
-        /// Determines whether the data buffer nedds to be resized.
+        /// Determines whether the data buffer needs to be resized.
         /// </summary>
         /// <param name="inData">The buffer to check.</param>
         /// <param name="inRect">The new source rectangle.</param>
@@ -1396,24 +1396,16 @@ namespace PSFilterLoad.PSApi
         /// <returns> <c>true</c> if a the buffer nedds to be resized; otherwise, <c>false</c></returns>
         static unsafe bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loplane, int hiplane)
         {
-            if (inData == IntPtr.Zero)
-            {
-                return false;
-            }
-
-            long size = 0;
-            int width, height, nplanes, bufferSize;
-
             
-            size = Memory.Size(inData);
+            long size = Memory.Size(inData);
 
-            width = inRect.right - inRect.left;
-            height = inRect.bottom -inRect.top;
-            nplanes = hiplane - loplane + 1;
+            int width = inRect.right - inRect.left;
+            int height = inRect.bottom -inRect.top;
+            int nplanes = hiplane - loplane + 1;
 
-            bufferSize = ((width * nplanes) * height);
+            long bufferSize = ((width * nplanes) * height);
 
-            return (bufferSize > size);
+            return (bufferSize != size);
         }
                 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -1641,8 +1633,8 @@ namespace PSFilterLoad.PSApi
 #endif
 
 			int nplanes = hiplane - loplane + 1;
-			int width = (rect.right - rect.left);
-			int height = (rect.bottom - rect.top);
+			int width = rect.right - rect.left;
+			int height = rect.bottom - rect.top;
 
 			if (rect.left < source.Width && rect.top < source.Height)
 			{
@@ -1990,7 +1982,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="maskData">The input buffer to fill.</param>
 		/// <param name="maskRowBytes">The stride of the input buffer.</param>
 		/// <param name="rect">The rectangle of interest within the image.</param>
-		static unsafe short fill_mask(ref IntPtr maskData, ref int maskRowBytes, Rect16 rect, int maskRate, int maskPadding)
+		static unsafe short fill_mask(ref IntPtr maskData, ref int maskRowBytes, Rect16 rect, int maskRate, short maskPadding)
 		{
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes = {0}, Rect = {1}", new object[] { maskRowBytes.ToString(), rect.ToString() }));
@@ -2054,9 +2046,9 @@ namespace PSFilterLoad.PSApi
 
 				if ((lockRect.Right > tempMask.Width || lockRect.Bottom > tempMask.Height) || padBuffer)
 				{
-					switch (maskPadding)
+					switch (((HostPadding)maskPadding))
 					{
-						case -1:
+						case HostPadding.plugInWantsEdgeReplication:
 
 							int top = rect.top;
 							int left = rect.left;
@@ -2169,9 +2161,9 @@ namespace PSFilterLoad.PSApi
 
 
 							break;
-						case -2:
+						case HostPadding.plugInDoesNotWantPadding:
 							break;
-						case -3:
+						case HostPadding.plugInWantsErrorOnBoundsException:
                             return PSError.paramErr;
 						default:
 							SafeNativeMethods.memset(maskData, maskPadding, new UIntPtr((ulong)len));
@@ -2510,9 +2502,10 @@ namespace PSFilterLoad.PSApi
 		{
 			if ((lockRect.Right > surface.Width || lockRect.Bottom > surface.Height) || (rect.top < 0 || rect.left < 0))
 			{
-				switch (inputPadding)
+
+				switch (((HostPadding)inputPadding))
 				{
-					case -1: // plugInWantsEdgeReplication
+					case HostPadding.plugInWantsEdgeReplication: 
 
 						int top = rect.top;
 						int left = rect.left;
@@ -2675,12 +2668,12 @@ namespace PSFilterLoad.PSApi
 						}
 
 						break;
-					case -2: // plugInDoesNotWantPadding
+					case HostPadding.plugInDoesNotWantPadding:
 						break;
-					case -3: // plugInWantsErrorOnBoundsException
+					case HostPadding.plugInWantsErrorOnBoundsException: 
                         return PSError.paramErr;
 					default:
-						SafeNativeMethods.memset(inData, inputPadding, new UIntPtr((ulong)(surface.Stride * surface.Height)));
+						SafeNativeMethods.memset(inData, inputPadding, new UIntPtr((ulong)Memory.Size(inData)));
 						break;
 				}
 
