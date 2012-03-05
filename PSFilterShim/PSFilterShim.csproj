@@ -120,6 +120,7 @@
     <Compile Include="PSApi\FilterRecord.cs" />
     <Compile Include="PSApi\FilterSelector.cs" />
     <Compile Include="PSApi\HandleProc.cs" />
+    <Compile Include="PSApi\HostPadding.cs" />
     <Compile Include="PSApi\HostProcs.cs" />
     <Compile Include="PSApi\ImageModes.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
