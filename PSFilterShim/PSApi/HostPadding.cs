@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 namespace PSFilterLoad.PSApi
-{
+{   
     /// <summary>
     /// The padding values used by the FilterRecord inputPadding and maskPadding.
     /// </summary>
