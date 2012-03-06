@@ -2025,11 +2025,6 @@ namespace PSFilterLoad.PSApi
 		/// <returns> <c>true</c> if a the buffer nedds to be resized; otherwise, <c>false</c></returns>
 		static unsafe bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loplane, int hiplane)
 		{
-			if (inData == IntPtr.Zero)
-			{
-				return false;
-			}
-
 			long size = size = Memory.Size(inData);
 
 			int width = inRect.right - inRect.left;
