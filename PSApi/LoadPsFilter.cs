@@ -2518,8 +2518,11 @@ namespace PSFilterLoad.PSApi
 						break;
 				}
 
-				SetFilterPadding(inData, inRowBytes, rect, nplanes, ofs, inputPadding, lockRect, tempSurface);
-				
+				short padErr = SetFilterPadding(inData, inRowBytes, rect, nplanes, ofs, inputPadding, lockRect, tempSurface);
+				if (padErr != PSError.noErr)
+				{
+					return padErr;
+				}				
 
 				/* the stride for the source image and destination buffer will almost never match
 				* so copy the data manually swapping the pixel order along the way
@@ -2639,7 +2642,11 @@ namespace PSFilterLoad.PSApi
 						break;
 				}
 
-				SetFilterPadding(outData, outRowBytes, rect, nplanes, ofs, outputPadding, lockRect, dest);
+				short padErr = SetFilterPadding(outData, outRowBytes, rect, nplanes, ofs, outputPadding, lockRect, dest);
+				if (padErr != PSError.noErr)
+				{
+					return padErr;
+				}
 
 				/* the stride for the source image and destination buffer will almost never match
 				* so copy the data manually swapping the pixel order along the way
