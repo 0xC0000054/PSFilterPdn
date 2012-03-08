@@ -7,16 +7,16 @@ namespace PSFilterLoad.PSApi
     enum DebugFlags
     {
         None = 0,
-        AdvanceState = 2,
-        BufferSuite = 4,
-        Call = 6,
+        AdvanceState = 1,
+        BufferSuite = 2,
+        Call = 4,
         ColorServices = 8,
-        DescriptorParameters = 10,
-        DisplayPixels = 12,
-        Error = 14,
-        HandleSuite = 16,
-        MiscCallbacks = 18,
-        PiPL = 20,
+        DescriptorParameters = 16,
+        DisplayPixels = 32,
+        Error = 64,
+        HandleSuite = 128,
+        MiscCallbacks = 256,
+        PiPL = 512
     }
 #endif
 }
