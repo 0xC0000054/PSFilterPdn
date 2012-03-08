@@ -263,18 +263,16 @@ namespace PSFilterLoad.PSApi
 
 		}
 
-		private static bool queryPlugin;
 		private static bool EnumPiPL(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
 		{
-			GCHandle gch = GCHandle.FromIntPtr(lParam);
-			PluginData enumData = new PluginData() { fileName = ((PluginData)gch.Target).fileName };
+			PluginData enumData = new PluginData() { fileName = enumFileName };
 			
 
 			IntPtr hRes = NativeMethods.FindResource(hModule, lpszName, lpszType);
 			if (hRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("FindResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumData.fileName));
+				Debug.WriteLine(string.Format("FindResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumFileName));
 #endif    
 				return true;
 			}
@@ -283,7 +281,7 @@ namespace PSFilterLoad.PSApi
 			if (loadRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LoadResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumData.fileName)); 
+				Debug.WriteLine(string.Format("LoadResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumFileName)); 
 #endif
 				return true;
 			}
@@ -292,7 +290,7 @@ namespace PSFilterLoad.PSApi
 			if (lockRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LockResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumData.fileName)); 
+				Debug.WriteLine(string.Format("LockResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumFileName)); 
 #endif
 
 				return true;
@@ -306,7 +304,7 @@ namespace PSFilterLoad.PSApi
 			if (version != 0)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("Invalid PiPL version in {0}: {1},  Expected version 0", enumData.fileName, version));
+				Debug.WriteLine(string.Format("Invalid PiPL version in {0}: {1},  Expected version 0", enumFileName, version));
 #endif
 				return true;
 			}
@@ -333,10 +331,10 @@ namespace PSFilterLoad.PSApi
 				IntPtr dataPtr = new IntPtr(propPtr.ToInt64() + dataOfs);
 				if (propKey == PIPropertyID.PIKindProperty)
 				{
-					if (PropToString((uint)pipp.propertyData.ToInt64()) != "8BFM")
+					if (Marshal.PtrToStringAnsi(dataPtr, 4) != "MFB8")
 					{
 #if DEBUG
-						Debug.WriteLine(string.Format("{0} is not a valid Photoshop Filter.", enumData.fileName));
+						Debug.WriteLine(string.Format("{0} is not a valid Photoshop Filter.", enumFileName));
 #endif	
 						return true;
 					}
@@ -354,7 +352,7 @@ namespace PSFilterLoad.PSApi
 						(HiWord(fltrVersion) == PSConstants.latestFilterVersion && LoWord(fltrVersion) > PSConstants.latestFilterSubVersion))
 					{
 #if DEBUG
-						Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumData.fileName, HiWord(fltrVersion).ToString(CultureInfo.CurrentCulture), LoWord(fltrVersion).ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) }));
+						Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumFileName, HiWord(fltrVersion).ToString(CultureInfo.CurrentCulture), LoWord(fltrVersion).ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) }));
 #endif			
 						return true;
 					}
@@ -366,7 +364,7 @@ namespace PSFilterLoad.PSApi
 					if ((bytes[0] & PSConstants.flagSupportsRGBColor) != PSConstants.flagSupportsRGBColor)
 					{
 #if DEBUG
-						Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", enumData.fileName));
+						Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", enumFileName));
 #endif					
 						return true;
 					}
@@ -392,12 +390,6 @@ namespace PSFilterLoad.PSApi
 				{
 #if DEBUG
 					int vers = Marshal.ReadInt32(dataPtr);
-
-					if (vers > 0)
-					{
-						continue;
-					}
-
 					int classId = Marshal.ReadInt32(dataPtr, 4);
 					int eventId = Marshal.ReadInt32(dataPtr, 8);
 #endif				
@@ -488,15 +480,14 @@ namespace PSFilterLoad.PSApi
 
 		private static bool EnumPiMI(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
 		{
-			GCHandle gch = GCHandle.FromIntPtr(lParam);
-			PluginData enumData = new PluginData() { fileName = ((PluginData)gch.Target).fileName };
+			PluginData enumData = new PluginData() { fileName = enumFileName };
 			
 
 			IntPtr hRes = NativeMethods.FindResource(hModule, lpszName, lpszType);
 			if (hRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("FindResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumData.fileName));
+				Debug.WriteLine(string.Format("FindResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumFileName));
 #endif
 				return true;
 			}
@@ -505,7 +496,7 @@ namespace PSFilterLoad.PSApi
 			if (loadRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LoadResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumData.fileName));
+				Debug.WriteLine(string.Format("LoadResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumFileName));
 #endif
 				return true;
 			}
@@ -514,7 +505,7 @@ namespace PSFilterLoad.PSApi
 			if (lockRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LockResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumData.fileName));
+				Debug.WriteLine(string.Format("LockResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumFileName));
 #endif
 				return true;
 			}
@@ -543,7 +534,7 @@ namespace PSFilterLoad.PSApi
 			   (major == PSConstants.latestFilterVersion && minor > PSConstants.latestFilterSubVersion))
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumData.fileName, major.ToString(CultureInfo.CurrentCulture), minor.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) }));
+				Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumFileName, major.ToString(CultureInfo.CurrentCulture), minor.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) }));
 #endif			
 				return true;
 			}
@@ -551,7 +542,7 @@ namespace PSFilterLoad.PSApi
 			if ((modes & PSConstants.supportsRGBColor) != PSConstants.supportsRGBColor)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", enumData.fileName));
+				Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", enumFileName));
 #endif
 				return true;
 			}
@@ -570,7 +561,7 @@ namespace PSFilterLoad.PSApi
 			if (filterRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("FindResource failed for {0} in {1}", "_8BFM", enumData.fileName));
+				Debug.WriteLine(string.Format("FindResource failed for {0} in {1}", "_8BFM", enumFileName));
 #endif
 				return true;
 			}
@@ -580,7 +571,7 @@ namespace PSFilterLoad.PSApi
 			if (filterLoad == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LoadResource failed for {0} in {1}", "_8BFM", enumData.fileName));
+				Debug.WriteLine(string.Format("LoadResource failed for {0} in {1}", "_8BFM", enumFileName));
 #endif
 				return true;
 			}
@@ -590,7 +581,7 @@ namespace PSFilterLoad.PSApi
 			if (filterLock == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LockResource failed for {0} in {1}", "_8BFM", enumData.fileName));
+				Debug.WriteLine(string.Format("LockResource failed for {0} in {1}", "_8BFM", enumFileName));
 #endif
 				return true;
 			}
@@ -1802,6 +1793,7 @@ namespace PSFilterLoad.PSApi
 		}
 
 		static List<PluginData> enumResList;
+		static string enumFileName;
 
 		/// <summary>
 		/// Adds the found plugin data to the list.
@@ -1840,19 +1832,14 @@ namespace PSFilterLoad.PSApi
 			{
 				if (!dll.IsInvalid)
 				{
-					PluginData pdata = new PluginData() { fileName = fileName };
-					GCHandle gch = GCHandle.Alloc(pdata);
 					enumResList = null;
+					enumFileName = fileName;
 					bool needsRelease = false;
 					try
 					{
-						if (!queryPlugin)
-						{
-							queryPlugin = true;
-						}
 
 						dll.DangerousAddRef(ref needsRelease);
-						if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiPl", new EnumResNameDelegate(EnumPiPL), GCHandle.ToIntPtr(gch)))
+						if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiPl", new EnumResNameDelegate(EnumPiPL), IntPtr.Zero))
 						{
 							foreach (PluginData data in enumResList)
 							{
@@ -1866,7 +1853,7 @@ namespace PSFilterLoad.PSApi
 								}
 							}
 						}// if there are no PiPL resources scan for Photoshop 2.5's PiMI resources. 
-						else if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiMI", new EnumResNameDelegate(EnumPiMI), GCHandle.ToIntPtr(gch)))
+						else if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiMI", new EnumResNameDelegate(EnumPiMI), IntPtr.Zero))
 						{
 							foreach (PluginData data in enumResList)
 							{
@@ -1890,7 +1877,6 @@ namespace PSFilterLoad.PSApi
 					}
 					finally
 					{
-						gch.Free();
 						if (needsRelease)
 						{
 							dll.DangerousRelease();
