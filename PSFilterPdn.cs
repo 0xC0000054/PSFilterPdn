@@ -210,6 +210,7 @@ namespace PSFilterPdn
                 proxyProcess.Start();
                 proxyProcess.StandardInput.WriteLine(endpointName);
                 proxyProcess.StandardInput.WriteLine(parmDataFileName);
+                proxyProcess.StandardInput.WriteLine(resourceDataFileName);
 
                 while (!proxyProcess.HasExited)
                 {
