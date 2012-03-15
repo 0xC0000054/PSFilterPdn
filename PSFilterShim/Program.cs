@@ -10,6 +10,7 @@ using System.ServiceModel;
 using System.Threading;
 using PSFilterLoad.PSApi;
 using PSFilterPdn;
+using System.Collections.Generic;
 
 namespace PSFilterShim
 {
@@ -24,7 +25,7 @@ namespace PSFilterShim
 
 		static ManualResetEvent resetEvent;
 		static IPSFilterShim serviceProxy;
-        static ProgressFunc progressCallback = new ProgressFunc(UpdateProgress);
+		static ProgressFunc progressCallback = new ProgressFunc(UpdateProgress);
 
 		static byte abortFilter()
 		{
@@ -61,23 +62,23 @@ namespace PSFilterShim
 			serviceProxy = null;
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
-            if (args.Length > 0 && args.Length == 2)
-            {
-                try
-                {
-                    Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+			if (args.Length > 0 && args.Length == 2)
+			{
+				try
+				{
+					Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
 
-                    filterThread.Start(args);
+					filterThread.Start(args);
 
-                    resetEvent.WaitOne();
+					resetEvent.WaitOne();
 
-                    filterThread.Join();
-                }
-                finally
-                {
-                    PaintDotNet.SystemLayer.Memory.DestroyHeap();
-                }
-            }
+					filterThread.Join();
+				}
+				finally
+				{
+					PaintDotNet.SystemLayer.Memory.DestroyHeap();
+				}
+			}
 			
 			
 
@@ -141,6 +142,16 @@ namespace PSFilterShim
 					}
 				}
 
+				List<PSResource> pseudoResources = null;
+				string resourceFileName = Console.ReadLine();
+				if (!string.IsNullOrEmpty(resourceFileName) && File.Exists(resourceFileName))
+				{
+					using (FileStream fs = new FileStream(resourceFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+					{
+						BinaryFormatter bf = new BinaryFormatter();
+						pseudoResources = (List<PSResource>)bf.Deserialize(fs);
+					}
+				}
 
 				using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, selectionRegion, owner))
 				{
@@ -148,18 +159,23 @@ namespace PSFilterShim
 					{
 						lps.SetAbortCallback(new AbortFunc(abortFilter));
 					}
-                    lps.SetProgressCallback(progressCallback);
+					lps.SetProgressCallback(progressCallback);
 
 					if (parmData != null)
 					{
 						// ignore the filters that only use the data handle, e.g. Filter Factory  
-                        if (((parmData.GlobalParameters.GetParameterDataBytes() != null && parmData.GlobalParameters.GetPluginDataBytes() != null) ||
-                            (parmData.GlobalParameters.GetParameterDataBytes() != null && parmData.GlobalParameters.GetPluginDataBytes() == null)) ||
+						if (((parmData.GlobalParameters.GetParameterDataBytes() != null && parmData.GlobalParameters.GetPluginDataBytes() != null) ||
+							(parmData.GlobalParameters.GetParameterDataBytes() != null && parmData.GlobalParameters.GetPluginDataBytes() == null)) ||
 							parmData.AETEDictionary != null)
 						{
 							lps.FilterParameters = parmData;
 							lps.IsRepeatEffect = repeatEffect;
 						}
+					}
+
+					if (pseudoResources != null)
+					{
+						lps.PseudoResources = pseudoResources;
 					}
 
 					bool result = lps.RunPlugin(pdata, showAbout);
@@ -173,12 +189,18 @@ namespace PSFilterShim
 
 						if (!lps.IsRepeatEffect)
 						{
-                            using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                            {
-                                BinaryFormatter bf = new BinaryFormatter();
-                                bf.Serialize(fs, lps.FilterParameters);
-                            }
-                        }
+							using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+							{
+								BinaryFormatter bf = new BinaryFormatter();
+								bf.Serialize(fs, lps.FilterParameters);
+							}
+
+							using (FileStream fs = new FileStream(resourceFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+							{
+								BinaryFormatter bf = new BinaryFormatter();
+								bf.Serialize(fs, lps.PseudoResources);
+							}
+						}
 					}
 					else
 					{
@@ -210,9 +232,9 @@ namespace PSFilterShim
 			catch (NullReferenceException ex)
 			{
 #if DEBUG
-                serviceProxy.SetProxyErrorMessage(ex.Message + Environment.NewLine + ex.StackTrace);
+				serviceProxy.SetProxyErrorMessage(ex.Message + Environment.NewLine + ex.StackTrace);
 #else				
-                serviceProxy.SetProxyErrorMessage(ex.Message);
+				serviceProxy.SetProxyErrorMessage(ex.Message);
 #endif
 			}
 			finally
@@ -228,7 +250,7 @@ namespace PSFilterShim
 
 		static void UpdateProgress(int done, int total)
 		{
-            serviceProxy.UpdateFilterProgress(done, total);
+			serviceProxy.UpdateFilterProgress(done, total);
 		}
 
 

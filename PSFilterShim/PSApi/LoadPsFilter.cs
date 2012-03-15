@@ -125,7 +125,7 @@ namespace PSFilterLoad.PSApi
 		static PutScopedObjectProc putScopedObjectProc; 
 		#endregion
 
-		static Dictionary<IntPtr, PSHandle> handles = null;
+		static Dictionary<IntPtr, PSHandle> handles;
 
 		// static PluginData enumData;  
 		static IntPtr filterRecordPtr;
@@ -192,8 +192,6 @@ namespace PSFilterLoad.PSApi
 		static IntPtr data;
 		static short result;
 
-		const int bpp = 4;
-
 		static string errorMessage;
 
 		public string ErrorMessage
@@ -234,6 +232,20 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
+        static List<PSResource> pseudoResources;
+
+        public List<PSResource> PseudoResources
+        {
+            get
+            {
+                return pseudoResources;
+            }
+            set
+            {
+                pseudoResources = value;
+            }
+        }
+
 		static short filterCase;
 
 		static float dpiX;
@@ -270,6 +282,8 @@ namespace PSFilterLoad.PSApi
 			frValuesSetup = false;
 			isRepeatEffect = false;
 			globalParms = new GlobalParameters();
+            pseudoResources = new List<PSResource>();
+            handles = new Dictionary<IntPtr, PSHandle>();
 
 #if USEMATTING
 			inputHandling = FilterDataHandling.filterDataHandlingNone;
@@ -3619,7 +3633,7 @@ namespace PSFilterLoad.PSApi
 
 		static bool handle_valid(IntPtr h)
 		{
-			return ((handles != null) && handles.ContainsKey(h));
+			return handles.ContainsKey(h);
 		}
 
 		static unsafe IntPtr handle_new_proc(int size)
@@ -3631,10 +3645,6 @@ namespace PSFilterLoad.PSApi
 				PSHandle* hand = (PSHandle*)handle.ToPointer();
 				hand->pointer = Memory.Allocate(size, true);
 				hand->size = size;
-
-
-				if (handles == null)
-					handles = new Dictionary<IntPtr, PSHandle>();
 
 				handles.Add(handle, *hand);
 #if DEBUG
@@ -3997,36 +4007,99 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		static short resource_add_proc(uint ofType, ref IntPtr data)
-		{
+        static short resource_add_proc(uint ofType, IntPtr data)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+			Ping(DebugFlags.MiscCallbacks, PropToString(ofType));
 #endif
-			return PSError.memFullErr;
-		}
+            short count = resource_count_proc(ofType);
 
-		static short resource_count_proc(uint ofType)
-		{
-#if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
-#endif
-			return 0;
-		}
+            int size = handle_get_size_proc(data);
+            byte[] bytes = new byte[size];
 
-		static void resource_delete_proc(uint ofType, short index)
-		{
+            Marshal.Copy(handle_lock_proc(data, 0), bytes, 0, size);
+            handle_unlock_proc(data);
+
+            pseudoResources.Add(new PSResource(ofType, count, bytes));
+
+            return PSError.noErr;
+        }
+
+        static short resource_count_proc(uint ofType)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+			Ping(DebugFlags.MiscCallbacks, PropToString(ofType));
 #endif
-		}
-		static IntPtr resource_get_proc(uint ofType, short index)
-		{
+            short count = 0;
+
+
+            foreach (var item in pseudoResources)
+            {
+                if (item.Key == ofType)
+                {
+                    count++;
+                }
+            }
+
+
+            return count;
+        }
+
+        static void resource_delete_proc(uint ofType, short index)
+        {
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Empty);
+			Ping(DebugFlags.MiscCallbacks, string.Format("{0}, {1}", PropToString(ofType), index));
 #endif
-			return IntPtr.Zero;
-		}
-		/// <summary>
+            PSResource res = pseudoResources.Find(delegate(PSResource r)
+            {
+                return r.Equals(ofType, index);
+            });
+            if (res != null)
+            {
+                pseudoResources.Remove(res);
+            }
+            int i = index + 1;
+
+            while (true) // renumber the index of subsequent items.
+            {
+                int next = pseudoResources.FindIndex(delegate(PSResource r)
+                {
+                    return r.Equals(ofType, i);
+                });
+
+                if (next < 0) break;
+
+                pseudoResources[next].Index = i - 1;
+
+                i++;
+            }
+        }
+        static IntPtr resource_get_proc(uint ofType, short index)
+        {
+#if DEBUG
+			Ping(DebugFlags.MiscCallbacks, string.Format("{0}, {1}", PropToString(ofType), index));
+#endif
+            int length = pseudoResources.Count;
+
+            PSResource res = pseudoResources.Find(delegate(PSResource r)
+            {
+                return r.Equals(ofType, index);
+            });
+
+            if (res != null)
+            {
+                byte[] data = res.GetData();
+
+                IntPtr h = handle_new_proc(data.Length);
+                Marshal.Copy(data, 0, handle_lock_proc(h, 0), data.Length);
+                handle_unlock_proc(h);
+
+                return h;
+            }
+
+            return IntPtr.Zero;
+        }
+        /// <summary>
 		/// Converts an Int32 to Photoshop's 'Fixed' type.
 		/// </summary>
 		/// <param name="value">The value to convert.</param>
@@ -4596,6 +4669,17 @@ namespace PSFilterLoad.PSApi
 					}
 					data = IntPtr.Zero;
 				}
+
+                // free any remaining handles
+                if (handles.Count > 0)
+                {
+                    foreach (var item in handles)
+                    {
+                        Memory.Free(item.Value.pointer);
+                        Memory.Free(item.Key);
+                    }
+                    handles.Clear();
+                }
 
 			}
 		}
