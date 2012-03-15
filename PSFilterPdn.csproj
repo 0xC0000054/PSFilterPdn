@@ -110,6 +110,7 @@
     <Compile Include="PSApi\ProgressFunc.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
+    <Compile Include="PSApi\PSResource.cs" />
     <Compile Include="PSApi\SafeLibraryHandle.cs" />
     <Compile Include="PSApi\SafeNativeMethods.cs" />
     <Compile Include="PsFilterPdnConfigToken.cs" />
