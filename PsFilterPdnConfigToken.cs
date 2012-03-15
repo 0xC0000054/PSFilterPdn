@@ -18,7 +18,7 @@ namespace PSFilterPdn
         private ParameterData filterParameters;
         private AETEData aeteData;
         private ReadOnlyCollection<string> expandedNodes;
-        
+        private Collection<PSResource> pseudoResources;
         
         public string Category
         {
@@ -140,7 +140,21 @@ namespace PSFilterPdn
             }
         }
 
-        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, string filterCaseInfo, Surface dest, bool useShim, ParameterData pdata, AETEData aete, ReadOnlyCollection<string> nodes)
+        public Collection<PSResource> PesudoResources
+        {
+            get
+            {
+                return pseudoResources;
+            }
+            internal set
+            {
+                pseudoResources = value;
+            }
+        }
+
+        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, 
+            string filterCaseInfo, Surface dest, bool useShim, ParameterData pdata, AETEData aete,
+            ReadOnlyCollection<string> nodes, Collection<PSResource> resources)
             : base()
         {
             this.category = category;
@@ -153,6 +167,7 @@ namespace PSFilterPdn
             this.filterParameters = pdata;
             this.aeteData = aete;
             this.expandedNodes = nodes;
+            this.pseudoResources = resources;
         }
 
         private PSFilterPdnConfigToken(PSFilterPdnConfigToken copyMe)
@@ -168,6 +183,7 @@ namespace PSFilterPdn
             this.filterParameters = copyMe.filterParameters;
             this.aeteData = copyMe.aeteData;
             this.expandedNodes = copyMe.expandedNodes;
+            this.pseudoResources = copyMe.pseudoResources;
         }
 
         public override object Clone()

@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Windows.Forms;
 using PaintDotNet;
@@ -112,9 +114,12 @@ namespace PSFilterPdn
                 return;
             }
 
-            string src = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxysourceimg.png");
-            string dest = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "proxyresultimg.png");
-            string parmDataFileName = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory, "filterParameters.dat");
+            string userDataPath = base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
+            string src = Path.Combine(userDataPath, "proxysourceimg.png");
+            string dest = Path.Combine(userDataPath, "proxyresultimg.png");
+            string parmDataFileName = Path.Combine(userDataPath, "filterParameters.dat");
+            string resourceDataFileName = Path.Combine(userDataPath, "pseudoResources.dat"); 
+
 
             FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
             PluginData pluginData = new PluginData()
@@ -168,8 +173,18 @@ namespace PSFilterPdn
                 
                 using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                    BinaryFormatter bf = new BinaryFormatter();
                     bf.Serialize(fs, token.FilterParameters);
+                }
+
+
+                if (token.PesudoResources.Count > 0)
+                {
+                    using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        BinaryFormatter bf = new BinaryFormatter();
+                        bf.Serialize(fs, token.PesudoResources.ToList());
+                    } 
                 }
 
 
@@ -237,6 +252,7 @@ namespace PSFilterPdn
 
                 File.Delete(src);
                 File.Delete(dest);
+                File.Delete(resourceDataFileName);
 
                 PSFilterShimServer.Stop();
             }
@@ -265,6 +281,7 @@ namespace PSFilterPdn
                     };
 
                     lps.FilterParameters = token.FilterParameters;
+                    lps.PseudoResources = token.PesudoResources.ToList();
                     lps.SetIsRepeatEffect(true);
 
                     bool result = lps.RunPlugin(pdata, false);
