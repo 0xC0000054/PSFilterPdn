@@ -3556,64 +3556,65 @@ namespace PSFilterLoad.PSApi
 				descErrValue = descErr;
 			}
 
-			if (aeteDict.Count > 0)
+			if (aeteDict.Count <= 0)
 			{
-				if (isSubKey)
-				{
-					if (subKeyIndex > (subKeys.Count - 1))
-					{
-						return 0;
-					}
-
-					getKey = key = subKeys[subKeyIndex];
-					AETEValue data = aeteDict[key];
-					try
-					{
-						type = data.Type;
-					}
-					catch (NullReferenceException)
-					{
-					}
-					try
-					{
-						flags = data.Flags;
-					}
-					catch (NullReferenceException)
-					{
-					}
-					subKeyIndex++;
-				}
-				else
-				{
-					if (getKeyIndex > (keys.Count - 1))
-					{
-						return 0;
-					}
-					getKey = key = keys[getKeyIndex];
-					AETEValue data = aeteDict[key];
-					try
-					{
-						type = data.Type; // the type or flags parameters may be null if the filter does not use them.
-					}
-					catch (NullReferenceException)
-					{
-					}
-					try
-					{
-						flags = data.Flags;
-					}
-					catch (NullReferenceException)
-					{
-					}
-					getKeyIndex++;
-				}
-
-
-
-				return 1;
+				return 0;
 			}
 
-			return 0;
+			if (isSubKey)
+			{
+				if (subKeyIndex > (subKeys.Count - 1) ||
+					subKeyIndex > (aeteDict.Count - 1))
+				{
+					return 0;
+				}
+
+				getKey = key = subKeys[subKeyIndex];
+				AETEValue data = aeteDict[key];
+				try
+				{
+					type = data.Type;
+				}
+				catch (NullReferenceException)
+				{
+				}
+				try
+				{
+					flags = data.Flags;
+				}
+				catch (NullReferenceException)
+				{
+				}
+				subKeyIndex++;
+			}
+			else
+			{
+				if (getKeyIndex > (keys.Count - 1) ||
+					getKeyIndex > (aeteDict.Count - 1))
+				{
+					return 0;
+				}
+
+				getKey = key = keys[getKeyIndex];
+				AETEValue data = aeteDict[key];
+				try
+				{
+					type = data.Type; // the type or flags parameters may be null if the filter does not use them.
+				}
+				catch (NullReferenceException)
+				{
+				}
+				try
+				{
+					flags = data.Flags;
+				}
+				catch (NullReferenceException)
+				{
+				}
+				getKeyIndex++;
+			}
+
+			return 1;
 		}
 		static short GetIntegerProc(System.IntPtr descriptor, ref int data)
 		{
