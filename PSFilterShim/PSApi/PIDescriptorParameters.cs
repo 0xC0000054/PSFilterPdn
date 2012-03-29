@@ -157,7 +157,7 @@ namespace PSFilterLoad.PSApi
     ///descriptor: PIDescriptorHandle->Handle->LPSTR*
     ///data: DescriptorKeyIDArray->DescriptorKeyID[]
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate System.IntPtr OpenReadDescriptorProc(ref System.IntPtr descriptorHandle, IntPtr keyArray);
+    internal delegate System.IntPtr OpenReadDescriptorProc(System.IntPtr descriptorHandle, IntPtr keyArray);
 
     /// Return Type: OSErr->short
     ///descriptor: PIReadDescriptor->PIOpaqueReadDescriptor*
