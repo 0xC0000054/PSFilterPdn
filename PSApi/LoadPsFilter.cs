@@ -3474,341 +3474,501 @@ namespace PSFilterLoad.PSApi
 		static List<uint> subKeys;
 		static bool isSubKey;
 		static int subKeyIndex;
-		static IntPtr OpenReadDescriptorProc(ref System.IntPtr descriptor, IntPtr keyArray)
-		{
+        static IntPtr keyArrayPtr;
+        static IntPtr subKeyArrayPtr;
+        static int subClassIndex;
+        static Dictionary<uint, AETEValue> subClassDict;
+
+        static IntPtr OpenReadDescriptorProc(System.IntPtr descriptor, IntPtr keyArray)
+        {
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
+
+            try
+            {
+                long size = NativeMethods.GlobalSize(descriptor).ToInt64();
+            }
+            catch (NullReferenceException)
+            {
+            }
 #endif
-			if (keys == null)
-			{
-				keys = new List<uint>();
-				int index = 0;
-				if (keyArray != IntPtr.Zero) // check if the pointer is valid
-				{
-					while (true)
-					{
-						uint key = (uint)Marshal.ReadInt32(keyArray, index);
-						if (key == 0)
-						{
-							break;
-						}
-						keys.Add(key);
-						index += 4;
-					}
-				}
-			}
-			else
-			{
-				subKeys = new List<uint>();
-				int index = 0;
-				if (keyArray != IntPtr.Zero)
-				{
-					while (true)
-					{
-						uint key = (uint)Marshal.ReadInt32(keyArray, index);
-						if (key == 0)
-						{
-							break;
-						}
-						subKeys.Add(key);
-						index += 4;
-					}
-				}
-				isSubKey = true;
 
-			}
 
-			if ((keys != null) && keys.Count > 0 && aeteDict.Count > 0 &&
-			  !aete.FlagList.ContainsKey(keys[0])) // some filters may hand us a list of bogus keys.
-			{
-				return IntPtr.Zero;
-			}
+            if (keys == null)
+            {
+                keys = new List<uint>();
+                int index = 0;
+                if (keyArray != IntPtr.Zero) // check if the pointer is valid
+                {
+                    keyArrayPtr = keyArray;
+                    while (true)
+                    {
+                        uint key = (uint)Marshal.ReadInt32(keyArray, index);
+                        if (key == 0)
+                        {
+                            break;
+                        }
+                        keys.Add(key);
+                        index += 4;
+                    }
+                }
+            }
+            else
+            {
+                subKeys = new List<uint>();
+                int index = 0;
+                if (keyArray != IntPtr.Zero)
+                {
+                    while (true)
+                    {
+                        uint key = (uint)Marshal.ReadInt32(keyArray, index);
+                        if (key == 0)
+                        {
+                            break;
+                        }
+                        subKeys.Add(key);
+                        index += 4;
+                    }
+                }
+                isSubKey = true;
+                subClassDict = null;
+                subClassIndex = 0;
+                if (handle_valid(descriptor) && handle_get_size_proc(descriptor) == 0)
+                {
+                    subClassDict = (Dictionary<uint, AETEValue>)aeteDict[getKey].Value;
+                }
+            }
 
-			if ((keys != null) && keys.Count == 0 && aeteDict.Count > 0)
-			{
-				keys.AddRange(aeteDict.Keys); // if the keys are not passed to us grab them from the aeteDict.
-			}
 
-			if (aeteDict.Count > 0)
-			{
-				return readDescriptorPtr;
-			}
 
-			return IntPtr.Zero;
-		}
-		static short CloseReadDescriptorProc(System.IntPtr descriptor)
-		{
+            if ((keys != null) && keys.Count > 0 && aeteDict.Count > 0 &&
+                (aete != null) && !aete.FlagList.ContainsKey(keys[0])) // some filters may hand us a list of bogus keys.
+            {
+                return IntPtr.Zero;
+            }
+
+            if ((keys != null) && keys.Count == 0 && aeteDict.Count > 0)
+            {
+                keys.AddRange(aeteDict.Keys); // if the keys are not passed to us grab them from the aeteDict.
+            }
+
+            if (aeteDict.Count > 0)
+            {
+                return readDescriptorPtr;
+            }
+
+            return IntPtr.Zero;
+        }
+        static short CloseReadDescriptorProc(System.IntPtr descriptor)
+        {
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-			if (isSubKey)
-			{
-				isSubKey = false;
-			}
+            if (isSubKey)
+            {
+                isSubKey = false;
+                subKeyArrayPtr = IntPtr.Zero;
+                subClassDict = null;
+            }
+            else
+            {
+                keyArrayPtr = IntPtr.Zero;
+            }
 
-			descriptor = IntPtr.Zero;
-			return descErrValue;
-		}
-		static byte GetKeyProc(System.IntPtr descriptor, ref uint key, ref uint type, ref int flags)
-		{
-			if (descErr != PSError.noErr)
-			{
-				descErrValue = descErr;
-			}
+            descriptor = IntPtr.Zero;
+            return descErrValue;
+        }
+        static unsafe byte GetKeyProc(System.IntPtr descriptor, ref uint key, ref uint type, ref int flags)
+        {
+#if DEBUG
+            Ping(DebugFlags.DescriptorParameters, string.Format("key = {0}", "0x" + key.ToString("X8")));
+#endif
 
-			if (aeteDict.Count <= 0)
-			{
-				return 0;
-			}
+            if (descErr != PSError.noErr)
+            {
+                descErrValue = descErr;
+            }
 
-			if (isSubKey)
-			{
-				if (subKeyIndex > (subKeys.Count - 1) ||
-					subKeyIndex > (aeteDict.Count - 1))
-				{
-					return 0;
-				}
+            if (aeteDict.Count <= 0)
+            {
+                return 0;
+            }
 
-				getKey = key = subKeys[subKeyIndex];
-				AETEValue data = aeteDict[key];
-				try
-				{
-					type = data.Type;
-				}
-				catch (NullReferenceException)
-				{
-				}
-				try
-				{
-					flags = data.Flags;
-				}
-				catch (NullReferenceException)
-				{
-				}
-				subKeyIndex++;
-			}
-			else
-			{
-				if (getKeyIndex > (keys.Count - 1) ||
-					getKeyIndex > (aeteDict.Count - 1))
-				{
-					return 0;
-				}
+            if (isSubKey)
+            {
+                if (subClassDict != null)
+                {
+                    if (subClassIndex > (subKeys.Count - 1) ||
+                        subClassIndex > (subClassDict.Count - 1))
+                    {
+                        return 0;
+                    }
 
-				getKey = key = keys[getKeyIndex];
-				AETEValue data = aeteDict[key];
-				try
-				{
-					type = data.Type; // the type or flags parameters may be null if the filter does not use them.
-				}
-				catch (NullReferenceException)
-				{
-				}
-				try
-				{
-					flags = data.Flags;
-				}
-				catch (NullReferenceException)
-				{
-				}
-				getKeyIndex++;
-			}
+                    getKey = key = subKeys[subClassIndex];
+                    AETEValue data = subClassDict[key];
+                    try
+                    {
+                        type = data.Type;
+                    }
+                    catch (NullReferenceException)
+                    {
+                    }
+                    try
+                    {
+                        flags = data.Flags;
+                    }
+                    catch (NullReferenceException)
+                    {
+                    }
 
-			return 1;
-		}
-		static short GetIntegerProc(System.IntPtr descriptor, ref int data)
-		{
-			data = (int)aeteDict[getKey].Value;
+                    subClassIndex++;
+                }
+                else
+                {
+                    if (subKeyIndex > (subKeys.Count - 1) ||
+                        subKeyIndex > (aeteDict.Count - 1))
+                    {
+                        return 0;
+                    }
 
-			return PSError.noErr;
-		}
-		static short GetFloatProc(System.IntPtr descriptor, ref double param1)
-		{
-			param1 = (double)aeteDict[getKey].Value;
+                    getKey = key = subKeys[subKeyIndex];
+                    AETEValue data = aeteDict[key];
+                    try
+                    {
+                        type = data.Type;
+                    }
+                    catch (NullReferenceException)
+                    {
+                    }
+                    try
+                    {
+                        flags = data.Flags;
+                    }
+                    catch (NullReferenceException)
+                    {
+                    }
 
-			return PSError.noErr;
-		}
-		static short GetUnitFloatProc(System.IntPtr descriptor, ref uint type, ref double data)
-		{
-			type = aeteDict[getKey].Type;
-			data = (double)aeteDict[getKey].Value;
-			return PSError.noErr;
-		}
-		static short GetBooleanProc(System.IntPtr descriptor, ref byte data)
-		{
-			data = (byte)aeteDict[getKey].Value;
+                    subKeyIndex++;
+                }
 
-			return PSError.noErr;
-		}
-		static short GetTextProc(System.IntPtr descriptor, ref System.IntPtr data)
-		{
-			int size = aeteDict[getKey].Size;
-			data = handle_new_proc(size);
-			IntPtr hPtr = Marshal.ReadIntPtr(data);
-			Marshal.Copy((byte[])aeteDict[getKey].Value, 0, hPtr, size);
+                if (subKeyArrayPtr != IntPtr.Zero)
+                {
+                    Marshal.WriteInt32(subKeyArrayPtr, (subKeyIndex * 4));
+                }
+            }
+            else
+            {
+                if (getKeyIndex > (keys.Count - 1) ||
+                    getKeyIndex > (aeteDict.Count - 1))
+                {
+                    return 0;
+                }
+
+                getKey = key = keys[getKeyIndex];
+
+                AETEValue data = aeteDict[key];
+
+                try
+                {
+                    type = data.Type; // the type or flags parameters may be null if the filter does not use them.
+                }
+                catch (NullReferenceException)
+                {
+                }
+                try
+                {
+                    flags = data.Flags;
+                }
+                catch (NullReferenceException)
+                {
+                }
+
+                if (keyArrayPtr != IntPtr.Zero)
+                {
+                    Marshal.WriteInt32(keyArrayPtr, (getKeyIndex * 4), 0);
+                }
+
+                getKeyIndex++;
+            }
+
+            return 1;
+        }
 
 
-			return PSError.noErr;
-		}
-		static short GetAliasProc(System.IntPtr descriptor, ref System.IntPtr data)
-		{
-			int size = aeteDict[getKey].Size;
-			data = handle_new_proc(size);
-			IntPtr hPtr = Marshal.ReadIntPtr(data);
-			Marshal.Copy((byte[])aeteDict[getKey].Value, 0, hPtr, size);
 
-			return PSError.noErr;
-		}
-		static short GetEnumeratedProc(System.IntPtr descriptor, ref uint type)
-		{
-			type = (uint)aeteDict[getKey].Value;
+        static short GetIntegerProc(System.IntPtr descriptor, ref int data)
+        {
+            if (subClassDict != null)
+            {
+                data = (int)subClassDict[getKey].Value;
+            }
+            else
+            {
+                data = (int)aeteDict[getKey].Value;
+            }
+            return PSError.noErr;
+        }
+        static short GetFloatProc(System.IntPtr descriptor, ref double data)
+        {
+            if (subClassDict != null)
+            {
+                data = (double)subClassDict[getKey].Value;
+            }
+            else
+            {
+                data = (double)aeteDict[getKey].Value;
+            }
+            return PSError.noErr;
+        }
+        static short GetUnitFloatProc(System.IntPtr descriptor, ref uint type, ref double data)
+        {
+            AETEValue item;
+            if (subClassDict != null)
+            {
+                item = subClassDict[getKey];
+            }
+            else
+            {
+                item = aeteDict[getKey];
+            }
 
-			return PSError.noErr;
-		}
-		static short GetClassProc(System.IntPtr descriptor, ref uint type)
-		{
-			return PSError.errPlugInHostInsufficient;
-		}
+            type = item.Type;
+            data = (double)item.Value;
+            return PSError.noErr;
+        }
+        static short GetBooleanProc(System.IntPtr descriptor, ref byte data)
+        {
+            data = (byte)aeteDict[getKey].Value;
 
-		static short GetSimpleReferenceProc(System.IntPtr descriptor, ref PIDescriptorSimpleReference data)
-		{
-			if (aeteDict.ContainsKey(getKey))
-			{
-				data = (PIDescriptorSimpleReference)aeteDict[getKey].Value;
-				return PSError.noErr;
-			}
-			return PSError.errPlugInHostInsufficient;
-		}
-		static short GetObjectProc(System.IntPtr descriptor, ref uint retType, ref System.IntPtr data)
-		{
-			uint type = aeteDict[getKey].Type;
+            return PSError.noErr;
+        }
+        static short GetTextProc(System.IntPtr descriptor, ref System.IntPtr data)
+        {
+            AETEValue item = aeteDict[getKey];
 
-			try
-			{
-				retType = type;
-			}
-			catch (NullReferenceException)
-			{
-				// ignore it
-			}
+            int size = item.Size;
+            data = handle_new_proc(size);
+            IntPtr hPtr = handle_lock_proc(data, 0);
+            Marshal.Copy((byte[])item.Value, 0, hPtr, size);
+            handle_unlock_proc(data);
 
-			byte[] bytes = null;
-			IntPtr hPtr = IntPtr.Zero;
-			switch (type)
-			{
+            return PSError.noErr;
+        }
+        static short GetAliasProc(System.IntPtr descriptor, ref System.IntPtr data)
+        {
+            AETEValue item = aeteDict[getKey];
 
-				case DescriptorTypes.classRGBColor:
-				case DescriptorTypes.classCMYKColor:
-				case DescriptorTypes.classGrayscale:
-				case DescriptorTypes.classLabColor:
-				case DescriptorTypes.classHSBColor:
-					data = handle_new_proc(1); // just assign a handle that is only one byte to allow it to work correctly. 
-					break;
+            int size = item.Size;
+            data = handle_new_proc(size);
+            IntPtr hPtr = handle_lock_proc(data, 0);
+            Marshal.Copy((byte[])item.Value, 0, hPtr, size);
+            handle_unlock_proc(data);
 
-				case DescriptorTypes.typeAlias:
-				case DescriptorTypes.typePath:
-				case DescriptorTypes.typeChar:
+            return PSError.noErr;
+        }
+        static short GetEnumeratedProc(System.IntPtr descriptor, ref uint type)
+        {
+            type = (uint)aeteDict[getKey].Value;
 
-					int size = aeteDict[getKey].Size;
-					data = handle_new_proc(size);
-					hPtr = Marshal.ReadIntPtr(data);
-					Marshal.Copy((byte[])aeteDict[getKey].Value, 0, hPtr, size);
-					break;
-				case DescriptorTypes.typeBoolean:
-					data = handle_new_proc(1);
-					hPtr = Marshal.ReadIntPtr(data);
+            return PSError.noErr;
+        }
+        static short GetClassProc(System.IntPtr descriptor, ref uint type)
+        {
+            return PSError.errPlugInHostInsufficient;
+        }
 
-					bytes = new byte[1] { (byte)aeteDict[getKey].Value };
+        static short GetSimpleReferenceProc(System.IntPtr descriptor, ref PIDescriptorSimpleReference data)
+        {
+            if (aeteDict.ContainsKey(getKey))
+            {
+                data = (PIDescriptorSimpleReference)aeteDict[getKey].Value;
+                return PSError.noErr;
+            }
 
-					Marshal.Copy(bytes, 0, hPtr, bytes.Length);
-					break;
-				case DescriptorTypes.typeInteger:
-					data = handle_new_proc(Marshal.SizeOf(typeof(Int32)));
-					hPtr = Marshal.ReadIntPtr(data);
-					bytes = BitConverter.GetBytes((int)aeteDict[getKey].Value);
-					Marshal.Copy(bytes, 0, hPtr, bytes.Length);
-					break;
-				case DescriptorTypes.typeFloat:
-				case DescriptorTypes.typeUintFloat:
-					data = handle_new_proc(Marshal.SizeOf(typeof(double)));
-					hPtr = Marshal.ReadIntPtr(data);
+            return PSError.errPlugInHostInsufficient;
+        }
+        static short GetObjectProc(System.IntPtr descriptor, ref uint retType, ref System.IntPtr data)
+        {
+            AETEValue item;
+            if (subClassDict != null)
+            {
+                item = subClassDict[getKey];
+            }
+            else
+            {
+                item = aeteDict[getKey];
+            }
+            uint type = item.Type;
 
-					bytes = BitConverter.GetBytes((double)aeteDict[getKey].Value);
-					Marshal.Copy(bytes, 0, hPtr, bytes.Length);
-					break;
+            try
+            {
+                retType = type;
+            }
+            catch (NullReferenceException)
+            {
+                // ignore it
+            }
 
-				default:
-					break;
-			}
+            byte[] bytes = null;
+            IntPtr hPtr = IntPtr.Zero;
+            switch (type)
+            {
 
-			return PSError.noErr;
-		}
-		static short GetCountProc(System.IntPtr descriptor, ref uint count)
-		{
-			count = (uint)aeteDict.Count;
-			return PSError.noErr;
-		}
-		static short GetStringProc(System.IntPtr descriptor, System.IntPtr data)
-		{
-			int size = aeteDict[getKey].Size;
-			Marshal.Copy((byte[])aeteDict[getKey].Value, 0, data, size);
-			return PSError.noErr;
-		}
-		static short GetPinnedIntegerProc(System.IntPtr descriptor, int min, int max, ref int intNumber)
-		{
-			descErr = PSError.noErr;
-			int amount = (int)aeteDict[getKey].Value;
-			if (amount < min)
-			{
-				amount = min;
-				descErr = PSError.coercedParamErr;
-			}
-			else if (amount > max)
-			{
-				amount = max;
-				descErr = PSError.coercedParamErr;
-			}
-			intNumber = amount;
+                case DescriptorTypes.classRGBColor:
+                case DescriptorTypes.classCMYKColor:
+                case DescriptorTypes.classGrayscale:
+                case DescriptorTypes.classLabColor:
+                case DescriptorTypes.classHSBColor:
+                    data = handle_new_proc(0); // assign a zero byte handle to allow it to work correctly in the OpenReadDescriptorProc(). 
+                    break;
 
-			return descErr;
-		}
-		static short GetPinnedFloatProc(System.IntPtr descriptor, ref double min, ref double max, ref double floatNumber)
-		{
-			descErr = PSError.noErr;
-			double amount = (double)aeteDict[getKey].Value;
-			if (amount < min)
-			{
-				amount = min;
-				descErr = PSError.coercedParamErr;
-			}
-			else if (amount > max)
-			{
-				amount = max;
-				descErr = PSError.coercedParamErr;
-			}
-			floatNumber = amount;
+                case DescriptorTypes.typeAlias:
+                case DescriptorTypes.typePath:
+                case DescriptorTypes.typeChar:
 
-			return descErr;
-		}
-		static short GetPinnedUnitFloatProc(System.IntPtr descriptor, ref double min, ref double max, ref uint units, ref double floatNumber)
-		{
-			descErr = PSError.noErr;
+                    int size = item.Size;
+                    data = handle_new_proc(size);
+                    hPtr = handle_lock_proc(data, 0);
+                    Marshal.Copy((byte[])item.Value, 0, hPtr, size);
+                    handle_unlock_proc(data);
+                    break;
+                case DescriptorTypes.typeBoolean:
+                    data = handle_new_proc(1);
+                    hPtr = handle_lock_proc(data, 0);
 
-			double amount = (double)aeteDict[getKey].Value;
-			if (amount < min)
-			{
-				amount = min;
-				descErr = PSError.coercedParamErr;
-			}
-			else if (amount > max)
-			{
-				amount = max;
-				descErr = PSError.coercedParamErr;
-			}
-			floatNumber = amount;
+                    Marshal.WriteByte(hPtr, (byte)item.Value);
+                    handle_unlock_proc(data);
+                    break;
+                case DescriptorTypes.typeInteger:
+                    data = handle_new_proc(Marshal.SizeOf(typeof(Int32)));
+                    hPtr = handle_lock_proc(data, 0);
+                    bytes = BitConverter.GetBytes((int)item.Value);
+                    Marshal.Copy(bytes, 0, hPtr, bytes.Length);
+                    handle_unlock_proc(data);
+                    break;
+                case DescriptorTypes.typeFloat:
+                case DescriptorTypes.typeUintFloat:
+                    data = handle_new_proc(Marshal.SizeOf(typeof(double)));
+                    hPtr = handle_lock_proc(data, 0);
 
-			return descErr;
-		}
+                    bytes = BitConverter.GetBytes((double)item.Value);
+                    Marshal.Copy(bytes, 0, hPtr, bytes.Length);
+                    handle_unlock_proc(data);
+                    break;
+
+                default:
+                    break;
+            }
+
+            return PSError.noErr;
+        }
+        static short GetCountProc(System.IntPtr descriptor, ref uint count)
+        {
+            if (subClassDict != null)
+            {
+                count = (uint)subClassDict.Count;
+            }
+            else
+            {
+                count = (uint)aeteDict.Count;
+            }
+            return PSError.noErr;
+        }
+        static short GetStringProc(System.IntPtr descriptor, System.IntPtr data)
+        {
+            AETEValue item = aeteDict[getKey];
+
+            int size = item.Size;
+
+            Marshal.WriteByte(data, (byte)size);
+
+            Marshal.Copy((byte[])item.Value, 0, new IntPtr(data.ToInt64() + 1L), size);
+            return PSError.noErr;
+        }
+        static short GetPinnedIntegerProc(System.IntPtr descriptor, int min, int max, ref int intNumber)
+        {
+            descErr = PSError.noErr;
+            AETEValue item;
+            if (subClassDict != null)
+            {
+                item = subClassDict[getKey];
+            }
+            else
+            {
+                item = aeteDict[getKey];
+            }
+
+            int amount = (int)item.Value;
+            if (amount < min)
+            {
+                amount = min;
+                descErr = PSError.coercedParamErr;
+            }
+            else if (amount > max)
+            {
+                amount = max;
+                descErr = PSError.coercedParamErr;
+            }
+            intNumber = amount;
+
+            return descErr;
+        }
+        static short GetPinnedFloatProc(System.IntPtr descriptor, ref double min, ref double max, ref double floatNumber)
+        {
+            descErr = PSError.noErr;
+            AETEValue item;
+            if (subClassDict != null)
+            {
+                item = subClassDict[getKey];
+            }
+            else
+            {
+                item = aeteDict[getKey];
+            }
+
+            double amount = (double)item.Value;
+            if (amount < min)
+            {
+                amount = min;
+                descErr = PSError.coercedParamErr;
+            }
+            else if (amount > max)
+            {
+                amount = max;
+                descErr = PSError.coercedParamErr;
+            }
+            floatNumber = amount;
+
+            return descErr;
+        }
+        static short GetPinnedUnitFloatProc(System.IntPtr descriptor, ref double min, ref double max, ref uint units, ref double floatNumber)
+        {
+            descErr = PSError.noErr;
+            AETEValue item;
+            if (subClassDict != null)
+            {
+                item = subClassDict[getKey];
+            }
+            else
+            {
+                item = aeteDict[getKey];
+            }
+
+            double amount = (double)item.Value;
+            if (amount < min)
+            {
+                amount = min;
+                descErr = PSError.coercedParamErr;
+            }
+            else if (amount > max)
+            {
+                amount = max;
+                descErr = PSError.coercedParamErr;
+            }
+            floatNumber = amount;
+
+            return descErr;
+        }
 		// WriteDescriptorProcs
 
 		static IntPtr OpenWriteDescriptorProc()
@@ -4000,54 +4160,88 @@ namespace PSFilterLoad.PSApi
 
 		static short PutObjectProc(System.IntPtr descriptor, uint key, uint type, System.IntPtr handle)
 		{
+
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+            Ping(DebugFlags.DescriptorParameters, string.Format("key: {0}, type: {1}", PropToString(key), PropToString(type)));
 #endif
-			byte[] data = null;
+            Dictionary<uint, AETEValue> classDict = null;
+            // TODO: Only the built in Photoshop classes are supported.
+            switch (type)
+            {
+                case DescriptorTypes.classRGBColor:
+                    classDict = new Dictionary<uint, AETEValue>(3);
+                    classDict.Add(DescriptorKeys.keyRed, aeteDict[DescriptorKeys.keyRed]);
+                    classDict.Add(DescriptorKeys.keyGreen, aeteDict[DescriptorKeys.keyGreen]);
+                    classDict.Add(DescriptorKeys.keyBlue, aeteDict[DescriptorKeys.keyBlue]);
 
-			switch (type)
-			{
-				case DescriptorTypes.classRGBColor:
-				case DescriptorTypes.classCMYKColor:
-				case DescriptorTypes.classGrayscale:
-				case DescriptorTypes.classLabColor:
-				case DescriptorTypes.classHSBColor:
-					aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), 0, null));
-					break;
+                    aeteDict.Remove(DescriptorKeys.keyRed);// remove the existing keys
+                    aeteDict.Remove(DescriptorKeys.keyGreen);
+                    aeteDict.Remove(DescriptorKeys.keyBlue);
 
-				default:
-					IntPtr hPtr = Marshal.ReadIntPtr(handle);
+                    aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), 0, classDict));
+                    break;
+                case DescriptorTypes.classCMYKColor:
+                    classDict = new Dictionary<uint, AETEValue>(4);
+                    classDict.Add(DescriptorKeys.keyCyan, aeteDict[DescriptorKeys.keyCyan]);
+                    classDict.Add(DescriptorKeys.keyMagenta, aeteDict[DescriptorKeys.keyMagenta]);
+                    classDict.Add(DescriptorKeys.keyYellow, aeteDict[DescriptorKeys.keyYellow]);
+                    classDict.Add(DescriptorKeys.keyBlack, aeteDict[DescriptorKeys.keyBlack]);
 
-					if (handle_valid(handle))
-					{
-						int size = handle_get_size_proc(handle);
-						data = new byte[size];
-						Marshal.Copy(hPtr, data, 0, size);
+                    aeteDict.Remove(DescriptorKeys.keyCyan);
+                    aeteDict.Remove(DescriptorKeys.keyMagenta);
+                    aeteDict.Remove(DescriptorKeys.keyYellow);
+                    aeteDict.Remove(DescriptorKeys.keyBlack);
 
-						aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), size, data));
-					}
-					else
-					{
-						int size = 0;
-						if (!IsBadReadPtr(hPtr))
-						{
-							size = NativeMethods.GlobalSize(hPtr).ToInt32();
-							data = new byte[size];
-							Marshal.Copy(hPtr, data, 0, size);
-						}
-						else
-						{
-							size = NativeMethods.GlobalSize(handle).ToInt32();
-							data = new byte[size];
-							Marshal.Copy(handle, data, 0, size);
-						}
+                    aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), 0, classDict));
+                    break;
+                case DescriptorTypes.classGrayscale:
+                    classDict = new Dictionary<uint, AETEValue>(1);
+                    classDict.Add(DescriptorKeys.keyGray, aeteDict[DescriptorKeys.keyGray]);
 
-						aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), size, data));
-					}
-					break;
-			}
+                    aeteDict.Remove(DescriptorKeys.keyGray);
 
+                    aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), 0, classDict));
+                    break;
+                case DescriptorTypes.classLabColor:
+                    classDict = new Dictionary<uint, AETEValue>(3);
+                    classDict.Add(DescriptorKeys.keyLuminance, aeteDict[DescriptorKeys.keyLuminance]);
+                    classDict.Add(DescriptorKeys.keyA, aeteDict[DescriptorKeys.keyA]);
+                    classDict.Add(DescriptorKeys.keyB, aeteDict[DescriptorKeys.keyB]);
 
+                    aeteDict.Remove(DescriptorKeys.keyLuminance);
+                    aeteDict.Remove(DescriptorKeys.keyA);
+                    aeteDict.Remove(DescriptorKeys.keyB);
+
+                    aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), 0, classDict));
+                    break;
+                case DescriptorTypes.classHSBColor:
+                    classDict = new Dictionary<uint, AETEValue>(3);
+                    classDict.Add(DescriptorKeys.keyHue, aeteDict[DescriptorKeys.keyHue]);
+                    classDict.Add(DescriptorKeys.keySaturation, aeteDict[DescriptorKeys.keySaturation]);
+                    classDict.Add(DescriptorKeys.keyBrightness, aeteDict[DescriptorKeys.keyBrightness]);
+
+                    aeteDict.Remove(DescriptorKeys.keyHue);
+                    aeteDict.Remove(DescriptorKeys.keySaturation);
+                    aeteDict.Remove(DescriptorKeys.keyBrightness);
+
+                    aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), 0, classDict));
+                    break;
+                case DescriptorTypes.classPoint:
+                    classDict = new Dictionary<uint, AETEValue>(2);
+
+                    classDict.Add(DescriptorKeys.keyHorizontal, aeteDict[DescriptorKeys.keyHorizontal]);
+                    classDict.Add(DescriptorKeys.keyVertical, aeteDict[DescriptorKeys.keyVertical]);
+
+                    aeteDict.Remove(DescriptorKeys.keyHorizontal);
+                    aeteDict.Remove(DescriptorKeys.keyVertical);
+
+                    aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), 0, classDict));
+
+                    break;
+
+                default:
+                    return PSError.errPlugInHostInsufficient;
+            }
 
 			return PSError.noErr;
 		}
