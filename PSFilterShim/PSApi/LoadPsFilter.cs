@@ -73,6 +73,7 @@ namespace PSFilterLoad.PSApi
 		static LockPIHandleProc handleLockProc;
 		static UnlockPIHandleProc handleUnlockProc;
 		static RecoverSpaceProc handleRecoverSpaceProc;
+		static DisposeRegularPIHandleProc handleDisposeRegularProc;
 		// ImageServicesProc
 #if USEIMAGESERVICES
 		static PIResampleProc resample1DProc;
@@ -3053,65 +3054,65 @@ namespace PSFilterLoad.PSApi
 
 			if (isSubKey)
 			{
-                if (subClassDict != null)
-                {
-                    if (subClassIndex > (subKeys.Count - 1) ||
-                        subClassIndex > (subClassDict.Count - 1))
-                    {
-                        return 0;
-                    }
+				if (subClassDict != null)
+				{
+					if (subClassIndex > (subKeys.Count - 1) ||
+						subClassIndex > (subClassDict.Count - 1))
+					{
+						return 0;
+					}
 
-                    getKey = key = subKeys[subClassIndex];
-                    AETEValue data = subClassDict[key];
-                    try
-                    {
-                        type = data.Type;
-                    }
-                    catch (NullReferenceException)
-                    {
-                    }
-                    try
-                    {
-                        flags = data.Flags;
-                    }
-                    catch (NullReferenceException)
-                    {
-                    }
+					getKey = key = subKeys[subClassIndex];
+					AETEValue data = subClassDict[key];
+					try
+					{
+						type = data.Type;
+					}
+					catch (NullReferenceException)
+					{
+					}
+					try
+					{
+						flags = data.Flags;
+					}
+					catch (NullReferenceException)
+					{
+					}
 
-                    subClassIndex++; 
-                }
-                else
-                {
-                    if (subKeyIndex > (subKeys.Count - 1) ||
-                        subKeyIndex > (aeteDict.Count - 1))
-                    {
-                        return 0;
-                    }
+					subClassIndex++; 
+				}
+				else
+				{
+					if (subKeyIndex > (subKeys.Count - 1) ||
+						subKeyIndex > (aeteDict.Count - 1))
+					{
+						return 0;
+					}
 
-                    getKey = key = subKeys[subKeyIndex];
-                    AETEValue data = aeteDict[key];
-                    try
-                    {
-                        type = data.Type;
-                    }
-                    catch (NullReferenceException)
-                    {
-                    }
-                    try
-                    {
-                        flags = data.Flags;
-                    }
-                    catch (NullReferenceException)
-                    {
-                    }
-                    
-                    subKeyIndex++; 
-                }  
+					getKey = key = subKeys[subKeyIndex];
+					AETEValue data = aeteDict[key];
+					try
+					{
+						type = data.Type;
+					}
+					catch (NullReferenceException)
+					{
+					}
+					try
+					{
+						flags = data.Flags;
+					}
+					catch (NullReferenceException)
+					{
+					}
+					
+					subKeyIndex++; 
+				}  
 
-                if (subKeyArrayPtr != IntPtr.Zero)
-                {
-                    Marshal.WriteInt32(subKeyArrayPtr, (subKeyIndex * 4));
-                }
+				if (subKeyArrayPtr != IntPtr.Zero)
+				{
+					Marshal.WriteInt32(subKeyArrayPtr, (subKeyIndex * 4));
+				}
 			}
 			else
 			{
@@ -3155,39 +3156,39 @@ namespace PSFilterLoad.PSApi
 
 		static short GetIntegerProc(System.IntPtr descriptor, ref int data)
 		{
-            if (subClassDict != null)
-            {
-                data = (int)subClassDict[getKey].Value;
-            }
-            else
-            {
-                data = (int)aeteDict[getKey].Value;
-            }
+			if (subClassDict != null)
+			{
+				data = (int)subClassDict[getKey].Value;
+			}
+			else
+			{
+				data = (int)aeteDict[getKey].Value;
+			}
 			return PSError.noErr;
 		}
 		static short GetFloatProc(System.IntPtr descriptor, ref double data)
 		{
-            if (subClassDict != null)
-            {
-                data = (double)subClassDict[getKey].Value;
-            }
-            else
-            {
-                data = (double)aeteDict[getKey].Value;
-            }
+			if (subClassDict != null)
+			{
+				data = (double)subClassDict[getKey].Value;
+			}
+			else
+			{
+				data = (double)aeteDict[getKey].Value;
+			}
 			return PSError.noErr;
 		}
 		static short GetUnitFloatProc(System.IntPtr descriptor, ref uint type, ref double data)
 		{
-            AETEValue item;
-            if (subClassDict != null)
-            {
-                item = subClassDict[getKey];
-            }
-            else
-            {
-                item = aeteDict[getKey];
-            }
+			AETEValue item;
+			if (subClassDict != null)
+			{
+				item = subClassDict[getKey];
+			}
+			else
+			{
+				item = aeteDict[getKey];
+			}
 
 			type = item.Type;
 			data = (double)item.Value;
@@ -3201,7 +3202,7 @@ namespace PSFilterLoad.PSApi
 		}
 		static short GetTextProc(System.IntPtr descriptor, ref System.IntPtr data)
 		{
-            AETEValue item = aeteDict[getKey];
+			AETEValue item = aeteDict[getKey];
 
 			int size = item.Size;
 			data = handle_new_proc(size);
@@ -3213,7 +3214,7 @@ namespace PSFilterLoad.PSApi
 		}
 		static short GetAliasProc(System.IntPtr descriptor, ref System.IntPtr data)
 		{
-            AETEValue item = aeteDict[getKey];
+			AETEValue item = aeteDict[getKey];
 
 			int size = item.Size;
 			data = handle_new_proc(size);
@@ -3241,20 +3242,20 @@ namespace PSFilterLoad.PSApi
 				data = (PIDescriptorSimpleReference)aeteDict[getKey].Value;
 				return PSError.noErr;
 			}
-           
+		   
 			return PSError.errPlugInHostInsufficient;
 		}
 		static short GetObjectProc(System.IntPtr descriptor, ref uint retType, ref System.IntPtr data)
 		{
-            AETEValue item;
-            if (subClassDict != null)
-            {
-                item = subClassDict[getKey];
-            }
-            else
-            {
-                item = aeteDict[getKey];
-            }
+			AETEValue item;
+			if (subClassDict != null)
+			{
+				item = subClassDict[getKey];
+			}
+			else
+			{
+				item = aeteDict[getKey];
+			}
 			uint type = item.Type;
 
 			try
@@ -3283,35 +3284,35 @@ namespace PSFilterLoad.PSApi
 				case DescriptorTypes.typePath:
 				case DescriptorTypes.typeChar:
 
-                    int size = item.Size;
-                    data = handle_new_proc(size);
-                    hPtr = handle_lock_proc(data, 0);
-                    Marshal.Copy((byte[])item.Value, 0, hPtr, size);
-                    handle_unlock_proc(data);
-                    break;
-                case DescriptorTypes.typeBoolean:
-                    data = handle_new_proc(1);
-                    hPtr = handle_lock_proc(data, 0);
+					int size = item.Size;
+					data = handle_new_proc(size);
+					hPtr = handle_lock_proc(data, 0);
+					Marshal.Copy((byte[])item.Value, 0, hPtr, size);
+					handle_unlock_proc(data);
+					break;
+				case DescriptorTypes.typeBoolean:
+					data = handle_new_proc(1);
+					hPtr = handle_lock_proc(data, 0);
 
-                    Marshal.WriteByte(hPtr, (byte)item.Value);
-                    handle_unlock_proc(data);
-                    break;
-                case DescriptorTypes.typeInteger:
-                    data = handle_new_proc(Marshal.SizeOf(typeof(Int32)));
-                    hPtr = handle_lock_proc(data, 0);
-                    bytes = BitConverter.GetBytes((int)item.Value);
-                    Marshal.Copy(bytes, 0, hPtr, bytes.Length);
-                    handle_unlock_proc(data);
-                    break;
-                case DescriptorTypes.typeFloat:
-                case DescriptorTypes.typeUintFloat:
-                    data = handle_new_proc(Marshal.SizeOf(typeof(double)));
-                    hPtr = handle_lock_proc(data, 0);
+					Marshal.WriteByte(hPtr, (byte)item.Value);
+					handle_unlock_proc(data);
+					break;
+				case DescriptorTypes.typeInteger:
+					data = handle_new_proc(Marshal.SizeOf(typeof(Int32)));
+					hPtr = handle_lock_proc(data, 0);
+					bytes = BitConverter.GetBytes((int)item.Value);
+					Marshal.Copy(bytes, 0, hPtr, bytes.Length);
+					handle_unlock_proc(data);
+					break;
+				case DescriptorTypes.typeFloat:
+				case DescriptorTypes.typeUintFloat:
+					data = handle_new_proc(Marshal.SizeOf(typeof(double)));
+					hPtr = handle_lock_proc(data, 0);
 
-                    bytes = BitConverter.GetBytes((double)item.Value);
-                    Marshal.Copy(bytes, 0, hPtr, bytes.Length);
-                    handle_unlock_proc(data);
-                    break;
+					bytes = BitConverter.GetBytes((double)item.Value);
+					Marshal.Copy(bytes, 0, hPtr, bytes.Length);
+					handle_unlock_proc(data);
+					break;
 
 				default:
 					break;
@@ -3321,19 +3322,19 @@ namespace PSFilterLoad.PSApi
 		}
 		static short GetCountProc(System.IntPtr descriptor, ref uint count)
 		{
-            if (subClassDict != null)
-            {
-                count = (uint)subClassDict.Count;
-            }
-            else
-            {
-                count = (uint)aeteDict.Count;
-            } 
-            return PSError.noErr;
+			if (subClassDict != null)
+			{
+				count = (uint)subClassDict.Count;
+			}
+			else
+			{
+				count = (uint)aeteDict.Count;
+			} 
+			return PSError.noErr;
 		}
 		static short GetStringProc(System.IntPtr descriptor, System.IntPtr data)
 		{
-            AETEValue item = aeteDict[getKey];
+			AETEValue item = aeteDict[getKey];
 
 			int size = item.Size;
 
@@ -3345,15 +3346,15 @@ namespace PSFilterLoad.PSApi
 		static short GetPinnedIntegerProc(System.IntPtr descriptor, int min, int max, ref int intNumber)
 		{
 			descErr = PSError.noErr;
-            AETEValue item;
-            if (subClassDict != null)
-            {
-                item = subClassDict[getKey];
-            }
-            else
-            {
-                item = aeteDict[getKey];
-            }
+			AETEValue item;
+			if (subClassDict != null)
+			{
+				item = subClassDict[getKey];
+			}
+			else
+			{
+				item = aeteDict[getKey];
+			}
 
 			int amount = (int)item.Value;
 			if (amount < min)
@@ -3373,15 +3374,15 @@ namespace PSFilterLoad.PSApi
 		static short GetPinnedFloatProc(System.IntPtr descriptor, ref double min, ref double max, ref double floatNumber)
 		{
 			descErr = PSError.noErr;
-            AETEValue item;
-            if (subClassDict != null)
-            {
-                item = subClassDict[getKey];
-            }
-            else
-            {
-                item = aeteDict[getKey];
-            }
+			AETEValue item;
+			if (subClassDict != null)
+			{
+				item = subClassDict[getKey];
+			}
+			else
+			{
+				item = aeteDict[getKey];
+			}
 
 			double amount = (double)item.Value;
 			if (amount < min)
@@ -3401,15 +3402,15 @@ namespace PSFilterLoad.PSApi
 		static short GetPinnedUnitFloatProc(System.IntPtr descriptor, ref double min, ref double max, ref uint units, ref double floatNumber)
 		{
 			descErr = PSError.noErr;
-            AETEValue item;
-            if (subClassDict != null)
-            {
-                item = subClassDict[getKey];
-            }
-            else
-            {
-                item = aeteDict[getKey];
-            }
+			AETEValue item;
+			if (subClassDict != null)
+			{
+				item = subClassDict[getKey];
+			}
+			else
+			{
+				item = aeteDict[getKey];
+			}
 
 			double amount = (double)item.Value;
 			if (amount < min)
@@ -3827,13 +3828,38 @@ namespace PSFilterLoad.PSApi
 					return;
 				}
 #if DEBUG
-				Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h));
+				Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
 				Ping(DebugFlags.HandleSuite, string.Format("Handle pointer address = {0:X8}", handles[h].pointer));
 #endif
 				handles.Remove(h);
 				PSHandle* handle = (PSHandle*)h.ToPointer();
 				Memory.Free(handle->pointer);
 				Memory.Free(h);
+			}
+		}
+
+		static unsafe void handle_dispose_regular_proc(IntPtr h)
+		{
+			// What is this supposed to do?
+			if (!handle_valid(h))
+			{
+				if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
+				{
+					IntPtr hPtr = Marshal.ReadIntPtr(h);
+
+					if (!IsBadReadPtr(hPtr))
+					{
+						NativeMethods.GlobalFree(hPtr);
+					}
+
+
+					NativeMethods.GlobalFree(h);
+					return;
+				}
+				else
+				{
+					return;
+				}
 			}
 		}
 
@@ -4331,7 +4357,7 @@ namespace PSFilterLoad.PSApi
 			handleLockProc = new LockPIHandleProc(handle_lock_proc);
 			handleRecoverSpaceProc = new RecoverSpaceProc(handle_recover_space_proc);
 			handleUnlockProc = new UnlockPIHandleProc(handle_unlock_proc);
-
+			handleDisposeRegularProc = new DisposeRegularPIHandleProc(handle_dispose_regular_proc);
 			// ImageServicesProc
 #if USEIMAGESERVICES
 			resample1DProc = new PIResampleProc(image_services_interpolate_1d_proc);
@@ -4395,7 +4421,7 @@ namespace PSFilterLoad.PSApi
 
 			suitesSetup = true;
 
-			// BufferProcs
+
 			buffer_procPtr = Memory.Allocate(Marshal.SizeOf(typeof(BufferProcs)), true);
 			BufferProcs* bufferProcs = (BufferProcs*)buffer_procPtr.ToPointer();
 			bufferProcs->bufferProcsVersion = PSConstants.kCurrentBufferProcsVersion;
@@ -4405,7 +4431,7 @@ namespace PSFilterLoad.PSApi
 			bufferProcs->lockProc = Marshal.GetFunctionPointerForDelegate(lockProc);
 			bufferProcs->unlockProc = Marshal.GetFunctionPointerForDelegate(unlockProc);
 			bufferProcs->spaceProc = Marshal.GetFunctionPointerForDelegate(spaceProc);
-			// HandleProc
+
 			handle_procPtr = Memory.Allocate(Marshal.SizeOf(typeof(HandleProcs)), true);
 			HandleProcs* handleProcs = (HandleProcs*)handle_procPtr.ToPointer();
 			handleProcs->handleProcsVersion = PSConstants.kCurrentHandleProcsVersion;
@@ -4413,11 +4439,11 @@ namespace PSFilterLoad.PSApi
 			handleProcs->newProc = Marshal.GetFunctionPointerForDelegate(handleNewProc);
 			handleProcs->disposeProc = Marshal.GetFunctionPointerForDelegate(handleDisposeProc);
 			handleProcs->getSizeProc = Marshal.GetFunctionPointerForDelegate(handleGetSizeProc);
-			handleProcs->lockProc = Marshal.GetFunctionPointerForDelegate(handleLockProc);
 			handleProcs->setSizeProc = Marshal.GetFunctionPointerForDelegate(handleSetSizeProc);
-			handleProcs->recoverSpaceProc = Marshal.GetFunctionPointerForDelegate(handleRecoverSpaceProc);
+			handleProcs->lockProc = Marshal.GetFunctionPointerForDelegate(handleLockProc);
 			handleProcs->unlockProc = Marshal.GetFunctionPointerForDelegate(handleUnlockProc);
-			// ImageServicesProc
+			handleProcs->recoverSpaceProc = Marshal.GetFunctionPointerForDelegate(handleRecoverSpaceProc);
+			handleProcs->disposeRegularHandleProc = Marshal.GetFunctionPointerForDelegate(handleDisposeRegularProc);
 
 #if USEIMAGESERVICES
 
@@ -4430,14 +4456,14 @@ namespace PSFilterLoad.PSApi
 			image_services_procsPtr = GCHandle.Alloc(image_services_procs, GCHandleType.Pinned); 
 #endif
 
-			// PropertyProcs
+
 			property_procsPtr = Memory.Allocate(Marshal.SizeOf(typeof(PropertyProcs)), true);
 			PropertyProcs* propertyProcs = (PropertyProcs*)property_procsPtr.ToPointer();
 			propertyProcs->propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion;
 			propertyProcs->numPropertyProcs = PSConstants.kCurrentPropertyProcsCount;
 			propertyProcs->getPropertyProc = Marshal.GetFunctionPointerForDelegate(getPropertyProc);
 			propertyProcs->setPropertyProc = Marshal.GetFunctionPointerForDelegate(setPropertyProc);
-			// ResourceProcs
+
 			resource_procsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ResourceProcs)), true);
 			ResourceProcs* resourceProcs = (ResourceProcs*)resource_procsPtr.ToPointer();
 			resourceProcs->resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion;
@@ -4470,7 +4496,6 @@ namespace PSFilterLoad.PSApi
 			readDescriptor->getTextProc = Marshal.GetFunctionPointerForDelegate(getTextProc);
 			readDescriptor->getUnitFloatProc = Marshal.GetFunctionPointerForDelegate(getUnitFloatProc);
 
-			// WriteDescriptorProcs		
 			writeDescriptorPtr = Memory.Allocate(Marshal.SizeOf(typeof(WriteDescriptorProcs)), true);
 			WriteDescriptorProcs* writeDescriptor = (WriteDescriptorProcs*)writeDescriptorPtr.ToPointer();
 			writeDescriptor->writeDescriptorProcsVersion = PSConstants.kCurrentWriteDescriptorProcsVersion;

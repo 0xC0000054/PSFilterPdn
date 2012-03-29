@@ -667,6 +667,7 @@ namespace PSFilterLoad.PSApi
 		static LockPIHandleProc handleLockProc;
 		static UnlockPIHandleProc handleUnlockProc;
 		static RecoverSpaceProc handleRecoverSpaceProc;
+        static DisposeRegularPIHandleProc handleDisposeRegularProc;
 		// ImageServicesProc
 #if USEIMAGESERVICES
 		static PIResampleProc resample1DProc;
@@ -4375,6 +4376,31 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
+        static unsafe void handle_dispose_regular_proc(IntPtr h)
+        {
+            // What is this supposed to do?
+            if (!handle_valid(h))
+            {
+                if (NativeMethods.GlobalSize(h).ToInt64() > 0L)
+                {
+                    IntPtr hPtr = Marshal.ReadIntPtr(h);
+
+                    if (!IsBadReadPtr(hPtr))
+                    {
+                        NativeMethods.GlobalFree(hPtr);
+                    }
+
+
+                    NativeMethods.GlobalFree(h);
+                    return;
+                }
+                else
+                {
+                    return;
+                }
+            }
+        }
+
 		static IntPtr handle_lock_proc(IntPtr h, byte moveHigh)
 		{
 #if DEBUG
@@ -4862,9 +4888,10 @@ namespace PSFilterLoad.PSApi
 			handleGetSizeProc = new GetPIHandleSizeProc(handle_get_size_proc);
 			handleSetSizeProc = new SetPIHandleSizeProc(handle_set_size);
 			handleLockProc = new LockPIHandleProc(handle_lock_proc);
-			handleRecoverSpaceProc = new RecoverSpaceProc(handle_recover_space_proc);
 			handleUnlockProc = new UnlockPIHandleProc(handle_unlock_proc);
-			
+			handleRecoverSpaceProc = new RecoverSpaceProc(handle_recover_space_proc);
+            handleDisposeRegularProc = new DisposeRegularPIHandleProc(handle_dispose_regular_proc);
+
 			// ImageServicesProc
 #if USEIMAGESERVICES
 			resample1DProc = new PIResampleProc(image_services_interpolate_1d_proc);
@@ -4927,8 +4954,8 @@ namespace PSFilterLoad.PSApi
 
 			suitesSetup = true;
 
-			// BufferProcs
-			buffer_procPtr = Memory.Allocate(Marshal.SizeOf(typeof(BufferProcs)), true);
+
+            buffer_procPtr = Memory.Allocate(Marshal.SizeOf(typeof(BufferProcs)), true);
 			BufferProcs* bufferProcs = (BufferProcs*)buffer_procPtr.ToPointer();
 			bufferProcs->bufferProcsVersion = PSConstants.kCurrentBufferProcsVersion;
 			bufferProcs->numBufferProcs = PSConstants.kCurrentBufferProcsCount;
@@ -4937,19 +4964,19 @@ namespace PSFilterLoad.PSApi
 			bufferProcs->lockProc = Marshal.GetFunctionPointerForDelegate(lockProc);
 			bufferProcs->unlockProc = Marshal.GetFunctionPointerForDelegate(unlockProc);
 			bufferProcs->spaceProc = Marshal.GetFunctionPointerForDelegate(spaceProc);
-			// HandleProc
-			handle_procPtr = Memory.Allocate(Marshal.SizeOf(typeof(HandleProcs)), true);
+
+            handle_procPtr = Memory.Allocate(Marshal.SizeOf(typeof(HandleProcs)), true);
 			HandleProcs* handleProcs = (HandleProcs*)handle_procPtr.ToPointer();
 			handleProcs->handleProcsVersion = PSConstants.kCurrentHandleProcsVersion;
 			handleProcs->numHandleProcs = PSConstants.kCurrentHandleProcsCount;
 			handleProcs->newProc = Marshal.GetFunctionPointerForDelegate(handleNewProc);
 			handleProcs->disposeProc = Marshal.GetFunctionPointerForDelegate(handleDisposeProc);
 			handleProcs->getSizeProc = Marshal.GetFunctionPointerForDelegate(handleGetSizeProc);
-			handleProcs->lockProc = Marshal.GetFunctionPointerForDelegate(handleLockProc);
 			handleProcs->setSizeProc = Marshal.GetFunctionPointerForDelegate(handleSetSizeProc);
-			handleProcs->recoverSpaceProc = Marshal.GetFunctionPointerForDelegate(handleRecoverSpaceProc);
+            handleProcs->lockProc = Marshal.GetFunctionPointerForDelegate(handleLockProc);
 			handleProcs->unlockProc = Marshal.GetFunctionPointerForDelegate(handleUnlockProc);
-			// ImageServicesProc
+            handleProcs->recoverSpaceProc = Marshal.GetFunctionPointerForDelegate(handleRecoverSpaceProc);
+            handleProcs->disposeRegularHandleProc = Marshal.GetFunctionPointerForDelegate(handleDisposeRegularProc);
 
 #if USEIMAGESERVICES
 
@@ -4962,15 +4989,15 @@ namespace PSFilterLoad.PSApi
 			image_services_procsPtr = GCHandle.Alloc(image_services_procs, GCHandleType.Pinned); 
 #endif
 
-			// PropertyProcs
-			property_procsPtr = Memory.Allocate(Marshal.SizeOf(typeof(PropertyProcs)), true);
+
+            property_procsPtr = Memory.Allocate(Marshal.SizeOf(typeof(PropertyProcs)), true);
 			PropertyProcs* propertyProcs = (PropertyProcs*)property_procsPtr.ToPointer();
 			propertyProcs->propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion;
 			propertyProcs->numPropertyProcs = PSConstants.kCurrentPropertyProcsCount;
 			propertyProcs->getPropertyProc = Marshal.GetFunctionPointerForDelegate(getPropertyProc);
 			propertyProcs->setPropertyProc = Marshal.GetFunctionPointerForDelegate(setPropertyProc);
-			// ResourceProcs
-			resource_procsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ResourceProcs)), true);
+
+            resource_procsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ResourceProcs)), true);
 			ResourceProcs* resourceProcs = (ResourceProcs*)resource_procsPtr.ToPointer();
 			resourceProcs->resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion;
 			resourceProcs->numResourceProcs = PSConstants.kCurrentResourceProcsCount;
@@ -5002,8 +5029,8 @@ namespace PSFilterLoad.PSApi
 			readDescriptor->getTextProc = Marshal.GetFunctionPointerForDelegate(getTextProc);
 			readDescriptor->getUnitFloatProc = Marshal.GetFunctionPointerForDelegate(getUnitFloatProc);
 
-			// WriteDescriptorProcs		
-			writeDescriptorPtr = Memory.Allocate(Marshal.SizeOf(typeof(WriteDescriptorProcs)), true);
+
+            writeDescriptorPtr = Memory.Allocate(Marshal.SizeOf(typeof(WriteDescriptorProcs)), true);
 			WriteDescriptorProcs* writeDescriptor = (WriteDescriptorProcs*)writeDescriptorPtr.ToPointer();
 			writeDescriptor->writeDescriptorProcsVersion = PSConstants.kCurrentWriteDescriptorProcsVersion;
 			writeDescriptor->numWriteDescriptorProcs = PSConstants.kCurrentWriteDescriptorProcsCount;

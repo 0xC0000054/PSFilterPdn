@@ -45,6 +45,9 @@ namespace PSFilterLoad.PSApi
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void UnlockPIHandleProc(System.IntPtr h);
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate void DisposeRegularPIHandleProc(IntPtr h);
+
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayoutAttribute(LayoutKind.Sequential)]
     internal struct HandleProcs
     {
@@ -73,6 +76,8 @@ namespace PSFilterLoad.PSApi
 
         /// RecoverSpaceProc
         public IntPtr recoverSpaceProc;
+
+        public IntPtr disposeRegularHandleProc;
     }
 
 }

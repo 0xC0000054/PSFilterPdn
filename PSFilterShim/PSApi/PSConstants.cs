@@ -22,7 +22,7 @@ namespace PSFilterLoad.PSApi
         
         /// kCurrentHandleProcsVersion -> 1
         public const int kCurrentHandleProcsVersion = 1;
-        public const short kCurrentHandleProcsCount = 7;
+        public const short kCurrentHandleProcsCount = 8;
 
 #if USEIMAGESERVICES
         /// kCurrentImageServicesProcsVersion -> 1
