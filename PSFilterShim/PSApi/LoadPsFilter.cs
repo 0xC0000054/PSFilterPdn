@@ -3195,31 +3195,13 @@ namespace PSFilterLoad.PSApi
 		}
 		static short GetBooleanProc(System.IntPtr descriptor, ref byte data)
 		{
-            AETEValue item;
-            if (subClassDict != null)
-            {
-                item = subClassDict[getKey];
-            }
-            else
-            {
-                item = aeteDict[getKey];
-            }
-
-			data = (byte)item.Value;
+			data = (byte) aeteDict[getKey].Value;
 
 			return PSError.noErr;
 		}
 		static short GetTextProc(System.IntPtr descriptor, ref System.IntPtr data)
 		{
-            AETEValue item;
-            if (subClassDict != null)
-            {
-                item = subClassDict[getKey];
-            }
-            else
-            {
-                item = aeteDict[getKey];
-            }
+            AETEValue item = aeteDict[getKey];
 
 			int size = item.Size;
 			data = handle_new_proc(size);
@@ -3231,15 +3213,7 @@ namespace PSFilterLoad.PSApi
 		}
 		static short GetAliasProc(System.IntPtr descriptor, ref System.IntPtr data)
 		{
-            AETEValue item;
-            if (subClassDict != null)
-            {
-                item = subClassDict[getKey];
-            }
-            else
-            {
-                item = aeteDict[getKey];
-            }
+            AETEValue item = aeteDict[getKey];
 
 			int size = item.Size;
 			data = handle_new_proc(size);
@@ -3251,17 +3225,7 @@ namespace PSFilterLoad.PSApi
 		}
 		static short GetEnumeratedProc(System.IntPtr descriptor, ref uint type)
 		{
-            AETEValue item;
-            if (subClassDict != null)
-            {
-                item = subClassDict[getKey];
-            }
-            else
-            {
-                item = aeteDict[getKey];
-            }
-
-			type = (uint)item.Value;
+			type = (uint)aeteDict[getKey].Value;
 
 			return PSError.noErr;
 		}
@@ -3277,11 +3241,7 @@ namespace PSFilterLoad.PSApi
 				data = (PIDescriptorSimpleReference)aeteDict[getKey].Value;
 				return PSError.noErr;
 			}
-            else if ((subClassDict != null) && subClassDict.ContainsKey(getKey))
-            {
-                data = (PIDescriptorSimpleReference)subClassDict[getKey].Value;
-                return PSError.noErr;
-            }
+           
 			return PSError.errPlugInHostInsufficient;
 		}
 		static short GetObjectProc(System.IntPtr descriptor, ref uint retType, ref System.IntPtr data)
@@ -3373,15 +3333,7 @@ namespace PSFilterLoad.PSApi
 		}
 		static short GetStringProc(System.IntPtr descriptor, System.IntPtr data)
 		{
-            AETEValue item;
-            if (subClassDict != null)
-            {
-                item = subClassDict[getKey];
-            }
-            else
-            {
-                item = aeteDict[getKey];
-            }
+            AETEValue item = aeteDict[getKey];
 
 			int size = item.Size;
 
