@@ -4625,20 +4625,20 @@ namespace PSFilterLoad.PSApi
 			filterRecord->imageServicesProcs = IntPtr.Zero;
 #endif
 			filterRecord->propertyProcs = property_procsPtr;
-			filterRecord->inTileHeight = 0;
-			filterRecord->inTileWidth = 0;
+			filterRecord->inTileHeight = (short)source.Width;
+			filterRecord->inTileWidth = (short)source.Height;
 			filterRecord->inTileOrigin.h = 0;
 			filterRecord->inTileOrigin.v = 0;
-			filterRecord->absTileHeight = 0;
-			filterRecord->absTileWidth = 0;
+            filterRecord->absTileHeight = filterRecord->inTileHeight;
+			filterRecord->absTileWidth = filterRecord->inTileWidth;
 			filterRecord->absTileOrigin.h = 0;
 			filterRecord->absTileOrigin.v = 0;
-			filterRecord->outTileHeight = 0;
-			filterRecord->outTileWidth = 0;
+            filterRecord->outTileHeight = filterRecord->inTileHeight;
+            filterRecord->outTileWidth = filterRecord->inTileWidth;
 			filterRecord->outTileOrigin.h = 0;
 			filterRecord->outTileOrigin.v = 0;
-			filterRecord->maskTileHeight = 0;
-			filterRecord->maskTileWidth = 0;
+            filterRecord->maskTileHeight = filterRecord->inTileHeight;
+            filterRecord->maskTileWidth = filterRecord->inTileWidth;
 			filterRecord->maskTileOrigin.h = 0;
 			filterRecord->maskTileOrigin.v = 0;
 			
