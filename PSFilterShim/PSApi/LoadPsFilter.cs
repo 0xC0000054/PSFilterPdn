@@ -2449,7 +2449,7 @@ namespace PSFilterLoad.PSApi
 						FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 						switch (info.selectorParameter.specialColorID)
 						{
-							case 0:
+							case ColorServicesConstants.plugIncolorServicesBackgroundColor:
 
 
 								for (int i = 0; i < 4; i++)
@@ -2459,7 +2459,7 @@ namespace PSFilterLoad.PSApi
 								
 
 								break;
-							case 1:
+							case ColorServicesConstants.plugIncolorServicesForegroundColor:
 
 
 								for (int i = 0; i < 4; i++)
@@ -4629,16 +4629,16 @@ namespace PSFilterLoad.PSApi
 			filterRecord->inTileWidth = (short)source.Height;
 			filterRecord->inTileOrigin.h = 0;
 			filterRecord->inTileOrigin.v = 0;
-            filterRecord->absTileHeight = filterRecord->inTileHeight;
+			filterRecord->absTileHeight = filterRecord->inTileHeight;
 			filterRecord->absTileWidth = filterRecord->inTileWidth;
 			filterRecord->absTileOrigin.h = 0;
 			filterRecord->absTileOrigin.v = 0;
-            filterRecord->outTileHeight = filterRecord->inTileHeight;
-            filterRecord->outTileWidth = filterRecord->inTileWidth;
+			filterRecord->outTileHeight = filterRecord->inTileHeight;
+			filterRecord->outTileWidth = filterRecord->inTileWidth;
 			filterRecord->outTileOrigin.h = 0;
 			filterRecord->outTileOrigin.v = 0;
-            filterRecord->maskTileHeight = filterRecord->inTileHeight;
-            filterRecord->maskTileWidth = filterRecord->inTileWidth;
+			filterRecord->maskTileHeight = filterRecord->inTileHeight;
+			filterRecord->maskTileWidth = filterRecord->inTileWidth;
 			filterRecord->maskTileOrigin.h = 0;
 			filterRecord->maskTileOrigin.v = 0;
 			

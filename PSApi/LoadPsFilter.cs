@@ -3180,7 +3180,7 @@ namespace PSFilterLoad.PSApi
 						FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 						switch (info.selectorParameter.specialColorID)
 						{
-							case 0:
+							case ColorServicesConstants.plugIncolorServicesBackgroundColor:
 
 
 								for (int i = 0; i < 4; i++)
@@ -3190,7 +3190,7 @@ namespace PSFilterLoad.PSApi
 								
 
 								break;
-							case 1:
+							case ColorServicesConstants.plugIncolorServicesForegroundColor:
 
 								for (int i = 0; i < 4; i++)
 								{
