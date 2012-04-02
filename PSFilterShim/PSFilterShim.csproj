@@ -77,6 +77,14 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColorSpace\CIELab.cs" />
+    <Compile Include="ColorSpace\CIEXYZ.cs" />
+    <Compile Include="ColorSpace\CMYK.cs" />
+    <Compile Include="ColorSpace\ColorSpaceHelper.cs" />
+    <Compile Include="ColorSpace\HSB.cs" />
+    <Compile Include="ColorSpace\HSL.cs" />
+    <Compile Include="ColorSpace\RGB.cs" />
+    <Compile Include="ColorSpace\YUV.cs" />
     <Compile Include="IPSFilterShim.cs" />
     <Compile Include="PaintDotNet\ColorBgra.cs">
       <SubType>Code</SubType>
