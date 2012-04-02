@@ -4008,7 +4008,7 @@ namespace PSFilterLoad.PSApi
 #endif
 		}
 
-#if PSSDK_3_0_4 && USEIMAGESERVICES
+#if USEIMAGESERVICES
 		static short image_services_interpolate_1d_proc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
 		{
 			return PSError.memFullErr;
