@@ -3209,8 +3209,11 @@ namespace PSFilterLoad.PSApi
 						
 					if (IsInSourceBounds(point))
 					{
-						ColorBgra pixel = source.GetPoint(point.h, point.v);
-						info.colorComponents = new short[4] { (short)pixel.R, (short)pixel.G, (short)pixel.B, 0 };
+						ColorBgra pixel = source.GetPointUnchecked(point.h, point.v);
+						info.colorComponents[0] = (short)pixel.R;
+                        info.colorComponents[1] = (short)pixel.G;
+                        info.colorComponents[2] = (short)pixel.B;
+                        info.colorComponents[3] = 0;
 						err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
 					}
 					else
@@ -3226,13 +3229,10 @@ namespace PSFilterLoad.PSApi
 
 		static bool IsInSourceBounds(Point16 point)
 		{
-			if (source == null) // Bitmap Disposed?
+			if (source == null) // Surface Disposed?
 				return false;
 
-			bool inh = (point.h >= 0 && point.h < (source.Width - 1));
-			bool inv = (point.v >= 0 && point.v < (source.Height - 1));
-
-			return (inh && inv);
+			return ((point.h >= 0 && point.h < (source.Width - 1)) && (point.v >= 0 && point.v < (source.Height - 1)));
 		} 
 
 		static Surface tempDisplaySurface;
@@ -4593,8 +4593,7 @@ namespace PSFilterLoad.PSApi
 						complexProperty = handle_new_proc(0);
 						break;
 					case PSProperties.propChannelName:
-						int maxChannelIndex = ignoreAlpha ? 2 : 3; // zero indexed
-						if (index < 0 || index > maxChannelIndex)
+						if (index < 0 || index > (filterRecord->planes - 1))
 						{
 							return PSError.errPlugInPropertyUndefined;
 						}
@@ -4653,19 +4652,20 @@ namespace PSFilterLoad.PSApi
 						simpleProperty = int2fixed(2);
 						break;
 					case PSProperties.propSerialString:
-
 						bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
 						complexProperty = handle_new_proc(bytes.Length);
 						Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
 						handle_unlock_proc(complexProperty); 
-
 						break;
 					case PSProperties.propURL:
 						complexProperty = handle_new_proc(0);
 						break;
 					case PSProperties.propTitle:
-						complexProperty = handle_new_proc(0);
-						break;
+                        bytes = Encoding.ASCII.GetBytes("temp.pdn"); // some filters just want a non empty string
+                        complexProperty = handle_new_proc(bytes.Length);
+                        Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
+                        handle_unlock_proc(complexProperty);						
+                        break;
 					case PSProperties.propWatchSuspension:
 						simpleProperty = 0;
 						break;
