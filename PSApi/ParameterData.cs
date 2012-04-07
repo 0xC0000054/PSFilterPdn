@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace PSFilterLoad.PSApi
 {
     /// <summary>
-    /// The struct that holds the saved filter global parameter data.
+    /// The class that holds the saved filter parameter and scripting data.
     /// </summary>
     [Serializable]
     public sealed class ParameterData 
