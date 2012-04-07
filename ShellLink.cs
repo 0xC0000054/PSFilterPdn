@@ -25,18 +25,6 @@ namespace PSFilterPdn
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ShellLink"/> class.
-        /// </summary>
-        /// <param name="linkPath">The link path to load.</param>
-        public ShellLink(string linkPath)
-        {
-            shellLinkCoClass = new ShellLinkCoClass();
-            shellLink = (NativeInterfaces.IShellLinkW)shellLinkCoClass;
-
-            this.Load(linkPath);
-        }
-
-        /// <summary>
         /// Loads a shortcut from a file.
         /// </summary>
         /// <param name="linkPath">The shortcut to load.</param>
