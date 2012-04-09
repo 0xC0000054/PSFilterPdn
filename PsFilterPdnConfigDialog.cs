@@ -46,13 +46,22 @@ namespace PSFilterPdn
 			InitializeComponent();
 			this.filterTreeItems = null;
 			this.proxyProcess = null;
-			this.proxyProcess = new Process();
 			this.destSurface = null;
-			this.proxyThread = null;
 			this.expandedNodes = new List<string>();
 			this.pseudoResources = new List<PSResource>();
 			this.fileNameLbl.Text = string.Empty;
 		}
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && proxyProcess != null)
+            {
+                proxyProcess.Dispose();
+                proxyProcess = null;
+            }
+
+            base.Dispose(disposing);
+        }
 
 		private static class NativeMethods
 		{
@@ -472,7 +481,33 @@ namespace PSFilterPdn
 		private bool proxyRunning;
 		private const string endpointName = "net.pipe://localhost/PSFilterShim/ShimData";
 
-		private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
+        private string srcFileName;
+        private string destFileName;
+        private string parmDataFileName;
+        private string resourceDataFileName;
+        private string rdwPath;
+        private PluginData proxyData;
+
+        private void proxyProcess_Exited(object sender, EventArgs e)
+        {
+            base.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] {destFileName, parmDataFileName, resourceDataFileName, proxyData});
+
+            
+            File.Delete(srcFileName);
+            File.Delete(destFileName);
+            if (!string.IsNullOrEmpty(rdwPath))
+            {
+                File.Delete(rdwPath);
+            }
+            File.Delete(parmDataFileName);
+            File.Delete(resourceDataFileName);
+
+            PSFilterShimServer.Stop();
+
+
+            proxyRunning = false;
+        }
+        private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
 		{
 			// check that PSFilterShim exists first thing and abort if it does not.
 			string shimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
@@ -484,12 +519,12 @@ namespace PSFilterPdn
 			}
 
 			string userDataPath = base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
-			string src = Path.Combine(userDataPath, "proxysourceimg.png");
-			string dest = Path.Combine(userDataPath, "proxyresultimg.png");
+			srcFileName = Path.Combine(userDataPath, "proxysourceimg.png");
+			destFileName = Path.Combine(userDataPath, "proxyresultimg.png");
 
-			string parmDataFileName = Path.Combine(userDataPath, "filterParameters.dat");
-			string resourceDataFileName = Path.Combine(userDataPath, "pseudoResources.dat"); ;
-			string rdwPath = string.Empty;
+			parmDataFileName = Path.Combine(userDataPath, "filterParameters.dat");
+			resourceDataFileName = Path.Combine(userDataPath, "pseudoResources.dat"); ;
+			rdwPath = string.Empty;
 
 
 			Rectangle sourceBounds = eep.SourceSurface.Bounds;
@@ -523,112 +558,82 @@ namespace PSFilterPdn
 			}; 
 
 			PSFilterShimServer.Start(service);
+            this.proxyData = data;
+            try
+            {
 
-			try
-			{
+                using (FileStream fs = new FileStream(srcFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    using (Bitmap bmp = base.EffectSourceSurface.CreateAliasedBitmap())
+                    {
+                        bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                }
 
-				using (FileStream fs = new FileStream(src, FileMode.Create, FileAccess.Write, FileShare.None))
-				{
-					using (Bitmap bmp = base.EffectSourceSurface.CreateAliasedBitmap())
-					{
-						bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
-					}
-				}
+                if ((filterParameters != null) && filterParameters.AETEDictionary.Count > 0
+                                       && data.fileName == fileName)
+                {
+                    using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        BinaryFormatter bf = new BinaryFormatter();
+                        bf.Serialize(fs, this.filterParameters);
+                    }
+                }
 
-				if ((filterParameters != null) && filterParameters.AETEDictionary.Count > 0
-									   && data.fileName == fileName)
-				{
-					using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-					{
-						BinaryFormatter bf = new BinaryFormatter();
-						bf.Serialize(fs, this.filterParameters);
-					}
-				}
+                if ((pseudoResources != null) && pseudoResources.Count > 0)
+                {
+                    using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        BinaryFormatter bf = new BinaryFormatter();
+                        bf.Serialize(fs, this.pseudoResources);
+                    }
+                }
 
-				if ((pseudoResources != null) && pseudoResources.Count > 0)
-				{
-					using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-					{
-						BinaryFormatter bf = new BinaryFormatter();
-						bf.Serialize(fs, this.pseudoResources);
-					}
-				}
-
-				string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\"", new object[] { src, dest});
+                string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\"", new object[] { srcFileName, destFileName });
 
 #if DEBUG
-				Debug.WriteLine(pArgs);
+                Debug.WriteLine(pArgs);
 #endif
-				ProcessStartInfo psi = new ProcessStartInfo(shimPath, pArgs);
-				psi.RedirectStandardInput = true;
-				psi.CreateNoWindow = true;
-				psi.UseShellExecute = false;
+                ProcessStartInfo psi = new ProcessStartInfo(shimPath, pArgs);
+                psi.RedirectStandardInput = true;
+                psi.CreateNoWindow = true;
+                psi.UseShellExecute = false;
 
-				proxyResult = true; // assume the filter succeded this will be set to false if it failed
-				proxyErrorMessage = string.Empty;
+                proxyResult = true; // assume the filter succeded this will be set to false if it failed
+                proxyErrorMessage = string.Empty;
 
-				proxyProcess = new Process();
-				proxyProcess.StartInfo = psi;
-				
+                if (proxyProcess == null)
+                {
+                    proxyProcess = new Process();
+                } 
+                proxyProcess.StartInfo = psi;
+
 #if DEBUG
-				bool st = proxyProcess.Start();
-				Debug.WriteLine("Started = " + st.ToString());
+                proxyProcess.EnableRaisingEvents = true;
+                proxyProcess.Exited += new EventHandler(proxyProcess_Exited);
+
+                bool st = proxyProcess.Start();
+                Debug.WriteLine("Started = " + st.ToString());
 #else
 				proxyProcess.Start();
 #endif
-				proxyProcess.StandardInput.WriteLine(endpointName); // proxy WCF service
-				proxyProcess.StandardInput.WriteLine(parmDataFileName);
-				proxyProcess.StandardInput.WriteLine(resourceDataFileName);
+                proxyProcess.StandardInput.WriteLine(endpointName); // proxy WCF service
+                proxyProcess.StandardInput.WriteLine(parmDataFileName);
+                proxyProcess.StandardInput.WriteLine(resourceDataFileName);
 
-				proxyRunning = true;
-				while (!proxyProcess.HasExited)
-				{
-					Application.DoEvents();
-					Thread.Sleep(250);
-				}
-
-				this.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] { dest, parmDataFileName,
-					resourceDataFileName, data });
-			}
-			catch (ArgumentException ax)
-			{
-				MessageBox.Show(ax.ToString(), PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-			}
-			catch (UnauthorizedAccessException ex)
-			{
-				MessageBox.Show(ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-			}
-			catch (Win32Exception wx)
-			{
-				MessageBox.Show(wx.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-			} 
-			finally
-			{
-				proxyProcess.Dispose();
-				proxyProcess = null;
-
-				if (File.Exists(src))
-				{
-					File.Delete(src);
-				}
-				if (File.Exists(dest))
-				{
-					File.Delete(dest);
-				}
-				if (!string.IsNullOrEmpty(rdwPath))
-				{
-					File.Delete(rdwPath);
-				}
-				File.Delete(parmDataFileName);
-				File.Delete(resourceDataFileName);
-
-				PSFilterShimServer.Stop();
-
-				proxyRunning = false;
-
-				proxyThread.Join();
-				proxyThread = null;
-			}
+            }
+            catch (ArgumentException ax)
+            {
+                MessageBox.Show(ax.ToString(), PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show(ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Win32Exception wx)
+            {
+                MessageBox.Show(wx.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 		}
 
 		private void SetProxyResultData(string destFileName, string parameterDataPath, string resourceDataFileName, PluginData data)
@@ -669,11 +674,6 @@ namespace PSFilterPdn
 					}
 				}
 
-
-				if (filterProgressBar.Value < filterProgressBar.Maximum)
-				{
-					filterProgressBar.Value = filterProgressBar.Maximum;
-				}
 			}
 			else
 			{
@@ -692,12 +692,11 @@ namespace PSFilterPdn
 			filterProgressBar.Value = 0;
 
 			FinishTokenUpdate();
-
+            Application.DoEvents();
 		}
 
 		private Surface destSurface;
 		private bool runWith32BitShim;
-		private Thread proxyThread;
 		private static bool filterRunning;
 
 		private void runFilterBtn_Click(object sender, EventArgs e)
@@ -712,8 +711,7 @@ namespace PSFilterPdn
 					if (data.runWith32BitShim || useDEPProxy)
 					{
 						this.runWith32BitShim = true;
-						proxyThread = new Thread(() => Run32BitFilterProxy(((PSFilterPdnEffect)this.Effect).EnvironmentParameters, data)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
-						proxyThread.Start();
+                        this.Run32BitFilterProxy(((PSFilterPdnEffect)this.Effect).EnvironmentParameters, data);
 					}
 					else
 					{
