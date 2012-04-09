@@ -2967,6 +2967,16 @@ namespace PSFilterLoad.PSApi
 						keys.Add(key);
 						index += 4;
 					}
+
+                    // trim the list to the actual values in the dictonary
+                    uint[] values = keys.ToArray();
+                    foreach (var item in values)
+                    {
+                        if (!aeteDict.ContainsKey(item))
+                        {
+                            keys.Remove(item);
+                        }
+                    }
 				}
 			}
 			else
@@ -2986,6 +2996,7 @@ namespace PSFilterLoad.PSApi
 						index += 4;
 					}
 				}
+
 				isSubKey = true;
 				subClassDict = null;
 				subClassIndex = 0;
@@ -2993,6 +3004,18 @@ namespace PSFilterLoad.PSApi
 				{
 					subClassDict = (Dictionary<uint, AETEValue>)aeteDict[getKey].Value;
 				}
+                else
+                {
+                    // trim the list to the actual values in the dictonary
+                    uint[] values = subKeys.ToArray();
+                    foreach (var item in values)
+                    {
+                        if (!aeteDict.ContainsKey(item))
+                        {
+                            subKeys.Remove(item);
+                        }
+                    }
+                }
 			}
 
 
