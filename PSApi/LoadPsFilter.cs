@@ -742,6 +742,7 @@ namespace PSFilterLoad.PSApi
 		static IntPtr descriptorParametersPtr;
 		static IntPtr readDescriptorPtr;
 		static IntPtr writeDescriptorPtr;
+        static IntPtr errorStringPtr;
 
 		static AETEData aete;
 		static Dictionary<uint, AETEValue> aeteDict;
@@ -1107,7 +1108,7 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Loads the filter into memory.
 		/// </summary>
-		/// <param name="pdata">The <see cref="PluginData"/> of the filter to load.</param>
+		/// <param name="proxyData">The <see cref="PluginData"/> of the filter to load.</param>
 		/// <returns><c>true</c> if the filter is loaded sucessfully; otherwise <c>false</c>.</returns>
 		static bool LoadFilter(ref PluginData pdata)
 		{
@@ -1134,7 +1135,7 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Free the loaded PluginData.
 		/// </summary>
-		/// <param name="pdata">The PluginData to  free</param>
+		/// <param name="proxyData">The PluginData to  free</param>
 		static void FreeLibrary(ref PluginData pdata)
 		{
 			if (!pdata.entry.dll.IsInvalid)
@@ -1725,7 +1726,7 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Runs a filter from the specified PluginData
 		/// </summary>
-		/// <param name="pdata">The PluginData to run</param>
+		/// <param name="proxyData">The PluginData to run</param>
 		/// <param name="showAbout">Show the Filter's About Box</param>
 		/// <returns>True if successful otherwise false</returns>
 		/// <exception cref="PSFilterLoad.PSApi.FilterLoadException">The Exception thrown when there is a problem with loading the Filter PiPl data.</exception>
@@ -1925,10 +1926,7 @@ namespace PSFilterLoad.PSApi
 			}
 			else if (result == PSError.errReportString)
 			{
-				unsafe
-				{
-					error = StringFromPString(((FilterRecord*)filterRecordPtr.ToPointer())->errorString);
-				}
+			    error = StringFromPString(errorStringPtr);
 			}
 			else
 			{
@@ -5176,7 +5174,8 @@ namespace PSFilterLoad.PSApi
 			filterRecord->maskTileOrigin.v = 0;
 			
 			filterRecord->descriptorParameters = descriptorParametersPtr;
-			filterRecord->errorString = Memory.Allocate(256, true);
+            errorStringPtr =  Memory.Allocate(256, true);
+            filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead. 
 			filterRecord->channelPortProcs = IntPtr.Zero;
 			filterRecord->documentInfo = IntPtr.Zero;
 
@@ -5316,16 +5315,15 @@ namespace PSFilterLoad.PSApi
 					Memory.Free(writeDescriptorPtr);
 					writeDescriptorPtr = IntPtr.Zero;
 				}
+                if (errorStringPtr != IntPtr.Zero)
+                {
+                    Memory.Free(errorStringPtr);
+                    errorStringPtr = IntPtr.Zero;
+                }
+
 				if (filterRecordPtr != IntPtr.Zero)
 				{
 					FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-
-
-					if (filterRecord->errorString != IntPtr.Zero)
-					{
-						Memory.Free(filterRecord->errorString);
-					}
-
 
 					if (filterRecord->parameters != IntPtr.Zero)
 					{
