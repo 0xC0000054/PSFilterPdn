@@ -34,12 +34,12 @@ namespace ns
 
         public static int Compare(string s1, string s2)
         {
-            if (null == s1 || 0 == s1.Length)
+            if (string.IsNullOrEmpty(s1))
             {
-                if (null == s2 || 0 == s2.Length) return 0;
+                if (string.IsNullOrEmpty(s2)) return 0;
                 return -1;
             }
-            else if (null == s2 || 0 == s2.Length)
+            else if (string.IsNullOrEmpty(s2))
             {
                 return 1;
             }
