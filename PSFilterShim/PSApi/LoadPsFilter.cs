@@ -3033,7 +3033,7 @@ namespace PSFilterLoad.PSApi
 
 			if (aeteDict.Count > 0)
 			{
-				return readDescriptorPtr;
+				return handle_new_proc(1); // return a new descriptor handle
 			}
 
 			return IntPtr.Zero;

@@ -3538,22 +3538,24 @@ namespace PSFilterLoad.PSApi
                         index += 4;
                     }
                 }
-                
-                uint[] values = subKeys.ToArray();
-                foreach (var item in values)
-                {
-                    if (!aeteDict.ContainsKey(item))
-                    {
-                        subKeys.Remove(item);
-                    }
-                }
-
+              
                 isSubKey = true;
                 subClassDict = null;
                 subClassIndex = 0;
                 if (handle_valid(descriptor) && handle_get_size_proc(descriptor) == 0)
                 {
                     subClassDict = (Dictionary<uint, AETEValue>)aeteDict[getKey].Value;
+                }
+                else
+                {
+                    uint[] values = subKeys.ToArray();
+                    foreach (var item in values)
+                    {
+                        if (!aeteDict.ContainsKey(item))
+                        {
+                            subKeys.Remove(item);
+                        }
+                    }
                 }
             }
 
@@ -3574,7 +3576,7 @@ namespace PSFilterLoad.PSApi
 
             if (aeteDict.Count > 0)
             {
-                return readDescriptorPtr;
+                return handle_new_proc(1); // return a new descriptor handle
             }
 
             return IntPtr.Zero;
