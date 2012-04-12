@@ -6,8 +6,12 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterPdn
 {
-    class NativeInterfaces
+    static class NativeInterfaces
     {
+        private NativeInterfaces()
+        {
+        }
+
         /// <summary>The IShellLink interface allows Shell links to be created, modified, and resolved</summary>
         [ComImport(), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("000214F9-0000-0000-C000-000000000046")]
         internal interface IShellLinkW
