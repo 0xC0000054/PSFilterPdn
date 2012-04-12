@@ -470,7 +470,6 @@ namespace PSFilterPdn
         {
             this.SetProxyResultData();
 
-            
             File.Delete(srcFileName);
             File.Delete(destFileName);
             if (!string.IsNullOrEmpty(rdwPath))
@@ -481,7 +480,6 @@ namespace PSFilterPdn
             File.Delete(resourceDataFileName);
 
             PSFilterShimServer.Stop();
-
 
             proxyRunning = false;
         }
@@ -545,8 +543,7 @@ namespace PSFilterPdn
                     }
                 }
 
-                if ((filterParameters != null) && filterParameters.AETEDictionary.Count > 0
-                                       && data.fileName == fileName)
+                if ((filterParameters != null) && filterParameters.AETEDictionary.Count > 0 && data.fileName == fileName)
                 {
                     using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
