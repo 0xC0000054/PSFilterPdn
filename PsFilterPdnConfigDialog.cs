@@ -590,6 +590,7 @@ namespace PSFilterPdn
 #else
 				proxyProcess.Start();
 #endif
+                proxyRunning = true;
                 proxyProcess.StandardInput.WriteLine(endpointName); // proxy WCF service
                 proxyProcess.StandardInput.WriteLine(parameterDataFileName);
                 proxyProcess.StandardInput.WriteLine(resourceDataFileName);
