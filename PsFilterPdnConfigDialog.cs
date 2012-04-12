@@ -34,7 +34,7 @@ namespace PSFilterPdn
 		private Label fldrLoadCountLbl;
 		private Label fldrLoadProgLbl;
 		private ProgressBar fldrLoadProgBar;
-		private CheckBox showAboutBoxcb;
+		private CheckBox showAboutBoxCb;
 		private CheckBox subDirSearchCb;
 		private TextBox filterSearchBox;
 		private Label fileNameLbl;
@@ -129,7 +129,7 @@ namespace PSFilterPdn
 			this.filterProgressBar = new System.Windows.Forms.ProgressBar();
 			this.fileNameLbl = new System.Windows.Forms.Label();
 			this.filterSearchBox = new System.Windows.Forms.TextBox();
-			this.showAboutBoxcb = new System.Windows.Forms.CheckBox();
+			this.showAboutBoxCb = new System.Windows.Forms.CheckBox();
 			this.fltrLoadProressPanel = new System.Windows.Forms.Panel();
 			this.fldrLdNameLbl = new System.Windows.Forms.Label();
 			this.fldrLoadCountLbl = new System.Windows.Forms.Label();
@@ -186,7 +186,7 @@ namespace PSFilterPdn
 			this.filterTab.Controls.Add(this.filterProgressBar);
 			this.filterTab.Controls.Add(this.fileNameLbl);
 			this.filterTab.Controls.Add(this.filterSearchBox);
-			this.filterTab.Controls.Add(this.showAboutBoxcb);
+			this.filterTab.Controls.Add(this.showAboutBoxCb);
 			this.filterTab.Controls.Add(this.fltrLoadProressPanel);
 			this.filterTab.Controls.Add(this.runFilterBtn);
 			this.filterTab.Controls.Add(this.filterTree);
@@ -228,15 +228,15 @@ namespace PSFilterPdn
 			this.filterSearchBox.Enter += new System.EventHandler(this.filterSearchBox_Enter);
 			this.filterSearchBox.Leave += new System.EventHandler(this.filterSearchBox_Leave);
 			// 
-			// showAboutBoxcb
+			// showAboutBoxCb
 			// 
-			this.showAboutBoxcb.AutoSize = true;
-			this.showAboutBoxcb.Location = new System.Drawing.Point(243, 243);
-			this.showAboutBoxcb.Name = "showAboutBoxcb";
-			this.showAboutBoxcb.Size = new System.Drawing.Size(104, 17);
-			this.showAboutBoxcb.TabIndex = 3;
-			this.showAboutBoxcb.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_showAboutBoxcb_Text;
-			this.showAboutBoxcb.UseVisualStyleBackColor = true;
+			this.showAboutBoxCb.AutoSize = true;
+			this.showAboutBoxCb.Location = new System.Drawing.Point(243, 243);
+			this.showAboutBoxCb.Name = "showAboutBoxCb";
+			this.showAboutBoxCb.Size = new System.Drawing.Size(104, 17);
+			this.showAboutBoxCb.TabIndex = 3;
+			this.showAboutBoxCb.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_showAboutBoxcb_Text;
+			this.showAboutBoxCb.UseVisualStyleBackColor = true;
 			// 
 			// fltrLoadProressPanel
 			// 
@@ -446,18 +446,6 @@ namespace PSFilterPdn
 			}
 		}
 
-		private void UpdateProxyProgress(int done, int total)
-		{
-			if (this.InvokeRequired)
-			{
-				this.Invoke(new ProgressFunc(UpdateProgress), new object[] { done, total });
-			}
-			else
-			{
-				UpdateProgress(done, total);
-			}
-		}
-
 		private void SetProxyErrorResult(string data)
 		{
 			proxyResult = false;
@@ -467,30 +455,20 @@ namespace PSFilterPdn
 		private bool proxyResult; 
 		private string proxyErrorMessage;
 
-		private bool GetShowAboutChecked()
-		{
-			return showAboutBoxcb.Checked;
-		}
-		private IntPtr GetHandle()
-		{
-			return this.Handle;
-		}
-
-		delegate void SetProxyResultDelegate(string destImageFileName, string paramFileName, string resourceDataFileName, PluginData data);
 		private Process proxyProcess;
 		private bool proxyRunning;
 		private const string endpointName = "net.pipe://localhost/PSFilterShim/ShimData";
 
         private string srcFileName;
         private string destFileName;
-        private string parmDataFileName;
+        private string parameterDataFileName;
         private string resourceDataFileName;
         private string rdwPath;
         private PluginData proxyData;
 
         private void proxyProcess_Exited(object sender, EventArgs e)
         {
-            base.Invoke(new SetProxyResultDelegate(SetProxyResultData), new object[] {destFileName, parmDataFileName, resourceDataFileName, proxyData});
+            this.SetProxyResultData();
 
             
             File.Delete(srcFileName);
@@ -499,7 +477,7 @@ namespace PSFilterPdn
             {
                 File.Delete(rdwPath);
             }
-            File.Delete(parmDataFileName);
+            File.Delete(parameterDataFileName);
             File.Delete(resourceDataFileName);
 
             PSFilterShimServer.Stop();
@@ -522,7 +500,7 @@ namespace PSFilterPdn
 			srcFileName = Path.Combine(userDataPath, "proxysourceimg.png");
 			destFileName = Path.Combine(userDataPath, "proxyresultimg.png");
 
-			parmDataFileName = Path.Combine(userDataPath, "filterParameters.dat");
+			parameterDataFileName = Path.Combine(userDataPath, "filterParameters.dat");
 			resourceDataFileName = Path.Combine(userDataPath, "pseudoResources.dat"); ;
 			rdwPath = string.Empty;
 
@@ -537,19 +515,16 @@ namespace PSFilterPdn
 				selectedRegion = new RegionDataWrapper(eep.GetSelection(sourceBounds).GetRegionData());
 			}
 
-			bool showAbout = (bool)base.Invoke(new Func<bool>(GetShowAboutChecked));
-			IntPtr owner = (IntPtr)base.Invoke(new Func<IntPtr>(GetHandle));
-
 			ProxyErrorDelegate errorDelegate = new ProxyErrorDelegate(SetProxyErrorResult);
-			ProgressFunc progressDelegate = new ProgressFunc(UpdateProxyProgress);
+			ProgressFunc progressDelegate = new ProgressFunc(UpdateProgress);
 
 			PSFilterShimService service = new PSFilterShimService()
 			{
 				isRepeatEffect = false,
-				showAboutDialog = showAbout,
+				showAboutDialog = showAboutBoxCb.Checked,
 				pluginData = data,
 				filterRect = selection,
-				parentHandle = owner,
+				parentHandle = this.Handle,
 				primary = eep.PrimaryColor.ToColor(),
 				secondary = eep.SecondaryColor.ToColor(),
 				selectedRegion = selectedRegion,
@@ -573,7 +548,7 @@ namespace PSFilterPdn
                 if ((filterParameters != null) && filterParameters.AETEDictionary.Count > 0
                                        && data.fileName == fileName)
                 {
-                    using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
                         BinaryFormatter bf = new BinaryFormatter();
                         bf.Serialize(fs, this.filterParameters);
@@ -607,18 +582,16 @@ namespace PSFilterPdn
                     proxyProcess = new Process();
                 } 
                 proxyProcess.StartInfo = psi;
-
-#if DEBUG
                 proxyProcess.EnableRaisingEvents = true;
                 proxyProcess.Exited += new EventHandler(proxyProcess_Exited);
-
+#if DEBUG
                 bool st = proxyProcess.Start();
                 Debug.WriteLine("Started = " + st.ToString());
 #else
 				proxyProcess.Start();
 #endif
                 proxyProcess.StandardInput.WriteLine(endpointName); // proxy WCF service
-                proxyProcess.StandardInput.WriteLine(parmDataFileName);
+                proxyProcess.StandardInput.WriteLine(parameterDataFileName);
                 proxyProcess.StandardInput.WriteLine(resourceDataFileName);
 
             }
@@ -636,26 +609,46 @@ namespace PSFilterPdn
             }
 		}
 
-		private void SetProxyResultData(string destFileName, string parameterDataPath, string resourceDataFileName, PluginData data)
+        private bool GetShowAboutChecked()
+        {
+            bool value = false;
+            if (base.InvokeRequired)
+            {
+                value = (bool)base.Invoke(new Func<bool>(delegate()
+                {
+                    return this.showAboutBoxCb.Checked;
+                }));
+            }
+            else
+            {
+                value = this.showAboutBoxCb.Checked;
+            }
+            
+            return value;
+        }
+
+		private void SetProxyResultData()
 		{ 
-			if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && !showAboutBoxcb.Checked 
+            bool showAbout = GetShowAboutChecked();
+
+			if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && !showAbout 
 				&& File.Exists(destFileName))
 			{
-				this.fileName = data.fileName;
-				this.entryPoint = data.entryPoint;
-				this.title = data.title;
-				this.category = data.category;
-				this.filterCaseInfo = GetFilterCaseInfoString(data);
-				this.aeteData = data.aete;
+				this.fileName = proxyData.fileName;
+                this.entryPoint = proxyData.entryPoint;
+                this.title = proxyData.title;
+                this.category = proxyData.category;
+                this.filterCaseInfo = GetFilterCaseInfoString(proxyData);
+                this.aeteData = proxyData.aete;
 
 				using (Bitmap dst = new Bitmap(destFileName))
 				{
 					this.destSurface = Surface.CopyFromBitmap(dst);
-				} 
+				}
 
-				if (File.Exists(parameterDataPath))
+                if (File.Exists(parameterDataFileName))
 				{
-					using (FileStream fs = new FileStream(parameterDataPath, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+					using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
 					{
 						SelfBinder binder = new SelfBinder();
 						BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
@@ -682,17 +675,26 @@ namespace PSFilterPdn
 					MessageBox.Show(this, proxyErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}
 
-				if (!showAboutBoxcb.Checked && destSurface != null)
+				if (!showAbout && destSurface != null)
 				{
 					destSurface.Dispose();
 					destSurface = null;
 				}
 			}
 
-			filterProgressBar.Value = 0;
+            if (base.InvokeRequired)
+            {
+                base.Invoke(new MethodInvoker(delegate()
+                {
+                    filterProgressBar.Value = 0;
+                })); 
+            }
+            else
+            {
+                this.filterProgressBar.Value = 0;
+            }
 
 			FinishTokenUpdate();
-            Application.DoEvents();
 		}
 
 		private Surface destSurface;
@@ -707,11 +709,10 @@ namespace PSFilterPdn
 
 				if (!proxyRunning && !filterRunning)
 				{
-
 					if (data.runWith32BitShim || useDEPProxy)
 					{
 						this.runWith32BitShim = true;
-                        this.Run32BitFilterProxy(((PSFilterPdnEffect)this.Effect).EnvironmentParameters, data);
+                        this.Run32BitFilterProxy(this.Effect.EnvironmentParameters, data);
 					}
 					else
 					{
@@ -721,7 +722,7 @@ namespace PSFilterPdn
 
 						try
 						{
-							using (LoadPsFilter lps = new LoadPsFilter(((PSFilterPdnEffect)this.Effect).EnvironmentParameters, this.Handle))
+							using (LoadPsFilter lps = new LoadPsFilter(this.Effect.EnvironmentParameters, this.Handle))
 							{
 								lps.SetProgressCallback(new ProgressFunc(UpdateProgress));
 
@@ -736,7 +737,7 @@ namespace PSFilterPdn
 									lps.PseudoResources = this.pseudoResources;
 								}
 
-								bool showAboutDialog =  showAboutBoxcb.Checked;
+								bool showAboutDialog =  showAboutBoxCb.Checked;
 								bool result = lps.RunPlugin(data, showAboutDialog);
 
 								if (!showAboutDialog && result)
