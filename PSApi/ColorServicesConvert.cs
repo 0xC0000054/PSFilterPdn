@@ -335,16 +335,16 @@ namespace PSFilterLoad.PSApi
 			return ColorSpaceHelper.RGBtoHSB(rgb);
 		}
 
-		private static CIELab HSLToLab(short[] hsb)
+		private static CIELab HSLToLab(short[] hsl)
 		{
-			CIEXYZ xyz = HSLtoXYZ(hsb);
+			CIEXYZ xyz = HSLtoXYZ(hsl);
 			return ColorSpaceHelper.XYZtoLab(xyz);
 		}
-		private static CIEXYZ HSLtoXYZ(short[] hsb)
+		private static CIEXYZ HSLtoXYZ(short[] hsl)
 		{
-			double h = hsb[0];
-			double s = (double)hsb[1] / 255d;
-			double l = (double)hsb[2] / 255d;
+			double h = hsl[0];
+			double s = (double)hsl[1] / 255d;
+			double l = (double)hsl[2] / 255d;
 			RGB rgb = ColorSpaceHelper.HSBtoRGB(h, s, l);
 			return ColorSpaceHelper.RGBtoXYZ(rgb);
 		}
