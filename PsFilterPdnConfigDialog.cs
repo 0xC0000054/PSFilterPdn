@@ -918,7 +918,7 @@ namespace PSFilterPdn
 						{
 							link.Load(item.FullName);
 							FileInfo info = new FileInfo(link.Path);
-							if (info.Exists && info.Extension == ".8bf")
+							if (info.Exists && info.Extension.Equals(".8bf", StringComparison.OrdinalIgnoreCase))
 							{
 								fileInfos.Add(info);
 							}
