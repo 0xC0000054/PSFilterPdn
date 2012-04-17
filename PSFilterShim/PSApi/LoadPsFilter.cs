@@ -398,6 +398,12 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		static byte[] primaryColor;
 
+        /// <summary>
+        /// The Windows-1252 Western European encoding for StringFromPString(IntPtr)
+        /// </summary>
+        private static readonly Encoding windows1252Encoding = Encoding.GetEncoding(1252);
+        private static readonly char[] trimChars = new char[] { ' ', '\0' };
+
 
 		/// <summary>
 		/// Determines whether the source image has transparent pixels.
@@ -859,18 +865,19 @@ namespace PSFilterLoad.PSApi
 			}
 
 		}
-		private static string StringFromPString(IntPtr PString)
+
+
+		private static unsafe string StringFromPString(IntPtr PString)
 		{
 			if (PString == IntPtr.Zero)
 			{
 				return string.Empty;
 			}
-			int length = (int)Marshal.ReadByte(PString);
-			PString = new IntPtr(PString.ToInt64() + 1L);
-			byte[] data = new byte[length];
-			Marshal.Copy(PString, data, 0, length);
+		    byte* ptr = (byte*)PString.ToPointer(); 
 
-			return Encoding.GetEncoding(1252).GetString(data).Trim(new char[] { ' ', '\0' });
+			int length = (int)ptr[0];
+			
+			return new string((sbyte*)ptr, 1, length, windows1252Encoding).Trim(trimChars);
 		}
 
 		static bool plugin_about(PluginData pdata)

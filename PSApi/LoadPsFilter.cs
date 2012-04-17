@@ -44,19 +44,17 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		/// <param name="PString">The PString to read.</param>
 		/// <returns>The resuting string</returns>
-		private static string StringFromPString(IntPtr PString)
+		private static unsafe string StringFromPString(IntPtr PString)
 		{
 			if (PString == IntPtr.Zero)
 			{
 				return string.Empty;
 			}
-			int length = (int)Marshal.ReadByte(PString);
-			PString = new IntPtr(PString.ToInt64() + 1L);
-			
-			byte[] bytes = new byte[length];
-			Marshal.Copy(PString, bytes, 0, length);
+            byte* ptr = (byte*)PString.ToPointer(); 
 
-			return windows1252Encoding.GetString(bytes, 0, length).Trim(trimChars);
+			int length = (int)ptr[0];
+			
+			return new string((sbyte*)ptr, 1, length, windows1252Encoding).Trim(trimChars);
 		}
 
 		/// <summary>
