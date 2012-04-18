@@ -966,7 +966,6 @@ namespace PSFilterPdn
 								{
 									TreeNode node = new TreeNode(item.category) { Name = item.category };
 
-
 									TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
 
 									node.Nodes.Add(subNode);
@@ -1124,7 +1123,7 @@ namespace PSFilterPdn
 			if (filterTree.SelectedNode.Tag != null)
 			{
 				runFilterBtn.Enabled = true;
-				fileNameLbl.Text = Path.GetFileName(((PluginData)(filterTree.SelectedNode.Tag)).fileName);
+				fileNameLbl.Text = Path.GetFileName(((PluginData)filterTree.SelectedNode.Tag).fileName);
 			}
 			else
 			{
@@ -1144,20 +1143,32 @@ namespace PSFilterPdn
 		{ 
 			base.OnLoad(e);
 
-			LoadSettings();
+			string dirs = string.Empty;
+			try
+			{
+				LoadSettings();
 
-			subDirSearchCb.Checked = bool.Parse(settings.GetSetting("searchSubDirs", bool.TrueString).Trim());
-			
-			foundEffectsDir = false;
+				subDirSearchCb.Checked = bool.Parse(settings.GetSetting("searchSubDirs", bool.TrueString).Trim());
+
+				dirs = settings.GetSetting("searchDirs", string.Empty).Trim();
+			}
+			catch (IOException ex)
+			{
+				MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+			catch (UnauthorizedAccessException ex)
+			{
+				MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+
 			string effectsDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-		  
+			foundEffectsDir = false;
+
 			if (!string.IsNullOrEmpty(effectsDir))
 			{
 				searchDirListView.Items.Add(effectsDir);
 				foundEffectsDir = true;
 			}
-			
-			string dirs = settings.GetSetting("searchDirs", string.Empty).Trim();
 
 			if (foundEffectsDir && string.IsNullOrEmpty(dirs))
 			{
@@ -1183,14 +1194,7 @@ namespace PSFilterPdn
 				int protect;
 				if (NativeMethods.GetProcessDEPPolicy(Process.GetCurrentProcess().Handle, out depFlags, out protect))
 				{
-					if (depFlags != 0)
-					{
-						this.useDEPProxy = true;
-					}
-					else
-					{
-						this.useDEPProxy = false;
-					}
+					this.useDEPProxy = (depFlags != 0);
 				}
 			}
 		}
