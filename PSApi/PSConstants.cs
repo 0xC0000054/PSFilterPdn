@@ -15,6 +15,11 @@ namespace PSFilterLoad.PSApi
     {
         /// kPhotoshopSignature -> 0x3842494dL
         public const uint kPhotoshopSignature = 0x3842494dU;
+        /// <summary>
+        /// The filter type code - '8BFM'
+        /// </summary>
+        public const uint filterKind = 0x3842464dU;
+
 
         /// kCurrentBufferProcsVersion -> 2
         public const int kCurrentBufferProcsVersion = 2;
