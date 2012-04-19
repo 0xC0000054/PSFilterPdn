@@ -50,12 +50,22 @@ namespace PSFilterLoad.PSApi
 			{
 				return string.Empty;
 			}
-			byte* ptr = (byte*)PString.ToPointer(); 
+			byte* ptr = (byte*)PString.ToPointer();
 
+			return StringFromPString(ptr);
+		}
+		/// <summary>
+		/// Reads a Pascal String into a string.
+		/// </summary>
+		/// <param name="PString">The PString to read.</param>
+		/// <returns>The resuting string</returns>
+		private static unsafe string StringFromPString(byte* ptr)
+		{
 			int length = (int)ptr[0];
-			
+
 			return new string((sbyte*)ptr, 1, length, windows1252Encoding).Trim(trimChars);
 		}
+
 
 		/// <summary>
 		/// Reads a Pascal String into a string.
@@ -64,23 +74,14 @@ namespace PSFilterLoad.PSApi
 		/// <param name="offset">The offset to start reading at.</param>
 		/// <param name="length">The length of the resulting Pascal String.</param>
 		/// <returns>The resuting string</returns>
-		private static string StringFromPString(IntPtr ptr, int offset, out int length)
+		private static unsafe string StringFromPString(byte* ptr, out int length)
 		{
-			IntPtr PString = new IntPtr(ptr.ToInt64() + (long)offset);
-			if (PString != IntPtr.Zero)
-			{
-				length = (int)Marshal.ReadByte(PString);
-			}
-			else
-			{
-				length = 0;
-			}
-			
-			return StringFromPString(PString);
+			length = (int)ptr[0];
+			return StringFromPString(ptr);
 		}
 
 		private static PluginAETE enumAETE;
-		private static bool EnumAETE(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
+		private static unsafe bool EnumAETE(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
 		{
 			IntPtr hRes = NativeMethods.FindResource(hModule, lpszName, lpszType);
 			if (hRes == IntPtr.Zero)
@@ -107,76 +108,78 @@ namespace PSFilterLoad.PSApi
 
 				enumAETE = new PluginAETE();
 
-				enumAETE.version = Marshal.ReadInt16(lockRes, 2); ;
+				byte* ptr = (byte*)loadRes.ToPointer() + 2;
+				enumAETE.version = *(short*)ptr;
+				ptr += 2;
 
-
-
-				enumAETE.lang = Marshal.ReadInt16(lockRes, 4);
-				short script = Marshal.ReadInt16(lockRes, 6);
-				short count = Marshal.ReadInt16(lockRes, 8);
-				IntPtr propPtr = new IntPtr(lockRes.ToInt64() + 10L);
+				short lang = *(short*)ptr;
+				ptr += 2;
+				short script = *(short*)ptr;
+				ptr += 2;
+				short count = *(short*)ptr;
+				ptr += 2;
+				byte* propPtr = ptr;
 
 				for (int i = 0; i < count; i++)
 				{
-					int index = 0;
 					int stringLength = 0;
 
-					string vend = StringFromPString(propPtr, index, out stringLength);
-					index += (stringLength + 1);
-					string desc = StringFromPString(propPtr, index, out stringLength);
-					index += (stringLength + 1);
-					enumAETE.suiteID = PropToString((uint)Marshal.ReadInt32(propPtr, index));
-					index += 4;
-					enumAETE.suiteLevel = Marshal.ReadInt16(propPtr, index);
-					index += 2;
-					enumAETE.suiteVersion = Marshal.ReadInt16(propPtr, index);
-					index += 2;
-					short evntCount = Marshal.ReadInt16(propPtr, index);
-					index += 2;
+					string vend = StringFromPString(propPtr, out stringLength);
+					propPtr += (stringLength + 1);
+					string desc = StringFromPString(propPtr, out stringLength);
+					propPtr += (stringLength + 1);
+					enumAETE.suiteID = PropToString(*(uint*)propPtr);
+					propPtr += 4;
+					enumAETE.suiteLevel = *(short*)propPtr;
+					propPtr += 2;
+					enumAETE.suiteVersion = *(short*)propPtr;
+					propPtr += 2;
+					short evntCount = *(short*)propPtr;
+					propPtr += 2;
 					enumAETE.events = new AETEEvent[evntCount];
 
 					for (int eventc = 0; eventc < evntCount; eventc++)
 					{
 
-						string vend2 = StringFromPString(propPtr, index, out stringLength);
-						index += (stringLength + 1);
-						string desc2 = StringFromPString(propPtr, index, out stringLength);
-						index += (stringLength + 1);
-						int evntClass = Marshal.ReadInt32(propPtr, index);
-						index += 4;
-						int evntType = Marshal.ReadInt32(propPtr, index);
-						index += 4;
+						string vend2 = StringFromPString(propPtr, out stringLength);
+						propPtr += (stringLength + 1);
+						string desc2 = StringFromPString(propPtr, out stringLength);
+						propPtr += (stringLength + 1);
+						int evntClass =  *(int*)propPtr;
+						propPtr += 4;
+						int evntType = *(int*)propPtr;
+						propPtr += 4;
 
 					   
  
-						uint replyType = (uint)Marshal.ReadInt32(propPtr, index);
-						index += 7;
+						uint replyType = *(uint*)propPtr;
+						propPtr += 7;
 						byte[] bytes = new byte[4];
 
 						int idx = 0;
 						while (true)
 						{
-							byte val = Marshal.ReadByte(propPtr, index);
+							byte val = *propPtr;
 
 							if (val != 0x27) // the ' char
 							{
 								if (val == 0)
 								{
-									index++;
+									propPtr++;
 									break;
 								}
 								bytes[idx] = val;
 								idx++;
 							}
-							index++;
+							propPtr++;
 						}
 
 						uint parmType = BitConverter.ToUInt32(bytes, 0);
 
-						short flags = Marshal.ReadInt16(propPtr, index);
-						index += 2;
-						short parmCount = Marshal.ReadInt16(propPtr, index);
-						index += 2;
+						short flags = *(short*)propPtr; ;
+						propPtr += 2;
+						short parmCount = *(short*)propPtr; 
+						propPtr += 2;
 
 						AETEEvent evnt = new AETEEvent()
 						{
@@ -192,51 +195,51 @@ namespace PSFilterLoad.PSApi
 						AETEParm[] parms = new AETEParm[parmCount];
 						for (int p = 0; p < parmCount; p++)
 						{
-							parms[p].name = StringFromPString(propPtr, index, out stringLength);
-							index += (stringLength + 1);
+							parms[p].name = StringFromPString(propPtr, out stringLength);
+							propPtr += (stringLength + 1);
 
-							parms[p].key = (uint)Marshal.ReadInt32(propPtr, index);
-							index += 4;
+							parms[p].key = *(uint*)propPtr;
+							propPtr += 4;
 
-							parms[p].type = (uint)Marshal.ReadInt32(propPtr, index);
-							index += 4;
+							parms[p].type = *(uint*)propPtr;
+							propPtr += 4;
 
-							parms[p].desc = StringFromPString(propPtr, index, out stringLength);
-							index += (stringLength + 1);
-							parms[p].flags = Marshal.ReadInt16(propPtr, index);
-							index += 2;
+							parms[p].desc = StringFromPString(propPtr, out stringLength);
+							propPtr += (stringLength + 1);
+							parms[p].flags = *(short*)propPtr; 
+							propPtr += 2;
 
 						}
 						evnt.parms = parms;
 
-						evnt.classCount = Marshal.ReadInt16(propPtr, index);
-						index += 2;
+						evnt.classCount = *(short*)propPtr;
+						propPtr += 2;
 						if (evnt.classCount == 0)
 						{
-							short compOps = Marshal.ReadInt16(propPtr, index);
-							index += 2;
-							short enumCount = Marshal.ReadInt16(propPtr, index);
-							index += 2;
+							short compOps = *(short*)propPtr;
+							propPtr += 2;
+							short enumCount = *(short*)propPtr;
+							propPtr += 2;
 							if (enumCount > 0)
 							{
 								AETEEnums[] enums = new AETEEnums[enumCount];
 								for (int enc = 0; enc < enumCount; enc++)
 								{
 									AETEEnums en = new AETEEnums();
-									en.type = (uint)Marshal.ReadInt32(propPtr, index);
-									index += 4;
-									en.count = Marshal.ReadInt16(propPtr, index);
-									index += 2;
+									en.type = *(uint*)propPtr;
+									propPtr += 4;
+									en.count = *(short*)propPtr;
+									propPtr += 2;
 									en.enums = new AETEEnum[en.count];
 
 									for (int e = 0; e < en.count; e++)
 									{
-										en.enums[e].name = StringFromPString(propPtr, index, out stringLength);
-										index += (stringLength + 1);
-										en.enums[e].type = (uint)Marshal.ReadInt32(propPtr, index);
-										index += 4;
-										en.enums[e].desc = StringFromPString(propPtr, index, out stringLength);
-										index += (stringLength + 1);
+										en.enums[e].name = StringFromPString(propPtr, out stringLength);
+										propPtr += (stringLength + 1);
+										en.enums[e].type = *(uint*)propPtr;
+										propPtr += 4;
+										en.enums[e].desc = StringFromPString(propPtr, out stringLength);
+										propPtr += (stringLength + 1);
 									}
 									enums[enc] = en;
 
@@ -261,10 +264,9 @@ namespace PSFilterLoad.PSApi
 
 		}
 
-		private static bool EnumPiPL(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
+		private static unsafe bool EnumPiPL(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
 		{
 			PluginData enumData = new PluginData() { fileName = enumFileName };
-			
 
 			IntPtr hRes = NativeMethods.FindResource(hModule, lpszName, lpszType);
 			if (hRes == IntPtr.Zero)
@@ -309,27 +311,23 @@ namespace PSFilterLoad.PSApi
 
 			int count = Marshal.ReadInt32(lockRes, 6);
 
-			long pos = (lockRes.ToInt64() + 10L);
-
-			IntPtr propPtr = new IntPtr(pos);
-
-			long dataOfs = Marshal.OffsetOf(typeof(PIProperty), "propertyData").ToInt64();
+			byte* propPtr = (byte*)lockRes.ToPointer() + 10L;
 
 			for (int i = 0; i < count; i++)
 			{
-				PIProperty pipp = (PIProperty)Marshal.PtrToStructure(propPtr, typeof(PIProperty));
-				PIPropertyID propKey = (PIPropertyID)pipp.propertyKey;
+				PIProperty* pipp = (PIProperty*)propPtr;
+				PIPropertyID propKey = (PIPropertyID)pipp->propertyKey;
 #if DEBUG
 				if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
 				{
 					Debug.WriteLine(string.Format("prop = {0}", propKey.ToString("X")));
-					Debug.WriteLine(PropToString(pipp.propertyKey));
+					Debug.WriteLine(PropToString(pipp->propertyKey));
 				}
 #endif
-				IntPtr dataPtr = new IntPtr(propPtr.ToInt64() + dataOfs);
+				byte* dataPtr = propPtr + 16;
 				if (propKey == PIPropertyID.PIKindProperty)
 				{
-					if (Marshal.PtrToStringAnsi(dataPtr, 4) != "MFB8")
+					if (*(uint*)dataPtr != PSConstants.filterKind)
 					{
 #if DEBUG
 						Debug.WriteLine(string.Format("{0} is not a valid Photoshop Filter.", enumFileName));
@@ -339,27 +337,25 @@ namespace PSFilterLoad.PSApi
 				}
 				else if ((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty) // the entrypoint for the current platform, this filters out incomptable processors architectures
 				{
-					enumData.entryPoint = Marshal.PtrToStringAnsi(dataPtr, pipp.propertyLength).TrimEnd('\0');
+					enumData.entryPoint = Marshal.PtrToStringAnsi(new IntPtr((void*)dataPtr), pipp->propertyLength).TrimEnd('\0');
 					// If it is a 32-bit plugin on a 64-bit OS run it with the 32-bit shim.
 					enumData.runWith32BitShim = (IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty);
 				}
 				else if (propKey == PIPropertyID.PIVersionProperty)
 				{
-					int fltrVersion = Marshal.ReadInt32(dataPtr);
-					if (HiWord(fltrVersion) > PSConstants.latestFilterVersion ||
-						(HiWord(fltrVersion) == PSConstants.latestFilterVersion && LoWord(fltrVersion) > PSConstants.latestFilterSubVersion))
+					short* fltrVersion = (short*)dataPtr;
+					if (fltrVersion[1] > PSConstants.latestFilterVersion ||
+						(fltrVersion[1] == PSConstants.latestFilterVersion && fltrVersion[0] > PSConstants.latestFilterSubVersion))
 					{
 #if DEBUG
-						Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumFileName, HiWord(fltrVersion).ToString(CultureInfo.CurrentCulture), LoWord(fltrVersion).ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) }));
+						Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumFileName, fltrVersion[1].ToString(CultureInfo.CurrentCulture), fltrVersion[0].ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) }));
 #endif			
 						return true;
 					}
 				}
 				else if (propKey == PIPropertyID.PIImageModesProperty)
 				{
-					byte byte0 = Marshal.ReadByte(dataPtr);
-
-					if ((byte0 & PSConstants.flagSupportsRGBColor) != PSConstants.flagSupportsRGBColor)
+					if ((dataPtr[0] & PSConstants.flagSupportsRGBColor) != PSConstants.flagSupportsRGBColor)
 					{
 #if DEBUG
 						Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", enumFileName));
@@ -380,30 +376,34 @@ namespace PSFilterLoad.PSApi
 					enumData.filterInfo = new FilterCaseInfo[7];
 					for (int j = 0; j < 7; j++)
 					{
-						enumData.filterInfo[j] = (FilterCaseInfo)Marshal.PtrToStructure(dataPtr, typeof(FilterCaseInfo));
-						dataPtr = new IntPtr(dataPtr.ToInt64() + (long)Marshal.SizeOf(typeof(FilterCaseInfo)));
+						enumData.filterInfo[j] = *(FilterCaseInfo*)dataPtr;
+						dataPtr += 4; 
 					}
 				}
 				else if (propKey == PIPropertyID.PIHasTerminologyProperty)
 				{
 #if DEBUG
-					int vers = Marshal.ReadInt32(dataPtr);
-					int classId = Marshal.ReadInt32(dataPtr, 4);
-					int eventId = Marshal.ReadInt32(dataPtr, 8);
-#endif				
-					short termId = Marshal.ReadInt16(dataPtr, 12);
+					int vers = *(int*)dataPtr;
+					dataPtr += 4;
+					int classId = *(int*)dataPtr;
+					dataPtr += 4;
+					int eventId =*(int*)dataPtr;
+					dataPtr += 4;
+					short termId = *(short*)dataPtr;
+					dataPtr += 2;
+#else
+					short termId = *(short*)(dataPtr + 12);
+#endif
+				  
 #if DEBUG
 					string aeteName = string.Empty;
-
-					dataPtr = new IntPtr(dataPtr.ToInt64() + 14L);
-
 					StringBuilder sb = new StringBuilder();
 					int ofs = 0;
 					while (true)
 					{
-						byte b = Marshal.ReadByte(dataPtr, ofs);
+						byte b = *dataPtr;
 						sb.Append((char)b);
-						ofs++;
+						dataPtr++;
 						if (b == 0)
 						{
 							aeteName = sb.ToString().TrimEnd('\0');
@@ -434,15 +434,14 @@ namespace PSFilterLoad.PSApi
 				}
 
 
-				int propertyDataPaddedLength = (pipp.propertyLength + 3) & ~3;
+				int propertyDataPaddedLength = (pipp->propertyLength + 3) & ~3;
 #if DEBUG
 				if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
 				{
 					Debug.WriteLine(string.Format("i = {0}, propPtr = 0x{1}", i.ToString(), ((long)propPtr).ToString("X8")));
 				}
 #endif
-				pos += (long)(16 + propertyDataPaddedLength);
-				propPtr = new IntPtr(pos);
+				propPtr += (16 + propertyDataPaddedLength);
 			}
 
 			AddFoundPluginData(enumData); // add each plugin found in the file to the query list
@@ -458,22 +457,10 @@ namespace PSFilterLoad.PSApi
 		/// <returns>The resulting string</returns>
 		private static string StringFromCString(IntPtr ptr, out int length)
 		{
-			StringBuilder sb = new StringBuilder();
-			int offset = 0;
-			while (true)
-			{
-				byte b = Marshal.ReadByte(ptr, offset);
-				sb.Append((char)b);   
-				offset++;
+			string data = Marshal.PtrToStringAnsi(ptr);
+			length = data.Length;
 
-				if (b == 0)
-				{
-					break;
-				}
-			}
-			length = offset;
-
-			return sb.ToString().Trim(trimChars);
+			return data.Trim(trimChars);
 		}
 
 		private static bool EnumPiMI(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
@@ -524,7 +511,7 @@ namespace PSFilterLoad.PSApi
 			short minor = Marshal.ReadInt16(ptr, 2);
 			short priority = Marshal.ReadInt16(ptr, 4);
 			short generalInfoSize = Marshal.ReadInt16(ptr, 6);
-			short typeInfoSize = Marshal.ReadInt16(ptr, 8);
+			short typeInfoSize = Marshal.ReadInt16(ptr, 8); 
 			short modes = Marshal.ReadInt16(ptr, 10);
 			int requiredHost = Marshal.ReadInt32(ptr, 12);
 
@@ -1849,7 +1836,7 @@ namespace PSFilterLoad.PSApi
 			{
 				if (!dll.IsInvalid)
 				{
-					enumResList = null;
+					enumResList = new List<PluginData>();
 					enumFileName = fileName;
 					bool needsRelease = false;
 					try
@@ -2078,7 +2065,6 @@ namespace PSFilterLoad.PSApi
 				filterRecord->maskRowBytes = 0;
 				maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
 			}
-
 
 			if (RectNonEmpty(filterRecord->inRect))
 			{
@@ -4788,7 +4774,7 @@ namespace PSFilterLoad.PSApi
 			}
 			int i = index + 1;
 
-			while (true) // renumber the index of subsequent items.
+			while (true) // renumber the propPtr of subsequent items.
 			{
 				int next = pseudoResources.FindIndex(delegate(PSResource r)
 				{
