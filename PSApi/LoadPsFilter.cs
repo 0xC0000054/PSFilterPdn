@@ -4774,7 +4774,7 @@ namespace PSFilterLoad.PSApi
 			}
 			int i = index + 1;
 
-			while (true) // renumber the propPtr of subsequent items.
+			while (true) // renumber the index of subsequent items.
 			{
 				int next = pseudoResources.FindIndex(delegate(PSResource r)
 				{
