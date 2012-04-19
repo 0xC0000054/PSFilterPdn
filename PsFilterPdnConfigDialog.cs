@@ -632,8 +632,7 @@ namespace PSFilterPdn
 		{ 
 			bool showAbout = GetShowAboutChecked();
 
-			if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && !showAbout 
-				&& File.Exists(destFileName))
+			if (proxyResult && !showAbout && File.Exists(destFileName))
 			{
 				this.fileName = proxyData.fileName;
 				this.entryPoint = proxyData.entryPoint;
@@ -671,9 +670,19 @@ namespace PSFilterPdn
 			}
 			else
 			{
-				if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage))
+				if (!string.IsNullOrEmpty(proxyErrorMessage))
 				{
-					MessageBox.Show(this, proxyErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+					if (base.InvokeRequired)
+					{
+						base.Invoke(new MethodInvoker(delegate()
+						{
+							MessageBox.Show(this, proxyErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+						}));
+					}
+					else
+					{
+						MessageBox.Show(this, proxyErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+					}
 				}
 
 				if (!showAbout && destSurface != null)
