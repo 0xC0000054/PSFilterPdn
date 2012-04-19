@@ -65,10 +65,19 @@ namespace PSFilterPdn
 
         protected override void OnDispose(bool disposing)
         {
-            if (disposing && configDialog != null)
+            if (disposing)
             {
-                configDialog.Dispose();
-                configDialog = null;
+                if (configDialog != null)
+                {
+                    configDialog.Dispose();
+                    configDialog = null; 
+                }
+
+                if (proxyProcess != null)
+                {
+                    proxyProcess.Dispose();
+                    proxyProcess = null;
+                }
             }
             
             base.OnDispose(disposing);
@@ -131,7 +140,6 @@ namespace PSFilterPdn
                 filterInfo = fci,
                 aete = token.AETE
             };
-
             
             Rectangle sourceBounds = base.EnvironmentParameters.SourceSurface.Bounds;
 
@@ -202,8 +210,10 @@ namespace PSFilterPdn
                 proxyResult = true; // assume the filter succeded this will be set to false if it failed
                 proxyErrorMessage = string.Empty;
 
-                proxyProcess = new Process();
-
+                if (proxyProcess == null)
+                {
+                    proxyProcess = new Process();
+                }
                 proxyProcess.StartInfo = psi;
 
 
@@ -225,7 +235,7 @@ namespace PSFilterPdn
                         token.Dest = Surface.CopyFromBitmap(bmp);
                     }
                 }
-                else if (!proxyResult && !string.IsNullOrEmpty(proxyErrorMessage))
+                else if (!string.IsNullOrEmpty(proxyErrorMessage))
                 {
                     MessageBox.Show(proxyErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
@@ -245,12 +255,6 @@ namespace PSFilterPdn
             }
             finally
             {
-                if (proxyProcess != null)
-                {
-                    proxyProcess.Dispose();
-                    proxyProcess = null; 
-                }
-
                 File.Delete(src);
                 File.Delete(dest);
                 File.Delete(resourceDataFileName);
@@ -291,11 +295,10 @@ namespace PSFilterPdn
                     {
                         token.Dest = lps.Dest.Clone();
                     }
-                    else if (!result && !string.IsNullOrEmpty(lps.ErrorMessage))
+                    else if (!string.IsNullOrEmpty(lps.ErrorMessage))
                     {
                         MessageBox.Show(lps.ErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-
                     
                 }
 
