@@ -13,6 +13,7 @@ using PaintDotNet;
 using PaintDotNet.Effects;
 using PSFilterLoad.PSApi;
 using PSFilterPdn.Properties;
+using System.Text;
 
 namespace PSFilterPdn
 {
@@ -1256,7 +1257,7 @@ namespace PSFilterPdn
 		{
 			if (settings != null)
 			{
-				string dirs = string.Empty;
+				StringBuilder dirs = new StringBuilder();
 				int count = searchDirListView.Items.Count;
 				int lastItem = count - 1;
 				for (int i = 0; i < count; i++)
@@ -1264,24 +1265,46 @@ namespace PSFilterPdn
 					if (foundEffectsDir && i == 0)
 						continue;
 
-					string val = searchDirListView.Items[i].Text;
+					dirs.Append(searchDirListView.Items[i].Text);
 
 					if (i < lastItem)
 					{
-						val += ",";
+                        dirs.Append(',');
 					}
-					dirs += val;
 				}
-				settings.PutSetting("searchDirs", dirs);
+				try
+				{
+					settings.PutSetting("searchDirs", dirs.ToString());
+
+				}
+				catch (IOException ex)
+				{
+					MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+				catch (UnauthorizedAccessException ex)
+				{
+					MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
 			}
 		}
 
 		private void subDirSearchCb_CheckedChanged(object sender, EventArgs e)
 		{
-			if (settings != null)
-			{
-				settings.PutSetting("searchSubDirs", subDirSearchCb.Checked.ToString(CultureInfo.InvariantCulture));
-			}
+            if (settings != null)
+            {
+                try
+                {
+                    settings.PutSetting("searchSubDirs", subDirSearchCb.Checked.ToString(CultureInfo.InvariantCulture));
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
 		}
 
 		private void filterSearchBox_Enter(object sender, EventArgs e)
