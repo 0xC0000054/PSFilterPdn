@@ -16,7 +16,6 @@ namespace PSFilterLoad.PSApi
         public uint propertyKey;		/* Identification key for this property type. */
 	    public int propertyID;		/* Index within this property type. Must be unique for properties of a given type in a PiPL. */
 	    public int propertyLength;	/* Length of following data array. Will be rounded to a multiple of 4. */
-        public IntPtr propertyData;
     }
 #pragma warning restore 0649
 
