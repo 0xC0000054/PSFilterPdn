@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Globalization;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using PSFilterPdn.Properties;
-using System.Globalization;
 using PaintDotNet;
+using PSFilterPdn.Properties;
 
 namespace PSFilterLoad.PSApi
 {
@@ -1840,31 +1839,22 @@ namespace PSFilterLoad.PSApi
 						dll.DangerousAddRef(ref needsRelease);
 						if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiPl", new EnumResNameDelegate(EnumPiPL), IntPtr.Zero))
 						{
-							foreach (PluginData data in enumResList)
-							{
-								if (!string.IsNullOrEmpty(data.entryPoint)) // Was the entrypoint found for the plugin.
-								{
-									pluginData.Add(data);
-									if (!result)
-									{
-										result = true;
-									}
-								}
-							}
+							IEnumerable<PluginData> plugins = from p in enumResList
+										  where !string.IsNullOrEmpty(p.entryPoint)
+										  select p;
+							pluginData.AddRange(plugins);
+
+							result = pluginData.Count > 0;
+							
 						}// if there are no PiPL resources scan for Photoshop 2.5's PiMI resources. 
 						else if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiMI", new EnumResNameDelegate(EnumPiMI), IntPtr.Zero))
 						{
-							foreach (PluginData data in enumResList)
-							{
-								if (!string.IsNullOrEmpty(data.entryPoint)) // Was the entrypoint found for the plugin.
-								{
-									pluginData.Add(data);
-									if (!result)
-									{
-										result = true;
-									}
-								}
-							}
+							IEnumerable<PluginData> plugins = from p in enumResList
+															  where !string.IsNullOrEmpty(p.entryPoint)
+															  select p;
+							pluginData.AddRange(plugins);
+
+							result = pluginData.Count > 0;
 						}
 #if DEBUG
 						else
