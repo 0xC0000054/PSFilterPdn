@@ -5,6 +5,7 @@
 
 namespace PSFilterLoad.PSApi
 {
+#pragma warning disable 0649
     struct PlugInInfo
     {
         /// <summary>
@@ -36,4 +37,5 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public uint requireHost;
     }
+#pragma warning restore 0649
 }
