@@ -1840,8 +1840,8 @@ namespace PSFilterLoad.PSApi
 						if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiPl", new EnumResNameDelegate(EnumPiPL), IntPtr.Zero))
 						{
 							IEnumerable<PluginData> plugins = from p in enumResList
-										  where !string.IsNullOrEmpty(p.entryPoint)
-										  select p;
+										                      where !string.IsNullOrEmpty(p.entryPoint)
+										                      select p;
 							pluginData.AddRange(plugins);
 
 							result = pluginData.Count > 0;
