@@ -9,6 +9,9 @@ using System.Text;
 using System.Windows.Forms;
 using PaintDotNet;
 using PSFilterPdn.Properties;
+#if DEBUG
+using System.Diagnostics;
+#endif
 
 namespace PSFilterLoad.PSApi
 {
@@ -397,7 +400,6 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 					string aeteName = string.Empty;
 					StringBuilder sb = new StringBuilder();
-					int ofs = 0;
 					while (true)
 					{
 						byte b = *dataPtr;
