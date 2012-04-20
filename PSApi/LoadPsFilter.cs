@@ -458,12 +458,12 @@ namespace PSFilterLoad.PSApi
 		private static string StringFromCString(IntPtr ptr, out int length)
 		{
 			string data = Marshal.PtrToStringAnsi(ptr);
-			length = data.Length;
+			length = data.Length + 1; // skip the trailing null
 
 			return data.Trim(trimChars);
 		}
 
-		private static bool EnumPiMI(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
+		private static unsafe bool EnumPiMI(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
 		{
 			PluginData enumData = new PluginData() { fileName = enumFileName };
 			
@@ -507,30 +507,25 @@ namespace PSFilterLoad.PSApi
 				enumData.category = Resources.PiMIDefaultCategoryName;
 			}
 
-			short major = Marshal.ReadInt16(ptr);
-			short minor = Marshal.ReadInt16(ptr, 2);
-			short priority = Marshal.ReadInt16(ptr, 4);
-			short generalInfoSize = Marshal.ReadInt16(ptr, 6);
-			short typeInfoSize = Marshal.ReadInt16(ptr, 8); 
-			short modes = Marshal.ReadInt16(ptr, 10);
-			int requiredHost = Marshal.ReadInt32(ptr, 12);
+			PlugInInfo* info = (PlugInInfo*)ptr.ToPointer();
 
-			if (major > PSConstants.latestFilterVersion ||
-			   (major == PSConstants.latestFilterVersion && minor > PSConstants.latestFilterSubVersion))
+			if (info->version > PSConstants.latestFilterVersion ||
+			   (info->version == PSConstants.latestFilterVersion && info->subVersion > PSConstants.latestFilterSubVersion))
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumFileName, major.ToString(CultureInfo.CurrentCulture), minor.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) }));
-#endif			
+				Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported", new object[] { enumFileName, info->version.ToString(CultureInfo.CurrentCulture), info->subVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterVersion.ToString(CultureInfo.CurrentCulture), PSConstants.latestFilterSubVersion.ToString(CultureInfo.CurrentCulture) }));
+#endif
 				return true;
 			}
 
-			if ((modes & PSConstants.supportsRGBColor) != PSConstants.supportsRGBColor)
+			if ((info->supportsMode & PSConstants.supportsRGBColor) != PSConstants.supportsRGBColor)
 			{
 #if DEBUG
 				Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", enumFileName));
 #endif
 				return true;
 			}
+
 			IntPtr filterRes = IntPtr.Zero;
 
 			IntPtr type = Marshal.StringToHGlobalUni("_8BFM");
