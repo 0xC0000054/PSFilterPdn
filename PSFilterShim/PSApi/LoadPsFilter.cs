@@ -154,7 +154,7 @@ namespace PSFilterLoad.PSApi
 		static IntPtr descriptorParametersPtr;
 		static IntPtr readDescriptorPtr;
 		static IntPtr writeDescriptorPtr;
-        static IntPtr errorStringPtr;
+		static IntPtr errorStringPtr;
 
 		static AETEData aete;
 		static Dictionary<uint, AETEValue> aeteDict;
@@ -398,11 +398,11 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		static byte[] primaryColor;
 
-        /// <summary>
-        /// The Windows-1252 Western European encoding for StringFromPString(IntPtr)
-        /// </summary>
-        private static readonly Encoding windows1252Encoding = Encoding.GetEncoding(1252);
-        private static readonly char[] trimChars = new char[] { ' ', '\0' };
+		/// <summary>
+		/// The Windows-1252 Western European encoding for StringFromPString(IntPtr)
+		/// </summary>
+		private static readonly Encoding windows1252Encoding = Encoding.GetEncoding(1252);
+		private static readonly char[] trimChars = new char[] { ' ', '\0' };
 
 
 		/// <summary>
@@ -873,7 +873,7 @@ namespace PSFilterLoad.PSApi
 			{
 				return string.Empty;
 			}
-		    byte* ptr = (byte*)PString.ToPointer(); 
+			byte* ptr = (byte*)PString.ToPointer(); 
 
 			int length = (int)ptr[0];
 			
@@ -2975,15 +2975,15 @@ namespace PSFilterLoad.PSApi
 						index += 4;
 					}
 
-                    // trim the list to the actual values in the dictonary
-                    uint[] values = keys.ToArray();
-                    foreach (var item in values)
-                    {
-                        if (!aeteDict.ContainsKey(item))
-                        {
-                            keys.Remove(item);
-                        }
-                    }
+					// trim the list to the actual values in the dictonary
+					uint[] values = keys.ToArray();
+					foreach (var item in values)
+					{
+						if (!aeteDict.ContainsKey(item))
+						{
+							keys.Remove(item);
+						}
+					}
 				}
 			}
 			else
@@ -3007,22 +3007,23 @@ namespace PSFilterLoad.PSApi
 				isSubKey = true;
 				subClassDict = null;
 				subClassIndex = 0;
-				if (handle_valid(descriptor) && handle_get_size_proc(descriptor) == 0)
+				if (handle_valid(descriptor) && handle_get_size_proc(descriptor) == 0 ||
+					aeteDict[getKey].Value is Dictionary<uint, AETEValue>)
 				{
 					subClassDict = (Dictionary<uint, AETEValue>)aeteDict[getKey].Value;
 				}
-                else
-                {
-                    // trim the list to the actual values in the dictonary
-                    uint[] values = subKeys.ToArray();
-                    foreach (var item in values)
-                    {
-                        if (!aeteDict.ContainsKey(item))
-                        {
-                            subKeys.Remove(item);
-                        }
-                    }
-                }
+				else
+				{
+					// trim the list to the actual values in the dictonary
+					uint[] values = subKeys.ToArray();
+					foreach (var item in values)
+					{
+						if (!aeteDict.ContainsKey(item))
+						{
+							subKeys.Remove(item);
+						}
+					}
+				}
 			}
 
 
@@ -4158,9 +4159,9 @@ namespace PSFilterLoad.PSApi
 						break;
 					case PSProperties.propTitle:
 						bytes = Encoding.ASCII.GetBytes("temp.pdn"); // some filters just want a non empty string
-                        complexProperty = handle_new_proc(bytes.Length);
-                        Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
-                        handle_unlock_proc(complexProperty);	
+						complexProperty = handle_new_proc(bytes.Length);
+						Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
+						handle_unlock_proc(complexProperty);	
 						break;
 					case PSProperties.propWatchSuspension:
 						simpleProperty = 0;
@@ -4671,9 +4672,9 @@ namespace PSFilterLoad.PSApi
 			filterRecord->maskTileOrigin.v = 0;
 			
 			filterRecord->descriptorParameters = descriptorParametersPtr;
-            errorStringPtr = Memory.Allocate(256, true);
-            filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead. 
-            filterRecord->channelPortProcs = IntPtr.Zero;
+			errorStringPtr = Memory.Allocate(256, true);
+			filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead. 
+			filterRecord->channelPortProcs = IntPtr.Zero;
 			filterRecord->documentInfo = IntPtr.Zero;
 
 			filterRecord->sSpBasic = IntPtr.Zero;
@@ -4814,11 +4815,11 @@ namespace PSFilterLoad.PSApi
 					Memory.Free(writeDescriptorPtr);
 					writeDescriptorPtr = IntPtr.Zero;
 				}
-                if (errorStringPtr != IntPtr.Zero)
-                {
-                    Memory.Free(errorStringPtr);
-                    errorStringPtr = IntPtr.Zero;
-                }
+				if (errorStringPtr != IntPtr.Zero)
+				{
+					Memory.Free(errorStringPtr);
+					errorStringPtr = IntPtr.Zero;
+				}
 
 				if (filterRecordPtr != IntPtr.Zero)
 				{

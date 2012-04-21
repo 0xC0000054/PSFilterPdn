@@ -1842,8 +1842,8 @@ namespace PSFilterLoad.PSApi
 						if (NativeMethods.EnumResourceNames(dll.DangerousGetHandle(), "PiPl", new EnumResNameDelegate(EnumPiPL), IntPtr.Zero))
 						{
 							IEnumerable<PluginData> plugins = from p in enumResList
-										                      where !string.IsNullOrEmpty(p.entryPoint)
-										                      select p;
+															  where !string.IsNullOrEmpty(p.entryPoint)
+															  select p;
 							pluginData.AddRange(plugins);
 
 							result = pluginData.Count > 0;
@@ -3513,7 +3513,8 @@ namespace PSFilterLoad.PSApi
 				isSubKey = true;
 				subClassDict = null;
 				subClassIndex = 0;
-				if (handle_valid(descriptor) && handle_get_size_proc(descriptor) == 0)
+				if (handle_valid(descriptor) && handle_get_size_proc(descriptor) == 0 ||
+					aeteDict[getKey].Value is Dictionary<uint, AETEValue>)
 				{
 					subClassDict = (Dictionary<uint, AETEValue>)aeteDict[getKey].Value;
 				}
