@@ -307,6 +307,18 @@ namespace PSFilterPdn
             {
                 MessageBox.Show(ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            catch (NullReferenceException nrex)
+            {
+                /* the filter probably tried to access an unimplemeted callback function 
+                 * without checking if it is valid.
+                */
+                MessageBox.Show(nrex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (System.Runtime.InteropServices.ExternalException eex)
+            {
+                MessageBox.Show(string.Concat(eex.Message, "0x", eex.ErrorCode.ToString("X8", CultureInfo.CurrentCulture)), PSFilterPdnEffect.StaticName,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
             finally
             {
                 filterDone.Set();
