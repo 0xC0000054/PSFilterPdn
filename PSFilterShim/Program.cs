@@ -131,14 +131,14 @@ namespace PSFilterShim
 			{
 				
 
-				ParameterData parmData = null;
+				ParameterData filterParameters = null;
 				string parmDataFileName = Console.ReadLine();
 				if (!string.IsNullOrEmpty(parmDataFileName) && File.Exists(parmDataFileName))
 				{
 					using (FileStream fs = new FileStream(parmDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
 					{
 						BinaryFormatter bf = new BinaryFormatter();
-						parmData = (ParameterData)bf.Deserialize(fs);
+						filterParameters = (ParameterData)bf.Deserialize(fs);
 					}
 				}
 
@@ -161,14 +161,16 @@ namespace PSFilterShim
 					}
 					lps.SetProgressCallback(progressCallback);
 
-					if (parmData != null)
+					if (filterParameters != null)
 					{
 						// ignore the filters that only use the data handle, e.g. Filter Factory  
-						if (((parmData.GlobalParameters.GetParameterDataBytes() != null && parmData.GlobalParameters.GetPluginDataBytes() != null) ||
-							(parmData.GlobalParameters.GetParameterDataBytes() != null && parmData.GlobalParameters.GetPluginDataBytes() == null)) ||
-							parmData.AETEDictionary != null)
+					    byte[] parameterData = filterParameters.GlobalParameters.GetParameterDataBytes();
+					    byte[] pluginData = filterParameters.GlobalParameters.GetPluginDataBytes();
+
+					    if ((parameterData != null && pluginData != null || parameterData != null && pluginData == null) ||
+						    filterParameters.AETEDictionary.Count > 0)
 						{
-							lps.FilterParameters = parmData;
+							lps.FilterParameters = filterParameters;
 							lps.IsRepeatEffect = repeatEffect;
 						}
 					}
