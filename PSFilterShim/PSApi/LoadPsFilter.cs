@@ -836,10 +836,10 @@ namespace PSFilterLoad.PSApi
 				if (globalParms.PluginDataSize == handleSize && globalParms.PluginDataIsPSHandle)
 				{
 					data = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.PluginDataSize));
-					parmDataHandle = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.GetPluginDataBytes().Length));
+					parmDataHandle = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)pluginDataBytes.Length));
 
 
-					Marshal.Copy(pluginDataBytes, 0, parmDataHandle, globalParms.GetPluginDataBytes().Length);
+					Marshal.Copy(pluginDataBytes, 0, parmDataHandle, pluginDataBytes.Length);
 
 					Marshal.WriteIntPtr(data, parmDataHandle);
 					Marshal.Copy(sig, 0, new IntPtr(data.ToInt64() + IntPtr.Size), 4);
@@ -853,12 +853,12 @@ namespace PSFilterLoad.PSApi
 
 						IntPtr ptr = Marshal.ReadIntPtr(data);
 
-						Marshal.Copy(pluginDataBytes, 0, ptr, globalParms.GetPluginDataBytes().Length);
+						Marshal.Copy(pluginDataBytes, 0, ptr, pluginDataBytes.Length);
 					}
 					else
 					{
-						data = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.GetPluginDataBytes().Length));
-						Marshal.Copy(pluginDataBytes, 0, data, globalParms.GetPluginDataBytes().Length);
+						data = NativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)pluginDataBytes.Length));
+						Marshal.Copy(pluginDataBytes, 0, data, pluginDataBytes.Length);
 					}
 
 				}
