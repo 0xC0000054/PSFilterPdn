@@ -153,7 +153,7 @@ namespace PSFilterPdn
         }
 
         public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, 
-            string filterCaseInfo, Surface dest, bool useShim, ParameterData pdata, AETEData aete,
+            string filterCaseInfo, Surface dest, bool useShim, ParameterData paramData, AETEData aete,
             ReadOnlyCollection<string> nodes, Collection<PSResource> resources)
             : base()
         {
@@ -164,7 +164,7 @@ namespace PSFilterPdn
             this.fileName = fileName;
             this.title = title;
             this.runWith32BitShim = useShim;
-            this.filterParameters = pdata;
+            this.filterParameters = paramData;
             this.aeteData = aete;
             this.expandedNodes = nodes;
             this.pseudoResources = resources;
