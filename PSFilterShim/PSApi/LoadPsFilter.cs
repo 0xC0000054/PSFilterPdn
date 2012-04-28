@@ -2076,13 +2076,18 @@ namespace PSFilterLoad.PSApi
 							int right = lockRect.Right - tempMask.Width;
 							int bottom = lockRect.Bottom - tempMask.Height;
 
+							int sWidth = tempMask.Width;
+							int sHeight = tempMask.Height;
+
+							int row, col;
+
 							while (top < 0)
 							{
 								for (int y = 0; y < height; y++)
 								{
 
-									int row = (y < tempMask.Height) ? y : (tempMask.Height - 1);
-									ColorBgra p = tempMask.GetPointUnchecked(0, row);
+									col = (y < sHeight) ? y : (sHeight - 1);
+									ColorBgra p = tempMask.GetPointUnchecked(0, col);
 									byte* dstRow = (byte*)maskDataPtr + ((y - rect.top) * maskRowBytes);
 
 									if (p.R > 0)
@@ -2109,8 +2114,8 @@ namespace PSFilterLoad.PSApi
 
 									for (int x = lockRect.Left; x < lockRect.Right; x++)
 									{
-										int col = (x < tempMask.Width) ? x : (tempMask.Width - 1);
-										ColorBgra p = tempMask.GetPointUnchecked(col, 0);
+										row = (x < sWidth) ? x : (sWidth - 1);
+										ColorBgra p = tempMask.GetPointUnchecked(row, 0);
 
 										if (p.R > 0)
 										{
@@ -2129,12 +2134,13 @@ namespace PSFilterLoad.PSApi
 								left++;
 							}
 
+							row = (sWidth - 1);
 							while (bottom > 0)
 							{
 								for (int y = lockRect.Top; y < lockRect.Bottom; y++)
 								{
-									int row = (y < tempMask.Height) ? y : (tempMask.Height - 1);
-									ColorBgra p = tempMask.GetPointUnchecked((tempMask.Width - 1), row);
+									col = (y < sHeight) ? y : (sHeight - 1);
+									ColorBgra p = tempMask.GetPointUnchecked(row, col);
 									byte* dstRow = (byte*)maskDataPtr + ((y - rect.top) * maskRowBytes);
 
 									if (p.R > 0)
@@ -2151,6 +2157,8 @@ namespace PSFilterLoad.PSApi
 								bottom--;
 
 							}
+								
+							col = (sHeight - 1);
 
 							while (right > 0)
 							{
@@ -2160,8 +2168,8 @@ namespace PSFilterLoad.PSApi
 
 									for (int x = lockRect.Left; x < lockRect.Right; x++)
 									{
-										int col = (x < tempMask.Width) ? x : (tempMask.Width - 1);
-										ColorBgra p = tempMask.GetPointUnchecked(col, (tempMask.Height - 1));
+										row = (x < sWidth) ? x : (sWidth - 1);
+										ColorBgra p = tempMask.GetPointUnchecked(row, col);
 
 										if (p.R > 0)
 										{
@@ -2535,14 +2543,20 @@ namespace PSFilterLoad.PSApi
 
 						int height = rect.bottom - rect.top;
 
+						
+						int sWidth = surface.Width;
+						int sHeight = surface.Height;
+						int row, col;
+
+						byte* inDataPtr = (byte*)inData.ToPointer();
+
 						while (top < 0)
 						{
 							for (int y = 0; y < height; y++)
 							{
-
-								int row = (y < surface.Height) ? y : (surface.Height - 1);
-								ColorBgra p = surface.GetPointUnchecked(0, row);
-								byte* q = (byte*)inData.ToPointer() + (y * inRowBytes);
+								col = (y < sHeight) ? y : (sHeight - 1);
+								ColorBgra p = surface.GetPointUnchecked(0, col);
+								byte* q = inDataPtr + (y * inRowBytes);
 
 								switch (nplanes)
 								{
@@ -2570,17 +2584,16 @@ namespace PSFilterLoad.PSApi
 							top++;
 						}
 
-
 						while (left < 0)
 						{
 							for (int y = 0; y < height; y++)
 							{
-								byte* q = (byte*)inData.ToPointer() + (y * inRowBytes);
+								byte* q = inDataPtr + (y * inRowBytes);
 
 								for (int x = lockRect.Left; x < lockRect.Right; x++)
 								{
-									int col = (x < surface.Width) ? x : (surface.Width - 1);
-									ColorBgra p = surface.GetPointUnchecked(col, 0);
+									row = (x < sWidth) ? x : (sWidth - 1);
+									ColorBgra p = surface.GetPointUnchecked(row, 0);
 
 									switch (nplanes)
 									{
@@ -2610,15 +2623,14 @@ namespace PSFilterLoad.PSApi
 							left++;
 						}
 
-
-
+						row = (sWidth - 1);
 						while (bottom > 0)
 						{
 							for (int y = lockRect.Top; y < lockRect.Bottom; y++)
 							{
-								int row = (y < surface.Height) ? y : (surface.Height - 1);
-								ColorBgra p = surface.GetPointUnchecked((surface.Width - 1), row);
-								byte* q = (byte*)inData.ToPointer() + ((y - lockRect.Top) * inRowBytes);
+								col = (y < sHeight) ? y : (sHeight - 1);
+								ColorBgra p = surface.GetPointUnchecked(row, col);
+								byte* q = inDataPtr + ((y - lockRect.Top) * inRowBytes);
 
 								switch (nplanes)
 								{
@@ -2647,17 +2659,17 @@ namespace PSFilterLoad.PSApi
 
 						}
 
-
+						col = (sHeight - 1);
 						while (right > 0)
 						{
 							for (int y = lockRect.Top; y < lockRect.Bottom; y++)
 							{
-								byte* q = (byte*)inData.ToPointer() + ((y - rect.top) * inRowBytes);
+								byte* q = inDataPtr + ((y - rect.top) * inRowBytes);
 
 								for (int x = lockRect.Left; x < lockRect.Right; x++)
 								{
-									int col = (x < surface.Width) ? x : (surface.Width - 1);
-									ColorBgra p = surface.GetPointUnchecked(col, (surface.Height - 1));
+									row = (x < sWidth) ? x : (sWidth - 1);
+									ColorBgra p = surface.GetPointUnchecked(row, col);
 
 									switch (nplanes)
 									{
@@ -4262,21 +4274,22 @@ namespace PSFilterLoad.PSApi
 			if (res != null)
 			{
 				pseudoResources.Remove(res);
-			}
-			int i = index + 1;
 
-			while (true) // renumber the index of subsequent items.
-			{
-				int next = pseudoResources.FindIndex(delegate(PSResource r)
+				int i = index + 1;
+
+				while (true) // renumber the index of subsequent items.
 				{
-					return r.Equals(ofType, i);
-				});
+					int next = pseudoResources.FindIndex(delegate(PSResource r)
+					{
+						return r.Equals(ofType, i);
+					});
 
-				if (next < 0) break;
+					if (next < 0) break;
 
-				pseudoResources[next].Index = i - 1;
+					pseudoResources[next].Index = i - 1;
 
-				i++;
+					i++;
+				}
 			}
 		}
 		static IntPtr resource_get_proc(uint ofType, short index)
