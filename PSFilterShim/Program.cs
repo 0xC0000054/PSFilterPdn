@@ -164,11 +164,11 @@ namespace PSFilterShim
 					if (filterParameters != null)
 					{
 						// ignore the filters that only use the data handle, e.g. Filter Factory  
-					    byte[] parameterData = filterParameters.GlobalParameters.GetParameterDataBytes();
-					    byte[] pluginData = filterParameters.GlobalParameters.GetPluginDataBytes();
+						byte[] parameterData = filterParameters.GlobalParameters.GetParameterDataBytes();
+						byte[] pluginData = filterParameters.GlobalParameters.GetPluginDataBytes();
 
-					    if ((parameterData != null && pluginData != null || parameterData != null && pluginData == null) ||
-						    filterParameters.AETEDictionary.Count > 0)
+						if ((parameterData != null && pluginData != null || parameterData != null && pluginData == null) ||
+							filterParameters.AETEDictionary.Count > 0)
 						{
 							lps.FilterParameters = filterParameters;
 							lps.IsRepeatEffect = repeatEffect;
@@ -182,34 +182,34 @@ namespace PSFilterShim
 
 					bool result = lps.RunPlugin(pdata, showAbout);
 
-					if (!showAbout && result && string.IsNullOrEmpty(lps.ErrorMessage))
+					if (!showAbout)
 					{
-						using (Bitmap dst = lps.Dest.CreateAliasedBitmap())
+						if (result && string.IsNullOrEmpty(lps.ErrorMessage))
 						{
-							dst.Save(dstImg, ImageFormat.Png);
-						}
-
-						if (!lps.IsRepeatEffect)
-						{
-							using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+							using (Bitmap dst = lps.Dest.CreateAliasedBitmap())
 							{
-								BinaryFormatter bf = new BinaryFormatter();
-								bf.Serialize(fs, lps.FilterParameters);
+								dst.Save(dstImg, ImageFormat.Png);
 							}
 
-							using (FileStream fs = new FileStream(resourceFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+							if (!lps.IsRepeatEffect)
 							{
-								BinaryFormatter bf = new BinaryFormatter();
-								bf.Serialize(fs, lps.PseudoResources);
+								using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+								{
+									BinaryFormatter bf = new BinaryFormatter();
+									bf.Serialize(fs, lps.FilterParameters);
+								}
+
+								using (FileStream fs = new FileStream(resourceFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+								{
+									BinaryFormatter bf = new BinaryFormatter();
+									bf.Serialize(fs, lps.PseudoResources);
+								}
 							}
 						}
-					}
-					else
-					{
-						if (!showAbout)
+						else
 						{
 							serviceProxy.SetProxyErrorMessage(lps.ErrorMessage);
-						}
+						} 
 					}
 				}
 
