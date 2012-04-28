@@ -1892,7 +1892,8 @@ namespace PSFilterLoad.PSApi
 		{
 			string error = string.Empty;
 
-			if (result == PSError.userCanceledErr || result == 1) // Many plug-ins seem to return 1 to indicate Cancel
+			// Any positive integer is a plugin handled error message.
+			if (result == PSError.userCanceledErr || result >= 1)
 			{
 				return string.Empty; // return an empty string as this message is never shown
 			}
