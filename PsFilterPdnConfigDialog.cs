@@ -556,7 +556,7 @@ namespace PSFilterPdn
 					}
 				}
 
-				if ((pseudoResources != null) && pseudoResources.Count > 0)
+				if (pseudoResources.Count > 0)
 				{
 					using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
 					{
@@ -743,7 +743,7 @@ namespace PSFilterPdn
 									lps.FilterParameters = this.filterParameters;
 								}
 
-								if ((pseudoResources != null) && pseudoResources.Count > 0)
+								if (pseudoResources.Count > 0)
 								{
 									lps.PseudoResources = this.pseudoResources;
 								}
@@ -1269,7 +1269,7 @@ namespace PSFilterPdn
 
 					if (i < lastItem)
 					{
-                        dirs.Append(',');
+						dirs.Append(',');
 					}
 				}
 				try
@@ -1290,21 +1290,21 @@ namespace PSFilterPdn
 
 		private void subDirSearchCb_CheckedChanged(object sender, EventArgs e)
 		{
-            if (settings != null)
-            {
-                try
-                {
-                    settings.PutSetting("searchSubDirs", subDirSearchCb.Checked.ToString(CultureInfo.InvariantCulture));
-                }
-                catch (IOException ex)
-                {
-                    MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                catch (UnauthorizedAccessException ex)
-                {
-                    MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
+			if (settings != null)
+			{
+				try
+				{
+					settings.PutSetting("searchSubDirs", subDirSearchCb.Checked.ToString(CultureInfo.InvariantCulture));
+				}
+				catch (IOException ex)
+				{
+					MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+				catch (UnauthorizedAccessException ex)
+				{
+					MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			}
 		}
 
 		private void filterSearchBox_Enter(object sender, EventArgs e)
