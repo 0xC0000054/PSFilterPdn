@@ -314,6 +314,8 @@ namespace PSFilterLoad.PSApi
 			inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
 			maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
 
+			maskDataPtr = inDataPtr = outDataPtr = IntPtr.Zero;
+
 			using (Bitmap bmp = new Bitmap(sourceImage))
 			{
 				if (bmp.Width > 32000 || bmp.Height > 32000)
@@ -1388,6 +1390,9 @@ namespace PSFilterLoad.PSApi
 		static int outHiPlane;
 		static Rect16 inRect;
 		static Rect16 maskRect;
+		static IntPtr maskDataPtr;
+		static IntPtr inDataPtr;
+		static IntPtr outDataPtr;
 
 		/// <summary>
 		/// Determines whether the filter uses planar order processing.
@@ -1434,9 +1439,9 @@ namespace PSFilterLoad.PSApi
 		{
 			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
-			if (filterRecord->outData != IntPtr.Zero && RectNonEmpty(outRect))
+			if (outDataPtr != IntPtr.Zero && RectNonEmpty(outRect))
 			{
-				store_buf(filterRecord->outData, outRowBytes, outRect, outLoPlane, outHiPlane);
+				store_buf(outDataPtr, outRowBytes, outRect, outLoPlane, outHiPlane);
 			}
 
 			short error;
@@ -1449,9 +1454,10 @@ namespace PSFilterLoad.PSApi
 				if (!maskRect.Equals(filterRecord->maskRect))
 				{
 
-					if (filterRecord->maskData != IntPtr.Zero && ResizeBuffer(filterRecord->maskData, filterRecord->maskRect, 0, 0))
+					if (maskDataPtr != IntPtr.Zero && ResizeBuffer(maskDataPtr, filterRecord->maskRect, 0, 0))
 					{
-						Memory.Free(filterRecord->maskData);
+						Memory.Free(maskDataPtr);
+						maskDataPtr = IntPtr.Zero;
 						filterRecord->maskData = IntPtr.Zero;
 					}
 
@@ -1466,9 +1472,10 @@ namespace PSFilterLoad.PSApi
 			}
 			else
 			{
-				if (filterRecord->maskData != IntPtr.Zero)
+				if (maskDataPtr != IntPtr.Zero)
 				{
-					Memory.Free(filterRecord->maskData);
+					Memory.Free(maskDataPtr);
+					maskDataPtr = IntPtr.Zero;
 					filterRecord->maskData = IntPtr.Zero;
 				}
 				filterRecord->maskRowBytes = 0;
@@ -1480,18 +1487,19 @@ namespace PSFilterLoad.PSApi
 			{
 				if (!inRect.Equals(filterRecord->inRect) || IsSinglePlane(filterRecord, false))
 				{
-					if (filterRecord->inData != IntPtr.Zero &&
-						ResizeBuffer(filterRecord->inData, filterRecord->inRect, filterRecord->inLoPlane, filterRecord->inHiPlane))
+					if (inDataPtr != IntPtr.Zero &&
+						ResizeBuffer(inDataPtr, filterRecord->inRect, filterRecord->inLoPlane, filterRecord->inHiPlane))
 					{
 						try
 						{
-							Memory.Free(filterRecord->inData);
+							Memory.Free(inDataPtr);
 						}
 						catch (Exception)
 						{
 						}
 						finally
 						{
+							inDataPtr = IntPtr.Zero;
 							filterRecord->inData = IntPtr.Zero;
 						}
 					}
@@ -1508,17 +1516,18 @@ namespace PSFilterLoad.PSApi
 			}
 			else
 			{
-				if (filterRecord->inData != IntPtr.Zero)
+				if (inDataPtr != IntPtr.Zero)
 				{
 					try
 					{
-						Memory.Free(filterRecord->inData);
+						Memory.Free(inDataPtr);
 					}
 					catch (Exception)
 					{
 					}
 					finally
 					{
+						inDataPtr = IntPtr.Zero;
 						filterRecord->inData = IntPtr.Zero;
 					}
 				}
@@ -1530,18 +1539,19 @@ namespace PSFilterLoad.PSApi
 			{
 				if (!outRect.Equals(filterRecord->outRect) || IsSinglePlane(filterRecord, true))
 				{
-					if (filterRecord->outData != IntPtr.Zero && 
-						ResizeBuffer(filterRecord->outData, filterRecord->outRect, filterRecord->outLoPlane, filterRecord->outHiPlane))
+					if (outDataPtr != IntPtr.Zero && 
+						ResizeBuffer(outDataPtr, filterRecord->outRect, filterRecord->outLoPlane, filterRecord->outHiPlane))
 					{
 						try
 						{
-							Memory.Free(filterRecord->outData);
+							Memory.Free(outDataPtr);
 						}
 						catch (Exception)
 						{
 						}
 						finally
 						{
+							outDataPtr = IntPtr.Zero;
 							filterRecord->outData = IntPtr.Zero;
 						}
 					}
@@ -1566,17 +1576,18 @@ namespace PSFilterLoad.PSApi
 			}
 			else
 			{
-				if (filterRecord->outData != IntPtr.Zero)
+				if (outDataPtr != IntPtr.Zero)
 				{
 					try
 					{
-						Memory.Free(filterRecord->outData);
+						Memory.Free(outDataPtr);
 					}
 					catch (Exception)
 					{
 					}
 					finally
 					{
+						outDataPtr = IntPtr.Zero;
 						filterRecord->outData = IntPtr.Zero;
 					}
 				}
@@ -1678,12 +1689,13 @@ namespace PSFilterLoad.PSApi
 
 
 				int stride = (width * nplanes);
-				if (inData == IntPtr.Zero)
+				if (inDataPtr == IntPtr.Zero)
 				{
 					int len = stride * height;
 
-					inData = Memory.Allocate(len, false); 
-				}
+					inDataPtr = Memory.Allocate(len, false);
+				}                   
+				inData = inDataPtr;
 				inRowBytes = stride;
 
 				if (lockRect.Left < 0 || lockRect.Top < 0)
@@ -1730,7 +1742,7 @@ namespace PSFilterLoad.PSApi
 				* so copy the data manually swapping the pixel order along the way
 				*/
 
-				void* inDataPtr = inData.ToPointer();
+				void* ptr = inData.ToPointer();
 				int top = lockRect.Top;
 				int left = lockRect.Left;
 				int bottom = Math.Min(lockRect.Bottom, tempSurface.Height);
@@ -1738,7 +1750,7 @@ namespace PSFilterLoad.PSApi
 				for (int y = top; y < bottom; y++)
 				{
 					byte* p = (byte*)tempSurface.GetPointAddressUnchecked(left, y);
-					byte* q = (byte*)inDataPtr + ((y - top) * stride);
+					byte* q = (byte*)ptr + ((y - top) * stride);
 					for (int x = left; x < right; x++)
 					{
 						switch (nplanes)
@@ -1869,12 +1881,15 @@ namespace PSFilterLoad.PSApi
 
 				int stride = (width * nplanes);
 
-				if (outData == IntPtr.Zero)
+				if (outDataPtr == IntPtr.Zero)
 				{				
 					int len = stride * height;
 
-					outData = Memory.Allocate(len, false);
-				} 
+					outDataPtr = Memory.Allocate(len, false);
+				}                     
+				
+				outData = outDataPtr;
+
 				outRowBytes = stride;
 
 				if (lockRect.Left < 0 || lockRect.Top < 0)
@@ -1917,7 +1932,7 @@ namespace PSFilterLoad.PSApi
 				/* the stride for the source image and destination buffer will almost never match
 				* so copy the data manually swapping the pixel order along the way
 				*/
-				void* outDataPtr = outData.ToPointer();
+				void* ptr = outData.ToPointer();
 				int top = lockRect.Top;
 				int left = lockRect.Left;
 				int bottom = Math.Min(lockRect.Bottom, dest.Height);
@@ -1925,7 +1940,7 @@ namespace PSFilterLoad.PSApi
 				for (int y = top; y < bottom; y++)
 				{
 					byte* p = (byte*)dest.GetPointAddressUnchecked(left, y);
-					byte* q = (byte*)outDataPtr + ((y - top) * stride);
+					byte* q = (byte*)ptr + ((y - top) * stride);
 					for (int x = left; x < right; x++)
 					{
 						switch (nplanes)
@@ -2057,13 +2072,14 @@ namespace PSFilterLoad.PSApi
 					
 				int len = width * height;
 
-				if (maskData == IntPtr.Zero)
+				if (maskDataPtr == IntPtr.Zero)
 				{
-					maskData = Memory.Allocate(len, false); 
-				}
+					maskDataPtr = Memory.Allocate(len, false);
+				}					
+				maskData = maskDataPtr;
 				maskRowBytes = width;
 				
-				void* maskDataPtr = maskData.ToPointer();
+				void* ptr = maskData.ToPointer();
 
 				if ((lockRect.Right > tempMask.Width || lockRect.Bottom > tempMask.Height) || padBuffer)
 				{
@@ -2088,7 +2104,7 @@ namespace PSFilterLoad.PSApi
 
 									col = (y < sHeight) ? y : (sHeight - 1);
 									ColorBgra p = tempMask.GetPointUnchecked(0, col);
-									byte* dstRow = (byte*)maskDataPtr + ((y - rect.top) * maskRowBytes);
+									byte* dstRow = (byte*)ptr + ((y - rect.top) * maskRowBytes);
 
 									if (p.R > 0)
 									{
@@ -2110,7 +2126,7 @@ namespace PSFilterLoad.PSApi
 							{
 								for (int y = 0; y < height; y++)
 								{
-									byte* dstRow = (byte*)maskDataPtr + ((y - rect.top) * maskRowBytes);
+									byte* dstRow = (byte*)ptr + ((y - rect.top) * maskRowBytes);
 
 									for (int x = lockRect.Left; x < lockRect.Right; x++)
 									{
@@ -2141,7 +2157,7 @@ namespace PSFilterLoad.PSApi
 								{
 									col = (y < sHeight) ? y : (sHeight - 1);
 									ColorBgra p = tempMask.GetPointUnchecked(row, col);
-									byte* dstRow = (byte*)maskDataPtr + ((y - rect.top) * maskRowBytes);
+									byte* dstRow = (byte*)ptr + ((y - rect.top) * maskRowBytes);
 
 									if (p.R > 0)
 									{
@@ -2164,7 +2180,7 @@ namespace PSFilterLoad.PSApi
 							{
 								for (int y = lockRect.Top; y < lockRect.Bottom; y++)
 								{
-									byte* dstRow = (byte*)maskDataPtr + ((y - rect.top) * maskRowBytes);
+									byte* dstRow = (byte*)ptr + ((y - rect.top) * maskRowBytes);
 
 									for (int x = lockRect.Left; x < lockRect.Right; x++)
 									{
@@ -2205,7 +2221,7 @@ namespace PSFilterLoad.PSApi
 				for (int y = lockRect.Top; y < maskHeight; y++)
 				{
 					ColorBgra *srcRow = tempMask.GetPointAddressUnchecked(lockRect.Left, y);
-					byte* dstRow = (byte*)maskDataPtr + ((y - lockRect.Top) * width);
+					byte* dstRow = (byte*)ptr + ((y - lockRect.Top) * width);
 					for (int x = lockRect.Left; x < maskWidth; x++)
 					{
 						if (srcRow->R > 0)
@@ -2969,93 +2985,93 @@ namespace PSFilterLoad.PSApi
 	}
 #endif
 
+            if (aeteDict.Count > 0)
+            {
+                if (keys == null)
+                {
+                    keys = new List<uint>();
+                    int index = 0;
+                    if (keyArray != IntPtr.Zero) // check if the pointer is valid
+                    {
+                        keyArrayPtr = keyArray;
+                        while (true)
+                        {
+                            uint key = (uint)Marshal.ReadInt32(keyArray, index);
+                            if (key == 0)
+                            {
+                                break;
+                            }
+                            keys.Add(key);
+                            index += 4;
+                        }
 
-			if (keys == null)
-			{
-				keys = new List<uint>();
-				int index = 0;
-				if (keyArray != IntPtr.Zero) // check if the pointer is valid
-				{
-					keyArrayPtr = keyArray;
-					while (true)
-					{
-						uint key = (uint)Marshal.ReadInt32(keyArray, index);
-						if (key == 0)
-						{
-							break;
-						}
-						keys.Add(key);
-						index += 4;
-					}
+                        // trim the list to the actual values in the dictonary
+                        uint[] values = keys.ToArray();
+                        foreach (var item in values)
+                        {
+                            if (!aeteDict.ContainsKey(item))
+                            {
+                                keys.Remove(item);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    subKeys = new List<uint>();
+                    int index = 0;
+                    if (keyArray != IntPtr.Zero)
+                    {
+                        while (true)
+                        {
+                            uint key = (uint)Marshal.ReadInt32(keyArray, index);
+                            if (key == 0)
+                            {
+                                break;
+                            }
+                            subKeys.Add(key);
+                            index += 4;
+                        }
+                    }
 
-					// trim the list to the actual values in the dictonary
-					uint[] values = keys.ToArray();
-					foreach (var item in values)
-					{
-						if (!aeteDict.ContainsKey(item))
-						{
-							keys.Remove(item);
-						}
-					}
-				}
-			}
-			else
-			{
-				subKeys = new List<uint>();
-				int index = 0;
-				if (keyArray != IntPtr.Zero)
-				{
-					while (true)
-					{
-						uint key = (uint)Marshal.ReadInt32(keyArray, index);
-						if (key == 0)
-						{
-							break;
-						}
-						subKeys.Add(key);
-						index += 4;
-					}
-				}
-
-				isSubKey = true;
-				subClassDict = null;
-				subClassIndex = 0;
-				if (handle_valid(descriptor) && handle_get_size_proc(descriptor) == 0 ||
-					aeteDict[getKey].Value is Dictionary<uint, AETEValue>)
-				{
-					subClassDict = (Dictionary<uint, AETEValue>)aeteDict[getKey].Value;
-				}
-				else
-				{
-					// trim the list to the actual values in the dictonary
-					uint[] values = subKeys.ToArray();
-					foreach (var item in values)
-					{
-						if (!aeteDict.ContainsKey(item))
-						{
-							subKeys.Remove(item);
-						}
-					}
-				}
-			}
+                    isSubKey = true;
+                    subClassDict = null;
+                    subClassIndex = 0;
+                    if (handle_valid(descriptor) && handle_get_size_proc(descriptor) == 0 ||
+                        aeteDict.ContainsKey(getKey) && aeteDict[getKey].Value is Dictionary<uint, AETEValue>)
+                    {
+                        subClassDict = (Dictionary<uint, AETEValue>)aeteDict[getKey].Value;
+                    }
+                    else
+                    {
+                        // trim the list to the actual values in the dictonary
+                        uint[] values = subKeys.ToArray();
+                        foreach (var item in values)
+                        {
+                            if (!aeteDict.ContainsKey(item))
+                            {
+                                subKeys.Remove(item);
+                            }
+                        }
+                    }
+                }
 
 
 
-			if ((keys != null) && keys.Count > 0 && aeteDict.Count > 0 && 
-				(aete != null) && !aete.FlagList.ContainsKey(keys[0])) // some filters may hand us a list of bogus keys.
-			{
-				return IntPtr.Zero;
-			}
+                if ((keys != null) && keys.Count > 0 && aete != null &&
+                    !aete.FlagList.ContainsKey(keys[0])) // some filters may hand us a list of bogus keys.
+                {
+                    return IntPtr.Zero;
+                }
 
-			if ((keys != null) && keys.Count == 0 && aeteDict.Count > 0)
-			{
-				keys.AddRange(aeteDict.Keys); // if the keys are not passed to us grab them from the aeteDict.
-			}
+                if ((keys != null) && keys.Count == 0)
+                {
+                    keys.AddRange(aeteDict.Keys); // if the keys are not passed to us grab them from the aeteDict.
+                }
 
-			if (aeteDict.Count > 0)
-			{
-				return handle_new_proc(1); // return a new descriptor handle
-			}
+
+                return handle_new_proc(1); // return a new descriptor handle
+            }
 
 			return IntPtr.Zero;
 		}
