@@ -967,7 +967,7 @@ namespace PSFilterPdn
 								{
 									TreeNode node = nodes[item.category];
 									TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
-									if (IsNotDuplicateNode(ref node, subNode, item))
+									if (IsNotDuplicateNode(ref node, item))
 									{
 										node.Nodes.Add(subNode);
 									}
@@ -999,31 +999,26 @@ namespace PSFilterPdn
 		/// Checks if the plugin is already contained in the list, and replaces it if the new plugin is 64-bit and the old one is 32-bit on a 64-bit OS.
 		/// </summary>
 		/// <param name="parent">The parent TreeNode to check</param>
-		/// <param name="child">The child TreeNode.</param>
+		/// <param name="childText">The child TreeNode.</param>
 		/// <param name="data">The PluginData to check.</param>
 		/// <returns>True if the item is a duplicate, otherwise false.</returns>
-		private static bool IsNotDuplicateNode(ref TreeNode parent, TreeNode child, PluginData data)
+		private static bool IsNotDuplicateNode(ref TreeNode parent, PluginData data)
 		{
 			if (IntPtr.Size == 8)
 			{
-				if (parent.Nodes.ContainsKey(child.Text))
+				if (parent.Nodes.ContainsKey(data.title))
 				{
-					TreeNode node = parent.Nodes[child.Text];
+					TreeNode node = parent.Nodes[data.title];
 					PluginData pd = (PluginData)node.Tag;
 
-					// The 64-bit Flaming Pear plugins crash so force the 32-bit versions to be used instead.
-					if ((pd.runWith32BitShim && !data.runWith32BitShim && pd.category != "Flaming Pear") 
-						|| (!pd.runWith32BitShim && pd.category == "Flaming Pear")) // LunarCell loads the 64-bit filters first
+					if (pd.runWith32BitShim && !data.runWith32BitShim) 
 					{
 						parent.Nodes.Remove(node); // if the new plugin is 64-bit and the old one is not remove the old one and use the 64-bit one.
 
 						return true;
 					}
-					else
-					{
-						return false;
-					}
-
+					
+					return false;
 				}
 				
 			}
