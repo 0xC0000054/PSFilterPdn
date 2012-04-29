@@ -3056,14 +3056,6 @@ namespace PSFilterLoad.PSApi
                     }
                 }
 
-
-
-                if ((keys != null) && keys.Count > 0 && aete != null &&
-                    !aete.FlagList.ContainsKey(keys[0])) // some filters may hand us a list of bogus keys.
-                {
-                    return IntPtr.Zero;
-                }
-
                 if ((keys != null) && keys.Count == 0)
                 {
                     keys.AddRange(aeteDict.Keys); // if the keys are not passed to us grab them from the aeteDict.
