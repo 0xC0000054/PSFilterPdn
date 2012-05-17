@@ -2971,7 +2971,7 @@ namespace PSFilterLoad.PSApi
 		static int subClassIndex;
 		static Dictionary<uint, AETEValue> subClassDict;
 
-		static IntPtr OpenReadDescriptorProc(System.IntPtr descriptor, IntPtr keyArray)
+		static unsafe IntPtr OpenReadDescriptorProc(System.IntPtr descriptor, IntPtr keyArray)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -2990,19 +2990,14 @@ namespace PSFilterLoad.PSApi
                 if (keys == null)
                 {
                     keys = new List<uint>();
-                    int index = 0;
-                    if (keyArray != IntPtr.Zero) // check if the pointer is valid
+                    if (keyArray != IntPtr.Zero) 
                     {
                         keyArrayPtr = keyArray;
-                        while (true)
+                        uint* key = (uint*)keyArray.ToPointer();
+                        while (*key != 0U)
                         {
-                            uint key = (uint)Marshal.ReadInt32(keyArray, index);
-                            if (key == 0)
-                            {
-                                break;
-                            }
-                            keys.Add(key);
-                            index += 4;
+                            keys.Add(*key);
+                            key++;
                         }
 
                         // trim the list to the actual values in the dictonary
@@ -3019,19 +3014,15 @@ namespace PSFilterLoad.PSApi
                 else
                 {
                     subKeys = new List<uint>();
-                    int index = 0;
                     if (keyArray != IntPtr.Zero)
                     {
-                        while (true)
+                        uint* key = (uint*)keyArray.ToPointer();
+                        while (*key != 0U)
                         {
-                            uint key = (uint)Marshal.ReadInt32(keyArray, index);
-                            if (key == 0)
-                            {
-                                break;
-                            }
-                            subKeys.Add(key);
-                            index += 4;
+                            subKeys.Add(*key);
+                            key++;
                         }
+
                     }
 
                     isSubKey = true;
@@ -3052,13 +3043,15 @@ namespace PSFilterLoad.PSApi
                             {
                                 subKeys.Remove(item);
                             }
-                        }
+                        }                        
+                        subKeyArrayPtr = subKeys.Count > 0 ? keyArray : IntPtr.Zero;
                     }
                 }
 
                 if ((keys != null) && keys.Count == 0)
                 {
                     keys.AddRange(aeteDict.Keys); // if the keys are not passed to us grab them from the aeteDict.
+                    keyArrayPtr = IntPtr.Zero;
                 }
 
 
