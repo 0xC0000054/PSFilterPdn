@@ -1242,7 +1242,7 @@ namespace PSFilterLoad.PSApi
 			if (pdata.filterInfo != null)
 			{
 				// compensate for the fact that the FilterCaseInfo array is zero indexed.
-				copyToDest = ((pdata.filterInfo[(filterCase - 1)].flags1 & FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit) == 0);
+				copyToDest = ((pdata.filterInfo[(filterCase - 1)].flags1 & (1 << FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit)) == 0);
 			}
 	
 			if (copyToDest)
