@@ -10,13 +10,14 @@ namespace PSFilterLoad.PSApi
         AdvanceState = 1,
         BufferSuite = 2,
         Call = 4,
-        ColorServices = 8,
-        DescriptorParameters = 16,
-        DisplayPixels = 32,
-        Error = 64,
-        HandleSuite = 128,
-        MiscCallbacks = 256,
-        PiPL = 512
+        ChannelPorts = 8,
+        ColorServices = 16,
+        DescriptorParameters = 32,
+        DisplayPixels = 64,
+        Error = 128,
+        HandleSuite = 256,
+        MiscCallbacks = 512,
+        PiPL = 1024
     }
 #endif
 }
