@@ -123,7 +123,11 @@ namespace PSFilterLoad.PSApi
 		static PutCountProc putCountProc;
 		static PutStringProc putStringProc;
 		static PutScopedClassProc putScopedClassProc;
-		static PutScopedObjectProc putScopedObjectProc; 
+		static PutScopedObjectProc putScopedObjectProc;
+        // ChannelPorts
+        static ReadPixelsProc readPixelsProc;
+        static WriteBasePixelsProc writeBasePixelsProc;
+        static ReadPortForWritePortProc readPortForWritePortProc;
 		#endregion
 
 		static Dictionary<IntPtr, PSHandle> handles;
@@ -155,6 +159,9 @@ namespace PSFilterLoad.PSApi
 		static IntPtr readDescriptorPtr;
 		static IntPtr writeDescriptorPtr;
 		static IntPtr errorStringPtr;
+
+        static IntPtr channelPortsPtr;
+        static IntPtr readDocumentPtr;
 
 		static AETEData aete;
 		static Dictionary<uint, AETEValue> aeteDict;
@@ -286,6 +293,7 @@ namespace PSFilterLoad.PSApi
 			globalParms = new GlobalParameters();
 			pseudoResources = new List<PSResource>();
 			handles = new Dictionary<IntPtr, PSHandle>();
+            channelReadDescPtrs = new List<ReadChannelPtrs>();
 
 #if USEMATTING
 			inputHandling = FilterDataHandling.filterDataHandlingNone;
@@ -383,11 +391,12 @@ namespace PSFilterLoad.PSApi
 			dbgFlags = DebugFlags.AdvanceState;
 			dbgFlags |= DebugFlags.Call;
 			dbgFlags |= DebugFlags.ColorServices;
+            dbgFlags |= DebugFlags.ChannelPorts;
 			dbgFlags |= DebugFlags.DescriptorParameters;
 			dbgFlags |= DebugFlags.DisplayPixels;
 			dbgFlags |= DebugFlags.Error;
 			dbgFlags |= DebugFlags.HandleSuite;
-			dbgFlags |= DebugFlags.MiscCallbacks; // progress callback 
+			dbgFlags |= DebugFlags.MiscCallbacks; 
 			dbgFlags |= DebugFlags.PiPL;
 #endif
 		}
@@ -1639,7 +1648,7 @@ namespace PSFilterLoad.PSApi
 				if (scaleFactor > 1) // Filter preview?
 				{
 					tempSurface = new Surface(scalew, scaleh);
-					tempSurface.FitSurface(source);
+					tempSurface.SuperSampleFitSurface(source);
 				}
 				else
 				{
@@ -2002,7 +2011,7 @@ namespace PSFilterLoad.PSApi
 				if (scaleFactor > 1) // Filter preview?
 				{
 					tempMask = new Surface(scalew, scaleh);
-					tempMask.FitSurface(mask);
+					tempMask.SuperSampleFitSurface(mask);
 				}
 				else
 				{
@@ -2530,7 +2539,290 @@ namespace PSFilterLoad.PSApi
 				return false;
 
 			return ((point.h >= 0 && point.h < (source.Width - 1)) && (point.v >= 0 && point.v < (source.Height - 1)));
-		} 
+		}
+
+        static Surface scaledChannelSurface;
+
+        static unsafe void FillChannelData(int channel, PixelMemoryDesc dest, Surface source, VRect srcRect, bool selectionMask)
+        {
+            byte* dstPtr = (byte*)dest.data.ToPointer();
+            int stride = dest.rowBits / 8;
+            int bpp = dest.colBits / 8;
+            int offset = dest.bitOffset / 8;
+
+
+            for (int y = srcRect.top; y < srcRect.bottom; y++)
+            {
+                ColorBgra* src = source.GetPointAddressUnchecked(srcRect.left, y);
+                byte* dst = dstPtr + (y * stride) + offset;
+                for (int x = srcRect.left; x < srcRect.right; x++)
+                {
+                    switch (channel)
+                    {
+                        case 0:
+                            *dst = src->R;
+                            break;
+                        case 1:
+                            *dst = src->G;
+                            break;
+                        case 2:
+                            *dst = src->B;
+                            break;
+                        case 3:
+                            *dst = src->A;
+                            break;
+                        case 4:
+                            *dst = src->R; // as the mask is grayscale ues only the red channel
+                            break;
+                    }
+                    src++;
+                    dst += bpp;
+                }
+            }
+
+        }
+
+        static unsafe void StoreChannelData(int channel, PixelMemoryDesc source, Surface dest, VRect srcRect, bool selectionMask)
+        {
+            void* srcPtr = source.data.ToPointer();
+            int stride = source.rowBits / 8;
+            int bpp = source.colBits / 8;
+            int offset = source.bitOffset / 8;
+
+            if (srcRect.top < 0)
+            {
+                srcRect.top = 0;
+            }
+            else if (srcRect.top >= dest.Height)
+            {
+                srcRect.top = dest.Height - srcRect.top;
+            }
+
+            if (srcRect.left < 0)
+            {
+                srcRect.left = 0;
+            }
+            else if (srcRect.left >= dest.Width)
+            {
+                srcRect.left = dest.Width - srcRect.left;
+            }
+            int bottom = Math.Min(srcRect.bottom, (dest.Height - 1));
+            int right = Math.Min(srcRect.right, (dest.Width - 1));
+
+            for (int y = srcRect.top; y < bottom; y++)
+            {
+                byte* src = (byte*)srcPtr + (y * stride) + offset;
+                ColorBgra* dst = dest.GetPointAddressUnchecked(srcRect.left, y);
+
+                for (int x = srcRect.left; x < right; x++)
+                {
+                    switch (channel)
+                    {
+                        case 0:
+                            dst->R = *src;
+                            break;
+                        case 1:
+                            dst->G = *src;
+                            break;
+                        case 2:
+                            dst->B = *src;
+                            break;
+                        case 3:
+                            dst->A = *src;
+                            break;
+                        case 4: // selection mask
+                            dst->R = dst->G = dst->B = *src;
+                            break;
+                    }
+                    src += bpp;
+                    dst++;
+                }
+            }
+
+        }
+
+        static unsafe short ReadPixelsProc(IntPtr port, ref PSScaling scaling, ref VRect writeRect, ref PixelMemoryDesc destination, ref VRect wroteRect)
+        {
+#if DEBUG
+            Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), writeRect.ToString()));
+#endif
+
+            int channel = port.ToInt32();
+            VRect srcRect = scaling.sourceRect;
+            VRect dstRect = scaling.destinationRect;
+
+            int srcWidth = srcRect.right - srcRect.left;
+            int srcHeight = srcRect.bottom - srcRect.top;
+            int dstWidth = dstRect.right - dstRect.left;
+            int dstHeight = dstRect.bottom - dstRect.top;
+            bool isSelection = channel == 4;
+
+            Surface temp = null;
+
+            if (isSelection)
+            {
+                temp = mask;
+            }
+            else
+            {
+                temp = source;
+            }
+
+            if (srcWidth == dstWidth && srcHeight == dstHeight)
+            {
+                FillChannelData(channel, destination, temp, srcRect, isSelection);
+            }
+            else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
+            {
+
+                if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
+                {
+                    if (scaledChannelSurface != null)
+                    {
+                        scaledChannelSurface.Dispose();
+                        scaledChannelSurface = null;
+                    }
+
+                    scaledChannelSurface = new Surface(dstWidth, dstHeight);
+                    scaledChannelSurface.SuperSampleFitSurface(temp);
+                }
+
+                FillChannelData(channel, destination, scaledChannelSurface, dstRect, isSelection);
+            }
+            else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
+            {
+
+                if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
+                {
+                    if (scaledChannelSurface != null)
+                    {
+                        scaledChannelSurface.Dispose();
+                        scaledChannelSurface = null;
+                    }
+
+                    scaledChannelSurface = new Surface(dstWidth, dstHeight);
+                    scaledChannelSurface.BicubicFitSurface(temp);
+                }
+
+                FillChannelData(channel, destination, scaledChannelSurface, dstRect, isSelection);
+            }
+
+
+            wroteRect = dstRect;
+
+            return PSError.noErr;
+        }
+
+        static short WriteBasePixels(IntPtr port, ref VRect writeRect, PixelMemoryDesc source)
+        {
+#if DEBUG
+            Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), writeRect.ToString()));
+#endif
+            return PSError.memFullErr;
+        }
+
+        static short ReadPortForWritePort(ref System.IntPtr readPort, System.IntPtr writePort)
+        {
+#if DEBUG
+            Ping(DebugFlags.ChannelPorts, string.Format("readPort: {0}, writePort: {1}", readPort.ToString(), writePort.ToString()));
+#endif
+            return PSError.memFullErr;
+        }
+
+        struct ReadChannelPtrs
+        {
+            public IntPtr address;
+            public IntPtr name;
+        }
+
+        static List<ReadChannelPtrs> channelReadDescPtrs;
+
+        static unsafe void CreateReadImageDocument()
+        {
+            int width = source.Width;
+            int height = source.Height;
+
+            readDocumentPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadImageDocumentDesc)), true);
+            ReadImageDocumentDesc* doc = (ReadImageDocumentDesc*)readDocumentPtr.ToPointer();
+            doc->minVersion = PSConstants.kCurrentMinVersReadImageDocDesc;
+            doc->maxVersion = PSConstants.kCurrentMaxVersReadImageDocDesc;
+            doc->imageMode = PSConstants.plugInModeRGBColor;
+            doc->depth = 8;
+            doc->bounds.top = 0;
+            doc->bounds.left = 0;
+            doc->bounds.right = width;
+            doc->bounds.bottom = height;
+            doc->hResolution = int2fixed((int)(dpiX + 0.5));
+            doc->vResolution = int2fixed((int)(dpiY + 0.5));
+
+            string[] names = new string[3] { "Red", "Green", "Blue" };
+            ReadChannelPtrs channel = CreateReadChannelDesc(0, names[0], doc->depth, doc->bounds);
+
+            ReadChannelDesc* ch = (ReadChannelDesc*)channel.address.ToPointer();
+            channelReadDescPtrs.Add(channel);
+
+            for (int i = 1; i < 3; i++)
+            {
+                ReadChannelPtrs ptr = CreateReadChannelDesc(i, names[i], doc->depth, doc->bounds);
+                channelReadDescPtrs.Add(ptr);
+
+                ch->next = ptr.address;
+
+                ch = (ReadChannelDesc*)ptr.address.ToPointer();
+            }
+
+            doc->targetCompositeChannels = doc->mergedCompositeChannels = channel.address;
+
+            if (!ignoreAlpha)
+            {
+                ReadChannelPtrs alphaPtr = CreateReadChannelDesc(3, "Alpha", doc->depth, doc->bounds);
+                channelReadDescPtrs.Add(alphaPtr);
+                doc->targetTransparency = doc->mergedTransparency = alphaPtr.address;
+            }
+
+            if (selectedRegion != null)
+            {
+                ReadChannelPtrs selectionPtr = CreateReadChannelDesc(4, "Selection Mask", doc->depth, doc->bounds);
+                channelReadDescPtrs.Add(selectionPtr);
+                doc->selection = selectionPtr.address;
+            }
+        }
+
+        static unsafe ReadChannelPtrs CreateReadChannelDesc(int channel, string name, int depth, VRect bounds)
+        {
+            IntPtr addressPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadChannelDesc)), true);
+            ReadChannelDesc* desc = (ReadChannelDesc*)addressPtr.ToPointer();
+            desc->minVersion = PSConstants.kCurrentMinVersReadChannelDesc;
+            desc->maxVersion = PSConstants.kCurrentMaxVersReadChannelDesc;
+            desc->depth = depth;
+            desc->bounds = bounds;
+            desc->target = (channel < 3) ? (byte)1 : (byte)0;
+            desc->shown = (channel < 4) ? (byte)1 : (byte)0;
+            desc->tileSize.h = bounds.right - bounds.left;
+            desc->tileSize.v = bounds.bottom - bounds.top;
+            desc->port = new IntPtr(channel);
+            switch (channel)
+            {
+                case 0:
+                    desc->channelType = ChannelTypes.ctRed;
+                    break;
+                case 1:
+                    desc->channelType = ChannelTypes.ctGreen;
+                    break;
+                case 2:
+                    desc->channelType = ChannelTypes.ctBlue;
+                    break;
+                case 3:
+                    desc->channelType = ChannelTypes.ctTransparency;
+                    break;
+                case 4:
+                    desc->channelType = ChannelTypes.ctSelectionMask;
+                    break;
+            }
+            IntPtr namePtr = Marshal.StringToHGlobalAnsi(name);
+
+            return new ReadChannelPtrs() { address = addressPtr, name = namePtr };
+        }
 
 		/// <summary>
 		/// Sets the filter padding.
@@ -4455,6 +4747,10 @@ namespace PSFilterLoad.PSApi
 			putStringProc = new PutStringProc(PutStringProc);
 			putTextProc = new PutTextProc(PutTextProc);
 			putUnitFloatProc = new PutUnitFloatProc(PutUnitFloatProc);
+            // ChannelPortsProcs
+            readPixelsProc = new ReadPixelsProc(ReadPixelsProc);
+            writeBasePixelsProc = new WriteBasePixelsProc(WriteBasePixels);
+            readPortForWritePortProc = new ReadPortForWritePortProc(ReadPortForWritePort);
 		}
 
 		static bool suitesSetup;
@@ -4593,6 +4889,16 @@ namespace PSFilterLoad.PSApi
 			{
 				descriptorParameters->playInfo = (short)PlayInfo.plugInDialogDisplay;
 			}
+
+            channelPortsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ChannelPortProcs)), true);
+            ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
+            channelPorts->channelPortProcsVersion = 1;
+            channelPorts->numChannelPortProcs = 3;
+            channelPorts->readPixelsProc = Marshal.GetFunctionPointerForDelegate(readPixelsProc);
+            channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
+            channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);
+
+            CreateReadImageDocument();
 		}
 		static bool frsetup;
 		static unsafe void setup_filter_record()
@@ -4689,8 +4995,8 @@ namespace PSFilterLoad.PSApi
 			filterRecord->descriptorParameters = descriptorParametersPtr;
 			errorStringPtr = Memory.Allocate(256, true);
 			filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead. 
-			filterRecord->channelPortProcs = IntPtr.Zero;
-			filterRecord->documentInfo = IntPtr.Zero;
+			filterRecord->channelPortProcs = channelPortsPtr;
+			filterRecord->documentInfo = readDocumentPtr;
 
 			filterRecord->sSpBasic = IntPtr.Zero;
 			filterRecord->plugInRef = IntPtr.Zero;

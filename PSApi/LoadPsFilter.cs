@@ -313,7 +313,7 @@ namespace PSFilterLoad.PSApi
 
 			int count = Marshal.ReadInt32(lockRes, 6);
 
-			byte* propPtr = (byte*)lockRes.ToPointer() + 10L;
+			byte* propPtr = (byte*)lockRes.ToPointer() + 10;
 
 			for (int i = 0; i < count; i++)
 			{
@@ -698,7 +698,11 @@ namespace PSFilterLoad.PSApi
 		static PutCountProc putCountProc;
 		static PutStringProc putStringProc;
 		static PutScopedClassProc putScopedClassProc;
-		static PutScopedObjectProc putScopedObjectProc; 
+		static PutScopedObjectProc putScopedObjectProc;
+		// ChannelPorts
+		static ReadPixelsProc readPixelsProc;
+		static WriteBasePixelsProc writeBasePixelsProc;
+		static ReadPortForWritePortProc readPortForWritePortProc;
 		#endregion
 
 		static Dictionary<IntPtr, PSHandle> handles; 
@@ -724,6 +728,9 @@ namespace PSFilterLoad.PSApi
 		static IntPtr readDescriptorPtr;
 		static IntPtr writeDescriptorPtr;
 		static IntPtr errorStringPtr;
+
+		static IntPtr channelPortsPtr;
+		static IntPtr readDocumentPtr;
 
 		static AETEData aete;
 		static Dictionary<uint, AETEValue> aeteDict;
@@ -884,6 +891,7 @@ namespace PSFilterLoad.PSApi
 			globalParameters = new GlobalParameters();
 			pseudoResources = new List<PSResource>();
 			handles = new Dictionary<IntPtr, PSHandle>();
+			channelReadDescPtrs = new List<ReadChannelPtrs>();
 
 			unsafe
 			{
@@ -895,7 +903,7 @@ namespace PSFilterLoad.PSApi
 			inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
 			maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
 
-            maskDataPtr = inDataPtr = outDataPtr = IntPtr.Zero;
+			maskDataPtr = inDataPtr = outDataPtr = IntPtr.Zero;
 
 			outRowBytes = 0;
 			outHiPlane = 0;
@@ -2077,7 +2085,7 @@ namespace PSFilterLoad.PSApi
 						}
 						finally
 						{
-                            inDataPtr = IntPtr.Zero;
+							inDataPtr = IntPtr.Zero;
 							filterRecord->inData = IntPtr.Zero;
 						}
 					}
@@ -2105,7 +2113,7 @@ namespace PSFilterLoad.PSApi
 					}
 					finally
 					{
-                        inDataPtr = IntPtr.Zero;
+						inDataPtr = IntPtr.Zero;
 						filterRecord->inData = IntPtr.Zero;
 					}
 				}
@@ -2129,7 +2137,7 @@ namespace PSFilterLoad.PSApi
 						}
 						finally
 						{
-                            outDataPtr = IntPtr.Zero;
+							outDataPtr = IntPtr.Zero;
 							filterRecord->outData = IntPtr.Zero;
 						}
 					}
@@ -2164,7 +2172,7 @@ namespace PSFilterLoad.PSApi
 					}
 					finally
 					{
-                        outDataPtr = IntPtr.Zero;
+						outDataPtr = IntPtr.Zero;
 						filterRecord->outData = IntPtr.Zero;
 					}
 				}
@@ -2470,7 +2478,7 @@ namespace PSFilterLoad.PSApi
 					int len = stride * height;
 					inDataPtr = Memory.Allocate(len, false);
 				}
-                inData = inDataPtr;
+				inData = inDataPtr;
 				inRowBytes = stride;
 
 				if (lockRect.Left < 0 || lockRect.Top < 0)
@@ -2597,7 +2605,7 @@ namespace PSFilterLoad.PSApi
 
 					outDataPtr = Memory.Allocate(len, false);
 				}
-                outData = outDataPtr;
+				outData = outDataPtr;
 				outRowBytes = stride;
 
 				if (lockRect.Left < 0 || lockRect.Top < 0)
@@ -3232,7 +3240,290 @@ namespace PSFilterLoad.PSApi
 				return false;
 
 			return ((point.h >= 0 && point.h < (source.Width - 1)) && (point.v >= 0 && point.v < (source.Height - 1)));
-		} 
+		}
+
+		static Surface scaledChannelSurface;
+
+		static unsafe void FillChannelData(int channel, PixelMemoryDesc dest, Surface source, VRect srcRect, bool selectionMask)
+		{
+			byte* dstPtr = (byte*)dest.data.ToPointer();
+			int stride = dest.rowBits / 8;
+			int bpp = dest.colBits / 8;
+			int offset = dest.bitOffset / 8;
+
+
+			for (int y = srcRect.top; y < srcRect.bottom; y++)
+			{
+				ColorBgra* src = source.GetPointAddressUnchecked(srcRect.left, y);
+				byte* dst = dstPtr + (y * stride) + offset;
+				for (int x = srcRect.left; x < srcRect.right; x++)
+				{
+					switch (channel)
+					{
+						case 0:
+							*dst = src->R;
+							break;
+						case 1:
+							*dst = src->G;
+							break;
+						case 2:
+							*dst = src->B;
+							break;
+						case 3:
+							*dst = src->A;
+							break;
+						case 4:
+							*dst = src->R; // as the mask is grayscale ues only the red channel
+							break;
+					}
+					src++;
+					dst += bpp;
+				}
+			}
+			
+		}
+
+		static unsafe void StoreChannelData(int channel, PixelMemoryDesc source, Surface dest, VRect srcRect, bool selectionMask)
+		{
+			void* srcPtr = source.data.ToPointer();
+			int stride = source.rowBits / 8;
+			int bpp = source.colBits / 8;
+			int offset = source.bitOffset / 8;
+
+			if (srcRect.top < 0)
+			{
+				srcRect.top = 0;
+			}
+			else if (srcRect.top >= dest.Height)
+			{
+				srcRect.top = dest.Height - srcRect.top;
+			}
+
+			if (srcRect.left < 0)
+			{
+				srcRect.left = 0;
+			}
+			else if (srcRect.left >= dest.Width)
+			{
+				srcRect.left = dest.Width - srcRect.left;
+			}
+			int bottom = Math.Min(srcRect.bottom, (dest.Height - 1));
+			int right = Math.Min(srcRect.right, (dest.Width - 1));
+
+			for (int y = srcRect.top; y < bottom; y++)
+			{
+				byte* src = (byte*)srcPtr + (y * stride) + offset;
+				ColorBgra* dst = dest.GetPointAddressUnchecked(srcRect.left, y);
+
+				for (int x = srcRect.left; x < right; x++)
+				{
+					switch (channel)
+					{
+						case 0:
+							dst->R = *src;
+							break;
+						case 1:
+							dst->G = *src;
+							break;
+						case 2:
+							dst->B = *src;
+							break;
+						case 3:
+							dst->A = *src;
+							break;
+						case 4: // selection mask
+							dst->R = dst->G = dst->B = *src;
+							break;
+					}
+					src += bpp;
+					dst++;
+				}
+			}
+			
+		}
+
+		static unsafe short ReadPixelsProc(IntPtr port, ref PSScaling scaling, ref VRect writeRect, ref PixelMemoryDesc destination, ref VRect wroteRect)
+		{
+#if DEBUG
+			Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), writeRect.ToString()));
+#endif
+
+			int channel = port.ToInt32();
+			VRect srcRect = scaling.sourceRect;
+			VRect dstRect = scaling.destinationRect;
+
+			int srcWidth = srcRect.right - srcRect.left;
+			int srcHeight = srcRect.bottom - srcRect.top;
+			int dstWidth = dstRect.right - dstRect.left;
+			int dstHeight = dstRect.bottom - dstRect.top;
+			bool isSelection = channel == 4;
+
+			Surface temp = null;
+
+			if (isSelection)
+			{
+				temp = mask;
+			}
+			else
+			{
+				temp = source;
+			}
+
+			if (srcWidth == dstWidth && srcHeight == dstHeight)
+			{
+				FillChannelData(channel, destination, temp, srcRect, isSelection);
+			}
+			else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
+			{
+
+				if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
+				{
+					if (scaledChannelSurface != null)
+					{
+						scaledChannelSurface.Dispose();
+						scaledChannelSurface = null;
+					}
+
+					scaledChannelSurface = new Surface(dstWidth, dstHeight);
+					scaledChannelSurface.FitSurface(ResamplingAlgorithm.SuperSampling, temp);
+				}
+
+				FillChannelData(channel, destination, scaledChannelSurface, dstRect, isSelection);
+			}
+			else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
+			{
+
+				if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
+				{
+					if (scaledChannelSurface != null)
+					{
+						scaledChannelSurface.Dispose();
+						scaledChannelSurface = null;
+					}
+
+					scaledChannelSurface = new Surface(dstWidth, dstHeight);
+					scaledChannelSurface.FitSurface(ResamplingAlgorithm.Bicubic, temp);
+				}
+
+				FillChannelData(channel, destination, scaledChannelSurface, dstRect, isSelection);
+			}
+
+
+			wroteRect = dstRect;
+
+			return PSError.noErr;
+		}
+
+		static short WriteBasePixels(IntPtr port, ref VRect writeRect, PixelMemoryDesc source)
+		{
+#if DEBUG
+			Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), writeRect.ToString()));
+#endif
+			return PSError.memFullErr;
+		}
+
+		static short ReadPortForWritePort(ref System.IntPtr readPort, System.IntPtr writePort)
+		{
+#if DEBUG
+			Ping(DebugFlags.ChannelPorts, string.Format("readPort: {0}, writePort: {1}", readPort.ToString(), writePort.ToString()));
+#endif
+			return PSError.memFullErr;
+		}
+
+		struct ReadChannelPtrs
+		{
+			public IntPtr address;
+			public IntPtr name;
+		}
+
+		static List<ReadChannelPtrs> channelReadDescPtrs;
+
+		static unsafe void CreateReadImageDocument()
+		{
+			int width = source.Width;
+			int height = source.Height;
+
+			readDocumentPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadImageDocumentDesc)), true);
+			ReadImageDocumentDesc* doc = (ReadImageDocumentDesc*)readDocumentPtr.ToPointer();
+			doc->minVersion = PSConstants.kCurrentMinVersReadImageDocDesc;
+			doc->maxVersion = PSConstants.kCurrentMaxVersReadImageDocDesc;
+			doc->imageMode = PSConstants.plugInModeRGBColor;
+			doc->depth = 8;
+			doc->bounds.top = 0;
+			doc->bounds.left = 0;
+			doc->bounds.right = width;
+			doc->bounds.bottom = height;
+			doc->hResolution = int2fixed((int)(dpiX + 0.5));
+			doc->vResolution = int2fixed((int)(dpiY + 0.5));
+
+			string[] names = new string[3] { "Red", "Green", "Blue" };
+			ReadChannelPtrs channel = CreateReadChannelDesc(0, names[0], doc->depth, doc->bounds);
+
+			ReadChannelDesc* ch = (ReadChannelDesc*)channel.address.ToPointer();
+			channelReadDescPtrs.Add(channel);
+
+			for (int i = 1; i < 3; i++)
+			{
+				ReadChannelPtrs ptr = CreateReadChannelDesc(i, names[i], doc->depth, doc->bounds);
+				channelReadDescPtrs.Add(ptr);
+
+				ch->next = ptr.address;
+
+				ch = (ReadChannelDesc*)ptr.address.ToPointer();
+			}
+
+			doc->targetCompositeChannels = doc->mergedCompositeChannels = channel.address;
+
+			if (!ignoreAlpha)
+			{
+				ReadChannelPtrs alphaPtr = CreateReadChannelDesc(3, "Alpha", doc->depth, doc->bounds);
+				channelReadDescPtrs.Add(alphaPtr);
+				doc->targetTransparency = doc->mergedTransparency = alphaPtr.address;
+			}
+
+			if (selectedRegion != null)
+			{
+				ReadChannelPtrs selectionPtr = CreateReadChannelDesc(4, "Selection Mask", doc->depth, doc->bounds);
+				channelReadDescPtrs.Add(selectionPtr);
+				doc->selection = selectionPtr.address;
+			}
+		}
+
+		static unsafe ReadChannelPtrs CreateReadChannelDesc(int channel, string name, int depth, VRect bounds)
+		{
+			IntPtr addressPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadChannelDesc)), true);
+			ReadChannelDesc* desc = (ReadChannelDesc*)addressPtr.ToPointer();
+			desc->minVersion = PSConstants.kCurrentMinVersReadChannelDesc;
+			desc->maxVersion = PSConstants.kCurrentMaxVersReadChannelDesc;
+			desc->depth = depth;
+			desc->bounds = bounds;
+			desc->target = (channel < 3) ? (byte)1 : (byte)0;
+			desc->shown = (channel < 4) ? (byte)1 : (byte)0;
+			desc->tileSize.h = bounds.right - bounds.left;
+			desc->tileSize.v = bounds.bottom - bounds.top;
+			desc->port = new IntPtr(channel);
+			switch (channel)
+			{
+				case 0:
+					desc->channelType = ChannelTypes.ctRed;
+					break;
+				case 1:
+					desc->channelType = ChannelTypes.ctGreen;
+					break;
+				case 2:
+					desc->channelType = ChannelTypes.ctBlue;
+					break;
+				case 3:
+					desc->channelType = ChannelTypes.ctTransparency;
+					break;
+				case 4:
+					desc->channelType = ChannelTypes.ctSelectionMask;
+					break;
+			}
+			IntPtr namePtr = Marshal.StringToHGlobalAnsi(name);
+
+			return new ReadChannelPtrs() { address = addressPtr, name = namePtr };
+		}
 
 		static Surface tempDisplaySurface;
 		static void SetupTempDisplaySurface(int width, int height, bool haveMask)
@@ -3493,78 +3784,78 @@ namespace PSFilterLoad.PSApi
 			}
 #endif
 
-            if (aeteDict.Count > 0)
-            {
-                if (keys == null)
-                {
-                    keys = new List<uint>();
-                    if (keyArray != IntPtr.Zero) // check if the pointer is valid
-                    {
-                        keyArrayPtr = keyArray;
-                        uint* key = (uint*)keyArray.ToPointer();
-                        while (*key != 0)
-                        {
-                            keys.Add(*key);
-                            key++;
-                        }
-                    }
-                    // trim the list to the actual values in the dictonary
-                    uint[] values = keys.ToArray();
-                    foreach (var item in values)
-                    {
-                        if (!aeteDict.ContainsKey(item))
-                        {
-                            keys.Remove(item);
-                        }
-                    }
-                }
-                else
-                {
-                    subKeys = new List<uint>();
-                    if (keyArray != IntPtr.Zero)
-                    {
-                        uint* key = (uint*)keyArray.ToPointer();
-                        while (*key != 0)
-                        {
-                            subKeys.Add(*key);
-                            key++;
-                        }
-                    }
+			if (aeteDict.Count > 0)
+			{
+				if (keys == null)
+				{
+					keys = new List<uint>();
+					if (keyArray != IntPtr.Zero) // check if the pointer is valid
+					{
+						keyArrayPtr = keyArray;
+						uint* key = (uint*)keyArray.ToPointer();
+						while (*key != 0)
+						{
+							keys.Add(*key);
+							key++;
+						}
+					}
+					// trim the list to the actual values in the dictonary
+					uint[] values = keys.ToArray();
+					foreach (var item in values)
+					{
+						if (!aeteDict.ContainsKey(item))
+						{
+							keys.Remove(item);
+						}
+					}
+				}
+				else
+				{
+					subKeys = new List<uint>();
+					if (keyArray != IntPtr.Zero)
+					{
+						uint* key = (uint*)keyArray.ToPointer();
+						while (*key != 0)
+						{
+							subKeys.Add(*key);
+							key++;
+						}
+					}
 
-                    isSubKey = true;
-                    subClassDict = null;
-                    subClassIndex = 0;
+					isSubKey = true;
+					subClassDict = null;
+					subClassIndex = 0;
 
-                    if (handle_valid(descriptor) && handle_get_size_proc(descriptor) == 0 ||
-                        aeteDict.ContainsKey(getKey) && aeteDict[getKey].Value is Dictionary<uint, AETEValue>)
-                    {
-                        subClassDict = (Dictionary<uint, AETEValue>)aeteDict[getKey].Value;
-                    }
-                    else
-                    {
-                        uint[] values = subKeys.ToArray();
-                        foreach (var item in values)
-                        {
-                            if (!aeteDict.ContainsKey(item))
-                            {
-                                subKeys.Remove(item);
-                            }
-                        } 
-                        subKeyArrayPtr = subKeys.Count > 0 ? keyArray : IntPtr.Zero;
-                    }
-                }
+					if (handle_valid(descriptor) && handle_get_size_proc(descriptor) == 0 ||
+						aeteDict.ContainsKey(getKey) && aeteDict[getKey].Value is Dictionary<uint, AETEValue>)
+					{
+						subClassDict = (Dictionary<uint, AETEValue>)aeteDict[getKey].Value;
+					}
+					else
+					{
+						uint[] values = subKeys.ToArray();
+						foreach (var item in values)
+						{
+							if (!aeteDict.ContainsKey(item))
+							{
+								subKeys.Remove(item);
+							}
+						} 
+						subKeyArrayPtr = subKeys.Count > 0 ? keyArray : IntPtr.Zero;
+					}
+				}
 
-                if ((keys != null) && keys.Count == 0)
-                {
-                    keys.AddRange(aeteDict.Keys); // if the keys are not passed to us grab them from the aeteDict.
-                    keyArrayPtr = IntPtr.Zero;
-                }
-
-
+				if ((keys != null) && keys.Count == 0)
+				{
+					keys.AddRange(aeteDict.Keys); // if the keys are not passed to us grab them from the aeteDict.
+					keyArrayPtr = IntPtr.Zero;
+				}
 
 
-                return handle_new_proc(1); // return a new descriptor handle
-            }
+
+
+				return handle_new_proc(1); // return a new descriptor handle
+			}
 
 			return IntPtr.Zero;
 		}
@@ -4954,6 +5245,10 @@ namespace PSFilterLoad.PSApi
 			putStringProc = new PutStringProc(PutStringProc);
 			putTextProc = new PutTextProc(PutTextProc);
 			putUnitFloatProc = new PutUnitFloatProc(PutUnitFloatProc);
+			// ChannelPortsProcs
+			readPixelsProc = new ReadPixelsProc(ReadPixelsProc);
+			writeBasePixelsProc = new WriteBasePixelsProc(WriteBasePixels);
+			readPortForWritePortProc = new ReadPortForWritePortProc(ReadPortForWritePort);
 		}
 
 		static bool suitesSetup;
@@ -5092,6 +5387,16 @@ namespace PSFilterLoad.PSApi
 			{
 				descriptorParameters->playInfo = (short)PlayInfo.plugInDialogDisplay;
 			}
+
+			channelPortsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ChannelPortProcs)), true);
+			ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
+			channelPorts->channelPortProcsVersion = 1;
+			channelPorts->numChannelPortProcs = 3;
+			channelPorts->readPixelsProc = Marshal.GetFunctionPointerForDelegate(readPixelsProc);
+			channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
+			channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);            
+			
+			CreateReadImageDocument();
 		}
 		static bool frsetup;
 		static unsafe void setup_filter_record()
@@ -5188,8 +5493,8 @@ namespace PSFilterLoad.PSApi
 			filterRecord->descriptorParameters = descriptorParametersPtr;
 			errorStringPtr =  Memory.Allocate(256, true);
 			filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead. 
-			filterRecord->channelPortProcs = IntPtr.Zero;
-			filterRecord->documentInfo = IntPtr.Zero;
+			filterRecord->channelPortProcs = channelPortsPtr;
+			filterRecord->documentInfo = readDocumentPtr;
 
 			filterRecord->sSpBasic = IntPtr.Zero;
 			filterRecord->plugInRef = IntPtr.Zero;
@@ -5288,10 +5593,10 @@ namespace PSFilterLoad.PSApi
 				}
 
 #if USEIMAGESERVICES
-					if (image_services_procsPtr.IsAllocated)
-					{
-						image_services_procsPtr.Free();
-					} 
+				if (image_services_procsPtr.IsAllocated)
+				{
+					image_services_procsPtr.Free();
+				} 
 #endif
 				if (property_procsPtr != IntPtr.Zero)
 				{
@@ -5331,6 +5636,28 @@ namespace PSFilterLoad.PSApi
 				{
 					Memory.Free(errorStringPtr);
 					errorStringPtr = IntPtr.Zero;
+				}
+
+				if (channelPortsPtr != IntPtr.Zero)
+				{
+					Memory.Free(channelPortsPtr);
+					channelPortsPtr = IntPtr.Zero;
+				}
+
+				if (readDocumentPtr != IntPtr.Zero)
+				{
+					Memory.Free(readDocumentPtr);
+					readDocumentPtr = IntPtr.Zero;
+				}
+
+				if (channelReadDescPtrs.Count > 0)
+				{
+					foreach (var item in channelReadDescPtrs)
+					{
+						Marshal.FreeHGlobal(item.name);
+						Memory.Free(item.address);
+					}
+					channelReadDescPtrs.Clear();
 				}
 
 				if (filterRecordPtr != IntPtr.Zero)

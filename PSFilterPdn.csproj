@@ -104,6 +104,7 @@
     <Compile Include="PluginSupportInfo.cs" />
     <Compile Include="PSApi\AETEData.cs" />
     <Compile Include="PSApi\AETEValue.cs" />
+    <Compile Include="PSApi\ChannelPortsProcs.cs" />
     <Compile Include="PSApi\DescriptorTypes.cs" />
     <Compile Include="PSApi\DictonaryExtensions.cs" />
     <Compile Include="PSApi\GlobalParameters.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
     <Compile Include="PSApi\PSResource.cs" />
+    <Compile Include="PSApi\ReadImageDocumentDesc.cs" />
     <Compile Include="PSApi\SafeLibraryHandle.cs" />
     <Compile Include="PSApi\SafeNativeMethods.cs" />
     <Compile Include="PsFilterPdnConfigToken.cs" />

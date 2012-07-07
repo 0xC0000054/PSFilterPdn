@@ -113,6 +113,7 @@
     <Compile Include="PSApi\AboutRecord.cs" />
     <Compile Include="PSApi\AdvanceStateProc.cs" />
     <Compile Include="PSApi\BufferProcs.cs" />
+    <Compile Include="PSApi\ChannelPortsProcs.cs" />
     <Compile Include="PSApi\ColorPicker.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -153,6 +154,7 @@
     <Compile Include="PSApi\PSImagePlane.cs" />
     <Compile Include="PSApi\PSPixelMap.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
+    <Compile Include="PSApi\ReadImageDocumentDesc.cs" />
     <Compile Include="PSApi\Rect.cs" />
     <Compile Include="PSApi\ResourceProc.cs" />
     <Compile Include="PSApi\RGBColor.cs" />
