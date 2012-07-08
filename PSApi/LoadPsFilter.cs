@@ -1003,17 +1003,19 @@ namespace PSFilterLoad.PSApi
 				}
 				return true;
 			}
+            
+            int filterCaseIndex = filterCase - 1;
 
-			outputHandling = data.filterInfo[filterCase - 1].outputHandling;
+			outputHandling = data.filterInfo[filterCaseIndex].outputHandling;
 
-			if (data.filterInfo[(filterCase - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
+
+			if (data.filterInfo[filterCaseIndex].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
 			{
 				/* use the flatImage modes if the filter dosen't support the protectedTransparency cases 
 				 * or image does not have any transparency */
 				bool hasTransparency = HasTransparentAlpha();
 
-				if (data.filterInfo[((filterCase + 2) - 1)].inputHandling == FilterDataHandling.filterDataHandlingCantFilter ||
-					(data.filterInfo[((filterCase + 2) - 1)].inputHandling != FilterDataHandling.filterDataHandlingCantFilter && !hasTransparency))
+				if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.filterDataHandlingCantFilter || !hasTransparency)
 				{
 					switch (filterCase)
 					{
