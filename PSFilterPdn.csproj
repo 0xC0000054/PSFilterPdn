@@ -213,7 +213,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PSFilterPdn.xml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="feather.png" />
+  </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "C:\Program Files\Paint.NET\Effects" /y
 if "$(ConfigurationName)" == "Debug" copy "$(TargetDir)$(TargetName).pdb" "C:\Program Files\Paint.NET\Effects" /y</PostBuildEvent>

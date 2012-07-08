@@ -32,7 +32,7 @@ namespace PSFilterPdn
         {
             get
             {
-                return null;
+                return new Bitmap(typeof(PSFilterPdnEffect), "feather.png");
             }
         }
 
