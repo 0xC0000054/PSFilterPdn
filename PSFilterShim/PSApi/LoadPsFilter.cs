@@ -2540,7 +2540,7 @@ namespace PSFilterLoad.PSApi
 
 		static Surface scaledChannelSurface;
 
-		static unsafe void FillChannelData(int channel, PixelMemoryDesc dest, Surface source, VRect srcRect, bool selectionMask)
+		static unsafe void FillChannelData(int channel, PixelMemoryDesc dest, Surface source, VRect srcRect)
 		{
 			byte* dstPtr = (byte*)dest.data.ToPointer();
 			int stride = dest.rowBits / 8;
@@ -2579,7 +2579,7 @@ namespace PSFilterLoad.PSApi
 
 		}
 
-		static unsafe void StoreChannelData(int channel, PixelMemoryDesc source, Surface dest, VRect srcRect, bool selectionMask)
+		static unsafe void StoreChannelData(int channel, PixelMemoryDesc source, Surface dest, VRect srcRect)
 		{
 			void* srcPtr = source.data.ToPointer();
 			int stride = source.rowBits / 8;
@@ -2652,11 +2652,10 @@ namespace PSFilterLoad.PSApi
 			int srcHeight = srcRect.bottom - srcRect.top;
 			int dstWidth = dstRect.right - dstRect.left;
 			int dstHeight = dstRect.bottom - dstRect.top;
-			bool isSelection = channel == 4;
 
 			Surface temp = null;
 
-			if (isSelection)
+			if (channel == 4)
 			{
 				temp = mask;
 			}
@@ -2667,7 +2666,7 @@ namespace PSFilterLoad.PSApi
 
 			if (srcWidth == dstWidth && srcHeight == dstHeight)
 			{
-				FillChannelData(channel, destination, temp, srcRect, isSelection);
+				FillChannelData(channel, destination, temp, srcRect);
 			}
 			else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
 			{
@@ -2684,7 +2683,7 @@ namespace PSFilterLoad.PSApi
 					scaledChannelSurface.SuperSampleFitSurface(temp);
 				}
 
-				FillChannelData(channel, destination, scaledChannelSurface, dstRect, isSelection);
+				FillChannelData(channel, destination, scaledChannelSurface, dstRect);
 			}
 			else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
 			{
@@ -2701,7 +2700,7 @@ namespace PSFilterLoad.PSApi
 					scaledChannelSurface.BicubicFitSurface(temp);
 				}
 
-				FillChannelData(channel, destination, scaledChannelSurface, dstRect, isSelection);
+				FillChannelData(channel, destination, scaledChannelSurface, dstRect);
 			}
 
 
