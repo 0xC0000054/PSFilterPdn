@@ -1290,6 +1290,7 @@ namespace PSFilterPdn
 				try
 				{
 					settings.PutSetting("searchSubDirs", subDirSearchCb.Checked.ToString(CultureInfo.InvariantCulture));
+                    UpdateFilterList();
 				}
 				catch (IOException ex)
 				{
