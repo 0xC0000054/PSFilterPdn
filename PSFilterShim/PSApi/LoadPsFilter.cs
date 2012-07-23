@@ -1238,10 +1238,9 @@ namespace PSFilterLoad.PSApi
 				return plugin_about(pdata);
 			}
 
-			/* Disable saving of the 'data' pointer for Noise Ninja 
-			 * as it points to a memory mapped file.
-			 */
+			// Disable saving of the 'data' pointer for Noise Ninja  as it points to a memory mapped file.
 			saveGlobalDataPointer = pdata.category != "PictureCode";
+            useChannelPorts = pdata.category == "Amico Perry"; // enable the Channel Ports for Luce 2
 
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
 			
@@ -2089,7 +2088,7 @@ namespace PSFilterLoad.PSApi
 
 				if ((lockRect.Right > tempMask.Width || lockRect.Bottom > tempMask.Height) || padBuffer)
 				{
-					switch (((HostPadding)maskPadding))
+					switch (maskPadding)
 					{
 						case HostPadding.plugInWantsEdgeReplication:
 
@@ -2836,7 +2835,7 @@ namespace PSFilterLoad.PSApi
 			if ((lockRect.Right > surface.Width || lockRect.Bottom > surface.Height) || (rect.top < 0 || rect.left < 0))
 			{
 
-				switch (((HostPadding)inputPadding))
+				switch (inputPadding)
 				{
 					case HostPadding.plugInWantsEdgeReplication: 
 
@@ -4749,6 +4748,7 @@ namespace PSFilterLoad.PSApi
 			readPortForWritePortProc = new ReadPortForWritePortProc(ReadPortForWritePort);
 		}
 
+        static bool useChannelPorts;
 		static bool suitesSetup;
 		static unsafe void setup_suites()
 		{
@@ -4886,15 +4886,18 @@ namespace PSFilterLoad.PSApi
 				descriptorParameters->playInfo = (short)PlayInfo.plugInDialogDisplay;
 			}
 
-			channelPortsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ChannelPortProcs)), true);
-			ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
-			channelPorts->channelPortProcsVersion = 1;
-			channelPorts->numChannelPortProcs = 3;
-			channelPorts->readPixelsProc = Marshal.GetFunctionPointerForDelegate(readPixelsProc);
-			channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
-			channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);
+            if (useChannelPorts)
+            {
+                channelPortsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ChannelPortProcs)), true);
+                ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
+                channelPorts->channelPortProcsVersion = 1;
+                channelPorts->numChannelPortProcs = 3;
+                channelPorts->readPixelsProc = Marshal.GetFunctionPointerForDelegate(readPixelsProc);
+                channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
+                channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);
 
-			CreateReadImageDocument();
+                CreateReadImageDocument(); 
+            }
 		}
 		static bool frsetup;
 		static unsafe void setup_filter_record()
@@ -5072,6 +5075,12 @@ namespace PSFilterLoad.PSApi
 						tempDisplaySurface.Dispose();
 						tempDisplaySurface = null;
 					}
+
+                    if (scaledChannelSurface != null)
+                    {
+                        scaledChannelSurface.Dispose();
+                        scaledChannelSurface = null;
+                    }
 				}
 
 				if (platFormDataPtr != IntPtr.Zero)
@@ -5137,6 +5146,28 @@ namespace PSFilterLoad.PSApi
 					Memory.Free(errorStringPtr);
 					errorStringPtr = IntPtr.Zero;
 				}
+
+                if (channelPortsPtr != IntPtr.Zero)
+                {
+                    Memory.Free(channelPortsPtr);
+                    channelPortsPtr = IntPtr.Zero;
+                }
+
+                if (readDocumentPtr != IntPtr.Zero)
+                {
+                    Memory.Free(readDocumentPtr);
+                    readDocumentPtr = IntPtr.Zero;
+                }
+
+                if (channelReadDescPtrs.Count > 0)
+                {
+                    foreach (var item in channelReadDescPtrs)
+                    {
+                        Marshal.FreeHGlobal(item.name);
+                        Memory.Free(item.address);
+                    }
+                    channelReadDescPtrs.Clear();
+                }
 
 				if (filterRecordPtr != IntPtr.Zero)
 				{

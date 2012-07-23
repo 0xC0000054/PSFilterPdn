@@ -1738,10 +1738,10 @@ namespace PSFilterLoad.PSApi
 			{
 				return plugin_about(pdata);
 			}
-			/* Disable saving of the 'data' pointer for Noise Ninja 
-			 * as it points to a memory mapped file.
-			 */
+			
+            // Disable saving of the 'data' pointer for Noise Ninja as it points to a memory mapped file.
 			saveGlobalDataPointer = pdata.category != "PictureCode";
+            useChannelPorts = pdata.category == "Amico Perry"; // enable the Channel Ports for Luce 2
 			
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
 	
@@ -2207,7 +2207,7 @@ namespace PSFilterLoad.PSApi
 			{
 
 
-				switch (((HostPadding)inputPadding))
+				switch (inputPadding)
 				{
 					case HostPadding.plugInWantsEdgeReplication:
 
@@ -2804,7 +2804,7 @@ namespace PSFilterLoad.PSApi
 
 				if ((lockRect.Right > tempMask.Width || lockRect.Bottom > tempMask.Height) || padBuffer)
 				{
-					switch (((HostPadding)maskPadding))
+					switch (maskPadding)
 					{
 						case HostPadding.plugInWantsEdgeReplication:
 
@@ -3344,6 +3344,7 @@ namespace PSFilterLoad.PSApi
 			
 		}
 
+        static bool useChannelPorts;
 		static unsafe short ReadPixelsProc(IntPtr port, ref PSScaling scaling, ref VRect writeRect, ref PixelMemoryDesc destination, ref VRect wroteRect)
 		{
 #if DEBUG
@@ -5389,15 +5390,18 @@ namespace PSFilterLoad.PSApi
 				descriptorParameters->playInfo = (short)PlayInfo.plugInDialogDisplay;
 			}
 
-			channelPortsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ChannelPortProcs)), true);
-			ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
-			channelPorts->channelPortProcsVersion = 1;
-			channelPorts->numChannelPortProcs = 3;
-			channelPorts->readPixelsProc = Marshal.GetFunctionPointerForDelegate(readPixelsProc);
-			channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
-			channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);            
-			
-			CreateReadImageDocument();
+            if (useChannelPorts)
+            {
+                channelPortsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ChannelPortProcs)), true);
+                ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
+                channelPorts->channelPortProcsVersion = 1;
+                channelPorts->numChannelPortProcs = 3;
+                channelPorts->readPixelsProc = Marshal.GetFunctionPointerForDelegate(readPixelsProc);
+                channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
+                channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);
+
+                CreateReadImageDocument(); 
+            }
 		}
 		static bool frsetup;
 		static unsafe void setup_filter_record()
@@ -5574,6 +5578,12 @@ namespace PSFilterLoad.PSApi
 						tempDisplaySurface.Dispose();
 						tempDisplaySurface = null;
 					}
+
+                    if (scaledChannelSurface != null)
+                    {
+                        scaledChannelSurface.Dispose();
+                        scaledChannelSurface = null;
+                    }
 				}
 
 				if (platFormDataPtr != IntPtr.Zero)
