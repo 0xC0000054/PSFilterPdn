@@ -281,12 +281,8 @@ namespace Devcorp.Controls.Design
 						break;
 				}
 			}
-			
-			return new RGB(
-				Convert.ToInt32( Double.Parse(String.Format("{0:0.00}", r*255.0)) ),
-				Convert.ToInt32( Double.Parse(String.Format("{0:0.00}", g*255.0)) ),
-				Convert.ToInt32( Double.Parse(String.Format("{0:0.00}", b*255.0)) )
-				);
+
+            return new RGB(ConvertDouble(r * 255.0), ConvertDouble(g * 255.0), ConvertDouble(b * 255.0));
 		}
 
 		/// <summary>
@@ -377,6 +373,13 @@ namespace Devcorp.Controls.Design
 
 		#endregion
 
+        private static int ConvertDouble(double t)
+        {
+            double val = Math.Floor(t * 100) / 100;
+
+            return (int)val;
+        }
+
 		#region HSL convert
 		/// <summary>
 		/// Converts HSL to RGB.
@@ -389,11 +392,8 @@ namespace Devcorp.Controls.Design
 			if(s == 0)
 			{
 				// achromatic color (gray scale)
-				return new RGB(
-					Convert.ToInt32( Double.Parse(String.Format("{0:0.00}", l*255.0)) ), 
-					Convert.ToInt32( Double.Parse(String.Format("{0:0.00}", l*255.0)) ), 
-					Convert.ToInt32( Double.Parse(String.Format("{0:0.00}", l*255.0)) )
-					);
+                int gray = ConvertDouble(l * 255.0);
+                return new RGB(gray, gray, gray);
 			}
 			else
 			{
@@ -426,11 +426,7 @@ namespace Devcorp.Controls.Design
 					else T[i] = p;
 				}
 
-				return new RGB(
-					Convert.ToInt32( Double.Parse(String.Format("{0:0.00}", T[0]*255.0)) ), 
-					Convert.ToInt32( Double.Parse(String.Format("{0:0.00}", T[1]*255.0)) ), 
-					Convert.ToInt32( Double.Parse(String.Format("{0:0.00}", T[2]*255.0)) )
-					);
+                return new RGB(ConvertDouble(T[0] * 255.0), ConvertDouble(T[1] * 255.0), ConvertDouble(T[2] * 255.0));
 			}
 		}
 	
@@ -982,11 +978,7 @@ namespace Devcorp.Controls.Design
 				Clinear[i] = (Clinear[i]<=0.0031308)? 12.92*Clinear[i] : (1+0.055)* Math.Pow(Clinear[i], (1.0/2.4)) - 0.055;
 			}
 
-			return new RGB(
-				Convert.ToInt32( Double.Parse(String.Format("{0:0.00}", Clinear[0]*255.0)) ), 
-				Convert.ToInt32( Double.Parse(String.Format("{0:0.00}", Clinear[1]*255.0)) ), 
-				Convert.ToInt32( Double.Parse(String.Format("{0:0.00}", Clinear[2]*255.0)) )
-				);
+            return new RGB(ConvertDouble(Clinear[0] * 255.0), ConvertDouble(Clinear[1] * 255.0), ConvertDouble(Clinear[2] * 255.0));
 		}
 
 		/// <summary>
