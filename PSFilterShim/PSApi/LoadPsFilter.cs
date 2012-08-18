@@ -2004,6 +2004,12 @@ namespace PSFilterLoad.PSApi
 			}
 			if ((tempMask == null) || scalew != tempMask.Width && scaleh != tempMask.Height)
 			{
+                if (tempMask != null)
+                {
+                    tempMask.Dispose();
+                    tempMask = null;
+                }
+
 				if (scaleFactor > 1) // Filter preview?
 				{
 					tempMask = new Surface(scalew, scaleh);
