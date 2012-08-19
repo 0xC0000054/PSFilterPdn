@@ -1520,7 +1520,7 @@ namespace PSFilterLoad.PSApi
 
 			if (!isRepeatEffect && result == PSError.noErr)
 			{
-				save_parm(); //  // save the parameters again in case the filter shows it's dialog when filterSelectorStart is called.
+				save_parm(); // save the parameters again in case the filter shows it's dialog when filterSelectorStart is called.
 			}
 
 			return true;
