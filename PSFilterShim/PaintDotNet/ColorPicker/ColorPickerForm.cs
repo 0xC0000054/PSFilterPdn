@@ -562,6 +562,7 @@ namespace PaintDotNet
             // 
             // hexBox
             // 
+            this.hexBox.CharacterCasing = CharacterCasing.Upper;
             this.hexBox.Location = new System.Drawing.Point(318, 89);
             this.hexBox.Name = "hexBox";
             this.hexBox.Size = new System.Drawing.Size(56, 20);
@@ -570,7 +571,7 @@ namespace PaintDotNet
             this.hexBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.hexBox.Enter += new System.EventHandler(this.HexUpDown_Enter);
             this.hexBox.Leave += new System.EventHandler(this.HexUpDown_Leave);
-            this.hexBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HexUpDown_KeyUp);
+            this.hexBox.KeyDown += new KeyEventHandler(hexBox_KeyDown);
             this.hexBox.TextChanged += new System.EventHandler(this.UpDown_ValueChanged);
             // 
             // hexLabel
@@ -1026,46 +1027,25 @@ namespace PaintDotNet
 
         private void HexUpDown_Leave(object sender, System.EventArgs e)
         {
-            hexBox.Text = hexBox.Text.ToUpper();
             UpDown_ValueChanged(sender, e);
         }
 
-        private void HexUpDown_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        private void hexBox_KeyDown(object sender, KeyEventArgs e)
         {
-            TextBox tb = (TextBox)sender;
-
-            if (CheckHexBox(tb.Text))
+            if ((e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9) || (e.KeyCode >= Keys.NumPad0 && e.KeyCode <= Keys.NumPad9) && ModifierKeys != Keys.Shift)
             {
-                UpDown_ValueChanged(sender, e);
+                e.Handled = true;
+                e.SuppressKeyPress = false;
             }
-        }
-
-        private bool CheckHexBox(String checkHex)
-        {
-            int num;
-        
-            try
+            else if (e.KeyCode == Keys.A || e.KeyCode == Keys.B || e.KeyCode == Keys.C || e.KeyCode == Keys.D || e.KeyCode == Keys.E || e.KeyCode == Keys.F || e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back || e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
             {
-                num = int.Parse(checkHex, System.Globalization.NumberStyles.HexNumber);
+                e.Handled = true;
+                e.SuppressKeyPress = false;
             }
-
-            catch (FormatException)
-            {
-                return false;
-            }
-
-            catch (OverflowException)
-            {
-                return false;
-            }
-        
-            if ((num <= 16777215) && (num >= 0))
-            {
-                return true;
-            }   
             else
             {
-                return false;
+                e.Handled = false;
+                e.SuppressKeyPress = true;
             }
         }
 

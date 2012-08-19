@@ -394,18 +394,18 @@ namespace PSFilterLoad.ColorPicker
             this.hexLabel = new System.Windows.Forms.Label();
             this.okBtn = new System.Windows.Forms.Button();
             this.cancelBtn = new System.Windows.Forms.Button();
-            this.blueGradientControl = new ColorGradientControl();
-            this.greenGradientControl = new ColorGradientControl();
-            this.redGradientControl = new ColorGradientControl();
-            this.saturationGradientControl = new ColorGradientControl();
-            this.hueGradientControl = new ColorGradientControl();
-            this.colorWheel = new ColorWheel();
-            this.hsvHeader = new HeaderLabel();
-            this.rgbHeader = new HeaderLabel();
-            this.valueGradientControl = new ColorGradientControl();
-            this.colorDisplayWidget = new ColorRectangleControl();
-            this.swatchHeader = new HeaderLabel();
-            this.swatchControl = new SwatchControl();
+            this.blueGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
+            this.greenGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
+            this.redGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
+            this.saturationGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
+            this.hueGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
+            this.colorWheel = new PSFilterLoad.ColorPicker.ColorWheel();
+            this.hsvHeader = new PSFilterLoad.ColorPicker.HeaderLabel();
+            this.rgbHeader = new PSFilterLoad.ColorPicker.HeaderLabel();
+            this.valueGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
+            this.colorDisplayWidget = new PSFilterLoad.ColorPicker.ColorRectangleControl();
+            this.swatchHeader = new PSFilterLoad.ColorPicker.HeaderLabel();
+            this.swatchControl = new PSFilterLoad.ColorPicker.SwatchControl();
             ((System.ComponentModel.ISupportInitialize)(this.redUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.greenUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.blueUpDown)).BeginInit();
@@ -568,16 +568,17 @@ namespace PSFilterLoad.ColorPicker
             // 
             // hexBox
             // 
+            this.hexBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.hexBox.Location = new System.Drawing.Point(318, 89);
             this.hexBox.Name = "hexBox";
             this.hexBox.Size = new System.Drawing.Size(56, 20);
             this.hexBox.TabIndex = 5;
             this.hexBox.Text = "000000";
             this.hexBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.hexBox.Enter += new System.EventHandler(this.HexUpDown_Enter);
-            this.hexBox.Leave += new System.EventHandler(this.HexUpDown_Leave);
-            this.hexBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HexUpDown_KeyUp);
             this.hexBox.TextChanged += new System.EventHandler(this.UpDown_ValueChanged);
+            this.hexBox.Enter += new System.EventHandler(this.HexUpDown_Enter);
+            this.hexBox.KeyDown += new KeyEventHandler(hexBox_KeyDown);
+            this.hexBox.Leave += new System.EventHandler(this.HexUpDown_Leave);
             // 
             // hexLabel
             // 
@@ -624,7 +625,7 @@ namespace PSFilterLoad.ColorPicker
             this.blueGradientControl.TabIndex = 39;
             this.blueGradientControl.TabStop = false;
             this.blueGradientControl.Value = 0;
-            this.blueGradientControl.ValueChanged += new EventHandler<IndexEventArgs>(this.RgbGradientControl_ValueChanged);
+            this.blueGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.RgbGradientControl_ValueChanged);
             // 
             // greenGradientControl
             // 
@@ -641,7 +642,7 @@ namespace PSFilterLoad.ColorPicker
             this.greenGradientControl.TabIndex = 38;
             this.greenGradientControl.TabStop = false;
             this.greenGradientControl.Value = 0;
-            this.greenGradientControl.ValueChanged += new EventHandler<IndexEventArgs>(this.RgbGradientControl_ValueChanged);
+            this.greenGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.RgbGradientControl_ValueChanged);
             // 
             // redGradientControl
             // 
@@ -658,7 +659,7 @@ namespace PSFilterLoad.ColorPicker
             this.redGradientControl.TabIndex = 37;
             this.redGradientControl.TabStop = false;
             this.redGradientControl.Value = 0;
-            this.redGradientControl.ValueChanged += new EventHandler<IndexEventArgs>(this.RgbGradientControl_ValueChanged);
+            this.redGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.RgbGradientControl_ValueChanged);
             // 
             // saturationGradientControl
             // 
@@ -675,7 +676,7 @@ namespace PSFilterLoad.ColorPicker
             this.saturationGradientControl.TabIndex = 35;
             this.saturationGradientControl.TabStop = false;
             this.saturationGradientControl.Value = 0;
-            this.saturationGradientControl.ValueChanged += new EventHandler<IndexEventArgs>(this.HsvGradientControl_ValueChanged);
+            this.saturationGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.HsvGradientControl_ValueChanged);
             // 
             // hueGradientControl
             // 
@@ -692,7 +693,7 @@ namespace PSFilterLoad.ColorPicker
             this.hueGradientControl.TabIndex = 34;
             this.hueGradientControl.TabStop = false;
             this.hueGradientControl.Value = 0;
-            this.hueGradientControl.ValueChanged += new EventHandler<IndexEventArgs>(this.HsvGradientControl_ValueChanged);
+            this.hueGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.HsvGradientControl_ValueChanged);
             // 
             // colorWheel
             // 
@@ -738,7 +739,7 @@ namespace PSFilterLoad.ColorPicker
             this.valueGradientControl.TabIndex = 2;
             this.valueGradientControl.TabStop = false;
             this.valueGradientControl.Value = 0;
-            this.valueGradientControl.ValueChanged += new EventHandler<IndexEventArgs>(this.HsvGradientControl_ValueChanged);
+            this.valueGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.HsvGradientControl_ValueChanged);
             // 
             // colorDisplayWidget
             // 
@@ -767,9 +768,9 @@ namespace PSFilterLoad.ColorPicker
             this.swatchControl.Size = new System.Drawing.Size(192, 74);
             this.swatchControl.TabIndex = 31;
             this.swatchControl.Text = "swatchControl1";
-            this.swatchControl.ColorClicked += new System.EventHandler<IndexEventArgs>(this.swatchControl_ColorClicked);
+            this.swatchControl.ColorClicked += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.swatchControl_ColorClicked);
             // 
-            // ColorPicker
+            // ColorPickerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
@@ -805,7 +806,7 @@ namespace PSFilterLoad.ColorPicker
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "ColorPicker";
+            this.Name = "ColorPickerForm";
             ((System.ComponentModel.ISupportInitialize)(this.redUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.greenUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.blueUpDown)).EndInit();
@@ -1036,45 +1037,25 @@ namespace PSFilterLoad.ColorPicker
             UpDown_ValueChanged(sender, e);
         }
 
-        private void HexUpDown_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        private void hexBox_KeyDown(object sender, KeyEventArgs e)
         {
-            TextBox tb = (TextBox)sender;
-
-            if (CheckHexBox(tb.Text))
+            if ((e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9) || (e.KeyCode >= Keys.NumPad0 && e.KeyCode <= Keys.NumPad9) && ModifierKeys != Keys.Shift)
             {
-                UpDown_ValueChanged(sender, e);
+                e.Handled = true;
+                e.SuppressKeyPress = false;
             }
-        }
-
-        private bool CheckHexBox(String checkHex)
-        {
-            int num;
-        
-            try
+            else if (e.KeyCode == Keys.A || e.KeyCode == Keys.B || e.KeyCode == Keys.C || e.KeyCode == Keys.D || e.KeyCode == Keys.E || e.KeyCode == Keys.F || e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back || e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
             {
-                num = int.Parse(checkHex, System.Globalization.NumberStyles.HexNumber);
+                e.Handled = true;
+                e.SuppressKeyPress = false;
             }
-
-            catch (FormatException)
-            {
-                return false;
-            }
-
-            catch (OverflowException)
-            {
-                return false;
-            }
-        
-            if ((num <= 16777215) && (num >= 0))
-            {
-                return true;
-            }   
             else
             {
-                return false;
+                e.Handled = false;
+                e.SuppressKeyPress = true;
             }
         }
-
+       
         private void UpDown_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             NumericUpDown nud = (NumericUpDown)sender;
