@@ -352,6 +352,8 @@ namespace PSFilterLoad.ColorPicker
             this.rgbHeader.Text = "RGB";
             this.hexLabel.Text = "Hex:";
             this.hsvHeader.Text = "HSV";
+            
+            this.swatchControl.Colors = paletteColors;
         }
 
         /// <summary>
@@ -1176,12 +1178,6 @@ namespace PSFilterLoad.ColorPicker
             return ColorBgra.FromBgra((byte)b, (byte)g, (byte)r, 255);
         }
 
-        protected override void OnLoad(EventArgs e)
-        {
-            this.swatchControl.Colors = paletteColors;
-
-            base.OnLoad(e);
-        }
         private void swatchControl_ColorClicked(object sender, IndexEventArgs e)
         {
             this.UserPrimaryColor = paletteColors[e.Index];
