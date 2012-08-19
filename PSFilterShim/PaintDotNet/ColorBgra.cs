@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Drawing;
 using System.Runtime.InteropServices;
 
 namespace PaintDotNet
@@ -74,6 +72,94 @@ namespace PaintDotNet
                 {
                     p[channel] = value;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Creates a new ColorBgra instance with the given color and alpha values.
+        /// </summary>
+        public static ColorBgra FromBgra(byte b, byte g, byte r, byte a)
+        {
+            ColorBgra color = new ColorBgra();
+            color.Bgra = BgraToUInt32(b, g, r, a);
+            return color;
+        }
+
+        /// <summary>
+        /// Packs color and alpha values into a 32-bit integer.
+        /// </summary>
+        public static UInt32 BgraToUInt32(byte b, byte g, byte r, byte a)
+        {
+            return (uint)b + ((uint)g << 8) + ((uint)r << 16) + ((uint)a << 24);
+        }
+
+        /// <summary>
+        /// Constructs a new ColorBgra instance with the given 32-bit value.
+        /// </summary>
+        public static ColorBgra FromUInt32(UInt32 bgra)
+        {
+            ColorBgra color = new ColorBgra();
+            color.Bgra = bgra;
+            return color;
+        }
+
+        /// <summary>
+        /// Constructs a new ColorBgra instance from the values in the given Color instance.
+        /// </summary>
+        public static ColorBgra FromColor(Color c)
+        {
+            return FromBgra(c.B, c.G, c.R, c.A);
+        }
+
+        /// <summary>
+        /// Converts this ColorBgra instance to a Color instance.
+        /// </summary>
+        public Color ToColor()
+        {
+            return Color.FromArgb(A, R, G, B);
+        }
+
+        /// <summary>
+        /// Compares two ColorBgra instance to determine if they are equal.
+        /// </summary>
+        public static bool operator ==(ColorBgra lhs, ColorBgra rhs)
+        {
+            return lhs.Bgra == rhs.Bgra;
+        }
+
+        /// <summary>
+        /// Compares two ColorBgra instance to determine if they are not equal.
+        /// </summary>
+        public static bool operator !=(ColorBgra lhs, ColorBgra rhs)
+        {
+            return lhs.Bgra != rhs.Bgra;
+        }
+       
+        /// <summary>
+        /// Compares two ColorBgra instance to determine if they are equal.
+        /// </summary>
+        public override bool Equals(object obj)
+        {
+
+            if (obj != null && obj is ColorBgra && ((ColorBgra)obj).Bgra == this.Bgra)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Returns a hash code for this color value.
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (int)Bgra;
             }
         }
     }

@@ -688,6 +688,52 @@ namespace PaintDotNet
         {
             return new Bitmap(width, height, stride, System.Drawing.Imaging.PixelFormat.Format32bppArgb, new IntPtr(this.scan0.VoidStar));
         }
+        /// <summary>
+        /// Gets or sets the pixel value at the requested offset.
+        /// </summary>
+        /// <remarks>
+        /// This property is implemented with correctness and error checking in mind. If performance
+        /// is a concern, do not use it.
+        /// </remarks>
+        public ColorBgra this[int x, int y]
+        {
+            get
+            {
+                if (disposed)
+                {
+                    throw new ObjectDisposedException("Surface");
+                }
+
+                if (x < 0 || y < 0 || x >= this.width || y >= this.height)
+                {
+                    throw new ArgumentOutOfRangeException("(x,y)", new Point(x, y), "Coordinates out of range, max=" + new Size(width - 1, height - 1).ToString());
+                }
+
+                unsafe
+                {
+                    return *GetPointAddressUnchecked(x, y);
+                }
+            }
+
+            set
+            {
+                if (disposed)
+                {
+                    throw new ObjectDisposedException("Surface");
+                }
+
+                if (x < 0 || y < 0 || x >= this.width || y >= this.height)
+                {
+                    throw new ArgumentOutOfRangeException("(x,y)", new Point(x, y), "Coordinates out of range, max=" + new Size(width - 1, height - 1).ToString());
+                }
+
+                unsafe
+                {
+                    *GetPointAddressUnchecked(x, y) = value;
+                }
+            }
+        }
+
 
         private void Dispose(bool disposing)
         {

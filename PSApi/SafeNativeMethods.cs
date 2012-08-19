@@ -33,5 +33,12 @@ namespace PSFilterLoad.PSApi
 
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
         internal static extern IntPtr memset(IntPtr dest, int c, UIntPtr count);
+
+        [DllImport("user32.dll", SetLastError = false)]
+        internal static extern IntPtr SendMessageW(
+            IntPtr hWnd,
+            uint msg,
+            IntPtr wParam,
+            IntPtr lParam);
     }
 }

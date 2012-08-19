@@ -33,5 +33,7 @@
 
         /// PAGE_GUARD -> 0x100
         public const int PAGE_GUARD = 256;
+
+        public const int WM_SETREDRAW = 0x000B;
     }
 }

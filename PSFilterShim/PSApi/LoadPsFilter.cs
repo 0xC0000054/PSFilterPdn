@@ -2455,27 +2455,25 @@ namespace PSFilterLoad.PSApi
 					
 					string name = StringFromPString(info.selectorParameter.pickerPrompt);
 
-					using (ColorPicker picker = new ColorPicker(name))
+					using (ColorPickerForm picker = new ColorPickerForm(name))
 					{
-						picker.AllowFullOpen = true;
-						picker.AnyColor = true;
-						picker.SolidColorOnly = true;
-
-						picker.Color = Color.FromArgb(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
+						picker.SetColorString(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
 
 						if (picker.ShowDialog() == DialogResult.OK)
 						{
-							info.colorComponents[0] = picker.Color.R;
-							info.colorComponents[1] = picker.Color.G;
-							info.colorComponents[2] = picker.Color.B;
+                            ColorBgra color = picker.UserPrimaryColor;
+                            info.colorComponents[0] = color.R;
+                            info.colorComponents[1] = color.G;
+                            info.colorComponents[2] = color.B;
+
+                            err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
+
 						}
 						else
 						{
-							return PSError.userCanceledErr;
+							err = PSError.userCanceledErr;
 						}
 					} 
-					
-					err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
 
 					break;
 				case ColorServicesSelector.plugIncolorServicesConvertColor:
@@ -2521,13 +2519,18 @@ namespace PSFilterLoad.PSApi
 					if (IsInSourceBounds(point))
 					{
 						ColorBgra pixel = source.GetPointUnchecked(point.h, point.v);
-						info.colorComponents = new short[4] { (short)pixel.R, (short)pixel.G, (short)pixel.B, 0 };
+                        info.colorComponents[0] = (short)pixel.R;
+                        info.colorComponents[1] = (short)pixel.G;
+                        info.colorComponents[2] = (short)pixel.B;
+                        info.colorComponents[3] = 0;
+                        
+                        err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
+
 					}
 					else
 					{
-						return PSError.errInvalidSamplePoint;
+						err = PSError.errInvalidSamplePoint;
 					}
-					err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
 
 					break;
 

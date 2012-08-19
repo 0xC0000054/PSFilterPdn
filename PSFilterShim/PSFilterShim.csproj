@@ -77,6 +77,34 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PaintDotNet\ColorPicker\ColorGradientControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\ColorPicker\ColorPickerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\ColorPicker\ColorRectangleControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\ColorPicker\ColorWheel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\ColorPicker\EtchedLine.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\ColorPicker\HeaderLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\ColorPicker\HsvColor.cs" />
+    <Compile Include="PaintDotNet\ColorPicker\IndexEventArgs.cs" />
+    <Compile Include="PaintDotNet\ColorPicker\RenderArgs.cs" />
+    <Compile Include="PaintDotNet\ColorPicker\RgbColor.cs" />
+    <Compile Include="PaintDotNet\ColorPicker\SwatchControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="PaintDotNet\ColorPicker\UI.cs" />
+    <Compile Include="PaintDotNet\ColorPicker\Utility.cs" />
+    <Compile Include="PaintDotNet\ColorPicker\VisualStyleClass.cs" />
     <Compile Include="ColorSpace\CIELab.cs" />
     <Compile Include="ColorSpace\CIEXYZ.cs" />
     <Compile Include="ColorSpace\CMYK.cs" />
@@ -114,9 +142,6 @@
     <Compile Include="PSApi\AdvanceStateProc.cs" />
     <Compile Include="PSApi\BufferProcs.cs" />
     <Compile Include="PSApi\ChannelPortsProcs.cs" />
-    <Compile Include="PSApi\ColorPicker.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="PSApi\ColorServicesConstants.cs" />
     <Compile Include="PSApi\ColorServicesConvert.cs" />
     <Compile Include="PSApi\ColorServicesProc.cs" />
@@ -164,6 +189,9 @@
     <Compile Include="PSApi\SafeNativeMethods.cs" />
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
+    <EmbeddedResource Include="PaintDotNet\ColorPicker\ColorPickerForm.resx">
+      <DependentUpon>ColorPickerForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

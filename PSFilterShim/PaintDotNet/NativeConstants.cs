@@ -7,6 +7,8 @@ namespace PaintDotNet.SystemLayer
 {
     internal static class NativeConstants
     {
+        public const int WM_SETREDRAW = 0x000B;
+
         /// PAGE_NOACCESS -> 0x01
         public const int PAGE_NOACCESS = 1;
 

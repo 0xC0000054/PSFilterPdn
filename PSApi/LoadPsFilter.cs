@@ -8,9 +8,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using PaintDotNet;
+using PSFilterLoad.ColorPicker;
 using PSFilterPdn.Properties;
 #if DEBUG
 using System.Diagnostics;
+using PSFilterLoad.ColorPicker;
 #endif
 
 namespace PSFilterLoad.PSApi
@@ -3158,19 +3160,17 @@ namespace PSFilterLoad.PSApi
 					
 					string name = StringFromPString(info.selectorParameter.pickerPrompt);
 
-					using (ColorPicker picker = new ColorPicker(name))
+					using (ColorPickerForm picker = new ColorPickerForm(name))
 					{
-						picker.AllowFullOpen = true;
-						picker.AnyColor = true;
-						picker.SolidColorOnly = true;
 
-						picker.Color = Color.FromArgb(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
+						picker.SetColorString(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
 
 						if (picker.ShowDialog() == DialogResult.OK)
 						{
-							info.colorComponents[0] = picker.Color.R;
-							info.colorComponents[1] = picker.Color.G;
-							info.colorComponents[2] = picker.Color.B;
+                            ColorBgra color = picker.UserPrimaryColor;
+							info.colorComponents[0] = color.R;
+							info.colorComponents[1] = color.G;
+							info.colorComponents[2] = color.B;
 
 							err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
 

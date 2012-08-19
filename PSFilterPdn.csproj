@@ -91,6 +91,39 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BooleanExtensions.cs" />
+    <Compile Include="ColorPicker\ColorGradientControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ColorPicker\ColorPickerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ColorPicker\ColorRectangleControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ColorPicker\ColorWheel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ColorPicker\EtchedLine.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ColorPicker\HeaderLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ColorPicker\IndexEventArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ColorPicker\SwatchControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ColorPicker\UI.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ColorPicker\Utility.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ColorPicker\VisualStyleClass.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ColorSpace\CIELab.cs" />
     <Compile Include="ColorSpace\CIEXYZ.cs" />
     <Compile Include="ColorSpace\CMYK.cs" />
@@ -139,9 +172,6 @@
     <Compile Include="PSApi\AdvanceStateProc.cs" />
     <Compile Include="PSApi\BufferProcs.cs" />
     <Compile Include="PSApi\AbortFunc.cs" />
-    <Compile Include="PSApi\ColorPicker.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="PSApi\ColorServicesConstants.cs" />
     <Compile Include="PSApi\ColorServicesConvert.cs" />
     <Compile Include="PSApi\ColorServicesProc.cs" />
@@ -184,6 +214,9 @@
     <Compile Include="TreeNodeItemComparer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ColorPicker\ColorPickerForm.resx">
+      <DependentUpon>ColorPickerForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PsFilterPdnConfigDialog.resx">
       <SubType>Designer</SubType>
       <DependentUpon>PsFilterPdnConfigDialog.cs</DependentUpon>

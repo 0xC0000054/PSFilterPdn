@@ -53,5 +53,13 @@ namespace PaintDotNet.SystemLayer
             IntPtr lpAddress,
             UIntPtr dwSize,
             uint dwFreeType);
+
+
+        [DllImport("user32.dll", SetLastError = false)]
+        internal static extern IntPtr SendMessageW(
+            IntPtr hWnd,
+            uint msg,
+            IntPtr wParam,
+            IntPtr lParam);
     }
 }
