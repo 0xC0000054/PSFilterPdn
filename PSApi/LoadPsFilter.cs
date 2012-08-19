@@ -12,7 +12,6 @@ using PSFilterLoad.ColorPicker;
 using PSFilterPdn.Properties;
 #if DEBUG
 using System.Diagnostics;
-using PSFilterLoad.ColorPicker;
 #endif
 
 namespace PSFilterLoad.PSApi
