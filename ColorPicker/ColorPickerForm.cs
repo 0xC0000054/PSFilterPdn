@@ -223,9 +223,7 @@ namespace PSFilterLoad.ColorPicker
 
         internal void SetColorString(short r, short g, short b)
         {
-            string fmt = string.Format("{0:X2}{1:X2}{2:X2}", r, g, b);
-
-            hexBox.Text = fmt;
+            hexBox.Text = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:X2}{1:X2}{2:X2}", r, g, b);
         }
 
         private string GetHexNumericUpDownValue(int red, int green, int blue)
