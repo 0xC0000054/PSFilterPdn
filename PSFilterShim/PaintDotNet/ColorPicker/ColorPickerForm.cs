@@ -348,6 +348,7 @@ namespace PaintDotNet
             this.hsvHeader.Text = "HSV";
 
             this.swatchControl.Colors = paletteColors;
+            this.hexBox.Text = "000000"; 
         }
 
         /// <summary>
@@ -569,7 +570,6 @@ namespace PaintDotNet
             this.hexBox.Name = "hexBox";
             this.hexBox.Size = new System.Drawing.Size(56, 20);
             this.hexBox.TabIndex = 5;
-            this.hexBox.Text = "000000";
             this.hexBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.hexBox.Enter += new System.EventHandler(this.HexUpDown_Enter);
             this.hexBox.Leave += new System.EventHandler(this.HexUpDown_Leave);
