@@ -579,7 +579,7 @@ namespace PSFilterLoad.ColorPicker
             this.hexBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.hexBox.TextChanged += new System.EventHandler(this.UpDown_ValueChanged);
             this.hexBox.Enter += new System.EventHandler(this.HexUpDown_Enter);
-            this.hexBox.KeyDown += new KeyEventHandler(hexBox_KeyDown);
+            this.hexBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.hexBox_KeyDown);
             this.hexBox.Leave += new System.EventHandler(this.HexUpDown_Leave);
             // 
             // hexLabel
@@ -809,6 +809,7 @@ namespace PSFilterLoad.ColorPicker
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ColorPickerForm";
+            this.ShowInTaskbar = false;
             ((System.ComponentModel.ISupportInitialize)(this.redUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.greenUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.blueUpDown)).EndInit();

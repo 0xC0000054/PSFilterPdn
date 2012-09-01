@@ -391,18 +391,18 @@ namespace PaintDotNet
             this.hexLabel = new System.Windows.Forms.Label();
             this.okBtn = new System.Windows.Forms.Button();
             this.cancelBtn = new System.Windows.Forms.Button();
-            this.blueGradientControl = new ColorGradientControl();
-            this.greenGradientControl = new ColorGradientControl();
-            this.redGradientControl = new ColorGradientControl();
-            this.saturationGradientControl = new ColorGradientControl();
-            this.hueGradientControl = new ColorGradientControl();
-            this.colorWheel = new ColorWheel();
-            this.hsvHeader = new HeaderLabel();
-            this.rgbHeader = new HeaderLabel();
-            this.valueGradientControl = new ColorGradientControl();
-            this.colorDisplayWidget = new ColorRectangleControl();
-            this.swatchHeader = new HeaderLabel();
-            this.swatchControl = new SwatchControl();
+            this.blueGradientControl = new PaintDotNet.ColorGradientControl();
+            this.greenGradientControl = new PaintDotNet.ColorGradientControl();
+            this.redGradientControl = new PaintDotNet.ColorGradientControl();
+            this.saturationGradientControl = new PaintDotNet.ColorGradientControl();
+            this.hueGradientControl = new PaintDotNet.ColorGradientControl();
+            this.colorWheel = new PaintDotNet.ColorWheel();
+            this.hsvHeader = new PaintDotNet.HeaderLabel();
+            this.rgbHeader = new PaintDotNet.HeaderLabel();
+            this.valueGradientControl = new PaintDotNet.ColorGradientControl();
+            this.colorDisplayWidget = new PaintDotNet.ColorRectangleControl();
+            this.swatchHeader = new PaintDotNet.HeaderLabel();
+            this.swatchControl = new PaintDotNet.SwatchControl();
             ((System.ComponentModel.ISupportInitialize)(this.redUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.greenUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.blueUpDown)).BeginInit();
@@ -565,16 +565,16 @@ namespace PaintDotNet
             // 
             // hexBox
             // 
-            this.hexBox.CharacterCasing = CharacterCasing.Upper;
+            this.hexBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.hexBox.Location = new System.Drawing.Point(318, 89);
             this.hexBox.Name = "hexBox";
             this.hexBox.Size = new System.Drawing.Size(56, 20);
             this.hexBox.TabIndex = 5;
             this.hexBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.hexBox.Enter += new System.EventHandler(this.HexUpDown_Enter);
-            this.hexBox.Leave += new System.EventHandler(this.HexUpDown_Leave);
-            this.hexBox.KeyDown += new KeyEventHandler(hexBox_KeyDown);
             this.hexBox.TextChanged += new System.EventHandler(this.UpDown_ValueChanged);
+            this.hexBox.Enter += new System.EventHandler(this.HexUpDown_Enter);
+            this.hexBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.hexBox_KeyDown);
+            this.hexBox.Leave += new System.EventHandler(this.HexUpDown_Leave);
             // 
             // hexLabel
             // 
@@ -621,7 +621,7 @@ namespace PaintDotNet
             this.blueGradientControl.TabIndex = 39;
             this.blueGradientControl.TabStop = false;
             this.blueGradientControl.Value = 0;
-            this.blueGradientControl.ValueChanged += new EventHandler<IndexEventArgs>(this.RgbGradientControl_ValueChanged);
+            this.blueGradientControl.ValueChanged += new System.EventHandler<PaintDotNet.IndexEventArgs>(this.RgbGradientControl_ValueChanged);
             // 
             // greenGradientControl
             // 
@@ -638,7 +638,7 @@ namespace PaintDotNet
             this.greenGradientControl.TabIndex = 38;
             this.greenGradientControl.TabStop = false;
             this.greenGradientControl.Value = 0;
-            this.greenGradientControl.ValueChanged += new EventHandler<IndexEventArgs>(this.RgbGradientControl_ValueChanged);
+            this.greenGradientControl.ValueChanged += new System.EventHandler<PaintDotNet.IndexEventArgs>(this.RgbGradientControl_ValueChanged);
             // 
             // redGradientControl
             // 
@@ -655,7 +655,7 @@ namespace PaintDotNet
             this.redGradientControl.TabIndex = 37;
             this.redGradientControl.TabStop = false;
             this.redGradientControl.Value = 0;
-            this.redGradientControl.ValueChanged += new EventHandler<IndexEventArgs>(this.RgbGradientControl_ValueChanged);
+            this.redGradientControl.ValueChanged += new System.EventHandler<PaintDotNet.IndexEventArgs>(this.RgbGradientControl_ValueChanged);
             // 
             // saturationGradientControl
             // 
@@ -672,7 +672,7 @@ namespace PaintDotNet
             this.saturationGradientControl.TabIndex = 35;
             this.saturationGradientControl.TabStop = false;
             this.saturationGradientControl.Value = 0;
-            this.saturationGradientControl.ValueChanged += new EventHandler<IndexEventArgs>(this.HsvGradientControl_ValueChanged);
+            this.saturationGradientControl.ValueChanged += new System.EventHandler<PaintDotNet.IndexEventArgs>(this.HsvGradientControl_ValueChanged);
             // 
             // hueGradientControl
             // 
@@ -689,7 +689,7 @@ namespace PaintDotNet
             this.hueGradientControl.TabIndex = 34;
             this.hueGradientControl.TabStop = false;
             this.hueGradientControl.Value = 0;
-            this.hueGradientControl.ValueChanged += new EventHandler<IndexEventArgs>(this.HsvGradientControl_ValueChanged);
+            this.hueGradientControl.ValueChanged += new System.EventHandler<PaintDotNet.IndexEventArgs>(this.HsvGradientControl_ValueChanged);
             // 
             // colorWheel
             // 
@@ -735,7 +735,7 @@ namespace PaintDotNet
             this.valueGradientControl.TabIndex = 2;
             this.valueGradientControl.TabStop = false;
             this.valueGradientControl.Value = 0;
-            this.valueGradientControl.ValueChanged += new EventHandler<IndexEventArgs>(this.HsvGradientControl_ValueChanged);
+            this.valueGradientControl.ValueChanged += new System.EventHandler<PaintDotNet.IndexEventArgs>(this.HsvGradientControl_ValueChanged);
             // 
             // colorDisplayWidget
             // 
@@ -764,9 +764,9 @@ namespace PaintDotNet
             this.swatchControl.Size = new System.Drawing.Size(192, 74);
             this.swatchControl.TabIndex = 31;
             this.swatchControl.Text = "swatchControl1";
-            this.swatchControl.ColorClicked += new System.EventHandler<IndexEventArgs>(this.swatchControl_ColorClicked);
+            this.swatchControl.ColorClicked += new System.EventHandler<PaintDotNet.IndexEventArgs>(this.swatchControl_ColorClicked);
             // 
-            // ColorPicker
+            // ColorPickerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
@@ -802,7 +802,8 @@ namespace PaintDotNet
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "ColorPicker";
+            this.Name = "ColorPickerForm";
+            this.ShowInTaskbar = false;
             ((System.ComponentModel.ISupportInitialize)(this.redUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.greenUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.blueUpDown)).EndInit();
