@@ -20,7 +20,7 @@ namespace PaintDotNet.SystemLayer
    
 
     /// <summary>
-    /// TODO: Update summary.
+    /// Contains static methods related to the user interface.
     /// </summary>
     internal static class UI
     {
@@ -226,9 +226,5 @@ namespace PaintDotNet.SystemLayer
             return (int)Math.Round((float)width * GetXScaleFactor());
         }
 
-        public static int ScaleHeight(int height)
-        {
-            return (int)Math.Round((float)height * GetYScaleFactor());
-        }
     }
 }
