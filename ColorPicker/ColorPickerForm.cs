@@ -7,14 +7,8 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PaintDotNet.SystemLayer;
 using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Windows.Forms;
 using PaintDotNet;
 
@@ -340,7 +334,11 @@ namespace PSFilterLoad.ColorPicker
             //
             InitializeComponent();
 
-            this.Text = title;
+            if (!string.IsNullOrEmpty(title))
+            {
+                this.Text = title;
+            } 
+
             this.redLabel.Text = "R:";
             this.greenLabel.Text = "G:";            
             this.blueLabel.Text = "B:";
@@ -810,6 +808,8 @@ namespace PSFilterLoad.ColorPicker
             this.MinimizeBox = false;
             this.Name = "ColorPickerForm";
             this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "Color Picker";
             ((System.ComponentModel.ISupportInitialize)(this.redUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.greenUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.blueUpDown)).EndInit();
