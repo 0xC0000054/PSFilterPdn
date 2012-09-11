@@ -75,11 +75,11 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		/// <param name="ptr">The pointer to read from.</param>
 		/// <param name="offset">The offset to start reading at.</param>
-		/// <param name="length">The length of the resulting Pascal String.</param>
+		/// <param name="length">The length of the resulting Pascal String plus the length byte.</param>
 		/// <returns>The resuting string</returns>
 		private static unsafe string StringFromPString(byte* ptr, out int length)
 		{
-			length = (int)ptr[0];
+			length = (int)ptr[0] + 1;
 			return StringFromPString(ptr);
 		}
 
@@ -122,15 +122,16 @@ namespace PSFilterLoad.PSApi
 				short count = *(short*)ptr;
 				ptr += 2;
 				byte* propPtr = ptr;
+					
+				int stringLength = 0;
 
 				for (int i = 0; i < count; i++)
 				{
-					int stringLength = 0;
 
 					string vend = StringFromPString(propPtr, out stringLength);
-					propPtr += (stringLength + 1);
+					propPtr += stringLength;
 					string desc = StringFromPString(propPtr, out stringLength);
-					propPtr += (stringLength + 1);
+					propPtr += stringLength;
 					enumAETE.suiteID = PropToString(*(uint*)propPtr);
 					propPtr += 4;
 					enumAETE.suiteLevel = *(short*)propPtr;
@@ -145,9 +146,9 @@ namespace PSFilterLoad.PSApi
 					{
 
 						string vend2 = StringFromPString(propPtr, out stringLength);
-						propPtr += (stringLength + 1);
+						propPtr += stringLength;
 						string desc2 = StringFromPString(propPtr, out stringLength);
-						propPtr += (stringLength + 1);
+						propPtr += stringLength;
 						int evntClass =  *(int*)propPtr;
 						propPtr += 4;
 						int evntType = *(int*)propPtr;
@@ -160,22 +161,16 @@ namespace PSFilterLoad.PSApi
 						byte[] bytes = new byte[4];
 
 						int idx = 0;
-						while (true)
+						while (*propPtr != 0)
 						{
-							byte val = *propPtr;
-
-							if (val != 0x27) // the ' char
+							if (*propPtr != 0x27) // the ' char
 							{
-								if (val == 0)
-								{
-									propPtr++;
-									break;
-								}
-								bytes[idx] = val;
+								bytes[idx] = *propPtr;
 								idx++;
 							}
 							propPtr++;
 						}
+						propPtr++; // skip the second null byte
 
 						uint parmType = BitConverter.ToUInt32(bytes, 0);
 
@@ -199,7 +194,7 @@ namespace PSFilterLoad.PSApi
 						for (int p = 0; p < parmCount; p++)
 						{
 							parms[p].name = StringFromPString(propPtr, out stringLength);
-							propPtr += (stringLength + 1);
+							propPtr += stringLength;
 
 							parms[p].key = *(uint*)propPtr;
 							propPtr += 4;
@@ -208,7 +203,7 @@ namespace PSFilterLoad.PSApi
 							propPtr += 4;
 
 							parms[p].desc = StringFromPString(propPtr, out stringLength);
-							propPtr += (stringLength + 1);
+							propPtr += stringLength;
 							parms[p].flags = *(short*)propPtr; 
 							propPtr += 2;
 
@@ -238,11 +233,11 @@ namespace PSFilterLoad.PSApi
 									for (int e = 0; e < en.count; e++)
 									{
 										en.enums[e].name = StringFromPString(propPtr, out stringLength);
-										propPtr += (stringLength + 1);
+										propPtr += stringLength;
 										en.enums[e].type = *(uint*)propPtr;
 										propPtr += 4;
 										en.enums[e].desc = StringFromPString(propPtr, out stringLength);
-										propPtr += (stringLength + 1);
+										propPtr += stringLength;
 									}
 									enums[enc] = en;
 
@@ -330,7 +325,7 @@ namespace PSFilterLoad.PSApi
 				byte* dataPtr = propPtr + 16;
 				if (propKey == PIPropertyID.PIKindProperty)
 				{
-					if (*(uint*)dataPtr != PSConstants.filterKind)
+					if (*((uint*)dataPtr) != PSConstants.filterKind)
 					{
 #if DEBUG
 						Debug.WriteLine(string.Format("{0} is not a valid Photoshop Filter.", enumFileName));
@@ -340,7 +335,7 @@ namespace PSFilterLoad.PSApi
 				}
 				else if ((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty) // the entrypoint for the current platform, this filters out incomptable processors architectures
 				{
-					enumData.entryPoint = Marshal.PtrToStringAnsi(new IntPtr((void*)dataPtr), pipp->propertyLength).TrimEnd('\0');
+					enumData.entryPoint = Marshal.PtrToStringAnsi((IntPtr)dataPtr, pipp->propertyLength).TrimEnd('\0');
 					// If it is a 32-bit plugin on a 64-bit OS run it with the 32-bit shim.
 					enumData.runWith32BitShim = (IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty);
 				}
@@ -401,17 +396,12 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 					string aeteName = string.Empty;
 					StringBuilder sb = new StringBuilder();
-					while (true)
+					while (*dataPtr != 0)
 					{
-						byte b = *dataPtr;
-						sb.Append((char)b);
+						sb.Append((char)*dataPtr);
 						dataPtr++;
-						if (b == 0)
-						{
-							aeteName = sb.ToString().TrimEnd('\0');
-							break;
-						}
-					} 
+					}
+					aeteName = sb.ToString().TrimEnd('\0');
 #endif
 					while (NativeMethods.EnumResourceNames(hModule, "AETE", new EnumResNameDelegate(EnumAETE), (IntPtr)termId))
 					{
@@ -1004,8 +994,8 @@ namespace PSFilterLoad.PSApi
 				}
 				return true;
 			}
-            
-            int filterCaseIndex = filterCase - 1;
+			
+			int filterCaseIndex = filterCase - 1;
 
 			outputHandling = data.filterInfo[filterCaseIndex].outputHandling;
 
@@ -1740,9 +1730,9 @@ namespace PSFilterLoad.PSApi
 				return plugin_about(pdata);
 			}
 			
-            // Disable saving of the 'data' pointer for Noise Ninja as it points to a memory mapped file.
+			// Disable saving of the 'data' pointer for Noise Ninja as it points to a memory mapped file.
 			saveGlobalDataPointer = pdata.category != "PictureCode";
-            useChannelPorts = pdata.category == "Amico Perry"; // enable the Channel Ports for Luce 2
+			useChannelPorts = pdata.category == "Amico Perry"; // enable the Channel Ports for Luce 2
 			
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
 	
@@ -2720,11 +2710,11 @@ namespace PSFilterLoad.PSApi
 			}
 			if ((tempMask == null) || scalew != tempMask.Width && scaleh != tempMask.Height)
 			{
-                if (tempMask != null)
-                {
-                    tempMask.Dispose();
-                    tempMask = null;
-                }
+				if (tempMask != null)
+				{
+					tempMask.Dispose();
+					tempMask = null;
+				}
 
 				if (scaleFactor > 1) // Filter preview?
 				{
@@ -3166,7 +3156,7 @@ namespace PSFilterLoad.PSApi
 
 						if (picker.ShowDialog() == DialogResult.OK)
 						{
-                            ColorBgra color = picker.UserPrimaryColor;
+							ColorBgra color = picker.UserPrimaryColor;
 							info.colorComponents[0] = color.R;
 							info.colorComponents[1] = color.G;
 							info.colorComponents[2] = color.B;
@@ -3349,7 +3339,7 @@ namespace PSFilterLoad.PSApi
 			
 		}
 
-        static bool useChannelPorts;
+		static bool useChannelPorts;
 		static unsafe short ReadPixelsProc(IntPtr port, ref PSScaling scaling, ref VRect writeRect, ref PixelMemoryDesc destination, ref VRect wroteRect)
 		{
 #if DEBUG
@@ -5395,18 +5385,18 @@ namespace PSFilterLoad.PSApi
 				descriptorParameters->playInfo = (short)PlayInfo.plugInDialogDisplay;
 			}
 
-            if (useChannelPorts)
-            {
-                channelPortsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ChannelPortProcs)), true);
-                ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
-                channelPorts->channelPortProcsVersion = 1;
-                channelPorts->numChannelPortProcs = 3;
-                channelPorts->readPixelsProc = Marshal.GetFunctionPointerForDelegate(readPixelsProc);
-                channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
-                channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);
+			if (useChannelPorts)
+			{
+				channelPortsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ChannelPortProcs)), true);
+				ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
+				channelPorts->channelPortProcsVersion = 1;
+				channelPorts->numChannelPortProcs = 3;
+				channelPorts->readPixelsProc = Marshal.GetFunctionPointerForDelegate(readPixelsProc);
+				channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
+				channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);
 
-                CreateReadImageDocument(); 
-            }
+				CreateReadImageDocument(); 
+			}
 		}
 		static bool frsetup;
 		static unsafe void setup_filter_record()
@@ -5584,11 +5574,11 @@ namespace PSFilterLoad.PSApi
 						tempDisplaySurface = null;
 					}
 
-                    if (scaledChannelSurface != null)
-                    {
-                        scaledChannelSurface.Dispose();
-                        scaledChannelSurface = null;
-                    }
+					if (scaledChannelSurface != null)
+					{
+						scaledChannelSurface.Dispose();
+						scaledChannelSurface = null;
+					}
 				}
 
 				if (platFormDataPtr != IntPtr.Zero)
