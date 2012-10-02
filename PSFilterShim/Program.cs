@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -10,7 +10,6 @@ using System.ServiceModel;
 using System.Threading;
 using PSFilterLoad.PSApi;
 using PSFilterPdn;
-using System.Collections.Generic;
 
 namespace PSFilterShim
 {
@@ -29,12 +28,7 @@ namespace PSFilterShim
 
 		static byte abortFilter()
 		{
-			byte abort = serviceProxy.AbortFilter();
-
-#if DEBUG
-			System.Diagnostics.Debug.WriteLine(string.Format("abortFilter returned: {0}", abort));
-#endif
-			return abort;
+			return serviceProxy.AbortFilter();
 		}
 
 		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
