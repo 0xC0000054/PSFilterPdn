@@ -29,9 +29,5 @@ namespace PSFilterLoad.PSApi
 
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
         internal static extern IntPtr memset(IntPtr dest, int c, UIntPtr count);
-
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool SetWindowText(IntPtr hWnd, string lpString);
     }
 }

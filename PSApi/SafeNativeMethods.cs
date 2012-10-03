@@ -9,10 +9,6 @@ namespace PSFilterLoad.PSApi
     [System.Security.SuppressUnmanagedCodeSecurity]
     internal static class SafeNativeMethods
     {
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool SetWindowText(IntPtr hWnd, string lpString);
-
         [DllImport("kernel32.dll", SetLastError = false)]
         internal static extern IntPtr GetProcessHeap();
 
