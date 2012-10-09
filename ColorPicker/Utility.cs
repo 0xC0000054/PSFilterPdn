@@ -90,18 +90,6 @@ namespace PSFilterLoad.ColorPicker
             }
         }
 
-        public static double Lerp(double from, double to, double frac)
-        {
-            return (from + frac * (to - from));
-        }
-
-        public static byte FastScaleByteByByte(byte a, byte b)
-        {
-            int r1 = a * b + 0x80;
-            int r2 = ((r1 >> 8) + r1) >> 8;
-            return (byte)r2;
-        }
-
         public static void SetNumericUpDownValue(NumericUpDown upDown, decimal newValue)
         {
             if (upDown.Value != newValue)
