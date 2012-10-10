@@ -132,7 +132,7 @@ namespace PSFilterLoad.PSApi
 					propPtr += stringLength;
 					string desc = StringFromPString(propPtr, out stringLength);
 					propPtr += stringLength;
-					enumAETE.suiteID = PropToString(*(uint*)propPtr);
+					uint suiteID = *(uint*)propPtr;
 					propPtr += 4;
 					enumAETE.suiteLevel = *(short*)propPtr;
 					propPtr += 2;
@@ -581,11 +581,7 @@ namespace PSFilterLoad.PSApi
 		{
 			return (dwValue >> 16) & 0xFFFF;
 		}
-		private static string PropToString(uint prop)
-		{
-			byte[] bytes = BitConverter.GetBytes(prop);
-			return new string(new char[] { (char)bytes[3], (char)bytes[2], (char)bytes[1], (char)bytes[0] });
-		}
+		
 		
 		private static List<PluginData> enumResList;
 		private static string enumFileName;
@@ -616,8 +612,14 @@ namespace PSFilterLoad.PSApi
 				Debug.WriteLine(string.Format("Function: {0} {1}\r\n", name, ", " + message));
 			}
 		} 
+
+		private static string PropToString(uint prop)
+		{
+			byte[] bytes = BitConverter.GetBytes(prop);
+			return new string(new char[] { (char)bytes[3], (char)bytes[2], (char)bytes[1], (char)bytes[0] });
+		}
 #endif
-	   
+
 		static bool RectNonEmpty(Rect16 rect)
 		{
 			return (rect.left < rect.right && rect.top < rect.bottom);
