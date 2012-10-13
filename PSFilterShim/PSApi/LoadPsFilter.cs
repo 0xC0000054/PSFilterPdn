@@ -4898,8 +4898,8 @@ namespace PSFilterLoad.PSApi
 			{
 				channelPortsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ChannelPortProcs)), true);
 				ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
-				channelPorts->channelPortProcsVersion = 1;
-				channelPorts->numChannelPortProcs = 3;
+				channelPorts->channelPortProcsVersion = PSConstants.kCurrentChannelPortProcsVersion;
+				channelPorts->numChannelPortProcs = PSConstants.kCurrentChannelPortProcsCount;
 				channelPorts->readPixelsProc = Marshal.GetFunctionPointerForDelegate(readPixelsProc);
 				channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
 				channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);
