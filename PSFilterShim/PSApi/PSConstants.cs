@@ -51,7 +51,11 @@ namespace PSFilterLoad.PSApi
         public const int kCurrentMaxVersWriteChannelDesc = 0;
 
         public const int kCurrentMinVersReadImageDocDesc = 0;
-        public const int kCurrentMaxVersReadImageDocDesc = 0; 
+        public const int kCurrentMaxVersReadImageDocDesc = 0;
+
+        public const int kCurrentChannelPortProcsVersion = 1;
+        public const short kCurrentChannelPortProcsCount = 3;
+
 
         /// kCurrentResourceProcsVersion -> 3
         public const int kCurrentResourceProcsVersion = 3;
