@@ -575,7 +575,7 @@ namespace PSFilterPdn
 				psi.CreateNoWindow = true;
 				psi.UseShellExecute = false;
 
-				proxyResult = true; // assume the filter succeded this will be set to false if it failed
+				proxyResult = true; // assume the filter succeeded this will be set to false if it failed
 				proxyErrorMessage = string.Empty;
 
 				if (proxyProcess == null)
@@ -1080,20 +1080,15 @@ namespace PSFilterPdn
 
 								if (!string.IsNullOrEmpty(lastSelectedFilterTitle) && node.Nodes.ContainsKey(lastSelectedFilterTitle))
 								{
-									node.EnsureVisible(); // make shure the last used category is visible
+									node.EnsureVisible(); // make sure the last used category is visible
 								}
 							}
 						}
 					}
 
 					
-					if (fldrLoadProgBar.Value == fldrLoadProgBar.Maximum)
-					{
-						fldrLoadProgBar.Value = 0;
-						fltrLoadProressPanel.Visible = false;
-					}
-					
-					
+					fldrLoadProgBar.Value = 0;
+					fltrLoadProressPanel.Visible = false;
 				}
 
 				this.updateFilterListBw.Dispose();
@@ -1290,7 +1285,7 @@ namespace PSFilterPdn
 				try
 				{
 					settings.PutSetting("searchSubDirs", subDirSearchCb.Checked.ToString(CultureInfo.InvariantCulture));
-                    UpdateFilterList();
+					UpdateFilterList();
 				}
 				catch (IOException ex)
 				{
@@ -1324,7 +1319,7 @@ namespace PSFilterPdn
 		}
 
 		/// <summary>
-		/// Filters the filtertreeview Items by the specified text
+		/// Filters the filter tree view Items by the specified text
 		/// </summary>
 		/// <param name="filtertext">The keyword text to filter by</param>
 		private void FilterTreeView(string filtertext)
@@ -1394,7 +1389,7 @@ namespace PSFilterPdn
 				}
 			}
 		}
-		delegate string GetFilterCaseInfoStringDelegate(PluginData data); 
+
 		private static string GetFilterCaseInfoString(PluginData data)
 		{
 			if (data.filterInfo != null)
@@ -1423,7 +1418,7 @@ namespace PSFilterPdn
 
 		private void filterTree_DoubleClick(object sender, EventArgs e)
 		{
-			// make shure a filter is not alredy running
+			// make sure a filter is not already running
 			if ((filterTree.SelectedNode != null) && filterTree.SelectedNode.Tag != null)
 			{
 				runFilterBtn.PerformClick();
