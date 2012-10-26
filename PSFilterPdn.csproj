@@ -90,7 +90,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BooleanExtensions.cs" />
     <Compile Include="ColorPicker\ColorGradientControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
