@@ -53,7 +53,12 @@ namespace PSFilterPdn
         /// <returns>The effect's IsCancelRequested property as a byte.</returns>
         private byte AbortFunc()
         {
-            return base.IsCancelRequested.ToByte();
+            if (base.IsCancelRequested)
+            {
+                return 1;
+            }
+
+            return 0;
         }
 
         PsFilterPdnConfigDialog configDialog;
@@ -207,7 +212,7 @@ namespace PSFilterPdn
                 psi.CreateNoWindow = true;
                 psi.UseShellExecute = false;
 
-                proxyResult = true; // assume the filter succeded this will be set to false if it failed
+                proxyResult = true; // assume the filter succeeded this will be set to false if it failed
                 proxyErrorMessage = string.Empty;
 
                 if (proxyProcess == null)
@@ -309,15 +314,14 @@ namespace PSFilterPdn
             }
             catch (NullReferenceException nrex)
             {
-                /* the filter probably tried to access an unimplemeted callback function 
+                /* the filter probably tried to access an unimplemented callback function 
                  * without checking if it is valid.
                 */
                 MessageBox.Show(nrex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (System.Runtime.InteropServices.ExternalException eex)
             {
-                MessageBox.Show(string.Concat(eex.Message, "0x", eex.ErrorCode.ToString("X8", CultureInfo.CurrentCulture)), PSFilterPdnEffect.StaticName,
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(eex.Message, PSFilterPdnEffect.StaticName,  MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
