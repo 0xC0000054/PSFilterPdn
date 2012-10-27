@@ -185,7 +185,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		public void SetProgressCallback(ProgressFunc callback)
+		public void SetProgressCallback(Action<int, int> callback)
 		{
 			if (callback == null)
 				throw new ArgumentNullException("callback", "callback is null.");
@@ -193,7 +193,7 @@ namespace PSFilterLoad.PSApi
 			progressFunc = callback;
 		}
 
-		public void SetAbortCallback(AbortFunc abortCallback)
+		public void SetAbortCallback(Func<byte> abortCallback)
 		{
 			if (abortCallback == null)
 				throw new ArgumentNullException("abortCallback", "abortCallback is null.");
@@ -201,8 +201,8 @@ namespace PSFilterLoad.PSApi
 			abortFunc = abortCallback;
 		}
 
-		private AbortFunc abortFunc;
-		private ProgressFunc progressFunc;
+		private Func<byte> abortFunc;
+		private Action<int, int> progressFunc;
 
 
 		private Surface source = null;

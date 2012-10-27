@@ -273,7 +273,7 @@ namespace PSFilterPdn
             {
                 using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, Process.GetCurrentProcess().MainWindowHandle))
                 {
-                    lps.SetAbortCallback(new AbortFunc(AbortFunc));
+                    lps.SetAbortCallback(new Func<byte>(AbortFunc));
 
                     FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
                     PluginData pdata = new PluginData()

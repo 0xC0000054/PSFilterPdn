@@ -137,7 +137,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PSApi\AbortFunc.cs" />
     <Compile Include="PSApi\AboutRecord.cs" />
     <Compile Include="PSApi\AdvanceStateProc.cs" />
     <Compile Include="PSApi\BufferProcs.cs" />
@@ -171,7 +170,6 @@
     <Compile Include="PSApi\PluginPhase.cs" />
     <Compile Include="PSApi\Point.cs" />
     <Compile Include="PSApi\ProcessEventProc.cs" />
-    <Compile Include="PSApi\ProgressFunc.cs" />
     <Compile Include="PSApi\ProgressProc.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\PSConstants.cs" />

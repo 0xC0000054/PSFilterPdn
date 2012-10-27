@@ -20,7 +20,7 @@ namespace PSFilterPdn
         internal Color secondary;
         internal RegionDataWrapper selectedRegion;
         internal Action<string> errorCallback;
-        internal ProgressFunc progressCallback;
+        internal Action<int,int> progressCallback;
 
         public PSFilterShimService() : this(null)
         {

@@ -756,7 +756,7 @@ namespace PSFilterLoad.PSApi
 		/// The filter progress callback.
 		/// </summary>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-		public void SetProgressCallback(ProgressFunc callback)
+		public void SetProgressCallback(Action<int, int> callback)
 		{
 			if (callback == null)
 				throw new ArgumentNullException("callback", "callback is null.");
@@ -764,7 +764,7 @@ namespace PSFilterLoad.PSApi
 			progressFunc = callback;
 		}
 
-		private ProgressFunc progressFunc;
+		private Action<int, int> progressFunc;
 
 		private Surface source;
 		private Surface dest;
@@ -773,9 +773,9 @@ namespace PSFilterLoad.PSApi
 		private IntPtr dataPtr;
 		private short result;
 
-		private AbortFunc abortFunc;
+		private Func<byte> abortFunc;
 
-		public void SetAbortCallback(AbortFunc abortCallback)
+		public void SetAbortCallback(Func<byte> abortCallback)
 		{
 			if (abortCallback == null)
 				throw new ArgumentNullException("abortCallback", "abortCallback is null.");

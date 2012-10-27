@@ -517,8 +517,6 @@ namespace PSFilterPdn
 				selectedRegion = new RegionDataWrapper(eep.GetSelection(sourceBounds).GetRegionData());
 			}
 
-			ProgressFunc progressDelegate = new ProgressFunc(UpdateProgress);
-
 			PSFilterShimService service = new PSFilterShimService()
 			{
 				isRepeatEffect = false,
@@ -530,7 +528,7 @@ namespace PSFilterPdn
 				secondary = eep.SecondaryColor.ToColor(),
 				selectedRegion = selectedRegion,
 				errorCallback = new Action<string>(SetProxyErrorResult),
-				progressCallback = progressDelegate
+				progressCallback = new Action<int,int>(UpdateProgress)
 			}; 
 
 			PSFilterShimServer.Start(service);
@@ -734,7 +732,7 @@ namespace PSFilterPdn
 						{
 							using (LoadPsFilter lps = new LoadPsFilter(this.Effect.EnvironmentParameters, this.Handle))
 							{
-								lps.SetProgressCallback(new ProgressFunc(UpdateProgress));
+								lps.SetProgressCallback(new Action<int, int>(UpdateProgress));
 
 								if ((filterParameters != null) && filterParameters.AETEDictionary.Count > 0
 									&& data.fileName == fileName)

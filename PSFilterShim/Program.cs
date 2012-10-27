@@ -24,7 +24,7 @@ namespace PSFilterShim
 
 		static ManualResetEvent resetEvent;
 		static IPSFilterShim serviceProxy;
-		static ProgressFunc progressCallback = new ProgressFunc(UpdateProgress);
+		static Action<int, int> progressCallback = new Action<int,int>(UpdateProgress);
 
 		static byte abortFilter()
 		{
@@ -92,7 +92,7 @@ namespace PSFilterShim
 			}
 
 			string src = args[0]; // the filename of the source image
-			string dstImg = args[1]; // the filename of the destiniation image
+			string dstImg = args[1]; // the filename of the destination image
 
 			
 			Color primary = serviceProxy.GetPrimaryColor();
@@ -151,7 +151,7 @@ namespace PSFilterShim
 				{
 					if (repeatEffect)
 					{
-						lps.SetAbortCallback(new AbortFunc(abortFilter));
+						lps.SetAbortCallback(new Func<byte>(abortFilter));
 					}
 					lps.SetProgressCallback(progressCallback);
 
