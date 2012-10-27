@@ -91,11 +91,6 @@ namespace PSFilterPdn
         private bool proxyResult;
         private string proxyErrorMessage;
         
-        private void SetProxyErrorResult(string data)
-        {
-            proxyResult = false;
-            proxyErrorMessage = data;
-        }
 
         private static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
         {
@@ -156,9 +151,6 @@ namespace PSFilterPdn
                 selectedRegion = new RegionDataWrapper(base.EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
             }
 
-            ProxyErrorDelegate errorDelegate = new ProxyErrorDelegate(SetProxyErrorResult);
-
-
             PSFilterShimService service = new PSFilterShimService(new Func<byte>(AbortFunc)) 
             {
                 isRepeatEffect = true,
@@ -169,7 +161,11 @@ namespace PSFilterPdn
                 primary = base.EnvironmentParameters.PrimaryColor.ToColor(),
                 secondary = base.EnvironmentParameters.SecondaryColor.ToColor(),
                 selectedRegion = selectedRegion,
-                errorCallback = errorDelegate,
+                errorCallback = delegate(string data)
+                                {
+                                    proxyResult = false;
+                                    proxyErrorMessage = data;
+                                },
             };
             
             PSFilterShimServer.Start(service);

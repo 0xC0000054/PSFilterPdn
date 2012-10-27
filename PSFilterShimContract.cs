@@ -7,8 +7,6 @@ using System.Drawing;
 
 namespace PSFilterPdn
 {
-    internal delegate void ProxyErrorDelegate(string message);
-
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     internal sealed class PSFilterShimService : IPSFilterShim
     {
@@ -21,7 +19,7 @@ namespace PSFilterPdn
         internal Color primary;
         internal Color secondary;
         internal RegionDataWrapper selectedRegion;
-        internal ProxyErrorDelegate errorCallback;
+        internal Action<string> errorCallback;
         internal ProgressFunc progressCallback;
 
         public PSFilterShimService() : this(null)

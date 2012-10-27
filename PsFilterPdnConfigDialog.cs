@@ -517,7 +517,6 @@ namespace PSFilterPdn
 				selectedRegion = new RegionDataWrapper(eep.GetSelection(sourceBounds).GetRegionData());
 			}
 
-			ProxyErrorDelegate errorDelegate = new ProxyErrorDelegate(SetProxyErrorResult);
 			ProgressFunc progressDelegate = new ProgressFunc(UpdateProgress);
 
 			PSFilterShimService service = new PSFilterShimService()
@@ -530,7 +529,7 @@ namespace PSFilterPdn
 				primary = eep.PrimaryColor.ToColor(),
 				secondary = eep.SecondaryColor.ToColor(),
 				selectedRegion = selectedRegion,
-				errorCallback = errorDelegate,
+				errorCallback = new Action<string>(SetProxyErrorResult),
 				progressCallback = progressDelegate
 			}; 
 
