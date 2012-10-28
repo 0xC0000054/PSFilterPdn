@@ -243,4 +243,8 @@
     <value>Other</value>
     <comment>The default category for PiMI filters that don't specify one.</comment>
   </data>
+  <data name="MaskChannelName" xml:space="preserve">
+    <value>Selection Mask</value>
+    <comment>SelectionMask description</comment>
+  </data>
 </root>
