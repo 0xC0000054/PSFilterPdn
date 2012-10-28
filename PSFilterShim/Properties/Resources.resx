@@ -199,4 +199,8 @@
   <data name="UnknownErrorCodeFormat" xml:space="preserve">
     <value>error code = {0}</value>
   </data>
+  <data name="MaskChannelName" xml:space="preserve">
+    <value>Selection Mask</value>
+    <comment>SelectionMask description</comment>
+  </data>
 </root>
