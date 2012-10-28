@@ -4375,7 +4375,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private short property_get_proc(uint signature, uint key, int index, ref int simpleProperty, ref System.IntPtr complexProperty)
+		private unsafe short property_get_proc(uint signature, uint key, int index, ref int simpleProperty, ref System.IntPtr complexProperty)
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Format("Sig: {0}, Key: {1}, Index: {2}", PropToString(signature), PropToString(key), index.ToString()));
@@ -4385,100 +4385,99 @@ namespace PSFilterLoad.PSApi
 
 			byte[] bytes = null;
 
-			unsafe
+			
+			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
+
+			switch (key)
 			{
-				FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-
-				switch (((PSProperties)key))
-				{
-					case PSProperties.propBigNudgeH:
-					case PSProperties.propBigNudgeV:
-						simpleProperty = int2fixed(10);
-						break;
-					case PSProperties.propCaption:
-						complexProperty = handle_new_proc(0);
-						break;
-					case PSProperties.propChannelName:
-						if (index < 0 || index > (filterRecord->planes - 1))
-						{
-							return PSError.errPlugInPropertyUndefined;
-						}
-						string name = string.Empty;
-						switch (index)
-						{
-							case 0:
-								name = Resources.RedChannelName;
-								break;
-							case 1:
-								name = Resources.GreenChannelName;
-								break;
-							case 2:
-								name = Resources.BlueChannelName;
-								break;
-							case 3:
-								name = Resources.AlphaChannelName;
-								break;
-						}
-
-						bytes = Encoding.ASCII.GetBytes(name);
-
-						complexProperty = handle_new_proc(bytes.Length);
-						Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
-						handle_unlock_proc(complexProperty); 
-						break;
-					case PSProperties.propCopyright:
-						simpleProperty = 0;  // no copyright
-						break;
-					case PSProperties.propEXIFData:
-						complexProperty = handle_new_proc(0);
-						break;
-					case PSProperties.propGridMajor:
-						simpleProperty = int2fixed(1);
-						break;
-					case PSProperties.propGridMinor:
-						simpleProperty = 4;
-						break;
-					case PSProperties.propImageMode:
-						simpleProperty = PSConstants.plugInModeRGBColor;
-						break;
-					case PSProperties.propInterpolationMethod:
-						simpleProperty = 1;
-						break;
-					case PSProperties.propNumberOfChannels:
-						simpleProperty = filterRecord->planes;
-						break;
-					case PSProperties.propNumberOfPaths:
-						simpleProperty = 0;
-						break;
-					case PSProperties.propRulerUnits:
-						simpleProperty = 0; // pixels
-						break;
-					case PSProperties.propRulerOriginH:
-					case PSProperties.propRulerOriginV:
-						simpleProperty = int2fixed(2);
-						break;
-					case PSProperties.propSerialString:
-						bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
-						complexProperty = handle_new_proc(bytes.Length);
-						Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
-						handle_unlock_proc(complexProperty);
-						break;
-					case PSProperties.propURL:
-						complexProperty = handle_new_proc(0);
-						break;
-					case PSProperties.propTitle:
-						bytes = Encoding.ASCII.GetBytes("temp.pdn"); // some filters just want a non empty string
-						complexProperty = handle_new_proc(bytes.Length);
-						Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
-						handle_unlock_proc(complexProperty);	
-						break;
-					case PSProperties.propWatchSuspension:
-						simpleProperty = 0;
-						break;
-					default:
+				case PSProperties.propBigNudgeH:
+				case PSProperties.propBigNudgeV:
+					simpleProperty = int2fixed(10);
+					break;
+				case PSProperties.propCaption:
+					complexProperty = handle_new_proc(0);
+					break;
+				case PSProperties.propChannelName:
+					if (index < 0 || index > (filterRecord->planes - 1))
+					{
 						return PSError.errPlugInPropertyUndefined;
-				} 
-			}
+					}
+					string name = string.Empty;
+					switch (index)
+					{
+						case 0:
+							name = Resources.RedChannelName;
+							break;
+						case 1:
+							name = Resources.GreenChannelName;
+							break;
+						case 2:
+							name = Resources.BlueChannelName;
+							break;
+						case 3:
+							name = Resources.AlphaChannelName;
+							break;
+					}
+
+					bytes = Encoding.ASCII.GetBytes(name);
+
+					complexProperty = handle_new_proc(bytes.Length);
+					Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
+					handle_unlock_proc(complexProperty); 
+					break;
+				case PSProperties.propCopyright:
+					simpleProperty = 0;  // no copyright
+					break;
+				case PSProperties.propEXIFData:
+					complexProperty = handle_new_proc(0);
+					break;
+				case PSProperties.propGridMajor:
+					simpleProperty = int2fixed(1);
+					break;
+				case PSProperties.propGridMinor:
+					simpleProperty = 4;
+					break;
+				case PSProperties.propImageMode:
+					simpleProperty = filterRecord->imageMode;
+					break;
+				case PSProperties.propInterpolationMethod:
+					simpleProperty = 1; // point sampling
+					break;
+				case PSProperties.propNumberOfChannels:
+					simpleProperty = filterRecord->planes;
+					break;
+				case PSProperties.propNumberOfPaths:
+					simpleProperty = 0;
+					break;
+				case PSProperties.propRulerUnits:
+					simpleProperty = 0; // pixels
+					break;
+				case PSProperties.propRulerOriginH:
+				case PSProperties.propRulerOriginV:
+					simpleProperty = int2fixed(2);
+					break;
+				case PSProperties.propSerialString:
+					bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
+					complexProperty = handle_new_proc(bytes.Length);
+					Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
+					handle_unlock_proc(complexProperty);
+					break;
+				case PSProperties.propURL:
+					complexProperty = handle_new_proc(0);
+					break;
+				case PSProperties.propTitle:
+					bytes = Encoding.ASCII.GetBytes("temp.pdn"); // some filters just want a non empty string
+					complexProperty = handle_new_proc(bytes.Length);
+					Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
+					handle_unlock_proc(complexProperty);	
+					break;
+				case PSProperties.propWatchSuspension:
+					simpleProperty = 0;
+					break;
+				default:
+					return PSError.errPlugInPropertyUndefined;
+			} 
+			
 
 			return PSError.noErr;
 		}
@@ -4491,7 +4490,7 @@ namespace PSFilterLoad.PSApi
 			if (signature != PSConstants.kPhotoshopSignature)
 				return PSError.errPlugInHostInsufficient;
 
-			switch (((PSProperties)key))
+			switch (key)
 			{
 				case PSProperties.propBigNudgeH:
 				case PSProperties.propBigNudgeV:

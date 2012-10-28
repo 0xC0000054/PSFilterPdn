@@ -5,87 +5,99 @@
 
 namespace PSFilterLoad.PSApi
 {
-    internal enum PSProperties : uint
+    internal static class PSProperties
     {
         /// <summary>
-        /// The big nudge distance Horizontal - 'bndH',
-        /// 10 pixels default.
+        /// The big nudge distance Horizontal; 10 pixels default.
         /// </summary>
-        propBigNudgeH = 0x626e6448U,
+        public const uint propBigNudgeH = 0x626e6448U;
         /// <summary>
-        /// The big nudge distance Vertical - 'bndV',
-        /// 10 pixels default.
+        /// The big nudge distance Vertical; 10 pixels default.
         /// </summary>
-        propBigNudgeV = 0x626e6456U,
+        public const uint propBigNudgeV = 0x626e6456U;
         /// <summary>
         /// The file caption - 'capt'
         /// </summary>
-        propCaption = 0x63617074U,
+        public const uint propCaption = 0x63617074U;
         /// <summary>
         /// Channel Name - 'nmch'
         /// </summary>
-        propChannelName = 0x6e6d6368U,
+        public const uint propChannelName = 0x6e6d6368U;
         /// <summary>
         /// The file copyright - 'cpyr' 
         /// </summary>
-        propCopyright = 0x63707972U,
+        public const uint propCopyright = 0x63707972U;
         /// <summary>
         /// The file EXIF data - 'EXIF' 
         /// </summary>
-        propEXIFData = 0x45584946U,
+        public const uint propEXIFData = 0x45584946U;
         /// <summary>
         /// Major grid size - 'grmj' 
         /// </summary>
-        propGridMajor = 0x67726d6aU,
+        public const uint propGridMajor = 0x67726d6aU;
         /// <summary>
-        /// Minort grid size - 'grmn'
+        /// Minor grid size - 'grmn'
         /// </summary>
-        propGridMinor = 0x67726d6eU,
+        public const uint propGridMinor = 0x67726d6eU;
         /// <summary>
         /// Image mode - 'mode'
         /// </summary>
-        propImageMode = 0x6d6f6465U,
+        public const uint propImageMode = 0x6d6f6465U;
         /// <summary>
-        /// Interplolation Mode - 'intp',
-        /// The current interpolation method: 1 = point sample, 2 = bilinear, 3 = bicubic
+        /// Interpolation Mode - 'intp';
         /// </summary>
-        propInterpolationMethod = 0x696E7470U,
+        public const uint propInterpolationMethod = 0x696E7470U;
         /// <summary>
         /// Number of channels - 'nuch'
         /// </summary>
-        propNumberOfChannels = 0x6e756368U,
+        public const uint propNumberOfChannels = 0x6e756368U;
         /// <summary>
-        /// The number of paths - 'nmpa'
+        /// The number of paths = 'nupa'
         /// </summary>
-        propNumberOfPaths = 0x6e6d7061U,
+        public const uint propNumberOfPaths = 0x6e757061U;
         /// <summary>
-        /// Ruler Units - 'rulr',
-        /// The current ruler units: 0 = pixels, 1 = inches, 2 = centimeters 
+        /// The name of the path = 'nmpa'
         /// </summary>
-        propRulerUnits = 0x72756c72U,
+        public const uint propPathName = 0x6e6d7061U;
         /// <summary>
-        /// Ruler origin horizontal - 'rorH'
+        /// The index of the work path = 'wkpa'
         /// </summary>
-        propRulerOriginH = 0x726f7248U,
+        public const uint propWorkPathIndex = 0x776b7061U;
         /// <summary>
-        /// Ruler origin vertical - 'rorV'
+        /// The index of the clipping path = 'clpa'
         /// </summary>
-        propRulerOriginV = 0x726f7256U,
+        public const uint propClippingPathIndex = 0x636c7061U;
+        /// <summary>
+        /// The index of the target path = 'tgpa'
+        /// </summary>
+        public const uint propTargetPathIndex = 0x74677061U;
+        /// <summary>
+        /// Ruler Units - 'rulr'
+        /// </summary>
+        public const uint propRulerUnits = 0x72756c72U;
+        /// <summary>
+        /// Ruler origin horizontal
+        /// </summary>
+        public const uint propRulerOriginH = 0x726f7248U;
+        /// <summary>
+        /// Ruler origin vertical
+        /// </summary>
+        public const uint propRulerOriginV = 0x726f7256U;
         /// <summary>
         /// The host's serial number string - 'sstr' 
         /// </summary>
-        propSerialString = 0x73737472U,
+        public const uint propSerialString = 0x73737472U;
         /// <summary>
         /// The file's URL - 'URL '
         /// </summary>
-        propURL = 0x55524c20U,
+        public const uint propURL = 0x55524c20U;
         /// <summary>
         /// The file title - 'titl'
         /// </summary>
-        propTitle = 0x7469746cU,
+        public const uint propTitle = 0x7469746cU;
         /// <summary>
         /// The watch suspension level - 'wtch'
         /// </summary>
-        propWatchSuspension = 0x77746368U
+        public const uint propWatchSuspension = 0x77746368U;
     }
 }
