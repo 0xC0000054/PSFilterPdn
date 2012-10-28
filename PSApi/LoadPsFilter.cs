@@ -3440,21 +3440,20 @@ namespace PSFilterLoad.PSApi
 
 		private unsafe void CreateReadImageDocument()
 		{
-			int width = source.Width;
-			int height = source.Height;
+			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
 			readDocumentPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadImageDocumentDesc)), true);
 			ReadImageDocumentDesc* doc = (ReadImageDocumentDesc*)readDocumentPtr.ToPointer();
 			doc->minVersion = PSConstants.kCurrentMinVersReadImageDocDesc;
 			doc->maxVersion = PSConstants.kCurrentMaxVersReadImageDocDesc;
 			doc->imageMode = PSConstants.plugInModeRGBColor;
-			doc->depth = 8;
+			doc->depth = filterRecord->depth;
 			doc->bounds.top = 0;
 			doc->bounds.left = 0;
-			doc->bounds.right = width;
-			doc->bounds.bottom = height;
-			doc->hResolution = int2fixed((int)(dpiX + 0.5));
-			doc->vResolution = int2fixed((int)(dpiY + 0.5));
+			doc->bounds.right = source.Width;
+			doc->bounds.bottom = source.Height;
+			doc->hResolution = filterRecord->imageHRes;
+			doc->vResolution = filterRecord->imageVRes;
 
 			string[] names = new string[3] { Resources.RedChannelName, Resources.GreenChannelName, Resources.BlueChannelName };
 			ReadChannelPtrs channel = CreateReadChannelDesc(0, names[0], doc->depth, doc->bounds);
