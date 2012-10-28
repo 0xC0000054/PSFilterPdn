@@ -1100,7 +1100,7 @@ namespace PSFilterLoad.ColorPicker
                     {
                         try
                         {
-                            hexInt = int.Parse(hexBox.Text,System.Globalization.NumberStyles.HexNumber);
+                            hexInt = int.Parse(hexBox.Text,System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
                         }
 
                         // Needs to be changed so it reads what the RGB values were last
