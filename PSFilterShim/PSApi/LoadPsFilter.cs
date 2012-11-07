@@ -2742,23 +2742,22 @@ namespace PSFilterLoad.PSApi
 
 		private unsafe void CreateReadImageDocument()
 		{
-			int width = source.Width;
-			int height = source.Height;
+			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer(); 
 
 			readDocumentPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadImageDocumentDesc)), true);
 			ReadImageDocumentDesc* doc = (ReadImageDocumentDesc*)readDocumentPtr.ToPointer();
 			doc->minVersion = PSConstants.kCurrentMinVersReadImageDocDesc;
 			doc->maxVersion = PSConstants.kCurrentMaxVersReadImageDocDesc;
 			doc->imageMode = PSConstants.plugInModeRGBColor;
-			doc->depth = 8;
+			doc->depth = filterRecord->depth;
 			doc->bounds.top = 0;
 			doc->bounds.left = 0;
-			doc->bounds.right = width;
-			doc->bounds.bottom = height;
-			doc->hResolution = int2fixed((int)(dpiX + 0.5));
-			doc->vResolution = int2fixed((int)(dpiY + 0.5));
+			doc->bounds.right = source.Width;
+			doc->bounds.bottom = source.Height;
+			doc->hResolution = filterRecord->imageHRes;
+			doc->vResolution = filterRecord->imageVRes;
 
-			string[] names = new string[3] { "Red", "Green", "Blue" };
+			string[] names = new string[3] { Resources.RedChannelName, Resources.GreenChannelName, Resources.BlueChannelName};
 			ReadChannelPtrs channel = CreateReadChannelDesc(0, names[0], doc->depth, doc->bounds);
 
 			ReadChannelDesc* ch = (ReadChannelDesc*)channel.address.ToPointer();
@@ -2778,14 +2777,14 @@ namespace PSFilterLoad.PSApi
 
 			if (!ignoreAlpha)
 			{
-				ReadChannelPtrs alphaPtr = CreateReadChannelDesc(3, "Alpha", doc->depth, doc->bounds);
+				ReadChannelPtrs alphaPtr = CreateReadChannelDesc(3, Resources.AlphaChannelName, doc->depth, doc->bounds);
 				channelReadDescPtrs.Add(alphaPtr);
 				doc->targetTransparency = doc->mergedTransparency = alphaPtr.address;
 			}
 
 			if (selectedRegion != null)
 			{
-				ReadChannelPtrs selectionPtr = CreateReadChannelDesc(4, "Selection Mask", doc->depth, doc->bounds);
+				ReadChannelPtrs selectionPtr = CreateReadChannelDesc(4, Resources.MaskChannelName, doc->depth, doc->bounds);
 				channelReadDescPtrs.Add(selectionPtr);
 				doc->selection = selectionPtr.address;
 			}
@@ -2833,7 +2832,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="inData">The input data.</param>
 		/// <param name="inRowBytes">The input row bytes (stride).</param>
 		/// <param name="rect">The input rect.</param>
-		/// <param name="nplanes">The number of channels in the inmage.</param>
+		/// <param name="nplanes">The number of channels in the image.</param>
 		/// <param name="ofs">The single channel offset to map to BGRA color space.</param>
 		/// <param name="inputPadding">The input padding mode.</param>
 		/// <param name="lockRect">The lock rect.</param>
