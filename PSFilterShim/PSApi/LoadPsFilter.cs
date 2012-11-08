@@ -3091,18 +3091,9 @@ namespace PSFilterLoad.PSApi
 
 			void* baseAddr = source.baseAddr.ToPointer();
 
-			int top = srcRect.top;
-			int bottom = srcRect.bottom;
-			int left = srcRect.left;
-			if (source.bounds.Equals(srcRect) && (top > 0 || left > 0))
+			for (int y = srcRect.top; y < srcRect.bottom; y++)
 			{
-				top = left = 0;
-				bottom = height;
-			}
-
-			for (int y = top; y < bottom; y++)
-			{
-				int surfaceY = y - top;
+				int surfaceY = y - srcRect.top;
 				if (source.colBytes == 1)
 				{
 					byte* row = (byte*)tempDisplaySurface.GetRowAddressUnchecked(surfaceY);
@@ -3120,7 +3111,7 @@ namespace PSFilterLoad.PSApi
 								break;
 						}
 						byte* p = row + ofs;
-						byte* q = (byte*)baseAddr + srcStride + (i * source.planeBytes) + left;
+						byte* q = (byte*)baseAddr + srcStride + (i * source.planeBytes) + srcRect.left;
 
 						for (int x = 0; x < width; x++)
 						{
@@ -3135,7 +3126,7 @@ namespace PSFilterLoad.PSApi
 				else
 				{
 					byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(surfaceY);
-					byte* q = (byte*)baseAddr + (y * source.rowBytes) + left;
+					byte* q = (byte*)baseAddr + (y * source.rowBytes) + srcRect.left;
 					for (int x = 0; x < width; x++)
 					{
 						p[0] = q[2];

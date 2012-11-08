@@ -3440,20 +3440,18 @@ namespace PSFilterLoad.PSApi
 
 		private unsafe void CreateReadImageDocument()
 		{
-			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-
 			readDocumentPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadImageDocumentDesc)), true);
 			ReadImageDocumentDesc* doc = (ReadImageDocumentDesc*)readDocumentPtr.ToPointer();
 			doc->minVersion = PSConstants.kCurrentMinVersReadImageDocDesc;
 			doc->maxVersion = PSConstants.kCurrentMaxVersReadImageDocDesc;
 			doc->imageMode = PSConstants.plugInModeRGBColor;
-			doc->depth = filterRecord->depth;
+			doc->depth = 8;
 			doc->bounds.top = 0;
 			doc->bounds.left = 0;
 			doc->bounds.right = source.Width;
 			doc->bounds.bottom = source.Height;
-			doc->hResolution = filterRecord->imageHRes;
-			doc->vResolution = filterRecord->imageVRes;
+			doc->hResolution = int2fixed((int)(dpiX + 0.5));
+			doc->vResolution = int2fixed((int)(dpiY + 0.5));
 
 			string[] names = new string[3] { Resources.RedChannelName, Resources.GreenChannelName, Resources.BlueChannelName };
 			ReadChannelPtrs channel = CreateReadChannelDesc(0, names[0], doc->depth, doc->bounds);
@@ -3590,18 +3588,9 @@ namespace PSFilterLoad.PSApi
 
 			void* baseAddr = source.baseAddr.ToPointer();
 
-			int top = srcRect.top;
-			int bottom = srcRect.bottom;
-			int left = srcRect.left;
-			if (source.bounds.Equals(srcRect) && (top > 0 || left > 0))
+			for (int y = srcRect.top; y < srcRect.bottom; y++)
 			{
-				top = left = 0;
-				bottom = height;
-			}
-
-			for (int y = top; y < bottom; y++)
-			{
-				int surfaceY = y - top;
+				int surfaceY = y - srcRect.top;
 				if (source.colBytes == 1)
 				{
 					byte* row = (byte*)tempDisplaySurface.GetRowAddressUnchecked(surfaceY);
@@ -3619,7 +3608,7 @@ namespace PSFilterLoad.PSApi
 								break;
 						}
 						byte* p = row + ofs;
-						byte* q = (byte*)baseAddr + srcStride + (i * source.planeBytes) + left;
+						byte* q = (byte*)baseAddr + srcStride + (i * source.planeBytes) + srcRect.left;
 
 						for (int x = 0; x < width; x++)
 						{
@@ -3634,7 +3623,7 @@ namespace PSFilterLoad.PSApi
 				else
 				{
 					byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(surfaceY);
-					byte* q = (byte*)baseAddr + (y * source.rowBytes) + left;
+					byte* q = (byte*)baseAddr + (y * source.rowBytes) + srcRect.left;
 					for (int x = 0; x < width; x++)
 					{
 						p[0] = q[2];
@@ -3664,10 +3653,10 @@ namespace PSFilterLoad.PSApi
 						PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
 
 						void* maskPtr = mask.maskData.ToPointer();
-						for (int y = 0; y < height; y++)
+						for (int y = srcRect.top; y < srcRect.bottom; y++)
 						{
-							ColorBgra* p = tempDisplaySurface.GetRowAddressUnchecked(y);
-							byte* q = (byte*)maskPtr + (y * mask.rowBytes);
+							ColorBgra* p = tempDisplaySurface.GetRowAddressUnchecked(y - srcRect.top);
+							byte* q = (byte*)maskPtr + (y * mask.rowBytes) + srcRect.left;
 							for (int x = 0; x < width; x++)
 							{
 								p->A = *q;
