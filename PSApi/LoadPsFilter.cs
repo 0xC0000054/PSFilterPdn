@@ -1019,11 +1019,9 @@ namespace PSFilterLoad.PSApi
 
 			if (data.filterInfo[filterCaseIndex].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
 			{
-				/* use the flatImage modes if the filter dosen't support the protectedTransparency cases 
+				/* use the flatImage modes if the filter doesn't support the protectedTransparency cases 
 				 * or image does not have any transparency */
-				bool hasTransparency = HasTransparentAlpha();
-
-				if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.filterDataHandlingCantFilter || !hasTransparency)
+				if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.filterDataHandlingCantFilter || !HasTransparentAlpha())
 				{
 					switch (filterCase)
 					{
@@ -1110,7 +1108,7 @@ namespace PSFilterLoad.PSApi
 		/// Loads the filter into memory.
 		/// </summary>
 		/// <param name="proxyData">The <see cref="PluginData"/> of the filter to load.</param>
-		/// <returns><c>true</c> if the filter is loaded sucessfully; otherwise <c>false</c>.</returns>
+		/// <returns><c>true</c> if the filter is loaded successfully; otherwise <c>false</c>.</returns>
 		private static bool LoadFilter(ref PluginData pdata)
 		{
 			bool loaded = false;
@@ -3077,7 +3075,7 @@ namespace PSFilterLoad.PSApi
 					}
 				}
 
-				// set tha alpha channel to 255 in the area affected by the filter if it needs it
+				// set the alpha channel to 255 in the area affected by the filter if it needs it
 				if ((filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection) &&
 					outputHandling == FilterDataHandling.filterDataHandlingFillMask && (nplanes == 4 || loplane == 3))
 				{
@@ -3273,7 +3271,7 @@ namespace PSFilterLoad.PSApi
 							*dst = src->A;
 							break;
 						case 4:
-							*dst = src->R; // as the mask is grayscale ues only the red channel
+							*dst = src->R; // as the mask is grayscale use only the red channel
 							break;
 					}
 					src++;
@@ -3648,7 +3646,7 @@ namespace PSFilterLoad.PSApi
 				}
 				else
 				{
-					if ((source.version >= 1) && source.masks != IntPtr.Zero && nplanes == 3) // use the mask for the Protected Transaprency cases 
+					if ((source.version >= 1) && source.masks != IntPtr.Zero && nplanes == 3) // use the mask for the Protected Transparency cases 
 					{
 						PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
 

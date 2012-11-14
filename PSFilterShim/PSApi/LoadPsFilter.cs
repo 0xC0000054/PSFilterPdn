@@ -493,11 +493,9 @@ namespace PSFilterLoad.PSApi
 
 			if (data.filterInfo[filterCaseIndex].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
 			{
-				/* use the flatImage modes if the filter dosen't support the protectedTransparency cases 
+				/* use the flatImage modes if the filter doesn't support the protectedTransparency cases 
 				* or image does not have any transparency */
-				bool hasTransparency = HasTransparentAlpha();
-
-				if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.filterDataHandlingCantFilter || !hasTransparency) 
+				if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.filterDataHandlingCantFilter || !HasTransparentAlpha()) 
 				{
 					switch (filterCase)
 					{
@@ -538,7 +536,7 @@ namespace PSFilterLoad.PSApi
 		/// <returns>
 		///   <c>true</c> if the pointer is invalid; otherwise, <c>false</c>.
 		/// </returns>
-		private bool IsBadReadPtr(IntPtr ptr)
+		private static bool IsBadReadPtr(IntPtr ptr)
 		{
 			bool result = false;
 			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
@@ -564,7 +562,7 @@ namespace PSFilterLoad.PSApi
 		/// <returns>
 		///   <c>true</c> if the pointer is invalid; otherwise, <c>false</c>.
 		/// </returns>
-		private bool IsBadWritePtr(IntPtr ptr)
+		private static bool IsBadWritePtr(IntPtr ptr)
 		{
 			bool result = false;
 			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
@@ -583,12 +581,12 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		/// Loads a Photroshop filter from the PluginData.
+		/// Loads a Photoshop filter from the PluginData.
 		/// </summary>
 		/// <param name="proxyData">The PluginData of the filter to load.</param>
-		/// <returns>True if sucessful, otherwise false.</returns>
+		/// <returns>True if successful, otherwise false.</returns>
 		/// <exception cref="System.FileNotFoundExecption">The file in the PluginData.fileName</exception>
-		private bool LoadFilter(ref PluginData pdata)
+		private static bool LoadFilter(ref PluginData pdata)
 		{
 			bool loaded = false;
 
@@ -794,16 +792,12 @@ namespace PSFilterLoad.PSApi
 					case 0:
 
 						filterRecord->parameters = handle_new_proc((int)globalParms.ParameterDataSize);
-						IntPtr hPtr = handle_lock_proc(filterRecord->parameters, 0);
-
-						Marshal.Copy(parameterDataBytes, 0, hPtr, parameterDataBytes.Length);
+						Marshal.Copy(parameterDataBytes, 0, handle_lock_proc(filterRecord->parameters, 0), parameterDataBytes.Length);
 
 						handle_unlock_proc(filterRecord->parameters);
 
 						break;
 					case 1:
-
-						// lock the parameters 
 
 						if (globalParms.ParameterDataSize == handleSize && globalParms.ParameterDataIsPSHandle)
 						{
@@ -870,9 +864,8 @@ namespace PSFilterLoad.PSApi
 					{
 						data = handle_new_proc(pluginDataBytes.Length);
 
-						IntPtr ptr = Marshal.ReadIntPtr(data);
-
-						Marshal.Copy(pluginDataBytes, 0, ptr, pluginDataBytes.Length);
+						Marshal.Copy(pluginDataBytes, 0, handle_lock_proc(data, 0), pluginDataBytes.Length);
+						handle_unlock_proc(data);
 					}
 					else
 					{
@@ -1406,7 +1399,7 @@ namespace PSFilterLoad.PSApi
 		/// <returns>
 		///   <c>true</c> if a single plane of data is requested; otherwise, <c>false</c>.
 		/// </returns>
-		private unsafe bool IsSinglePlane(FilterRecord* fr, bool outData)
+		private static unsafe bool IsSinglePlane(FilterRecord* fr, bool outData)
 		{
 			if (outData)
 			{
@@ -1424,7 +1417,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="loplane">The loplane.</param>
 		/// <param name="hiplane">The hiplane.</param>
 		/// <returns> <c>true</c> if a the buffer nedds to be resized; otherwise, <c>false</c></returns>
-		private unsafe bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loplane, int hiplane)
+		private static unsafe bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loplane, int hiplane)
 		{
 			
 			long size = Memory.Size(inData);
@@ -2576,7 +2569,7 @@ namespace PSFilterLoad.PSApi
 							*dst = src->A;
 							break;
 						case 4:
-							*dst = src->R; // as the mask is grayscale ues only the red channel
+							*dst = src->R; // as the mask is grayscale use only the red channel
 							break;
 					}
 					src++;
@@ -2742,20 +2735,18 @@ namespace PSFilterLoad.PSApi
 
 		private unsafe void CreateReadImageDocument()
 		{
-			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer(); 
-
 			readDocumentPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadImageDocumentDesc)), true);
 			ReadImageDocumentDesc* doc = (ReadImageDocumentDesc*)readDocumentPtr.ToPointer();
 			doc->minVersion = PSConstants.kCurrentMinVersReadImageDocDesc;
 			doc->maxVersion = PSConstants.kCurrentMaxVersReadImageDocDesc;
 			doc->imageMode = PSConstants.plugInModeRGBColor;
-			doc->depth = filterRecord->depth;
+			doc->depth = 8;
 			doc->bounds.top = 0;
 			doc->bounds.left = 0;
 			doc->bounds.right = source.Width;
 			doc->bounds.bottom = source.Height;
-			doc->hResolution = filterRecord->imageHRes;
-			doc->vResolution = filterRecord->imageVRes;
+			doc->hResolution = int2fixed((int)(dpiX + 0.5));
+			doc->vResolution = int2fixed((int)(dpiY + 0.5));
 
 			string[] names = new string[3] { Resources.RedChannelName, Resources.GreenChannelName, Resources.BlueChannelName};
 			ReadChannelPtrs channel = CreateReadChannelDesc(0, names[0], doc->depth, doc->bounds);
@@ -2790,7 +2781,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private unsafe ReadChannelPtrs CreateReadChannelDesc(int channel, string name, int depth, VRect bounds)
+		private static unsafe ReadChannelPtrs CreateReadChannelDesc(int channel, string name, int depth, VRect bounds)
 		{
 			IntPtr addressPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadChannelDesc)), true);
 			ReadChannelDesc* desc = (ReadChannelDesc*)addressPtr.ToPointer();
@@ -3151,7 +3142,7 @@ namespace PSFilterLoad.PSApi
 				}
 				else
 				{
-					if ((source.version >= 1) && source.masks != IntPtr.Zero && nplanes == 3) // use the mask for the Protected Transaprency cases 
+					if ((source.version >= 1) && source.masks != IntPtr.Zero && nplanes == 3) // use the mask for the Protected Transparency cases 
 					{
 						PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
 
