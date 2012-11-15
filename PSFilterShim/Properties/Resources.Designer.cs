@@ -88,15 +88,6 @@ namespace PSFilterShim.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search Filters.
-        /// </summary>
-        internal static string ConfigDialog_FilterSearchBox_BackText {
-            get {
-                return ResourceManager.GetString("ConfigDialog_FilterSearchBox_BackText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Disk full..
         /// </summary>
         internal static string DiskFullError {

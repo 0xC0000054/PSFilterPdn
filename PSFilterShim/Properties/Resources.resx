@@ -121,9 +121,6 @@
     <value>Bad parameters.</value>
     <comment>BadParameters description</comment>
   </data>
-  <data name="ConfigDialog_FilterSearchBox_BackText" xml:space="preserve">
-    <value>Search Filters</value>
-  </data>
   <data name="DiskFullError" xml:space="preserve">
     <value>Disk full.</value>
     <comment>DiskFull description</comment>
