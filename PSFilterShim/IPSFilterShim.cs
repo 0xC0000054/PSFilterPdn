@@ -16,6 +16,12 @@ internal interface IPSFilterShim
     bool ShowAboutDialog();
 
     [OperationContract]
+    string GetSoureImagePath();
+
+    [OperationContract]
+    string GetDestImagePath();
+
+    [OperationContract]
     Rectangle GetFilterRect();
 
     [OperationContract]
@@ -31,7 +37,13 @@ internal interface IPSFilterShim
     Color GetSecondaryColor();
 
     [OperationContract]
-    RegionDataWrapper GetSelectedRegion();
+    string GetRegionDataPath();
+    
+    [OperationContract]
+    string GetParameterDataPath();
+
+    [OperationContract]
+    string GetPseudoResourcePath();
     
     [OperationContract(IsOneWay = true)]
     void SetProxyErrorMessage(string errorMessage);

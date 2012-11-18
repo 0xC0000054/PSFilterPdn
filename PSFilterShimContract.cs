@@ -13,12 +13,16 @@ namespace PSFilterPdn
         private Func<byte> abortFunc;
         internal bool isRepeatEffect;
         internal bool showAboutDialog;
+        internal string sourceFileName;
+        internal string destFileName;
         internal PluginData pluginData;
         internal IntPtr parentHandle;
         internal Rectangle filterRect;
         internal Color primary;
         internal Color secondary;
-        internal RegionDataWrapper selectedRegion;
+        internal string regionFileName;
+        internal string parameterDataFileName;
+        internal string resourceFileName;
         internal Action<string> errorCallback;
         internal Action<int,int> progressCallback;
 
@@ -36,7 +40,7 @@ namespace PSFilterPdn
             this.filterRect = Rectangle.Empty;
             this.primary = Color.Black;
             this.secondary = Color.White;
-            this.selectedRegion = null;
+            this.regionFileName = string.Empty;
             this.errorCallback = null;
             this.progressCallback = null;
         }
@@ -59,6 +63,16 @@ namespace PSFilterPdn
         public bool ShowAboutDialog()
         {
             return showAboutDialog;
+        }
+
+        public string GetSoureImagePath()
+        {
+            return sourceFileName;
+        }
+
+        public string GetDestImagePath()
+        {
+            return destFileName;
         }
         
         public Rectangle GetFilterRect()
@@ -86,11 +100,21 @@ namespace PSFilterPdn
             return secondary;
         }
 
-        public RegionDataWrapper GetSelectedRegion()
+        public string GetRegionDataPath()
         {
-            return selectedRegion;
+            return regionFileName;
         }  
         
+        public string GetParameterDataPath()
+        {
+           return parameterDataFileName;
+        }
+
+        public string GetPseudoResourcePath()
+        {
+            return resourceFileName;
+        }
+
         public void SetProxyErrorMessage(string errorMessage)
         {
             errorCallback.Invoke(errorMessage);
@@ -103,6 +127,9 @@ namespace PSFilterPdn
                 progressCallback.Invoke(done, total);
             }
         }
+
+
+     
     }
 
     // Adapted from: http://www.jmedved.com/2010/03/named-pipes-in-wcf/ 

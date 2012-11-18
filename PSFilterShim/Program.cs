@@ -56,23 +56,22 @@ namespace PSFilterShim
 			serviceProxy = null;
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
-			if (args.Length > 0 && args.Length == 2)
+
+			try
 			{
-				try
-				{
-					Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+				Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
 
-					filterThread.Start(args);
+				filterThread.Start(args);
 
-					resetEvent.WaitOne();
+				resetEvent.WaitOne();
 
-					filterThread.Join();
-				}
-				finally
-				{
-					PaintDotNet.SystemLayer.Memory.DestroyHeap();
-				}
+				filterThread.Join();
 			}
+			finally
+			{
+				PaintDotNet.SystemLayer.Memory.DestroyHeap();
+			}
+			
 			
 			
 
@@ -83,7 +82,7 @@ namespace PSFilterShim
 		{
 			string[] args = (string[])argsObj;
 
-			string endpointName = Console.ReadLine();
+			string endpointName = args[0];
 
 			if (!string.IsNullOrEmpty(endpointName))
 			{
@@ -91,8 +90,8 @@ namespace PSFilterShim
 				serviceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(new NetNamedPipeBinding(), address);
 			}
 
-			string src = args[0]; // the filename of the source image
-			string dstImg = args[1]; // the filename of the destination image
+			string src = serviceProxy.GetSoureImagePath(); 
+			string dstImg = serviceProxy.GetDestImagePath(); 
 
 			
 			Color primary = serviceProxy.GetPrimaryColor();
@@ -110,23 +109,30 @@ namespace PSFilterShim
 
 			Region selectionRegion = null;
 
-			RegionDataWrapper wrap = serviceProxy.GetSelectedRegion();
-			if (wrap != null)
+			string wrapFileName = serviceProxy.GetRegionDataPath();
+			if (!string.IsNullOrEmpty(wrapFileName))
 			{
-				using (Region temp = new Region())
-				{
-					RegionData rgnData = temp.GetRegionData();
-					rgnData.Data = wrap.GetData();
+                using (FileStream fs = new FileStream(wrapFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+                {
+                    BinaryFormatter bf = new BinaryFormatter();
+                    RegionDataWrapper wrapper = (RegionDataWrapper)bf.Deserialize(fs);
 
-					selectionRegion = new Region(rgnData);
-				}
+
+                    using (Region temp = new Region())
+                    {
+                        RegionData rgnData = temp.GetRegionData();
+                        rgnData.Data = wrapper.GetData();
+
+                        selectionRegion = new Region(rgnData);
+                    }
+                }
 			}
 			try
 			{
 				
 
 				ParameterData filterParameters = null;
-				string parmDataFileName = Console.ReadLine();
+				string parmDataFileName = serviceProxy.GetParameterDataPath();
 				if (!string.IsNullOrEmpty(parmDataFileName) && File.Exists(parmDataFileName))
 				{
 					using (FileStream fs = new FileStream(parmDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
@@ -137,7 +143,7 @@ namespace PSFilterShim
 				}
 
 				List<PSResource> pseudoResources = null;
-				string resourceFileName = Console.ReadLine();
+				string resourceFileName = serviceProxy.GetPseudoResourcePath();
 				if (!string.IsNullOrEmpty(resourceFileName) && File.Exists(resourceFileName))
 				{
 					using (FileStream fs = new FileStream(resourceFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))

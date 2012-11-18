@@ -128,7 +128,7 @@ namespace PSFilterPdn
             string dest = Path.Combine(userDataPath, "proxyresultimg.png");
             string parmDataFileName = Path.Combine(userDataPath, "filterParameters.dat");
             string resourceDataFileName = Path.Combine(userDataPath, "pseudoResources.dat"); 
-
+            string regionFileName = string.Empty; 
 
             FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
             PluginData pluginData = new PluginData()
@@ -148,6 +148,7 @@ namespace PSFilterPdn
 
             if (selection != sourceBounds)
             {
+                regionFileName = Path.Combine(userDataPath, "selection.dat");
                 selectedRegion = new RegionDataWrapper(base.EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
             }
 
@@ -155,12 +156,16 @@ namespace PSFilterPdn
             {
                 isRepeatEffect = true,
                 showAboutDialog = false,
-                pluginData = pluginData,   
+                sourceFileName = src,
+                destFileName = dest,
+                pluginData = pluginData,
                 filterRect = selection,
-                parentHandle = Process.GetCurrentProcess().MainWindowHandle,
+                parentHandle =  Process.GetCurrentProcess().MainWindowHandle,
                 primary = base.EnvironmentParameters.PrimaryColor.ToColor(),
                 secondary = base.EnvironmentParameters.SecondaryColor.ToColor(),
-                selectedRegion = selectedRegion,
+                regionFileName = regionFileName,
+                parameterDataFileName = parmDataFileName,
+                resourceFileName = resourceDataFileName,
                 errorCallback = delegate(string data)
                                 {
                                     proxyResult = false;
@@ -197,13 +202,7 @@ namespace PSFilterPdn
                 }
 
 
-                string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\"", src, dest);
-#if DEBUG
-                Debug.WriteLine(pArgs);
-#endif
-
-
-                ProcessStartInfo psi = new ProcessStartInfo(shimPath, pArgs);
+                ProcessStartInfo psi = new ProcessStartInfo(shimPath, endpointName);
                 psi.RedirectStandardInput = true;
                 psi.CreateNoWindow = true;
                 psi.UseShellExecute = false;
@@ -259,6 +258,11 @@ namespace PSFilterPdn
                 File.Delete(src);
                 File.Delete(dest);
                 File.Delete(resourceDataFileName);
+
+                if (!string.IsNullOrEmpty(regionFileName))
+                {
+                    File.Delete(regionFileName);
+                }
 
                 PSFilterShimServer.Stop();
             }

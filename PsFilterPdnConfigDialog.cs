@@ -510,23 +510,33 @@ namespace PSFilterPdn
 			Rectangle sourceBounds = eep.SourceSurface.Bounds;
 
 			Rectangle selection = eep.GetSelection(sourceBounds).GetBoundsInt();
-			RegionDataWrapper selectedRegion = null;
 
 			if (selection != sourceBounds)
 			{
-				selectedRegion = new RegionDataWrapper(eep.GetSelection(sourceBounds).GetRegionData());
+                rdwPath = Path.Combine(userDataPath, "selection.dat");
+				RegionDataWrapper selectedRegion = new RegionDataWrapper(eep.GetSelection(sourceBounds).GetRegionData());
+
+                using (FileStream fs = new FileStream(rdwPath, FileMode.Create, FileAccess.Write))
+                {
+                    BinaryFormatter bf = new BinaryFormatter();
+                    bf.Serialize(fs, selectedRegion);
+                }
 			}
 
 			PSFilterShimService service = new PSFilterShimService()
 			{
 				isRepeatEffect = false,
 				showAboutDialog = showAboutBoxCb.Checked,
+                sourceFileName = srcFileName,
+                destFileName = destFileName,
 				pluginData = data,
 				filterRect = selection,
 				parentHandle = this.Handle,
 				primary = eep.PrimaryColor.ToColor(),
 				secondary = eep.SecondaryColor.ToColor(),
-				selectedRegion = selectedRegion,
+				regionFileName = rdwPath,
+                parameterDataFileName = parameterDataFileName,
+                resourceFileName = resourceDataFileName,
 				errorCallback = new Action<string>(SetProxyErrorResult),
 				progressCallback = new Action<int,int>(UpdateProgress)
 			}; 
@@ -562,12 +572,8 @@ namespace PSFilterPdn
 					}
 				}
 
-				string pArgs = string.Format(CultureInfo.InvariantCulture, "\"{0}\" \"{1}\"", new object[] { srcFileName, destFileName });
 
-#if DEBUG
-				Debug.WriteLine(pArgs);
-#endif
-				ProcessStartInfo psi = new ProcessStartInfo(shimPath, pArgs);
+				ProcessStartInfo psi = new ProcessStartInfo(shimPath, endpointName);
 				psi.RedirectStandardInput = true;
 				psi.CreateNoWindow = true;
 				psi.UseShellExecute = false;
@@ -589,9 +595,6 @@ namespace PSFilterPdn
 				proxyProcess.Start();
 #endif
 				proxyRunning = true;
-				proxyProcess.StandardInput.WriteLine(endpointName); // proxy WCF service
-				proxyProcess.StandardInput.WriteLine(parameterDataFileName);
-				proxyProcess.StandardInput.WriteLine(resourceDataFileName);
 
 			}
 			catch (ArgumentException ax)
