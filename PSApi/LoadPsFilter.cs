@@ -992,10 +992,10 @@ namespace PSFilterLoad.PSApi
 		private FilterDataHandling outputHandling;
 
 		/// <summary>
-		///Checks if the host should ignore tha alpha channel for the plugin.
+		///Checks if the host should ignore the alpha channel for the plugin.
 		/// </summary>
 		/// <param name="data">The plugin to check.</param>
-		/// <returns><c>true</c> if the alpha chennel should be ignored; otherwise <c>false</c>.</returns>
+		/// <returns><c>true</c> if the alpha channel should be ignored; otherwise <c>false</c>.</returns>
 		private bool IgnoreAlphaChannel(PluginData data)
 		{
 			if (data.filterInfo == null || data.category == "PictureCode")
@@ -3586,7 +3586,17 @@ namespace PSFilterLoad.PSApi
 
 			void* baseAddr = source.baseAddr.ToPointer();
 
-			for (int y = srcRect.top; y < srcRect.bottom; y++)
+			int top = srcRect.top;
+			int left = srcRect.left;
+			int bottom = srcRect.bottom;
+			// Some Vanderlee plug-ins set the srcRect incorrectly.
+			if (source.bounds.Equals(srcRect) && (top > 0 || left > 0))
+			{
+				top = left = 0;
+				bottom = height;
+			}
+
+			for (int y = top; y < bottom; y++)
 			{
 				int surfaceY = y - srcRect.top;
 				if (source.colBytes == 1)
@@ -3606,7 +3616,7 @@ namespace PSFilterLoad.PSApi
 								break;
 						}
 						byte* p = row + ofs;
-						byte* q = (byte*)baseAddr + srcStride + (i * source.planeBytes) + srcRect.left;
+						byte* q = (byte*)baseAddr + srcStride + (i * source.planeBytes) + left;
 
 						for (int x = 0; x < width; x++)
 						{
@@ -3621,7 +3631,7 @@ namespace PSFilterLoad.PSApi
 				else
 				{
 					byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(surfaceY);
-					byte* q = (byte*)baseAddr + (y * source.rowBytes) + srcRect.left;
+					byte* q = (byte*)baseAddr + (y * source.rowBytes) + left;
 					for (int x = 0; x < width; x++)
 					{
 						p[0] = q[2];
