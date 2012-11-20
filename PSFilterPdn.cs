@@ -43,7 +43,6 @@ namespace PSFilterPdn
             proxyResult = false;
             filterDone = null;
             filterThread = null;
-            proxyProcess = null;
             proxyErrorMessage = string.Empty;
         }
        
@@ -77,12 +76,6 @@ namespace PSFilterPdn
                     configDialog.Dispose();
                     configDialog = null; 
                 }
-
-                if (proxyProcess != null)
-                {
-                    proxyProcess.Dispose();
-                    proxyProcess = null;
-                }
             }
             
             base.OnDispose(disposing);
@@ -111,7 +104,6 @@ namespace PSFilterPdn
         }
 
         private const string endpointName = "net.pipe://localhost/PSFilterShim/ShimData";
-        private Process proxyProcess;
         private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token)
         {
             // check that PSFilterShim exists first thing and abort if it does not.
@@ -203,30 +195,22 @@ namespace PSFilterPdn
 
 
                 ProcessStartInfo psi = new ProcessStartInfo(shimPath, endpointName);
-                psi.RedirectStandardInput = true;
                 psi.CreateNoWindow = true;
                 psi.UseShellExecute = false;
 
                 proxyResult = true; // assume the filter succeeded this will be set to false if it failed
                 proxyErrorMessage = string.Empty;
 
-                if (proxyProcess == null)
+
+                using (Process proxy = Process.Start(psi))
                 {
-                    proxyProcess = new Process();
+                    while (!proxy.HasExited)
+                    {
+                        Application.DoEvents(); // Keep the message pump running while we wait for the proxy to exit
+                        Thread.Sleep(250);
+                    }
                 }
-                proxyProcess.StartInfo = psi;
-
-
-                proxyProcess.Start();
-                proxyProcess.StandardInput.WriteLine(endpointName);
-                proxyProcess.StandardInput.WriteLine(parmDataFileName);
-                proxyProcess.StandardInput.WriteLine(resourceDataFileName);
-
-                while (!proxyProcess.HasExited)
-                {
-                    Application.DoEvents(); // Keep the message pump running while we wait for the proxy to exit
-                    Thread.Sleep(250);
-                }
+                
   
                 if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && File.Exists(dest))
                 {
