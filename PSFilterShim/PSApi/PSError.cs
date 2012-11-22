@@ -51,7 +51,7 @@ namespace PSFilterLoad.PSApi
         /// errHostDoesNotSupportColStep -> -30902
         public const short errHostDoesNotSupportColStep = -30902;
         /// errInvalidSamplePoshort -> -30903
-        public const short errInvalidSamplePoshort = -30903;
+        public const short errInvalidSamplePoint = -30903;
         /// errReportString -> -30904
         public const short errReportString = -30904;
         /// filterBadParameters -> -30100
