@@ -385,11 +385,65 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unknown port..
+        /// </summary>
+        internal static string UnknownChannelPort {
+            get {
+                return ResourceManager.GetString("UnknownChannelPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to error code = {0}.
         /// </summary>
         internal static string UnknownErrorCodeFormat {
             get {
                 return ResourceManager.GetString("UnknownErrorCodeFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported bit offset..
+        /// </summary>
+        internal static string UnsupportedChannelBitOffset {
+            get {
+                return ResourceManager.GetString("UnsupportedChannelBitOffset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported column bits..
+        /// </summary>
+        internal static string UnsupportedChannelColumnBits {
+            get {
+                return ResourceManager.GetString("UnsupportedChannelColumnBits", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported depth..
+        /// </summary>
+        internal static string UnsupportedChannelDepth {
+            get {
+                return ResourceManager.GetString("UnsupportedChannelDepth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported depth conversion..
+        /// </summary>
+        internal static string UnsupportedChannelDepthConversion {
+            get {
+                return ResourceManager.GetString("UnsupportedChannelDepthConversion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported row bits..
+        /// </summary>
+        internal static string UnsupportedChannelRowBits {
+            get {
+                return ResourceManager.GetString("UnsupportedChannelRowBits", resourceCulture);
             }
         }
         

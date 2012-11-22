@@ -200,4 +200,22 @@
     <value>Selection Mask</value>
     <comment>SelectionMask description</comment>
   </data>
+  <data name="UnknownChannelPort" xml:space="preserve">
+    <value>Unknown port.</value>
+  </data>
+  <data name="UnsupportedChannelBitOffset" xml:space="preserve">
+    <value>Unsupported bit offset.</value>
+  </data>
+  <data name="UnsupportedChannelColumnBits" xml:space="preserve">
+    <value>Unsupported column bits.</value>
+  </data>
+  <data name="UnsupportedChannelDepth" xml:space="preserve">
+    <value>Unsupported depth.</value>
+  </data>
+  <data name="UnsupportedChannelDepthConversion" xml:space="preserve">
+    <value>Unsupported depth conversion.</value>
+  </data>
+  <data name="UnsupportedChannelRowBits" xml:space="preserve">
+    <value>Unsupported row bits.</value>
+  </data>
 </root>
