@@ -1360,6 +1360,24 @@ namespace PSFilterLoad.PSApi
 					case PSError.errInvalidSamplePoint:
 						error = Resources.InvalidSamplePoint;
 						break;
+					case PSError.errUnknownPort:
+						error = Resources.UnknownChannelPort;
+						break;
+					case PSError.errUnsupportedBitOffset:
+						error = Resources.UnsupportedChannelBitOffset;
+						break;
+					case PSError.errUnsupportedColBits:
+						error = Resources.UnsupportedChannelColumnBits;
+						break;
+					case PSError.errUnsupportedDepth:
+						error = Resources.UnsupportedChannelDepth;
+						break;
+					case PSError.errUnsupportedDepthConversion:
+						error = Resources.UnsupportedChannelDepthConversion;
+						break;
+					case PSError.errUnsupportedRowBits:
+						error = Resources.UnsupportedChannelRowBits;
+						break;                  
 					default:
 						error = string.Format(CultureInfo.CurrentCulture, Resources.UnknownErrorCodeFormat, result);
 						break;
@@ -2643,8 +2661,33 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), writeRect.ToString()));
 #endif
+			if (destination.depth != 8)
+			{
+				return PSError.errUnsupportedDepth;
+			}
+
+			if ((destination.bitOffset % 8) != 0)
+			{
+				return PSError.errUnsupportedBitOffset;
+			}
+
+			if ((destination.colBits % 8) != 0)
+			{
+				return PSError.errUnsupportedColBits;
+			}
+
+			if ((destination.rowBits % 8) != 0)
+			{
+				return PSError.errUnsupportedRowBits;
+			}
 
 			int channel = port.ToInt32();
+
+			if (channel < 0 || channel > 4)
+			{
+				return PSError.errUnknownPort;
+			}
+
 			VRect srcRect = scaling.sourceRect;
 			VRect dstRect = scaling.destinationRect;
 
@@ -3082,15 +3125,15 @@ namespace PSFilterLoad.PSApi
 
 			void* baseAddr = source.baseAddr.ToPointer();
 
-            int top = srcRect.top;
-            int left = srcRect.left;
-            int bottom = srcRect.bottom;
-            // Some Vanderlee plug-ins set the srcRect incorrectly.
-            if (source.bounds.Equals(srcRect) && (top > 0 || left > 0))
-            {
-                top = left = 0;
-                bottom = height;
-            }
+			int top = srcRect.top;
+			int left = srcRect.left;
+			int bottom = srcRect.bottom;
+			// Some Vanderlee plug-ins set the srcRect incorrectly.
+			if (source.bounds.Equals(srcRect) && (top > 0 || left > 0))
+			{
+				top = left = 0;
+				bottom = height;
+			}
 
 			for (int y = top; y < bottom; y++)
 			{

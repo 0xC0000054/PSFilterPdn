@@ -333,7 +333,7 @@ namespace PSFilterLoad.PSApi
 						return true;
 					}
 				}
-				else if ((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty) // the entrypoint for the current platform, this filters out incomptable processors architectures
+				else if ((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty) // the entrypoint for the current platform, this filters out incompatible processors architectures
 				{
 					enumData.entryPoint = Marshal.PtrToStringAnsi((IntPtr)dataPtr, pipp->propertyLength).TrimEnd('\0');
 					// If it is a 32-bit plugin on a 64-bit OS run it with the 32-bit shim.
@@ -1948,6 +1948,24 @@ namespace PSFilterLoad.PSApi
 					case PSError.errInvalidSamplePoint:
 						message = Resources.InvalidSamplePoint;
 						break;
+					case PSError.errUnknownPort:
+						message = Resources.UnknownChannelPort;
+						break;
+					case PSError.errUnsupportedBitOffset:
+						message = Resources.UnsupportedChannelBitOffset;
+						break;
+					case PSError.errUnsupportedColBits:
+						message = Resources.UnsupportedChannelColumnBits;
+						break;
+					case PSError.errUnsupportedDepth:
+						message = Resources.UnsupportedChannelDepth;
+						break;
+					case PSError.errUnsupportedDepthConversion:
+						message = Resources.UnsupportedChannelDepthConversion;
+						break;
+					case PSError.errUnsupportedRowBits:
+						message = Resources.UnsupportedChannelRowBits;
+						break;                  
 					default:
 						message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.UnknownErrorCodeFormat, error);
 						break;
@@ -2988,20 +3006,6 @@ namespace PSFilterLoad.PSApi
 				if (rect.left >= source.Width || rect.top >= source.Height)
 					return;
 
-#if DEBUG			
-					int width = (rect.right - rect.left);
-					int height = (rect.bottom - rect.top);
-
-					int bmpw = width;
-					int bmph = height;
-					if ((rect.left + width) > source.Width)
-						bmpw = (source.Width - rect.left);
-
-					if ((rect.top + height) > source.Height)
-						bmph = (source.Height - rect.top); 
-#endif
-
-
 				int ofs = loplane;
 				switch (loplane)
 				{
@@ -3347,7 +3351,34 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), writeRect.ToString()));
 #endif
 
+			if (destination.depth != 8)
+			{
+				return PSError.errUnsupportedDepth;
+			}
+
+			if ((destination.bitOffset % 8) != 0)
+			{
+				return PSError.errUnsupportedBitOffset;
+			}
+
+			if ((destination.colBits % 8) != 0)
+			{
+				return PSError.errUnsupportedColBits;
+			}
+
+			if ((destination.rowBits % 8) != 0)
+			{
+				return PSError.errUnsupportedRowBits;
+			}
+
+
 			int channel = port.ToInt32();
+
+			if (channel < 0 || channel > 4)
+			{
+				return PSError.errUnknownPort;
+			}
+
 			VRect srcRect = scaling.sourceRect;
 			VRect dstRect = scaling.destinationRect;
 
@@ -3484,7 +3515,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private unsafe ReadChannelPtrs CreateReadChannelDesc(int channel, string name, int depth, VRect bounds)
+		private static unsafe ReadChannelPtrs CreateReadChannelDesc(int channel, string name, int depth, VRect bounds)
 		{
 			IntPtr addressPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadChannelDesc)), true);
 			ReadChannelDesc* desc = (ReadChannelDesc*)addressPtr.ToPointer();
