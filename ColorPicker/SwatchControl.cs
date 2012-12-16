@@ -7,7 +7,6 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PaintDotNet.SystemLayer;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

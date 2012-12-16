@@ -78,9 +78,6 @@
     <Reference Include="PaintDotNet.Effects">
       <HintPath>Refrences\PaintDotNet.Effects.dll</HintPath>
     </Reference>
-    <Reference Include="PaintDotNet.SystemLayer">
-      <HintPath>Refrences\PaintDotNet.SystemLayer.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
