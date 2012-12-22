@@ -770,7 +770,7 @@ namespace PSFilterPdn
 										filterProgressBar.Value = filterProgressBar.Maximum;
 									}
 								}
-								else if (!result && !string.IsNullOrEmpty(lps.ErrorMessage))
+								else if (!string.IsNullOrEmpty(lps.ErrorMessage))
 								{
 									MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 								}
