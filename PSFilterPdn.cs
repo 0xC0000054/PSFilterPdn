@@ -136,12 +136,17 @@ namespace PSFilterPdn
             Rectangle sourceBounds = base.EnvironmentParameters.SourceSurface.Bounds;
 
             Rectangle selection = base.EnvironmentParameters.GetSelection(sourceBounds).GetBoundsInt();
-            RegionDataWrapper selectedRegion = null;
 
             if (selection != sourceBounds)
             {
                 regionFileName = Path.Combine(userDataPath, "selection.dat");
-                selectedRegion = new RegionDataWrapper(base.EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
+                RegionDataWrapper selectedRegion = new RegionDataWrapper(base.EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
+
+                using (FileStream fs = new FileStream(regionFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    BinaryFormatter bf = new BinaryFormatter();
+                    bf.Serialize(fs, selectedRegion);
+                }
             }
 
             PSFilterShimService service = new PSFilterShimService(new Func<byte>(AbortFunc)) 
