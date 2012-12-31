@@ -923,7 +923,7 @@ namespace PSFilterPdn
                     files.Add(item.Path);
                 }
 
-				IEnumerable<FileData> links = FastDirectoryEnumerator.GetFiles(parm.dirlist[i], "*.lnk", parm.options);
+				var links = FastDirectoryEnumerator.EnumerateFiles(parm.dirlist[i], "*.lnk", parm.options);
 				if (links.Count() > 0)
 				{
 					using (ShellLink link = new ShellLink())
@@ -941,7 +941,7 @@ namespace PSFilterPdn
 				}
 
 				worker.ReportProgress(i, Path.GetFileName(parm.dirlist[i]));
-				foreach (var fi in files)
+				foreach (var file in files)
 				{
 					if (worker.CancellationPending)
 					{
@@ -950,7 +950,7 @@ namespace PSFilterPdn
 					}
 
 					
-					if (LoadPsFilter.QueryPlugin(fi, out pd))
+					if (LoadPsFilter.QueryPlugin(file, out pd))
 					{
 						foreach (var item in pd)
 						{
@@ -1159,11 +1159,11 @@ namespace PSFilterPdn
 			{
 				searchDirListView.Items.Add(effectsDir);
 				foundEffectsDir = true;
-			}
 
-			if (foundEffectsDir && string.IsNullOrEmpty(dirs))
-			{
-				UpdateFilterList();
+                if (string.IsNullOrEmpty(dirs))
+                {
+                    UpdateFilterList();
+                }
 			}
 
 			if (!string.IsNullOrEmpty(dirs))
