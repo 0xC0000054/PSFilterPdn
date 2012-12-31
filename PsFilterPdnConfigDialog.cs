@@ -5,15 +5,15 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading;
+using System.Text;
 using System.Windows.Forms;
 using PaintDotNet;
 using PaintDotNet.Effects;
 using PSFilterLoad.PSApi;
 using PSFilterPdn.Properties;
-using System.Text;
 
 namespace PSFilterPdn
 {
@@ -915,40 +915,33 @@ namespace PSFilterPdn
 			int length = parm.dirlist.Length;
 			for (int i = 0; i < length; i++)
 			{
-				DirectoryInfo di = new DirectoryInfo(parm.dirlist[i]);
 
-				FileInfo[] files = di.GetFiles("*.8bf", parm.options);
+                List<string> files = new List<string>();
 
-				FileInfo[] links = di.GetFiles("*.lnk", parm.options);
-				if (links.Length > 0)
+                foreach (var item in FastDirectoryEnumerator.EnumerateFiles(parm.dirlist[i], "*.8bf", parm.options))
+                {
+                    files.Add(item.Path);
+                }
+
+				IEnumerable<FileData> links = FastDirectoryEnumerator.GetFiles(parm.dirlist[i], "*.lnk", parm.options);
+				if (links.Count() > 0)
 				{
-					List<FileInfo> fileInfos = new List<FileInfo>();
-
 					using (ShellLink link = new ShellLink())
 					{
 						foreach (var item in links)
 						{
-							link.Load(item.FullName);
+							link.Load(item.Path);
 							FileInfo info = new FileInfo(link.Path);
 							if (info.Exists && info.Extension.Equals(".8bf", StringComparison.OrdinalIgnoreCase))
 							{
-								fileInfos.Add(info);
+								files.Add(info.FullName);
 							}
 						} 
 					}
-
-					if (fileInfos.Count > 0)
-					{
-						List<FileInfo> temp = new List<FileInfo>(files.Length + fileInfos.Count);
-						temp.AddRange(files);
-						temp.AddRange(fileInfos);
-
-						files = temp.ToArray();
-					}
 				}
 
-				worker.ReportProgress(i, di.Name);
-				foreach (FileInfo fi in files)
+				worker.ReportProgress(i, Path.GetFileName(parm.dirlist[i]));
+				foreach (var fi in files)
 				{
 					if (worker.CancellationPending)
 					{
@@ -956,36 +949,35 @@ namespace PSFilterPdn
 						return;
 					}
 
-					if (fi.Exists)
+					
+					if (LoadPsFilter.QueryPlugin(fi, out pd))
 					{
-						if (LoadPsFilter.QueryPlugin(fi.FullName, out pd))
+						foreach (var item in pd)
 						{
-							foreach (var item in pd)
+							if (nodes.ContainsKey(item.category))
 							{
-								if (nodes.ContainsKey(item.category))
+								TreeNode node = nodes[item.category];
+								TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
+								if (IsNotDuplicateNode(ref node, item))
 								{
-									TreeNode node = nodes[item.category];
-									TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
-									if (IsNotDuplicateNode(ref node, item))
-									{
-										node.Nodes.Add(subNode);
-									}
-								}
-								else
-								{
-									TreeNode node = new TreeNode(item.category) { Name = item.category };
-
-									TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
-
 									node.Nodes.Add(subNode);
-
-									nodes.Add(item.category, node);
 								}
-							} 
+							}
+							else
+							{
+								TreeNode node = new TreeNode(item.category) { Name = item.category };
+
+								TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
+
+								node.Nodes.Add(subNode);
+
+								nodes.Add(item.category, node);
+							}
+						} 
 							
-						}
-						
 					}
+						
+					
 				}
 			}
 
