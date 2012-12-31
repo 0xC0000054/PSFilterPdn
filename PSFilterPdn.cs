@@ -276,7 +276,7 @@ namespace PSFilterPdn
 
                     lps.FilterParameters = token.FilterParameters;
                     lps.PseudoResources = token.PesudoResources.ToList();
-                    lps.SetIsRepeatEffect(true);
+                    lps.IsRepeatEffect = true;
 
                     bool result = lps.RunPlugin(pdata, false);
 

@@ -813,10 +813,13 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Is the filter a repeat Effect.
 		/// </summary>
-		public void SetIsRepeatEffect(bool repeatEffect)
-		{
-			isRepeatEffect = repeatEffect;
-		}
+        public bool IsRepeatEffect
+        {
+            set
+            {
+                isRepeatEffect = value;
+            }
+        }
 
 
 		private List<PSResource> pseudoResources;
