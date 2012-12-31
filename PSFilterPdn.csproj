@@ -128,6 +128,9 @@
     <Compile Include="ColorSpace\HSL.cs" />
     <Compile Include="ColorSpace\RGB.cs" />
     <Compile Include="ColorSpace\YUV.cs" />
+    <Compile Include="FastDirectoryEnumerator.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="IPSFilterShim.cs" />
     <Compile Include="NativeInterfaces.cs" />
     <Compile Include="PluginSupportInfo.cs" />
