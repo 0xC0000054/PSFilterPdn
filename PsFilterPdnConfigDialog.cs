@@ -582,11 +582,11 @@ namespace PSFilterPdn
 
 				if (proxyProcess == null)
 				{
-					proxyProcess = new Process();
+					proxyProcess = new Process();				
+                    proxyProcess.EnableRaisingEvents = true;
+				    proxyProcess.Exited += new EventHandler(proxyProcess_Exited);
 				} 
 				proxyProcess.StartInfo = psi;
-				proxyProcess.EnableRaisingEvents = true;
-				proxyProcess.Exited += new EventHandler(proxyProcess_Exited);
 #if DEBUG
 				bool st = proxyProcess.Start();
 				Debug.WriteLine("Started = " + st.ToString());
