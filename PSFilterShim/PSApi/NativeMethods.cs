@@ -5,7 +5,6 @@ using System.Security;
 
 namespace PSFilterLoad.PSApi
 {
-    internal delegate bool EnumResNameDelegate(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam);
     static class NativeMethods
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
