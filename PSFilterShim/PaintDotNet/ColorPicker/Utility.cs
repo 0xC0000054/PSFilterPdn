@@ -58,50 +58,6 @@ namespace PaintDotNet
             colorBrush.Dispose();
         }
 
-        public static byte ClampToByte(double x)
-        {
-            if (x > 255)
-            {
-                return 255;
-            }
-            else if (x < 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return (byte)x;
-            }
-        }
-
-        public static byte ClampToByte(int x)
-        {
-            if (x > 255)
-            {
-                return 255;
-            }
-            else if (x < 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return (byte)x;
-            }
-        }
-
-        public static double Lerp(double from, double to, double frac)
-        {
-            return (from + frac * (to - from));
-        }
-
-        public static byte FastScaleByteByByte(byte a, byte b)
-        {
-            int r1 = a * b + 0x80;
-            int r2 = ((r1 >> 8) + r1) >> 8;
-            return (byte)r2;
-        }
-
         public static void SetNumericUpDownValue(NumericUpDown upDown, decimal newValue)
         {
             if (upDown.Value != newValue)

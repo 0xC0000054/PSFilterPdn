@@ -58,38 +58,6 @@ namespace PSFilterLoad.ColorPicker
             colorBrush.Dispose();
         }
 
-        public static byte ClampToByte(double x)
-        {
-            if (x > 255)
-            {
-                return 255;
-            }
-            else if (x < 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return (byte)x;
-            }
-        }
-
-        public static byte ClampToByte(int x)
-        {
-            if (x > 255)
-            {
-                return 255;
-            }
-            else if (x < 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return (byte)x;
-            }
-        }
-
         public static void SetNumericUpDownValue(NumericUpDown upDown, decimal newValue)
         {
             if (upDown.Value != newValue)
