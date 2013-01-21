@@ -10,7 +10,7 @@ using System.Resources;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("null54")]
 [assembly: AssemblyProduct("PSFilterPdn")]
-[assembly: AssemblyCopyright("Copyright © 2012 Nicholas Hayes (aka null54)")]
+[assembly: AssemblyCopyright("Copyright © 2013 Nicholas Hayes (aka null54)")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
