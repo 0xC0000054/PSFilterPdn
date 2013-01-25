@@ -114,6 +114,7 @@
     <Compile Include="PaintDotNet\ColorBgra.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PaintDotNet\MaskSurface.cs" />
     <Compile Include="PaintDotNet\Memory.cs">
       <SubType>Code</SubType>
     </Compile>
