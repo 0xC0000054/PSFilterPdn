@@ -123,9 +123,6 @@
     <Compile Include="PaintDotNet\NativeConstants.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PaintDotNet\NativeStructs.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="PaintDotNet\SafeNativeMethods.cs">
       <SubType>Code</SubType>
     </Compile>
