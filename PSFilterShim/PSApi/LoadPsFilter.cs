@@ -4988,6 +4988,11 @@ namespace PSFilterLoad.PSApi
 
 				CreateReadImageDocument(); 
 			}
+            else
+            {
+                channelPortsPtr = IntPtr.Zero;
+                readDescriptorPtr = IntPtr.Zero;
+            }
 		}
 		private bool frsetup;
 		private unsafe void setup_filter_record()
