@@ -38,7 +38,7 @@ namespace PSFilterLoad.PSApi
 		} 
 #endif
 		/// <summary>
-		/// The Windows-1252 Western European encoding for StringFromPString(IntPtr)
+		/// The Windows-1252 Western European encoding for StringFromPString(byte*)
 		/// </summary>
 		private static readonly Encoding windows1252Encoding = Encoding.GetEncoding(1252);
 		private static readonly char[] trimChars = new char[] { ' ', '\0' };
@@ -46,7 +46,7 @@ namespace PSFilterLoad.PSApi
 		/// Reads a Pascal String into a string.
 		/// </summary>
 		/// <param name="PString">The PString to read.</param>
-		/// <returns>The resuting string</returns>
+		/// <returns>The resulting string</returns>
 		private static unsafe string StringFromPString(IntPtr PString)
 		{
 			if (PString == IntPtr.Zero)
@@ -61,7 +61,7 @@ namespace PSFilterLoad.PSApi
 		/// Reads a Pascal String into a string.
 		/// </summary>
 		/// <param name="PString">The PString to read.</param>
-		/// <returns>The resuting string</returns>
+		/// <returns>The resulting string</returns>
 		private static unsafe string StringFromPString(byte* ptr)
 		{
 			int length = (int)ptr[0];
@@ -76,7 +76,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="ptr">The pointer to read from.</param>
 		/// <param name="offset">The offset to start reading at.</param>
 		/// <param name="length">The length of the resulting Pascal String plus the length byte.</param>
-		/// <returns>The resuting string</returns>
+		/// <returns>The resulting string</returns>
 		private static unsafe string StringFromPString(byte* ptr, out int length)
 		{
 			length = (int)ptr[0] + 1;
@@ -86,17 +86,17 @@ namespace PSFilterLoad.PSApi
 		private static PluginAETE enumAETE;
 		private static unsafe bool EnumAETE(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
 		{
-			IntPtr hRes = NativeMethods.FindResource(hModule, lpszName, lpszType);
-			if (hRes == IntPtr.Zero)
-			{
-#if DEBUG
-				Debug.WriteLine(Marshal.GetLastWin32Error().ToString());
-#endif				
-				return true;
-			}
-
 			if (lpszName == lParam) // is the resource id the one we want
 			{
+				IntPtr hRes = NativeMethods.FindResource(hModule, lpszName, lpszType);
+				if (hRes == IntPtr.Zero)
+				{
+	#if DEBUG
+					Debug.WriteLine(Marshal.GetLastWin32Error().ToString());
+	#endif				
+					return true;
+				}
+
 				IntPtr loadRes = NativeMethods.LoadResource(hModule, hRes);
 				if (loadRes == IntPtr.Zero)
 				{
@@ -174,7 +174,7 @@ namespace PSFilterLoad.PSApi
 
 						uint parmType = BitConverter.ToUInt32(bytes, 0);
 
-						short flags = *(short*)propPtr; ;
+						short flags = *(short*)propPtr;
 						propPtr += 2;
 						short parmCount = *(short*)propPtr; 
 						propPtr += 2;
@@ -255,11 +255,8 @@ namespace PSFilterLoad.PSApi
 
 				return false;
 			}
-			else
-			{
-				return true;
-			}
-
+				
+			return true;
 		}
 
 		private static unsafe bool EnumPiPL(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
@@ -813,13 +810,13 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Is the filter a repeat Effect.
 		/// </summary>
-        public bool IsRepeatEffect
-        {
-            set
-            {
-                isRepeatEffect = value;
-            }
-        }
+		public bool IsRepeatEffect
+		{
+			set
+			{
+				isRepeatEffect = value;
+			}
+		}
 
 
 		private List<PSResource> pseudoResources;
@@ -2709,7 +2706,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private Surface tempMask;
+		private MaskSurface tempMask;
 
 		private unsafe void ScaleTempMask(int maskRate, Rectangle lockRect)
 		{
@@ -2740,8 +2737,8 @@ namespace PSFilterLoad.PSApi
 
 				if (scaleFactor > 1) // Filter preview?
 				{
-					tempMask = new Surface(scalew, scaleh);
-					tempMask.FitSurface(ResamplingAlgorithm.SuperSampling, mask);
+					tempMask = new MaskSurface(scalew, scaleh);
+					tempMask.SuperSampleFitSurface(mask);
 				}
 				else
 				{
@@ -2843,10 +2840,10 @@ namespace PSFilterLoad.PSApi
 								{
 
 									col = (y < sHeight) ? y : (sHeight - 1);
-									ColorBgra p = tempMask.GetPointUnchecked(0, col);
+									byte p = tempMask.GetPointUnchecked(0, col);
 									byte* dstRow = (byte*)ptr + ((y - rect.top) * maskRowBytes);
 
-									if (p.R > 0)
+									if (p > 0)
 									{
 										*dstRow = 255;
 									}
@@ -2871,9 +2868,9 @@ namespace PSFilterLoad.PSApi
 									for (int x = lockRect.Left; x < lockRect.Right; x++)
 									{
 										row = (x < sWidth) ? x : (sWidth - 1);
-										ColorBgra p = tempMask.GetPointUnchecked(row, 0);
+										byte p = tempMask.GetPointUnchecked(row, 0);
 
-										if (p.R > 0)
+										if (p > 0)
 										{
 											*dstRow = 255;
 										}
@@ -2896,10 +2893,10 @@ namespace PSFilterLoad.PSApi
 								for (int y = lockRect.Top; y < lockRect.Bottom; y++)
 								{
 									col = (y < sHeight) ? y : (sHeight - 1);
-									ColorBgra p = tempMask.GetPointUnchecked(row, col);
+									byte p = tempMask.GetPointUnchecked(row, col);
 									byte* dstRow = (byte*)ptr + ((y - rect.top) * maskRowBytes);
 
-									if (p.R > 0)
+									if (p > 0)
 									{
 										*dstRow = 255;
 									}
@@ -2925,9 +2922,9 @@ namespace PSFilterLoad.PSApi
 									for (int x = lockRect.Left; x < lockRect.Right; x++)
 									{
 										row = (x < sWidth) ? x : (sWidth - 1);
-										ColorBgra p = tempMask.GetPointUnchecked(row, col);
+										byte p = tempMask.GetPointUnchecked(row, col);
 
-										if (p.R > 0)
+										if (p > 0)
 										{
 											*dstRow = 255;
 										}
@@ -2960,19 +2957,12 @@ namespace PSFilterLoad.PSApi
 
 				for (int y = lockRect.Top; y < maskHeight; y++)
 				{
-					ColorBgra* srcRow = tempMask.GetPointAddressUnchecked(lockRect.Left, y);
+					byte* srcRow = tempMask.GetPointAddressUnchecked(lockRect.Left, y);
 					byte* dstRow = (byte*)ptr + ((y - lockRect.Top) * width);
 					for (int x = lockRect.Left; x < maskWidth; x++)
 					{
 
-						if (srcRow->R > 0)
-						{
-							*dstRow = 255;
-						}
-						else
-						{
-							*dstRow = 0;
-						}
+                        *dstRow = *srcRow;
 
 						srcRow++;
 						dstRow++;
@@ -3248,6 +3238,7 @@ namespace PSFilterLoad.PSApi
 		}
 
 		private Surface scaledChannelSurface;
+        private MaskSurface scaledSelectionMask;
 
 		private static unsafe void FillChannelData(int channel, PixelMemoryDesc destiniation, Surface source, VRect srcRect)
 		{
@@ -3276,9 +3267,6 @@ namespace PSFilterLoad.PSApi
 							break;
 						case 3:
 							*dst = src->A;
-							break;
-						case 4:
-							*dst = src->R; // as the mask is grayscale use only the red channel
 							break;
 					}
 					src++;
@@ -3336,9 +3324,6 @@ namespace PSFilterLoad.PSApi
 						case 3:
 							dst->A = *src;
 							break;
-						case 4: // selection mask
-							dst->R = dst->G = dst->B = *src;
-							break;
 					}
 					src += bpp;
 					dst++;
@@ -3347,104 +3332,156 @@ namespace PSFilterLoad.PSApi
 			
 		}
 
-		private bool useChannelPorts;
-		private unsafe short ReadPixelsProc(IntPtr port, ref PSScaling scaling, ref VRect writeRect, ref PixelMemoryDesc destination, ref VRect wroteRect)
-		{
+        private unsafe void FillSelectionMask(PixelMemoryDesc destiniation, MaskSurface source, VRect srcRect)
+        {
+            byte* dstPtr = (byte*)destiniation.data.ToPointer();
+            int stride = destiniation.rowBits / 8;
+            int bpp = destiniation.colBits / 8;
+            int offset = destiniation.bitOffset / 8;
+
+            for (int y = srcRect.top; y < srcRect.bottom; y++)
+            {
+                byte* src = source.GetPointAddressUnchecked(srcRect.left, y);
+                byte* dst = dstPtr + (y * stride) + offset;
+                for (int x = srcRect.left; x < srcRect.right; x++)
+                {
+                    *dst = *src;
+
+                    src++;
+                    dst += bpp;
+                }
+            }
+        }
+
+        private bool useChannelPorts;
+        private unsafe short ReadPixelsProc(IntPtr port, ref PSScaling scaling, ref VRect writeRect, ref PixelMemoryDesc destination, ref VRect wroteRect)
+        {
 #if DEBUG
 			Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), writeRect.ToString()));
 #endif
+            if (destination.depth != 8)
+            {
+                return PSError.errUnsupportedDepth;
+            }
 
-			if (destination.depth != 8)
-			{
-				return PSError.errUnsupportedDepth;
-			}
+            if ((destination.bitOffset % 8) != 0)
+            {
+                return PSError.errUnsupportedBitOffset;
+            }
 
-			if ((destination.bitOffset % 8) != 0)
-			{
-				return PSError.errUnsupportedBitOffset;
-			}
+            if ((destination.colBits % 8) != 0)
+            {
+                return PSError.errUnsupportedColBits;
+            }
 
-			if ((destination.colBits % 8) != 0)
-			{
-				return PSError.errUnsupportedColBits;
-			}
+            if ((destination.rowBits % 8) != 0)
+            {
+                return PSError.errUnsupportedRowBits;
+            }
 
-			if ((destination.rowBits % 8) != 0)
-			{
-				return PSError.errUnsupportedRowBits;
-			}
+            int channel = port.ToInt32();
+
+            if (channel < 0 || channel > 4)
+            {
+                return PSError.errUnknownPort;
+            }
+
+            VRect srcRect = scaling.sourceRect;
+            VRect dstRect = scaling.destinationRect;
+
+            int srcWidth = srcRect.right - srcRect.left;
+            int srcHeight = srcRect.bottom - srcRect.top;
+            int dstWidth = dstRect.right - dstRect.left;
+            int dstHeight = dstRect.bottom - dstRect.top;
+
+            if (channel == 4)
+            {
+                if (srcWidth == dstWidth && srcHeight == dstHeight)
+                {
+                    FillSelectionMask(destination, mask, srcRect);
+                }
+                else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
+                {
+
+                    if ((scaledSelectionMask == null) || scaledSelectionMask.Width != dstWidth || scaledSelectionMask.Height != dstHeight)
+                    {
+                        if (scaledSelectionMask != null)
+                        {
+                            scaledSelectionMask.Dispose();
+                            scaledSelectionMask = null;
+                        }
+
+                        scaledSelectionMask = new MaskSurface(dstWidth, dstHeight);
+                        scaledSelectionMask.SuperSampleFitSurface(mask);
+                    }
+
+                    FillSelectionMask(destination, scaledSelectionMask, dstRect);
+                }
+                else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
+                {
+
+                    if ((scaledSelectionMask == null) || scaledSelectionMask.Width != dstWidth || scaledSelectionMask.Height != dstHeight)
+                    {
+                        if (scaledSelectionMask != null)
+                        {
+                            scaledSelectionMask.Dispose();
+                            scaledSelectionMask = null;
+                        }
+
+                        scaledSelectionMask = new MaskSurface(dstWidth, dstHeight);
+                        scaledSelectionMask.BicubicFitSurface(mask);
+                    }
+
+                    FillSelectionMask(destination, scaledSelectionMask, dstRect);
+                }
+            }
+            else
+            {
+                if (srcWidth == dstWidth && srcHeight == dstHeight)
+                {
+                    FillChannelData(channel, destination, source, srcRect);
+                }
+                else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
+                {
+
+                    if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
+                    {
+                        if (scaledChannelSurface != null)
+                        {
+                            scaledChannelSurface.Dispose();
+                            scaledChannelSurface = null;
+                        }
+
+                        scaledChannelSurface = new Surface(dstWidth, dstHeight);
+                        scaledChannelSurface.FitSurface(ResamplingAlgorithm.SuperSampling, source);
+                    }
+
+                    FillChannelData(channel, destination, scaledChannelSurface, dstRect);
+                }
+                else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
+                {
+
+                    if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
+                    {
+                        if (scaledChannelSurface != null)
+                        {
+                            scaledChannelSurface.Dispose();
+                            scaledChannelSurface = null;
+                        }
+
+                        scaledChannelSurface = new Surface(dstWidth, dstHeight);
+                        scaledChannelSurface.FitSurface(ResamplingAlgorithm.Bicubic, source);
+                    }
+
+                    FillChannelData(channel, destination, scaledChannelSurface, dstRect);
+                }
+            }
 
 
-			int channel = port.ToInt32();
+            wroteRect = dstRect;
 
-			if (channel < 0 || channel > 4)
-			{
-				return PSError.errUnknownPort;
-			}
-
-			VRect srcRect = scaling.sourceRect;
-			VRect dstRect = scaling.destinationRect;
-
-			int srcWidth = srcRect.right - srcRect.left;
-			int srcHeight = srcRect.bottom - srcRect.top;
-			int dstWidth = dstRect.right - dstRect.left;
-			int dstHeight = dstRect.bottom - dstRect.top;
-
-			Surface temp = null;
-
-			if (channel == 4)
-			{
-				temp = mask;
-			}
-			else
-			{
-				temp = source;
-			}
-
-			if (srcWidth == dstWidth && srcHeight == dstHeight)
-			{
-				FillChannelData(channel, destination, temp, srcRect);
-			}
-			else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
-			{
-
-				if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
-				{
-					if (scaledChannelSurface != null)
-					{
-						scaledChannelSurface.Dispose();
-						scaledChannelSurface = null;
-					}
-
-					scaledChannelSurface = new Surface(dstWidth, dstHeight);
-					scaledChannelSurface.FitSurface(ResamplingAlgorithm.SuperSampling, temp);
-				}
-
-				FillChannelData(channel, destination, scaledChannelSurface, dstRect);
-			}
-			else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
-			{
-
-				if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
-				{
-					if (scaledChannelSurface != null)
-					{
-						scaledChannelSurface.Dispose();
-						scaledChannelSurface = null;
-					}
-
-					scaledChannelSurface = new Surface(dstWidth, dstHeight);
-					scaledChannelSurface.FitSurface(ResamplingAlgorithm.Bicubic, temp);
-				}
-
-				FillChannelData(channel, destination, scaledChannelSurface, dstRect);
-			}
-
-
-			wroteRect = dstRect;
-
-			return PSError.noErr;
-		}
+            return PSError.noErr;
+        }
 
 		private short WriteBasePixels(IntPtr port, ref VRect writeRect, PixelMemoryDesc source)
 		{
@@ -3756,25 +3793,25 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// The selection mask for the image
 		/// </summary>
-		private Surface mask;
+		private MaskSurface mask;
 		private unsafe void DrawMask()
 		{
-			mask = new Surface(source.Width, source.Height);
+			mask = new MaskSurface(source.Width, source.Height);
 
 
 			for (int y = 0; y < mask.Height; y++)
 			{
-				ColorBgra* p = mask.GetRowAddressUnchecked(y);
+				byte* p = mask.GetRowAddressUnchecked(y);
 				for (int x = 0; x < mask.Width; x++)
 				{
 
 					if (selectedRegion.IsVisible(x, y))
 					{
-						p->Bgra |= 0xffffffff; // 0xaarrggbb format
+						*p = 255;
 					}
 					else
 					{
-						p->Bgra |= 0xff000000; 
+						*p = 0; 
 					}
 
 					p++;
@@ -5429,6 +5466,11 @@ namespace PSFilterLoad.PSApi
 
 				CreateReadImageDocument(); 
 			}
+            else
+            {
+                channelPortsPtr = IntPtr.Zero;
+                readDescriptorPtr = IntPtr.Zero;
+            }
 		}
 		private bool frsetup;
 		private unsafe void setup_filter_record()
