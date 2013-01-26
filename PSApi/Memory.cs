@@ -17,7 +17,7 @@ namespace PSFilterLoad.PSApi
 			hHeap = SafeNativeMethods.GetProcessHeap();
 		}
 
-		public static IntPtr Allocate(int size, bool zeroMemory)
+		public static IntPtr Allocate(long size, bool zeroMemory)
 		{
 			if (hHeap == IntPtr.Zero)
 			{
@@ -47,6 +47,24 @@ namespace PSFilterLoad.PSApi
 			return block;
 
 		}
+
+        public static IntPtr AllocateLarge(ulong bytes)
+        {
+            IntPtr block = SafeNativeMethods.VirtualAlloc(IntPtr.Zero, new UIntPtr(bytes),
+                NativeConstants.MEM_COMMIT, NativeConstants.PAGE_READWRITE);
+
+            if (block == IntPtr.Zero)
+            {
+                throw new OutOfMemoryException("VirtualAlloc returned a null pointer");
+            }
+
+            if (bytes > 0)
+            {
+                GC.AddMemoryPressure((long)bytes);
+            }
+
+            return block;
+        }
 
 		public static void Free(IntPtr hMem)
 		{
@@ -116,5 +134,26 @@ namespace PSFilterLoad.PSApi
 
 			return 0L;
 		}
+
+        public static void FreeLarge(IntPtr block, ulong bytes)
+        {
+            bool result = SafeNativeMethods.VirtualFree(block, UIntPtr.Zero, NativeConstants.MEM_RELEASE);
+
+            if (!result)
+            {
+                int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                throw new InvalidOperationException("VirtualFree returned an error: " + error.ToString());
+            }
+
+            if (bytes > 0)
+            {
+                GC.RemoveMemoryPressure((long)bytes);
+            }
+        }
+
+        public static unsafe void Copy(void* dst, void* src, ulong length)
+        {
+            SafeNativeMethods.memcpy(dst, src, new UIntPtr(length));
+        }
 	}
 }

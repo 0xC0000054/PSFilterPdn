@@ -19,9 +19,6 @@
         /// PAGE_WRITECOPY -> 0x08
         public const int PAGE_WRITECOPY = 8;
 
-        /// PAGE_EXECUTE -> 0x10
-        public const int PAGE_EXECUTE = 16;
-
         /// PAGE_EXECUTE_READ -> 0x20
         public const int PAGE_EXECUTE_READ = 32;
 
@@ -35,5 +32,8 @@
         public const int PAGE_GUARD = 256;
 
         public const int WM_SETREDRAW = 0x000B;
+
+        public const uint MEM_COMMIT = 0x1000;
+        public const uint MEM_RELEASE = 0x8000;
     }
 }

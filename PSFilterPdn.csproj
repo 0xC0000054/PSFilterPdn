@@ -131,6 +131,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="IPSFilterShim.cs" />
+    <Compile Include="MaskSurface\MaskSurface.cs" />
+    <Compile Include="MaskSurface\MemoryBlock.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="NativeInterfaces.cs" />
     <Compile Include="PluginSupportInfo.cs" />
     <Compile Include="PSApi\AETEData.cs" />
@@ -245,6 +249,7 @@
   <ItemGroup>
     <EmbeddedResource Include="feather.png" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "C:\Program Files\Paint.NET\Effects" /y
 if "$(ConfigurationName)" == "Debug" copy "$(TargetDir)$(TargetName).pdb" "C:\Program Files\Paint.NET\Effects" /y</PostBuildEvent>
