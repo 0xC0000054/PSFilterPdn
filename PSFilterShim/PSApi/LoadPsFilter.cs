@@ -2127,14 +2127,7 @@ namespace PSFilterLoad.PSApi
 									byte p = tempMask.GetPointUnchecked(0, col);
 									byte* dstRow = (byte*)ptr + ((y - rect.top) * maskRowBytes);
 
-									if (p > 0)
-									{
-										*dstRow = 255;
-									}
-									else
-									{
-										*dstRow = 0;
-									}
+									*dstRow = p;
 
 									dstRow++;
 								}
@@ -2154,14 +2147,7 @@ namespace PSFilterLoad.PSApi
 										row = (x < sWidth) ? x : (sWidth - 1);
 										byte p = tempMask.GetPointUnchecked(row, 0);
 
-										if (p > 0)
-										{
-											*dstRow = 255;
-										}
-										else
-										{
-											*dstRow = 0;
-										}
+										*dstRow = p;
 
 										dstRow++;
 
@@ -2180,14 +2166,7 @@ namespace PSFilterLoad.PSApi
 									byte p = tempMask.GetPointUnchecked(row, col);
 									byte* dstRow = (byte*)ptr + ((y - rect.top) * maskRowBytes);
 
-									if (p > 0)
-									{
-										*dstRow = 255;
-									}
-									else
-									{
-										*dstRow = 0;
-									}
+									*dstRow = p;
 
 									dstRow++;
 								}
@@ -2208,14 +2187,7 @@ namespace PSFilterLoad.PSApi
 										row = (x < sWidth) ? x : (sWidth - 1);
 										byte p = tempMask.GetPointUnchecked(row, col);
 
-										if (p > 0)
-										{
-											*dstRow = 255;
-										}
-										else
-										{
-											*dstRow = 0;
-										}
+										*dstRow = p;
 
 										dstRow++;
 									}
@@ -2241,18 +2213,11 @@ namespace PSFilterLoad.PSApi
 
 				for (int y = lockRect.Top; y < maskHeight; y++)
 				{
-					byte *srcRow = tempMask.GetPointAddressUnchecked(lockRect.Left, y);
+					byte* srcRow = tempMask.GetPointAddressUnchecked(lockRect.Left, y);
 					byte* dstRow = (byte*)ptr + ((y - lockRect.Top) * width);
 					for (int x = lockRect.Left; x < maskWidth; x++)
 					{
-						if (*srcRow > 0)
-						{
-							*dstRow = 255;
-						}
-						else
-						{
-							*dstRow = 0;
-						}
+						*dstRow = *srcRow;
 
 						srcRow++;
 						dstRow++;
@@ -2557,7 +2522,7 @@ namespace PSFilterLoad.PSApi
 		}
 
 		private Surface scaledChannelSurface;
-        private MaskSurface scaledSelectionMask;
+		private MaskSurface scaledSelectionMask;
 
 		private unsafe void FillChannelData(int channel, PixelMemoryDesc dest, Surface source, VRect srcRect)
 		{
@@ -2651,26 +2616,26 @@ namespace PSFilterLoad.PSApi
 
 		}
 
-        private unsafe void FillSelectionMask(PixelMemoryDesc destiniation, MaskSurface source, VRect srcRect)
-        {
-            byte* dstPtr = (byte*)destiniation.data.ToPointer();
-            int stride = destiniation.rowBits / 8;
-            int bpp = destiniation.colBits / 8;
-            int offset = destiniation.bitOffset / 8;
+		private unsafe void FillSelectionMask(PixelMemoryDesc destiniation, MaskSurface source, VRect srcRect)
+		{
+			byte* dstPtr = (byte*)destiniation.data.ToPointer();
+			int stride = destiniation.rowBits / 8;
+			int bpp = destiniation.colBits / 8;
+			int offset = destiniation.bitOffset / 8;
 
-            for (int y = srcRect.top; y < srcRect.bottom; y++)
-            {
-                byte* src = source.GetPointAddressUnchecked(srcRect.left, y);
-                byte* dst = dstPtr + (y * stride) + offset;
-                for (int x = srcRect.left; x < srcRect.right; x++)
-                {
-                    *dst = *src;
+			for (int y = srcRect.top; y < srcRect.bottom; y++)
+			{
+				byte* src = source.GetPointAddressUnchecked(srcRect.left, y);
+				byte* dst = dstPtr + (y * stride) + offset;
+				for (int x = srcRect.left; x < srcRect.right; x++)
+				{
+					*dst = *src;
 
-                    src++;
-                    dst += bpp;
-                }
-            }
-        }
+					src++;
+					dst += bpp;
+				}
+			}
+		}
 
 		private unsafe short ReadPixelsProc(IntPtr port, ref PSScaling scaling, ref VRect writeRect, ref PixelMemoryDesc destination, ref VRect wroteRect)
 		{
@@ -2712,88 +2677,88 @@ namespace PSFilterLoad.PSApi
 			int dstWidth = dstRect.right - dstRect.left;
 			int dstHeight = dstRect.bottom - dstRect.top;
 
-            if (channel == 4)
-            {
-                if (srcWidth == dstWidth && srcHeight == dstHeight)
-                {
-                    FillSelectionMask(destination, mask, srcRect);
-                }
-                else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
-                {
+			if (channel == 4)
+			{
+				if (srcWidth == dstWidth && srcHeight == dstHeight)
+				{
+					FillSelectionMask(destination, mask, srcRect);
+				}
+				else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
+				{
 
-                    if ((scaledSelectionMask == null) || scaledSelectionMask.Width != dstWidth || scaledSelectionMask.Height != dstHeight)
-                    {
-                        if (scaledSelectionMask != null)
-                        {
-                            scaledSelectionMask.Dispose();
-                            scaledSelectionMask = null;
-                        }
+					if ((scaledSelectionMask == null) || scaledSelectionMask.Width != dstWidth || scaledSelectionMask.Height != dstHeight)
+					{
+						if (scaledSelectionMask != null)
+						{
+							scaledSelectionMask.Dispose();
+							scaledSelectionMask = null;
+						}
 
-                        scaledSelectionMask = new MaskSurface(dstWidth, dstHeight);
-                        scaledSelectionMask.SuperSampleFitSurface(mask);
-                    }
+						scaledSelectionMask = new MaskSurface(dstWidth, dstHeight);
+						scaledSelectionMask.SuperSampleFitSurface(mask);
+					}
 
-                    FillSelectionMask(destination, scaledSelectionMask, dstRect);
-                }
-                else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
-                {
+					FillSelectionMask(destination, scaledSelectionMask, dstRect);
+				}
+				else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
+				{
 
-                    if ((scaledSelectionMask == null) || scaledSelectionMask.Width != dstWidth || scaledSelectionMask.Height != dstHeight)
-                    {
-                        if (scaledSelectionMask != null)
-                        {
-                            scaledSelectionMask.Dispose();
-                            scaledSelectionMask = null;
-                        }
+					if ((scaledSelectionMask == null) || scaledSelectionMask.Width != dstWidth || scaledSelectionMask.Height != dstHeight)
+					{
+						if (scaledSelectionMask != null)
+						{
+							scaledSelectionMask.Dispose();
+							scaledSelectionMask = null;
+						}
 
-                        scaledSelectionMask = new MaskSurface(dstWidth, dstHeight);
-                        scaledSelectionMask.BicubicFitSurface(mask);
-                    }
+						scaledSelectionMask = new MaskSurface(dstWidth, dstHeight);
+						scaledSelectionMask.BicubicFitSurface(mask);
+					}
 
-                    FillSelectionMask(destination, scaledSelectionMask, dstRect);
-                }
-            }
-            else
-            {
-                if (srcWidth == dstWidth && srcHeight == dstHeight)
-                {
-                    FillChannelData(channel, destination, source, srcRect);
-                }
-                else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
-                {
+					FillSelectionMask(destination, scaledSelectionMask, dstRect);
+				}
+			}
+			else
+			{
+				if (srcWidth == dstWidth && srcHeight == dstHeight)
+				{
+					FillChannelData(channel, destination, source, srcRect);
+				}
+				else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
+				{
 
-                    if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
-                    {
-                        if (scaledChannelSurface != null)
-                        {
-                            scaledChannelSurface.Dispose();
-                            scaledChannelSurface = null;
-                        }
+					if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
+					{
+						if (scaledChannelSurface != null)
+						{
+							scaledChannelSurface.Dispose();
+							scaledChannelSurface = null;
+						}
 
-                        scaledChannelSurface = new Surface(dstWidth, dstHeight);
-                        scaledChannelSurface.SuperSampleFitSurface(source);
-                    }
+						scaledChannelSurface = new Surface(dstWidth, dstHeight);
+						scaledChannelSurface.SuperSampleFitSurface(source);
+					}
 
-                    FillChannelData(channel, destination, scaledChannelSurface, dstRect);
-                }
-                else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
-                {
+					FillChannelData(channel, destination, scaledChannelSurface, dstRect);
+				}
+				else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
+				{
 
-                    if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
-                    {
-                        if (scaledChannelSurface != null)
-                        {
-                            scaledChannelSurface.Dispose();
-                            scaledChannelSurface = null;
-                        }
+					if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
+					{
+						if (scaledChannelSurface != null)
+						{
+							scaledChannelSurface.Dispose();
+							scaledChannelSurface = null;
+						}
 
-                        scaledChannelSurface = new Surface(dstWidth, dstHeight);
-                        scaledChannelSurface.BicubicFitSurface(source);
-                    }
+						scaledChannelSurface = new Surface(dstWidth, dstHeight);
+						scaledChannelSurface.BicubicFitSurface(source);
+					}
 
-                    FillChannelData(channel, destination, scaledChannelSurface, dstRect);
-                }
-            }
+					FillChannelData(channel, destination, scaledChannelSurface, dstRect);
+				}
+			}
 
 
 			wroteRect = dstRect;
@@ -3177,7 +3142,7 @@ namespace PSFilterLoad.PSApi
 			int top = srcRect.top;
 			int left = srcRect.left;
 			int bottom = srcRect.bottom;
-			// Some Vanderlee plug-ins set the srcRect incorrectly.
+			// Some plug-ins set the srcRect incorrectly for 100% or greater zoom.
 			if (source.bounds.Equals(srcRect) && (top > 0 || left > 0))
 			{
 				top = left = 0;
@@ -4988,11 +4953,11 @@ namespace PSFilterLoad.PSApi
 
 				CreateReadImageDocument(); 
 			}
-            else
-            {
-                channelPortsPtr = IntPtr.Zero;
-                readDescriptorPtr = IntPtr.Zero;
-            }
+			else
+			{
+				channelPortsPtr = IntPtr.Zero;
+				readDescriptorPtr = IntPtr.Zero;
+			}
 		}
 		private bool frsetup;
 		private unsafe void setup_filter_record()
@@ -5177,11 +5142,11 @@ namespace PSFilterLoad.PSApi
 						scaledChannelSurface = null;
 					}
 
-                    if (scaledSelectionMask != null)
-                    {
-                        scaledSelectionMask.Dispose();
-                        scaledSelectionMask = null;
-                    }
+					if (scaledSelectionMask != null)
+					{
+						scaledSelectionMask.Dispose();
+						scaledSelectionMask = null;
+					}
 				}
 
 				if (platFormDataPtr != IntPtr.Zero)
