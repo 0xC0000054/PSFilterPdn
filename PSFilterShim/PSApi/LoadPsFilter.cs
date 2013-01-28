@@ -3213,10 +3213,11 @@ namespace PSFilterLoad.PSApi
 					{
 						PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
 
+                        void* maskPtr = mask.maskData.ToPointer();
 						for (int y = 0; y < height; y++)
 						{
 							ColorBgra* p = tempDisplaySurface.GetRowAddressUnchecked(y);
-							byte* q = (byte*)mask.maskData.ToPointer() + (y * mask.rowBytes);
+							byte* q = (byte*)maskPtr + (y * mask.rowBytes);
 							for (int x = 0; x < width; x++)
 							{
 								p->A = *q;
