@@ -1185,7 +1185,7 @@ namespace PSFilterPdn
 				int protect;
 				if (NativeMethods.GetProcessDEPPolicy(Process.GetCurrentProcess().Handle, out depFlags, out protect))
 				{
-					this.useDEPProxy = (depFlags != 0);
+					this.useDEPProxy = (depFlags != 0U);
 				}
 			}
 		}
@@ -1196,41 +1196,36 @@ namespace PSFilterPdn
 		{
 			if (settings == null)
 			{
-				string dir = this.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
+				string userDataPath = this.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
 
-				if (!Directory.Exists(dir))
+				if (!Directory.Exists(userDataPath))
 				{
-					Directory.CreateDirectory(dir);
+					Directory.CreateDirectory(userDataPath);
 				}
 
-				string path = Path.Combine(dir, @"PSFilterPdn.xml");
-				if (File.Exists(path))
-				{
-					settings = new Settings(path);
-				}
-				else
-				{
-					using (Stream res = Assembly.GetAssembly(typeof(PSFilterPdnEffect)).GetManifestResourceStream(@"PSFilterPdn.PSFilterPdn.xml"))
-					{
-						byte[] bytes = new byte[res.Length];
-						int numBytesToRead = (int)res.Length;
-						int numBytesRead = 0;
-						while (numBytesToRead > 0)
-						{
-							// Read may return anything from 0 to numBytesToRead.
-							int n = res.Read(bytes, numBytesRead, numBytesToRead);
-							// The end of the file is reached.
-							if (n == 0)
-								break;
-							numBytesRead += n;
-							numBytesToRead -= n;
-						}
-						File.WriteAllBytes(path, bytes);
-					}
-
-					settings = new Settings(path);
-
-				}
+				string path = Path.Combine(userDataPath, @"PSFilterPdn.xml");
+                if (!File.Exists(path))
+                {
+                    using (Stream res = Assembly.GetAssembly(typeof(PSFilterPdnEffect)).GetManifestResourceStream(@"PSFilterPdn.PSFilterPdn.xml"))
+                    {
+                        byte[] bytes = new byte[res.Length];
+                        int numBytesToRead = (int)res.Length;
+                        int numBytesRead = 0;
+                        while (numBytesToRead > 0)
+                        {
+                            // Read may return anything from 0 to numBytesToRead.
+                            int n = res.Read(bytes, numBytesRead, numBytesToRead);
+                            // The end of the file is reached.
+                            if (n == 0)
+                                break;
+                            numBytesRead += n;
+                            numBytesToRead -= n;
+                        }
+                        File.WriteAllBytes(path, bytes);
+                    }
+                }
+                
+                settings = new Settings(path);
 			}
 		}
 
@@ -1327,13 +1322,13 @@ namespace PSFilterPdn
 						if (nodes.ContainsKey(item.Value)) 
 						{
 							TreeNode node = nodes[item.Value];
-							TreeNode subnode = new TreeNode(title) { Name = child.Name, Tag = child.Tag }; // title
+							TreeNode subnode = new TreeNode(title) { Name = child.Name, Tag = child.Tag };
 							node.Nodes.Add(subnode);
 						}
 						else
 						{
 							TreeNode node = new TreeNode(item.Value); // the parent category
-							TreeNode subnode = new TreeNode(title) { Name = child.Name, Tag = child.Tag }; // title
+							TreeNode subnode = new TreeNode(title) { Name = child.Name, Tag = child.Tag }; 
 							node.Nodes.Add(subnode);
 
 							nodes.Add(item.Value, node);
@@ -1412,7 +1407,7 @@ namespace PSFilterPdn
 			// make sure a filter is not already running
 			if ((filterTree.SelectedNode != null) && filterTree.SelectedNode.Tag != null)
 			{
-				runFilterBtn.PerformClick();
+                runFilterBtn_Click(this, EventArgs.Empty);
 			}
 		}
 
@@ -1445,7 +1440,7 @@ namespace PSFilterPdn
 			if ((filterTree.SelectedNode != null) && filterTree.SelectedNode.Tag != null && e.KeyCode == Keys.Enter)
 			{
 				e.Handled = true;
-				runFilterBtn.PerformClick();
+                runFilterBtn_Click(this, EventArgs.Empty);
 			}
 			else
 			{
