@@ -53,10 +53,6 @@ namespace Devcorp.Controls.Design
 			{
 				return red;
 			}
-			set
-			{
-				red = (value>255)? 255 : ((value<0)?0 : value);
-			}
 		}
 
 		[Description("Green component."),]
@@ -66,10 +62,6 @@ namespace Devcorp.Controls.Design
 			{
 				return green;
 			}
-			set
-			{
-				green = (value>255)? 255 : ((value<0)?0 : value);
-			}
 		}
 
 		[Description("Blue component."),]
@@ -78,10 +70,6 @@ namespace Devcorp.Controls.Design
 			get
 			{
 				return blue;
-			}
-			set
-			{
-				blue = (value>255)? 255 : ((value<0)?0 : value);
 			}
 		}
 		#endregion

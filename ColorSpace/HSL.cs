@@ -55,10 +55,6 @@ namespace Devcorp.Controls.Design
 			{
 				return hue;
 			} 
-			set
-			{ 
-				hue = (value>360)? 360 : ((value<0)?0:value); 
-			} 
 		} 
 
 		/// <summary>
@@ -71,10 +67,6 @@ namespace Devcorp.Controls.Design
 			{
 				return saturation;
 			} 
-			set
-			{ 
-				saturation = (value>1)? 1 : ((value<0)?0:value); 
-			} 
 		} 
 
 		/// <summary>
@@ -86,10 +78,6 @@ namespace Devcorp.Controls.Design
 			get
 			{
 				return luminance;
-			} 
-			set
-			{ 
-				luminance = (value>1)? 1 : ((value<0)? 0 : value); 
 			} 
 		}
 

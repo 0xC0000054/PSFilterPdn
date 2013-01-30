@@ -140,41 +140,6 @@ namespace PaintDotNet
             }
         }
 
-       
-        public void SetColorControlsRedraw(bool enabled)
-        {
-            Control[] controls =
-                new Control[]
-                {
-                    this.colorWheel,
-                    this.hueGradientControl,
-                    this.saturationGradientControl,
-                    this.valueGradientControl,
-                    this.redGradientControl,
-                    this.greenGradientControl,
-                    this.blueGradientControl,
-                    this.hueUpDown,
-                    this.saturationUpDown,
-                    this.valueUpDown,
-                    this.redUpDown,
-                    this.greenUpDown,
-                    this.blueUpDown,
-                };
-
-            foreach (Control control in controls)
-            {
-                if (enabled)
-                {
-                    UI.ResumeControlPainting(control);
-                    control.Invalidate(true);
-                }
-                else
-                {
-                    UI.SuspendControlPainting(control);
-                }
-            }
-        }
-     
         private ColorBgra userPrimaryColor;
         public ColorBgra UserPrimaryColor
         {

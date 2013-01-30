@@ -510,15 +510,6 @@ namespace Devcorp.Controls.Design
 				(fz > theta)? CIEXYZ.D65.Z * (fz*fz*fz) : (fz - 16.0/116.0)*3*(theta*theta)*CIEXYZ.D65.Z
 				);
 		}
-
-		/// <summary>
-		/// Converts CIELab to CIEXYZ.
-		/// </summary>
-		public static CIEXYZ LabtoXYZ(CIELab lab)
-		{
-			return LabtoXYZ(lab.L, lab.A, lab.B);
-		}
-
 		
 		/// <summary>
 		/// Converts CIELab to RGB.

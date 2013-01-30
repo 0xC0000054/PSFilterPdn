@@ -86,7 +86,7 @@ namespace PaintDotNet
             return points;
         }
 
-        private Color[] GetColors()
+        private static Color[] GetColors()
         {
             Color[] colors = new Color[colorTesselation];
 

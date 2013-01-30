@@ -54,11 +54,7 @@ namespace Devcorp.Controls.Design
 			{
 				return c;
 			} 
-			set
-			{ 
-				c = value; 
-				c = (c>1)? 1 : ((c<0)? 0 : c); 
-			} 
+
 		} 
 
 		public double Magenta
@@ -66,11 +62,6 @@ namespace Devcorp.Controls.Design
 			get
 			{
 				return m;
-			} 
-			set
-			{ 
-				m = value; 
-				m = (m>1)? 1 : ((m<0)? 0 : m); 
 			} 
 		} 
 
@@ -80,11 +71,7 @@ namespace Devcorp.Controls.Design
 			{
 				return y;
 			} 
-			set
-			{ 
-				y = value; 
-				y = (y>1)? 1 : ((y<0)? 0 : y); 
-			} 
+
 		} 
 
 		public double Black 
@@ -92,11 +79,6 @@ namespace Devcorp.Controls.Design
 			get
 			{
 				return k;
-			} 
-			set
-			{ 
-				k = value; 
-				k = (k>1)? 1 : ((k<0)? 0 : k); 
 			} 
 		} 
 		#endregion

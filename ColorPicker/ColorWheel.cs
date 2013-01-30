@@ -89,7 +89,7 @@ namespace PSFilterLoad.ColorPicker
             return points;
         }
 
-        private Color[] GetColors()
+        private static Color[] GetColors()
         {
             Color[] colors = new Color[colorTesselation];
 

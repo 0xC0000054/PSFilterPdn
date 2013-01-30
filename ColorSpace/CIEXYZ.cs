@@ -59,10 +59,7 @@ namespace Devcorp.Controls.Design
 			{
 				return this.x;
 			}
-			set
-			{
-				this.x = (value>0.9505)? 0.9505 : ((value<0)? 0 : value);
-			}
+			
 		}
 
 		/// <summary>
@@ -74,10 +71,7 @@ namespace Devcorp.Controls.Design
 			{
 				return this.y;
 			}
-			set
-			{
-				this.y = (value>1.0)? 1.0 : ((value<0)?0 : value);
-			}
+			
 		}
 
 		/// <summary>
@@ -89,10 +83,7 @@ namespace Devcorp.Controls.Design
 			{
 				return this.z;
 			}
-			set
-			{
-				this.z = (value>1.089)? 1.089 : ((value<0)? 0 : value);
-			}
+			
 		}
 
 		#endregion

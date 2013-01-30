@@ -139,42 +139,7 @@ namespace PSFilterLoad.ColorPicker
                 return this.ignoreChangedEvents != 0;
             }
         }
-
        
-        public void SetColorControlsRedraw(bool enabled)
-        {
-            Control[] controls =
-                new Control[]
-                {
-                    this.colorWheel,
-                    this.hueGradientControl,
-                    this.saturationGradientControl,
-                    this.valueGradientControl,
-                    this.redGradientControl,
-                    this.greenGradientControl,
-                    this.blueGradientControl,
-                    this.hueUpDown,
-                    this.saturationUpDown,
-                    this.valueUpDown,
-                    this.redUpDown,
-                    this.greenUpDown,
-                    this.blueUpDown,
-                };
-
-            foreach (Control control in controls)
-            {
-                if (enabled)
-                {
-                    UI.ResumeControlPainting(control);
-                    control.Invalidate(true);
-                }
-                else
-                {
-                    UI.SuspendControlPainting(control);
-                }
-            }
-        }
-     
         private ColorBgra userPrimaryColor;
         public ColorBgra UserPrimaryColor
         {
@@ -220,7 +185,7 @@ namespace PSFilterLoad.ColorPicker
             hexBox.Text = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:X2}{1:X2}{2:X2}", r, g, b);
         }
 
-        private string GetHexNumericUpDownValue(int red, int green, int blue)
+        private static string GetHexNumericUpDownValue(int red, int green, int blue)
         {
             int newHexNumber = (red << 16) | (green << 8) | blue;
             string newHexText = System.Convert.ToString(newHexNumber, 16);
@@ -1168,15 +1133,6 @@ namespace PSFilterLoad.ColorPicker
         private void PopIgnoreChangedEvents()
         {
             --this.ignoreChangedEvents;
-        }
-
-        private ColorBgra GetColorFromUpDowns()
-        {
-            int r = (int)this.redUpDown.Value;
-            int g = (int)this.greenUpDown.Value;
-            int b = (int)this.blueUpDown.Value;
-
-            return ColorBgra.FromBgra((byte)b, (byte)g, (byte)r, 255);
         }
 
         private void swatchControl_ColorClicked(object sender, IndexEventArgs e)

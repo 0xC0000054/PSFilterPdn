@@ -60,19 +60,6 @@ namespace PaintDotNet
                     return p[channel];
                 }
             }
-
-            set
-            {
-                if (channel < 0 || channel > 3)
-                {
-                    throw new ArgumentOutOfRangeException("channel", channel, "valid range is [0,3]");
-                }
-
-                fixed (byte* p = &B)
-                {
-                    p[channel] = value;
-                }
-            }
         }
 
         /// <summary>
