@@ -618,7 +618,7 @@ namespace PSFilterLoad.PSApi
 		/// Free the loaded PluginData.
 		/// </summary>
 		/// <param name="proxyData">The PluginData to  free/</param>
-		private void FreeLibrary(ref PluginData pdata)
+		private static void FreeLibrary(ref PluginData pdata)
 		{
 			if (!pdata.entry.dll.IsClosed)
 			{
@@ -2524,7 +2524,7 @@ namespace PSFilterLoad.PSApi
 		private Surface scaledChannelSurface;
 		private MaskSurface scaledSelectionMask;
 
-		private unsafe void FillChannelData(int channel, PixelMemoryDesc dest, Surface source, VRect srcRect)
+		private unsafe static void FillChannelData(int channel, PixelMemoryDesc dest, Surface source, VRect srcRect)
 		{
 			byte* dstPtr = (byte*)dest.data.ToPointer();
 			int stride = dest.rowBits / 8;
@@ -2560,63 +2560,65 @@ namespace PSFilterLoad.PSApi
 
 		}
 
-		private unsafe void StoreChannelData(int channel, PixelMemoryDesc source, Surface dest, VRect srcRect)
-		{
-			void* srcPtr = source.data.ToPointer();
-			int stride = source.rowBits / 8;
-			int bpp = source.colBits / 8;
-			int offset = source.bitOffset / 8;
+#if DEBUG
+        private unsafe void StoreChannelData(int channel, PixelMemoryDesc source, Surface dest, VRect srcRect)
+        {
+            void* srcPtr = source.data.ToPointer();
+            int stride = source.rowBits / 8;
+            int bpp = source.colBits / 8;
+            int offset = source.bitOffset / 8;
 
-			if (srcRect.top < 0)
-			{
-				srcRect.top = 0;
-			}
-			else if (srcRect.top >= dest.Height)
-			{
-				srcRect.top = dest.Height - srcRect.top;
-			}
+            if (srcRect.top < 0)
+            {
+                srcRect.top = 0;
+            }
+            else if (srcRect.top >= dest.Height)
+            {
+                srcRect.top = dest.Height - srcRect.top;
+            }
 
-			if (srcRect.left < 0)
-			{
-				srcRect.left = 0;
-			}
-			else if (srcRect.left >= dest.Width)
-			{
-				srcRect.left = dest.Width - srcRect.left;
-			}
-			int bottom = Math.Min(srcRect.bottom, (dest.Height - 1));
-			int right = Math.Min(srcRect.right, (dest.Width - 1));
+            if (srcRect.left < 0)
+            {
+                srcRect.left = 0;
+            }
+            else if (srcRect.left >= dest.Width)
+            {
+                srcRect.left = dest.Width - srcRect.left;
+            }
+            int bottom = Math.Min(srcRect.bottom, (dest.Height - 1));
+            int right = Math.Min(srcRect.right, (dest.Width - 1));
 
-			for (int y = srcRect.top; y < bottom; y++)
-			{
-				byte* src = (byte*)srcPtr + (y * stride) + offset;
-				ColorBgra* dst = dest.GetPointAddressUnchecked(srcRect.left, y);
+            for (int y = srcRect.top; y < bottom; y++)
+            {
+                byte* src = (byte*)srcPtr + (y * stride) + offset;
+                ColorBgra* dst = dest.GetPointAddressUnchecked(srcRect.left, y);
 
-				for (int x = srcRect.left; x < right; x++)
-				{
-					switch (channel)
-					{
-						case 0:
-							dst->R = *src;
-							break;
-						case 1:
-							dst->G = *src;
-							break;
-						case 2:
-							dst->B = *src;
-							break;
-						case 3:
-							dst->A = *src;
-							break;
-					}
-					src += bpp;
-					dst++;
-				}
-			}
+                for (int x = srcRect.left; x < right; x++)
+                {
+                    switch (channel)
+                    {
+                        case 0:
+                            dst->R = *src;
+                            break;
+                        case 1:
+                            dst->G = *src;
+                            break;
+                        case 2:
+                            dst->B = *src;
+                            break;
+                        case 3:
+                            dst->A = *src;
+                            break;
+                    }
+                    src += bpp;
+                    dst++;
+                }
+            }
 
-		}
+        } 
+#endif
 
-		private unsafe void FillSelectionMask(PixelMemoryDesc destiniation, MaskSurface source, VRect srcRect)
+		private unsafe static void FillSelectionMask(PixelMemoryDesc destiniation, MaskSurface source, VRect srcRect)
 		{
 			byte* dstPtr = (byte*)destiniation.data.ToPointer();
 			int stride = destiniation.rowBits / 8;
@@ -4666,7 +4668,7 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		/// <param name="value">The value to convert.</param>
 		/// <returns>The converted value</returns>
-		private int int2fixed(int value)
+		private static int int2fixed(int value)
 		{
 			return (value << 16);
 		}
@@ -4676,7 +4678,7 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		/// <param name="value">The value to convert.</param>
 		/// <returns>The converted value</returns>
-		private int fixed2int(int value)
+		private static int fixed2int(int value)
 		{
 			return (value >> 16);
 		}

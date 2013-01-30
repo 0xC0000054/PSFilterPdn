@@ -3247,61 +3247,63 @@ namespace PSFilterLoad.PSApi
 			
 		}
 
-		private static unsafe void StoreChannelData(int channel, PixelMemoryDesc source, Surface dest, VRect srcRect)
-		{
-			void* srcPtr = source.data.ToPointer();
-			int stride = source.rowBits / 8;
-			int bpp = source.colBits / 8;
-			int offset = source.bitOffset / 8;
+#if DEBUG
+        private static unsafe void StoreChannelData(int channel, PixelMemoryDesc source, Surface dest, VRect srcRect)
+        {
+            void* srcPtr = source.data.ToPointer();
+            int stride = source.rowBits / 8;
+            int bpp = source.colBits / 8;
+            int offset = source.bitOffset / 8;
 
-			if (srcRect.top < 0)
-			{
-				srcRect.top = 0;
-			}
-			else if (srcRect.top >= dest.Height)
-			{
-				srcRect.top = dest.Height - srcRect.top;
-			}
+            if (srcRect.top < 0)
+            {
+                srcRect.top = 0;
+            }
+            else if (srcRect.top >= dest.Height)
+            {
+                srcRect.top = dest.Height - srcRect.top;
+            }
 
-			if (srcRect.left < 0)
-			{
-				srcRect.left = 0;
-			}
-			else if (srcRect.left >= dest.Width)
-			{
-				srcRect.left = dest.Width - srcRect.left;
-			}
-			int bottom = Math.Min(srcRect.bottom, (dest.Height - 1));
-			int right = Math.Min(srcRect.right, (dest.Width - 1));
+            if (srcRect.left < 0)
+            {
+                srcRect.left = 0;
+            }
+            else if (srcRect.left >= dest.Width)
+            {
+                srcRect.left = dest.Width - srcRect.left;
+            }
+            int bottom = Math.Min(srcRect.bottom, (dest.Height - 1));
+            int right = Math.Min(srcRect.right, (dest.Width - 1));
 
-			for (int y = srcRect.top; y < bottom; y++)
-			{
-				byte* src = (byte*)srcPtr + (y * stride) + offset;
-				ColorBgra* dst = dest.GetPointAddressUnchecked(srcRect.left, y);
+            for (int y = srcRect.top; y < bottom; y++)
+            {
+                byte* src = (byte*)srcPtr + (y * stride) + offset;
+                ColorBgra* dst = dest.GetPointAddressUnchecked(srcRect.left, y);
 
-				for (int x = srcRect.left; x < right; x++)
-				{
-					switch (channel)
-					{
-						case 0:
-							dst->R = *src;
-							break;
-						case 1:
-							dst->G = *src;
-							break;
-						case 2:
-							dst->B = *src;
-							break;
-						case 3:
-							dst->A = *src;
-							break;
-					}
-					src += bpp;
-					dst++;
-				}
-			}
-			
-		}
+                for (int x = srcRect.left; x < right; x++)
+                {
+                    switch (channel)
+                    {
+                        case 0:
+                            dst->R = *src;
+                            break;
+                        case 1:
+                            dst->G = *src;
+                            break;
+                        case 2:
+                            dst->B = *src;
+                            break;
+                        case 3:
+                            dst->A = *src;
+                            break;
+                    }
+                    src += bpp;
+                    dst++;
+                }
+            }
+
+        } 
+#endif
 
 		private unsafe void FillSelectionMask(PixelMemoryDesc destiniation, MaskSurface source, VRect srcRect)
 		{
