@@ -36,14 +36,14 @@ namespace PSFilterPdn
             }
         }
 
+        private bool repeatEffect;
+
         public PSFilterPdnEffect()
             : base(PSFilterPdnEffect.StaticName, PSFilterPdnEffect.StaticIcon, EffectFlags.Configurable)
         {
-            configDialog = null;
-            proxyResult = false;
+            repeatEffect = true;
             filterDone = null;
             filterThread = null;
-            proxyErrorMessage = string.Empty;
         }
        
         /// <summary>
@@ -60,30 +60,11 @@ namespace PSFilterPdn
             return 0;
         }
 
-        PsFilterPdnConfigDialog configDialog;
         public override EffectConfigDialog CreateConfigDialog()
         {
-            this.configDialog = new PsFilterPdnConfigDialog();
-            return configDialog;
+            this.repeatEffect = false;
+            return new PsFilterPdnConfigDialog();
         }
-
-        protected override void OnDispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (configDialog != null)
-                {
-                    configDialog.Dispose();
-                    configDialog = null; 
-                }
-            }
-            
-            base.OnDispose(disposing);
-        }
-
-        private bool proxyResult;
-        private string proxyErrorMessage;
-        
 
         private static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
         {
@@ -148,6 +129,9 @@ namespace PSFilterPdn
                     bf.Serialize(fs, selectedRegion);
                 }
             }
+
+            bool proxyResult;
+            string proxyErrorMessage;
 
             PSFilterShimService service = new PSFilterShimService(new Func<byte>(AbortFunc)) 
             {
@@ -322,7 +306,7 @@ namespace PSFilterPdn
 
         protected override void OnSetRenderInfo(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs)
         {
-            if (configDialog == null) // repeat effect
+            if (repeatEffect) 
             {           
                 PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)parameters;
 
