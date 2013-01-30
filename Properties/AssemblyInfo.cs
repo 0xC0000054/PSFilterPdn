@@ -5,12 +5,12 @@ using System.Resources;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Adobe® Photoshop® Filter Host for Paint.NET")]
+[assembly: AssemblyTitle("Adobe® Photoshop® filter host for Paint.NET")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("null54")]
 [assembly: AssemblyProduct("PSFilterPdn")]
-[assembly: AssemblyCopyright("Copyright © 2013 Nicholas Hayes (aka null54)")]
+[assembly: AssemblyCopyright("Copyright © 2010-2013 Nicholas Hayes (aka null54)")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
