@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
@@ -10,7 +7,7 @@ namespace PSFilterLoad.PSApi
     internal static class UnsafeNativeMethods
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        public static extern SafeLibraryHandle LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
+        public static extern SafeLibraryHandle LoadLibrary(string lpFileName);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
