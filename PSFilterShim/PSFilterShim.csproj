@@ -156,7 +156,6 @@
     <Compile Include="PSApi\LoadPsFilter.cs" />
     <Compile Include="PSApi\Memory.cs" />
     <Compile Include="PSApi\NativeConstants.cs" />
-    <Compile Include="PSApi\NativeMethods.cs" />
     <Compile Include="PSApi\NativeStructs.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\PlatformData.cs" />
@@ -180,6 +179,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PSApi\SafeNativeMethods.cs" />
+    <Compile Include="PSApi\UnsafeNativeMethods.cs" />
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
     <EmbeddedResource Include="PaintDotNet\ColorPicker\ColorPickerForm.resx">
