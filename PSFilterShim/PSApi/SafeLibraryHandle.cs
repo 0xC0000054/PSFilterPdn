@@ -25,7 +25,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         protected override bool ReleaseHandle()
         {
-            return NativeMethods.FreeLibrary(handle);
+            return UnsafeNativeMethods.FreeLibrary(handle);
         }
     }
     
