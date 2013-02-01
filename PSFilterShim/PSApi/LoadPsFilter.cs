@@ -377,25 +377,17 @@ namespace PSFilterLoad.PSApi
 			secondaryColor = new byte[4] { secondary.R, secondary.G, secondary.B, 255 };
 
 			primaryColor = new byte[4] { primary.R, primary.G, primary.B, 255 };
-
 			
-
-			if (selectionRegion != null)
-			{
-				selectedRegion = selectionRegion.Clone();
-			}
-			else
-			{
-				selectionRegion = null;
-			}
 			
-			if (selection == Rectangle.FromLTRB(0, 0, source.Width, source.Height))
+			if (selection == source.Bounds)
 			{
 				filterCase = FilterCase.filterCaseEditableTransparencyNoSelection;
+				selectionRegion = null;
 			}
 			else
 			{
 				filterCase = FilterCase.filterCaseEditableTransparencyWithSelection;
+				selectedRegion = selectionRegion.Clone();
 			}
 
 #if DEBUG
@@ -659,9 +651,9 @@ namespace PSFilterLoad.PSApi
 
 					globalParms.StoreMethod = 0;
 				}
-                else if ((size = SafeNativeMethods.GlobalSize(filterRecord->parameters).ToInt64()) > 0L)
+				else if ((size = SafeNativeMethods.GlobalSize(filterRecord->parameters).ToInt64()) > 0L)
 				{
-                    IntPtr ptr = SafeNativeMethods.GlobalLock(filterRecord->parameters);
+					IntPtr ptr = SafeNativeMethods.GlobalLock(filterRecord->parameters);
 
 					try
 					{                           
@@ -670,7 +662,7 @@ namespace PSFilterLoad.PSApi
 						if (size == ParmDataSize && Marshal.ReadInt32(ptr, IntPtr.Size) == 0x464f544f)
 						{
 							long ps = 0;
-                            if ((ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64()) > 0L)
+							if ((ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64()) > 0L)
 							{
 								Byte[] buf = new byte[ps];
 								Marshal.Copy(hPtr, buf, 0, (int)ps);
@@ -683,7 +675,7 @@ namespace PSFilterLoad.PSApi
 						{
 							if (!IsBadReadPtr(hPtr))
 							{
-                                int ps = SafeNativeMethods.GlobalSize(hPtr).ToInt32();
+								int ps = SafeNativeMethods.GlobalSize(hPtr).ToInt32();
 								if (ps == 0)
 								{
 									ps = ((int)size - IntPtr.Size);
@@ -707,7 +699,7 @@ namespace PSFilterLoad.PSApi
 					}
 					finally
 					{
-                        SafeNativeMethods.GlobalUnlock(filterRecord->parameters);
+						SafeNativeMethods.GlobalUnlock(filterRecord->parameters);
 					}
 
 					globalParms.ParameterDataSize = size;
@@ -717,10 +709,10 @@ namespace PSFilterLoad.PSApi
 			}
 			if (filterRecord->parameters != IntPtr.Zero && data != IntPtr.Zero && saveGlobalDataPointer)
 			{
-                long pluginDataSize = SafeNativeMethods.GlobalSize(data).ToInt64();
+				long pluginDataSize = SafeNativeMethods.GlobalSize(data).ToInt64();
 				globalParms.PluginDataIsPSHandle = false;
 
-                IntPtr dataPtr = SafeNativeMethods.GlobalLock(data);
+				IntPtr dataPtr = SafeNativeMethods.GlobalLock(data);
 
 				try
 				{
@@ -728,7 +720,7 @@ namespace PSFilterLoad.PSApi
 					{
 						IntPtr hPtr = Marshal.ReadIntPtr(dataPtr);
 						long ps = 0;
-                        if (!IsBadReadPtr(hPtr) && (ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64()) > 0L)
+						if (!IsBadReadPtr(hPtr) && (ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64()) > 0L)
 						{
 							Byte[] dataBuf = new byte[ps];
 							Marshal.Copy(hPtr, dataBuf, 0, (int)ps);
@@ -763,7 +755,7 @@ namespace PSFilterLoad.PSApi
 				}
 				finally
 				{
-                    SafeNativeMethods.GlobalUnlock(dataPtr);
+					SafeNativeMethods.GlobalUnlock(dataPtr);
 				}
 
 			}
@@ -803,7 +795,7 @@ namespace PSFilterLoad.PSApi
 						{
 							filterRecord->parameters = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParameterDataSize));
 
-                            filterParametersHandle = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)parameterDataBytes.Length));
+							filterParametersHandle = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)parameterDataBytes.Length));
 
 							Marshal.Copy(parameterDataBytes, 0, filterParametersHandle, parameterDataBytes.Length);
 
@@ -820,7 +812,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 								System.Diagnostics.Debug.Assert((globalParms.ParameterDataSize == (parameterDataBytes.Length + IntPtr.Size)));
 #endif
-                                filterRecord->parameters = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParameterDataSize));
+								filterRecord->parameters = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.ParameterDataSize));
 
 								IntPtr ptr = new IntPtr(filterRecord->parameters.ToInt64() + (long)IntPtr.Size);
 
@@ -830,7 +822,7 @@ namespace PSFilterLoad.PSApi
 							}
 							else
 							{
-                                filterRecord->parameters = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((ulong)parameterDataBytes.Length));
+								filterRecord->parameters = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((ulong)parameterDataBytes.Length));
 								Marshal.Copy(parameterDataBytes, 0, filterRecord->parameters, parameterDataBytes.Length);
 							}
 
@@ -848,8 +840,8 @@ namespace PSFilterLoad.PSApi
 			{
 				if (globalParms.PluginDataSize == handleSize && globalParms.PluginDataIsPSHandle)
 				{
-                    data = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.PluginDataSize));
-                    parmDataHandle = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)pluginDataBytes.Length));
+					data = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.PluginDataSize));
+					parmDataHandle = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)pluginDataBytes.Length));
 
 
 					Marshal.Copy(pluginDataBytes, 0, parmDataHandle, pluginDataBytes.Length);
@@ -869,7 +861,7 @@ namespace PSFilterLoad.PSApi
 					}
 					else
 					{
-                        data = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)pluginDataBytes.Length));
+						data = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)pluginDataBytes.Length));
 						Marshal.Copy(pluginDataBytes, 0, data, pluginDataBytes.Length);
 					}
 
@@ -2561,61 +2553,61 @@ namespace PSFilterLoad.PSApi
 		}
 
 #if DEBUG
-        private unsafe void StoreChannelData(int channel, PixelMemoryDesc source, Surface dest, VRect srcRect)
-        {
-            void* srcPtr = source.data.ToPointer();
-            int stride = source.rowBits / 8;
-            int bpp = source.colBits / 8;
-            int offset = source.bitOffset / 8;
+		private unsafe void StoreChannelData(int channel, PixelMemoryDesc source, Surface dest, VRect srcRect)
+		{
+			void* srcPtr = source.data.ToPointer();
+			int stride = source.rowBits / 8;
+			int bpp = source.colBits / 8;
+			int offset = source.bitOffset / 8;
 
-            if (srcRect.top < 0)
-            {
-                srcRect.top = 0;
-            }
-            else if (srcRect.top >= dest.Height)
-            {
-                srcRect.top = dest.Height - srcRect.top;
-            }
+			if (srcRect.top < 0)
+			{
+				srcRect.top = 0;
+			}
+			else if (srcRect.top >= dest.Height)
+			{
+				srcRect.top = dest.Height - srcRect.top;
+			}
 
-            if (srcRect.left < 0)
-            {
-                srcRect.left = 0;
-            }
-            else if (srcRect.left >= dest.Width)
-            {
-                srcRect.left = dest.Width - srcRect.left;
-            }
-            int bottom = Math.Min(srcRect.bottom, (dest.Height - 1));
-            int right = Math.Min(srcRect.right, (dest.Width - 1));
+			if (srcRect.left < 0)
+			{
+				srcRect.left = 0;
+			}
+			else if (srcRect.left >= dest.Width)
+			{
+				srcRect.left = dest.Width - srcRect.left;
+			}
+			int bottom = Math.Min(srcRect.bottom, (dest.Height - 1));
+			int right = Math.Min(srcRect.right, (dest.Width - 1));
 
-            for (int y = srcRect.top; y < bottom; y++)
-            {
-                byte* src = (byte*)srcPtr + (y * stride) + offset;
-                ColorBgra* dst = dest.GetPointAddressUnchecked(srcRect.left, y);
+			for (int y = srcRect.top; y < bottom; y++)
+			{
+				byte* src = (byte*)srcPtr + (y * stride) + offset;
+				ColorBgra* dst = dest.GetPointAddressUnchecked(srcRect.left, y);
 
-                for (int x = srcRect.left; x < right; x++)
-                {
-                    switch (channel)
-                    {
-                        case 0:
-                            dst->R = *src;
-                            break;
-                        case 1:
-                            dst->G = *src;
-                            break;
-                        case 2:
-                            dst->B = *src;
-                            break;
-                        case 3:
-                            dst->A = *src;
-                            break;
-                    }
-                    src += bpp;
-                    dst++;
-                }
-            }
+				for (int x = srcRect.left; x < right; x++)
+				{
+					switch (channel)
+					{
+						case 0:
+							dst->R = *src;
+							break;
+						case 1:
+							dst->G = *src;
+							break;
+						case 2:
+							dst->B = *src;
+							break;
+						case 3:
+							dst->A = *src;
+							break;
+					}
+					src += bpp;
+					dst++;
+				}
+			}
 
-        } 
+		} 
 #endif
 
 		private unsafe static void FillSelectionMask(PixelMemoryDesc destiniation, MaskSurface source, VRect srcRect)
@@ -3215,7 +3207,7 @@ namespace PSFilterLoad.PSApi
 					{
 						PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
 
-                        void* maskPtr = mask.maskData.ToPointer();
+						void* maskPtr = mask.maskData.ToPointer();
 						for (int y = 0; y < height; y++)
 						{
 							ColorBgra* p = tempDisplaySurface.GetRowAddressUnchecked(y);
@@ -3920,13 +3912,13 @@ namespace PSFilterLoad.PSApi
 					int size = 0;
 					if (!IsBadReadPtr(hPtr))
 					{
-                        size = SafeNativeMethods.GlobalSize(hPtr).ToInt32();
+						size = SafeNativeMethods.GlobalSize(hPtr).ToInt32();
 						data = new byte[size];
 						Marshal.Copy(hPtr, data, 0, size);
 					}
 					else
 					{
-                        size = SafeNativeMethods.GlobalSize(textHandle).ToInt32();
+						size = SafeNativeMethods.GlobalSize(textHandle).ToInt32();
 						data = new byte[size];
 						Marshal.Copy(textHandle, data, 0, size);
 					}
@@ -3958,17 +3950,17 @@ namespace PSFilterLoad.PSApi
 			}
 			else
 			{
-                int size = SafeNativeMethods.GlobalSize(aliasHandle).ToInt32();
+				int size = SafeNativeMethods.GlobalSize(aliasHandle).ToInt32();
 				byte[] data = new byte[size];
 				if (!IsBadReadPtr(hPtr))
 				{
-                    size = SafeNativeMethods.GlobalSize(hPtr).ToInt32();
+					size = SafeNativeMethods.GlobalSize(hPtr).ToInt32();
 					data = new byte[size];
 					Marshal.Copy(hPtr, data, 0, size);
 				}
 				else
 				{
-                    size = SafeNativeMethods.GlobalSize(aliasHandle).ToInt32();
+					size = SafeNativeMethods.GlobalSize(aliasHandle).ToInt32();
 					data = new byte[size];
 					Marshal.Copy(aliasHandle, data, 0, size);
 				}
@@ -4148,13 +4140,13 @@ namespace PSFilterLoad.PSApi
 				int size = 0;
 				if (!IsBadReadPtr(hPtr))
 				{
-                    size = SafeNativeMethods.GlobalSize(handle).ToInt32();
+					size = SafeNativeMethods.GlobalSize(handle).ToInt32();
 					data = new byte[size];
 					Marshal.Copy(hPtr, data, 0, size);
 				}
 				else
 				{
-                    size = SafeNativeMethods.GlobalSize(handle).ToInt32();
+					size = SafeNativeMethods.GlobalSize(handle).ToInt32();
 					data = new byte[size];
 					Marshal.Copy(handle, data, 0, size);
 				}
@@ -4203,16 +4195,16 @@ namespace PSFilterLoad.PSApi
 			{
 				if (!handle_valid(h))
 				{
-                    if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
+					if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
 					{
 						IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-                        if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+						if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
 						{
-                            SafeNativeMethods.GlobalFree(hPtr);
+							SafeNativeMethods.GlobalFree(hPtr);
 						}
 
-                        SafeNativeMethods.GlobalFree(h);
+						SafeNativeMethods.GlobalFree(h);
 					}
 					return;
 				}
@@ -4232,17 +4224,17 @@ namespace PSFilterLoad.PSApi
 			// What is this supposed to do?
 			if (!handle_valid(h))
 			{
-                if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
+				if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
 				{
 					IntPtr hPtr = Marshal.ReadIntPtr(h);
 
 					if (!IsBadReadPtr(hPtr))
 					{
-                        SafeNativeMethods.GlobalFree(hPtr);
+						SafeNativeMethods.GlobalFree(hPtr);
 					}
 
 
-                    SafeNativeMethods.GlobalFree(h);
+					SafeNativeMethods.GlobalFree(h);
 					return;
 				}
 				else
@@ -4259,15 +4251,15 @@ namespace PSFilterLoad.PSApi
 #endif
 			if (!handle_valid(h))
 			{
-                if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
+				if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
 				{
 					IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-                    if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+					if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
 					{
-                        return SafeNativeMethods.GlobalLock(hPtr);
+						return SafeNativeMethods.GlobalLock(hPtr);
 					}
-                    return SafeNativeMethods.GlobalLock(h);
+					return SafeNativeMethods.GlobalLock(h);
 				}
 				else if (!IsBadReadPtr(h) && !IsBadWritePtr(h))
 				{
@@ -4290,18 +4282,18 @@ namespace PSFilterLoad.PSApi
 #endif
 			if (!handle_valid(h))
 			{
-                if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
+				if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
 				{
 					IntPtr hPtr = Marshal.ReadIntPtr(h);
 
 					int size = 0;
-                    if (!IsBadReadPtr(hPtr) && (size = SafeNativeMethods.GlobalSize(hPtr).ToInt32()) > 0)
+					if (!IsBadReadPtr(hPtr) && (size = SafeNativeMethods.GlobalSize(hPtr).ToInt32()) > 0)
 					{
 						return size;
 					}
 					else
 					{
-                        return SafeNativeMethods.GlobalSize(h).ToInt32();
+						return SafeNativeMethods.GlobalSize(h).ToInt32();
 					}
 				}
 				else
@@ -4327,20 +4319,20 @@ namespace PSFilterLoad.PSApi
 #endif
 			if (!handle_valid(h))
 			{
-                if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
+				if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
 				{
 					IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-                    if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+					if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
 					{
-                        hPtr = SafeNativeMethods.GlobalReAlloc(hPtr, new UIntPtr((uint)newSize), NativeConstants.GPTR);
+						hPtr = SafeNativeMethods.GlobalReAlloc(hPtr, new UIntPtr((uint)newSize), NativeConstants.GPTR);
 						if (hPtr == IntPtr.Zero)
 						{
 							return PSError.nilHandleErr;
 						}
 						Marshal.WriteIntPtr(h, hPtr);
 					}
-                    else if ((h = SafeNativeMethods.GlobalReAlloc(h, new UIntPtr((uint)newSize), NativeConstants.GPTR)) == IntPtr.Zero)
+					else if ((h = SafeNativeMethods.GlobalReAlloc(h, new UIntPtr((uint)newSize), NativeConstants.GPTR)) == IntPtr.Zero)
 						return PSError.nilHandleErr;
 
 					return PSError.noErr;
@@ -4371,17 +4363,17 @@ namespace PSFilterLoad.PSApi
 #endif
 			if (!handle_valid(h))
 			{
-                if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
+				if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
 				{
 					IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-                    if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+					if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
 					{
-                        SafeNativeMethods.GlobalUnlock(hPtr);
+						SafeNativeMethods.GlobalUnlock(hPtr);
 					}
 					else
 					{
-                        SafeNativeMethods.GlobalUnlock(h);
+						SafeNativeMethods.GlobalUnlock(h);
 					}
 				}
 				
@@ -5251,8 +5243,8 @@ namespace PSFilterLoad.PSApi
 						}
 						else
 						{
-                            SafeNativeMethods.GlobalUnlock(filterRecord->parameters);
-                            SafeNativeMethods.GlobalFree(filterRecord->parameters);
+							SafeNativeMethods.GlobalUnlock(filterRecord->parameters);
+							SafeNativeMethods.GlobalFree(filterRecord->parameters);
 						}
 						filterRecord->parameters = IntPtr.Zero;
 					}
@@ -5266,8 +5258,8 @@ namespace PSFilterLoad.PSApi
 				{
 					try
 					{
-                        SafeNativeMethods.GlobalUnlock(parmDataHandle);
-                        SafeNativeMethods.GlobalFree(parmDataHandle);
+						SafeNativeMethods.GlobalUnlock(parmDataHandle);
+						SafeNativeMethods.GlobalFree(parmDataHandle);
 					}
 					finally
 					{
@@ -5282,10 +5274,10 @@ namespace PSFilterLoad.PSApi
 						handle_unlock_proc(data);
 						handle_dispose_proc(data);
 					}
-                    else if (SafeNativeMethods.GlobalSize(data).ToInt64() > 0L)
+					else if (SafeNativeMethods.GlobalSize(data).ToInt64() > 0L)
 					{
-                        SafeNativeMethods.GlobalUnlock(data);
-                        SafeNativeMethods.GlobalFree(data);
+						SafeNativeMethods.GlobalUnlock(data);
+						SafeNativeMethods.GlobalFree(data);
 					}
 					data = IntPtr.Zero;
 				}
