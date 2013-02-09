@@ -26,8 +26,11 @@ namespace ns
             if (null == x) return -1;
             if (null == y) return 1;
 
-            if (x is string && y is string)
-                return Compare((string)x, (string)y);
+            string left = x as string;
+            string right = y as string;
+
+            if (left != null && right != null)
+                return Compare(left, right);
 
             return Comparer.Default.Compare(x, y);
         }
