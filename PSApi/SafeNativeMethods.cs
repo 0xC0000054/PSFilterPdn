@@ -44,13 +44,6 @@ namespace PSFilterLoad.PSApi
             UIntPtr dwSize,
             uint dwFreeType);
 
-        [DllImport("user32.dll", SetLastError = false)]
-        internal static extern IntPtr SendMessageW(
-            IntPtr hWnd,
-            uint msg,
-            IntPtr wParam,
-            IntPtr lParam);
-
         [DllImport("kernel32.dll", EntryPoint = "GlobalAlloc")]
         internal static extern IntPtr GlobalAlloc(uint uFlags, UIntPtr dwBytes);
 
