@@ -26,21 +26,18 @@ namespace PaintDotNet.SystemLayer
     {
         private static bool initScales = false;
         private static float xScale;
-        private static float yScale;
 
         private static void InitScaleFactors(Control c)
         {
             if (c == null)
             {
                 xScale = 1.0f;
-                yScale = 1.0f;
             }
             else
             {
                 using (Graphics g = c.CreateGraphics())
                 {
                     xScale = g.DpiX / 96.0f;
-                    yScale = g.DpiY / 96.0f;
                 }
             }
 
