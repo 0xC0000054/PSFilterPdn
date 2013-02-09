@@ -31,8 +31,6 @@
         /// PAGE_GUARD -> 0x100
         public const int PAGE_GUARD = 256;
 
-        public const int WM_SETREDRAW = 0x000B;
-
         public const uint MEM_COMMIT = 0x1000;
         public const uint MEM_RELEASE = 0x8000;
     }
