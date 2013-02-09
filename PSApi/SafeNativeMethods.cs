@@ -13,6 +13,7 @@ namespace PSFilterLoad.PSApi
         internal static extern IntPtr HeapAlloc(IntPtr hHeap, uint dwFlags, UIntPtr dwSize);
 
         [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool HeapFree(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
 
         [DllImport("kernel32.dll", SetLastError = true)]
