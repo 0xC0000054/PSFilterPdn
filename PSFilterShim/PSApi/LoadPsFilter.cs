@@ -2340,7 +2340,7 @@ namespace PSFilterLoad.PSApi
 						q += ColorBgra.SizeOf;
 					}
 				}
-				// set tha alpha channel to 255 in the area affected by the filter if it needs it
+				// set the alpha channel to 255 in the area affected by the filter if it needs it
 				if ((filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection) &&
 					outputHandling == FilterDataHandling.filterDataHandlingFillMask && (nplanes == 4 || loplane == 3))
 				{
@@ -3244,9 +3244,12 @@ namespace PSFilterLoad.PSApi
 			BitmapData bd = checkerBoardBitmap.LockBits(new Rectangle(0, 0, checkerBoardBitmap.Width, checkerBoardBitmap.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
 			try
 			{
+				void* scan0 = bd.Scan0.ToPointer();
+				int stride = bd.Stride;
+
 				for (int y = 0; y < checkerBoardBitmap.Height; y++)
 				{
-					byte* p = (byte*)bd.Scan0.ToPointer() + (y * bd.Stride);
+					byte* p = (byte*)scan0 + (y * stride);
 					for (int x = 0; x < checkerBoardBitmap.Width; x++)
 					{
 						byte v = (byte)((((x ^ y) & 8) * 8) + 191);
@@ -3272,7 +3275,6 @@ namespace PSFilterLoad.PSApi
 		{
 			mask = new MaskSurface(source.Width, source.Height);
 
-			
 			for (int y = 0; y < mask.Height; y++)
 			{
 				byte* p = mask.GetRowAddressUnchecked(y);
@@ -3338,7 +3340,7 @@ namespace PSFilterLoad.PSApi
 							key++;
 						}
 
-						// trim the list to the actual values in the dictonary
+						// trim the list to the actual values in the dictionary
 						uint[] values = keys.ToArray();
 						foreach (var item in values)
 						{
@@ -3373,7 +3375,7 @@ namespace PSFilterLoad.PSApi
 					}
 					else
 					{
-						// trim the list to the actual values in the dictonary
+						// trim the list to the actual values in the dictionary
 						uint[] values = subKeys.ToArray();
 						foreach (var item in values)
 						{
@@ -3577,13 +3579,31 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetBooleanProc(System.IntPtr descriptor, ref byte data)
 		{
-			data = (byte) aeteDict[getKey].Value;
+			AETEValue item;
+			if (subClassDict != null)
+			{
+				item = subClassDict[getKey];
+			}
+			else
+			{
+				item = aeteDict[getKey];
+			}
+
+			data = (byte)item.Value;
 
 			return PSError.noErr;
 		}
 		private short GetTextProc(System.IntPtr descriptor, ref System.IntPtr data)
 		{
-			AETEValue item = aeteDict[getKey];
+			AETEValue item;
+			if (subClassDict != null)
+			{
+				item = subClassDict[getKey];
+			}
+			else
+			{
+				item = aeteDict[getKey];
+			}
 
 			int size = item.Size;
 			data = handle_new_proc(size);
@@ -3595,7 +3615,15 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetAliasProc(System.IntPtr descriptor, ref System.IntPtr data)
 		{
-			AETEValue item = aeteDict[getKey];
+			AETEValue item;
+			if (subClassDict != null)
+			{
+				item = subClassDict[getKey];
+			}
+			else
+			{
+				item = aeteDict[getKey];
+			}
 
 			int size = item.Size;
 			data = handle_new_proc(size);
@@ -3607,7 +3635,16 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetEnumeratedProc(System.IntPtr descriptor, ref uint type)
 		{
-			type = (uint)aeteDict[getKey].Value;
+			AETEValue item;
+			if (subClassDict != null)
+			{
+				item = subClassDict[getKey];
+			}
+			else
+			{
+				item = aeteDict[getKey];
+			}
+			type = (uint)item.Value;
 
 			return PSError.noErr;
 		}
@@ -3658,6 +3695,7 @@ namespace PSFilterLoad.PSApi
 				case DescriptorTypes.classGrayscale:
 				case DescriptorTypes.classLabColor:
 				case DescriptorTypes.classHSBColor:
+				case DescriptorTypes.classPoint:
 					data = handle_new_proc(0); // assign a zero byte handle to allow it to work correctly in the OpenReadDescriptorProc(). 
 					break;
 
@@ -3715,8 +3753,15 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetStringProc(System.IntPtr descriptor, System.IntPtr data)
 		{
-			AETEValue item = aeteDict[getKey];
-
+			AETEValue item;
+			if (subClassDict != null)
+			{
+				item = subClassDict[getKey];
+			}
+			else
+			{
+				item = aeteDict[getKey];
+			}
 			int size = item.Size;
 
 			Marshal.WriteByte(data, (byte)size);
