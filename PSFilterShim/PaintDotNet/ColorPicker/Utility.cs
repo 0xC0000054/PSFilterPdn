@@ -42,20 +42,26 @@ namespace PaintDotNet
             Brush colorBrush = new LinearGradientBrush(colorRectangle, Color.FromArgb(255, color), color, 90.0f, false);
             HatchBrush backgroundBrush = new HatchBrush(HatchStyle.LargeCheckerBoard, Color.FromArgb(191, 191, 191), Color.FromArgb(255, 255, 255));
 
-            if (drawBorder)
+            try
             {
-                g.DrawRectangle(Pens.Black, rect.Left, rect.Top, rect.Width - 1, rect.Height - 1);
-                g.DrawRectangle(Pens.White, rect.Left + 1, rect.Top + 1, rect.Width - 3, rect.Height - 3);
+                if (drawBorder)
+                {
+                    g.DrawRectangle(Pens.Black, rect.Left, rect.Top, rect.Width - 1, rect.Height - 1);
+                    g.DrawRectangle(Pens.White, rect.Left + 1, rect.Top + 1, rect.Width - 3, rect.Height - 3);
+                }
+
+                PixelOffsetMode oldPOM = g.PixelOffsetMode;
+                g.PixelOffsetMode = PixelOffsetMode.Half;
+                g.FillRectangle(backgroundBrush, colorRectangle);
+                g.FillRectangle(colorBrush, colorRectangle);
+                g.PixelOffsetMode = oldPOM;
+            }
+            finally
+            {
+                backgroundBrush.Dispose();
+                colorBrush.Dispose();
             }
 
-            PixelOffsetMode oldPOM = g.PixelOffsetMode;
-            g.PixelOffsetMode = PixelOffsetMode.Half;
-            g.FillRectangle(backgroundBrush, colorRectangle);
-            g.FillRectangle(colorBrush, colorRectangle);
-            g.PixelOffsetMode = oldPOM;
-
-            backgroundBrush.Dispose();
-            colorBrush.Dispose();
         }
 
         public static void SetNumericUpDownValue(NumericUpDown upDown, decimal newValue)
