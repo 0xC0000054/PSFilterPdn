@@ -3315,14 +3315,6 @@ namespace PSFilterLoad.PSApi
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
-
-	try 
-	{	        
-			long size = NativeMethods.GlobalSize(descriptor).ToInt64();
-	}
-	catch (NullReferenceException)
-	{
-	}
 #endif
 
 			if (aeteDict.Count > 0)
