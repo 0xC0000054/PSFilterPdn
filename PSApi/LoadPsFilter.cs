@@ -847,28 +847,6 @@ namespace PSFilterLoad.PSApi
 			if (eep == null)
 				throw new ArgumentNullException("eep", "eep is null.");
 
-			if (eep.SourceSurface.Width > 32000 || eep.SourceSurface.Height > 32000)
-			{
-				string message = string.Empty;
-				if (eep.SourceSurface.Width > 32000 && eep.SourceSurface.Height > 32000)
-				{
-					message = Resources.ImageSizeTooLarge;
-				}
-				else
-				{
-					if (eep.SourceSurface.Width > 32000)
-					{
-						message = Resources.ImageWidthTooLarge;
-					}
-					else
-					{
-						message = Resources.ImageHeightTooLarge;
-					}
-				}
-
-				throw new ImageSizeTooLargeException(message);
-			}
-
 			keys = null;
 			aete = null;
 			aeteDict = new Dictionary<uint,AETEValue>();
@@ -896,6 +874,28 @@ namespace PSFilterLoad.PSApi
 			pseudoResources = new List<PSResource>();
 			handles = new Dictionary<IntPtr, PSHandle>();
 			channelReadDescPtrs = new List<ReadChannelPtrs>();
+
+			if (eep.SourceSurface.Width > 32000 || eep.SourceSurface.Height > 32000)
+			{
+				string message = string.Empty;
+				if (eep.SourceSurface.Width > 32000 && eep.SourceSurface.Height > 32000)
+				{
+					message = Resources.ImageSizeTooLarge;
+				}
+				else
+				{
+					if (eep.SourceSurface.Width > 32000)
+					{
+						message = Resources.ImageWidthTooLarge;
+					}
+					else
+					{
+						message = Resources.ImageHeightTooLarge;
+					}
+				}
+
+				throw new ImageSizeTooLargeException(message);
+			}
 
 			unsafe
 			{
