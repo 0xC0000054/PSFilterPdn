@@ -584,7 +584,7 @@ namespace PSFilterLoad.PSApi
 
 			if (!string.IsNullOrEmpty(pdata.entryPoint)) // The filter has already been queried so take a shortcut.
 			{
-				pdata.entry.dll = UnsafeNativeMethods.LoadLibrary(pdata.fileName);
+				pdata.entry.dll = UnsafeNativeMethods.LoadLibraryW(pdata.fileName);
 
 				if (!pdata.entry.dll.IsInvalid)
 				{
