@@ -19,45 +19,45 @@ namespace PSFilterLoad.PSApi
     }
 #pragma warning restore 0649
 
-    enum PIPropertyID : uint
+    static class PIPropertyID
     {
         /// <summary>
         /// The property giving the plug-in's kind, 8BFM for Photoshop Filters
         /// </summary>
-        PIKindProperty = 0x6b696e64U,
+        public const uint PIKindProperty = 0x6b696e64U;
         /// <summary>
         /// Win32 Intel code descriptor, Entrypoint
         /// </summary>
-        PIWin32X86CodeProperty = 0x77783836U,
+        public const uint PIWin32X86CodeProperty = 0x77783836U;
         /// <summary>
         /// Win64 Intel code descriptor, Entrypoint 
         /// </summary>
         /// <remarks>Taken from the PiPL resources of a 64-bit Photoshop Plugin.</remarks>
-        PIWin64X86CodeProperty = 0x38363634U,
+        public const uint PIWin64X86CodeProperty = 0x38363634U;
         /// <summary>
         /// Major(int16).Minor(int16) version number
         /// </summary>
-        PIVersionProperty = 0x76657273U,
+        public const uint  PIVersionProperty = 0x76657273U;
         /// <summary>
         /// Image modes supported flags. (bitmask)
         /// </summary>
-        PIImageModesProperty = 0x6d6f6465U,
+        public const uint PIImageModesProperty = 0x6d6f6465U;
         /// <summary>
         /// Category name that appears on top level menu
         /// </summary>
-        PICategoryProperty = 0x63617467U,
+        public const uint PICategoryProperty = 0x63617467U;
         /// <summary>
         /// Menu name
         /// </summary>
-        PINameProperty = 0x6e616d65U,
+        public const uint PINameProperty = 0x6e616d65U;
         /// <summary>
         /// Has Terminology Property
         /// </summary>
-        PIHasTerminologyProperty = 0x6873746DU,
+        public const uint PIHasTerminologyProperty = 0x6873746DU;
         /// <summary>
         /// FilterCaseInfo Property
         /// </summary>
-        PIFilterCaseInfoProperty = 0x66696369U
+        public const uint PIFilterCaseInfoProperty = 0x66696369U;
 
     }
     
