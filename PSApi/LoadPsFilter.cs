@@ -88,7 +88,7 @@ namespace PSFilterLoad.PSApi
 		{
 			if (lpszName == lParam) // is the resource id the one we want
 			{
-				IntPtr hRes = UnsafeNativeMethods.FindResource(hModule, lpszName, lpszType);
+				IntPtr hRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, lpszType);
 				if (hRes == IntPtr.Zero)
 				{
 	#if DEBUG
@@ -263,7 +263,7 @@ namespace PSFilterLoad.PSApi
 		{
 			PluginData enumData = new PluginData() { fileName = enumFileName };
 
-			IntPtr hRes = UnsafeNativeMethods.FindResource(hModule, lpszName, lpszType);
+			IntPtr hRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, lpszType);
 			if (hRes == IntPtr.Zero)
 			{
 #if DEBUG
@@ -311,7 +311,7 @@ namespace PSFilterLoad.PSApi
 			for (int i = 0; i < count; i++)
 			{
 				PIProperty* pipp = (PIProperty*)propPtr;
-				PIPropertyID propKey = (PIPropertyID)pipp->propertyKey;
+				uint propKey = pipp->propertyKey;
 #if DEBUG
 				if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
 				{
@@ -457,7 +457,7 @@ namespace PSFilterLoad.PSApi
 			PluginData enumData = new PluginData() { fileName = enumFileName };
 
 
-			IntPtr hRes = UnsafeNativeMethods.FindResource(hModule, lpszName, lpszType);
+			IntPtr hRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, lpszType);
 			if (hRes == IntPtr.Zero)
 			{
 #if DEBUG
@@ -520,7 +520,7 @@ namespace PSFilterLoad.PSApi
 			IntPtr type = Marshal.StringToHGlobalUni("_8BFM");
 			try
 			{
-				filterRes = UnsafeNativeMethods.FindResource(hModule, lpszName, type); // load the _8BFM resource to get the category name
+				filterRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, type); // load the _8BFM resource to get the category name
 			}
 			finally
 			{
@@ -1111,7 +1111,7 @@ namespace PSFilterLoad.PSApi
 
 			if (!string.IsNullOrEmpty(pdata.entryPoint)) // The filter has already been queried so take a shortcut.
 			{
-				pdata.entry.dll = UnsafeNativeMethods.LoadLibraryEx(pdata.fileName, IntPtr.Zero, 0U);
+				pdata.entry.dll = UnsafeNativeMethods.LoadLibraryExW(pdata.fileName, IntPtr.Zero, 0U);
 				if (!pdata.entry.dll.IsInvalid)
 				{
 					IntPtr entry = UnsafeNativeMethods.GetProcAddress(pdata.entry.dll, pdata.entryPoint);
@@ -1808,12 +1808,12 @@ namespace PSFilterLoad.PSApi
 
 
 		/// <summary>
-		/// Querys a 8bf plugin
+		/// Queries a 8bf plugin
 		/// </summary>
 		/// <param name="fileName">The fileName to query.</param>
 		/// <param name="pluginData">The list filters within the plugin.</param>
 		/// <returns>
-		/// True if succssful otherwise false
+		/// True if successful otherwise false
 		/// </returns>
 		public static bool QueryPlugin(string fileName, out List<PluginData> pluginData)
 		{
@@ -1822,9 +1822,7 @@ namespace PSFilterLoad.PSApi
 
 			pluginData = new List<PluginData>();
 
-			bool result = false;
-
-			SafeLibraryHandle dll = UnsafeNativeMethods.LoadLibraryEx(fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE);
+			SafeLibraryHandle dll = UnsafeNativeMethods.LoadLibraryExW(fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE);
 			/* Use LOAD_LIBRARY_AS_DATAFILE to prevent a BadImageFormatException from being thrown if the file
 			 * is a different processor architecture than the parent process.
 			 */
@@ -1835,6 +1833,7 @@ namespace PSFilterLoad.PSApi
 					enumResList = new List<PluginData>();
 					enumFileName = fileName;
 					bool needsRelease = false;
+                    System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions();
 					try
 					{
 
@@ -1846,8 +1845,6 @@ namespace PSFilterLoad.PSApi
 															  select p;
 							pluginData.AddRange(plugins);
 
-							result = pluginData.Count > 0;
-							
 						}// if there are no PiPL resources scan for Photoshop 2.5's PiMI resources. 
 						else if (UnsafeNativeMethods.EnumResourceNamesW(dll.DangerousGetHandle(), "PiMI", new UnsafeNativeMethods.EnumResNameDelegate(EnumPiMI), IntPtr.Zero))
 						{
@@ -1855,8 +1852,6 @@ namespace PSFilterLoad.PSApi
 															  where !string.IsNullOrEmpty(p.entryPoint)
 															  select p;
 							pluginData.AddRange(plugins);
-
-							result = pluginData.Count > 0;
 						}
 #if DEBUG
 						else
@@ -1885,7 +1880,7 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
-			return result;
+			return pluginData.Count > 0;
 		}
 
 		private string error_message(short error)
