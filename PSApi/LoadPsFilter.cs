@@ -1996,7 +1996,7 @@ namespace PSFilterLoad.PSApi
 		/// <returns>
 		///   <c>true</c> if a single plane of data is requested; otherwise, <c>false</c>.
 		/// </returns>
-		private unsafe bool IsSinglePlane(FilterRecord* fr, bool outData)
+		private static unsafe bool IsSinglePlane(FilterRecord* fr, bool outData)
 		{
 			if (outData)
 			{
@@ -2013,7 +2013,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="inRect">The new source rectangle.</param>
 		/// <param name="loplane">The loplane.</param>
 		/// <param name="hiplane">The hiplane.</param>
-		/// <returns> <c>true</c> if a the buffer nedds to be resized; otherwise, <c>false</c></returns>
+		/// <returns> <c>true</c> if a the buffer needs to be resized; otherwise, <c>false</c></returns>
 		private static unsafe bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loplane, int hiplane)
 		{
 			long size = Memory.Size(inData);
@@ -5657,6 +5657,12 @@ namespace PSFilterLoad.PSApi
 						scaledChannelSurface.Dispose();
 						scaledChannelSurface = null;
 					}
+
+                    if (scaledSelectionMask != null)
+                    {
+                        scaledSelectionMask.Dispose();
+                        scaledSelectionMask = null;
+                    }
 				}
 
 				if (platFormDataPtr != IntPtr.Zero)
