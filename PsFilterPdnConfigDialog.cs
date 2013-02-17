@@ -464,7 +464,7 @@ namespace PSFilterPdn
 		private string destFileName;
 		private string parameterDataFileName;
 		private string resourceDataFileName;
-		private string rdwPath;
+		private string regionFileName;
 		private PluginData proxyData;
 
 		private void proxyProcess_Exited(object sender, EventArgs e)
@@ -475,9 +475,9 @@ namespace PSFilterPdn
 
 				File.Delete(srcFileName);
 				File.Delete(destFileName);
-				if (!string.IsNullOrEmpty(rdwPath))
+				if (!string.IsNullOrEmpty(regionFileName))
 				{
-					File.Delete(rdwPath);
+					File.Delete(regionFileName);
 				}
 				File.Delete(parameterDataFileName);
 				File.Delete(resourceDataFileName);
@@ -504,7 +504,7 @@ namespace PSFilterPdn
 
 			parameterDataFileName = Path.Combine(userDataPath, "filterParameters.dat");
 			resourceDataFileName = Path.Combine(userDataPath, "pseudoResources.dat"); ;
-			rdwPath = string.Empty;
+			regionFileName = string.Empty;
 
 
 			Rectangle sourceBounds = eep.SourceSurface.Bounds;
@@ -513,10 +513,10 @@ namespace PSFilterPdn
 
 			if (selection != sourceBounds)
 			{
-				rdwPath = Path.Combine(userDataPath, "selection.dat");
+				regionFileName = Path.Combine(userDataPath, "selection.dat");
 				RegionDataWrapper selectedRegion = new RegionDataWrapper(eep.GetSelection(sourceBounds).GetRegionData());
 
-				using (FileStream fs = new FileStream(rdwPath, FileMode.Create, FileAccess.Write))
+				using (FileStream fs = new FileStream(regionFileName, FileMode.Create, FileAccess.Write))
 				{
 					BinaryFormatter bf = new BinaryFormatter();
 					bf.Serialize(fs, selectedRegion);
@@ -534,7 +534,7 @@ namespace PSFilterPdn
 				parentHandle = this.Handle,
 				primary = eep.PrimaryColor.ToColor(),
 				secondary = eep.SecondaryColor.ToColor(),
-				regionFileName = rdwPath,
+				regionFileName = regionFileName,
 				parameterDataFileName = parameterDataFileName,
 				resourceFileName = resourceDataFileName,
 				errorCallback = new Action<string>(SetProxyErrorResult),
@@ -765,10 +765,6 @@ namespace PSFilterPdn
 										this.pseudoResources.AddRange(lps.PseudoResources);
 									}
 
-									if (filterProgressBar.Value < filterProgressBar.Maximum)
-									{
-										filterProgressBar.Value = filterProgressBar.Maximum;
-									}
 								}
 								else if (!string.IsNullOrEmpty(lps.ErrorMessage))
 								{
@@ -808,8 +804,7 @@ namespace PSFilterPdn
 						}
 						catch (System.Runtime.InteropServices.ExternalException eex)
 						{
-							MessageBox.Show(this, eex.Message, this.Text,
-								MessageBoxButtons.OK, MessageBoxIcon.Error);
+							MessageBox.Show(this, eex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 						}
 						finally
 						{
