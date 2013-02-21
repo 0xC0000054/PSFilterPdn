@@ -583,8 +583,8 @@ namespace PSFilterPdn
 				if (proxyProcess == null)
 				{
 					proxyProcess = new Process();				
-                    proxyProcess.EnableRaisingEvents = true;
-				    proxyProcess.Exited += new EventHandler(proxyProcess_Exited);
+					proxyProcess.EnableRaisingEvents = true;
+					proxyProcess.Exited += new EventHandler(proxyProcess_Exited);
 				} 
 				proxyProcess.StartInfo = psi;
 #if DEBUG
@@ -911,12 +911,12 @@ namespace PSFilterPdn
 			for (int i = 0; i < length; i++)
 			{
 
-                List<string> files = new List<string>();
+				List<string> files = new List<string>();
 
-                foreach (var item in FastDirectoryEnumerator.EnumerateFiles(parm.dirlist[i], "*.8bf", parm.options))
-                {
-                    files.Add(item.Path);
-                }
+				foreach (var item in FastDirectoryEnumerator.EnumerateFiles(parm.dirlist[i], "*.8bf", parm.options))
+				{
+					files.Add(item.Path);
+				}
 
 				var links = FastDirectoryEnumerator.EnumerateFiles(parm.dirlist[i], "*.lnk", parm.options);
 				if (links.Count() > 0)
@@ -944,28 +944,24 @@ namespace PSFilterPdn
 						return;
 					}
 
-					
 					if (LoadPsFilter.QueryPlugin(file, out pd))
 					{
 						foreach (var item in pd)
 						{
+							TreeNode child = new TreeNode(item.title) { Name = item.title, Tag = item };
+
 							if (nodes.ContainsKey(item.category))
 							{
-								TreeNode node = nodes[item.category];
-								TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
-								if (IsNotDuplicateNode(ref node, item))
+								TreeNode parent = nodes[item.category];
+								if (IsNotDuplicateNode(ref parent, item))
 								{
-									node.Nodes.Add(subNode);
+									parent.Nodes.Add(child);
 								}
 							}
 							else
 							{
-								TreeNode node = new TreeNode(item.category) { Name = item.category };
-
-								TreeNode subNode = new TreeNode(item.title) { Name = item.title, Tag = item };
-
-								node.Nodes.Add(subNode);
-
+								TreeNode node = new TreeNode(item.category, new TreeNode[] { child }) { Name = item.category };
+								
 								nodes.Add(item.category, node);
 							}
 						} 
@@ -985,9 +981,8 @@ namespace PSFilterPdn
 		/// Checks if the plugin is already contained in the list, and replaces it if the new plugin is 64-bit and the old one is 32-bit on a 64-bit OS.
 		/// </summary>
 		/// <param name="parent">The parent TreeNode to check</param>
-		/// <param name="childText">The child TreeNode.</param>
 		/// <param name="data">The PluginData to check.</param>
-		/// <returns>True if the item is a duplicate, otherwise false.</returns>
+		/// <returns>True if the item is a duplicate; otherwise false.</returns>
 		private static bool IsNotDuplicateNode(ref TreeNode parent, PluginData data)
 		{
 			if (IntPtr.Size == 8)
@@ -1155,10 +1150,10 @@ namespace PSFilterPdn
 				searchDirListView.Items.Add(effectsDir);
 				foundEffectsDir = true;
 
-                if (string.IsNullOrEmpty(dirs))
-                {
-                    UpdateFilterList();
-                }
+				if (string.IsNullOrEmpty(dirs))
+				{
+					UpdateFilterList();
+				}
 			}
 
 			if (!string.IsNullOrEmpty(dirs))
@@ -1199,28 +1194,28 @@ namespace PSFilterPdn
 				}
 
 				string path = Path.Combine(userDataPath, @"PSFilterPdn.xml");
-                if (!File.Exists(path))
-                {
-                    using (Stream res = Assembly.GetAssembly(typeof(PSFilterPdnEffect)).GetManifestResourceStream(@"PSFilterPdn.PSFilterPdn.xml"))
-                    {
-                        byte[] bytes = new byte[res.Length];
-                        int numBytesToRead = (int)res.Length;
-                        int numBytesRead = 0;
-                        while (numBytesToRead > 0)
-                        {
-                            // Read may return anything from 0 to numBytesToRead.
-                            int n = res.Read(bytes, numBytesRead, numBytesToRead);
-                            // The end of the file is reached.
-                            if (n == 0)
-                                break;
-                            numBytesRead += n;
-                            numBytesToRead -= n;
-                        }
-                        File.WriteAllBytes(path, bytes);
-                    }
-                }
-                
-                settings = new Settings(path);
+				if (!File.Exists(path))
+				{
+					using (Stream res = Assembly.GetAssembly(typeof(PSFilterPdnEffect)).GetManifestResourceStream(@"PSFilterPdn.PSFilterPdn.xml"))
+					{
+						byte[] bytes = new byte[res.Length];
+						int numBytesToRead = (int)res.Length;
+						int numBytesRead = 0;
+						while (numBytesToRead > 0)
+						{
+							// Read may return anything from 0 to numBytesToRead.
+							int n = res.Read(bytes, numBytesRead, numBytesToRead);
+							// The end of the file is reached.
+							if (n == 0)
+								break;
+							numBytesRead += n;
+							numBytesToRead -= n;
+						}
+						File.WriteAllBytes(path, bytes);
+					}
+				}
+				
+				settings = new Settings(path);
 			}
 		}
 
@@ -1402,7 +1397,7 @@ namespace PSFilterPdn
 			// make sure a filter is not already running
 			if ((filterTree.SelectedNode != null) && filterTree.SelectedNode.Tag != null)
 			{
-                runFilterBtn_Click(this, EventArgs.Empty);
+				runFilterBtn_Click(this, EventArgs.Empty);
 			}
 		}
 
@@ -1435,7 +1430,7 @@ namespace PSFilterPdn
 			if ((filterTree.SelectedNode != null) && filterTree.SelectedNode.Tag != null && e.KeyCode == Keys.Enter)
 			{
 				e.Handled = true;
-                runFilterBtn_Click(this, EventArgs.Empty);
+				runFilterBtn_Click(this, EventArgs.Empty);
 			}
 			else
 			{
