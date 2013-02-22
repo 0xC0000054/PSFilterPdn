@@ -419,7 +419,7 @@ namespace PSFilterPdn
 		}
 
 		/// <summary>
-		/// Binds the serialzation to types in the currently loaded assembly. 
+		/// Binds the serialization to types in the currently loaded assembly. 
 		/// </summary>
 		private class SelfBinder : System.Runtime.Serialization.SerializationBinder
 		{
@@ -610,27 +610,21 @@ namespace PSFilterPdn
 			}
 		}
 
-		private bool GetShowAboutChecked()
-		{
-			bool value = false;
+		private void SetProxyResultData()
+		{ 
+			bool showAbout = false;
+
 			if (base.InvokeRequired)
 			{
-				value = (bool)base.Invoke(new Func<bool>(delegate()
+				showAbout = (bool)base.Invoke(new Func<bool>(delegate()
 				{
 					return this.showAboutBoxCb.Checked;
 				}));
 			}
 			else
 			{
-				value = this.showAboutBoxCb.Checked;
+				showAbout = this.showAboutBoxCb.Checked;
 			}
-			
-			return value;
-		}
-
-		private void SetProxyResultData()
-		{ 
-			bool showAbout = GetShowAboutChecked();
 
 			if (proxyResult && !showAbout && File.Exists(destFileName))
 			{
@@ -886,7 +880,7 @@ namespace PSFilterPdn
 
 					filterTree.Nodes.Clear();
 
-					fldrLoadProgBar.Maximum = searchDirListView.Items.Count;
+					fldrLoadProgBar.Maximum = count;
 					fldrLoadProgBar.Step = 1;
 					fltrLoadProressPanel.Visible = true;
 					fldrLoadCountLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_fldrLoadCountLbl_Format, "0", searchDirListView.Items.Count);
@@ -919,17 +913,18 @@ namespace PSFilterPdn
 				}
 
 				var links = FastDirectoryEnumerator.EnumerateFiles(parm.dirlist[i], "*.lnk", parm.options);
-				if (links.Count() > 0)
+				if (links.Any())
 				{
 					using (ShellLink link = new ShellLink())
 					{
 						foreach (var item in links)
 						{
 							link.Load(item.Path);
-							FileInfo info = new FileInfo(link.Path);
-							if (info.Exists && info.Extension.Equals(".8bf", StringComparison.OrdinalIgnoreCase))
+							string fileName = link.Path;
+
+							if (File.Exists(fileName) && Path.GetExtension(fileName).Equals(".8bf", StringComparison.OrdinalIgnoreCase))
 							{
-								files.Add(info.FullName);
+								files.Add(fileName);
 							}
 						} 
 					}
