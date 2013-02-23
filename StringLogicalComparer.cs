@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using System.Globalization;
 
-namespace ns
+namespace PSFilterPdn
 {
     internal sealed class StringLogicalComparer : IComparer
     {
