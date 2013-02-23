@@ -14,7 +14,7 @@ namespace PSFilterPdn
         public int Compare(object x, object y)
         {
             int returnVal = -1;
-            returnVal = PSFilterPdn.StringLogicalComparer.Compare(((TreeNode)x).Text,
+            returnVal = StringLogicalComparer.Compare(((TreeNode)x).Text,
                                     ((TreeNode)y).Text);
             // Determine whether the sort order is descending.
             if (order == SortOrder.Descending)
