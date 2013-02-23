@@ -32,6 +32,23 @@ namespace PSFilterLoad.PSApi
         public bool runWith32BitShim;
         [DataMember]
         public AETEData aete;
+
+        public PluginData()
+        {
+            this.fileName = string.Empty;
+            this.entryPoint = string.Empty;
+            this.category = string.Empty;
+            this.title = string.Empty;
+            this.filterInfo = null;
+            this.entry = new PIEntrypoint();
+            this.runWith32BitShim = false;
+            this.aete = null;
+        }
+
+        public bool IsValid()
+        {
+            return (!string.IsNullOrEmpty(this.category) && !string.IsNullOrEmpty(this.title) && !string.IsNullOrEmpty(this.entryPoint));
+        }
     }
 
     internal struct PIEntrypoint
