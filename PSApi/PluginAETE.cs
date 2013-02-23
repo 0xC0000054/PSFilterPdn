@@ -44,7 +44,8 @@ namespace PSFilterLoad.PSApi
 
     internal sealed class PluginAETE
     {
-        public short version;
+        public short major;
+        public short minor;
         public short suiteLevel;
         public short suiteVersion;
 
