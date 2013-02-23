@@ -112,8 +112,12 @@ namespace PSFilterLoad.PSApi
 				enumAETE = new PluginAETE();
 
 				byte* ptr = (byte*)loadRes.ToPointer() + 2;
-				enumAETE.version = *(short*)ptr;
-				ptr += 2;
+                
+                short version = *(short*)ptr;
+                ptr += 2;
+				
+                enumAETE.major = (short)(version & 0xffff);
+                enumAETE.minor = (short)((version >> 16) & 0xffff);
 
 				short lang = *(short*)ptr;
 				ptr += 2;
@@ -408,15 +412,11 @@ namespace PSFilterLoad.PSApi
 
 					if (enumAETE != null)
 					{
-						if (((HiWord(enumAETE.version) > 1) || (HiWord(enumAETE.version) == 1 && LoWord(enumAETE.version) > 0)) ||
-										(enumAETE.suiteLevel > 1 || enumAETE.suiteVersion > 1 || enumAETE.events[0].classCount > 0))
+						if (enumAETE.major == 1 && enumAETE.minor == 0 && enumAETE.suiteLevel == 1 && enumAETE.suiteVersion == 1 && enumAETE.events[0].classCount == 0)
 						{
-							enumAETE = null; // ignore it if it is a newer version.
+                            enumData.aete = new AETEData(enumAETE); // Filter out any newer versions.
 						}
-						else
-						{
-							enumData.aete = new AETEData(enumAETE);
-						} 
+						
 					}
 
 
@@ -433,7 +433,10 @@ namespace PSFilterLoad.PSApi
 				propPtr += (16 + propertyDataPaddedLength);
 			}
 
-			AddFoundPluginData(enumData); // add each plugin found in the file to the query list
+            if (enumData.IsValid())
+            {
+                AddFoundPluginData(enumData); // add each plugin found in the file to the query list
+            }
 
 			return true;
 		}
@@ -564,22 +567,14 @@ namespace PSFilterLoad.PSApi
 			enumData.runWith32BitShim = true; // these filters should always be 32-bit
 			enumData.filterInfo = null;
 
-			AddFoundPluginData(enumData); // add each plugin found in the file to the query list
+            if (enumData.IsValid())
+            {
+                AddFoundPluginData(enumData); // add each plugin found in the file to the query list
+            }
 
 			return true;
 		}
 
-		private static int LoWord(int dwValue)
-		{
-			return (dwValue & 0xFFFF);
-		}
-
-		private static int HiWord(int dwValue)
-		{
-			return (dwValue >> 16) & 0xFFFF;
-		}
-		
-		
 		private static List<PluginData> enumResList;
 		private static string enumFileName;
 
@@ -1840,18 +1835,12 @@ namespace PSFilterLoad.PSApi
 						dll.DangerousAddRef(ref needsRelease);
 						if (UnsafeNativeMethods.EnumResourceNamesW(dll.DangerousGetHandle(), "PiPl", new UnsafeNativeMethods.EnumResNameDelegate(EnumPiPL), IntPtr.Zero))
 						{
-							IEnumerable<PluginData> plugins = from p in enumResList
-															  where !string.IsNullOrEmpty(p.entryPoint)
-															  select p;
-							pluginData.AddRange(plugins);
+							pluginData.AddRange(enumResList);
 
 						}// if there are no PiPL resources scan for Photoshop 2.5's PiMI resources. 
 						else if (UnsafeNativeMethods.EnumResourceNamesW(dll.DangerousGetHandle(), "PiMI", new UnsafeNativeMethods.EnumResNameDelegate(EnumPiMI), IntPtr.Zero))
 						{
-							IEnumerable<PluginData> plugins = from p in enumResList
-															  where !string.IsNullOrEmpty(p.entryPoint)
-															  select p;
-							pluginData.AddRange(plugins);
+							pluginData.AddRange(enumResList);
 						}
 #if DEBUG
 						else
