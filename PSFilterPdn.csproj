@@ -141,7 +141,7 @@
     <Compile Include="PSApi\AETEValue.cs" />
     <Compile Include="PSApi\ChannelPortsProcs.cs" />
     <Compile Include="PSApi\DescriptorTypes.cs" />
-    <Compile Include="PSApi\DictonaryExtensions.cs" />
+    <Compile Include="PSApi\DictionaryExtensions.cs" />
     <Compile Include="PSApi\GlobalParameters.cs" />
     <Compile Include="PSApi\HostPadding.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
