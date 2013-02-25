@@ -1,9 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// Adapted from:
+/////////////////////////////////////////////////////////////////////////////////
+// Paint.NET                                                                   //
+// Copyright (C) dotPDN LLC, Rick Brewster, Tom Jackson, and contributors.     //
+// Portions Copyright (C) Microsoft Corporation. All Rights Reserved.          //
+// See src/Resources/Files/License.txt for full licensing and attribution      //
+// details.                                                                    //
+// .                                                                           //
+/////////////////////////////////////////////////////////////////////////////////
+
+using System;
 using System.Runtime.InteropServices;
-using System.ComponentModel;
 
 namespace PSFilterLoad.PSApi
 {
@@ -137,9 +143,7 @@ namespace PSFilterLoad.PSApi
 
         public static void FreeLarge(IntPtr block, ulong bytes)
         {
-            bool result = SafeNativeMethods.VirtualFree(block, UIntPtr.Zero, NativeConstants.MEM_RELEASE);
-
-            if (!result)
+            if (!SafeNativeMethods.VirtualFree(block, UIntPtr.Zero, NativeConstants.MEM_RELEASE))
             {
                 int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
                 throw new InvalidOperationException("VirtualFree returned an error: " + error.ToString());

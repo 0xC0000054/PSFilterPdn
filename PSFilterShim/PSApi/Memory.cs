@@ -1,9 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// Adapted from:
+/////////////////////////////////////////////////////////////////////////////////
+// Paint.NET                                                                   //
+// Copyright (C) dotPDN LLC, Rick Brewster, Tom Jackson, and contributors.     //
+// Portions Copyright (C) Microsoft Corporation. All Rights Reserved.          //
+// See src/Resources/Files/License.txt for full licensing and attribution      //
+// details.                                                                    //
+// .                                                                           //
+/////////////////////////////////////////////////////////////////////////////////
+
+using System;
 using System.Runtime.InteropServices;
-using System.ComponentModel;
 
 namespace PSFilterLoad.PSApi
 {
@@ -11,10 +17,10 @@ namespace PSFilterLoad.PSApi
 	{
 		private static IntPtr hHeap;
 
-        static Memory()
-        {
-            hHeap = SafeNativeMethods.GetProcessHeap();
-        }
+		static Memory()
+		{
+			hHeap = SafeNativeMethods.GetProcessHeap();
+		}
 
 
 		public static IntPtr Allocate(int size, bool zeroMemory)
@@ -28,15 +34,15 @@ namespace PSFilterLoad.PSApi
 			try
 			{
 				UIntPtr bytes = new UIntPtr((ulong)size);
-                block = SafeNativeMethods.HeapAlloc(hHeap, zeroMemory ? 8U : 0U, bytes);
+				block = SafeNativeMethods.HeapAlloc(hHeap, zeroMemory ? 8U : 0U, bytes);
 			}
-			catch (OverflowException ex)
+			catch (OverflowException)
 			{
-				throw new OutOfMemoryException(string.Format("Overflow while trying to allocate {0} bytes", size.ToString("N")), ex);
+				throw new OutOfMemoryException();
 			}
 			if (block == IntPtr.Zero)
 			{
-				throw new OutOfMemoryException(string.Format("HeapAlloc returned a null pointer while trying to allocate {0} bytes", size.ToString("N")));
+				throw new OutOfMemoryException();
 			}
 			
 			if (size > 0L)
@@ -52,70 +58,70 @@ namespace PSFilterLoad.PSApi
 		{
 			if (hHeap != IntPtr.Zero)
 			{
-                long size = (long)SafeNativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
-                if (!SafeNativeMethods.HeapFree(hHeap, 0, hMem))
+				long size = (long)SafeNativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
+				if (!SafeNativeMethods.HeapFree(hHeap, 0, hMem))
 				{
 					int error = Marshal.GetLastWin32Error();
 
 					throw new InvalidOperationException(string.Format("HeapFree returned an error {0}", error.ToString("X8", System.Globalization.CultureInfo.InvariantCulture)));
 				}
 
-                if (size > 0L)
-                {
-                    GC.RemoveMemoryPressure(size);
-                }
+				if (size > 0L)
+				{
+					GC.RemoveMemoryPressure(size);
+				}
 			}
 		}
 
-        public static IntPtr ReAlloc(IntPtr pv, int newSize)
-        {
-            if (hHeap == IntPtr.Zero)
-            {
-                throw new InvalidOperationException("heap has already been destroyed");
-            }
-            IntPtr block = IntPtr.Zero;
+		public static IntPtr ReAlloc(IntPtr pv, int newSize)
+		{
+			if (hHeap == IntPtr.Zero)
+			{
+				throw new InvalidOperationException("heap has already been destroyed");
+			}
+			IntPtr block = IntPtr.Zero;
 
-            long oldSize = Size(pv);
+			long oldSize = Size(pv);
 
-            try
-            {
-                UIntPtr bytes = new UIntPtr((ulong)newSize);
-                block = SafeNativeMethods.HeapReAlloc(hHeap, 0U, pv, bytes);
-            }
-            catch (OverflowException ex)
-            {
-                throw new OutOfMemoryException(string.Format("Overflow while trying to allocate {0} bytes", newSize.ToString("N")), ex);
-            }
-            if (block == IntPtr.Zero)
-            {
-                throw new OutOfMemoryException(string.Format("HeapAlloc returned a null pointer while trying to allocate {0} bytes", newSize.ToString("N")));
-            }
+			try
+			{
+				UIntPtr bytes = new UIntPtr((ulong)newSize);
+				block = SafeNativeMethods.HeapReAlloc(hHeap, 0U, pv, bytes);
+			}
+			catch (OverflowException)
+			{
+				throw new OutOfMemoryException();
+			}
+			if (block == IntPtr.Zero)
+			{
+				throw new OutOfMemoryException();
+			}
 
-            if (oldSize > 0L)
-            {
-                GC.RemoveMemoryPressure(oldSize);
-            }
+			if (oldSize > 0L)
+			{
+				GC.RemoveMemoryPressure(oldSize);
+			}
 
-            if (newSize > 0)
-            {
-                GC.AddMemoryPressure((long)newSize);
-            }
+			if (newSize > 0)
+			{
+				GC.AddMemoryPressure((long)newSize);
+			}
 
-            return block;
-        }
+			return block;
+		}
 
-        public static long Size(IntPtr hMem)
-        {
+		public static long Size(IntPtr hMem)
+		{
 
-            if (hHeap != IntPtr.Zero)
-            {
-                long size = (long)SafeNativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
+			if (hHeap != IntPtr.Zero)
+			{
+				long size = (long)SafeNativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
 
-                return size;
-            }
+				return size;
+			}
 
-            return 0L;
-        }
+			return 0L;
+		}
 
 	}
 }
