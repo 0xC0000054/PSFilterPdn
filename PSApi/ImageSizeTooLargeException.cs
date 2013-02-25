@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace PSFilterLoad.PSApi
 {
     /// <summary>
-    /// The exception that occurs when the image size exceeds 32000 pixels.
+    /// The exception that occurs when the image size exceeds 32000 pixels in width or height.
     /// </summary>
     [Serializable]
     public sealed class ImageSizeTooLargeException : Exception, ISerializable
@@ -12,20 +12,17 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageSizeTooLargeException"/> class.
         /// </summary>
-        public ImageSizeTooLargeException()
-            : base("An ImageSizeTooLargeException has occured")
+        public ImageSizeTooLargeException() : base("An ImageSizeTooLargeException has occurred")
         {
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageSizeTooLargeException"/> class.
         /// </summary>
         /// <param name="message">The message to display.</param>
-        public ImageSizeTooLargeException(string message)
-            : base(message)
+        public ImageSizeTooLargeException(string message) : base(message)
         {
         }
-        private ImageSizeTooLargeException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
+        private ImageSizeTooLargeException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
 
