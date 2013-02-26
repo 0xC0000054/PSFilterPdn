@@ -94,17 +94,14 @@ namespace PSFilterPdn
         /// object wraps.</param>
         internal FileData(string dir, WIN32_FIND_DATA findData) 
         {
-            this.Attributes = findData.dwFileAttributes;
+            this.Attributes = (FileAttributes)findData.dwFileAttributes;
 
 
-            this.CreationTimeUtc = ConvertDateTime(findData.ftCreationTime_dwHighDateTime, 
-                                                findData.ftCreationTime_dwLowDateTime);
+            this.CreationTimeUtc = ConvertDateTime(findData.ftCreationTime);
 
-            this.LastAccessTimeUtc = ConvertDateTime(findData.ftLastAccessTime_dwHighDateTime,
-                                                findData.ftLastAccessTime_dwLowDateTime);
+            this.LastAccessTimeUtc = ConvertDateTime(findData.ftLastAccessTime);
 
-            this.LastWriteTimeUtc = ConvertDateTime(findData.ftLastWriteTime_dwHighDateTime,
-                                                findData.ftLastWriteTime_dwLowDateTime);
+            this.LastWriteTimeUtc = ConvertDateTime(findData.ftLastWriteTime);
 
             this.Size = CombineHighLowInts(findData.nFileSizeHigh, findData.nFileSizeLow);
 
@@ -117,46 +114,59 @@ namespace PSFilterPdn
             return (((long)high) << 0x20) | low;
         }
 
-        private static DateTime ConvertDateTime(uint high, uint low)
+        private static DateTime ConvertDateTime(FILETIME time)
         {
-            long fileTime = CombineHighLowInts(high, low);
+            long fileTime = CombineHighLowInts(time.dwHighDateTime, time.dwLowDateTime);
             return DateTime.FromFileTimeUtc(fileTime);
         }
     }
 
-    /// <summary>
-    /// Contains information about the file that is found 
-    /// by the FindFirstFile or FindNextFile functions.
-    /// </summary>
-    [Serializable, StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto), BestFitMapping(false)]
-    internal class WIN32_FIND_DATA
+    [StructLayoutAttribute(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    internal struct WIN32_FIND_DATA
     {
-        public FileAttributes dwFileAttributes;
-        public uint ftCreationTime_dwLowDateTime;
-        public uint ftCreationTime_dwHighDateTime;
-        public uint ftLastAccessTime_dwLowDateTime;
-        public uint ftLastAccessTime_dwHighDateTime;
-        public uint ftLastWriteTime_dwLowDateTime;
-        public uint ftLastWriteTime_dwHighDateTime;
+
+        /// DWORD->unsigned int
+        public uint dwFileAttributes;
+
+        /// FILETIME->_FILETIME
+        public FILETIME ftCreationTime;
+
+        /// FILETIME->_FILETIME
+        public FILETIME ftLastAccessTime;
+
+        /// FILETIME->_FILETIME
+        public FILETIME ftLastWriteTime;
+
+        /// DWORD->unsigned int
         public uint nFileSizeHigh;
+
+        /// DWORD->unsigned int
         public uint nFileSizeLow;
-        public int dwReserved0;
-        public int dwReserved1;
+
+        /// DWORD->unsigned int
+        public uint dwReserved0;
+
+        /// DWORD->unsigned int
+        public uint dwReserved1;
+
+        /// WCHAR[260]
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
         public string cFileName;
+
+        /// WCHAR[14]
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 14)]
         public string cAlternateFileName;
+    }
 
-        /// <summary>
-        /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
-        /// </returns>
-        public override string ToString()
-        {
-            return "File name=" + cFileName;
-        }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    internal struct FILETIME
+    {
+
+        /// DWORD->unsigned int
+        public uint dwLowDateTime;
+
+        /// DWORD->unsigned int
+        public uint dwHighDateTime;
     }
 
     /// <summary>
@@ -166,7 +176,7 @@ namespace PSFilterPdn
     /// <remarks>
     /// This enumerator is substantially faster than using <see cref="Directory.GetFiles(string)"/>
     /// and then creating a new FileInfo object for each path.  Use this version when you 
-    /// will need to look at the attibutes of each file returned (for example, you need
+    /// will need to look at the attributes of each file returned (for example, you need
     /// to check each file in a directory to see if it was modified after a specific date).
     /// </remarks>
     internal static class FastDirectoryEnumerator
@@ -332,17 +342,28 @@ namespace PSFilterPdn
 
             #endregion
         }
+        
+        [System.Security.SuppressUnmanagedCodeSecurity]
+        private static class UnsafeNativeMethods
+        {
+            [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+            [DllImport("kernel32.dll")]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            internal static extern bool FindClose(IntPtr handle);
+
+            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+            internal static extern SafeFindHandle FindFirstFileW([In] string fileName, out WIN32_FIND_DATA data);
+
+            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            internal static extern bool FindNextFileW([In] SafeFindHandle hndFindFile, out WIN32_FIND_DATA lpFindFileData);
+        }
 
         /// <summary>
         /// Wraps a FindFirstFile handle.
         /// </summary>
         private sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
         {
-            [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-            [DllImport("kernel32.dll")]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            private static extern bool FindClose(IntPtr handle);
-
             /// <summary>
             /// Initializes a new instance of the <see cref="SafeFindHandle"/> class.
             /// </summary>
@@ -362,7 +383,7 @@ namespace PSFilterPdn
             /// </returns>
             protected override bool ReleaseHandle()
             {
-                return FindClose(base.handle);
+                return UnsafeNativeMethods.FindClose(base.handle);
             }
         }
 
@@ -370,17 +391,8 @@ namespace PSFilterPdn
         /// Provides the implementation of the 
         /// <see cref="T:System.Collections.Generic.IEnumerator`1"/> interface
         /// </summary>
-        [System.Security.SuppressUnmanagedCodeSecurity]
         private class FileEnumerator : IEnumerator<FileData>
         {
-            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-            private static extern SafeFindHandle FindFirstFile(string fileName, 
-                [In, Out] WIN32_FIND_DATA data);
-
-            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            private static extern bool FindNextFile(SafeFindHandle hndFindFile, 
-                    [In, Out, MarshalAs(UnmanagedType.LPStruct)] WIN32_FIND_DATA lpFindFileData);
 
             /// <summary>
             /// Hold context information about where we current are in the directory search.
@@ -496,13 +508,13 @@ namespace PSFilterPdn
                         new FileIOPermission(FileIOPermissionAccess.PathDiscovery, m_path).Demand();
 
                         string searchPath = Path.Combine(m_path, m_filter);
-                        m_hndFindFile = FindFirstFile(searchPath, m_win_find_data);
+                        m_hndFindFile = UnsafeNativeMethods.FindFirstFileW(searchPath, out m_win_find_data);
                         retval = !m_hndFindFile.IsInvalid;
                     }
                     else
                     {
                         //Otherwise, find the next item.
-                        retval = FindNextFile(m_hndFindFile, m_win_find_data);
+                        retval =  UnsafeNativeMethods.FindNextFileW(m_hndFindFile, out m_win_find_data);
                     }
                 }
 
