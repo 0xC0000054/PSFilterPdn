@@ -287,6 +287,7 @@ namespace PSFilterPdn
 			// 
 			// runFilterBtn
 			// 
+			this.runFilterBtn.Enabled = false;
 			this.runFilterBtn.Location = new System.Drawing.Point(243, 266);
 			this.runFilterBtn.Name = "runFilterBtn";
 			this.runFilterBtn.Size = new System.Drawing.Size(75, 23);
@@ -1096,10 +1097,10 @@ namespace PSFilterPdn
 
 		private void filterTree_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			if (filterTree.SelectedNode.Tag != null)
+			if (e.Node.Tag != null)
 			{
 				runFilterBtn.Enabled = true;
-				fileNameLbl.Text = Path.GetFileName(((PluginData)filterTree.SelectedNode.Tag).fileName);
+				fileNameLbl.Text = Path.GetFileName(((PluginData)e.Node.Tag).fileName);
 			}
 			else
 			{
@@ -1307,14 +1308,12 @@ namespace PSFilterPdn
 						if (nodes.ContainsKey(item.Value)) 
 						{
 							TreeNode node = nodes[item.Value];
-							TreeNode subnode = new TreeNode(title) { Name = child.Name, Tag = child.Tag };
-							node.Nodes.Add(subnode);
+							node.Nodes.Add(child.CloneT<TreeNode>());
 						}
 						else
 						{
 							TreeNode node = new TreeNode(item.Value); // the parent category
-							TreeNode subnode = new TreeNode(title) { Name = child.Name, Tag = child.Tag }; 
-							node.Nodes.Add(subnode);
+							node.Nodes.Add(child.CloneT<TreeNode>());
 
 							nodes.Add(item.Value, node);
 						}
