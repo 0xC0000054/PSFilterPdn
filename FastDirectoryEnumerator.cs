@@ -400,7 +400,7 @@ namespace PSFilterPdn
             private class SearchContext
             {
                 public readonly string Path;
-                public Stack<string> SubdirectoriesToProcess;
+                public Queue<string> SubdirectoriesToProcess;
 
                 public SearchContext(string path)
                 {
@@ -411,7 +411,7 @@ namespace PSFilterPdn
             private string m_path;
             private string m_filter;
             private SearchOption m_searchOption;
-            private Stack<SearchContext> m_contextStack;
+            private Queue<SearchContext> m_contextStack;
             private SearchContext m_currentContext;
 
             private SafeFindHandle m_hndFindFile;
@@ -435,7 +435,7 @@ namespace PSFilterPdn
                 
                 if (m_searchOption == SearchOption.AllDirectories)
                 {
-                    m_contextStack = new Stack<SearchContext>();
+                    m_contextStack = new Queue<SearchContext>();
                 }
             }
 
@@ -521,7 +521,7 @@ namespace PSFilterPdn
                 //If the call to FindNextFile or FindFirstFile succeeded...
                 if (retval)
                 {
-                    if (((FileAttributes)m_win_find_data.dwFileAttributes & FileAttributes.Directory) == FileAttributes.Directory)
+                    if ((m_win_find_data.dwFileAttributes & 16) == 16)
                     {
                         //Ignore folders for now.   We call MoveNext recursively here to 
                         // move to the next item that FindNextFile will return.
@@ -538,14 +538,14 @@ namespace PSFilterPdn
                     if (m_currentContext.SubdirectoriesToProcess == null)
                     {
                         string[] subDirectories = Directory.GetDirectories(m_path);
-                        m_currentContext.SubdirectoriesToProcess = new Stack<string>(subDirectories);
+                        m_currentContext.SubdirectoriesToProcess = new Queue<string>(subDirectories);
                     }
 
                     if (m_currentContext.SubdirectoriesToProcess.Count > 0)
                     {
-                        string subDir = m_currentContext.SubdirectoriesToProcess.Pop();
+                        string subDir = m_currentContext.SubdirectoriesToProcess.Dequeue();
 
-                        m_contextStack.Push(m_currentContext);
+                        m_contextStack.Enqueue(m_currentContext);
                         m_path = subDir;
                         m_hndFindFile = null;
                         m_currentContext = new SearchContext(m_path);
@@ -557,7 +557,7 @@ namespace PSFilterPdn
                     // continue the search from there.
                     if (m_contextStack.Count > 0)
                     {
-                        m_currentContext = m_contextStack.Pop();
+                        m_currentContext = m_contextStack.Dequeue();
                         m_path = m_currentContext.Path;
                         if (m_hndFindFile != null)
                         {
