@@ -404,10 +404,10 @@ namespace PSFilterLoad.PSApi
         public short descriptorParametersVersion;
 
         /// int16->short
-        public short playInfo;
+        public PlayInfo playInfo;
 
         /// int16->short
-        public short recordInfo;
+        public RecordInfo recordInfo;
 
         /// PIDescriptorHandle->Handle->LPSTR*
         public System.IntPtr descriptor;

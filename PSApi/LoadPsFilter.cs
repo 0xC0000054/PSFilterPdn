@@ -5422,11 +5422,11 @@ namespace PSFilterLoad.PSApi
 			descriptorParameters->writeDescriptorProcs = writeDescriptorPtr;
 			if (!isRepeatEffect)
 			{
-				descriptorParameters->recordInfo = (short)RecordInfo.plugInDialogOptional;
+				descriptorParameters->recordInfo = RecordInfo.plugInDialogOptional;
 			}
 			else
 			{
-				descriptorParameters->recordInfo = (short)RecordInfo.plugInDialogNone;
+				descriptorParameters->recordInfo = RecordInfo.plugInDialogNone;
 			}
 
 
@@ -5435,16 +5435,16 @@ namespace PSFilterLoad.PSApi
 				descriptorParameters->descriptor = handle_new_proc(1);
 				if (!isRepeatEffect)
 				{
-					descriptorParameters->playInfo = (short)PlayInfo.plugInDialogDisplay;
+					descriptorParameters->playInfo = PlayInfo.plugInDialogDisplay;
 				}
 				else
 				{
-					descriptorParameters->playInfo = (short)PlayInfo.plugInDialogDontDisplay;
+					descriptorParameters->playInfo = PlayInfo.plugInDialogDontDisplay;
 				}
 			}
 			else
 			{
-				descriptorParameters->playInfo = (short)PlayInfo.plugInDialogDisplay;
+				descriptorParameters->playInfo = PlayInfo.plugInDialogDisplay;
 			}
 
 			if (useChannelPorts)
