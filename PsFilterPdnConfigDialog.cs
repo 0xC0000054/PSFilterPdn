@@ -495,7 +495,7 @@ namespace PSFilterPdn
 
 			if (!File.Exists(shimPath))
 			{
-				MessageBox.Show(Resources.PSFilterShimNotFound, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(this, Resources.PSFilterShimNotFound, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 
@@ -599,15 +599,15 @@ namespace PSFilterPdn
 			}
 			catch (ArgumentException ax)
 			{
-				MessageBox.Show(ax.ToString(), PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(this, ax.ToString(), this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 			catch (UnauthorizedAccessException ex)
 			{
-				MessageBox.Show(ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 			catch (Win32Exception wx)
 			{
-				MessageBox.Show(wx.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(this, wx.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 
