@@ -936,7 +936,7 @@ namespace PSFilterLoad.PSApi
 
 			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
-			while (RectNonEmpty(filterRecord->inRect) || RectNonEmpty(filterRecord->outRect))
+			while (RectNonEmpty(filterRecord->inRect) || RectNonEmpty(filterRecord->outRect) || RectNonEmpty(filterRecord->maskRect))
 			{
 				advance_state_proc();
 				result = PSError.noErr;
@@ -1426,7 +1426,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="inRect">The new source rectangle.</param>
 		/// <param name="loplane">The loplane.</param>
 		/// <param name="hiplane">The hiplane.</param>
-		/// <returns> <c>true</c> if a the buffer nedds to be resized; otherwise, <c>false</c></returns>
+		/// <returns> <c>true</c> if a the buffer needs to be resized; otherwise, <c>false</c></returns>
 		private static unsafe bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loplane, int hiplane)
 		{
 			
