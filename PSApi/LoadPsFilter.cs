@@ -112,12 +112,12 @@ namespace PSFilterLoad.PSApi
 				enumAETE = new PluginAETE();
 
 				byte* ptr = (byte*)loadRes.ToPointer() + 2;
-                
-                short version = *(short*)ptr;
-                ptr += 2;
 				
-                enumAETE.major = (short)(version & 0xffff);
-                enumAETE.minor = (short)((version >> 16) & 0xffff);
+				short version = *(short*)ptr;
+				ptr += 2;
+				
+				enumAETE.major = (short)(version & 0xffff);
+				enumAETE.minor = (short)((version >> 16) & 0xffff);
 
 				short lang = *(short*)ptr;
 				ptr += 2;
@@ -404,6 +404,7 @@ namespace PSFilterLoad.PSApi
 					}
 					aeteName = sb.ToString().TrimEnd('\0');
 #endif
+					enumAETE = null;
 					while (UnsafeNativeMethods.EnumResourceNamesW(hModule, "AETE", new UnsafeNativeMethods.EnumResNameDelegate(EnumAETE), (IntPtr)termId))
 					{
 						// do nothing
@@ -414,7 +415,7 @@ namespace PSFilterLoad.PSApi
 					{
 						if (enumAETE.major == 1 && enumAETE.minor == 0 && enumAETE.suiteLevel == 1 && enumAETE.suiteVersion == 1 && enumAETE.events[0].classCount == 0)
 						{
-                            enumData.aete = new AETEData(enumAETE); // Filter out any newer versions.
+							enumData.aete = new AETEData(enumAETE); // Filter out any newer versions.
 						}
 						
 					}
@@ -433,10 +434,10 @@ namespace PSFilterLoad.PSApi
 				propPtr += (16 + propertyDataPaddedLength);
 			}
 
-            if (enumData.IsValid())
-            {
-                AddFoundPluginData(enumData); // add each plugin found in the file to the query list
-            }
+			if (enumData.IsValid())
+			{
+				AddFoundPluginData(enumData); // add each plugin found in the file to the query list
+			}
 
 			return true;
 		}
@@ -487,19 +488,18 @@ namespace PSFilterLoad.PSApi
 				return true;
 			}
 			int length = 0;
-			IntPtr ptr = new IntPtr(lockRes.ToInt64() + 2L);
+			byte* ptr = (byte*)lockRes.ToPointer() + 2L;
 
-			enumData.category = StringFromCString(ptr, out length);
+			enumData.category = StringFromCString((IntPtr)ptr, out length);
 
-			ptr = new IntPtr(ptr.ToInt64() + (long)length);
-
+			ptr += length;
 
 			if (string.IsNullOrEmpty(enumData.category))
 			{
 				enumData.category = Resources.PiMIDefaultCategoryName;
 			}
 
-			PlugInInfo* info = (PlugInInfo*)ptr.ToPointer();
+			PlugInInfo* info = (PlugInInfo*)ptr;
 
 			if (info->version > PSConstants.latestFilterVersion ||
 			   (info->version == PSConstants.latestFilterVersion && info->subVersion > PSConstants.latestFilterSubVersion))
@@ -523,7 +523,7 @@ namespace PSFilterLoad.PSApi
 			IntPtr type = Marshal.StringToHGlobalUni("_8BFM");
 			try
 			{
-				filterRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, type); // load the _8BFM resource to get the category name
+				filterRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, type); // load the _8BFM resource to get the filter title
 			}
 			finally
 			{
@@ -567,10 +567,10 @@ namespace PSFilterLoad.PSApi
 			enumData.runWith32BitShim = true; // these filters should always be 32-bit
 			enumData.filterInfo = null;
 
-            if (enumData.IsValid())
-            {
-                AddFoundPluginData(enumData); // add each plugin found in the file to the query list
-            }
+			if (enumData.IsValid())
+			{
+				AddFoundPluginData(enumData); // add each plugin found in the file to the query list
+			}
 
 			return true;
 		}
@@ -1828,7 +1828,7 @@ namespace PSFilterLoad.PSApi
 					enumResList = new List<PluginData>();
 					enumFileName = fileName;
 					bool needsRelease = false;
-                    System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions();
+					System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions();
 					try
 					{
 
@@ -5647,11 +5647,11 @@ namespace PSFilterLoad.PSApi
 						scaledChannelSurface = null;
 					}
 
-                    if (scaledSelectionMask != null)
-                    {
-                        scaledSelectionMask.Dispose();
-                        scaledSelectionMask = null;
-                    }
+					if (scaledSelectionMask != null)
+					{
+						scaledSelectionMask.Dispose();
+						scaledSelectionMask = null;
+					}
 				}
 
 				if (platFormDataPtr != IntPtr.Zero)
