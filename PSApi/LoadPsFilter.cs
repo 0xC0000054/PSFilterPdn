@@ -436,7 +436,7 @@ namespace PSFilterLoad.PSApi
 
 			if (enumData.IsValid())
 			{
-				AddFoundPluginData(enumData); // add each plugin found in the file to the query list
+				enumResList.Add(enumData); 
 			}
 
 			return true;
@@ -569,7 +569,7 @@ namespace PSFilterLoad.PSApi
 
 			if (enumData.IsValid())
 			{
-				AddFoundPluginData(enumData); // add each plugin found in the file to the query list
+				enumResList.Add(enumData);
 			}
 
 			return true;
@@ -577,19 +577,6 @@ namespace PSFilterLoad.PSApi
 
 		private static List<PluginData> enumResList;
 		private static string enumFileName;
-
-		/// <summary>
-		/// Adds the found plugin data to the list.
-		/// </summary>
-		/// <param name="data">The data to add.</param>
-		private static void AddFoundPluginData(PluginData data)
-		{
-			if (enumResList == null)
-			{
-				enumResList = new List<PluginData>();
-			}
-			enumResList.Add(data);
-		}
 
 		#endregion
 
