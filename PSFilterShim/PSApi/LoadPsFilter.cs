@@ -295,9 +295,7 @@ namespace PSFilterLoad.PSApi
 			phase = PluginPhase.None; 
 			errorMessage = String.Empty;
 			disposed = false;
-			frsetup = false;
 			copyToDest = true;
-			suitesSetup = false;
 			sizesSetup = false;
 			frValuesSetup = false;
 			isRepeatEffect = false;
@@ -305,35 +303,6 @@ namespace PSFilterLoad.PSApi
 			pseudoResources = new List<PSResource>();
 			handles = new Dictionary<IntPtr, PSHandle>();
 			channelReadDescPtrs = new List<ReadChannelPtrs>();
-
-#if USEMATTING
-			inputHandling = FilterDataHandling.filterDataHandlingNone;
-#endif			
-			outputHandling = FilterDataHandling.filterDataHandlingNone; 
-
-
-			abortFunc = null;
-			progressFunc = null;
-
-			keys = null;
-			aete = null;
-			aeteDict = new Dictionary<uint,AETEValue>();
-			getKey = 0;
-			getKeyIndex = 0;
-			subKeys = null;
-			subKeyIndex = 0;
-			isSubKey = false;
-			unsafe
-			{
-				platFormDataPtr = Memory.Allocate(Marshal.SizeOf(typeof(PlatformData)), true);
-				((PlatformData*)platFormDataPtr)->hwnd = owner; 
-			}
-
-			outRect.left = outRect.top = outRect.right = outRect.bottom = 0;
-			inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
-			maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
-
-			maskDataPtr = inDataPtr = outDataPtr = IntPtr.Zero;
 
 			using (Bitmap bmp = new Bitmap(sourceImage))
 			{
@@ -368,6 +337,35 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
+#if USEMATTING
+			inputHandling = FilterDataHandling.filterDataHandlingNone;
+#endif			
+			outputHandling = FilterDataHandling.filterDataHandlingNone; 
+
+
+			abortFunc = null;
+			progressFunc = null;
+
+			keys = null;
+			aete = null;
+			aeteDict = new Dictionary<uint,AETEValue>();
+			getKey = 0;
+			getKeyIndex = 0;
+			subKeys = null;
+			subKeyIndex = 0;
+			isSubKey = false;
+			unsafe
+			{
+				platFormDataPtr = Memory.Allocate(Marshal.SizeOf(typeof(PlatformData)), true);
+				((PlatformData*)platFormDataPtr)->hwnd = owner; 
+			}
+
+			outRect.left = outRect.top = outRect.right = outRect.bottom = 0;
+			inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
+			maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
+
+			maskDataPtr = inDataPtr = outDataPtr = IntPtr.Zero;
+
 			outRowBytes = 0;
 			outHiPlane = 0;
 			outLoPlane = 0;
@@ -377,17 +375,17 @@ namespace PSFilterLoad.PSApi
 			secondaryColor = new byte[4] { secondary.R, secondary.G, secondary.B, 255 };
 
 			primaryColor = new byte[4] { primary.R, primary.G, primary.B, 255 };
-			
-			
-			if (selection == source.Bounds)
-			{
-				filterCase = FilterCase.filterCaseEditableTransparencyNoSelection;
-				selectionRegion = null;
-			}
-			else
+
+
+			if (selection != source.Bounds)
 			{
 				filterCase = FilterCase.filterCaseEditableTransparencyWithSelection;
 				selectedRegion = selectionRegion.Clone();
+			}
+			else
+			{
+				filterCase = FilterCase.filterCaseEditableTransparencyNoSelection;
+				selectionRegion = null;
 			}
 
 #if DEBUG
@@ -584,15 +582,15 @@ namespace PSFilterLoad.PSApi
 
 			if (!string.IsNullOrEmpty(pdata.entryPoint)) // The filter has already been queried so take a shortcut.
 			{
-				pdata.entry.dll = UnsafeNativeMethods.LoadLibraryW(pdata.fileName);
+				pdata.module.dll = UnsafeNativeMethods.LoadLibraryW(pdata.fileName);
 
-				if (!pdata.entry.dll.IsInvalid)
+				if (!pdata.module.dll.IsInvalid)
 				{
-					IntPtr entry = UnsafeNativeMethods.GetProcAddress(pdata.entry.dll, pdata.entryPoint);
+					IntPtr entry = UnsafeNativeMethods.GetProcAddress(pdata.module.dll, pdata.entryPoint);
 
 					if (entry != IntPtr.Zero)
 					{
-						pdata.entry.entry = (filterep)Marshal.GetDelegateForFunctionPointer(entry, typeof(filterep));
+						pdata.module.entryPoint = (pluginEntryPoint)Marshal.GetDelegateForFunctionPointer(entry, typeof(pluginEntryPoint));
 						loaded = true;
 					} 
 				}
@@ -612,11 +610,11 @@ namespace PSFilterLoad.PSApi
 		/// <param name="proxyData">The PluginData to  free/</param>
 		private static void FreeLibrary(ref PluginData pdata)
 		{
-			if (!pdata.entry.dll.IsClosed)
+			if (!pdata.module.dll.IsClosed)
 			{
-				pdata.entry.dll.Dispose();
-				pdata.entry.dll = null;
-				pdata.entry.entry = null;
+				pdata.module.dll.Dispose();
+				pdata.module.dll = null;
+				pdata.module.entryPoint = null;
 			}
 		}
 
@@ -886,7 +884,7 @@ namespace PSFilterLoad.PSApi
 
 			try
 			{
-				pdata.entry.entry(FilterSelector.filterSelectorAbout, gch.AddrOfPinnedObject(), ref data, ref result);
+				pdata.module.entryPoint(FilterSelector.filterSelectorAbout, gch.AddrOfPinnedObject(), ref data, ref result);
 			}
 			finally
 			{
@@ -917,7 +915,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before FilterSelectorStart");
 #endif
 
-			pdata.entry.entry(FilterSelector.filterSelectorStart, filterRecordPtr, ref data, ref result);
+			pdata.module.entryPoint(FilterSelector.filterSelectorStart, filterRecordPtr, ref data, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After FilterSelectorStart");
@@ -945,7 +943,7 @@ namespace PSFilterLoad.PSApi
 				Ping(DebugFlags.Call, "Before FilterSelectorContinue");
 #endif
 
-				pdata.entry.entry(FilterSelector.filterSelectorContinue, filterRecordPtr, ref data, ref result);
+				pdata.module.entryPoint(FilterSelector.filterSelectorContinue, filterRecordPtr, ref data, ref result);
 
 #if DEBUG
 				Ping(DebugFlags.Call, "After FilterSelectorContinue");
@@ -963,7 +961,7 @@ namespace PSFilterLoad.PSApi
 					Ping(DebugFlags.Call, "Before FilterSelectorFinish");
 #endif
 
-					pdata.entry.entry(FilterSelector.filterSelectorFinish, filterRecordPtr, ref data, ref result);
+					pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref data, ref result);
 
 #if DEBUG
 					Ping(DebugFlags.Call, "After FilterSelectorFinish");
@@ -992,7 +990,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before FilterSelectorFinish");
 #endif
 
-			pdata.entry.entry(FilterSelector.filterSelectorFinish, filterRecordPtr, ref data, ref result);
+			pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref data, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After FilterSelectorFinish");
@@ -1016,7 +1014,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before filterSelectorParameters");
 #endif
 
-			pdata.entry.entry(FilterSelector.filterSelectorParameters, filterRecordPtr, ref data, ref result);
+			pdata.module.entryPoint(FilterSelector.filterSelectorParameters, filterRecordPtr, ref data, ref result);
 #if DEBUG
 			unsafe
 			{
@@ -1141,7 +1139,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			Ping(DebugFlags.Call, "Before filterSelectorPrepare");
 #endif
-			pdata.entry.entry(FilterSelector.filterSelectorPrepare, filterRecordPtr, ref data, ref result);
+			pdata.module.entryPoint(FilterSelector.filterSelectorPrepare, filterRecordPtr, ref data, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After filterSelectorPrepare");
@@ -1231,7 +1229,7 @@ namespace PSFilterLoad.PSApi
 			if (pdata.filterInfo != null)
 			{
 				// compensate for the fact that the FilterCaseInfo array is zero indexed.
-				copyToDest = ((pdata.filterInfo[(filterCase - 1)].flags1 & (1 << FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit)) == 0);
+				copyToDest = ((pdata.filterInfo[(filterCase - 1)].flags1 & FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit) == 0);
 			}
 	
 			if (copyToDest)
@@ -4836,15 +4834,8 @@ namespace PSFilterLoad.PSApi
 		}
 
 		private bool useChannelPorts;
-		private bool suitesSetup;
 		private unsafe void setup_suites()
 		{
-			if (suitesSetup)
-				return;
-
-			suitesSetup = true;
-
-
 			buffer_procPtr = Memory.Allocate(Marshal.SizeOf(typeof(BufferProcs)), true);
 			BufferProcs* bufferProcs = (BufferProcs*)buffer_procPtr.ToPointer();
 			bufferProcs->bufferProcsVersion = PSConstants.kCurrentBufferProcsVersion;
@@ -4991,15 +4982,9 @@ namespace PSFilterLoad.PSApi
 				readDescriptorPtr = IntPtr.Zero;
 			}
 		}
-		private bool frsetup;
-		private unsafe void setup_filter_record()
+
+        private unsafe void setup_filter_record()
 		{
-			if (frsetup)
-				return;
-
-			frsetup = true;
-
-
 			filterRecordPtr = Memory.Allocate(Marshal.SizeOf(typeof(FilterRecord)), true);
 			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
