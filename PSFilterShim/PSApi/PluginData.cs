@@ -4,8 +4,8 @@ using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
 {
-    [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl, CharSet = CharSet.Ansi), System.Security.SuppressUnmanagedCodeSecurity]
-    internal delegate int filterep(short selector, IntPtr pluginParamBlock, ref IntPtr pluginData, ref short result);
+    [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
+    internal delegate int pluginEntryPoint(short selector, IntPtr pluginParamBlock, ref IntPtr pluginData, ref short result);
  
 #pragma warning disable 0649
    
@@ -26,9 +26,9 @@ namespace PSFilterLoad.PSApi
         [DataMember]
         public FilterCaseInfo[] filterInfo;
         /// <summary>
-        /// The structure containing the dll entrypoint
+        /// The structure containing the plugin entrypoint
         /// </summary>
-        public PIEntrypoint entry;
+        public PIEntrypoint module;
         /// <summary>
         /// Used to run 32-bit plugins in 64-bit Paint.NET
         /// </summary>
@@ -47,7 +47,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// The entrypoint for the FilterParmBlock and AboutRecord
         /// </summary>
-        public filterep entry;
+        public pluginEntryPoint entryPoint;
     }
 
 }

@@ -4,10 +4,10 @@ using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
 {
-    [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl, CharSet = CharSet.Ansi), System.Security.SuppressUnmanagedCodeSecurity]
-    internal delegate int filterep(short selector, IntPtr pluginParamBlock, ref IntPtr pluginData, ref short result);
+    [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
+    internal delegate int pluginEntryPoint(short selector, IntPtr pluginParamBlock, ref IntPtr pluginData, ref short result);
     /// <summary>
-    /// The class that encapsulates a Photoshop Filter plugin
+    /// The class that encapsulates an Adobe® Photoshop® filter plugin
     /// </summary>
     [DataContract()]
     internal sealed class PluginData
@@ -25,7 +25,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// The structure containing the dll entrypoint
         /// </summary>
-        public PIEntrypoint entry;
+        public PIEntrypoint module;
         /// <summary>
         /// Used to run 32-bit plugins in 64-bit Paint.NET
         /// </summary>
@@ -40,7 +40,7 @@ namespace PSFilterLoad.PSApi
             this.category = string.Empty;
             this.title = string.Empty;
             this.filterInfo = null;
-            this.entry = new PIEntrypoint();
+            this.module = new PIEntrypoint();
             this.runWith32BitShim = false;
             this.aete = null;
         }
@@ -60,7 +60,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// The entrypoint for the FilterParmBlock and AboutRecord
         /// </summary>
-        public filterep entry;
+        public pluginEntryPoint entryPoint;
     }
 
 }
