@@ -57,16 +57,16 @@ namespace PSFilterLoad.PSApi
     internal static class FilterCaseInfoFlags
     {
         /// PIFilterDontCopyToDestinationBit -> 0
-        public const byte PIFilterDontCopyToDestinationBit = 0;
+        public const byte PIFilterDontCopyToDestinationBit = (1 << 0);
 
         /// PIFilterWorksWithBlankDataBit -> 1
-        public const byte PIFilterWorksWithBlankDataBit = 1;
+        public const byte PIFilterWorksWithBlankDataBit = (1 << 1);
 
         /// PIFilterFiltersLayerMaskBit -> 2
-        public const byte PIFilterFiltersLayerMaskBit = 2;
+        public const byte PIFilterFiltersLayerMaskBit = (1 << 2);
 
         /// PIFilterWritesOutsideSelectionBit -> 3
-        public const byte PIFilterWritesOutsideSelectionBit = 3;
+        public const byte PIFilterWritesOutsideSelectionBit = (1 << 3);
     }
 
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 1)]
