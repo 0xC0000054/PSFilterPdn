@@ -154,16 +154,13 @@
     <comment>FileWriteError description</comment>
   </data>
   <data name="ImageHeightTooLarge" xml:space="preserve">
-    <value>Image Height must be less than or equal to 32000 pixels.</value>
+    <value>Image height must be less than or equal to 32000 pixels.</value>
   </data>
   <data name="ImageSizeTooLarge" xml:space="preserve">
-    <value>Image Size must be less than or equal to 32000x32000 pixels.</value>
+    <value>Image size must be less than or equal to 32000x32000 pixels.</value>
   </data>
   <data name="ImageWidthTooLarge" xml:space="preserve">
-    <value>Image Width must be less than or equal to 32000 pixels.</value>
-  </data>
-  <data name="InvalidPiPLVersionFormat" xml:space="preserve">
-    <value>Invalid PiPL version in {0}: {1},  Expected version 0.</value>
+    <value>Image width must be less than or equal to 32000 pixels.</value>
   </data>
   <data name="InvalidSamplePoint" xml:space="preserve">
     <value>Invalid sample point.</value>
