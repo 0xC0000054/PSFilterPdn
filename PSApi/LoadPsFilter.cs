@@ -214,9 +214,9 @@ namespace PSFilterLoad.PSApi
 						}
 						evnt.parms = parms;
 
-						evnt.classCount = *(short*)propPtr;
+						short classCount = *(short*)propPtr;
 						propPtr += 2;
-						if (evnt.classCount == 0)
+						if (classCount == 0)
 						{
 							short compOps = *(short*)propPtr;
 							propPtr += 2;
@@ -413,7 +413,7 @@ namespace PSFilterLoad.PSApi
 
 					if (enumAETE != null)
 					{
-						if (enumAETE.major == 1 && enumAETE.minor == 0 && enumAETE.suiteLevel == 1 && enumAETE.suiteVersion == 1 && enumAETE.events[0].classCount == 0)
+						if (enumAETE.major == 1 && enumAETE.minor == 0 && enumAETE.suiteLevel == 1 && enumAETE.suiteVersion == 1)
 						{
 							enumData.aete = new AETEData(enumAETE); // Filter out any newer versions.
 						}
