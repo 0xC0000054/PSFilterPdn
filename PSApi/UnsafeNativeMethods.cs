@@ -9,7 +9,7 @@ namespace PSFilterLoad.PSApi
     {
         internal delegate bool EnumResNameDelegate([In()] IntPtr hModule, [In()] IntPtr lpszType, [In()] IntPtr lpszName, [In()] IntPtr lParam);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
         internal static extern SafeLibraryHandle LoadLibraryExW([In()] string lpFileName, IntPtr hFile, uint dwFlags);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
@@ -30,7 +30,7 @@ namespace PSFilterLoad.PSApi
         internal static extern bool FreeLibrary([In()] IntPtr hModule);
 
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, BestFitMapping = false, SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, BestFitMapping = false)]
         internal static extern IntPtr GetProcAddress([In()] SafeLibraryHandle hModule, [In(), MarshalAs(UnmanagedType.LPStr)] string lpProcName);
     }
 }
