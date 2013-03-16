@@ -85,14 +85,14 @@ namespace PSFilterPdn
         }
 
         private const string endpointName = "net.pipe://localhost/PSFilterShim/ShimData";
-        private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token)
+        private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token, IWin32Window window)
         {
             // check that PSFilterShim exists first thing and abort if it does not.
             string shimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
 
             if (!File.Exists(shimPath)) 
             {
-                MessageBox.Show(Resources.PSFilterShimNotFound, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(window, Resources.PSFilterShimNotFound, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -141,7 +141,7 @@ namespace PSFilterPdn
                 destFileName = dest,
                 pluginData = pluginData,
                 filterRect = selection,
-                parentHandle =  Process.GetCurrentProcess().MainWindowHandle,
+                parentHandle =  window.Handle,
                 primary = base.EnvironmentParameters.PrimaryColor.ToColor(),
                 secondary = base.EnvironmentParameters.SecondaryColor.ToColor(),
                 regionFileName = regionFileName,
@@ -210,21 +210,21 @@ namespace PSFilterPdn
                 }
                 else if (!string.IsNullOrEmpty(proxyErrorMessage))
                 {
-                    MessageBox.Show(proxyErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(window, proxyErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
             }
             catch (ArgumentException ax)
             {
-                MessageBox.Show(ax.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(window, ax.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(window, ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Win32Exception wx)
             {
-                MessageBox.Show(wx.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(window, wx.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -244,11 +244,11 @@ namespace PSFilterPdn
 
         private static ManualResetEvent filterDone;
         private Thread filterThread;
-        private void RunRepeatFilter(ref PSFilterPdnConfigToken token)
+        private void RunRepeatFilter(ref PSFilterPdnConfigToken token, IWin32Window window)
         {
             try
             {
-                using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, Process.GetCurrentProcess().MainWindowHandle))
+                using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, window.Handle))
                 {
                     lps.SetAbortCallback(new Func<byte>(AbortFunc));
 
@@ -275,7 +275,7 @@ namespace PSFilterPdn
                     }
                     else if (!string.IsNullOrEmpty(lps.ErrorMessage))
                     {
-                        MessageBox.Show(lps.ErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(window, lps.ErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     
                 }
@@ -283,18 +283,18 @@ namespace PSFilterPdn
             }
             catch (ImageSizeTooLargeException ex)
             {
-                MessageBox.Show(ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(window, ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (NullReferenceException nrex)
             {
                 /* the filter probably tried to access an unimplemented callback function 
                  * without checking if it is valid.
                 */
-                MessageBox.Show(nrex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(window, nrex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (System.Runtime.InteropServices.ExternalException eex)
             {
-                MessageBox.Show(eex.Message, PSFilterPdnEffect.StaticName,  MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(window, eex.Message, PSFilterPdnEffect.StaticName,  MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -316,16 +316,16 @@ namespace PSFilterPdn
                     token.Dest = null; 
                 }
 
-
+                Win32Window win32Window = new Win32Window(Process.GetCurrentProcess().MainWindowHandle);
                 if (token.RunWith32BitShim)
                 {
-                    Run32BitFilterProxy(ref token);
+                    Run32BitFilterProxy(ref token, win32Window);
                 }
                 else
                 {
                     filterDone = new ManualResetEvent(false);
 
-                    filterThread = new Thread(() => RunRepeatFilter(ref token)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+                    filterThread = new Thread(() => RunRepeatFilter(ref token, win32Window)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
                     filterThread.Start();
 
                     filterDone.WaitOne();
@@ -351,6 +351,21 @@ namespace PSFilterPdn
             {
                 dstArgs.Surface.CopySurface(srcArgs.Surface);
             }
+        }
+
+        private sealed class Win32Window : IWin32Window
+        {
+            private IntPtr handle;
+
+            public IntPtr Handle
+            {
+                get { return handle; }
+            }
+
+            internal Win32Window (IntPtr hWnd)
+	        {
+                this.handle = hWnd;
+	        }
         }
     }
 }
