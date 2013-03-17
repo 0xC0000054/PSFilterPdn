@@ -4983,7 +4983,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-        private unsafe void setup_filter_record()
+		private unsafe void setup_filter_record()
 		{
 			filterRecordPtr = Memory.Allocate(Marshal.SizeOf(typeof(FilterRecord)), true);
 			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();

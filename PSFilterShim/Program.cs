@@ -112,20 +112,20 @@ namespace PSFilterShim
 			string wrapFileName = serviceProxy.GetRegionDataPath();
 			if (!string.IsNullOrEmpty(wrapFileName))
 			{
-                using (FileStream fs = new FileStream(wrapFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
-                {
-                    BinaryFormatter bf = new BinaryFormatter();
-                    RegionDataWrapper wrapper = (RegionDataWrapper)bf.Deserialize(fs);
+				using (FileStream fs = new FileStream(wrapFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+				{
+					BinaryFormatter bf = new BinaryFormatter();
+					RegionDataWrapper wrapper = (RegionDataWrapper)bf.Deserialize(fs);
 
 
-                    using (Region temp = new Region())
-                    {
-                        RegionData rgnData = temp.GetRegionData();
-                        rgnData.Data = wrapper.GetData();
+					using (Region temp = new Region())
+					{
+						RegionData rgnData = temp.GetRegionData();
+						rgnData.Data = wrapper.GetData();
 
-                        selectionRegion = new Region(rgnData);
-                    }
-                }
+						selectionRegion = new Region(rgnData);
+					}
+				}
 			}
 			try
 			{
