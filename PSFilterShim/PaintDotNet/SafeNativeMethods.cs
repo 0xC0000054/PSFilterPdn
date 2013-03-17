@@ -20,11 +20,7 @@ namespace PaintDotNet.SystemLayer
         internal static extern UIntPtr HeapSize(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
 
         [DllImport("Kernel32.dll", SetLastError = true)]
-        internal static extern IntPtr HeapCreate(
-            uint flOptions,
-            [MarshalAs(UnmanagedType.SysUInt)] IntPtr dwInitialSize,
-            [MarshalAs(UnmanagedType.SysUInt)] IntPtr dwMaximumSize
-            );
+        internal static extern IntPtr HeapCreate(uint flOptions, UIntPtr dwInitialSize, UIntPtr dwMaximumSize);
 
         [DllImport("Kernel32.dll", SetLastError = true)]
         internal static extern uint HeapDestroy(IntPtr hHeap);

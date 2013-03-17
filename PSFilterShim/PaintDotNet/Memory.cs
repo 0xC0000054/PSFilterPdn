@@ -29,7 +29,7 @@ namespace PaintDotNet.SystemLayer
 
         static Memory()
         {
-            hHeap = SafeNativeMethods.HeapCreate(0, IntPtr.Zero, IntPtr.Zero);
+            hHeap = SafeNativeMethods.HeapCreate(0, UIntPtr.Zero, UIntPtr.Zero);
 
             uint info = 2;
 
