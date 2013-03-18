@@ -3335,7 +3335,6 @@ namespace PSFilterLoad.PSApi
 				}
 				else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
 				{
-
 					if ((scaledSelectionMask == null) || scaledSelectionMask.Width != dstWidth || scaledSelectionMask.Height != dstHeight)
 					{
 						if (scaledSelectionMask != null)
@@ -3352,7 +3351,6 @@ namespace PSFilterLoad.PSApi
 				}
 				else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
 				{
-
 					if ((scaledSelectionMask == null) || scaledSelectionMask.Width != dstWidth || scaledSelectionMask.Height != dstHeight)
 					{
 						if (scaledSelectionMask != null)
@@ -3376,7 +3374,6 @@ namespace PSFilterLoad.PSApi
 				}
 				else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
 				{
-
 					if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
 					{
 						if (scaledChannelSurface != null)
@@ -3393,7 +3390,6 @@ namespace PSFilterLoad.PSApi
 				}
 				else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
 				{
-
 					if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
 					{
 						if (scaledChannelSurface != null)
@@ -3586,7 +3582,7 @@ namespace PSFilterLoad.PSApi
 			int height = srcRect.bottom - srcRect.top;
 			int nplanes = ((FilterRecord*)filterRecordPtr.ToPointer())->planes;
 
-			SetupTempDisplaySurface(width, height, (source.version >= 1 && nplanes == 3 && source.masks != IntPtr.Zero));
+			SetupTempDisplaySurface(width, height, (source.version >= 1 && source.masks != IntPtr.Zero));
 
 			void* baseAddr = source.baseAddr.ToPointer();
 
@@ -3660,7 +3656,7 @@ namespace PSFilterLoad.PSApi
 				}
 				else
 				{
-					if ((source.version >= 1) && source.masks != IntPtr.Zero && nplanes == 3) // use the mask for the Protected Transparency cases 
+					if ((source.version >= 1) && source.masks != IntPtr.Zero) // use the mask for the Protected Transparency cases 
 					{
 						PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
 
