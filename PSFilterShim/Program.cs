@@ -24,12 +24,6 @@ namespace PSFilterShim
 
 		static ManualResetEvent resetEvent;
 		static IPSFilterShim serviceProxy;
-		static Action<int, int> progressCallback = new Action<int,int>(UpdateProgress);
-
-		static byte abortFilter()
-		{
-			return serviceProxy.AbortFilter();
-		}
 
 		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{ 
@@ -52,16 +46,21 @@ namespace PSFilterShim
 #else
 			NativeMethods.SetProcessDEPPolicy(0U); // Kill DEP
 #endif
-			resetEvent = new ManualResetEvent(false);
-			serviceProxy = null;
-			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+		   
 
+			string endpointName = args[0];
+
+			EndpointAddress address = new EndpointAddress(endpointName);
+			serviceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(new NetNamedPipeBinding(), address);
+			
+			resetEvent = new ManualResetEvent(false);
+			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
 			try
 			{
-				Thread filterThread = new Thread(new ParameterizedThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+				Thread filterThread = new Thread(new ThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
 
-				filterThread.Start(args);
+				filterThread.Start();
 
 				resetEvent.WaitOne();
 
@@ -71,25 +70,10 @@ namespace PSFilterShim
 			{
 				PaintDotNet.SystemLayer.Memory.DestroyHeap();
 			}
-			
-			
-			
-
-			
 		}
 
-		static void RunFilterThread(object argsObj)
+		static void RunFilterThread()
 		{
-			string[] args = (string[])argsObj;
-
-			string endpointName = args[0];
-
-			if (!string.IsNullOrEmpty(endpointName))
-			{
-				EndpointAddress address = new EndpointAddress(endpointName);
-				serviceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(new NetNamedPipeBinding(), address);
-			}
-
 			string src = serviceProxy.GetSoureImagePath(); 
 			string dstImg = serviceProxy.GetDestImagePath(); 
 
@@ -117,7 +101,6 @@ namespace PSFilterShim
 					BinaryFormatter bf = new BinaryFormatter();
 					RegionDataWrapper wrapper = (RegionDataWrapper)bf.Deserialize(fs);
 
-
 					using (Region temp = new Region())
 					{
 						RegionData rgnData = temp.GetRegionData();
@@ -129,8 +112,6 @@ namespace PSFilterShim
 			}
 			try
 			{
-				
-
 				ParameterData filterParameters = null;
 				string parmDataFileName = serviceProxy.GetParameterDataPath();
 				if (!string.IsNullOrEmpty(parmDataFileName) && File.Exists(parmDataFileName))
@@ -157,9 +138,13 @@ namespace PSFilterShim
 				{
 					if (repeatEffect)
 					{
-						lps.SetAbortCallback(new Func<byte>(abortFilter));
+						lps.SetAbortCallback(new Func<byte>(serviceProxy.AbortFilter));
 					}
-					lps.SetProgressCallback(progressCallback);
+					else
+					{
+						// As Paint.NET does not currently allow custom progress reporting only set this callback for the effect dialog.
+						lps.SetProgressCallback(new Action<int, int>(serviceProxy.UpdateFilterProgress)); 
+					}
 
 					if (filterParameters != null)
 					{
@@ -249,12 +234,6 @@ namespace PSFilterShim
 				resetEvent.Set();
 			}
 		}
-
-		static void UpdateProgress(int done, int total)
-		{
-			serviceProxy.UpdateFilterProgress(done, total);
-		}
-
 
 	}
 
