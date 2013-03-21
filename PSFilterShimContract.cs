@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ServiceModel;
-using System.Text;
-using PSFilterLoad.PSApi;
 using System.Drawing;
+using System.ServiceModel;
+using PSFilterLoad.PSApi;
 
 namespace PSFilterPdn
 {
@@ -47,12 +45,7 @@ namespace PSFilterPdn
 
         public byte AbortFilter()
         {
-            if (abortFunc != null)
-            {
-                return abortFunc();
-            }
-
-            return 0;
+            return abortFunc();
         }
 
         public bool IsRepeatEffect()
@@ -122,20 +115,14 @@ namespace PSFilterPdn
 
         public void UpdateFilterProgress(int done, int total)
         {
-            if (progressCallback != null)
-            {
-                progressCallback.Invoke(done, total);
-            }
+            progressCallback.Invoke(done, total);
         }
-
-
      
     }
 
     // Adapted from: http://www.jmedved.com/2010/03/named-pipes-in-wcf/ 
     static class PSFilterShimServer
     {
-
         private static readonly Uri ServiceUri = new Uri("net.pipe://localhost/PSFilterShim");
         private static readonly string PipeName = "ShimData";
 
