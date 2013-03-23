@@ -701,14 +701,14 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		private IntPtr platFormDataPtr;
 
-		private IntPtr buffer_procPtr;
+		private IntPtr bufferProcsPtr;
 
-		private IntPtr handle_procPtr;
+		private IntPtr handleProcsPtr;
 #if USEIMAGESERVICES
 		private IntPtr image_services_procsPtr;
 #endif	
-		private IntPtr property_procsPtr; 
-		private IntPtr resource_procsPtr;
+		private IntPtr propertyProcsPtr; 
+		private IntPtr resourceProcsPtr;
 
 
 		private IntPtr descriptorParametersPtr;
@@ -752,12 +752,12 @@ namespace PSFilterLoad.PSApi
 
 		private Func<byte> abortFunc;
 
-		public void SetAbortCallback(Func<byte> abortCallback)
+		public void SetAbortCallback(Func<byte> callback)
 		{
-			if (abortCallback == null)
+			if (callback == null)
 				throw new ArgumentNullException("abortCallback", "abortCallback is null.");
 
-			abortFunc = abortCallback;
+			abortFunc = callback;
 		}
 
 		private string errorMessage;
@@ -903,7 +903,6 @@ namespace PSFilterLoad.PSApi
 
 			dpiX = dpiY = 96f; // Paint.NET does not expose the DPI info to Effects, assume standard monitor resolution of 96.
 
-			selectedRegion = null;
 			if (eep.GetSelection(eep.SourceSurface.Bounds).GetBoundsInt() != eep.SourceSurface.Bounds)
 			{
 				filterCase = FilterCase.filterCaseEditableTransparencyWithSelection;
@@ -911,7 +910,8 @@ namespace PSFilterLoad.PSApi
 			}
 			else
 			{
-				filterCase = FilterCase.filterCaseEditableTransparencyNoSelection;
+				filterCase = FilterCase.filterCaseEditableTransparencyNoSelection;			
+				selectedRegion = null;
 			}
 
 #if DEBUG
@@ -1082,24 +1082,20 @@ namespace PSFilterLoad.PSApi
 		/// <returns><c>true</c> if the filter is loaded successfully; otherwise <c>false</c>.</returns>
 		private static bool LoadFilter(ref PluginData pdata)
 		{
-			bool loaded = false;
-
-			if (!string.IsNullOrEmpty(pdata.entryPoint)) // The filter has already been queried so take a shortcut.
+			pdata.module.dll = UnsafeNativeMethods.LoadLibraryExW(pdata.fileName, IntPtr.Zero, 0U);
+			if (!pdata.module.dll.IsInvalid)
 			{
-				pdata.module.dll = UnsafeNativeMethods.LoadLibraryExW(pdata.fileName, IntPtr.Zero, 0U);
-				if (!pdata.module.dll.IsInvalid)
+				IntPtr entry = UnsafeNativeMethods.GetProcAddress(pdata.module.dll, pdata.entryPoint);
+
+				if (entry != IntPtr.Zero)
 				{
-					IntPtr entry = UnsafeNativeMethods.GetProcAddress(pdata.module.dll, pdata.entryPoint);
-
-					if (entry != IntPtr.Zero)
-					{
-						pdata.module.entryPoint = (pluginEntryPoint)Marshal.GetDelegateForFunctionPointer(entry, typeof(pluginEntryPoint));
-						loaded = true;
-					} 
-				}
+					pdata.module.entryPoint = (pluginEntryPoint)Marshal.GetDelegateForFunctionPointer(entry, typeof(pluginEntryPoint));
+					return true;
+				} 
 			}
+			
 
-			return loaded;
+			return false;
 		}
 		
 		/// <summary>
@@ -1108,7 +1104,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="proxyData">The PluginData to  free</param>
 		private static void FreeLibrary(ref PluginData pdata)
 		{
-			if (!pdata.module.dll.IsInvalid)
+			if (pdata.module.dll != null)
 			{
 				pdata.module.dll.Dispose();
 				pdata.module.dll = null;
@@ -3069,7 +3065,7 @@ namespace PSFilterLoad.PSApi
 			return 1000000000;
 		}
 
-		private short color_services_proc(ref ColorServicesInfo info)
+		private unsafe short color_services_proc(ref ColorServicesInfo info)
 		{
 			short err = PSError.noErr;
 			switch (info.selector)
@@ -3080,7 +3076,6 @@ namespace PSFilterLoad.PSApi
 
 					using (ColorPickerForm picker = new ColorPickerForm(name))
 					{
-
 						picker.SetColorString(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
 
 						if (picker.ShowDialog() == DialogResult.OK)
@@ -3108,44 +3103,42 @@ namespace PSFilterLoad.PSApi
 					break;
 				case ColorServicesSelector.plugIncolorServicesGetSpecialColor:
 					
-					unsafe
+					FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
+					switch (info.selectorParameter.specialColorID)
 					{
-						FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-						switch (info.selectorParameter.specialColorID)
-						{
-							case ColorServicesConstants.plugIncolorServicesBackgroundColor:
+						case ColorServicesConstants.plugIncolorServicesBackgroundColor:
 
 
-								for (int i = 0; i < 4; i++)
-								{
-									info.colorComponents[i] = (short)filterRecord->backColor[i];
-								}
+							for (int i = 0; i < 4; i++)
+							{
+								info.colorComponents[i] = filterRecord->backColor[i];
+							}
 								
 
-								break;
-							case ColorServicesConstants.plugIncolorServicesForegroundColor:
+							break;
+						case ColorServicesConstants.plugIncolorServicesForegroundColor:
 
-								for (int i = 0; i < 4; i++)
-								{
-									info.colorComponents[i] = (short)filterRecord->foreColor[i];
-								}
+							for (int i = 0; i < 4; i++)
+							{
+								info.colorComponents[i] = filterRecord->foreColor[i];
+							}
 								
-								break;
-							default:
-								err = PSError.paramErr;
-								break;
-						}
+							break;
+						default:
+							err = PSError.paramErr;
+							break;
 					}
 					break;
 				case ColorServicesSelector.plugIncolorServicesSamplePoint:
-					Point16 point = (Point16)Marshal.PtrToStructure(info.selectorParameter.globalSamplePoint, typeof(Point16));
-						
-					if (IsInSourceBounds(point))
+					
+					Point16* point = (Point16*)info.selectorParameter.globalSamplePoint.ToPointer();
+
+					if ((point->h >= 0 && point->h < source.Width) && (point->v >= 0 && point->v < source.Height))
 					{
-						ColorBgra pixel = source.GetPointUnchecked(point.h, point.v);
-						info.colorComponents[0] = (short)pixel.R;
-						info.colorComponents[1] = (short)pixel.G;
-						info.colorComponents[2] = (short)pixel.B;
+						ColorBgra pixel = source.GetPointUnchecked(point->h, point->v);
+						info.colorComponents[0] = pixel.R;
+						info.colorComponents[1] = pixel.G;
+						info.colorComponents[2] = pixel.B;
 						info.colorComponents[3] = 0;
 						err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
 					}
@@ -3158,14 +3151,6 @@ namespace PSFilterLoad.PSApi
 
 			}
 			return err;
-		}
-
-		private bool IsInSourceBounds(Point16 point)
-		{
-			if (source == null) // Surface Disposed?
-				return false;
-
-			return ((point.h >= 0 && point.h < (source.Width - 1)) && (point.v >= 0 && point.v < (source.Height - 1)));
 		}
 
 		private Surface scaledChannelSurface;
@@ -3658,19 +3643,19 @@ namespace PSFilterLoad.PSApi
 				{
 					if ((source.version >= 1) && source.masks != IntPtr.Zero) // use the mask for the Protected Transparency cases 
 					{
-						PSPixelMask mask = (PSPixelMask)Marshal.PtrToStructure(source.masks, typeof(PSPixelMask));
+						PSPixelMask* mask = (PSPixelMask*)source.masks.ToPointer();
 
-						void* maskPtr = mask.maskData.ToPointer();
+						void* maskPtr = mask->maskData.ToPointer();
 						for (int y = srcRect.top; y < srcRect.bottom; y++)
 						{
 							ColorBgra* p = tempDisplaySurface.GetRowAddressUnchecked(y - srcRect.top);
-							byte* q = (byte*)maskPtr + (y * mask.rowBytes) + srcRect.left;
+							byte* q = (byte*)maskPtr + (y * mask->rowBytes) + srcRect.left;
 							for (int x = 0; x < width; x++)
 							{
 								p->A = *q;
 
 								p++;
-								q += mask.colBytes;
+								q += mask->colBytes;
 							}
 						}
 
@@ -5288,8 +5273,8 @@ namespace PSFilterLoad.PSApi
 
 		private unsafe void setup_suites()
 		{
-			buffer_procPtr = Memory.Allocate(Marshal.SizeOf(typeof(BufferProcs)), true);
-			BufferProcs* bufferProcs = (BufferProcs*)buffer_procPtr.ToPointer();
+			bufferProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(BufferProcs)), true);
+			BufferProcs* bufferProcs = (BufferProcs*)bufferProcsPtr.ToPointer();
 			bufferProcs->bufferProcsVersion = PSConstants.kCurrentBufferProcsVersion;
 			bufferProcs->numBufferProcs = PSConstants.kCurrentBufferProcsCount;
 			bufferProcs->allocateProc = Marshal.GetFunctionPointerForDelegate(allocProc);
@@ -5298,8 +5283,8 @@ namespace PSFilterLoad.PSApi
 			bufferProcs->unlockProc = Marshal.GetFunctionPointerForDelegate(unlockProc);
 			bufferProcs->spaceProc = Marshal.GetFunctionPointerForDelegate(spaceProc);
 
-			handle_procPtr = Memory.Allocate(Marshal.SizeOf(typeof(HandleProcs)), true);
-			HandleProcs* handleProcs = (HandleProcs*)handle_procPtr.ToPointer();
+			handleProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(HandleProcs)), true);
+			HandleProcs* handleProcs = (HandleProcs*)handleProcsPtr.ToPointer();
 			handleProcs->handleProcsVersion = PSConstants.kCurrentHandleProcsVersion;
 			handleProcs->numHandleProcs = PSConstants.kCurrentHandleProcsCount;
 			handleProcs->newProc = Marshal.GetFunctionPointerForDelegate(handleNewProc);
@@ -5323,15 +5308,15 @@ namespace PSFilterLoad.PSApi
 #endif
 
 
-			property_procsPtr = Memory.Allocate(Marshal.SizeOf(typeof(PropertyProcs)), true);
-			PropertyProcs* propertyProcs = (PropertyProcs*)property_procsPtr.ToPointer();
+			propertyProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(PropertyProcs)), true);
+			PropertyProcs* propertyProcs = (PropertyProcs*)propertyProcsPtr.ToPointer();
 			propertyProcs->propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion;
 			propertyProcs->numPropertyProcs = PSConstants.kCurrentPropertyProcsCount;
 			propertyProcs->getPropertyProc = Marshal.GetFunctionPointerForDelegate(getPropertyProc);
 			propertyProcs->setPropertyProc = Marshal.GetFunctionPointerForDelegate(setPropertyProc);
 
-			resource_procsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ResourceProcs)), true);
-			ResourceProcs* resourceProcs = (ResourceProcs*)resource_procsPtr.ToPointer();
+			resourceProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ResourceProcs)), true);
+			ResourceProcs* resourceProcs = (ResourceProcs*)resourceProcsPtr.ToPointer();
 			resourceProcs->resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion;
 			resourceProcs->numResourceProcs = PSConstants.kCurrentResourceProcsCount;
 			resourceProcs->addProc = Marshal.GetFunctionPointerForDelegate(addResourceProc);
@@ -5468,12 +5453,12 @@ namespace PSFilterLoad.PSApi
 			filterRecord->hostSig = BitConverter.ToUInt32(Encoding.ASCII.GetBytes(".PDN"), 0);
 			filterRecord->hostProcs = Marshal.GetFunctionPointerForDelegate(hostProc);
 			filterRecord->platformData = platFormDataPtr;
-			filterRecord->bufferProcs = buffer_procPtr;
-			filterRecord->resourceProcs = resource_procsPtr;
+			filterRecord->bufferProcs = bufferProcsPtr;
+			filterRecord->resourceProcs = resourceProcsPtr;
 			filterRecord->processEvent = Marshal.GetFunctionPointerForDelegate(processEventProc);
 			filterRecord->displayPixels = Marshal.GetFunctionPointerForDelegate(displayPixelsProc);
 
-			filterRecord->handleProcs = handle_procPtr;
+			filterRecord->handleProcs = handleProcsPtr;
 
 			filterRecord->supportsDummyChannels = 0;
 			filterRecord->supportsAlternateLayouts = 0;
@@ -5502,7 +5487,7 @@ namespace PSFilterLoad.PSApi
 #else
 			filterRecord->imageServicesProcs = IntPtr.Zero;
 #endif
-			filterRecord->propertyProcs = property_procsPtr;
+			filterRecord->propertyProcs = propertyProcsPtr;
 			filterRecord->inTileHeight = (short)source.Width;
 			filterRecord->inTileWidth = (short)source.Height;
 			filterRecord->inTileOrigin.h = 0;
@@ -5623,15 +5608,15 @@ namespace PSFilterLoad.PSApi
 					platFormDataPtr = IntPtr.Zero;
 				}
 
-				if (buffer_procPtr != IntPtr.Zero)
+				if (bufferProcsPtr != IntPtr.Zero)
 				{
-					Memory.Free(buffer_procPtr);
-					buffer_procPtr = IntPtr.Zero;
+					Memory.Free(bufferProcsPtr);
+					bufferProcsPtr = IntPtr.Zero;
 				}
-				if (handle_procPtr != IntPtr.Zero)
+				if (handleProcsPtr != IntPtr.Zero)
 				{
-					Memory.Free(handle_procPtr);
-					handle_procPtr = IntPtr.Zero;
+					Memory.Free(handleProcsPtr);
+					handleProcsPtr = IntPtr.Zero;
 				}
 
 #if USEIMAGESERVICES
@@ -5640,16 +5625,16 @@ namespace PSFilterLoad.PSApi
 					image_services_procsPtr.Free();
 				} 
 #endif
-				if (property_procsPtr != IntPtr.Zero)
+				if (propertyProcsPtr != IntPtr.Zero)
 				{
-					Memory.Free(property_procsPtr);
-					property_procsPtr = IntPtr.Zero;
+					Memory.Free(propertyProcsPtr);
+					propertyProcsPtr = IntPtr.Zero;
 				}
 
-				if (resource_procsPtr != IntPtr.Zero)
+				if (resourceProcsPtr != IntPtr.Zero)
 				{
-					Memory.Free(resource_procsPtr);
-					resource_procsPtr = IntPtr.Zero;
+					Memory.Free(resourceProcsPtr);
+					resourceProcsPtr = IntPtr.Zero;
 				}
 				if (descriptorParametersPtr != IntPtr.Zero)
 				{
