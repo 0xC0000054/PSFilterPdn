@@ -1230,13 +1230,13 @@ namespace PSFilterLoad.PSApi
 				dest.CopySurface(source); // copy the source image to the dest image if the filter does not write to all the pixels.
 			}
 
-			if (!ignoreAlpha)
-			{
-				DrawCheckerBoardBitmap();
-			}
-			else 
+			if (ignoreAlpha)
 			{
 				ClearDestAlpha();
+			}
+			else
+			{
+				DrawCheckerBoardBitmap();
 			}
 
 			if (pdata.aete != null)
@@ -3185,10 +3185,10 @@ namespace PSFilterLoad.PSApi
 						PSPixelMask* mask = (PSPixelMask*)source.masks.ToPointer();
 
 						void* maskPtr = mask->maskData.ToPointer();
-						for (int y = 0; y < height; y++)
+						for (int y = top; y < bottom; y++)
 						{
-							ColorBgra* p = tempDisplaySurface.GetRowAddressUnchecked(y);
-							byte* q = (byte*)maskPtr + (y * mask->rowBytes);
+							ColorBgra* p = tempDisplaySurface.GetRowAddressUnchecked(y - top);
+							byte* q = (byte*)maskPtr + (y * mask->rowBytes) + left;
 							for (int x = 0; x < width; x++)
 							{
 								p->A = *q;
