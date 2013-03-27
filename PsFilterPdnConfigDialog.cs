@@ -40,6 +40,7 @@ namespace PSFilterPdn
 		private TextBox filterSearchBox;
 		private Label fileNameLbl;
 		private ProgressBar filterProgressBar;
+		private LinkLabel donateLink;
 		private Button buttonCancel;
 
 		public PsFilterPdnConfigDialog()
@@ -145,6 +146,7 @@ namespace PSFilterPdn
 			this.searchDirListView = new System.Windows.Forms.ListView();
 			this.dirHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.updateFilterListBw = new System.ComponentModel.BackgroundWorker();
+			this.donateLink = new System.Windows.Forms.LinkLabel();
 			this.tabControl1.SuspendLayout();
 			this.filterTab.SuspendLayout();
 			this.fltrLoadProressPanel.SuspendLayout();
@@ -382,10 +384,22 @@ namespace PSFilterPdn
 			this.updateFilterListBw.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.updateFilterListBw_ProgressChanged);
 			this.updateFilterListBw.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.updateFilterListBw_RunWorkerCompleted);
 			// 
+			// donateLink
+			// 
+			this.donateLink.AutoSize = true;
+			this.donateLink.Location = new System.Drawing.Point(9, 373);
+			this.donateLink.Name = "donateLink";
+			this.donateLink.Size = new System.Drawing.Size(45, 13);
+			this.donateLink.TabIndex = 4;
+			this.donateLink.TabStop = true;
+			this.donateLink.Text = "Donate!";
+			this.donateLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.donateLink_LinkClicked);
+			// 
 			// PsFilterPdnConfigDialog
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.ClientSize = new System.Drawing.Size(484, 403);
+			this.Controls.Add(this.donateLink);
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.buttonOK);
 			this.Controls.Add(this.buttonCancel);
@@ -396,6 +410,7 @@ namespace PSFilterPdn
 			this.Controls.SetChildIndex(this.buttonCancel, 0);
 			this.Controls.SetChildIndex(this.buttonOK, 0);
 			this.Controls.SetChildIndex(this.tabControl1, 0);
+			this.Controls.SetChildIndex(this.donateLink, 0);
 			this.tabControl1.ResumeLayout(false);
 			this.filterTab.ResumeLayout(false);
 			this.filterTab.PerformLayout();
@@ -404,6 +419,7 @@ namespace PSFilterPdn
 			this.dirTab.ResumeLayout(false);
 			this.dirTab.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -1109,7 +1125,6 @@ namespace PSFilterPdn
 			}
 		}
 
-
 		private string lastSelectedFilterTitle;
 		private bool foundEffectsDir;
 		/// <summary>
@@ -1430,6 +1445,11 @@ namespace PSFilterPdn
 			{
 				e.Handled = false;
 			}
+		}
+
+		private void donateLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			base.Services.GetService<PaintDotNet.AppModel.IShellService>().LaunchUrl(this, @"http://forums.getpaint.net/index.php?showtopic=20622");
 		}
 	}
 }
