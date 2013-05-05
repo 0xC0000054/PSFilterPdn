@@ -2161,7 +2161,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="inData">The input data.</param>
 		/// <param name="inRowBytes">The input row bytes (stride).</param>
 		/// <param name="rect">The input rect.</param>
-		/// <param name="nplanes">The number of channels in the inmage.</param>
+		/// <param name="nplanes">The number of channels in the image.</param>
 		/// <param name="ofs">The single channel offset to map to BGRA color space.</param>
 		/// <param name="inputPadding">The input padding mode.</param>
 		/// <param name="lockRect">The lock rect.</param>
@@ -2177,64 +2177,69 @@ namespace PSFilterLoad.PSApi
 				{
 					case HostPadding.plugInWantsEdgeReplication:
 
-						int top = rect.top;
-						int left = rect.left;
-						int right = lockRect.Right - tempSurface.Width;
-						int bottom = lockRect.Bottom - tempSurface.Height;
+						int top = rect.top < 0 ? -rect.top : 0;
+						int left = rect.left < 0 ? -rect.left : 0;
+ 
+						int right = lockRect.Right - surface.Width;
+						int bottom = lockRect.Bottom - surface.Height;
 
 						int height = rect.bottom - rect.top;
-
+						int width = rect.right - rect.left;
+						
 						int sWidth = surface.Width;
 						int sHeight = surface.Height;
 						int row, col;
 
 						byte* inDataPtr = (byte*)inData.ToPointer();
 
-						while (top < 0)
+						if (top > 0)
 						{
-							for (int y = 0; y < height; y++)
+							for (int y = 0; y < top; y++)
 							{
-								col = (y < sHeight) ? y : (sHeight - 1);
-								ColorBgra p = surface.GetPointUnchecked(0, col);
+								ColorBgra* p = surface.GetRowAddressUnchecked(0);
 								byte* q = inDataPtr + (y * inRowBytes);
 
-								switch (nplanes)
+								for (int x = 0; x < width; x++)
 								{
-									case 1:
-										*q = p[ofs];
-										break;
-									case 2:
-										q[0] = p[ofs];
-										q[1] = p[ofs + 1];
-										break;
-									case 3:
-										q[0] = p.R;
-										q[1] = p.G;
-										q[2] = p.B;
-										break;
-									case 4:
-										q[0] = p.R;
-										q[1] = p.G;
-										q[2] = p.B;
-										q[3] = p.A;
-										break;
-								}
-							}
+									switch (nplanes)
+									{
+										case 1:
+											*q = (*p)[ofs];
+											break;
+										case 2:
+											q[0] = (*p)[ofs];
+											q[1] = (*p)[ofs + 1];
+											break;
+										case 3:
+											q[0] = p->R;
+											q[1] = p->G;
+											q[2] = p->B;
+											break;
+										case 4:
+											q[0] = p->R;
+											q[1] = p->G;
+											q[2] = p->B;
+											q[3] = p->A;
+											break;
+									}
 
-							top++;
+									p++;
+									q += nplanes;
+								}
+							} 
 						}
 
-						while (left < 0)
+
+						if (left > 0)
 						{
 							for (int y = 0; y < height; y++)
 							{
 								byte* q = inDataPtr + (y * inRowBytes);
 
-								for (int x = lockRect.Left; x < lockRect.Right; x++)
-								{
-									row = (x < sWidth) ? x : (sWidth - 1);
-									ColorBgra p = surface.GetPointUnchecked(row, 0);
+								ColorBgra p = surface.GetPointUnchecked(0, y);
 
+								for (int x = 0; x < left; x++)
+								{
 									switch (nplanes)
 									{
 										case 1:
@@ -2258,59 +2263,62 @@ namespace PSFilterLoad.PSApi
 									}
 									q += nplanes;
 								}
-							}
-
-							left++;
+							} 
 						}
 
-						row = (sWidth - 1);
-						while (bottom > 0)
-						{
-							for (int y = lockRect.Top; y < lockRect.Bottom; y++)
-							{
-								col = (y < sHeight) ? y : (sHeight - 1);
-								ColorBgra p = surface.GetPointUnchecked(row, col);
-								byte* q = inDataPtr + ((y - lockRect.Top) * inRowBytes);
 
-								switch (nplanes)
+						if (bottom > 0)
+						{
+							col = sHeight - 1;
+							int lockBottom = height - 1;
+							for (int y = 0; y < bottom; y++)
+							{
+								ColorBgra* p = surface.GetRowAddressUnchecked(col);
+								byte* q = inDataPtr + ((lockBottom - y) * inRowBytes);
+
+								for (int x = 0; x < width; x++)
 								{
-									case 1:
-										*q = p[ofs];
-										break;
-									case 2:
-										q[0] = p[ofs];
-										q[1] = p[ofs + 1];
-										break;
-									case 3:
-										q[0] = p.R;
-										q[1] = p.G;
-										q[2] = p.B;
-										break;
-									case 4:
-										q[0] = p.R;
-										q[1] = p.G;
-										q[2] = p.B;
-										q[3] = p.A;
-										break;
+									switch (nplanes)
+									{
+										case 1:
+											*q = (*p)[ofs];
+											break;
+										case 2:
+											q[0] = (*p)[ofs];
+											q[1] = (*p)[ofs + 1];
+											break;
+										case 3:
+											q[0] = p->R;
+											q[1] = p->G;
+											q[2] = p->B;
+											break;
+										case 4:
+											q[0] = p->R;
+											q[1] = p->G;
+											q[2] = p->B;
+											q[3] = p->A;
+											break;
+									}
+
+									p++;
+									q += nplanes;
 								}
 
-							}
-							bottom--;
-
+							} 
 						}
 
-						col = (sHeight - 1);
-						while (right > 0)
+						if (right > 0)
 						{
-							for (int y = lockRect.Top; y < lockRect.Bottom; y++)
+							row = sWidth - 1;
+							int rowEnd = width - right;
+							for (int y = 0; y < height; y++)
 							{
-								byte* q = inDataPtr + ((y - rect.top) * inRowBytes);
+								byte* q = inDataPtr + (y * inRowBytes) + rowEnd;
 
-								for (int x = lockRect.Left; x < lockRect.Right; x++)
+								ColorBgra p = surface.GetPointUnchecked(row, y);
+
+								for (int x = 0; x < right; x++)
 								{
-									row = (x < sWidth) ? x : (sWidth - 1);
-									ColorBgra p = surface.GetPointUnchecked(row, col);
-
 									switch (nplanes)
 									{
 										case 1:
@@ -2334,10 +2342,7 @@ namespace PSFilterLoad.PSApi
 									}
 									q += nplanes;
 								}
-
-							}
-
-							right--;
+							} 
 						}
 
 						break;
@@ -2772,7 +2777,7 @@ namespace PSFilterLoad.PSApi
 				maskData = maskDataPtr;
 				maskRowBytes = width;
 
-				void* ptr = maskData.ToPointer();
+				byte* ptr = (byte*)maskData.ToPointer();
 
 				if ((lockRect.Right > tempMask.Width || lockRect.Bottom > tempMask.Height) || padBuffer)
 				{
@@ -2780,95 +2785,92 @@ namespace PSFilterLoad.PSApi
 					{
 						case HostPadding.plugInWantsEdgeReplication:
 
-							int top = rect.top;
-							int left = rect.left;
+							int top = rect.top < 0 ? -rect.top : 0;
+							int left = rect.left < 0 ? -rect.left : 0;
+
 							int right = lockRect.Right - tempMask.Width;
 							int bottom = lockRect.Bottom - tempMask.Height;
 
 							int sWidth = tempMask.Width;
 							int sHeight = tempMask.Height;
-
 							int row, col;
 
-							while (top < 0)
+							if (top > 0)
+							{
+								for (int y = 0; y < top; y++)
+								{
+									byte* p = tempMask.GetRowAddressUnchecked(0);
+									byte* q = ptr + (y * maskRowBytes);
+
+									for (int x = 0; x < width; x++)
+									{
+										*q = *p;
+
+										p++;
+										q++;
+									}
+								}
+							}
+
+
+							if (left > 0)
 							{
 								for (int y = 0; y < height; y++)
 								{
+									byte* q = ptr + (y * maskRowBytes);
 
-									col = (y < sHeight) ? y : (sHeight - 1);
-									byte p = tempMask.GetPointUnchecked(0, col);
-									byte* dstRow = (byte*)ptr + ((y - rect.top) * maskRowBytes);
+									byte p = tempMask.GetPointUnchecked(0, y);
 
-									*dstRow = p;
+									for (int x = 0; x < left; x++)
+									{
+										*q = p;
 
-									dstRow++;
+										q++;
+									}
 								}
-
-								top++;
 							}
 
 
-							while (left < 0)
+							if (bottom > 0)
 							{
+								col = sHeight - 1;
+								int lockBottom = height - 1;
+								for (int y = 0; y < bottom; y++)
+								{
+									byte* p = tempMask.GetRowAddressUnchecked(col);
+									byte* q = ptr + ((lockBottom - y) * maskRowBytes);
+
+									for (int x = 0; x < width; x++)
+									{
+										*q = *p;
+
+
+										p++;
+										q++;
+									}
+
+								}
+							}
+
+							if (right > 0)
+							{
+								row = sWidth - 1;
+								int rowEnd = width - right;
 								for (int y = 0; y < height; y++)
 								{
-									byte* dstRow = (byte*)ptr + ((y - rect.top) * maskRowBytes);
+									byte* q = ptr + (y * maskRowBytes) + rowEnd;
 
-									for (int x = lockRect.Left; x < lockRect.Right; x++)
+									byte p = tempMask.GetPointUnchecked(row, y);
+
+									for (int x = 0; x < right; x++)
 									{
-										row = (x < sWidth) ? x : (sWidth - 1);
-										byte p = tempMask.GetPointUnchecked(row, 0);
 
-										*dstRow = p;
+										*q = p;
 
-										dstRow++;
-
+										q++;
 									}
 								}
-
-								left++;
 							}
-
-							row = (sWidth - 1);
-							while (bottom > 0)
-							{
-								for (int y = lockRect.Top; y < lockRect.Bottom; y++)
-								{
-									col = (y < sHeight) ? y : (sHeight - 1);
-									byte p = tempMask.GetPointUnchecked(row, col);
-									byte* dstRow = (byte*)ptr + ((y - rect.top) * maskRowBytes);
-
-									*dstRow = p;
-
-									dstRow++;
-								}
-								bottom--;
-
-							}
-								
-							col = (sHeight - 1);
-
-							while (right > 0)
-							{
-								for (int y = lockRect.Top; y < lockRect.Bottom; y++)
-								{
-									byte* dstRow = (byte*)ptr + ((y - rect.top) * maskRowBytes);
-
-									for (int x = lockRect.Left; x < lockRect.Right; x++)
-									{
-										row = (x < sWidth) ? x : (sWidth - 1);
-										byte p = tempMask.GetPointUnchecked(row, col);
-
-										*dstRow = p;
-
-										dstRow++;
-									}
-
-								}
-
-								right--;
-							}
-
 
 							break;
 						case HostPadding.plugInDoesNotWantPadding:
@@ -5684,7 +5686,7 @@ namespace PSFilterLoad.PSApi
 						Marshal.FreeHGlobal(item.name);
 						Memory.Free(item.address);
 					}
-					channelReadDescPtrs.Clear();
+					channelReadDescPtrs = null;
 				}
 
 				if (filterRecordPtr != IntPtr.Zero)
@@ -5748,7 +5750,7 @@ namespace PSFilterLoad.PSApi
 						Memory.Free(item.Value.pointer);
 						Memory.Free(item.Key);
 					}
-					handles.Clear();
+					handles = null;
 				}
 
 				disposed = true;
