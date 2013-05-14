@@ -209,7 +209,7 @@ namespace PSFilterLoad.PSApi
 		private Surface dest;
 		private PluginPhase phase; 
 
-		private IntPtr data;
+		private IntPtr dataPtr;
 		private short result;
 
 		private string errorMessage;
@@ -290,7 +290,7 @@ namespace PSFilterLoad.PSApi
 			if (String.IsNullOrEmpty(sourceImage))
 				throw new ArgumentException("sourceImage is null or empty.", "sourceImage");
 
-			data = IntPtr.Zero;
+			dataPtr = IntPtr.Zero;
 
 			phase = PluginPhase.None; 
 			errorMessage = String.Empty;
@@ -698,18 +698,18 @@ namespace PSFilterLoad.PSApi
 				}
 
 			}
-			if (filterRecord->parameters != IntPtr.Zero && data != IntPtr.Zero && saveGlobalDataPointer)
+			if (filterRecord->parameters != IntPtr.Zero && dataPtr != IntPtr.Zero && saveGlobalDataPointer)
 			{
-				long pluginDataSize = SafeNativeMethods.GlobalSize(data).ToInt64();
+				long pluginDataSize = SafeNativeMethods.GlobalSize(dataPtr).ToInt64();
 				globalParms.PluginDataIsPSHandle = false;
 
-				IntPtr dataPtr = SafeNativeMethods.GlobalLock(data);
+				IntPtr ptr = SafeNativeMethods.GlobalLock(dataPtr);
 
 				try
 				{
-					if (pluginDataSize == ParmDataSize && Marshal.ReadInt32(dataPtr, IntPtr.Size) == 0x464f544f) // OTOF reversed
+					if (pluginDataSize == ParmDataSize && Marshal.ReadInt32(ptr, IntPtr.Size) == 0x464f544f) // OTOF reversed
 					{
-						IntPtr hPtr = Marshal.ReadIntPtr(dataPtr);
+						IntPtr hPtr = Marshal.ReadIntPtr(ptr);
 						long ps = 0;
 						if (!IsBadReadPtr(hPtr) && (ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64()) > 0L)
 						{
@@ -723,14 +723,14 @@ namespace PSFilterLoad.PSApi
 					}
 					else if (pluginDataSize > 0)
 					{
-						if (handle_valid(dataPtr))
+						if (handle_valid(ptr))
 						{
-							int ps = handle_get_size_proc(dataPtr);
+							int ps = handle_get_size_proc(ptr);
 							byte[] dataBuf = new byte[ps];
 
-							IntPtr hPtr = handle_lock_proc(dataPtr, 0);
+							IntPtr hPtr = handle_lock_proc(ptr, 0);
 							Marshal.Copy(hPtr, dataBuf, 0, ps);
-							handle_unlock_proc(dataPtr);
+							handle_unlock_proc(ptr);
 							globalParms.SetPluginDataBytes(dataBuf);
 							globalParms.PluginDataSize = ps;
 							globalParms.PluginDataIsPSHandle = true;
@@ -738,7 +738,7 @@ namespace PSFilterLoad.PSApi
 						else
 						{
 							Byte[] dataBuf = new byte[pluginDataSize];
-							Marshal.Copy(dataPtr, dataBuf, 0, (int)pluginDataSize);
+							Marshal.Copy(ptr, dataBuf, 0, (int)pluginDataSize);
 							globalParms.SetPluginDataBytes(dataBuf);
 							globalParms.PluginDataSize = pluginDataSize;
 						}
@@ -746,7 +746,7 @@ namespace PSFilterLoad.PSApi
 				}
 				finally
 				{
-					SafeNativeMethods.GlobalUnlock(dataPtr);
+					SafeNativeMethods.GlobalUnlock(ptr);
 				}
 
 			}
@@ -831,29 +831,29 @@ namespace PSFilterLoad.PSApi
 			{
 				if (globalParms.PluginDataSize == handleSize && globalParms.PluginDataIsPSHandle)
 				{
-					data = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.PluginDataSize));
+					dataPtr = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParms.PluginDataSize));
 					parmDataHandle = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)pluginDataBytes.Length));
 
 
 					Marshal.Copy(pluginDataBytes, 0, parmDataHandle, pluginDataBytes.Length);
 
-					Marshal.WriteIntPtr(data, parmDataHandle);
-					Marshal.Copy(sig, 0, new IntPtr(data.ToInt64() + IntPtr.Size), 4);
+					Marshal.WriteIntPtr(dataPtr, parmDataHandle);
+					Marshal.Copy(sig, 0, new IntPtr(dataPtr.ToInt64() + IntPtr.Size), 4);
 
 				}
 				else
 				{
 					if (globalParms.PluginDataIsPSHandle)
 					{
-						data = handle_new_proc(pluginDataBytes.Length);
+						dataPtr = handle_new_proc(pluginDataBytes.Length);
 
-						Marshal.Copy(pluginDataBytes, 0, handle_lock_proc(data, 0), pluginDataBytes.Length);
-						handle_unlock_proc(data);
+						Marshal.Copy(pluginDataBytes, 0, handle_lock_proc(dataPtr, 0), pluginDataBytes.Length);
+						handle_unlock_proc(dataPtr);
 					}
 					else
 					{
-						data = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)pluginDataBytes.Length));
-						Marshal.Copy(pluginDataBytes, 0, data, pluginDataBytes.Length);
+						dataPtr = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)pluginDataBytes.Length));
+						Marshal.Copy(pluginDataBytes, 0, dataPtr, pluginDataBytes.Length);
 					}
 
 				}
@@ -877,7 +877,24 @@ namespace PSFilterLoad.PSApi
 
 			try
 			{
-				pdata.module.entryPoint(FilterSelector.filterSelectorAbout, gch.AddrOfPinnedObject(), ref data, ref result);
+				if (pdata.moduleEntryPoints == null)
+				{
+					pdata.module.entryPoint(FilterSelector.filterSelectorAbout, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
+				}
+				else
+				{
+					// call all the entry points in the module only one should show the about box.
+					foreach (var entryPoint in pdata.moduleEntryPoints)
+					{
+						IntPtr ptr = UnsafeNativeMethods.GetProcAddress(pdata.module.dll, entryPoint);
+
+						pluginEntryPoint ep = (pluginEntryPoint)Marshal.GetDelegateForFunctionPointer(ptr, typeof(pluginEntryPoint));
+
+						ep(FilterSelector.filterSelectorAbout, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
+
+						GC.KeepAlive(ep);
+					}
+				}
 			}
 			finally
 			{
@@ -908,7 +925,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before FilterSelectorStart");
 #endif
 
-			pdata.module.entryPoint(FilterSelector.filterSelectorStart, filterRecordPtr, ref data, ref result);
+			pdata.module.entryPoint(FilterSelector.filterSelectorStart, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After FilterSelectorStart");
@@ -936,7 +953,7 @@ namespace PSFilterLoad.PSApi
 				Ping(DebugFlags.Call, "Before FilterSelectorContinue");
 #endif
 
-				pdata.module.entryPoint(FilterSelector.filterSelectorContinue, filterRecordPtr, ref data, ref result);
+				pdata.module.entryPoint(FilterSelector.filterSelectorContinue, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 				Ping(DebugFlags.Call, "After FilterSelectorContinue");
@@ -954,7 +971,7 @@ namespace PSFilterLoad.PSApi
 					Ping(DebugFlags.Call, "Before FilterSelectorFinish");
 #endif
 
-					pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref data, ref result);
+					pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 					Ping(DebugFlags.Call, "After FilterSelectorFinish");
@@ -983,7 +1000,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before FilterSelectorFinish");
 #endif
 
-			pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref data, ref result);
+			pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After FilterSelectorFinish");
@@ -1007,11 +1024,11 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before filterSelectorParameters");
 #endif
 
-			pdata.module.entryPoint(FilterSelector.filterSelectorParameters, filterRecordPtr, ref data, ref result);
+			pdata.module.entryPoint(FilterSelector.filterSelectorParameters, filterRecordPtr, ref dataPtr, ref result);
 #if DEBUG
 			unsafe
 			{
-				Ping(DebugFlags.Call, string.Format("data = {0:X},  parameters = {1:X}", data, ((FilterRecord*)filterRecordPtr)->parameters));
+				Ping(DebugFlags.Call, string.Format("data = {0:X},  parameters = {1:X}", dataPtr, ((FilterRecord*)filterRecordPtr)->parameters));
 			}
 
 			Ping(DebugFlags.Call, "After filterSelectorParameters");
@@ -1132,7 +1149,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			Ping(DebugFlags.Call, "Before filterSelectorPrepare");
 #endif
-			pdata.module.entryPoint(FilterSelector.filterSelectorPrepare, filterRecordPtr, ref data, ref result);
+			pdata.module.entryPoint(FilterSelector.filterSelectorPrepare, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After filterSelectorPrepare");
@@ -5271,19 +5288,19 @@ namespace PSFilterLoad.PSApi
 					}
 				}
 
-				if (data != IntPtr.Zero)
+				if (dataPtr != IntPtr.Zero)
 				{
-					if (handle_valid(data))
+					if (handle_valid(dataPtr))
 					{
-						handle_unlock_proc(data);
-						handle_dispose_proc(data);
+						handle_unlock_proc(dataPtr);
+						handle_dispose_proc(dataPtr);
 					}
-					else if (SafeNativeMethods.GlobalSize(data).ToInt64() > 0L)
+					else if (SafeNativeMethods.GlobalSize(dataPtr).ToInt64() > 0L)
 					{
-						SafeNativeMethods.GlobalUnlock(data);
-						SafeNativeMethods.GlobalFree(data);
+						SafeNativeMethods.GlobalUnlock(dataPtr);
+						SafeNativeMethods.GlobalFree(dataPtr);
 					}
-					data = IntPtr.Zero;
+					dataPtr = IntPtr.Zero;
 				}
 
 				// free any remaining handles
