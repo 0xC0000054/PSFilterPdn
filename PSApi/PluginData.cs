@@ -32,6 +32,8 @@ namespace PSFilterLoad.PSApi
         public bool runWith32BitShim;
         [DataMember]
         public AETEData aete;
+        [DataMember]
+        public string[] moduleEntryPoints;
 
         public PluginData()
         {
@@ -43,6 +45,7 @@ namespace PSFilterLoad.PSApi
             this.module = new PIEntrypoint();
             this.runWith32BitShim = false;
             this.aete = null;
+            this.moduleEntryPoints = null;
         }
 
         public bool IsValid()

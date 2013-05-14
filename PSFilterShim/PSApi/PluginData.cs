@@ -35,6 +35,8 @@ namespace PSFilterLoad.PSApi
         public bool runWith32BitShim;
         [DataMember]
         public AETEData aete;
+        [DataMember]
+        public string[] moduleEntryPoints;
     }
 #pragma warning restore
 
