@@ -1112,7 +1112,6 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private bool saveGlobalDataPointer;
 		/// <summary>
 		/// Saves the filter parameters for repeat runs.
 		/// </summary>
@@ -1199,7 +1198,7 @@ namespace PSFilterLoad.PSApi
 				}
 
 			}
-			if (filterRecord->parameters != IntPtr.Zero && dataPtr != IntPtr.Zero && saveGlobalDataPointer)
+			if (filterRecord->parameters != IntPtr.Zero && dataPtr != IntPtr.Zero)
 			{
 				long pluginDataSize = SafeNativeMethods.GlobalSize(dataPtr).ToInt64();
 				globalParameters.PluginDataIsPSHandle = false;
@@ -1509,7 +1508,7 @@ namespace PSFilterLoad.PSApi
 
 			if (!isRepeatEffect && result == PSError.noErr)
 			{
-				save_parm(); // save the parameters again in case the filter shows it's dialog when filterSelectorStart is called.
+				save_parm();
 			}
 
 			return true;
@@ -1536,8 +1535,6 @@ namespace PSFilterLoad.PSApi
 
 			Ping(DebugFlags.Call, "After filterSelectorParameters"); 
 #endif
-
-			save_parm();
 
 			if (result != PSError.noErr)
 			{
@@ -1729,8 +1726,6 @@ namespace PSFilterLoad.PSApi
 				return plugin_about(pdata);
 			}
 			
-			// Disable saving of the 'data' pointer for Noise Ninja as it points to a memory mapped file.
-			saveGlobalDataPointer = pdata.category != "PictureCode";
 			useChannelPorts = pdata.category == "Amico Perry"; // enable the Channel Ports for Luce 2
 			
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
