@@ -854,6 +854,7 @@ namespace PSFilterLoad.PSApi
 			pseudoResources = new List<PSResource>();
 			handles = new Dictionary<IntPtr, PSHandle>();
 			channelReadDescPtrs = new List<ReadChannelPtrs>();
+			bufferIDs = new List<IntPtr>();
 
 			if (eep.SourceSurface.Width > 32000 || eep.SourceSurface.Height > 32000)
 			{
@@ -1251,7 +1252,7 @@ namespace PSFilterLoad.PSApi
 
 			}
 		}
-		private IntPtr parmDataHandle;
+		private IntPtr pluginDataHandle;
 		private IntPtr filterParametersHandle;
 		/// <summary>
 		/// Restores the filter parameters for repeat runs.
@@ -1335,12 +1336,12 @@ namespace PSFilterLoad.PSApi
 				if (globalParameters.PluginDataSize == handleSize && globalParameters.PluginDataIsPSHandle)
 				{
 					dataPtr = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)globalParameters.PluginDataSize));
-					parmDataHandle = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)pluginDataBytes.Length));
+					pluginDataHandle = SafeNativeMethods.GlobalAlloc(NativeConstants.GPTR, new UIntPtr((uint)pluginDataBytes.Length));
 
 
-					Marshal.Copy(pluginDataBytes, 0, parmDataHandle, pluginDataBytes.Length);
+					Marshal.Copy(pluginDataBytes, 0, pluginDataHandle, pluginDataBytes.Length);
 
-					Marshal.WriteIntPtr(dataPtr, parmDataHandle);
+					Marshal.WriteIntPtr(dataPtr, pluginDataHandle);
 					Marshal.Copy(sig, 0, new IntPtr(dataPtr.ToInt64() + IntPtr.Size), 4);
 
 				}
@@ -3051,6 +3052,8 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
+		private List<IntPtr> bufferIDs;
+
 		private short allocate_buffer_proc(int size, ref System.IntPtr bufferID)
 		{
 #if DEBUG
@@ -3060,6 +3063,8 @@ namespace PSFilterLoad.PSApi
 			try
 			{
 				bufferID = Memory.Allocate(size, false);
+
+				this.bufferIDs.Add(bufferID);
 			}
 			catch (OutOfMemoryException)
 			{
@@ -3076,6 +3081,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.BufferSuite, string.Format("Buffer address = {0:X8}, Size = {1}", bufferID.ToInt64(), size));
 #endif     
 			Memory.Free(bufferID);
+			this.bufferIDs.Remove(bufferID);
 		   
 		}
 		private IntPtr buffer_lock_proc(System.IntPtr bufferID, byte moveHigh)
@@ -5677,7 +5683,6 @@ namespace PSFilterLoad.PSApi
 						handle_dispose_proc(descParam->descriptor);
 					}
 
-
 					Memory.Free(descriptorParametersPtr);
 					descriptorParametersPtr = IntPtr.Zero;
 				}
@@ -5719,57 +5724,75 @@ namespace PSFilterLoad.PSApi
 					channelReadDescPtrs = null;
 				}
 
+				if (filterParametersHandle != IntPtr.Zero)
+				{
+					try
+					{
+						SafeNativeMethods.GlobalUnlock(filterParametersHandle);
+						SafeNativeMethods.GlobalFree(filterParametersHandle);
+					}
+					finally
+					{
+						filterParametersHandle = IntPtr.Zero;
+					}
+				}
+
 				if (filterRecordPtr != IntPtr.Zero)
 				{
 					FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
 					if (filterRecord->parameters != IntPtr.Zero)
 					{
-						if (handle_valid(filterRecord->parameters))
+						if (bufferIDs.Contains(filterRecord->parameters))
+						{
+							buffer_free_proc(filterRecord->parameters);
+						}
+						else
 						{
 							handle_unlock_proc(filterRecord->parameters);
 							handle_dispose_proc(filterRecord->parameters);
 						}
-						else
-						{
-							SafeNativeMethods.GlobalUnlock(filterRecord->parameters);
-							SafeNativeMethods.GlobalFree(filterRecord->parameters);
-						}
 						filterRecord->parameters = IntPtr.Zero;
 					}
-
 
 					Memory.Free(filterRecordPtr);
 					filterRecordPtr = IntPtr.Zero;
 				}
 
-				if (parmDataHandle != IntPtr.Zero)
+				if (pluginDataHandle != IntPtr.Zero)
 				{
-
 					try
 					{
-						SafeNativeMethods.GlobalUnlock(parmDataHandle);
-						SafeNativeMethods.GlobalFree(parmDataHandle);
+						SafeNativeMethods.GlobalUnlock(pluginDataHandle);
+						SafeNativeMethods.GlobalFree(pluginDataHandle);
 					}
 					finally
 					{
-						parmDataHandle = IntPtr.Zero;
+						pluginDataHandle = IntPtr.Zero;
 					}
 				}
 
 				if (dataPtr != IntPtr.Zero)
 				{
-					if (handle_valid(dataPtr))
+					if (bufferIDs.Contains(dataPtr))
+					{
+						buffer_free_proc(dataPtr);
+					}
+					else
 					{
 						handle_unlock_proc(dataPtr);
 						handle_dispose_proc(dataPtr);
 					}
-					else if (SafeNativeMethods.GlobalSize(dataPtr).ToInt64() > 0L)
-					{
-						SafeNativeMethods.GlobalUnlock(dataPtr);
-						SafeNativeMethods.GlobalFree(dataPtr);
-					}
 					dataPtr = IntPtr.Zero;
+				}
+
+				if (bufferIDs.Count > 0)
+				{
+					for (int i = 0; i < bufferIDs.Count; i++)
+					{
+						buffer_free_proc(bufferIDs[i]);
+					}
+					bufferIDs = null;
 				}
 
 				// free any remaining handles
