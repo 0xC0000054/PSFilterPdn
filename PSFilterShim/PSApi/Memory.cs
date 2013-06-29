@@ -22,8 +22,7 @@ namespace PSFilterLoad.PSApi
 			hHeap = SafeNativeMethods.GetProcessHeap();
 		}
 
-
-		public static IntPtr Allocate(int size, bool zeroMemory)
+		public static IntPtr Allocate(long size, bool zeroMemory)
 		{
 			if (hHeap == IntPtr.Zero)
 			{
@@ -73,7 +72,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		public static IntPtr ReAlloc(IntPtr pv, int newSize)
+		public static IntPtr ReAlloc(IntPtr pv, long newSize)
 		{
 			if (hHeap == IntPtr.Zero)
 			{
