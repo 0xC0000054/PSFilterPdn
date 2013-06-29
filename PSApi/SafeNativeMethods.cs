@@ -28,7 +28,7 @@ namespace PSFilterLoad.PSApi
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
         internal static extern IntPtr memset(IntPtr dest, int c, UIntPtr count);
 
-                [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
+        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
         internal static extern unsafe void memcpy(void* dst, void* src, UIntPtr length);
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -44,9 +44,6 @@ namespace PSFilterLoad.PSApi
             IntPtr lpAddress,
             UIntPtr dwSize,
             uint dwFreeType);
-
-        [DllImport("kernel32.dll", EntryPoint = "GlobalAlloc")]
-        internal static extern IntPtr GlobalAlloc(uint uFlags, UIntPtr dwBytes);
 
         [DllImport("kernel32.dll", EntryPoint = "GlobalSize")]
         internal static extern IntPtr GlobalSize([In()] System.IntPtr hMem);
