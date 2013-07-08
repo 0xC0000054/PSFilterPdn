@@ -15,7 +15,7 @@ namespace PSFilterLoad.PSApi
     ///simpleProperty: int32*
     ///complexProperty: Handle*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetPropertyProc(uint signature, uint key, int index, ref int simpleProperty, ref System.IntPtr complexProperty);
+    internal delegate short GetPropertyProc(uint signature, uint key, int index, ref IntPtr simpleProperty, ref System.IntPtr complexProperty);
 
     /// Return Type: OSErr->short
     ///signature: PIType->unsigned int
@@ -24,7 +24,7 @@ namespace PSFilterLoad.PSApi
     ///simpleProperty: int32->int
     ///complexProperty: Handle->LPSTR*
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short SetPropertyProc(uint signature, uint key, int index, int simpleProperty, ref System.IntPtr complexProperty);
+    internal delegate short SetPropertyProc(uint signature, uint key, int index, IntPtr simpleProperty, IntPtr complexProperty);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayout(LayoutKind.Sequential)]
     internal struct PropertyProcs
