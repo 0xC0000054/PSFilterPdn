@@ -151,7 +151,7 @@ namespace PSFilterPdn
 								{
 									proxyResult = false;
 									proxyErrorMessage = data;
-								},
+								} 
 			};
 			
 			PSFilterShimServer.Start(service);
@@ -338,11 +338,11 @@ namespace PSFilterPdn
 			PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)parameters;
 			if (token.Dest != null)
 			{
-				dstArgs.Surface.CopySurface(token.Dest, rois);
+				dstArgs.Surface.CopySurface(token.Dest, rois, startIndex, length);
 			}
 			else
 			{
-				dstArgs.Surface.CopySurface(srcArgs.Surface);
+				dstArgs.Surface.CopySurface(srcArgs.Surface, rois, startIndex, length);
 			}
 		}
 
