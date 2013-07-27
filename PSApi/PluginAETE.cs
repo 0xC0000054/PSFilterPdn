@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PSFilterLoad.PSApi
 {
-    internal struct AETEParm
+    internal struct AETEParameter
     {
         public string name;
         public uint key;
@@ -28,16 +28,16 @@ namespace PSFilterLoad.PSApi
         public string desc;
     }
 
-    internal struct AETEEvent
+    internal sealed class AETEEvent
     {
         public string vendor;
         public string desc;
-        public int evntClass;
+        public int eventClass;
         public int type;
         public uint replyType;
-        public uint parmType;
+        public uint paramType;
         public short flags;
-        public AETEParm[] parms;
+        public AETEParameter[] parameters;
         public AETEEnums[] enums;
     }
 
@@ -48,6 +48,6 @@ namespace PSFilterLoad.PSApi
         public short suiteLevel;
         public short suiteVersion;
 
-        public AETEEvent[] events;
+        public AETEEvent scriptEvent;
     } 
 }

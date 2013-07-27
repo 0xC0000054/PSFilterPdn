@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 namespace PSFilterLoad.PSApi
 {
-
     [System.Serializable()]
     public sealed class AETEData
     {
@@ -18,16 +17,15 @@ namespace PSFilterLoad.PSApi
         internal AETEData(PluginAETE enumAETE)
         {
             this.flagList = new Dictionary<uint, short>();
-            foreach (var item in enumAETE.events)
+            
+            foreach (AETEParameter parm in enumAETE.scriptEvent.parameters)
             {
-                foreach (AETEParm parm in item.parms)
+                if (!flagList.ContainsKey(parm.key))
                 {
-                    if (!flagList.ContainsKey(parm.key))
-                    {
-                        flagList.Add(parm.key, parm.flags);
-                    }
+                    flagList.Add(parm.key, parm.flags);
                 }
             }
+            
         }
     } 
     
