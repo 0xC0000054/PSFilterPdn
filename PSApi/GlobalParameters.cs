@@ -10,134 +10,132 @@ namespace PSFilterLoad.PSApi
     [Serializable]
     public sealed class GlobalParameters : ISerializable
     {
+        public enum DataStorageMethod
+        {
+            HandleSuite,
+            OTOFHandle,
+            RawBytes
+        }
 
-        private long parameterDataSize;
         private byte[] parameterDataBytes;
-        private bool parameterDataIsPSHandle;
-        private long pluginDataSize;
+        private DataStorageMethod parameterDataStorageMethod;
         private byte[] pluginDataBytes;
-        private bool pluginDataIsPSHandle;
-        private int storeMethod;
-       
+        private DataStorageMethod pluginDataStorageMethod;
+
+        /// <summary>
+        /// Gets the parameter data bytes.
+        /// </summary>
+        /// <returns>The parameter data bytes.</returns>
         public byte[] GetParameterDataBytes()
         {
             return parameterDataBytes;
         }
-        public void SetParameterDataBytes(byte[] value)
-        {
-            parameterDataBytes = value;
-        }
- 
 
-        public long ParameterDataSize
+        /// <summary>
+        /// Sets the parameter data bytes.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        public void SetParameterDataBytes(byte[] data)
+        {
+            parameterDataBytes = data;
+        }
+
+        /// <summary>
+        /// Gets or sets the storage method of the parameter data.
+        /// </summary>
+        /// <value>
+        /// The parameter data storage method.
+        /// </value>
+        public DataStorageMethod ParameterDataStorageMethod
         {
             get
             {
-                return parameterDataSize;
+                return parameterDataStorageMethod;
             }
             set
             {
-                parameterDataSize = value;
+                parameterDataStorageMethod = value;
             }
         }
 
         /// <summary>
-        /// Is the parm data a PS Handle.
+        /// Gets the plugin data bytes.
         /// </summary>
-        public bool ParameterDataIsPSHandle
-        {
-            get
-            {
-                return parameterDataIsPSHandle;
-            }
-            set
-            {
-                parameterDataIsPSHandle = value;
-            }
-        }
-
+        /// <returns>The plugin data bytes.</returns>
         public byte[] GetPluginDataBytes()
         {
             return pluginDataBytes;
         }
-        public void SetPluginDataBytes(byte[] value)
-        {
-            pluginDataBytes = value;
-        }
-        
 
-        public long PluginDataSize
+        /// <summary>
+        /// Sets the plugin data bytes.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        public void SetPluginDataBytes(byte[] data)
         {
-            get
-            {
-                return pluginDataSize;
-            }
-            set
-            {
-                pluginDataSize = value;
-            }
+            pluginDataBytes = data;
         }
 
         /// <summary>
-        /// Is the plugin data a PS Handle.
+        /// Gets or sets the storage method of the plugin data.
         /// </summary>
-        public bool PluginDataIsPSHandle
+        /// <value>
+        /// The plugin data storage method.
+        /// </value>
+        public DataStorageMethod PluginDataStorageMethod
         {
             get
             {
-                return pluginDataIsPSHandle;
+                return pluginDataStorageMethod;
             }
             set
             {
-                pluginDataIsPSHandle = value;
+                pluginDataStorageMethod = value;
             }
         }
 
-        public int StoreMethod
-        {
-            get
-            {
-                return storeMethod;
-            }
-            set
-            {
-                storeMethod = value;
-            }
-        }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GlobalParameters"/> class.
+        /// </summary>
         public GlobalParameters()
         {
-            this.parameterDataSize = 0;
             this.parameterDataBytes = null;
-            this.parameterDataIsPSHandle = false;
-            this.pluginDataSize = 0;
+            this.parameterDataStorageMethod = DataStorageMethod.HandleSuite;
             this.pluginDataBytes = null;
-            this.pluginDataIsPSHandle = false;
-            this.storeMethod = 0;
+            this.pluginDataStorageMethod = DataStorageMethod.HandleSuite;
         }
         private GlobalParameters(SerializationInfo info, StreamingContext context)
         {
-            this.parameterDataSize = info.GetInt64("parameterDataSize");
+            if (info == null)
+                throw new ArgumentNullException("info");
+
             this.parameterDataBytes = (byte[])info.GetValue("parameterDataBytes", typeof(byte[]));
-            this.parameterDataIsPSHandle = info.GetBoolean("parameterDataIsPSHandle");
-            this.pluginDataSize = info.GetInt64("pluginDataSize");
+            this.parameterDataStorageMethod = (DataStorageMethod)info.GetValue("parameterDataStorageMethod", typeof(DataStorageMethod));
+
             this.pluginDataBytes = (byte[])info.GetValue("pluginDataBytes", typeof(byte[]));
-            this.pluginDataIsPSHandle = info.GetBoolean("pluginDataIsPSHandle");
-            this.storeMethod = info.GetInt32("storeMethod");
+            this.pluginDataStorageMethod = (DataStorageMethod)info.GetValue("pluginDataStorageMethod", typeof(DataStorageMethod));
         }
+        /// <summary>
+        /// Populates a <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with the data needed to serialize the target object.
+        /// </summary>
+        /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> to populate with data.</param>
+        /// <param name="context">The destination (see <see cref="T:System.Runtime.Serialization.StreamingContext"/>) for this serialization.</param>
+        /// <exception cref="T:System.Security.SecurityException">
+        /// The caller does not have the required permission.
+        ///   </exception>
+        ///   <exception cref="T:System.ArgumentNullException">The SerializationInfo is null.</exception>
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             if (info == null)
-                throw new ArgumentNullException("info", "info is null.");
+                throw new ArgumentNullException("info");
 
-            info.AddValue("parameterDataSize", this.parameterDataSize);
             info.AddValue("parameterDataBytes", this.parameterDataBytes, typeof(byte[]));
-            info.AddValue("parameterDataIsPSHandle", this.parameterDataIsPSHandle);
-            info.AddValue("pluginDataSize", this.pluginDataSize);
+            info.AddValue("parameterDataStorageMethod", this.parameterDataStorageMethod, typeof(DataStorageMethod));
+
             info.AddValue("pluginDataBytes", this.pluginDataBytes, typeof(byte[]));
-            info.AddValue("pluginDataIsPSHandle", this.pluginDataIsPSHandle);
-            info.AddValue("storeMethod", this.storeMethod);
+            info.AddValue("pluginDataStorageMethod", this.pluginDataStorageMethod, typeof(DataStorageMethod));
         }
     }
 }
