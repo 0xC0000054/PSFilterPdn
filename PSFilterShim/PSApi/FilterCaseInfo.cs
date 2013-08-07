@@ -16,57 +16,27 @@ namespace PSFilterLoad.PSApi
     /// </summary>
     internal enum FilterDataHandling : byte
     {
-
-        /// filterDataHandlingCantFilter -> 0
         filterDataHandlingCantFilter = 0,
-
-        /// filterDataHandlingNone -> 1
         filterDataHandlingNone = 1,
-
-        /// filterDataHandlingBlackMat -> 2
         filterDataHandlingBlackMat = 2,
-
-        /// filterDataHandlingGrayMat -> 3
         filterDataHandlingGrayMat = 3,
-
-        /// filterDataHandlingWhiteMat -> 4
         filterDataHandlingWhiteMat = 4,
-
-        /// filterDataHandlingDefringe -> 5
         filterDataHandlingDefringe = 5,
-
-        /// filterDataHandlingBlackZap -> 6
         filterDataHandlingBlackZap = 6,
-
-        /// filterDataHandlingGrayZap -> 7
         filterDataHandlingGrayZap = 7,
-
-        /// filterDataHandlingWhiteZap -> 8
         filterDataHandlingWhiteZap = 8,
-
-        /// filterDataHandlingFillMask -> 9
         filterDataHandlingFillMask = 9,
-
-        /// filterDataHandlingBackgroundZap -> 10
         filterDataHandlingBackgroundZap = 10,
-
-        /// filterDataHandlingForegroundZap -> 11
         filterDataHandlingForegroundZap = 11,
-      
     }
-    internal static class FilterCaseInfoFlags
+    
+    [Flags]
+    internal enum FilterCaseInfoFlags : byte
     {
-        /// PIFilterDontCopyToDestinationBit -> 0
-        public const byte PIFilterDontCopyToDestinationBit = (1 << 0);
-
-        /// PIFilterWorksWithBlankDataBit -> 1
-        public const byte PIFilterWorksWithBlankDataBit = (1 << 1);
-
-        /// PIFilterFiltersLayerMaskBit -> 2
-        public const byte PIFilterFiltersLayerMaskBit = (1 << 2);
-
-        /// PIFilterWritesOutsideSelectionBit -> 3
-        public const byte PIFilterWritesOutsideSelectionBit = (1 << 3);
+        PIFilterDontCopyToDestinationBit = (1 << 0),
+        PIFilterWorksWithBlankDataBit = (1 << 1),
+        PIFilterFiltersLayerMaskBit = (1 << 2),
+        PIFilterWritesOutsideSelectionBit = (1 << 3)
     }
 
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 1)]
@@ -83,7 +53,7 @@ namespace PSFilterLoad.PSApi
     
         /// char
         [DataMember]
-        public byte flags1;
+        public FilterCaseInfoFlags flags1;
     
         /// char
         [DataMember]       

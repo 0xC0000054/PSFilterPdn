@@ -1388,7 +1388,7 @@ namespace PSFilterPdn
 					string outputHandling = info.outputHandling.ToString("G");
 
 
-					fici.AppendFormat(CultureInfo.InvariantCulture, "{0}_{1}_{2}", new object[] { inputHandling, outputHandling, info.flags1.ToString(CultureInfo.InvariantCulture) });
+					fici.AppendFormat(CultureInfo.InvariantCulture, "{0}_{1}_{2}", new object[] { inputHandling, outputHandling, info.flags1.ToString("G") });
 					if (i < 6)
 					{
 						fici.Append(':');

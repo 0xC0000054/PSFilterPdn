@@ -77,7 +77,7 @@ namespace PSFilterPdn
 
 				info[i].inputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[0]);
 				info[i].outputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[1]);
-				info[i].flags1 = byte.Parse(data[2], NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+				info[i].flags1 = (FilterCaseInfoFlags)Enum.Parse(typeof(FilterCaseInfoFlags), data[2]);
 				info[i].flags2 = 0;
 			}
 
