@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using PaintDotNet;
 using PSFilterShim.Properties;
+using System.ComponentModel;
 
 namespace PSFilterLoad.PSApi
 {
@@ -52,7 +53,7 @@ namespace PSFilterLoad.PSApi
 			return new string((sbyte*)ptr, 1, length, windows1252Encoding).Trim(trimChars);
 		}
 
-		private static readonly long psHandleSize = IntPtr.Size + 4L;
+		private static readonly long OTOFHandleSize = IntPtr.Size + 4L;
 
 		struct PSHandle
 		{
@@ -222,18 +223,18 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private GlobalParameters globalParms;
+		private GlobalParameters globalParameters;
 		private bool isRepeatEffect;
 
 		public ParameterData FilterParameters
 		{
 			get
 			{
-				return new ParameterData(globalParms, aeteDict);
+				return new ParameterData(globalParameters, aeteDict);
 			}
 			set
 			{
-				globalParms = value.GlobalParameters;
+				globalParameters = value.GlobalParameters;
 				aeteDict = value.AETEDictionary;
 			}
 		}
@@ -299,7 +300,7 @@ namespace PSFilterLoad.PSApi
 			sizesSetup = false;
 			frValuesSetup = false;
 			isRepeatEffect = false;
-			globalParms = new GlobalParameters();
+			globalParameters = new GlobalParameters();
 			pseudoResources = new List<PSResource>();
 			handles = new Dictionary<IntPtr, PSHandle>();
 			channelReadDescPtrs = new List<ReadChannelPtrs>();
@@ -362,19 +363,20 @@ namespace PSFilterLoad.PSApi
 				((PlatformData*)platFormDataPtr)->hwnd = owner; 
 			}
 
-			outRect.left = outRect.top = outRect.right = outRect.bottom = 0;
-			inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
-			maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
+			lastOutRect.left = lastOutRect.top = lastOutRect.right = lastOutRect.bottom = 0;
+			lastInRect.left = lastInRect.top = lastInRect.right = lastInRect.bottom = 0;
+			lastMaskRect.left = lastMaskRect.right = lastMaskRect.bottom = lastMaskRect.top = 0;
 
 			maskDataPtr = inDataPtr = outDataPtr = IntPtr.Zero;
 
-			outRowBytes = 0;
-			outHiPlane = 0;
-			outLoPlane = 0;
+			lastOutRowBytes = 0;
+			lastOutHiPlane = 0;
+			lastOutLoPlane = -1;
+			lastInLoPlane = -1;
 
-			secondaryColor = new byte[4] { secondary.R, secondary.G, secondary.B, 255 };
+			secondaryColor = new byte[4] { secondary.R, secondary.G, secondary.B, 0 };
 
-			primaryColor = new byte[4] { primary.R, primary.G, primary.B, 255 };
+			primaryColor = new byte[4] { primary.R, primary.G, primary.B, 0 };
 
 			if (selection != source.Bounds)
 			{
@@ -462,23 +464,11 @@ namespace PSFilterLoad.PSApi
 						filterCase = FilterCase.filterCaseFlatImageWithSelection;
 						break;
 				}
-#if USEMATTING
-				if (data.filterInfo != null)
-				{
-					inputHandling = data.filterInfo[(filterCase - 1)].inputHandling;
-					outputHandling = data.filterInfo[(filterCase - 1)].outputHandling;
-				}  
-#endif
+				
 				return true;
 			}
 
 			int filterCaseIndex = filterCase - 1;
-			
-#if USEMATTING
-			inputHandling = data.filterInfo[filterCaseIndex].inputHandling;
-#endif
-			outputHandling = data.filterInfo[filterCaseIndex].outputHandling;
-
 
 			if (data.filterInfo[filterCaseIndex].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
 			{
@@ -513,7 +503,11 @@ namespace PSFilterLoad.PSApi
 				}
 					
 			}
-			
+
+#if USEMATTING
+			inputHandling = data.filterInfo[filterCaseIndex].inputHandling;
+#endif						
+			outputHandling = data.filterInfo[filterCaseIndex].outputHandling;
 
 			return false;
 		}
@@ -615,30 +609,24 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Save the filter parameters for repeat runs.
 		/// </summary>
-		private unsafe void save_parm()
+		private unsafe void SaveParameters()
 		{
 			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
 			if (filterRecord->parameters != IntPtr.Zero)
 			{
 				long size = 0;
-				globalParms.ParameterDataIsPSHandle = false;
 				if (handle_valid(filterRecord->parameters))
 				{
-					globalParms.ParameterDataSize = handle_get_size_proc(filterRecord->parameters);
+					int handleSize = HandleGetSizeProc(filterRecord->parameters);
 
 				   
-					IntPtr ptr = handle_lock_proc(filterRecord->parameters, 0);
+					byte[] buf = new byte[handleSize];
+					Marshal.Copy(HandleLockProc(filterRecord->parameters, 0), buf, 0, buf.Length);
+					HandleUnlockProc(filterRecord->parameters);
 
-					Byte[] buf = new byte[globalParms.ParameterDataSize];
-					Marshal.Copy(ptr, buf, 0, buf.Length);
-					globalParms.SetParameterDataBytes(buf);
-					globalParms.ParameterDataIsPSHandle = true;
-
-					handle_unlock_proc(filterRecord->parameters);
-
-
-					globalParms.StoreMethod = 0;
+					globalParameters.SetParameterDataBytes(buf);
+					globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
 				}
 				else if ((size = SafeNativeMethods.GlobalSize(filterRecord->parameters).ToInt64()) > 0L)
 				{
@@ -648,15 +636,15 @@ namespace PSFilterLoad.PSApi
 					{                           
 						IntPtr hPtr = Marshal.ReadIntPtr(ptr);
 
-						if (size == psHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == 0x464f544f)
+						if (size == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == 0x464f544f)
 						{
 							long ps = 0;
 							if ((ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64()) > 0L)
 							{
-								Byte[] buf = new byte[ps];
+								byte[] buf = new byte[ps];
 								Marshal.Copy(hPtr, buf, 0, (int)ps);
-								globalParms.SetParameterDataBytes(buf);
-								globalParms.ParameterDataIsPSHandle = true;
+								globalParameters.SetParameterDataBytes(buf);
+								globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.OTOFHandle;
 							}
 
 						}
@@ -670,18 +658,19 @@ namespace PSFilterLoad.PSApi
 									ps = ((int)size - IntPtr.Size);
 								}
 
-								Byte[] buf = new byte[ps];
+								byte[] buf = new byte[ps];
 
 								Marshal.Copy(hPtr, buf, 0, ps);
-								globalParms.SetParameterDataBytes(buf);
-								globalParms.ParameterDataIsPSHandle = true;
+								globalParameters.SetParameterDataBytes(buf);
+								globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
 							}
 							else
 							{
-								Byte[] buf = new byte[(int)size];
+								byte[] buf = new byte[(int)size];
 
 								Marshal.Copy(filterRecord->parameters, buf, 0, (int)size);
-								globalParms.SetParameterDataBytes(buf);
+								globalParameters.SetParameterDataBytes(buf);
+								globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.RawBytes;
 							}
 
 						}
@@ -690,56 +679,58 @@ namespace PSFilterLoad.PSApi
 					{
 						SafeNativeMethods.GlobalUnlock(filterRecord->parameters);
 					}
-
-					globalParms.ParameterDataSize = size;
-					globalParms.StoreMethod = 1;
 				}
 
 			}
 			if (filterRecord->parameters != IntPtr.Zero && dataPtr != IntPtr.Zero)
 			{
-				long pluginDataSize = SafeNativeMethods.GlobalSize(dataPtr).ToInt64();
-				globalParms.PluginDataIsPSHandle = false;
+				long pluginDataSize = 0L;
+				if (!handle_valid(dataPtr))
+				{
+					if (bufferIDs.Contains(dataPtr))
+					{
+						pluginDataSize = Memory.Size(dataPtr);
+					}
+					else
+					{
+						pluginDataSize = SafeNativeMethods.GlobalSize(dataPtr).ToInt64();
+					}
+				}
 
 				IntPtr ptr = SafeNativeMethods.GlobalLock(dataPtr);
 
 				try
 				{
-					if (pluginDataSize == psHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == 0x464f544f) // OTOF reversed
+					if (handle_valid(ptr))
+					{
+						int ps = HandleGetSizeProc(ptr);
+						byte[] dataBuf = new byte[ps];
+
+						Marshal.Copy(HandleLockProc(ptr, 0), dataBuf, 0, ps);
+						HandleUnlockProc(ptr);
+							
+						globalParameters.SetPluginDataBytes(dataBuf);
+						globalParameters.ParameterDataStorageMethod = globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
+					}
+					else if (pluginDataSize == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == 0x464f544f) // OTOF reversed
 					{
 						IntPtr hPtr = Marshal.ReadIntPtr(ptr);
 						long ps = 0;
 						if (!IsBadReadPtr(hPtr) && (ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64()) > 0L)
 						{
-							Byte[] dataBuf = new byte[ps];
+							byte[] dataBuf = new byte[ps];
 							Marshal.Copy(hPtr, dataBuf, 0, (int)ps);
-							globalParms.SetPluginDataBytes(dataBuf);
-							globalParms.PluginDataIsPSHandle = true;
+							globalParameters.SetPluginDataBytes(dataBuf);
+							globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.OTOFHandle;
 						}
-						globalParms.PluginDataSize = pluginDataSize;
 
 					}
 					else if (pluginDataSize > 0)
 					{
-						if (handle_valid(ptr))
-						{
-							int ps = handle_get_size_proc(ptr);
-							byte[] dataBuf = new byte[ps];
-
-							IntPtr hPtr = handle_lock_proc(ptr, 0);
-							Marshal.Copy(hPtr, dataBuf, 0, ps);
-							handle_unlock_proc(ptr);
-							globalParms.SetPluginDataBytes(dataBuf);
-							globalParms.PluginDataSize = ps;
-							globalParms.PluginDataIsPSHandle = true;
-						}
-						else
-						{
-							Byte[] dataBuf = new byte[pluginDataSize];
-							Marshal.Copy(ptr, dataBuf, 0, (int)pluginDataSize);
-							globalParms.SetPluginDataBytes(dataBuf);
-							globalParms.PluginDataSize = pluginDataSize;
-						}
+						byte[] dataBuf = new byte[pluginDataSize];
+						Marshal.Copy(ptr, dataBuf, 0, (int)pluginDataSize);
+						globalParameters.SetPluginDataBytes(dataBuf);
+						globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.RawBytes;
 					}
 				}
 				finally
@@ -754,101 +745,83 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Restore the filter parameters for repeat runs.
 		/// </summary>
-		private unsafe void restore_parm()
+		private unsafe void RestoreParameters()
 		{
 			if (phase == PluginPhase.Parameters)
 				return;
 
-			byte[] sig = new byte[4] { (byte)'O', (byte)'T', (byte)'O', (byte)'F' };
+			byte[] sig = new byte[4] { 0x4f, 0x54, 0x4f, 0x46 }; // OTOF
 
 			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
-			byte[] parameterDataBytes = globalParms.GetParameterDataBytes();
+			byte[] parameterDataBytes = globalParameters.GetParameterDataBytes();
 			if (parameterDataBytes != null)
 			{
 
-				switch (globalParms.StoreMethod)
+				switch (globalParameters.ParameterDataStorageMethod)
 				{
-					case 0:
+					case GlobalParameters.DataStorageMethod.HandleSuite:
+						filterRecord->parameters = HandleNewProc(parameterDataBytes.Length);
+						Marshal.Copy(parameterDataBytes, 0, HandleLockProc(filterRecord->parameters, 0), parameterDataBytes.Length);
 
-						filterRecord->parameters = handle_new_proc(parameterDataBytes.Length);
-						Marshal.Copy(parameterDataBytes, 0, handle_lock_proc(filterRecord->parameters, 0), parameterDataBytes.Length);
-
-						handle_unlock_proc(filterRecord->parameters);
+						HandleUnlockProc(filterRecord->parameters);
 
 						break;
-					case 1:
+					case GlobalParameters.DataStorageMethod.OTOFHandle:
+						filterRecord->parameters = Memory.Allocate(OTOFHandleSize, false);
+						filterParametersHandle = Memory.Allocate(parameterDataBytes.Length, false);
 
-						if (globalParms.ParameterDataSize == psHandleSize && globalParms.ParameterDataIsPSHandle)
-						{
-							filterRecord->parameters = Memory.Allocate(globalParms.ParameterDataSize, false);
+						Marshal.Copy(parameterDataBytes, 0, filterParametersHandle, parameterDataBytes.Length);
 
-							filterParametersHandle = Memory.Allocate(parameterDataBytes.Length, false);
+						Marshal.WriteIntPtr(filterRecord->parameters, filterParametersHandle);
+						Marshal.Copy(sig, 0, new IntPtr(filterRecord->parameters.ToInt64() + IntPtr.Size), 4);
 
-							Marshal.Copy(parameterDataBytes, 0, filterParametersHandle, parameterDataBytes.Length);
-
-
-							Marshal.WriteIntPtr(filterRecord->parameters, filterParametersHandle);
-							Marshal.Copy(sig, 0, new IntPtr(filterRecord->parameters.ToInt64() + IntPtr.Size), 4);
-						}
-						else
-						{
-
-							if (globalParms.ParameterDataIsPSHandle)
-							{
-								filterRecord->parameters = handle_new_proc(parameterDataBytes.Length);
-								Marshal.Copy(parameterDataBytes, 0, handle_lock_proc(filterRecord->parameters, 0), parameterDataBytes.Length);
-								handle_unlock_proc(filterRecord->parameters);
-							}
-							else
-							{
-								filterRecord->parameters = Memory.Allocate(globalParms.ParameterDataSize, false);
-								Marshal.Copy(parameterDataBytes, 0, filterRecord->parameters, parameterDataBytes.Length);
-							}
-
-						}
-
+						break;
+					case GlobalParameters.DataStorageMethod.RawBytes:
+						filterRecord->parameters = Memory.Allocate(parameterDataBytes.Length, false);
+						Marshal.Copy(parameterDataBytes, 0, filterRecord->parameters, parameterDataBytes.Length);
 
 						break;
 					default:
-						filterRecord->parameters = IntPtr.Zero;
-						break;
+						throw new InvalidEnumArgumentException("ParameterDataStorageMethod", (int)globalParameters.ParameterDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
 				}
 			}
-			byte[] pluginDataBytes = globalParms.GetPluginDataBytes();
+			byte[] pluginDataBytes = globalParameters.GetPluginDataBytes();
 			if (pluginDataBytes != null)
 			{
-				if (globalParms.PluginDataSize == psHandleSize && globalParms.PluginDataIsPSHandle)
+
+				switch (globalParameters.PluginDataStorageMethod)
 				{
-					dataPtr = Memory.Allocate(globalParms.PluginDataSize, false);
-					pluginDataHandle = Memory.Allocate(pluginDataBytes.Length, false);
+					case GlobalParameters.DataStorageMethod.HandleSuite:
+						dataPtr = HandleNewProc(pluginDataBytes.Length);
 
-					Marshal.Copy(pluginDataBytes, 0, pluginDataHandle, pluginDataBytes.Length);
+						Marshal.Copy(pluginDataBytes, 0, HandleLockProc(dataPtr, 0), pluginDataBytes.Length);
+						HandleUnlockProc(dataPtr);
 
-					Marshal.WriteIntPtr(dataPtr, pluginDataHandle);
-					Marshal.Copy(sig, 0, new IntPtr(dataPtr.ToInt64() + IntPtr.Size), 4);
-				}
-				else
-				{
-					if (globalParms.PluginDataIsPSHandle)
-					{
-						dataPtr = handle_new_proc(pluginDataBytes.Length);
+						break;
+					case GlobalParameters.DataStorageMethod.OTOFHandle:
+						dataPtr = Memory.Allocate(OTOFHandleSize, false);
+						pluginDataHandle = Memory.Allocate(pluginDataBytes.Length, false);
 
-						Marshal.Copy(pluginDataBytes, 0, handle_lock_proc(dataPtr, 0), pluginDataBytes.Length);
-						handle_unlock_proc(dataPtr);
-					}
-					else
-					{
+						Marshal.Copy(pluginDataBytes, 0, pluginDataHandle, pluginDataBytes.Length);
+
+						Marshal.WriteIntPtr(dataPtr, pluginDataHandle);
+						Marshal.Copy(sig, 0, new IntPtr(dataPtr.ToInt64() + IntPtr.Size), 4);
+
+						break;
+					case GlobalParameters.DataStorageMethod.RawBytes:
 						dataPtr = Memory.Allocate(pluginDataBytes.Length, false);
 						Marshal.Copy(pluginDataBytes, 0, dataPtr, pluginDataBytes.Length);
-					}
-
+						break;
+					default:
+						throw new InvalidEnumArgumentException("PluginDataStorageMethod", (int)globalParameters.PluginDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
 				}
+	
 			}
 
 		}
 		
-		private bool plugin_about(PluginData pdata)
+		private bool PluginAbout(PluginData pdata)
 		{
 
 			AboutRecord about = new AboutRecord()
@@ -899,7 +872,7 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
-		private unsafe bool plugin_apply(PluginData pdata)
+		private unsafe bool PluginApply(PluginData pdata)
 		{
 #if DEBUG
 			System.Diagnostics.Debug.Assert(phase == PluginPhase.Prepare);
@@ -918,7 +891,7 @@ namespace PSFilterLoad.PSApi
 			if (result != PSError.noErr)
 			{
 				FreeLibrary(ref pdata);
-				errorMessage = error_message(result);
+				errorMessage = GetErrorMessage(result);
 
 #if DEBUG
 				string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
@@ -931,7 +904,7 @@ namespace PSFilterLoad.PSApi
 
 			while (RectNonEmpty(filterRecord->inRect) || RectNonEmpty(filterRecord->outRect) || RectNonEmpty(filterRecord->maskRect))
 			{
-				advance_state_proc();
+				AdvanceStateProc();
 				result = PSError.noErr;
 
 #if DEBUG
@@ -962,7 +935,7 @@ namespace PSFilterLoad.PSApi
 #endif
 
 					FreeLibrary(ref pdata);
-					errorMessage = error_message(saved_result);
+					errorMessage = GetErrorMessage(saved_result);
 
 #if DEBUG
 					string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
@@ -972,13 +945,13 @@ namespace PSFilterLoad.PSApi
 					return false;
 				}
 
-				if (abort_proc() != 0)
+				if (AbortProc() != 0)
 				{
 					pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref dataPtr, ref result);
 
 					if (result != PSError.noErr)
 					{
-						errorMessage = error_message(result);
+						errorMessage = GetErrorMessage(result);
 					}
 
 					FreeLibrary(ref pdata);
@@ -986,7 +959,7 @@ namespace PSFilterLoad.PSApi
 					return false;
 				}
 			}
-			advance_state_proc();
+			AdvanceStateProc();
 
 
 			result = PSError.noErr;
@@ -1002,13 +975,13 @@ namespace PSFilterLoad.PSApi
 #endif
 			if (!isRepeatEffect && result == PSError.noErr)
 			{
-				save_parm();
+				SaveParameters();
 			}
 
 			return true;
 		}
 
-		private bool plugin_parms(PluginData pdata)
+		private bool PluginParams(PluginData pdata)
 		{
 			result = PSError.noErr;
 			
@@ -1032,7 +1005,7 @@ namespace PSFilterLoad.PSApi
 			if (result != PSError.noErr)
 			{
 				FreeLibrary(ref pdata);
-				errorMessage = error_message(result);
+				errorMessage = GetErrorMessage(result);
 #if DEBUG
 				string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
 				Ping(DebugFlags.Error, string.Format("filterSelectorParameters failed result code: {0}({1})", message, result));
@@ -1137,10 +1110,10 @@ namespace PSFilterLoad.PSApi
 
 		}
 
-		private bool plugin_prepare(PluginData pdata)
+		private bool PluginPrepare(PluginData pdata)
 		{
 			setup_sizes();
-			restore_parm();
+			RestoreParameters();
 			SetFilterRecordValues(); 
 
 
@@ -1159,7 +1132,7 @@ namespace PSFilterLoad.PSApi
 			if (result != PSError.noErr)
 			{
 				FreeLibrary(ref pdata);
-				errorMessage = error_message(result);
+				errorMessage = GetErrorMessage(result);
 #if DEBUG
 				string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
 				Ping(DebugFlags.Error, string.Format("filterSelectorParameters failed result code: {0}({1})", message, result));
@@ -1209,6 +1182,35 @@ namespace PSFilterLoad.PSApi
 #endif
 			}
 		}
+
+		/// <summary>
+		/// Determines whether the source surface is completely transparent.
+		/// </summary>
+		/// <returns>
+		///   <c>true</c> if the source surface is completely transparent; otherwise, <c>false</c>.
+		/// </returns>
+		private unsafe bool IsBlankLayer()
+		{
+			int height = source.Height;
+			int width = source.Width;
+
+			for (int y = 0; y < height; y++)
+			{
+				ColorBgra* ptr = source.GetRowAddressUnchecked(y);
+				ColorBgra* endPtr = ptr + width;
+
+				while (ptr < endPtr)
+				{
+					if (ptr->A > 0)
+					{
+						return false;
+					}
+					ptr++;
+				}
+			}
+
+			return true;
+		}
 	  
 		/// <summary>
 		/// Runs a filter from the specified PluginData
@@ -1228,7 +1230,7 @@ namespace PSFilterLoad.PSApi
 
 			if (showAbout)
 			{
-				return plugin_about(pdata);
+				return PluginAbout(pdata);
 			}
 
 			useChannelPorts = pdata.category == "Amico Perry"; // enable the Channel Ports for Luce 2
@@ -1237,8 +1239,21 @@ namespace PSFilterLoad.PSApi
 			
 			if (pdata.filterInfo != null)
 			{
-				// compensate for the fact that the FilterCaseInfo array is zero indexed.
-				copyToDest = ((pdata.filterInfo[(filterCase - 1)].flags1 & FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit) == 0);
+				int index = filterCase - 1;
+
+				copyToDest = ((pdata.filterInfo[index].flags1 & FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit) == 0);
+
+				bool worksWithBlankData = ((pdata.filterInfo[index].flags1 & FilterCaseInfoFlags.PIFilterWorksWithBlankDataBit) != 0);
+
+				if ((filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection) && !worksWithBlankData)
+				{
+					// If the filter does not support processing completely transparent (blank) layers return an error message.
+					if (IsBlankLayer())
+					{
+						errorMessage = Resources.BlankDataNotSupported;
+						return false;
+					}
+				}
 			}
 	
 			if (copyToDest)
@@ -1260,13 +1275,13 @@ namespace PSFilterLoad.PSApi
 				aete = pdata.aete;
 			}
 
-			setup_delegates();
-			setup_suites();
-			setup_filter_record();
+			SetupDelegates();
+			SetupSuites();
+			SetupFilterRecord();
 
 			if (!isRepeatEffect)
 			{
-				if (!plugin_parms(pdata))
+				if (!PluginParams(pdata))
 				{
 #if DEBUG
 					Ping(DebugFlags.Error, "plugin_parms failed");
@@ -1276,7 +1291,7 @@ namespace PSFilterLoad.PSApi
 			}
 			
 
-			if (!plugin_prepare(pdata))
+			if (!PluginPrepare(pdata))
 			{
 #if DEBUG
 				Ping(DebugFlags.Error, "plugin_prepare failed");
@@ -1284,7 +1299,7 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			if (!plugin_apply(pdata))
+			if (!PluginApply(pdata))
 			{
 #if DEBUG
 				Ping(DebugFlags.Error, "plugin_apply failed");
@@ -1303,7 +1318,7 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
-		private string error_message(short result)
+		private string GetErrorMessage(short result)
 		{
 			string error = string.Empty;
  
@@ -1348,13 +1363,13 @@ namespace PSFilterLoad.PSApi
 						error = Resources.UnsupportedImageMode;
 						break;
 					case PSError.errPlugInHostInsufficient:
-						error = Resources.errPlugInHostInsufficient;
+						error = Resources.PlugInHostInsufficient;
 						break;
 					case PSError.errPlugInPropertyUndefined:
-						error = Resources.errPlugInPropertyUndefined;
+						error = Resources.PlugInPropertyUndefined;
 						break;
 					case PSError.errHostDoesNotSupportColStep:
-						error = Resources.errHostDoesNotSupportColStep;
+						error = Resources.HostDoesNotSupportColStep;
 						break;
 					case PSError.errInvalidSamplePoint:
 						error = Resources.InvalidSamplePoint;
@@ -1385,7 +1400,7 @@ namespace PSFilterLoad.PSApi
 			return error;
 		}
 
-		private byte abort_proc()
+		private byte AbortProc()
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Empty);
@@ -1397,13 +1412,15 @@ namespace PSFilterLoad.PSApi
 
 			return 0;
 		}
+		private Rect16 lastInRect;		
+		private Rect16 lastOutRect;
+		private Rect16 lastMaskRect;
 
-		private Rect16 outRect;
-		private int outRowBytes;
-		private int outLoPlane;
-		private int outHiPlane;
-		private Rect16 inRect;
-		private Rect16 maskRect;
+		private int lastInLoPlane;
+		private int lastOutRowBytes;
+		private int lastOutLoPlane;
+		private int lastOutHiPlane;
+
 		private IntPtr maskDataPtr;
 		private IntPtr inDataPtr;
 		private IntPtr outDataPtr;
@@ -1436,7 +1453,6 @@ namespace PSFilterLoad.PSApi
 		/// <returns> <c>true</c> if a the buffer needs to be resized; otherwise, <c>false</c></returns>
 		private static unsafe bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loplane, int hiplane)
 		{
-			
 			long size = Memory.Size(inData);
 
 			int width = inRect.right - inRect.left;
@@ -1449,13 +1465,13 @@ namespace PSFilterLoad.PSApi
 		}
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-		private unsafe short advance_state_proc()
+		private unsafe short AdvanceStateProc()
 		{
 			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
-			if (outDataPtr != IntPtr.Zero && RectNonEmpty(outRect))
+			if (outDataPtr != IntPtr.Zero && RectNonEmpty(lastOutRect))
 			{
-				store_buf(outDataPtr, outRowBytes, outRect, outLoPlane, outHiPlane);
+				store_buf(outDataPtr, lastOutRowBytes, lastOutRect, lastOutLoPlane, lastOutHiPlane);
 			}
 
 			short error;
@@ -1465,7 +1481,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			if (filterRecord->haveMask == 1 && RectNonEmpty(filterRecord->maskRect))
 			{
-				if (!maskRect.Equals(filterRecord->maskRect))
+				if (!lastMaskRect.Equals(filterRecord->maskRect))
 				{
 
 					if (maskDataPtr != IntPtr.Zero && ResizeBuffer(maskDataPtr, filterRecord->maskRect, 0, 0))
@@ -1475,13 +1491,13 @@ namespace PSFilterLoad.PSApi
 						filterRecord->maskData = IntPtr.Zero;
 					}
 
-					error =  fill_mask(ref filterRecord->maskData, ref filterRecord->maskRowBytes, filterRecord->maskRect, filterRecord->maskRate, filterRecord->maskPadding);
+					error =  FillMaskBuffer(ref filterRecord->maskData, ref filterRecord->maskRowBytes, filterRecord->maskRect, filterRecord->maskRate, filterRecord->maskPadding);
 					if (error != PSError.noErr)
 					{
 						return error;
 					}
 					
-					maskRect = filterRecord->maskRect;
+					lastMaskRect = filterRecord->maskRect;
 				}
 			}
 			else
@@ -1493,13 +1509,13 @@ namespace PSFilterLoad.PSApi
 					filterRecord->maskData = IntPtr.Zero;
 				}
 				filterRecord->maskRowBytes = 0;
-				maskRect.left = maskRect.right = maskRect.bottom = maskRect.top = 0;
+				lastMaskRect.left = lastMaskRect.right = lastMaskRect.bottom = lastMaskRect.top = 0;
 			}
 
 
 			if (RectNonEmpty(filterRecord->inRect))
 			{
-				if (!inRect.Equals(filterRecord->inRect) || IsSinglePlane(filterRecord, false))
+				if (!lastInRect.Equals(filterRecord->inRect) || (IsSinglePlane(filterRecord, false) && filterRecord->inLoPlane != lastInLoPlane))
 				{
 					if (inDataPtr != IntPtr.Zero &&
 						ResizeBuffer(inDataPtr, filterRecord->inRect, filterRecord->inLoPlane, filterRecord->inHiPlane))
@@ -1518,13 +1534,14 @@ namespace PSFilterLoad.PSApi
 						}
 					}
 
-					error = fill_buf(ref filterRecord->inData, ref filterRecord->inRowBytes, filterRecord->inRect, filterRecord->inLoPlane, filterRecord->inHiPlane, filterRecord->inputRate, filterRecord->inputPadding);
+					error = FillInputBuffer(ref filterRecord->inData, ref filterRecord->inRowBytes, filterRecord->inRect, filterRecord->inLoPlane, filterRecord->inHiPlane, filterRecord->inputRate, filterRecord->inputPadding);
 					if (error != PSError.noErr)
 					{
 						return error;
 					}
 					
-					inRect = filterRecord->inRect;
+					lastInRect = filterRecord->inRect;
+					lastInLoPlane = filterRecord->inLoPlane;
 					filterRecord->inColumnBytes = (filterRecord->inHiPlane - filterRecord->inLoPlane) + 1;
 				}
 			}
@@ -1546,12 +1563,13 @@ namespace PSFilterLoad.PSApi
 					}
 				}
 				filterRecord->inRowBytes = 0;
-				inRect.left = inRect.top = inRect.right = inRect.bottom = 0;
+				lastInLoPlane = -1;
+				lastInRect.left = lastInRect.top = lastInRect.right = lastInRect.bottom = 0;
 			}
 
 			if (RectNonEmpty(filterRecord->outRect))
 			{
-				if (!outRect.Equals(filterRecord->outRect) || IsSinglePlane(filterRecord, true))
+				if (!lastOutRect.Equals(filterRecord->outRect) || (IsSinglePlane(filterRecord, true) && filterRecord->outLoPlane != lastOutLoPlane))
 				{
 					if (outDataPtr != IntPtr.Zero && 
 						ResizeBuffer(outDataPtr, filterRecord->outRect, filterRecord->outLoPlane, filterRecord->outHiPlane))
@@ -1570,23 +1588,25 @@ namespace PSFilterLoad.PSApi
 						}
 					}
 
-					error = fillOutBuf(ref filterRecord->outData, ref filterRecord->outRowBytes, filterRecord->outRect, filterRecord->outLoPlane, filterRecord->outHiPlane, filterRecord->outputPadding);
+					error = FillOutputBuffer(ref filterRecord->outData, ref filterRecord->outRowBytes, filterRecord->outRect, filterRecord->outLoPlane, filterRecord->outHiPlane, filterRecord->outputPadding);
 
 					if (error != PSError.noErr)
 					{
 						return error;
 					}
 
+#if DEBUG
+					System.Diagnostics.Debug.WriteLine(string.Format("outRowBytes = {0}", filterRecord->outRowBytes));
+#endif
+					// store previous values
+					lastOutRowBytes = filterRecord->outRowBytes;
+					lastOutRect = filterRecord->outRect;
+					lastOutLoPlane = filterRecord->outLoPlane;
+					lastOutHiPlane = filterRecord->outHiPlane;
+
 					filterRecord->outColumnBytes = (filterRecord->outHiPlane - filterRecord->outLoPlane) + 1;
 				}
-#if DEBUG
-				System.Diagnostics.Debug.WriteLine(string.Format("outRowBytes = {0}", filterRecord->outRowBytes));
-#endif
-				// store previous values
-				outRowBytes = filterRecord->outRowBytes;
-				outRect = filterRecord->outRect;
-				outLoPlane = filterRecord->outLoPlane;
-				outHiPlane = filterRecord->outHiPlane;
+
 			}
 			else
 			{
@@ -1606,10 +1626,10 @@ namespace PSFilterLoad.PSApi
 					}
 				}
 				filterRecord->outRowBytes = 0;
-				outRowBytes = 0;
-				outRect.left = outRect.top = outRect.right = outRect.bottom = 0;
-				outLoPlane = 0;
-				outHiPlane = 0;
+				lastOutRowBytes = 0;
+				lastOutRect.left = lastOutRect.top = lastOutRect.right = lastOutRect.bottom = 0;
+				lastOutLoPlane = -1;
+				lastOutHiPlane = 0;
 
 			}
 
@@ -1671,7 +1691,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="rect">The rectangle of interest within the image.</param>
 		/// <param name="loplane">The input loPlane.</param>
 		/// <param name="hiplane">The input hiPlane.</param>
-		private unsafe short fill_buf(ref IntPtr inData, ref int inRowBytes, Rect16 rect, short loplane, short hiplane, int inputRate, short inputPadding)
+		private unsafe short FillInputBuffer(ref IntPtr inData, ref int inRowBytes, Rect16 rect, short loplane, short hiplane, int inputRate, short inputPadding)
 		{
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("inRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { inRowBytes.ToString(), rect.ToString(), loplane.ToString(), hiplane.ToString() }));
@@ -1702,7 +1722,7 @@ namespace PSFilterLoad.PSApi
 				Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
 
 
-				int stride = (width * nplanes);
+				int stride = width * nplanes;
 				if (inDataPtr == IntPtr.Zero)
 				{
 					int len = stride * height;
@@ -1854,7 +1874,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private unsafe short fillOutBuf(ref IntPtr outData, ref int outRowBytes, Rect16 rect, short loplane, short hiplane, short outputPadding)
+		private unsafe short FillOutputBuffer(ref IntPtr outData, ref int outRowBytes, Rect16 rect, short loplane, short hiplane, short outputPadding)
 		{
 
 #if DEBUG
@@ -2038,14 +2058,14 @@ namespace PSFilterLoad.PSApi
 		/// <param name="maskData">The input buffer to fill.</param>
 		/// <param name="maskRowBytes">The stride of the input buffer.</param>
 		/// <param name="rect">The rectangle of interest within the image.</param>
-		private unsafe short fill_mask(ref IntPtr maskData, ref int maskRowBytes, Rect16 rect, int maskRate, short maskPadding)
+		private unsafe short FillMaskBuffer(ref IntPtr maskData, ref int maskRowBytes, Rect16 rect, int maskRate, short maskPadding)
 		{
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes = {0}, Rect = {1}", new object[] { maskRowBytes.ToString(), rect.ToString() }));
 			Ping(DebugFlags.AdvanceState, string.Format("maskRate = {0}", fixed2int(maskRate)));
 #endif
-			int width = (rect.right - rect.left);
-			int height = (rect.bottom - rect.top);
+			int width = rect.right - rect.left;
+			int height = rect.bottom - rect.top;
 
 			if (rect.left < source.Width && rect.top < source.Height)
 			{
@@ -2370,7 +2390,7 @@ namespace PSFilterLoad.PSApi
 
 		private List<IntPtr> bufferIDs;
 
-		private short allocate_buffer_proc(int size, ref System.IntPtr bufferID)
+		private short AllocateBufferProc(int size, ref IntPtr bufferID)
 		{
 #if DEBUG
 			Ping(DebugFlags.BufferSuite, string.Format("Size = {0}", size));
@@ -2389,7 +2409,7 @@ namespace PSFilterLoad.PSApi
 
 			return err;
 		}
-		private void buffer_free_proc(System.IntPtr bufferID)
+		private void BufferFreeProc(IntPtr bufferID)
 		{
 
 #if DEBUG
@@ -2400,7 +2420,7 @@ namespace PSFilterLoad.PSApi
 
 			this.bufferIDs.Remove(bufferID);
 		}
-		private IntPtr buffer_lock_proc(System.IntPtr bufferID, byte moveHigh)
+		private IntPtr BufferLockProc(IntPtr bufferID, byte moveHigh)
 		{
 #if DEBUG
 			Ping(DebugFlags.BufferSuite, string.Format("Buffer address = {0:X8}", bufferID.ToInt64()));
@@ -2408,18 +2428,18 @@ namespace PSFilterLoad.PSApi
 
 			return bufferID;
 		}
-		private void buffer_unlock_proc(System.IntPtr bufferID)
+		private void BufferUnlockProc(IntPtr bufferID)
 		{
 #if DEBUG
 			Ping(DebugFlags.BufferSuite, string.Format("Buffer address = {0:X8}", bufferID.ToInt64()));
 #endif
 		}
-		private int buffer_space_proc()
+		private int BufferSpaceProc()
 		{
 			return 1000000000;
 		}
 
-		private unsafe short color_services_proc(ref ColorServicesInfo info)
+		private unsafe short ColorServicesProc(ref ColorServicesInfo info)
 		{
 #if DEBUG
 			Ping(DebugFlags.ColorServices, string.Format("selector = {0}", info.selector));
@@ -2763,7 +2783,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.memFullErr;
 		}
 
-		private short ReadPortForWritePort(ref System.IntPtr readPort, System.IntPtr writePort)
+		private short ReadPortForWritePort(ref IntPtr readPort, IntPtr writePort)
 		{
 #if DEBUG
 			Ping(DebugFlags.ChannelPorts, string.Format("readPort: {0}, writePort: {1}", readPort.ToString(), writePort.ToString()));
@@ -3115,7 +3135,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private unsafe short display_pixels_proc(ref PSPixelMap source, ref VRect srcRect, int dstRow, int dstCol, System.IntPtr platformContext)
+		private unsafe short DisplayPixelsProc(ref PSPixelMap source, ref VRect srcRect, int dstRow, int dstCol, IntPtr platformContext)
 		{
 #if DEBUG
 			Ping(DebugFlags.DisplayPixels, string.Format("source: version = {0} bounds = {1}, ImageMode = {2}, colBytes = {3}, rowBytes = {4},planeBytes = {5}, BaseAddress = {6}, mat = {7}, masks = {8}", new object[]{ source.version.ToString(), source.bounds.ToString(), ((ImageModes)source.imageMode).ToString("G"),
@@ -3307,12 +3327,10 @@ namespace PSFilterLoad.PSApi
 		private List<uint> subKeys;
 		private bool isSubKey;
 		private int subKeyIndex;
-		private IntPtr keyArrayPtr;
-		private IntPtr subKeyArrayPtr;
 		private int subClassIndex;
 		private Dictionary<uint, AETEValue> subClassDict;
 
-		private unsafe IntPtr OpenReadDescriptorProc(System.IntPtr descriptor, IntPtr keyArray)
+		private unsafe IntPtr OpenReadDescriptorProc(IntPtr descriptor, IntPtr keyArray)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -3325,7 +3343,6 @@ namespace PSFilterLoad.PSApi
 					keys = new List<uint>();
 					if (keyArray != IntPtr.Zero) 
 					{
-						keyArrayPtr = keyArray;
 						uint* key = (uint*)keyArray.ToPointer();
 						while (*key != 0U)
 						{
@@ -3342,6 +3359,11 @@ namespace PSFilterLoad.PSApi
 								keys.Remove(item);
 							}
 						}
+					}
+
+					if (keys.Count == 0)
+					{
+						keys.AddRange(aeteDict.Keys); // if the keys are not passed to us or if there are no valid keys grab them from the aeteDict.
 					}
 				}
 				else
@@ -3361,8 +3383,8 @@ namespace PSFilterLoad.PSApi
 					isSubKey = true;
 					subClassDict = null;
 					subClassIndex = 0;
-					if (handle_valid(descriptor) && handle_get_size_proc(descriptor) == 0 ||
-						aeteDict.ContainsKey(getKey) && aeteDict[getKey].Value is Dictionary<uint, AETEValue>)
+					
+					if (aeteDict.ContainsKey(getKey) && aeteDict[getKey].Value is Dictionary<uint, AETEValue>)
 					{
 						subClassDict = (Dictionary<uint, AETEValue>)aeteDict[getKey].Value;
 					}
@@ -3377,23 +3399,15 @@ namespace PSFilterLoad.PSApi
 								subKeys.Remove(item);
 							}
 						}                        
-						subKeyArrayPtr = subKeys.Count > 0 ? keyArray : IntPtr.Zero;
 					}
 				}
 
-				if ((keys != null) && keys.Count == 0)
-				{
-					keys.AddRange(aeteDict.Keys); // if the keys are not passed to us grab them from the aeteDict.
-					keyArrayPtr = IntPtr.Zero;
-				}
-
-
-				return handle_new_proc(1); // return a new descriptor handle
+				return HandleNewProc(0); // return a new descriptor handle
 			}
 
 			return IntPtr.Zero;
 		}
-		private short CloseReadDescriptorProc(System.IntPtr descriptor)
+		private short CloseReadDescriptorProc(IntPtr descriptor)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -3401,18 +3415,13 @@ namespace PSFilterLoad.PSApi
 			if (isSubKey)
 			{
 				isSubKey = false;
-				subKeyArrayPtr = IntPtr.Zero;
 				subClassDict = null;
-			}
-			else
-			{
-				keyArrayPtr = IntPtr.Zero;
 			}
 
 			descriptor = IntPtr.Zero;
 			return descErrValue;
 		}
-		private unsafe byte GetKeyProc(System.IntPtr descriptor, ref uint key, ref uint type, ref int flags)
+		private unsafe byte GetKeyProc(IntPtr descriptor, ref uint key, ref uint type, ref int flags)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Format("key = {0}", "0x" + key.ToString("X8")));
@@ -3432,8 +3441,7 @@ namespace PSFilterLoad.PSApi
 			{
 				if (subClassDict != null)
 				{
-					if (subClassIndex > (subKeys.Count - 1) ||
-						subClassIndex > (subClassDict.Count - 1))
+					if (subClassIndex >= subKeys.Count || subClassIndex >= subClassDict.Count)
 					{
 						return 0;
 					}
@@ -3459,8 +3467,7 @@ namespace PSFilterLoad.PSApi
 				}
 				else
 				{
-					if (subKeyIndex > (subKeys.Count - 1) ||
-						subKeyIndex > (aeteDict.Count - 1))
+					if (subKeyIndex >= subKeys.Count || subKeyIndex >= aeteDict.Count)
 					{
 						return 0;
 					}
@@ -3484,16 +3491,10 @@ namespace PSFilterLoad.PSApi
 					
 					subKeyIndex++; 
 				}  
-
-				if (subKeyArrayPtr != IntPtr.Zero)
-				{
-					Marshal.WriteInt32(subKeyArrayPtr, (subKeyIndex * 4));
-				}
 			}
 			else
 			{
-				if (getKeyIndex > (keys.Count - 1) ||
-					getKeyIndex > (aeteDict.Count - 1))
+				if (getKeyIndex >= keys.Count || getKeyIndex >= aeteDict.Count)
 				{
 					return 0;
 				}
@@ -3517,11 +3518,6 @@ namespace PSFilterLoad.PSApi
 				{
 				}
 
-				if (keyArrayPtr != IntPtr.Zero)
-				{
-					Marshal.WriteInt32(keyArrayPtr, (getKeyIndex * 4), 0);
-				}
-
 				getKeyIndex++;
 			}
 
@@ -3530,7 +3526,7 @@ namespace PSFilterLoad.PSApi
 
 
 
-		private short GetIntegerProc(System.IntPtr descriptor, ref int data)
+		private short GetIntegerProc(IntPtr descriptor, ref int data)
 		{
 			if (subClassDict != null)
 			{
@@ -3542,7 +3538,7 @@ namespace PSFilterLoad.PSApi
 			}
 			return PSError.noErr;
 		}
-		private short GetFloatProc(System.IntPtr descriptor, ref double data)
+		private short GetFloatProc(IntPtr descriptor, ref double data)
 		{
 			if (subClassDict != null)
 			{
@@ -3554,7 +3550,7 @@ namespace PSFilterLoad.PSApi
 			}
 			return PSError.noErr;
 		}
-		private short GetUnitFloatProc(System.IntPtr descriptor, ref uint type, ref double data)
+		private short GetUnitFloatProc(IntPtr descriptor, ref uint type, ref double data)
 		{
 			AETEValue item;
 			if (subClassDict != null)
@@ -3570,7 +3566,7 @@ namespace PSFilterLoad.PSApi
 			data = (double)item.Value;
 			return PSError.noErr;
 		}
-		private short GetBooleanProc(System.IntPtr descriptor, ref byte data)
+		private short GetBooleanProc(IntPtr descriptor, ref byte data)
 		{
 			AETEValue item;
 			if (subClassDict != null)
@@ -3586,7 +3582,7 @@ namespace PSFilterLoad.PSApi
 
 			return PSError.noErr;
 		}
-		private short GetTextProc(System.IntPtr descriptor, ref System.IntPtr data)
+		private short GetTextProc(IntPtr descriptor, ref IntPtr data)
 		{
 			AETEValue item;
 			if (subClassDict != null)
@@ -3599,14 +3595,14 @@ namespace PSFilterLoad.PSApi
 			}
 
 			int size = item.Size;
-			data = handle_new_proc(size);
-			IntPtr hPtr = handle_lock_proc(data, 0);
+			data = HandleNewProc(size);
+			IntPtr hPtr = HandleLockProc(data, 0);
 			Marshal.Copy((byte[])item.Value, 0, hPtr, size);
-			handle_unlock_proc(data);
+			HandleUnlockProc(data);
 
 			return PSError.noErr;
 		}
-		private short GetAliasProc(System.IntPtr descriptor, ref System.IntPtr data)
+		private short GetAliasProc(IntPtr descriptor, ref IntPtr data)
 		{
 			AETEValue item;
 			if (subClassDict != null)
@@ -3619,14 +3615,14 @@ namespace PSFilterLoad.PSApi
 			}
 
 			int size = item.Size;
-			data = handle_new_proc(size);
-			IntPtr hPtr = handle_lock_proc(data, 0);
+			data = HandleNewProc(size);
+			IntPtr hPtr = HandleLockProc(data, 0);
 			Marshal.Copy((byte[])item.Value, 0, hPtr, size);
-			handle_unlock_proc(data);
+			HandleUnlockProc(data);
 
 			return PSError.noErr;
 		}
-		private short GetEnumeratedProc(System.IntPtr descriptor, ref uint type)
+		private short GetEnumeratedProc(IntPtr descriptor, ref uint type)
 		{
 			AETEValue item;
 			if (subClassDict != null)
@@ -3641,12 +3637,12 @@ namespace PSFilterLoad.PSApi
 
 			return PSError.noErr;
 		}
-		private short GetClassProc(System.IntPtr descriptor, ref uint type)
+		private short GetClassProc(IntPtr descriptor, ref uint type)
 		{
 			return PSError.errPlugInHostInsufficient;
 		}
 
-		private short GetSimpleReferenceProc(System.IntPtr descriptor, ref PIDescriptorSimpleReference data)
+		private short GetSimpleReferenceProc(IntPtr descriptor, ref PIDescriptorSimpleReference data)
 		{
 			if (aeteDict.ContainsKey(getKey))
 			{
@@ -3656,7 +3652,7 @@ namespace PSFilterLoad.PSApi
 		   
 			return PSError.errPlugInHostInsufficient;
 		}
-		private short GetObjectProc(System.IntPtr descriptor, ref uint retType, ref System.IntPtr data)
+		private short GetObjectProc(IntPtr descriptor, ref uint retType, ref IntPtr data)
 		{
 			AETEValue item;
 			if (subClassDict != null)
@@ -3679,7 +3675,6 @@ namespace PSFilterLoad.PSApi
 			}
 
 			byte[] bytes = null;
-			IntPtr hPtr = IntPtr.Zero;
 			switch (type)
 			{
 
@@ -3689,7 +3684,7 @@ namespace PSFilterLoad.PSApi
 				case DescriptorTypes.classLabColor:
 				case DescriptorTypes.classHSBColor:
 				case DescriptorTypes.classPoint:
-					data = handle_new_proc(0); // assign a zero byte handle to allow it to work correctly in the OpenReadDescriptorProc(). 
+					data = HandleNewProc(0); // assign a zero byte handle to allow it to work correctly in the OpenReadDescriptorProc(). 
 					break;
 
 				case DescriptorTypes.typeAlias:
@@ -3697,33 +3692,26 @@ namespace PSFilterLoad.PSApi
 				case DescriptorTypes.typeChar:
 
 					int size = item.Size;
-					data = handle_new_proc(size);
-					hPtr = handle_lock_proc(data, 0);
-					Marshal.Copy((byte[])item.Value, 0, hPtr, size);
-					handle_unlock_proc(data);
+					data = HandleNewProc(size);
+					Marshal.Copy((byte[])item.Value, 0, HandleLockProc(data, 0), size);
+					HandleUnlockProc(data);
 					break;
 				case DescriptorTypes.typeBoolean:
-					data = handle_new_proc(1);
-					hPtr = handle_lock_proc(data, 0);
-
-					Marshal.WriteByte(hPtr, (byte)item.Value);
-					handle_unlock_proc(data);
+					data = HandleNewProc(sizeof(Byte));
+					Marshal.WriteByte(HandleLockProc(data, 0), (byte)item.Value);
+					HandleUnlockProc(data);
 					break;
 				case DescriptorTypes.typeInteger:
-					data = handle_new_proc(Marshal.SizeOf(typeof(Int32)));
-					hPtr = handle_lock_proc(data, 0);
-					bytes = BitConverter.GetBytes((int)item.Value);
-					Marshal.Copy(bytes, 0, hPtr, bytes.Length);
-					handle_unlock_proc(data);
+					data = HandleNewProc(sizeof(Int32));
+					Marshal.WriteInt32(HandleLockProc(data, 0), (int)item.Value);
+					HandleUnlockProc(data);
 					break;
 				case DescriptorTypes.typeFloat:
 				case DescriptorTypes.typeUintFloat:
-					data = handle_new_proc(Marshal.SizeOf(typeof(double)));
-					hPtr = handle_lock_proc(data, 0);
-
+					data = HandleNewProc(sizeof(Double));
 					bytes = BitConverter.GetBytes((double)item.Value);
-					Marshal.Copy(bytes, 0, hPtr, bytes.Length);
-					handle_unlock_proc(data);
+					Marshal.Copy(bytes, 0, HandleLockProc(data, 0), bytes.Length);
+					HandleUnlockProc(data);
 					break;
 
 				default:
@@ -3732,7 +3720,7 @@ namespace PSFilterLoad.PSApi
 
 			return PSError.noErr;
 		}
-		private short GetCountProc(System.IntPtr descriptor, ref uint count)
+		private short GetCountProc(IntPtr descriptor, ref uint count)
 		{
 			if (subClassDict != null)
 			{
@@ -3744,7 +3732,7 @@ namespace PSFilterLoad.PSApi
 			} 
 			return PSError.noErr;
 		}
-		private short GetStringProc(System.IntPtr descriptor, System.IntPtr data)
+		private short GetStringProc(IntPtr descriptor, IntPtr data)
 		{
 			AETEValue item;
 			if (subClassDict != null)
@@ -3762,7 +3750,7 @@ namespace PSFilterLoad.PSApi
 			Marshal.Copy((byte[])item.Value, 0, new IntPtr(data.ToInt64() + 1L), size);
 			return PSError.noErr;
 		}
-		private short GetPinnedIntegerProc(System.IntPtr descriptor, int min, int max, ref int intNumber)
+		private short GetPinnedIntegerProc(IntPtr descriptor, int min, int max, ref int intNumber)
 		{
 			descErr = PSError.noErr;
 			AETEValue item;
@@ -3790,7 +3778,7 @@ namespace PSFilterLoad.PSApi
 
 			return descErr;
 		}
-		private short GetPinnedFloatProc(System.IntPtr descriptor, ref double min, ref double max, ref double floatNumber)
+		private short GetPinnedFloatProc(IntPtr descriptor, ref double min, ref double max, ref double floatNumber)
 		{
 			descErr = PSError.noErr;
 			AETEValue item;
@@ -3818,7 +3806,7 @@ namespace PSFilterLoad.PSApi
 
 			return descErr;
 		}
-		private short GetPinnedUnitFloatProc(System.IntPtr descriptor, ref double min, ref double max, ref uint units, ref double floatNumber)
+		private short GetPinnedUnitFloatProc(IntPtr descriptor, ref double min, ref double max, ref uint units, ref double floatNumber)
 		{
 			descErr = PSError.noErr;
 			AETEValue item;
@@ -3855,7 +3843,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			return writeDescriptorPtr;
 		}
-		private short CloseWriteDescriptorProc(System.IntPtr descriptor, ref System.IntPtr descriptorHandle)
+		private short CloseWriteDescriptorProc(IntPtr descriptor, ref IntPtr descriptorHandle)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -3865,7 +3853,7 @@ namespace PSFilterLoad.PSApi
 				isSubKey = false;
 			}
 
-			descriptorHandle = handle_new_proc(1);
+			descriptorHandle = HandleNewProc(0);
 
 			return PSError.noErr;
 		}
@@ -3886,7 +3874,7 @@ namespace PSFilterLoad.PSApi
 			return 0;
 		}
 
-		private short PutIntegerProc(System.IntPtr descriptor, uint key, int data)
+		private short PutIntegerProc(IntPtr descriptor, uint key, int data)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -3895,7 +3883,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short PutFloatProc(System.IntPtr descriptor, uint key, ref double data)
+		private short PutFloatProc(IntPtr descriptor, uint key, ref double data)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -3904,7 +3892,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short PutUnitFloatProc(System.IntPtr descriptor, uint key, uint unit, ref double data)
+		private short PutUnitFloatProc(IntPtr descriptor, uint key, uint unit, ref double data)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -3913,7 +3901,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short PutBooleanProc(System.IntPtr descriptor, uint key, byte data)
+		private short PutBooleanProc(IntPtr descriptor, uint key, byte data)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -3922,7 +3910,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short PutTextProc(System.IntPtr descriptor, uint key, IntPtr textHandle)
+		private short PutTextProc(IntPtr descriptor, uint key, IntPtr textHandle)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -3930,7 +3918,7 @@ namespace PSFilterLoad.PSApi
 
 			if (textHandle != IntPtr.Zero)
 			{
-				IntPtr hPtr = handle_lock_proc(textHandle, 0);
+				IntPtr hPtr = HandleLockProc(textHandle, 0);
 
 #if DEBUG
 				System.Diagnostics.Debug.WriteLine("ptr: " + textHandle.ToInt64().ToString("X8"));
@@ -3938,7 +3926,7 @@ namespace PSFilterLoad.PSApi
 				if (handle_valid(textHandle))
 				{
 
-					int size = handle_get_size_proc(textHandle);
+					int size = HandleGetSizeProc(textHandle);
 					byte[] data = new byte[size];
 					Marshal.Copy(hPtr, data, 0, size);
 
@@ -3965,22 +3953,22 @@ namespace PSFilterLoad.PSApi
 
 				}
 
-				handle_unlock_proc(textHandle);
+				HandleUnlockProc(textHandle);
 			}
 
 			return PSError.noErr;
 		}
 
-		private short PutAliasProc(System.IntPtr descriptor, uint key, System.IntPtr aliasHandle)
+		private short PutAliasProc(IntPtr descriptor, uint key, IntPtr aliasHandle)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-			IntPtr hPtr = handle_lock_proc(aliasHandle, 0);
+			IntPtr hPtr = HandleLockProc(aliasHandle, 0);
 
 			if (handle_valid(aliasHandle))
 			{
-				int size = handle_get_size_proc(aliasHandle);
+				int size = HandleGetSizeProc(aliasHandle);
 				byte[] data = new byte[size];
 				Marshal.Copy(hPtr, data, 0, size);
 
@@ -4006,12 +3994,12 @@ namespace PSFilterLoad.PSApi
 
 			}
 
-			handle_unlock_proc(aliasHandle);
+			HandleUnlockProc(aliasHandle);
 
 			return PSError.noErr;
 		}
 
-		private short PutEnumeratedProc(System.IntPtr descriptor, uint key, uint type, uint data)
+		private short PutEnumeratedProc(IntPtr descriptor, uint key, uint type, uint data)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -4020,7 +4008,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short PutClassProc(System.IntPtr descriptor, uint key, uint data)
+		private short PutClassProc(IntPtr descriptor, uint key, uint data)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -4030,7 +4018,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.errPlugInHostInsufficient;
 		}
 
-		private short PutSimpleReferenceProc(System.IntPtr descriptor, uint key, ref PIDescriptorSimpleReference data)
+		private short PutSimpleReferenceProc(IntPtr descriptor, uint key, ref PIDescriptorSimpleReference data)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -4039,7 +4027,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short PutObjectProc(System.IntPtr descriptor, uint key, uint type, System.IntPtr handle)
+		private short PutObjectProc(IntPtr descriptor, uint key, uint type, IntPtr handle)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Format("key: {0}, type: {1}", PropToString(key), PropToString(type)));
@@ -4128,7 +4116,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short PutCountProc(System.IntPtr descriptor, uint key, uint count)
+		private short PutCountProc(IntPtr descriptor, uint key, uint count)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -4136,7 +4124,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short PutStringProc(System.IntPtr descriptor, uint key, IntPtr stringHandle)
+		private short PutStringProc(IntPtr descriptor, uint key, IntPtr stringHandle)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -4150,23 +4138,23 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short PutScopedClassProc(System.IntPtr descriptor, uint key, uint data)
+		private short PutScopedClassProc(IntPtr descriptor, uint key, uint data)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
 			return PSError.errPlugInHostInsufficient;
 		}
-		private short PutScopedObjectProc(System.IntPtr descriptor, uint key, uint type, ref System.IntPtr handle)
+		private short PutScopedObjectProc(IntPtr descriptor, uint key, uint type, IntPtr handle)
 		{
 #if DEBUG
 			Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-			IntPtr hPtr = handle_lock_proc(handle, 0);
+			IntPtr hPtr = HandleLockProc(handle, 0);
 
 			if (handle_valid(handle))
 			{
-				int size = handle_get_size_proc(handle);
+				int size = HandleGetSizeProc(handle);
 				byte[] data = new byte[size];
 				Marshal.Copy(hPtr, data, 0, size);
 
@@ -4193,7 +4181,7 @@ namespace PSFilterLoad.PSApi
 				aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParmFlags(key), size, data));
 			}
 
-			handle_unlock_proc(handle);
+			HandleUnlockProc(handle);
 
 			return PSError.noErr;
 		}
@@ -4205,13 +4193,14 @@ namespace PSFilterLoad.PSApi
 			return handles.ContainsKey(h);
 		}
 
-		private unsafe IntPtr handle_new_proc(int size)
+		private unsafe IntPtr HandleNewProc(int size)
 		{
 			try
 			{
 				IntPtr handle = Memory.Allocate(Marshal.SizeOf(typeof(PSHandle)), true);
 
 				PSHandle* hand = (PSHandle*)handle.ToPointer();
+					
 				hand->pointer = Memory.Allocate(size, true);
 				hand->size = size;
 
@@ -4227,7 +4216,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private unsafe void handle_dispose_proc(IntPtr h)
+		private unsafe void HandleDisposeProc(IntPtr h)
 		{
 			if (h != IntPtr.Zero)
 			{
@@ -4252,12 +4241,13 @@ namespace PSFilterLoad.PSApi
 #endif
 				handles.Remove(h);
 				PSHandle* handle = (PSHandle*)h.ToPointer();
+					
 				Memory.Free(handle->pointer);
 				Memory.Free(h);
 			}
 		}
 
-		private unsafe void handle_dispose_regular_proc(IntPtr h)
+		private unsafe void HandleDisposeRegularProc(IntPtr h)
 		{
 			// What is this supposed to do?
 			if (!handle_valid(h))
@@ -4282,7 +4272,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private IntPtr handle_lock_proc(IntPtr h, byte moveHigh)
+		private IntPtr HandleLockProc(IntPtr h, byte moveHigh)
 		{
 #if DEBUG
 			Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}, moveHigh = {1:X1}", h.ToInt64(), moveHigh));
@@ -4313,7 +4303,7 @@ namespace PSFilterLoad.PSApi
 			return handles[h].pointer;
 		}
 
-		private int handle_get_size_proc(IntPtr h)
+		private int HandleGetSizeProc(IntPtr h)
 		{
 #if DEBUG
 			Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
@@ -4343,14 +4333,14 @@ namespace PSFilterLoad.PSApi
 			return handles[h].size;
 		}
 
-		private void handle_recover_space_proc(int size)
+		private void HandleRecoverSpaceProc(int size)
 		{
 #if DEBUG
 			Ping(DebugFlags.HandleSuite, string.Format("size = {0}", size));
 #endif
 		}
 
-		private unsafe short handle_set_size(IntPtr h, int newSize)
+		private unsafe short HandleSetSize(IntPtr h, int newSize)
 		{
 #if DEBUG
 			Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
@@ -4382,6 +4372,7 @@ namespace PSFilterLoad.PSApi
 			{
 				PSHandle* handle = (PSHandle*)h.ToPointer();
 				IntPtr ptr = Memory.ReAlloc(handle->pointer, newSize);
+
 				handle->pointer = ptr;
 				handle->size = newSize;
 
@@ -4394,7 +4385,7 @@ namespace PSFilterLoad.PSApi
 			}
 			return PSError.noErr;
 		}
-		private void handle_unlock_proc(IntPtr h)
+		private void HandleUnlockProc(IntPtr h)
 		{
 #if DEBUG
 			Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
@@ -4420,7 +4411,7 @@ namespace PSFilterLoad.PSApi
 			
 		}
 
-		private void host_proc(short selector, IntPtr data)
+		private void HostProc(short selector, IntPtr data)
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Format("{0} : {1}", selector, data));
@@ -4439,10 +4430,10 @@ namespace PSFilterLoad.PSApi
 		} 
 #endif
 
-		private void process_event_proc(IntPtr @event)
+		private void ProcessEventProc(IntPtr @event)
 		{
 		}
-		private void progress_proc(int done, int total)
+		private void ProgressProc(int done, int total)
 		{
 			if (done < 0)
 				done = 0;
@@ -4456,7 +4447,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private unsafe short property_get_proc(uint signature, uint key, int index, ref IntPtr simpleProperty, ref IntPtr complexProperty)
+		private unsafe short PropertyGetProc(uint signature, uint key, int index, ref IntPtr simpleProperty, ref IntPtr complexProperty)
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Format("Sig: {0}, Key: {1}, Index: {2}", PropToString(signature), PropToString(key), index.ToString()));
@@ -4476,7 +4467,7 @@ namespace PSFilterLoad.PSApi
 					simpleProperty = new IntPtr(int2fixed(10));
 					break;
 				case PSProperties.propCaption:
-					complexProperty = handle_new_proc(0);
+					complexProperty = HandleNewProc(0);
 					break;
 				case PSProperties.propChannelName:
 					if (index < 0 || index > (filterRecord->planes - 1))
@@ -4502,15 +4493,15 @@ namespace PSFilterLoad.PSApi
 
 					bytes = Encoding.ASCII.GetBytes(name);
 
-					complexProperty = handle_new_proc(bytes.Length);
-					Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
-					handle_unlock_proc(complexProperty); 
+					complexProperty = HandleNewProc(bytes.Length);
+					Marshal.Copy(bytes, 0, HandleLockProc(complexProperty, 0), bytes.Length);
+					HandleUnlockProc(complexProperty); 
 					break;
 				case PSProperties.propCopyright:
 					simpleProperty = new IntPtr(0);  // no copyright
 					break;
 				case PSProperties.propEXIFData:
-					complexProperty = handle_new_proc(0);
+					complexProperty = HandleNewProc(0);
 					break;
 				case PSProperties.propGridMajor:
 					simpleProperty = new IntPtr(int2fixed(1));
@@ -4539,18 +4530,18 @@ namespace PSFilterLoad.PSApi
 					break;
 				case PSProperties.propSerialString:
 					bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
-					complexProperty = handle_new_proc(bytes.Length);
-					Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
-					handle_unlock_proc(complexProperty);
+					complexProperty = HandleNewProc(bytes.Length);
+					Marshal.Copy(bytes, 0, HandleLockProc(complexProperty, 0), bytes.Length);
+					HandleUnlockProc(complexProperty);
 					break;
 				case PSProperties.propURL:
-					complexProperty = handle_new_proc(0);
+					complexProperty = HandleNewProc(0);
 					break;
 				case PSProperties.propTitle:
 					bytes = Encoding.ASCII.GetBytes("temp.pdn"); // some filters just want a non empty string
-					complexProperty = handle_new_proc(bytes.Length);
-					Marshal.Copy(bytes, 0, handle_lock_proc(complexProperty, 0), bytes.Length);
-					handle_unlock_proc(complexProperty);	
+					complexProperty = HandleNewProc(bytes.Length);
+					Marshal.Copy(bytes, 0, HandleLockProc(complexProperty, 0), bytes.Length);
+					HandleUnlockProc(complexProperty);	
 					break;
 				case PSProperties.propWatchSuspension:
 					simpleProperty = new IntPtr(0);
@@ -4563,7 +4554,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short property_set_proc(uint signature, uint key, int index, IntPtr simpleProperty, IntPtr complexProperty)
+		private short PropertySetProc(uint signature, uint key, int index, IntPtr simpleProperty, IntPtr complexProperty)
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Format("Sig: {0}, Key: {1}, Index: {2}", PropToString(signature), PropToString(key), index.ToString()));
@@ -4600,25 +4591,25 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short resource_add_proc(uint ofType, IntPtr data)
+		private short ResourceAddProc(uint ofType, IntPtr data)
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, PropToString(ofType));
 #endif
-			short count = resource_count_proc(ofType);
+			short count = ResourceCountProc(ofType);
 
-			int size = handle_get_size_proc(data);
+			int size = HandleGetSizeProc(data);
 			byte[] bytes = new byte[size];
 
-			Marshal.Copy(handle_lock_proc(data, 0), bytes, 0, size);
-			handle_unlock_proc(data);
+			Marshal.Copy(HandleLockProc(data, 0), bytes, 0, size);
+			HandleUnlockProc(data);
 
 			pseudoResources.Add(new PSResource(ofType, count, bytes));
 
 			return PSError.noErr;
 		}
 
-		private short resource_count_proc(uint ofType)
+		private short ResourceCountProc(uint ofType)
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, PropToString(ofType));
@@ -4638,7 +4629,7 @@ namespace PSFilterLoad.PSApi
 			return count;
 		}
 
-		private void resource_delete_proc(uint ofType, short index)
+		private void ResourceDeleteProc(uint ofType, short index)
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Format("{0}, {1}", PropToString(ofType), index));
@@ -4668,7 +4659,7 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 		}
-		private IntPtr resource_get_proc(uint ofType, short index)
+		private IntPtr ResourceGetProc(uint ofType, short index)
 		{
 #if DEBUG
 			Ping(DebugFlags.MiscCallbacks, string.Format("{0}, {1}", PropToString(ofType), index));
@@ -4684,9 +4675,9 @@ namespace PSFilterLoad.PSApi
 			{
 				byte[] data = res.GetData();
 
-				IntPtr h = handle_new_proc(data.Length);
-				Marshal.Copy(data, 0, handle_lock_proc(h, 0), data.Length);
-				handle_unlock_proc(h);
+				IntPtr h = HandleNewProc(data.Length);
+				Marshal.Copy(data, 0, HandleLockProc(h, 0), data.Length);
+				HandleUnlockProc(h);
 
 				return h;
 			}
@@ -4752,31 +4743,31 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Setup the delegates for this instance.
 		/// </summary>
-		private void setup_delegates()
+		private void SetupDelegates()
 		{
-			advanceProc = new AdvanceStateProc(advance_state_proc);
+			advanceProc = new AdvanceStateProc(AdvanceStateProc);
 			// BufferProc
-			allocProc = new AllocateBufferProc(allocate_buffer_proc);
-			freeProc = new FreeBufferProc(buffer_free_proc);
-			lockProc = new LockBufferProc(buffer_lock_proc);
-			unlockProc = new UnlockBufferProc(buffer_unlock_proc);
-			spaceProc = new BufferSpaceProc(buffer_space_proc);
+			allocProc = new AllocateBufferProc(AllocateBufferProc);
+			freeProc = new FreeBufferProc(BufferFreeProc);
+			lockProc = new LockBufferProc(BufferLockProc);
+			unlockProc = new UnlockBufferProc(BufferUnlockProc);
+			spaceProc = new BufferSpaceProc(BufferSpaceProc);
 			// Misc Callbacks
-			colorProc = new ColorServicesProc(color_services_proc);
-			displayPixelsProc = new DisplayPixelsProc(display_pixels_proc);
-			hostProc = new HostProcs(host_proc);
-			processEventProc = new ProcessEventProc(process_event_proc);
-			progressProc = new ProgressProc(progress_proc);
-			abortProc = new TestAbortProc(abort_proc);
+			colorProc = new ColorServicesProc(ColorServicesProc);
+			displayPixelsProc = new DisplayPixelsProc(DisplayPixelsProc);
+			hostProc = new HostProcs(HostProc);
+			processEventProc = new ProcessEventProc(ProcessEventProc);
+			progressProc = new ProgressProc(ProgressProc);
+			abortProc = new TestAbortProc(AbortProc);
 			// HandleProc
-			handleNewProc = new NewPIHandleProc(handle_new_proc);
-			handleDisposeProc = new DisposePIHandleProc(handle_dispose_proc);
-			handleGetSizeProc = new GetPIHandleSizeProc(handle_get_size_proc);
-			handleSetSizeProc = new SetPIHandleSizeProc(handle_set_size);
-			handleLockProc = new LockPIHandleProc(handle_lock_proc);
-			handleRecoverSpaceProc = new RecoverSpaceProc(handle_recover_space_proc);
-			handleUnlockProc = new UnlockPIHandleProc(handle_unlock_proc);
-			handleDisposeRegularProc = new DisposeRegularPIHandleProc(handle_dispose_regular_proc);
+			handleNewProc = new NewPIHandleProc(HandleNewProc);
+			handleDisposeProc = new DisposePIHandleProc(HandleDisposeProc);
+			handleGetSizeProc = new GetPIHandleSizeProc(HandleGetSizeProc);
+			handleSetSizeProc = new SetPIHandleSizeProc(HandleSetSize);
+			handleLockProc = new LockPIHandleProc(HandleLockProc);
+			handleRecoverSpaceProc = new RecoverSpaceProc(HandleRecoverSpaceProc);
+			handleUnlockProc = new UnlockPIHandleProc(HandleUnlockProc);
+			handleDisposeRegularProc = new DisposeRegularPIHandleProc(HandleDisposeRegularProc);
 			// ImageServicesProc
 #if USEIMAGESERVICES
 			resample1DProc = new PIResampleProc(image_services_interpolate_1d_proc);
@@ -4784,14 +4775,14 @@ namespace PSFilterLoad.PSApi
 #endif
 
 			// PropertyProc
-			getPropertyProc = new GetPropertyProc(property_get_proc);
+			getPropertyProc = new GetPropertyProc(PropertyGetProc);
 
-			setPropertyProc = new SetPropertyProc(property_set_proc);
+			setPropertyProc = new SetPropertyProc(PropertySetProc);
 			// ResourceProcs
-			countResourceProc = new CountPIResourcesProc(resource_count_proc);
-			getResourceProc = new GetPIResourceProc(resource_get_proc);
-			deleteResourceProc = new DeletePIResourceProc(resource_delete_proc);
-			addResourceProc = new AddPIResourceProc(resource_add_proc);
+			countResourceProc = new CountPIResourcesProc(ResourceCountProc);
+			getResourceProc = new GetPIResourceProc(ResourceGetProc);
+			deleteResourceProc = new DeletePIResourceProc(ResourceDeleteProc);
+			addResourceProc = new AddPIResourceProc(ResourceAddProc);
 
 
 			// ReadDescriptorProcs
@@ -4837,7 +4828,7 @@ namespace PSFilterLoad.PSApi
 		}
 
 		private bool useChannelPorts;
-		private unsafe void setup_suites()
+		private unsafe void SetupSuites()
 		{
 			bufferProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(BufferProcs)), true);
 			BufferProcs* bufferProcs = (BufferProcs*)bufferProcsPtr.ToPointer();
@@ -4951,7 +4942,7 @@ namespace PSFilterLoad.PSApi
 
 			if (aeteDict.Count > 0)
 			{                    
-				descriptorParameters->descriptor = handle_new_proc(1);
+				descriptorParameters->descriptor = HandleNewProc(0);
 
 				if (!isRepeatEffect)
 				{
@@ -4986,7 +4977,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private unsafe void setup_filter_record()
+		private unsafe void SetupFilterRecord()
 		{
 			filterRecordPtr = Memory.Allocate(Marshal.SizeOf(typeof(FilterRecord)), true);
 			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
@@ -5014,7 +5005,7 @@ namespace PSFilterLoad.PSApi
 				filterRecord->foreColor[i] = primaryColor[i];
 			}
 
-			filterRecord->bufferSpace = buffer_space_proc();
+			filterRecord->bufferSpace = BufferSpaceProc();
 			filterRecord->maxSpace = 1000000000;
 			filterRecord->hostSig = BitConverter.ToUInt32(Encoding.ASCII.GetBytes(".PDN"), 0);
 			filterRecord->hostProcs = Marshal.GetFunctionPointerForDelegate(hostProc);
@@ -5031,21 +5022,21 @@ namespace PSFilterLoad.PSApi
 			filterRecord->wantLayout = 0;
 			filterRecord->filterCase = filterCase;
 			filterRecord->dummyPlaneValue = -1;
-			/* premiereHook */
+			filterRecord->premiereHook = IntPtr.Zero;
 			filterRecord->advanceState = Marshal.GetFunctionPointerForDelegate(advanceProc);
 
 			filterRecord->supportsAbsolute = 1;
 			filterRecord->wantsAbsolute = 0;
 			filterRecord->getPropertyObsolete = Marshal.GetFunctionPointerForDelegate(getPropertyProc);
-			/* cannotUndo */
+			filterRecord->cannotUndo = 0;
 			filterRecord->supportsPadding = 1;
-			/* inputPadding */
-			/* outputPadding */
-			/* maskPadding */
+			filterRecord->inputPadding = HostPadding.plugInWantsErrorOnBoundsException;
+			filterRecord->outputPadding = HostPadding.plugInWantsErrorOnBoundsException;
+			filterRecord->maskPadding = HostPadding.plugInWantsErrorOnBoundsException;
 			filterRecord->samplingSupport = 1;
-			/* reservedByte */
-			/* inputRate */
-			/* maskRate */
+			filterRecord->reservedByte = 0;
+			filterRecord->inputRate = int2fixed(1);
+			filterRecord->maskRate = int2fixed(1);
 			filterRecord->colorServices = Marshal.GetFunctionPointerForDelegate(colorProc);
 
 #if USEIMAGESERVICES
@@ -5210,7 +5201,7 @@ namespace PSFilterLoad.PSApi
 
 					if (descParam->descriptor != IntPtr.Zero)
 					{
-						handle_dispose_proc(descParam->descriptor);
+						HandleDisposeProc(descParam->descriptor);
 					}
 
 
@@ -5272,12 +5263,12 @@ namespace PSFilterLoad.PSApi
 						}
 						else if (bufferIDs.Contains(filterRecord->parameters))
 						{
-							buffer_free_proc(filterRecord->parameters);
+							BufferFreeProc(filterRecord->parameters);
 						}
 						else
 						{
-							handle_unlock_proc(filterRecord->parameters);
-							handle_dispose_proc(filterRecord->parameters);
+							HandleUnlockProc(filterRecord->parameters);
+							HandleDisposeProc(filterRecord->parameters);
 						}
 						filterRecord->parameters = IntPtr.Zero;
 					}
@@ -5320,12 +5311,12 @@ namespace PSFilterLoad.PSApi
 					}
 					else if (bufferIDs.Contains(dataPtr))
 					{
-						buffer_free_proc(dataPtr);
+						BufferFreeProc(dataPtr);
 					}
 					else 
 					{
-						handle_unlock_proc(dataPtr);
-						handle_dispose_proc(dataPtr);
+						HandleUnlockProc(dataPtr);
+						HandleDisposeProc(dataPtr);
 					}
 					dataPtr = IntPtr.Zero;
 				}
@@ -5344,7 +5335,7 @@ namespace PSFilterLoad.PSApi
 				{
 					foreach (var item in handles)
 					{
-						Memory.Free(item.Value.pointer);
+						Memory.Free(item.Value.pointer); 
 						Memory.Free(item.Key);
 					}
 					handles = null;
