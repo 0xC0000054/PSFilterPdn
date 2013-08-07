@@ -125,15 +125,15 @@
     <value>Disk full.</value>
     <comment>DiskFull description</comment>
   </data>
-  <data name="errHostDoesNotSupportColStep" xml:space="preserve">
+  <data name="HostDoesNotSupportColStep" xml:space="preserve">
     <value>This Paint.NET plug-in does not support colBytes other than 1.</value>
     <comment>ThisPlugInDoesNotSupportColBytesOtherThan1 description</comment>
   </data>
-  <data name="errPlugInHostInsufficient" xml:space="preserve">
+  <data name="PlugInHostInsufficient" xml:space="preserve">
     <value>Requires services not provided by this Paint.NET plug-in.</value>
     <comment>RequiresServicesNotProvidedByThisPlugIn description</comment>
   </data>
-  <data name="errPlugInPropertyUndefined" xml:space="preserve">
+  <data name="PlugInPropertyUndefined" xml:space="preserve">
     <value>A requested property could not be found.</value>
     <comment>ARequestedPropertyCouldNotBeFound description</comment>
   </data>
@@ -191,7 +191,7 @@
     <value>Red</value>
   </data>
   <data name="UnknownErrorCodeFormat" xml:space="preserve">
-    <value>error code = {0}</value>
+    <value>error code: {0}</value>
   </data>
   <data name="MaskChannelName" xml:space="preserve">
     <value>Selection Mask</value>
@@ -214,5 +214,8 @@
   </data>
   <data name="UnsupportedChannelRowBits" xml:space="preserve">
     <value>Unsupported row bits.</value>
+  </data>
+  <data name="BlankDataNotSupported" xml:space="preserve">
+    <value>The filter does not support processing empty layers.</value>
   </data>
 </root>
