@@ -79,7 +79,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The filter does not support processing completely transparent layers..
+        ///   Looks up a localized string similar to The filter does not support processing empty layers..
         /// </summary>
         internal static string BlankDataNotSupported {
             get {

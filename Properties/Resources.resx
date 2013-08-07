@@ -266,6 +266,6 @@
     <value>Unsupported row bits.</value>
   </data>
   <data name="BlankDataNotSupported" xml:space="preserve">
-    <value>The filter does not support processing completely transparent layers.</value>
+    <value>The filter does not support processing empty layers.</value>
   </data>
 </root>
