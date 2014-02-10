@@ -592,6 +592,7 @@ namespace PaintDotNet
 		{
 			if (!disposed && disposing)
 			{
+				this.disposed = true;
 				if (scan0 != null)
 				{
 					this.scan0.Dispose();
