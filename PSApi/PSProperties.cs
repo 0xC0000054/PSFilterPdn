@@ -20,6 +20,10 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public const uint propCaption = 0x63617074U;
         /// <summary>
+        /// The new copyright property from 5.0, a get only version of propCopyright - 'cpyR'
+        /// </summary>
+        public const uint propCopyright2 = 0x63707952U;
+        /// <summary>
         /// Channel Name - 'nmch'
         /// </summary>
         public const uint propChannelName = 0x6e6d6368U;
@@ -31,6 +35,10 @@ namespace PSFilterLoad.PSApi
         /// The file EXIF data - 'EXIF' 
         /// </summary>
         public const uint propEXIFData = 0x45584946U;
+        /// <summary>
+        /// The document XMP data - 'xmpd' 
+        /// </summary>
+        public const uint propXMPData = 0x786d7064U;
         /// <summary>
         /// Major grid size - 'grmj' 
         /// </summary>
@@ -99,5 +107,17 @@ namespace PSFilterLoad.PSApi
         /// The watch suspension level - 'wtch'
         /// </summary>
         public const uint propWatchSuspension = 0x77746368U;
+        /// <summary>
+        /// The width of the current document in pixels - 'docW'  
+        /// </summary>
+        public const uint propDocumentWidth = 0x646f6357U;
+        /// <summary>
+        /// The height of the current document in pixels - 'docH'  
+        /// </summary>
+        public const uint propDocumentHeight = 0x646f6348U;
+        /// <summary>
+        /// Tool tip display - 'tltp'
+        /// </summary>
+        public const uint propToolTips = 0x746c7470U;
     }
 }
