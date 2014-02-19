@@ -6,24 +6,23 @@
 namespace PSFilterLoad.PSApi
 {
 
+    internal enum MaskDescription : int
+    {
+        kSimplePSMask = 0,
+        kBlackMatPSMask = 1,
+        kGrayMatPSMask = 2,
+        kWhiteMatPSMask = 3,
+        kInvertPSMask = 4
+    }
+
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     internal struct PSPixelMask
     {
-
-        /// PSPixelMask*
         public System.IntPtr next;
-
-        /// void*
         public System.IntPtr maskData;
-
-        /// int32->int
         public int rowBytes;
-
-        /// int32->int
         public int colBytes;
-
-        /// int32->int
-        public int maskDescription;
+        public MaskDescription maskDescription;
     }
 
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
