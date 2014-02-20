@@ -218,10 +218,10 @@
   <data name="ConfigDialog_subDirSearchCb_Text" xml:space="preserve">
     <value>Search Subdirectories</value>
   </data>
-  <data name="ConfigDialog_fldrLdNameLbl_Format" xml:space="preserve">
+  <data name="ConfigDialog_FolderName_Format" xml:space="preserve">
     <value>({0})</value>
   </data>
-  <data name="ConfigDialog_fldrLoadCountLbl_Format" xml:space="preserve">
+  <data name="ConfigDialog_FolderCount_Format" xml:space="preserve">
     <value>({0} of {1})</value>
   </data>
   <data name="AlphaChannelName" xml:space="preserve">
