@@ -10,7 +10,7 @@ using System.Resources;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("null54")]
 [assembly: AssemblyProduct("PSFilterPdn")]
-[assembly: AssemblyCopyright("Copyright © 2010-2013 Nicholas Hayes (aka null54)")]
+[assembly: AssemblyCopyright("Copyright © 2010-2014 Nicholas Hayes (aka null54)")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,6 +32,6 @@ using System.Resources;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.2.5")]
-[assembly: AssemblyFileVersion("1.0.2.5")]
+[assembly: AssemblyVersion("1.0.2.6")]
+[assembly: AssemblyFileVersion("1.0.2.6")]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
