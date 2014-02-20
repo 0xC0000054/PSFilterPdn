@@ -59,6 +59,7 @@ namespace PSFilterShim
 			try
 			{
 				Thread filterThread = new Thread(new ThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+				filterThread.SetApartmentState(ApartmentState.STA); // Some filters may use OLE which requires Single Threaded Apartment mode.
 
 				filterThread.Start();
 
@@ -150,10 +151,8 @@ namespace PSFilterShim
 					{
 						// ignore the filters that only use the data handle, e.g. Filter Factory  
 						byte[] parameterData = filterParameters.GlobalParameters.GetParameterDataBytes();
-						byte[] pluginData = filterParameters.GlobalParameters.GetPluginDataBytes();
 
-						if ((parameterData != null && pluginData != null || parameterData != null && pluginData == null) ||
-							filterParameters.AETEDictionary.Count > 0)
+						if (parameterData != null || filterParameters.AETEDictionary.Count > 0)
 						{
 							lps.FilterParameters = filterParameters;
 							lps.IsRepeatEffect = repeatEffect;
