@@ -15,17 +15,21 @@ namespace PSFilterLoad.PSApi
     {
         /// kPhotoshopSignature -> 0x3842494dL
         public const uint kPhotoshopSignature = 0x3842494dU;
+
+        /// <summary>
+        /// The signature used when a plug-in works with any host.
+        /// </summary>
+        public const uint noRequiredHost = 0x20202020U;
+
         /// <summary>
         /// The filter type code - '8BFM'
         /// </summary>
         public const uint filterKind = 0x3842464dU;
 
 
-        /// kCurrentBufferProcsVersion -> 2
         public const int kCurrentBufferProcsVersion = 2;
         public const int kCurrentBufferProcsCount = 5; 
         
-        /// kCurrentHandleProcsVersion -> 1
         public const int kCurrentHandleProcsVersion = 1;
         public const short kCurrentHandleProcsCount = 8;
 
@@ -35,18 +39,14 @@ namespace PSFilterLoad.PSApi
         public const short kCurrentImageServicesProcsCount = 2; 
 #endif
 
-        /// kCurrentPropertyProcsVersion -> 1
         public const int kCurrentPropertyProcsVersion = 1;
         public const short kCurrentPropertyProcsCount = 2;
 
-        /// kCurrentDescriptorParametersVersion -> 0
         public const int kCurrentDescriptorParametersVersion = 0;
 
-        /// kCurrentReadDescriptorProcsVersion -> 0
         public const int kCurrentReadDescriptorProcsVersion = 0;
         public const short kCurrentReadDescriptorProcsCount = 18;
 
-        /// kCurrentWriteDescriptorProcsVersion -> 0
         public const int kCurrentWriteDescriptorProcsVersion = 0;
         public const short kCurrentWriteDescriptorProcsCount = 16;
 
@@ -63,7 +63,6 @@ namespace PSFilterLoad.PSApi
         public const int kCurrentChannelPortProcsVersion = 1;
         public const short kCurrentChannelPortProcsCount = 3;
 
-        /// kCurrentResourceProcsVersion -> 3
         public const int kCurrentResourceProcsVersion = 3;
         public const short kCurrentResourceProcsCount = 4;
 
@@ -80,5 +79,55 @@ namespace PSFilterLoad.PSApi
         /// PiMI resource, the third bit in the imageModes short is RGB. 
         /// </summary>
         public const int supportsRGBColor = 8;
+
+        /// <summary>
+        /// The host sampling support constants 
+        /// </summary>
+        internal static class SamplingSupport
+        {
+            public const byte hostDoesNotSupportSampling = 0;
+            public const byte hostSupportsIntegralSampling = 1;
+            public const byte hostSupportsFractionalSampling = 2;
+        }
+
+        /// <summary>
+        /// The InterpolationMethod constants used by PSProperties.propInterpolationMethod 
+        /// </summary>
+        internal static class InterpolationMethod
+        {
+            public const int NearestNeghbor = 1;
+            public const int Bilinear = 2;
+            public const int Bicubic = 3;
+        }
+
+        /// <summary>
+        /// The ruler constants used by PSProperties.propRulerUnits.
+        /// </summary>
+        internal static class RulerUnits
+        {
+            public const int Pixels = 0;
+            public const int Inches = 1;
+            public const int Centimeters = 2;
+            public const int Points = 3;
+            public const int Picas = 4;
+            public const int Percent = 5;
+        }
+
+        /// <summary>
+        /// The layout constants for the data presented to the plug-ins.
+        /// </summary>
+        internal static class Layout
+        {
+            /// <summary>
+            /// Rows, columns, planes with colbytes = # planes
+            /// </summary>
+            public const short piLayoutTraditional = 0;
+            public const short piLayoutRowsColumnsPlanes = 1;
+            public const short piLayoutRowsPlanesColumns = 2;
+            public const short piLayoutColumnsRowsPlanes = 3;
+            public const short piLayoutColumnsPlanesRows = 4;
+            public const short piLayoutPlanesRowsColumns = 5;
+            public const short piLayoutPlanesColumnsRows = 6;
+        }
     }
 }
