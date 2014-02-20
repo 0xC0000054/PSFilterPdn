@@ -27,12 +27,13 @@ namespace PSFilterLoad.PSApi
         filterDataHandlingWhiteZap = 8,
         filterDataHandlingFillMask = 9,
         filterDataHandlingBackgroundZap = 10,
-        filterDataHandlingForegroundZap = 11,
+        filterDataHandlingForegroundZap = 11
     }
     
     [Flags]
     internal enum FilterCaseInfoFlags : byte
     {
+        None = 0,
         PIFilterDontCopyToDestinationBit = (1 << 0),
         PIFilterWorksWithBlankDataBit = (1 << 1),
         PIFilterFiltersLayerMaskBit = (1 << 2),
@@ -43,19 +44,15 @@ namespace PSFilterLoad.PSApi
     [DataContract()]
     struct FilterCaseInfo
     {
-        /// char
         [DataMember]       
         public FilterDataHandling inputHandling;
     
-        /// char
         [DataMember]
         public FilterDataHandling outputHandling;
     
-        /// char
         [DataMember]
         public FilterCaseInfoFlags flags1;
     
-        /// char
         [DataMember]       
         public byte flags2;
     }
