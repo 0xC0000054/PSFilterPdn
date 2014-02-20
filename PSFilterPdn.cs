@@ -41,9 +41,9 @@ namespace PSFilterPdn
 		public PSFilterPdnEffect()
 			: base(PSFilterPdnEffect.StaticName, PSFilterPdnEffect.StaticIcon, EffectFlags.Configurable)
 		{
-			repeatEffect = true;
+			this.repeatEffect = true;
+			this.filterThread = null;			
 			filterDone = null;
-			filterThread = null;
 		}
 	   
 		/// <summary>
@@ -68,20 +68,25 @@ namespace PSFilterPdn
 
 		private static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
 		{
-			FilterCaseInfo[] info = new FilterCaseInfo[7];
-			string[] split = input.Split(new char[] { ':' });
-
-			for (int i = 0; i < split.Length; i++)
+			if (!string.IsNullOrEmpty(input))
 			{
-				string[] data = split[i].Split(new char[] { '_' });
+				FilterCaseInfo[] info = new FilterCaseInfo[7];
+				string[] split = input.Split(new char[] { ':' });
 
-				info[i].inputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[0]);
-				info[i].outputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[1]);
-				info[i].flags1 = (FilterCaseInfoFlags)Enum.Parse(typeof(FilterCaseInfoFlags), data[2]);
-				info[i].flags2 = 0;
+				for (int i = 0; i < split.Length; i++)
+				{
+					string[] data = split[i].Split(new char[] { '_' });
+
+					info[i].inputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[0]);
+					info[i].outputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[1]);
+					info[i].flags1 = (FilterCaseInfoFlags)Enum.Parse(typeof(FilterCaseInfoFlags), data[2]);
+					info[i].flags2 = 0;
+				}
+
+				return info;
 			}
 
-			return info;
+			return null;
 		}
 
 		private const string endpointName = "net.pipe://localhost/PSFilterShim/ShimData";
@@ -103,7 +108,7 @@ namespace PSFilterPdn
 			string resourceDataFileName = Path.Combine(userDataPath, "pseudoResources.dat"); 
 			string regionFileName = string.Empty; 
 
-			FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
+			FilterCaseInfo[] fci = GetFilterCaseInfoFromString(token.FilterCaseInfo);
 			PluginData pluginData = new PluginData()
 			{
 				fileName = token.FileName,
@@ -245,7 +250,7 @@ namespace PSFilterPdn
 				{
 					lps.SetAbortCallback(new Func<byte>(AbortFunc));
 
-					FilterCaseInfo[] fci = string.IsNullOrEmpty(token.FilterCaseInfo) ? null : GetFilterCaseInfoFromString(token.FilterCaseInfo);
+					FilterCaseInfo[] fci = GetFilterCaseInfoFromString(token.FilterCaseInfo);
 					PluginData pdata = new PluginData()
 					{
 						fileName = token.FileName,
@@ -318,13 +323,14 @@ namespace PSFilterPdn
 				{
 					filterDone = new ManualResetEvent(false);
 
-					filterThread = new Thread(() => RunRepeatFilter(ref token, win32Window)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
-					filterThread.Start();
+					this.filterThread = new Thread(() => RunRepeatFilter(ref token, win32Window)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+					this.filterThread.SetApartmentState(ApartmentState.STA); // Some filters may use OLE which requires Single Threaded Apartment mode.
+					this.filterThread.Start();
 
 					filterDone.WaitOne();
 
-					filterThread.Join();
-					filterThread = null;
+					this.filterThread.Join();
+					this.filterThread = null;
 				}
 			 
 			}
