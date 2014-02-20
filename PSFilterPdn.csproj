@@ -127,9 +127,7 @@
     <Compile Include="ColorSpace\HSB.cs" />
     <Compile Include="ColorSpace\HSL.cs" />
     <Compile Include="ColorSpace\RGB.cs" />
-    <Compile Include="FastDirectoryEnumerator.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="FileEnumerator.cs" />
     <Compile Include="IPSFilterShim.cs" />
     <Compile Include="MaskSurface\MaskSurface.cs" />
     <Compile Include="MaskSurface\MemoryBlock.cs">
