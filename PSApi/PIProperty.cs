@@ -26,6 +26,10 @@ namespace PSFilterLoad.PSApi
 		public uint classID;
 		public uint eventID;
 		public short terminologyID;
+
+#if DEBUG
+		public const int SizeOf = 14;
+#endif
 	}
 
 #pragma warning restore 0649
