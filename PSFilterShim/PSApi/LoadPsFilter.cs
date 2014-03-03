@@ -521,15 +521,19 @@ namespace PSFilterLoad.PSApi
 			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
 			int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
 
-			if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new IntPtr(mbiSize)) == IntPtr.Zero)
+			if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
+			{
 				return true;
+			}
 
 			result = ((mbi.Protect & NativeConstants.PAGE_READONLY) != 0 || (mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 ||
 			(mbi.Protect & NativeConstants.PAGE_WRITECOPY) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_READ) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_READWRITE) != 0 ||
 			(mbi.Protect & NativeConstants.PAGE_EXECUTE_WRITECOPY) != 0);
 
 			if ((mbi.Protect & NativeConstants.PAGE_GUARD) != 0 || (mbi.Protect & NativeConstants.PAGE_NOACCESS) != 0)
+			{
 				result = false;
+			}
 
 			return !result;
 		}
@@ -547,14 +551,18 @@ namespace PSFilterLoad.PSApi
 			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
 			int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
 
-			if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new IntPtr(mbiSize)) == IntPtr.Zero)
+			if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
+			{
 				return true;
+			}
 
 			result = ((mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 || (mbi.Protect & NativeConstants.PAGE_WRITECOPY) != 0 ||
 				(mbi.Protect & NativeConstants.PAGE_EXECUTE_READWRITE) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_WRITECOPY) != 0);
 
 			if ((mbi.Protect & NativeConstants.PAGE_GUARD) != 0 || (mbi.Protect & NativeConstants.PAGE_NOACCESS) != 0)
+			{
 				result = false;
+			}
 
 			return !result;
 		}
@@ -611,7 +619,6 @@ namespace PSFilterLoad.PSApi
 
 			if (filterRecord->parameters != IntPtr.Zero)
 			{
-				long size = 0;
 				if (IsHandleValid(filterRecord->parameters))
 				{
 					int handleSize = HandleGetSizeProc(filterRecord->parameters);
@@ -624,56 +631,60 @@ namespace PSFilterLoad.PSApi
 					globalParameters.SetParameterDataBytes(buf);
 					globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
 				}
-				else if ((size = SafeNativeMethods.GlobalSize(filterRecord->parameters).ToInt64()) > 0L)
+				else
 				{
-					IntPtr ptr = SafeNativeMethods.GlobalLock(filterRecord->parameters);
+					long size = SafeNativeMethods.GlobalSize(filterRecord->parameters).ToInt64();
+					if (size > 0L)
+					{
+						IntPtr ptr = SafeNativeMethods.GlobalLock(filterRecord->parameters);
 
-					try
-					{                           
-						IntPtr hPtr = Marshal.ReadIntPtr(ptr);
-
-						if (size == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == 0x464f544f)
+						try
 						{
-							long ps = 0;
-							if ((ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64()) > 0L)
-							{
-								byte[] buf = new byte[ps];
-								Marshal.Copy(hPtr, buf, 0, (int)ps);
-								globalParameters.SetParameterDataBytes(buf);
-								globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.OTOFHandle;
-							}
+							IntPtr hPtr = Marshal.ReadIntPtr(ptr);
 
-						}
-						else
-						{
-							if (!IsBadReadPtr(hPtr))
+							if (size == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == 0x464f544f)
 							{
-								int ps = SafeNativeMethods.GlobalSize(hPtr).ToInt32();
-								if (ps == 0)
+								long ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64();
+								if (ps > 0L)
 								{
-									ps = ((int)size - IntPtr.Size);
+									byte[] buf = new byte[ps];
+									Marshal.Copy(hPtr, buf, 0, (int)ps);
+									globalParameters.SetParameterDataBytes(buf);
+									globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.OTOFHandle;
 								}
 
-								byte[] buf = new byte[ps];
-
-								Marshal.Copy(hPtr, buf, 0, ps);
-								globalParameters.SetParameterDataBytes(buf);
-								globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
 							}
 							else
 							{
-								byte[] buf = new byte[(int)size];
+								if (!IsBadReadPtr(hPtr))
+								{
+									int ps = SafeNativeMethods.GlobalSize(hPtr).ToInt32();
+									if (ps == 0)
+									{
+										ps = ((int)size - IntPtr.Size);
+									}
 
-								Marshal.Copy(filterRecord->parameters, buf, 0, (int)size);
-								globalParameters.SetParameterDataBytes(buf);
-								globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.RawBytes;
+									byte[] buf = new byte[ps];
+
+									Marshal.Copy(hPtr, buf, 0, ps);
+									globalParameters.SetParameterDataBytes(buf);
+									globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
+								}
+								else
+								{
+									byte[] buf = new byte[(int)size];
+
+									Marshal.Copy(filterRecord->parameters, buf, 0, (int)size);
+									globalParameters.SetParameterDataBytes(buf);
+									globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.RawBytes;
+								}
+
 							}
-
 						}
-					}
-					finally
-					{
-						SafeNativeMethods.GlobalUnlock(filterRecord->parameters);
+						finally
+						{
+							SafeNativeMethods.GlobalUnlock(filterRecord->parameters);
+						}
 					}
 				}
 
@@ -711,8 +722,8 @@ namespace PSFilterLoad.PSApi
 					else if (pluginDataSize == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == 0x464f544f) // OTOF reversed
 					{
 						IntPtr hPtr = Marshal.ReadIntPtr(ptr);
-						long ps = 0;
-						if (!IsBadReadPtr(hPtr) && (ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64()) > 0L)
+						long ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64();
+						if (ps > 0L)
 						{
 							byte[] dataBuf = new byte[ps];
 							Marshal.Copy(hPtr, dataBuf, 0, (int)ps);
@@ -721,7 +732,7 @@ namespace PSFilterLoad.PSApi
 						}
 
 					}
-					else if (pluginDataSize > 0)
+					else if (pluginDataSize > 0L)
 					{
 						byte[] dataBuf = new byte[pluginDataSize];
 						Marshal.Copy(ptr, dataBuf, 0, (int)pluginDataSize);
@@ -978,7 +989,7 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
-		private bool PluginParams(PluginData pdata)
+		private bool PluginParameters(PluginData pdata)
 		{
 			result = PSError.noErr;
 			
@@ -993,7 +1004,8 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			unsafe
 			{
-				Ping(DebugFlags.Call, string.Format("data = {0:X},  parameters = {1:X}", dataPtr, ((FilterRecord*)filterRecordPtr)->parameters));
+				FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
+				Ping(DebugFlags.Call, string.Format("data: {0},  parameters: {1}", dataPtr.ToString("X8"), filterRecord->parameters.ToString("X8")));
 			}
 
 			Ping(DebugFlags.Call, "After filterSelectorParameters");
@@ -1278,7 +1290,7 @@ namespace PSFilterLoad.PSApi
 
 			if (!isRepeatEffect)
 			{
-				if (!PluginParams(pdata))
+				if (!PluginParameters(pdata))
 				{
 #if DEBUG
 					Ping(DebugFlags.Error, "plugin_parms failed");
@@ -2429,7 +2441,7 @@ namespace PSFilterLoad.PSApi
 
 #if DEBUG
 			long size = Memory.Size(bufferID);
-			Ping(DebugFlags.BufferSuite, string.Format("Buffer address = {0:X8}, Size = {1}", bufferID.ToInt64(), size));
+			Ping(DebugFlags.BufferSuite, string.Format("Buffer: {0:X8}, size = {1}", bufferID.ToInt64(), size));
 #endif
 			Memory.Free(bufferID);
 
@@ -2438,7 +2450,7 @@ namespace PSFilterLoad.PSApi
 		private IntPtr BufferLockProc(IntPtr bufferID, byte moveHigh)
 		{
 #if DEBUG
-			Ping(DebugFlags.BufferSuite, string.Format("Buffer address = {0:X8}", bufferID.ToInt64()));
+			Ping(DebugFlags.BufferSuite, string.Format("Buffer: {0:X8}", bufferID.ToInt64()));
 #endif
 
 			return bufferID;
@@ -2446,7 +2458,7 @@ namespace PSFilterLoad.PSApi
 		private void BufferUnlockProc(IntPtr bufferID)
 		{
 #if DEBUG
-			Ping(DebugFlags.BufferSuite, string.Format("Buffer address = {0:X8}", bufferID.ToInt64()));
+			Ping(DebugFlags.BufferSuite, string.Format("Buffer: {0:X8}", bufferID.ToInt64()));
 #endif
 		}
 		private int BufferSpaceProc()
@@ -2894,6 +2906,8 @@ namespace PSFilterLoad.PSApi
 					break;
 			}
 			IntPtr namePtr = Marshal.StringToHGlobalAnsi(name);
+
+			desc->name = namePtr;
 
 			return new ReadChannelPtrs() { address = addressPtr, name = namePtr };
 		}
@@ -4240,7 +4254,7 @@ namespace PSFilterLoad.PSApi
 
 				handles.Add(handle, *hand);
 #if DEBUG
-				Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}, size = {1}", hand->pointer.ToInt64(), size));
+				Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}, pointer: {1:X8}, size = {2}", handle.ToInt64(), hand->pointer.ToInt64(), size));
 #endif
 			}
 			catch (OutOfMemoryException)
@@ -4277,8 +4291,7 @@ namespace PSFilterLoad.PSApi
 					return;
 				}
 #if DEBUG
-				Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
-				Ping(DebugFlags.HandleSuite, string.Format("Handle pointer address = {0:X8}", handles[h].pointer));
+				Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}, pointer: {1:X8}", h.ToInt64(), handles[h].pointer.ToInt64()));
 #endif
 				handles.Remove(h);
 				PSHandle* handle = (PSHandle*)h.ToPointer();
@@ -4290,6 +4303,9 @@ namespace PSFilterLoad.PSApi
 
 		private unsafe void HandleDisposeRegularProc(IntPtr h)
 		{
+#if DEBUG
+			Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}", h.ToInt64()));
+#endif
 			// What is this supposed to do?
 			if (!IsHandleValid(h))
 			{
@@ -4311,7 +4327,7 @@ namespace PSFilterLoad.PSApi
 		private IntPtr HandleLockProc(IntPtr h, byte moveHigh)
 		{
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}, moveHigh = {1:X1}", h.ToInt64(), moveHigh));
+			Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}, moveHigh: {1}", h.ToInt64(), moveHigh));
 #endif
 			if (!IsHandleValid(h))
 			{
@@ -4334,7 +4350,7 @@ namespace PSFilterLoad.PSApi
 			}
 
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, String.Format("Handle Pointer Address = 0x{0:X}", handles[h].pointer));
+			Ping(DebugFlags.HandleSuite, String.Format("Handle Pointer Address = 0x{0:X8}", handles[h].pointer.ToInt64()));
 #endif
 			return handles[h].pointer;
 		}
@@ -4342,7 +4358,7 @@ namespace PSFilterLoad.PSApi
 		private int HandleGetSizeProc(IntPtr h)
 		{
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
+			Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}", h.ToInt64()));
 #endif
 			if (!IsHandleValid(h))
 			{
@@ -4372,14 +4388,14 @@ namespace PSFilterLoad.PSApi
 		private void HandleRecoverSpaceProc(int size)
 		{
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("size = {0}", size));
+			Ping(DebugFlags.HandleSuite, string.Format("size: {0}", size));
 #endif
 		}
 
 		private unsafe short HandleSetSize(IntPtr h, int newSize)
 		{
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
+			Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}", h.ToInt64()));
 #endif
 			if (!IsHandleValid(h))
 			{
@@ -4432,7 +4448,7 @@ namespace PSFilterLoad.PSApi
 		private void HandleUnlockProc(IntPtr h)
 		{
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("Handle address = {0:X8}", h.ToInt64()));
+			Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}", h.ToInt64()));
 #endif
 			if (!IsHandleValid(h))
 			{
@@ -4451,8 +4467,6 @@ namespace PSFilterLoad.PSApi
 				}
 				
 			}
-
-			
 		}
 
 		private void HostProc(short selector, IntPtr data)
@@ -4480,10 +4494,11 @@ namespace PSFilterLoad.PSApi
 		private void ProgressProc(int done, int total)
 		{
 			if (done < 0)
+			{
 				done = 0;
+			}
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Format("Done = {0}, Total = {1}", done, total));
-			Ping(DebugFlags.MiscCallbacks, string.Format("progress_proc = {0}", (((double)done / (double)total) * 100d).ToString()));
+			Ping(DebugFlags.MiscCallbacks, string.Format("Done: {0}, Total: {1}, Progress: {2}%", done, total, (((double)done / (double)total) * 100.0)));
 #endif
 			if (progressFunc != null)
 			{
