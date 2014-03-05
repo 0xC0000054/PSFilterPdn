@@ -28,6 +28,13 @@ namespace PSFilterLoad.PSApi
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
         internal static extern IntPtr memset(IntPtr dest, int c, UIntPtr count);
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern IntPtr VirtualAlloc(IntPtr lpAddress, UIntPtr dwSize, uint flAllocationType, uint flProtect);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool VirtualFree(IntPtr lpAddress, UIntPtr dwSize, uint dwFreeType);
+
         [DllImport("kernel32.dll", EntryPoint = "GlobalSize")]
         internal static extern IntPtr GlobalSize([In()] System.IntPtr hMem);
 
