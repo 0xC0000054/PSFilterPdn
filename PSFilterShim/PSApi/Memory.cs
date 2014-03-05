@@ -53,6 +53,23 @@ namespace PSFilterLoad.PSApi
 
 		}
 
+		public static IntPtr AllocateExecutable(long size)
+		{
+			IntPtr block = SafeNativeMethods.VirtualAlloc(IntPtr.Zero, new UIntPtr((ulong)size), NativeConstants.MEM_COMMIT, NativeConstants.PAGE_EXECUTE_READWRITE);
+
+			if (block == IntPtr.Zero)
+			{
+				throw new OutOfMemoryException("VirtualAlloc returned a null pointer");
+			}
+
+			if (size > 0)
+			{
+				GC.AddMemoryPressure(size);
+			}
+
+			return block;
+		}
+
 		public static void Free(IntPtr hMem)
 		{
 			if (hHeap != IntPtr.Zero)
@@ -69,6 +86,20 @@ namespace PSFilterLoad.PSApi
 				{
 					GC.RemoveMemoryPressure(size);
 				}
+			}
+		}
+
+		public static void FreeExecutable(IntPtr hMem, long size)
+		{
+			if (!SafeNativeMethods.VirtualFree(hMem, UIntPtr.Zero, NativeConstants.MEM_RELEASE))
+			{
+				int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+				throw new InvalidOperationException("VirtualFree returned an error: " + error.ToString(System.Globalization.CultureInfo.InvariantCulture));
+			}
+
+			if (size > 0L)
+			{
+				GC.RemoveMemoryPressure(size);
 			}
 		}
 
