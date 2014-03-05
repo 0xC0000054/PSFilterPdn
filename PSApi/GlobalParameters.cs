@@ -19,8 +19,10 @@ namespace PSFilterLoad.PSApi
 
         private byte[] parameterDataBytes;
         private DataStorageMethod parameterDataStorageMethod;
+        private bool parameterDataExecutable;
         private byte[] pluginDataBytes;
         private DataStorageMethod pluginDataStorageMethod;
+        private bool pluginDataExecutable;
 
         /// <summary>
         /// Gets the parameter data bytes.
@@ -55,6 +57,24 @@ namespace PSFilterLoad.PSApi
             set
             {
                 parameterDataStorageMethod = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the parameter data memory must be executable.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if the parameter data memory must be executable; otherwise, <c>false</c>.
+        /// </value>
+        public bool ParameterDataExecutable
+        {
+            get
+            {
+                return parameterDataExecutable;
+            }
+            set
+            {
+                parameterDataExecutable = value;
             }
         }
 
@@ -94,6 +114,23 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether plugin data memory must be executable.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if the plugin data memory must be executable; otherwise, <c>false</c>.
+        /// </value>
+        public bool PluginDataExecutable
+        {
+            get
+            {
+                return pluginDataExecutable;
+            }
+            set
+            {
+                pluginDataExecutable = value;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GlobalParameters"/> class.
@@ -102,8 +139,10 @@ namespace PSFilterLoad.PSApi
         {
             this.parameterDataBytes = null;
             this.parameterDataStorageMethod = DataStorageMethod.HandleSuite;
+            this.parameterDataExecutable = false;
             this.pluginDataBytes = null;
             this.pluginDataStorageMethod = DataStorageMethod.HandleSuite;
+            this.pluginDataExecutable = false;
         }
         private GlobalParameters(SerializationInfo info, StreamingContext context)
         {
@@ -112,9 +151,11 @@ namespace PSFilterLoad.PSApi
 
             this.parameterDataBytes = (byte[])info.GetValue("parameterDataBytes", typeof(byte[]));
             this.parameterDataStorageMethod = (DataStorageMethod)info.GetValue("parameterDataStorageMethod", typeof(DataStorageMethod));
+            this.parameterDataExecutable = info.GetBoolean("parameterDataExecutable");
 
             this.pluginDataBytes = (byte[])info.GetValue("pluginDataBytes", typeof(byte[]));
             this.pluginDataStorageMethod = (DataStorageMethod)info.GetValue("pluginDataStorageMethod", typeof(DataStorageMethod));
+            this.pluginDataExecutable = info.GetBoolean("pluginDataExecutable");
         }
         /// <summary>
         /// Populates a <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with the data needed to serialize the target object.
@@ -133,9 +174,11 @@ namespace PSFilterLoad.PSApi
 
             info.AddValue("parameterDataBytes", this.parameterDataBytes, typeof(byte[]));
             info.AddValue("parameterDataStorageMethod", this.parameterDataStorageMethod, typeof(DataStorageMethod));
+            info.AddValue("parameterDataExecutable", this.parameterDataExecutable);
 
             info.AddValue("pluginDataBytes", this.pluginDataBytes, typeof(byte[]));
             info.AddValue("pluginDataStorageMethod", this.pluginDataStorageMethod, typeof(DataStorageMethod));
+            info.AddValue("pluginDataExecutable", this.pluginDataExecutable);
         }
     }
 }
