@@ -1090,6 +1090,29 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
+		/// Determines whether the memory block is marked as executable.
+		/// </summary>
+		/// <param name="ptr">The pointer to check.</param>
+		/// <returns>
+		///   <c>true</c> if memory block is marked as executable; otherwise, <c>false</c>.
+		/// </returns>
+		private static bool IsMemoryExecutable(IntPtr ptr)
+		{
+			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
+			int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
+
+			if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
+			{
+				return false;
+			}
+
+			bool result = ((mbi.Protect & NativeConstants.PAGE_EXECUTE) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_READ) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_READWRITE) != 0 ||
+			(mbi.Protect & NativeConstants.PAGE_EXECUTE_WRITECOPY) != 0);
+
+			return result;
+		}
+
+		/// <summary>
 		/// Loads the filter into memory.
 		/// </summary>
 		/// <param name="proxyData">The <see cref="PluginData"/> of the filter to load.</param>
@@ -1139,7 +1162,6 @@ namespace PSFilterLoad.PSApi
 				{
 					int handleSize = HandleGetSizeProc(filterRecord->parameters);
 
-
 					byte[] buf = new byte[handleSize];
 					Marshal.Copy(HandleLockProc(filterRecord->parameters, 0), buf, 0, buf.Length);
 					HandleUnlockProc(filterRecord->parameters);
@@ -1168,6 +1190,8 @@ namespace PSFilterLoad.PSApi
 									Marshal.Copy(hPtr, buf, 0, (int)ps);
 									globalParameters.SetParameterDataBytes(buf);
 									globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.OTOFHandle;
+									// Some plug-ins may have executable code in the parameter block.
+									globalParameters.ParameterDataExecutable = IsMemoryExecutable(hPtr);
 								}
 
 							}
@@ -1246,6 +1270,7 @@ namespace PSFilterLoad.PSApi
 							Marshal.Copy(hPtr, dataBuf, 0, (int)ps);
 							globalParameters.SetPluginDataBytes(dataBuf);
 							globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.OTOFHandle;
+							globalParameters.PluginDataExecutable = IsMemoryExecutable(hPtr);
 						}
 
 					}
@@ -1293,7 +1318,15 @@ namespace PSFilterLoad.PSApi
 						break;
 					case GlobalParameters.DataStorageMethod.OTOFHandle:
 						filterRecord->parameters = Memory.Allocate(OTOFHandleSize, false);
-						filterParametersHandle = Memory.Allocate(parameterDataBytes.Length, false);
+
+						if (globalParameters.ParameterDataExecutable)
+						{
+							filterParametersHandle = Memory.AllocateExecutable(parameterDataBytes.Length);
+						}
+						else
+						{
+							filterParametersHandle = Memory.Allocate(parameterDataBytes.Length, false); 
+						}
 
 						Marshal.Copy(parameterDataBytes, 0, filterParametersHandle, parameterDataBytes.Length);
 
@@ -1325,7 +1358,15 @@ namespace PSFilterLoad.PSApi
 						break;
 					case GlobalParameters.DataStorageMethod.OTOFHandle:
 						dataPtr = Memory.Allocate(OTOFHandleSize, false);
-						pluginDataHandle = Memory.Allocate(pluginDataBytes.Length, false);
+
+						if (globalParameters.PluginDataExecutable)
+						{
+							pluginDataHandle = Memory.AllocateExecutable(pluginDataBytes.Length);
+						}
+						else
+						{
+							pluginDataHandle = Memory.Allocate(pluginDataBytes.Length, false); 
+						}
 
 						Marshal.Copy(pluginDataBytes, 0, pluginDataHandle, pluginDataBytes.Length);
 
@@ -5946,7 +5987,14 @@ namespace PSFilterLoad.PSApi
 						{
 							if (filterParametersHandle != IntPtr.Zero)
 							{
-								Memory.Free(filterParametersHandle);
+								if (globalParameters.ParameterDataExecutable)
+								{
+									Memory.FreeExecutable(filterParametersHandle, globalParameters.GetParameterDataBytes().Length);
+								}
+								else
+								{
+									Memory.Free(filterParametersHandle);
+								}
 								filterParametersHandle = IntPtr.Zero;
 							}
 							Memory.Free(filterRecord->parameters);
@@ -5994,7 +6042,14 @@ namespace PSFilterLoad.PSApi
 					{
 						if (pluginDataHandle != IntPtr.Zero)
 						{
-							Memory.Free(pluginDataHandle);
+							if (globalParameters.PluginDataExecutable)
+							{
+								Memory.FreeExecutable(pluginDataHandle, globalParameters.GetPluginDataBytes().Length);
+							}
+							else
+							{
+								Memory.Free(pluginDataHandle);
+							} 
 							pluginDataHandle = IntPtr.Zero;
 						}
 						Memory.Free(dataPtr);
