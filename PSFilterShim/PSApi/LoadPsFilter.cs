@@ -54,6 +54,7 @@ namespace PSFilterLoad.PSApi
 		}
 
 		private static readonly long OTOFHandleSize = IntPtr.Size + 4L;
+		private const int OTOFSignature = 0x464f544f;
 
 		struct PSHandle
 		{
@@ -665,7 +666,7 @@ namespace PSFilterLoad.PSApi
 						{
 							IntPtr hPtr = Marshal.ReadIntPtr(ptr);
 
-							if (size == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == 0x464f544f)
+							if (size == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == OTOFSignature)
 							{
 								long ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64();
 								if (ps > 0L)
@@ -744,7 +745,7 @@ namespace PSFilterLoad.PSApi
 						globalParameters.SetPluginDataBytes(dataBuf);
 						globalParameters.ParameterDataStorageMethod = globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
 					}
-					else if (pluginDataSize == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == 0x464f544f) // OTOF reversed
+					else if (pluginDataSize == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == OTOFSignature)
 					{
 						IntPtr hPtr = Marshal.ReadIntPtr(ptr);
 						long ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64();
@@ -783,8 +784,6 @@ namespace PSFilterLoad.PSApi
 			if (phase == PluginPhase.Parameters)
 				return;
 
-			byte[] sig = new byte[4] { 0x4f, 0x54, 0x4f, 0x46 }; // OTOF
-
 			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
 			byte[] parameterDataBytes = globalParameters.GetParameterDataBytes();
@@ -798,7 +797,6 @@ namespace PSFilterLoad.PSApi
 						Marshal.Copy(parameterDataBytes, 0, HandleLockProc(filterRecord->parameters, 0), parameterDataBytes.Length);
 
 						HandleUnlockProc(filterRecord->parameters);
-
 						break;
 					case GlobalParameters.DataStorageMethod.OTOFHandle:
 						filterRecord->parameters = Memory.Allocate(OTOFHandleSize, false);
@@ -815,13 +813,11 @@ namespace PSFilterLoad.PSApi
 						Marshal.Copy(parameterDataBytes, 0, filterParametersHandle, parameterDataBytes.Length);
 
 						Marshal.WriteIntPtr(filterRecord->parameters, filterParametersHandle);
-						Marshal.Copy(sig, 0, new IntPtr(filterRecord->parameters.ToInt64() + IntPtr.Size), 4);
-
+						Marshal.WriteInt32(filterRecord->parameters, IntPtr.Size, OTOFSignature);
 						break;
 					case GlobalParameters.DataStorageMethod.RawBytes:
 						filterRecord->parameters = Memory.Allocate(parameterDataBytes.Length, false);
 						Marshal.Copy(parameterDataBytes, 0, filterRecord->parameters, parameterDataBytes.Length);
-
 						break;
 					default:
 						throw new InvalidEnumArgumentException("ParameterDataStorageMethod", (int)globalParameters.ParameterDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
@@ -838,7 +834,6 @@ namespace PSFilterLoad.PSApi
 
 						Marshal.Copy(pluginDataBytes, 0, HandleLockProc(dataPtr, 0), pluginDataBytes.Length);
 						HandleUnlockProc(dataPtr);
-
 						break;
 					case GlobalParameters.DataStorageMethod.OTOFHandle:
 						dataPtr = Memory.Allocate(OTOFHandleSize, false);
@@ -855,8 +850,7 @@ namespace PSFilterLoad.PSApi
 						Marshal.Copy(pluginDataBytes, 0, pluginDataHandle, pluginDataBytes.Length);
 
 						Marshal.WriteIntPtr(dataPtr, pluginDataHandle);
-						Marshal.Copy(sig, 0, new IntPtr(dataPtr.ToInt64() + IntPtr.Size), 4);
-
+						Marshal.WriteInt32(filterRecord->parameters, IntPtr.Size, OTOFSignature);
 						break;
 					case GlobalParameters.DataStorageMethod.RawBytes:
 						dataPtr = Memory.Allocate(pluginDataBytes.Length, false);
@@ -3504,7 +3498,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe byte GetKeyProc(IntPtr descriptor, ref uint key, ref uint type, ref int flags)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Format("key = {0}", "0x" + key.ToString("X8")));
+			Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
 
 			if (descErr != PSError.noErr)
@@ -3604,10 +3598,11 @@ namespace PSFilterLoad.PSApi
 			return 1;
 		}
 
-
-
 		private short GetIntegerProc(IntPtr descriptor, ref int data)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			if (subClassDict != null)
 			{
 				data = (int)subClassDict[getKey].Value;
@@ -3620,6 +3615,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetFloatProc(IntPtr descriptor, ref double data)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			if (subClassDict != null)
 			{
 				data = (double)subClassDict[getKey].Value;
@@ -3632,6 +3630,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetUnitFloatProc(IntPtr descriptor, ref uint unit, ref double data)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			AETEValue item;
 			if (subClassDict != null)
 			{
@@ -3658,6 +3659,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetBooleanProc(IntPtr descriptor, ref byte data)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			AETEValue item;
 			if (subClassDict != null)
 			{
@@ -3674,6 +3678,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetTextProc(IntPtr descriptor, ref IntPtr data)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			AETEValue item;
 			if (subClassDict != null)
 			{
@@ -3699,6 +3706,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetAliasProc(IntPtr descriptor, ref IntPtr data)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			AETEValue item;
 			if (subClassDict != null)
 			{
@@ -3724,6 +3734,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetEnumeratedProc(IntPtr descriptor, ref uint type)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			AETEValue item;
 			if (subClassDict != null)
 			{
@@ -3739,6 +3752,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetClassProc(IntPtr descriptor, ref uint type)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			AETEValue item;
 			if (subClassDict != null)
 			{
@@ -3755,6 +3771,9 @@ namespace PSFilterLoad.PSApi
 
 		private short GetSimpleReferenceProc(IntPtr descriptor, ref PIDescriptorSimpleReference data)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			if (aeteDict.ContainsKey(getKey))
 			{
 				data = (PIDescriptorSimpleReference)aeteDict[getKey].Value;
@@ -3765,6 +3784,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetObjectProc(IntPtr descriptor, ref uint retType, ref IntPtr data)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			AETEValue item;
 			if (subClassDict != null)
 			{
@@ -3866,6 +3888,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetCountProc(IntPtr descriptor, ref uint count)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			if (subClassDict != null)
 			{
 				count = (uint)subClassDict.Count;
@@ -3878,6 +3903,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetStringProc(IntPtr descriptor, IntPtr data)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			AETEValue item;
 			if (subClassDict != null)
 			{
@@ -3896,6 +3924,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetPinnedIntegerProc(IntPtr descriptor, int min, int max, ref int intNumber)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			descErr = PSError.noErr;
 			AETEValue item;
 			if (subClassDict != null)
@@ -3924,6 +3955,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetPinnedFloatProc(IntPtr descriptor, ref double min, ref double max, ref double floatNumber)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			descErr = PSError.noErr;
 			AETEValue item;
 			if (subClassDict != null)
@@ -3952,6 +3986,9 @@ namespace PSFilterLoad.PSApi
 		}
 		private short GetPinnedUnitFloatProc(IntPtr descriptor, ref double min, ref double max, ref uint units, ref double floatNumber)
 		{
+#if DEBUG
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", getKey));
+#endif
 			descErr = PSError.noErr;
 			AETEValue item;
 			if (subClassDict != null)
@@ -4029,7 +4066,7 @@ namespace PSFilterLoad.PSApi
 		private short PutIntegerProc(IntPtr descriptor, uint key, int data)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4} ({1})", key, PropToString(key)));
 #endif
 			aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeInteger, GetAETEParamFlags(key), 0, data));
 			return PSError.noErr;
@@ -4038,7 +4075,7 @@ namespace PSFilterLoad.PSApi
 		private short PutFloatProc(IntPtr descriptor, uint key, ref double data)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4} ({1})", key, PropToString(key)));
 #endif
 			aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeFloat, GetAETEParamFlags(key), 0, data));
 			return PSError.noErr;
@@ -4047,7 +4084,7 @@ namespace PSFilterLoad.PSApi
 		private short PutUnitFloatProc(IntPtr descriptor, uint key, uint unit, ref double data)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: {0}, unit: {1}", PropToString(key), PropToString(unit)));
 #endif
 			UnitFloat item = new UnitFloat(unit, data);
 
@@ -4058,7 +4095,7 @@ namespace PSFilterLoad.PSApi
 		private short PutBooleanProc(IntPtr descriptor, uint key, byte data)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4} ({1})", key, PropToString(key)));
 #endif
 			aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeBoolean, GetAETEParamFlags(key), 0, data));
 			return PSError.noErr;
@@ -4067,16 +4104,12 @@ namespace PSFilterLoad.PSApi
 		private short PutTextProc(IntPtr descriptor, uint key, IntPtr textHandle)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4} ({1})", key, PropToString(key)));
 #endif
 
 			if (textHandle != IntPtr.Zero)
 			{
 				IntPtr hPtr = HandleLockProc(textHandle, 0);
-
-#if DEBUG
-				System.Diagnostics.Debug.WriteLine("ptr: " + textHandle.ToInt64().ToString("X8"));
-#endif
 
 				int size = HandleGetSizeProc(textHandle);
 				byte[] data = new byte[size];
@@ -4093,7 +4126,7 @@ namespace PSFilterLoad.PSApi
 		private short PutAliasProc(IntPtr descriptor, uint key, IntPtr aliasHandle)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4} ({1})", key, PropToString(key)));
 #endif
 			IntPtr hPtr = HandleLockProc(aliasHandle, 0);
 
@@ -4111,7 +4144,7 @@ namespace PSFilterLoad.PSApi
 		private short PutEnumeratedProc(IntPtr descriptor, uint key, uint type, uint data)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4} ({1})", key, PropToString(key)));
 #endif
 			aeteDict.AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
 			return PSError.noErr;
@@ -4120,7 +4153,7 @@ namespace PSFilterLoad.PSApi
 		private short PutClassProc(IntPtr descriptor, uint key, uint data)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4} ({1})", key, PropToString(key)));
 #endif
 
 			aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
@@ -4130,7 +4163,7 @@ namespace PSFilterLoad.PSApi
 		private short PutSimpleReferenceProc(IntPtr descriptor, uint key, ref PIDescriptorSimpleReference data)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4} ({1})", key, PropToString(key)));
 #endif
 			aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeObjectRefrence, GetAETEParamFlags(key), 0, data));
 			return PSError.noErr;
@@ -4220,15 +4253,13 @@ namespace PSFilterLoad.PSApi
 					return PSError.errPlugInHostInsufficient;
 			}
 
-
-
 			return PSError.noErr;
 		}
 
 		private short PutCountProc(IntPtr descriptor, uint key, uint count)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4} ({1})", key, PropToString(key)));
 #endif
 			return PSError.noErr;
 		}
@@ -4236,7 +4267,7 @@ namespace PSFilterLoad.PSApi
 		private short PutStringProc(IntPtr descriptor, uint key, IntPtr stringHandle)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4} ({1})", key, PropToString(key)));
 #endif
 			int size = (int)Marshal.ReadByte(stringHandle);
 			byte[] data = new byte[size];
@@ -4250,7 +4281,7 @@ namespace PSFilterLoad.PSApi
 		private short PutScopedClassProc(IntPtr descriptor, uint key, uint data)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4} ({1})", key, PropToString(key)));
 #endif
 			aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
 
@@ -4259,7 +4290,7 @@ namespace PSFilterLoad.PSApi
 		private short PutScopedObjectProc(IntPtr descriptor, uint key, uint type, IntPtr handle)
 		{
 #if DEBUG
-			Ping(DebugFlags.DescriptorParameters, string.Empty);
+			Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4} ({1})", key, PropToString(key)));
 #endif
 			IntPtr hPtr = HandleLockProc(handle, 0);
 
