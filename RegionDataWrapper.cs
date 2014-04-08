@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
@@ -30,7 +29,10 @@ namespace PSFilterPdn
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             if (info == null)
+            {
                 throw new ArgumentNullException("info", "info is null.");
+            }
+
             info.AddValue("rgnData", this.rgnData, typeof(byte[]));
         }
     }
