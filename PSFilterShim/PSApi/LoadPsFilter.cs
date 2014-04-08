@@ -162,7 +162,7 @@ namespace PSFilterLoad.PSApi
 
 		private IntPtr handleProcsPtr;
 #if USEIMAGESERVICES
-		private IntPtr image_services_procsPtr;
+		private IntPtr imageServicesProcsPtr;
 #endif
 		private IntPtr propertyProcsPtr; 
 		private IntPtr resourceProcsPtr;
@@ -613,8 +613,18 @@ namespace PSFilterLoad.PSApi
 			}
 			else
 			{
-				int hr = Marshal.GetHRForLastWin32Error();
-				Marshal.ThrowExceptionForHR(hr);
+				int lastError = Marshal.GetLastWin32Error();
+
+				if (lastError != NativeConstants.ERROR_SUCCESS)
+				{
+					switch (lastError)
+					{
+						case NativeConstants.ERROR_FILE_NOT_FOUND:
+							throw new System.IO.FileNotFoundException();
+						default:
+							throw new Win32Exception(lastError);
+					}
+				}
 			}
 			
 			return false;
@@ -5031,14 +5041,13 @@ namespace PSFilterLoad.PSApi
 			handleProcs->disposeRegularHandleProc = Marshal.GetFunctionPointerForDelegate(handleDisposeRegularProc);
 
 #if USEIMAGESERVICES
+            imageServicesProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ImageServicesProcs)), true);
 
-			image_services_procs = new ImageServicesProcs();
-			image_services_procs.imageServicesProcsVersion = PSConstants.kCurrentImageServicesProcsVersion;
-			image_services_procs.numImageServicesProcs = PSConstants.kCurrentImageServicesProcsCount;
-			image_services_procs.interpolate1DProc = Marshal.GetFunctionPointerForDelegate(resample1DProc);
-			image_services_procs.interpolate2DProc = Marshal.GetFunctionPointerForDelegate(resample2DProc);
-
-			image_services_procsPtr = GCHandle.Alloc(image_services_procs, GCHandleType.Pinned); 
+            ImageServicesProcs* imageServicesProcs = (ImageServicesProcs*)imageServicesProcsPtr.ToPointer();
+			imageServicesProcs->imageServicesProcsVersion = PSConstants.kCurrentImageServicesProcsVersion;
+			imageServicesProcs->numImageServicesProcs = PSConstants.kCurrentImageServicesProcsCount;
+			imageServicesProcs->interpolate1DProc = Marshal.GetFunctionPointerForDelegate(resample1DProc);
+			imageServicesProcs->interpolate2DProc = Marshal.GetFunctionPointerForDelegate(resample2DProc);
 #endif
 
 
@@ -5217,7 +5226,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->colorServices = Marshal.GetFunctionPointerForDelegate(colorProc);
 
 #if USEIMAGESERVICES
-			filterRecord->imageServicesProcs = image_services_procsPtr.AddrOfPinnedObject();
+			filterRecord->imageServicesProcs = imageServicesProcsPtr;
 #else
 			filterRecord->imageServicesProcs = IntPtr.Zero;
 #endif
@@ -5356,10 +5365,11 @@ namespace PSFilterLoad.PSApi
 				}
 
 #if USEIMAGESERVICES
-				if (image_services_procsPtr.IsAllocated)
-				{
-					image_services_procsPtr.Free();
-				} 
+                if (imageServicesProcsPtr != IntPtr.Zero)
+                {
+                    Memory.Free(imageServicesProcsPtr);
+                    imageServicesProcsPtr = IntPtr.Zero;
+                }
 #endif
 				if (propertyProcsPtr != IntPtr.Zero)
 				{
