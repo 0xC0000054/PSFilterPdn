@@ -318,7 +318,7 @@ namespace PSFilterLoad.PSApi
 				PIProperty* pipp = (PIProperty*)propPtr;
 				uint propKey = pipp->propertyKey;
 #if DEBUG
-				if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
+				if ((debugFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
 				{
 					Debug.WriteLine(string.Format("prop = {0}", propKey.ToString("X")));
 					Debug.WriteLine(PropToString(pipp->propertyKey));
@@ -416,7 +416,7 @@ namespace PSFilterLoad.PSApi
 
 				int propertyDataPaddedLength = (pipp->propertyLength + 3) & ~3;
 #if DEBUG
-				if ((dbgFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
+				if ((debugFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
 				{
 					Debug.WriteLine(string.Format("i = {0}, propPtr = 0x{1}", i.ToString(), ((long)propPtr).ToString("X8")));
 				}
@@ -579,10 +579,10 @@ namespace PSFilterLoad.PSApi
 		#endregion
 
 #if DEBUG
-		private static DebugFlags dbgFlags;
-		static void Ping(DebugFlags dbg, string message)
+		private static DebugFlags debugFlags;
+		static void Ping(DebugFlags flag, string message)
 		{
-			if ((dbgFlags & dbg) != 0)
+			if ((debugFlags & flag) == flag)
 			{
 				StackFrame sf = new StackFrame(1);
 				string name = sf.GetMethod().Name;
@@ -697,9 +697,6 @@ namespace PSFilterLoad.PSApi
 
 		private IntPtr filterRecordPtr;
 
-		/// <summary>
-		/// The GCHandle to the PlatformData structure
-		/// </summary>
 		private IntPtr platFormDataPtr;
 
 		private IntPtr bufferProcsPtr;
@@ -918,14 +915,16 @@ namespace PSFilterLoad.PSApi
 			}
 
 #if DEBUG
-			dbgFlags = DebugFlags.AdvanceState;
-			dbgFlags |= DebugFlags.Call;
-			dbgFlags |= DebugFlags.ColorServices;
-			dbgFlags |= DebugFlags.DescriptorParameters;
-			dbgFlags |= DebugFlags.DisplayPixels;
-			dbgFlags |= DebugFlags.Error;
-			dbgFlags |= DebugFlags.HandleSuite;
-			dbgFlags |= DebugFlags.MiscCallbacks; // progress callback 
+			debugFlags = DebugFlags.AdvanceState;
+			debugFlags |= DebugFlags.Call;
+			debugFlags |= DebugFlags.ColorServices;
+			debugFlags |= DebugFlags.DescriptorParameters;
+			debugFlags |= DebugFlags.DisplayPixels;
+			debugFlags |= DebugFlags.Error;
+			debugFlags |= DebugFlags.HandleSuite;
+			debugFlags |= DebugFlags.MiscCallbacks; // progress callback 
+			debugFlags |= DebugFlags.PropertySuite;
+			debugFlags |= DebugFlags.ResourceSuite;
 #endif
 		}
 		/// <summary>
@@ -2061,7 +2060,7 @@ namespace PSFilterLoad.PSApi
 		private byte AbortProc()
 		{
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, "");
+			Ping(DebugFlags.MiscCallbacks, string.Empty);
 #endif
 			if (abortFunc != null)
 			{
@@ -5156,7 +5155,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe short PropertyGetProc(uint signature, uint key, int index, ref IntPtr simpleProperty, ref IntPtr complexProperty)
 		{
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Format("Sig: {0}, Key: {1}, Index: {2}", PropToString(signature), PropToString(key), index.ToString()));
+			Ping(DebugFlags.PropertySuite, string.Format("Sig: {0}, Key: {1}, Index: {2}", PropToString(signature), PropToString(key), index.ToString()));
 #endif
 			if (signature != PSConstants.kPhotoshopSignature)
 				return PSError.errPlugInHostInsufficient;
@@ -5300,7 +5299,7 @@ namespace PSFilterLoad.PSApi
 		private short PropertySetProc(uint signature, uint key, int index, IntPtr simpleProperty, IntPtr complexProperty)
 		{
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Format("Sig: {0}, Key: {1}, Index: {2}", PropToString(signature), PropToString(key), index.ToString()));
+			Ping(DebugFlags.PropertySuite, string.Format("Sig: {0}, Key: {1}, Index: {2}", PropToString(signature), PropToString(key), index.ToString()));
 #endif
 			if (signature != PSConstants.kPhotoshopSignature)
 				return PSError.errPlugInHostInsufficient;
@@ -5331,7 +5330,7 @@ namespace PSFilterLoad.PSApi
 		private short ResourceAddProc(uint ofType, IntPtr data)
 		{
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, PropToString(ofType));
+			Ping(DebugFlags.ResourceSuite, PropToString(ofType));
 #endif
 			short count = ResourceCountProc(ofType);
 
@@ -5359,7 +5358,7 @@ namespace PSFilterLoad.PSApi
 		private short ResourceCountProc(uint ofType)
 		{
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, PropToString(ofType));
+			Ping(DebugFlags.ResourceSuite, PropToString(ofType));
 #endif
 			short count = 0;
 
@@ -5377,7 +5376,7 @@ namespace PSFilterLoad.PSApi
 		private void ResourceDeleteProc(uint ofType, short index)
 		{
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Format("{0}, {1}", PropToString(ofType), index));
+			Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", PropToString(ofType), index));
 #endif
 			PSResource res = pseudoResources.Find(delegate(PSResource r)
 			{
@@ -5407,7 +5406,7 @@ namespace PSFilterLoad.PSApi
 		private IntPtr ResourceGetProc(uint ofType, short index)
 		{
 #if DEBUG
-			Ping(DebugFlags.MiscCallbacks, string.Format("{0}, {1}", PropToString(ofType), index));
+			Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", PropToString(ofType), index));
 #endif
 			int length = pseudoResources.Count;
 
