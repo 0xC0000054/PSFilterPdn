@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -144,7 +145,7 @@ namespace PSFilterShim
 					else
 					{
 						// As Paint.NET does not currently allow custom progress reporting only set this callback for the effect dialog.
-						lps.SetProgressCallback(new Action<int, int>(serviceProxy.UpdateFilterProgress)); 
+						lps.SetProgressCallback(new Action<int, int>(serviceProxy.UpdateFilterProgress));
 					}
 
 					if (filterParameters != null)
@@ -193,7 +194,7 @@ namespace PSFilterShim
 						else
 						{
 							serviceProxy.SetProxyErrorMessage(lps.ErrorMessage);
-						} 
+						}
 					}
 				}
 
@@ -222,6 +223,10 @@ namespace PSFilterShim
 #else				
 				serviceProxy.SetProxyErrorMessage(ex.Message);
 #endif
+			}
+			catch (Win32Exception ex)
+			{
+				serviceProxy.SetProxyErrorMessage(ex.Message);
 			}
 			finally
 			{
