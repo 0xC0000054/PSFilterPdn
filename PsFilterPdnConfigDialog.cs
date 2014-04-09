@@ -67,11 +67,30 @@ namespace PSFilterPdn
 			base.Dispose(disposing);
 		}
 
-		private static class NativeMethods
+		private DialogResult ShowErrorMessage(string message)
 		{
-			[DllImport("kernel32.dll", EntryPoint="GetProcessDEPPolicy")]
+			if (base.InvokeRequired)
+			{
+				return (DialogResult)base.Invoke(new Func<string, DialogResult>(delegate(string error)
+					{
+						return MessageBox.Show(this, error, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+					}), message);
+			}
+			else
+			{
+				return MessageBox.Show(this, message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+		}
+
+		[System.Security.SuppressUnmanagedCodeSecurity]
+		private static class SafeNativeMethods
+		{
+			[DllImport("kernel32.dll", EntryPoint = "GetProcessDEPPolicy")]
 			[return: MarshalAs(UnmanagedType.Bool)]
 			internal static extern bool GetProcessDEPPolicy([In()] IntPtr hProcess, [Out()] out uint lpFlags, [Out()] out int lpPermanent);
+			
+			[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = false, ExactSpelling = true)]
+			internal static extern IntPtr GetCurrentProcess();
 		}
 
 		protected override void InitialInitToken()
@@ -513,7 +532,7 @@ namespace PSFilterPdn
 
 			if (!File.Exists(shimPath))
 			{
-				MessageBox.Show(this, Resources.PSFilterShimNotFound, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				ShowErrorMessage(Resources.PSFilterShimNotFound);
 				return;
 			}
 
@@ -617,15 +636,15 @@ namespace PSFilterPdn
 			}
 			catch (ArgumentException ax)
 			{
-				MessageBox.Show(this, ax.ToString(), this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				ShowErrorMessage(ax.ToString());
 			}
 			catch (UnauthorizedAccessException ex)
 			{
-				MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				ShowErrorMessage(ex.Message);
 			}
 			catch (Win32Exception wx)
 			{
-				MessageBox.Show(this, wx.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				ShowErrorMessage(wx.Message);
 			}
 		}
 
@@ -685,17 +704,7 @@ namespace PSFilterPdn
 			{
 				if (!string.IsNullOrEmpty(proxyErrorMessage))
 				{
-					if (base.InvokeRequired)
-					{
-						base.Invoke(new MethodInvoker(delegate()
-						{
-							MessageBox.Show(this, proxyErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-						}));
-					}
-					else
-					{
-						MessageBox.Show(this, proxyErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-					}
+					ShowErrorMessage(proxyErrorMessage);
 				}
 
 				if (!showAbout && destSurface != null)
@@ -759,7 +768,7 @@ namespace PSFilterPdn
 									lps.PseudoResources = this.pseudoResources;
 								}
 
-								bool showAboutDialog =  showAboutBoxCb.Checked;
+								bool showAboutDialog = showAboutBoxCb.Checked;
 								bool result = lps.RunPlugin(data, showAboutDialog);
 
 								if (!showAboutDialog && result)
@@ -780,7 +789,7 @@ namespace PSFilterPdn
 								}
 								else if (!string.IsNullOrEmpty(lps.ErrorMessage))
 								{
-									MessageBox.Show(this, lps.ErrorMessage, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+									ShowErrorMessage(lps.ErrorMessage);
 								}
 								else
 								{
@@ -798,18 +807,26 @@ namespace PSFilterPdn
 						}
 						catch (BadImageFormatException bifex)
 						{
-							MessageBox.Show(this, bifex.Message + Environment.NewLine + bifex.FileName, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+							ShowErrorMessage(bifex.Message + Environment.NewLine + bifex.FileName);
+						}
+						catch (FileNotFoundException fnfex)
+						{
+							ShowErrorMessage(fnfex.Message);
 						}
 						catch (NullReferenceException nrex)
 						{
 							/* the filter probably tried to access an unimplemented callback function 
 							 * without checking if it is valid.
 							*/
-							MessageBox.Show(this, nrex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+							ShowErrorMessage(nrex.Message);
 						}
+						catch (Win32Exception w32ex)
+						{
+							ShowErrorMessage(w32ex.Message);
+						} 
 						catch (System.Runtime.InteropServices.ExternalException eex)
 						{
-							MessageBox.Show(this, eex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+							ShowErrorMessage(eex.Message);
 						}
 						finally
 						{
@@ -904,9 +921,9 @@ namespace PSFilterPdn
 				if (parent.Nodes.ContainsKey(data.title))
 				{
 					TreeNode node = parent.Nodes[data.title];
-					PluginData pd = (PluginData)node.Tag;
+					PluginData menuData = (PluginData)node.Tag;
 
-					if (pd.runWith32BitShim && !data.runWith32BitShim) 
+					if (menuData.runWith32BitShim && !data.runWith32BitShim) 
 					{
 						parent.Nodes.Remove(node); // if the new plugin is 64-bit and the old one is not remove the old one and use the 64-bit one.
 
@@ -1014,7 +1031,7 @@ namespace PSFilterPdn
 			{
 				if (e.Error != null)
 				{
-					MessageBox.Show(this, e.Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+					ShowErrorMessage(e.Error.Message);
 				}
 				else
 				{
@@ -1124,7 +1141,7 @@ namespace PSFilterPdn
 					}
 				}
 
-				if (MessageBox.Show(this, message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error) == System.Windows.Forms.DialogResult.OK)
+				if (ShowErrorMessage(message) == System.Windows.Forms.DialogResult.OK)
 				{
 					this.Close();
 				}
@@ -1145,7 +1162,16 @@ namespace PSFilterPdn
 			{
 				this.LoadSettings();
 
-				this.subDirSearchCb.Checked = bool.Parse(settings.GetSetting("searchSubDirs", bool.TrueString).Trim());
+				bool searchSubDirs;
+				if (bool.TryParse(settings.GetSetting("searchSubDirs", bool.TrueString), out searchSubDirs))
+				{
+					this.subDirSearchCb.Checked = searchSubDirs;
+				}
+				else
+				{
+					this.subDirSearchCb.Checked = true;
+				}
+				
 			}
 			catch (IOException ex)
 			{
@@ -1156,7 +1182,7 @@ namespace PSFilterPdn
 				MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 			
-			// set the useDEPProxy flag when on 32-bit OS.
+			// set the useDEPProxy flag when on a 32-bit OS.
 			this.useDEPProxy = false;
 			if (IntPtr.Size == 4)
 			{
@@ -1164,7 +1190,7 @@ namespace PSFilterPdn
 				int protect;
 				try
 				{
-					if (NativeMethods.GetProcessDEPPolicy(Process.GetCurrentProcess().Handle, out depFlags, out protect))
+					if (SafeNativeMethods.GetProcessDEPPolicy(SafeNativeMethods.GetCurrentProcess(), out depFlags, out protect))
 					{
 						this.useDEPProxy = (depFlags != 0U);
 					}
@@ -1274,11 +1300,11 @@ namespace PSFilterPdn
 				}
 				catch (IOException ex)
 				{
-					MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+					ShowErrorMessage(ex.Message);
 				}
 				catch (UnauthorizedAccessException ex)
 				{
-					MessageBox.Show(this, ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+					ShowErrorMessage(ex.Message);
 				}
 			}
 		}
