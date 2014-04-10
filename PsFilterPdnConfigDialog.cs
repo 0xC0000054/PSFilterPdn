@@ -908,6 +908,26 @@ namespace PSFilterPdn
 			}
 		}
 
+		private static Version PDNVersion;
+
+		/// <summary>
+		/// Checks if the 64-bit filter is is incompatible, if so use the 32-bit version.
+		/// </summary>
+		/// <param name="plugin">The plugin to check.</param>
+		/// <returns>
+		///   <c>true</c> if the 64-bit filter is is incompatible; otherwise, <c>false</c>.
+		/// </returns>
+		private static bool Is64BitFilterIncompatible(PluginData plugin)
+		{
+			// Many Topaz filters crash with a NullReferenceException when run under .NET 3.5, so we use the 32-bit versions unless we are running on Paint.NET 4.0 or later.
+			if (plugin.category == "Topaz Labs" && PDNVersion.Major < 4)
+			{
+				return true;
+			}
+
+			return false;
+		}
+
 		/// <summary>
 		/// Checks if the plugin is already contained in the list, and replaces it if the new plugin is 64-bit and the old one is not on a 64-bit OS.
 		/// </summary>
@@ -920,6 +940,11 @@ namespace PSFilterPdn
 			{
 				if (parent.Nodes.ContainsKey(data.title))
 				{
+					if (Is64BitFilterIncompatible(data))
+					{
+						return data.runWith32BitShim;
+					}
+
 					TreeNode node = parent.Nodes[data.title];
 					PluginData menuData = (PluginData)node.Tag;
 
@@ -1158,6 +1183,7 @@ namespace PSFilterPdn
 		{ 
 			base.OnLoad(e);
 
+			PDNVersion = base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().AppVersion;
 			try
 			{
 				this.LoadSettings();
