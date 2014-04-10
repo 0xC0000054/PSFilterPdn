@@ -1333,7 +1333,7 @@ namespace PSFilterLoad.PSApi
 				if (!PluginParameters(pdata))
 				{
 #if DEBUG
-					Ping(DebugFlags.Error, "plugin_parms failed");
+					Ping(DebugFlags.Error, "PluginParameters failed");
 #endif
 					return false;
 				}
@@ -1343,7 +1343,7 @@ namespace PSFilterLoad.PSApi
 			if (!PluginPrepare(pdata))
 			{
 #if DEBUG
-				Ping(DebugFlags.Error, "plugin_prepare failed");
+				Ping(DebugFlags.Error, "PluginPrepare failed");
 #endif
 				return false;
 			}
@@ -1351,7 +1351,7 @@ namespace PSFilterLoad.PSApi
 			if (!PluginApply(pdata))
 			{
 #if DEBUG
-				Ping(DebugFlags.Error, "plugin_apply failed");
+				Ping(DebugFlags.Error, "PluginApply failed");
 #endif
 				return false;
 			}
