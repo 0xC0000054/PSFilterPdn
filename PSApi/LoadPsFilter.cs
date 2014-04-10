@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -9,7 +10,6 @@ using System.Windows.Forms;
 using PaintDotNet;
 using PSFilterLoad.ColorPicker;
 using PSFilterPdn.Properties;
-using System.ComponentModel;
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -74,7 +74,6 @@ namespace PSFilterLoad.PSApi
 		/// Reads a Pascal String into a string.
 		/// </summary>
 		/// <param name="ptr">The pointer to read from.</param>
-		/// <param name="offset">The offset to start reading at.</param>
 		/// <param name="length">The length of the resulting Pascal String plus the length byte.</param>
 		/// <returns>The resulting string</returns>
 		private static unsafe string StringFromPString(byte* ptr, out int length)
