@@ -854,7 +854,7 @@ namespace PSFilterLoad.PSApi
 						Marshal.Copy(pluginDataBytes, 0, pluginDataHandle, pluginDataBytes.Length);
 
 						Marshal.WriteIntPtr(dataPtr, pluginDataHandle);
-						Marshal.WriteInt32(filterRecord->parameters, IntPtr.Size, OTOFSignature);
+						Marshal.WriteInt32(dataPtr, IntPtr.Size, OTOFSignature);
 						break;
 					case GlobalParameters.DataStorageMethod.RawBytes:
 						dataPtr = Memory.Allocate(pluginDataBytes.Length, false);
