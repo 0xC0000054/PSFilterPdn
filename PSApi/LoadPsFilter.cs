@@ -1130,18 +1130,8 @@ namespace PSFilterLoad.PSApi
 			}
 			else
 			{
-				int lastError = Marshal.GetLastWin32Error();
-
-				if (lastError != NativeConstants.ERROR_SUCCESS)
-				{
-					switch (lastError)
-					{
-						case NativeConstants.ERROR_FILE_NOT_FOUND:
-							throw new System.IO.FileNotFoundException();
-						default:
-							throw new Win32Exception(lastError);
-					}
-				}
+                int hr = Marshal.GetHRForLastWin32Error();
+                Marshal.ThrowExceptionForHR(hr);
 			}
 
 			return false;
@@ -2310,7 +2300,7 @@ namespace PSFilterLoad.PSApi
 			{
 				switch (inputPadding)
 				{
-					case HostPadding.plugInWantsEdgeReplication:
+                    case PSConstants.Padding.plugInWantsEdgeReplication:
 
 						int top = rect.top < 0 ? -rect.top : 0;
 						int left = rect.left < 0 ? -rect.left : 0;
@@ -2479,9 +2469,9 @@ namespace PSFilterLoad.PSApi
 						}
 
 						break;
-					case HostPadding.plugInDoesNotWantPadding:
+					case PSConstants.Padding.plugInDoesNotWantPadding:
 						break;
-					case HostPadding.plugInWantsErrorOnBoundsException:
+                    case PSConstants.Padding.plugInWantsErrorOnBoundsException:
 						return PSError.paramErr;
 					default:
 						// Any other padding value is a constant byte.
@@ -2922,7 +2912,7 @@ namespace PSFilterLoad.PSApi
 				{
 					switch (maskPadding)
 					{
-						case HostPadding.plugInWantsEdgeReplication:
+						case PSConstants.Padding.plugInWantsEdgeReplication:
 
 							int top = rect.top < 0 ? -rect.top : 0;
 							int left = rect.left < 0 ? -rect.left : 0;
@@ -3010,9 +3000,9 @@ namespace PSFilterLoad.PSApi
 							}
 
 							break;
-						case HostPadding.plugInDoesNotWantPadding:
+                        case PSConstants.Padding.plugInDoesNotWantPadding:
 							break;
-						case HostPadding.plugInWantsErrorOnBoundsException:
+                        case PSConstants.Padding.plugInWantsErrorOnBoundsException:
 							return PSError.paramErr;
 						default:
 							// Any other padding value is a constant byte.
@@ -5776,9 +5766,9 @@ namespace PSFilterLoad.PSApi
 			filterRecord->getPropertyObsolete = Marshal.GetFunctionPointerForDelegate(getPropertyProc);
 			filterRecord->cannotUndo = 0;
 			filterRecord->supportsPadding = 1;
-			filterRecord->inputPadding = HostPadding.plugInWantsErrorOnBoundsException;
-			filterRecord->outputPadding = HostPadding.plugInWantsErrorOnBoundsException;
-			filterRecord->maskPadding = HostPadding.plugInWantsErrorOnBoundsException;
+            filterRecord->inputPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
+            filterRecord->outputPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
+            filterRecord->maskPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
 			filterRecord->samplingSupport = PSConstants.SamplingSupport.hostSupportsIntegralSampling;
 			filterRecord->reservedByte = 0;
 			filterRecord->inputRate = int2fixed(1);
