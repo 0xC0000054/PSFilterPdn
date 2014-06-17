@@ -21,7 +21,6 @@
         public const uint MEM_COMMIT = 0x1000;
         public const uint MEM_RELEASE = 0x8000;
 
-        public const int ERROR_SUCCESS = 0;
-        public const int ERROR_FILE_NOT_FOUND = 2;
+        public const uint SEM_FAILCRITICALERRORS = 1;
     }
 }
