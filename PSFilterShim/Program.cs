@@ -20,7 +20,12 @@ namespace PSFilterShim
 		{
 			[DllImport("kernel32.dll", EntryPoint = "SetProcessDEPPolicy")]
 			[return: MarshalAs(UnmanagedType.Bool)]
-			public static extern bool SetProcessDEPPolicy(uint dwFlags);
+			internal static extern bool SetProcessDEPPolicy(uint dwFlags);
+
+			[DllImport("kernel32.dll", EntryPoint = "SetErrorMode")]
+			internal static extern uint SetErrorMode(uint uMode);
+
+			internal const uint SEM_FAILCRITICALERRORS = 1U;
 		}
 
 		static ManualResetEvent resetEvent;
@@ -47,7 +52,8 @@ namespace PSFilterShim
 #else
 			NativeMethods.SetProcessDEPPolicy(0U); // Kill DEP
 #endif
-		   
+			// Disable the critical-error-handler message box displayed when a filter cannot find a dependency.
+			NativeMethods.SetErrorMode(NativeMethods.SetErrorMode(0U) | NativeMethods.SEM_FAILCRITICALERRORS);
 
 			string endpointName = args[0];
 
