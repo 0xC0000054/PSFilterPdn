@@ -102,6 +102,16 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
+        /// The padding values used by the FilterRecord inputPadding and maskPadding.
+        /// </summary>
+        internal static class Padding
+        {
+            public const short plugInWantsEdgeReplication = -1;
+            public const short plugInDoesNotWantPadding = -2;
+            public const short plugInWantsErrorOnBoundsException = -3;
+        }
+
+        /// <summary>
         /// The layout constants for the data presented to the plug-ins.
         /// </summary>
         internal static class Layout
