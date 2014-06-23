@@ -1130,8 +1130,8 @@ namespace PSFilterLoad.PSApi
 			}
 			else
 			{
-                int hr = Marshal.GetHRForLastWin32Error();
-                Marshal.ThrowExceptionForHR(hr);
+				int hr = Marshal.GetHRForLastWin32Error();
+				Marshal.ThrowExceptionForHR(hr);
 			}
 
 			return false;
@@ -1785,7 +1785,7 @@ namespace PSFilterLoad.PSApi
 			if (!LoadFilter(ref pdata))
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LoadFilter failed GetLastError() returned: {0}", Marshal.GetLastWin32Error().ToString("X8")));
+				Debug.WriteLine(string.Format("LoadFilter failed GetLastError() returned: 0x{0:X8}", Marshal.GetLastWin32Error()));
 
 #endif
 				return false;
@@ -1884,12 +1884,14 @@ namespace PSFilterLoad.PSApi
 		/// <returns>
 		/// True if successful otherwise false
 		/// </returns>
-		internal static bool QueryPlugin(string fileName, out List<PluginData> pluginData)
+		internal static IEnumerable<PluginData> QueryPlugin(string fileName)
 		{
-			if (String.IsNullOrEmpty(fileName))
-				throw new ArgumentException("fileName is null or empty.", "fileName");
+			if (fileName == null)
+			{
+				throw new ArgumentNullException("fileName");
+			}
 
-			pluginData = new List<PluginData>();
+			List<PluginData> pluginData = new List<PluginData>();
 
 			SafeLibraryHandle dll = UnsafeNativeMethods.LoadLibraryExW(fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE);
 			/* Use LOAD_LIBRARY_AS_DATAFILE to prevent a BadImageFormatException from being thrown if the file
@@ -1961,7 +1963,7 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
-			return count > 0;
+			return pluginData;
 		}
 
 		private string GetErrorMessage(short error)
@@ -2300,7 +2302,7 @@ namespace PSFilterLoad.PSApi
 			{
 				switch (inputPadding)
 				{
-                    case PSConstants.Padding.plugInWantsEdgeReplication:
+					case PSConstants.Padding.plugInWantsEdgeReplication:
 
 						int top = rect.top < 0 ? -rect.top : 0;
 						int left = rect.left < 0 ? -rect.left : 0;
@@ -2471,7 +2473,7 @@ namespace PSFilterLoad.PSApi
 						break;
 					case PSConstants.Padding.plugInDoesNotWantPadding:
 						break;
-                    case PSConstants.Padding.plugInWantsErrorOnBoundsException:
+					case PSConstants.Padding.plugInWantsErrorOnBoundsException:
 						return PSError.paramErr;
 					default:
 						// Any other padding value is a constant byte.
@@ -2495,7 +2497,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="lockRect">The rectangle to clamp the size to.</param>
 		private unsafe void ScaleTempSurface(int inputRate, Rectangle lockRect)
 		{
-			int scaleFactor = fixed2int(inputRate);
+			int scaleFactor = FixedToInt32(inputRate);
 			if (scaleFactor == 0) // Photoshop 2.5 filters don't use the host scaling.
 			{
 				scaleFactor = 1;
@@ -2547,7 +2549,7 @@ namespace PSFilterLoad.PSApi
 		{
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("inRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { inRowBytes.ToString(), rect.ToString(), loplane.ToString(), hiplane.ToString() }));
-			Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", fixed2int(inputRate)));
+			Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", FixedToInt32(inputRate)));
 #endif
 
 			int nplanes = hiplane - loplane + 1;
@@ -2800,7 +2802,7 @@ namespace PSFilterLoad.PSApi
 
 		private unsafe void ScaleTempMask(int maskRate, Rectangle lockRect)
 		{
-			int scaleFactor = fixed2int(maskRate);
+			int scaleFactor = FixedToInt32(maskRate);
 
 			if (scaleFactor == 0)
 				scaleFactor = 1;
@@ -2849,7 +2851,7 @@ namespace PSFilterLoad.PSApi
 		{
 #if DEBUG
 			Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes = {0}, Rect = {1}", new object[] { maskRowBytes.ToString(), rect.ToString() }));
-			Ping(DebugFlags.AdvanceState, string.Format("maskRate = {0}", fixed2int(maskRate)));
+			Ping(DebugFlags.AdvanceState, string.Format("maskRate = {0}", FixedToInt32(maskRate)));
 #endif
 			int width = (rect.right - rect.left);
 			int height = (rect.bottom - rect.top);
@@ -3000,9 +3002,9 @@ namespace PSFilterLoad.PSApi
 							}
 
 							break;
-                        case PSConstants.Padding.plugInDoesNotWantPadding:
+						case PSConstants.Padding.plugInDoesNotWantPadding:
 							break;
-                        case PSConstants.Padding.plugInWantsErrorOnBoundsException:
+						case PSConstants.Padding.plugInWantsErrorOnBoundsException:
 							return PSError.paramErr;
 						default:
 							// Any other padding value is a constant byte.
@@ -3635,8 +3637,8 @@ namespace PSFilterLoad.PSApi
 			doc->bounds.left = 0;
 			doc->bounds.right = source.Width;
 			doc->bounds.bottom = source.Height;
-			doc->hResolution = int2fixed((int)(dpiX + 0.5));
-			doc->vResolution = int2fixed((int)(dpiY + 0.5));
+			doc->hResolution = Int32ToFixed((int)(dpiX + 0.5));
+			doc->vResolution = Int32ToFixed((int)(dpiY + 0.5));
 
 			string[] names = new string[3] { Resources.RedChannelName, Resources.GreenChannelName, Resources.BlueChannelName };
 			ReadChannelPtrs channel = CreateReadChannelDesc(0, names[0], doc->depth, doc->bounds);
@@ -5156,7 +5158,7 @@ namespace PSFilterLoad.PSApi
 			{
 				case PSProperties.propBigNudgeH:
 				case PSProperties.propBigNudgeV:
-					simpleProperty = new IntPtr(int2fixed(10));
+					simpleProperty = new IntPtr(Int32ToFixed(10));
 					break;
 				case PSProperties.propCaption:
 					if (complexProperty != IntPtr.Zero)
@@ -5210,7 +5212,7 @@ namespace PSFilterLoad.PSApi
 					}
 					break;
 				case PSProperties.propGridMajor:
-					simpleProperty = new IntPtr(int2fixed(1));
+					simpleProperty = new IntPtr(Int32ToFixed(1));
 					break;
 				case PSProperties.propGridMinor:
 					simpleProperty = new IntPtr(4);
@@ -5232,7 +5234,7 @@ namespace PSFilterLoad.PSApi
 					break;
 				case PSProperties.propRulerOriginH:
 				case PSProperties.propRulerOriginV:
-					simpleProperty = new IntPtr(int2fixed(0));
+					simpleProperty = new IntPtr(Int32ToFixed(0));
 					break;
 				case PSProperties.propSerialString:
 					bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
@@ -5422,21 +5424,21 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		/// Converts an Int32 to Photoshop's 'Fixed' type.
+		/// Converts an Int32 to a 16.16 fixed point value.
 		/// </summary>
 		/// <param name="value">The value to convert.</param>
-		/// <returns>The converted value</returns>
-		private static int int2fixed(int value)
+		/// <returns>The value converted to a 16.16 fixed point number.</returns>
+		private static int Int32ToFixed(int value)
 		{
 			return (value << 16);
 		}
 
 		/// <summary>
-		/// Converts Photoshop's 'Fixed' type to an Int32.
+		/// Converts a 16.16 fixed point value to an Int32.
 		/// </summary>
 		/// <param name="value">The value to convert.</param>
-		/// <returns>The converted value</returns>
-		private static int fixed2int(int value)
+		/// <returns>The value converted from a 16.16 fixed point number.</returns>
+		private static int FixedToInt32(int value)
 		{
 			return (value >> 16);
 		}
@@ -5473,8 +5475,8 @@ namespace PSFilterLoad.PSApi
 			filterRecord->filterRect.right = width;
 			filterRecord->filterRect.bottom = height;
 
-			filterRecord->imageHRes = int2fixed((int)(dpiX + 0.5));
-			filterRecord->imageVRes = int2fixed((int)(dpiY + 0.5));
+			filterRecord->imageHRes = Int32ToFixed((int)(dpiX + 0.5));
+			filterRecord->imageVRes = Int32ToFixed((int)(dpiY + 0.5));
 
 			filterRecord->wholeSize.h = width;
 			filterRecord->wholeSize.v = height;
@@ -5766,13 +5768,13 @@ namespace PSFilterLoad.PSApi
 			filterRecord->getPropertyObsolete = Marshal.GetFunctionPointerForDelegate(getPropertyProc);
 			filterRecord->cannotUndo = 0;
 			filterRecord->supportsPadding = 1;
-            filterRecord->inputPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
-            filterRecord->outputPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
-            filterRecord->maskPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
+			filterRecord->inputPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
+			filterRecord->outputPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
+			filterRecord->maskPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
 			filterRecord->samplingSupport = PSConstants.SamplingSupport.hostSupportsIntegralSampling;
 			filterRecord->reservedByte = 0;
-			filterRecord->inputRate = int2fixed(1);
-			filterRecord->maskRate = int2fixed(1);
+			filterRecord->inputRate = Int32ToFixed(1);
+			filterRecord->maskRate = Int32ToFixed(1);
 			filterRecord->colorServices = Marshal.GetFunctionPointerForDelegate(colorProc);
 
 #if USEIMAGESERVICES
