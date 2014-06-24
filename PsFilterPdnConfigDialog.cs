@@ -5,8 +5,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Windows.Forms;
@@ -14,7 +14,6 @@ using PaintDotNet;
 using PaintDotNet.Effects;
 using PSFilterLoad.PSApi;
 using PSFilterPdn.Properties;
-using System.Runtime.InteropServices;
 
 namespace PSFilterPdn
 {
@@ -88,7 +87,7 @@ namespace PSFilterPdn
 			[DllImport("kernel32.dll", EntryPoint = "GetProcessDEPPolicy")]
 			[return: MarshalAs(UnmanagedType.Bool)]
 			internal static extern bool GetProcessDEPPolicy([In()] IntPtr hProcess, [Out()] out uint lpFlags, [Out()] out int lpPermanent);
-			
+
 			[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = false, ExactSpelling = true)]
 			internal static extern IntPtr GetCurrentProcess();
 		}
@@ -101,7 +100,7 @@ namespace PSFilterPdn
 		protected override void InitTokenFromDialog()
 		{
 			PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)base.theEffectToken;
-			
+
 			token.Category = this.category;
 			token.Dest = this.destSurface;
 			token.EntryPoint = this.entryPoint;
@@ -126,10 +125,10 @@ namespace PSFilterPdn
 
 			if (!string.IsNullOrEmpty(token.FileName) && token.FilterParameters != null)
 			{
-				this.fileName = token.FileName; 
+				this.fileName = token.FileName;
 				this.filterParameters = token.FilterParameters;
 			}
-			
+
 			if ((token.ExpandedNodes != null) && token.ExpandedNodes.Count > 0)
 			{
 				this.expandedNodes = new List<string>(token.ExpandedNodes);
@@ -491,7 +490,7 @@ namespace PSFilterPdn
 			proxyErrorMessage = data;
 		}
 
-		private bool proxyResult; 
+		private bool proxyResult;
 		private string proxyErrorMessage;
 
 		private Process proxyProcess;
@@ -522,7 +521,7 @@ namespace PSFilterPdn
 
 				PSFilterShimServer.Stop();
 
-				proxyRunning = false; 
+				proxyRunning = false;
 			}
 		}
 		private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
@@ -576,8 +575,8 @@ namespace PSFilterPdn
 				parameterDataFileName = parameterDataFileName,
 				resourceFileName = resourceDataFileName,
 				errorCallback = new Action<string>(SetProxyErrorResult),
-				progressCallback = new Action<int,int>(UpdateProgress)
-			}; 
+				progressCallback = new Action<int, int>(UpdateProgress)
+			};
 
 			PSFilterShimServer.Start(service);
 			this.proxyData = data;
@@ -620,10 +619,10 @@ namespace PSFilterPdn
 
 				if (proxyProcess == null)
 				{
-					proxyProcess = new Process();				
+					proxyProcess = new Process();
 					proxyProcess.EnableRaisingEvents = true;
 					proxyProcess.Exited += new EventHandler(proxyProcess_Exited);
-				} 
+				}
 				proxyProcess.StartInfo = psi;
 #if DEBUG
 				bool st = proxyProcess.Start();
@@ -649,7 +648,7 @@ namespace PSFilterPdn
 		}
 
 		private void SetProxyResultData()
-		{ 
+		{
 			bool showAbout = false;
 
 			if (base.InvokeRequired)
@@ -684,7 +683,7 @@ namespace PSFilterPdn
 					{
 						SelfBinder binder = new SelfBinder();
 						BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
-						this.filterParameters  = (ParameterData)bf.Deserialize(fs);
+						this.filterParameters = (ParameterData)bf.Deserialize(fs);
 					}
 				}
 
@@ -719,7 +718,7 @@ namespace PSFilterPdn
 				base.Invoke(new MethodInvoker(delegate()
 				{
 					this.filterProgressBar.Value = 0;
-				})); 
+				}));
 			}
 			else
 			{
@@ -823,7 +822,7 @@ namespace PSFilterPdn
 						catch (Win32Exception w32ex)
 						{
 							ShowErrorMessage(w32ex.Message);
-						} 
+						}
 						catch (System.Runtime.InteropServices.ExternalException eex)
 						{
 							ShowErrorMessage(eex.Message);
@@ -835,10 +834,10 @@ namespace PSFilterPdn
 						}
 					}
 
-				} 
+				}
 			}
 		}
-		
+
 		private void addDirBtn_Click(object sender, EventArgs e)
 		{
 			using (FolderBrowserDialog fbd = new FolderBrowserDialog())
@@ -854,7 +853,7 @@ namespace PSFilterPdn
 					}
 				}
 			}
-			
+
 		}
 
 		private void remDirBtn_Click(object sender, EventArgs e)
@@ -862,7 +861,7 @@ namespace PSFilterPdn
 			if (searchDirListView.SelectedItems.Count > 0)
 			{
 				int index = searchDirListView.SelectedItems[0].Index;
-				
+
 				searchDirListView.Items.RemoveAt(index);
 				UpdateSearchList();
 				UpdateFilterList();
@@ -904,7 +903,7 @@ namespace PSFilterPdn
 					this.Cursor = Cursors.WaitCursor;
 
 					this.updateFilterListBw.RunWorkerAsync(uflp);
-				} 
+				}
 			}
 		}
 
@@ -948,16 +947,16 @@ namespace PSFilterPdn
 					TreeNode node = parent.Nodes[data.title];
 					PluginData menuData = (PluginData)node.Tag;
 
-					if (menuData.runWith32BitShim && !data.runWith32BitShim) 
+					if (menuData.runWith32BitShim && !data.runWith32BitShim)
 					{
 						parent.Nodes.Remove(node); // if the new plugin is 64-bit and the old one is not remove the old one and use the 64-bit one.
 
 						return true;
 					}
-					
+
 					return false;
 				}
-				
+
 			}
 
 			return true;
@@ -965,29 +964,24 @@ namespace PSFilterPdn
 
 		private static void AddFilter(string path, ref Dictionary<string, TreeNode> nodes)
 		{
-			List<PluginData> pluginData;
-			if (LoadPsFilter.QueryPlugin(path, out pluginData))
+			foreach (var item in LoadPsFilter.QueryPlugin(path))
 			{
-				foreach (var item in pluginData)
+				TreeNode child = new TreeNode(item.title) { Name = item.title, Tag = item };
+
+				if (nodes.ContainsKey(item.category))
 				{
-					TreeNode child = new TreeNode(item.title) { Name = item.title, Tag = item };
-
-					if (nodes.ContainsKey(item.category))
+					TreeNode parent = nodes[item.category];
+					if (IsNotDuplicateNode(ref parent, item))
 					{
-						TreeNode parent = nodes[item.category];
-						if (IsNotDuplicateNode(ref parent, item))
-						{
-							parent.Nodes.Add(child);
-						}
-					}
-					else
-					{
-						TreeNode node = new TreeNode(item.category, new TreeNode[] { child }) { Name = item.category };
-
-						nodes.Add(item.category, node);
+						parent.Nodes.Add(child);
 					}
 				}
+				else
+				{
+					TreeNode node = new TreeNode(item.category, new TreeNode[] { child }) { Name = item.category };
 
+					nodes.Add(item.category, node);
+				}
 			}
 		}
 
@@ -1047,7 +1041,7 @@ namespace PSFilterPdn
 			this.folderCountLbl.Text = String.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderCount_Format, (e.ProgressPercentage + 1), searchDirListView.Items.Count);
 			this.folderNameLbl.Text = String.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderName_Format, e.UserState);
 		}
-	   
+
 		private bool formClosePending;
 		private Dictionary<TreeNode, string> filterTreeItems;
 		private void updateFilterListBw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -1147,7 +1141,7 @@ namespace PSFilterPdn
 			int height = base.EffectSourceSurface.Height;
 
 			if (width > 32000 || height > 32000)
-			{           
+			{
 				string message = string.Empty;
 
 				if (width > 32000 && height > 32000)
@@ -1180,7 +1174,7 @@ namespace PSFilterPdn
 		/// </summary>
 		private bool useDEPProxy;
 		protected override void OnLoad(EventArgs e)
-		{ 
+		{
 			base.OnLoad(e);
 
 			PDNVersion = base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().AppVersion;
@@ -1197,7 +1191,7 @@ namespace PSFilterPdn
 				{
 					this.subDirSearchCb.Checked = true;
 				}
-				
+
 			}
 			catch (IOException ex)
 			{
@@ -1207,7 +1201,7 @@ namespace PSFilterPdn
 			{
 				MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
-			
+
 			// set the useDEPProxy flag when on a 32-bit OS.
 			this.useDEPProxy = false;
 			if (IntPtr.Size == 4)
@@ -1258,7 +1252,7 @@ namespace PSFilterPdn
 						}
 					}
 					this.UpdateFilterList();
-				} 
+				}
 			}
 		}
 
@@ -1295,7 +1289,7 @@ namespace PSFilterPdn
 						File.WriteAllBytes(path, bytes);
 					}
 				}
-				
+
 				settings = new Settings(path);
 			}
 		}
@@ -1390,7 +1384,7 @@ namespace PSFilterPdn
 					string title = child.Text;
 					if ((string.IsNullOrEmpty(filtertext)) || title.ToUpperInvariant().Contains(filtertext.ToUpperInvariant()))
 					{
-						if (nodes.ContainsKey(item.Value)) 
+						if (nodes.ContainsKey(item.Value))
 						{
 							TreeNode node = nodes[item.Value];
 							node.Nodes.Add(child.CloneT<TreeNode>());
@@ -1454,7 +1448,7 @@ namespace PSFilterPdn
 				{
 					FilterCaseInfo info = data.filterInfo[i];
 					fici.AppendFormat(CultureInfo.InvariantCulture, "{0:G}_{1:G}_{2:G}", new object[] { info.inputHandling, info.outputHandling, info.flags1 });
-					
+
 					if (i < 6)
 					{
 						fici.Append(':');
