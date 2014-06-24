@@ -3273,10 +3273,14 @@ namespace PSFilterLoad.PSApi
 
 		private unsafe short ColorServicesProc(ref ColorServicesInfo info)
 		{
+#if DEBUG
+            Ping(DebugFlags.ColorServices, string.Format("selector: {0}", info.selector));
+#endif
+
 			short err = PSError.noErr;
 			switch (info.selector)
 			{
-				case ColorServicesSelector.plugIncolorServicesChooseColor:
+				case ColorServicesSelector.ChooseColor:
 
 					string name = StringFromPString(info.selectorParameter.pickerPrompt);
 
@@ -3302,17 +3306,17 @@ namespace PSFilterLoad.PSApi
 					}
 
 					break;
-				case ColorServicesSelector.plugIncolorServicesConvertColor:
+				case ColorServicesSelector.ConvertColor:
 
 					err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
 
 					break;
-				case ColorServicesSelector.plugIncolorServicesGetSpecialColor:
+				case ColorServicesSelector.GetSpecialColor:
 
 					FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 					switch (info.selectorParameter.specialColorID)
 					{
-						case ColorServicesConstants.plugIncolorServicesBackgroundColor:
+						case SpecialColorID.BackgroundColor:
 
 							for (int i = 0; i < 4; i++)
 							{
@@ -3320,7 +3324,7 @@ namespace PSFilterLoad.PSApi
 							}
 
 							break;
-						case ColorServicesConstants.plugIncolorServicesForegroundColor:
+						case SpecialColorID.ForegroundColor:
 
 							for (int i = 0; i < 4; i++)
 							{
@@ -3333,7 +3337,7 @@ namespace PSFilterLoad.PSApi
 							break;
 					}
 					break;
-				case ColorServicesSelector.plugIncolorServicesSamplePoint:
+				case ColorServicesSelector.SamplePoint:
 
 					Point16* point = (Point16*)info.selectorParameter.globalSamplePoint.ToPointer();
 

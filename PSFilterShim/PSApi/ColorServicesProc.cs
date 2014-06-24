@@ -6,66 +6,60 @@
 using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
+    internal enum SpecialColorID : int
+    {
+        ForegroundColor = 0,
+        BackgroundColor = 1
+    }
 
+    internal enum ColorServicesSelector : short
+    {
+        ChooseColor = 0,
+        ConvertColor = 1,
+        SamplePoint = 2,
+        GetSpecialColor = 3
+    }
+
+    internal enum ColorSpace : short
+    {
+        ChosenSpace = -1,
+        RGBSpace = 0,
+        HSBSpace = 1,
+        CMYKSpace = 2,
+        LabSpace = 3,
+        GraySpace = 4,
+        HSLSpace = 5,
+        XYZSpace = 6
+    }
 
     [StructLayoutAttribute(LayoutKind.Explicit)]
     internal struct SelectorParameters
     {
-
-        /// Str255*
         [FieldOffsetAttribute(0)]
         public System.IntPtr pickerPrompt;
-
-        /// Point*
         [FieldOffsetAttribute(0)]
         public System.IntPtr globalSamplePoint;
-
-        /// int32->int
         [FieldOffsetAttribute(0)]
-        public int specialColorID;
+        public SpecialColorID specialColorID;
     }
-    /// Return Type: OSErr->short
-    ///info: ColorServicesInfo*
-    [UnmanagedFunctionPointer(System.Runtime.InteropServices.CallingConvention.Cdecl)]
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short ColorServicesProc(ref ColorServicesInfo info);
 
     [StructLayoutAttribute(LayoutKind.Sequential)]
     internal unsafe struct ColorServicesInfo
     {
-
-        /// int32->int
         public int infoSize;
-
-        /// int16->short
-        public short selector;
-
-        /// int16->short
-        public short sourceSpace;
-
-        /// int16->short
-        public short resultSpace;
-
-        /// Boolean->BYTE->unsigned char
+        public ColorServicesSelector selector;
+        public ColorSpace sourceSpace;
+        public ColorSpace resultSpace;
         public byte resultGamutInfoValid;
-
-        /// Boolean->BYTE->unsigned char
         public byte resultInGamut;
-
-        /// void*
         public System.IntPtr reservedSourceSpaceInfo;
-
-        /// void*
         public System.IntPtr reservedResultSpaceInfo;
-
-        /// int16[4]
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.I2, SizeConst = 4)]
         public short[] colorComponents;
-
-        /// void*
         public System.IntPtr reserved;
-
-        /// SelectorParameters
         public SelectorParameters selectorParameter;
     }
-
 }
