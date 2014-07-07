@@ -6,7 +6,7 @@ namespace PSFilterLoad.PSApi
     {
         private Dictionary<uint, short> flagList;
 
-        public Dictionary<uint, short> FlagList
+        public IEnumerable<KeyValuePair<uint, short>> FlagList
         {
             get
             {
