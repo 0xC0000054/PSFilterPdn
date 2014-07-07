@@ -169,10 +169,8 @@
     <Compile Include="PSApi\AboutRecord.cs" />
     <Compile Include="PSApi\AdvanceStateProc.cs" />
     <Compile Include="PSApi\BufferProcs.cs" />
-    <Compile Include="PSApi\ColorServicesConstants.cs" />
     <Compile Include="PSApi\ColorServicesConvert.cs" />
     <Compile Include="PSApi\ColorServicesProc.cs" />
-    <Compile Include="PSApi\ColorServicesSelector.cs" />
     <Compile Include="PSApi\DebugFlags.cs" />
     <Compile Include="PSApi\DisplayPixelsProc.cs" />
     <Compile Include="PSApi\FilterCase.cs" />
