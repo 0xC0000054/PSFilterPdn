@@ -904,12 +904,12 @@ namespace PSFilterLoad.PSApi
 
 			if (eep.GetSelection(eep.SourceSurface.Bounds).GetBoundsInt() != eep.SourceSurface.Bounds)
 			{
-				filterCase = FilterCase.filterCaseEditableTransparencyWithSelection;
+				filterCase = FilterCase.EditableTransparencyWithSelection;
 				selectedRegion = eep.GetSelection(eep.SourceSurface.Bounds).GetRegionReadOnly().Clone();
 			}
 			else
 			{
-				filterCase = FilterCase.filterCaseEditableTransparencyNoSelection;
+				filterCase = FilterCase.EditableTransparencyNoSelection;
 				selectedRegion = null;
 			}
 
@@ -975,11 +975,11 @@ namespace PSFilterLoad.PSApi
 			{
 				switch (filterCase)
 				{
-					case FilterCase.filterCaseEditableTransparencyNoSelection:
-						filterCase = FilterCase.filterCaseFlatImageNoSelection;
+					case FilterCase.EditableTransparencyNoSelection:
+						filterCase = FilterCase.FlatImageNoSelection;
 						break;
-					case FilterCase.filterCaseEditableTransparencyWithSelection:
-						filterCase = FilterCase.filterCaseFlatImageWithSelection;
+					case FilterCase.EditableTransparencyWithSelection:
+						filterCase = FilterCase.FlatImageWithSelection;
 						break;
 				}
 				return true;
@@ -995,11 +995,11 @@ namespace PSFilterLoad.PSApi
 				{
 					switch (filterCase)
 					{
-						case FilterCase.filterCaseEditableTransparencyNoSelection:
-							filterCase = FilterCase.filterCaseFlatImageNoSelection;
+						case FilterCase.EditableTransparencyNoSelection:
+							filterCase = FilterCase.FlatImageNoSelection;
 							break;
-						case FilterCase.filterCaseEditableTransparencyWithSelection:
-							filterCase = FilterCase.filterCaseFlatImageWithSelection;
+						case FilterCase.EditableTransparencyWithSelection:
+							filterCase = FilterCase.FlatImageWithSelection;
 							break;
 					}
 					return true;
@@ -1008,11 +1008,11 @@ namespace PSFilterLoad.PSApi
 				{
 					switch (filterCase)
 					{
-						case FilterCase.filterCaseEditableTransparencyNoSelection:
-							filterCase = FilterCase.filterCaseProtectedTransparencyNoSelection;
+						case FilterCase.EditableTransparencyNoSelection:
+							filterCase = FilterCase.ProtectedTransparencyNoSelection;
 							break;
-						case FilterCase.filterCaseEditableTransparencyWithSelection:
-							filterCase = FilterCase.filterCaseProtectedTransparencyWithSelection;
+						case FilterCase.EditableTransparencyWithSelection:
+							filterCase = FilterCase.ProtectedTransparencyWithSelection;
 							break;
 					}
 
@@ -1639,8 +1639,8 @@ namespace PSFilterLoad.PSApi
 
 			filterRecord->inColumnBytes = ignoreAlpha ? 3 : 4;
 
-			if (filterCase == FilterCase.filterCaseProtectedTransparencyNoSelection ||
-				filterCase == FilterCase.filterCaseProtectedTransparencyWithSelection)
+			if (filterCase == FilterCase.ProtectedTransparencyNoSelection ||
+				filterCase == FilterCase.ProtectedTransparencyWithSelection)
 			{
 				filterRecord->planes = 3;
 				filterRecord->outLayerPlanes = 0;
@@ -1808,7 +1808,7 @@ namespace PSFilterLoad.PSApi
 
 				bool worksWithBlankData = ((pdata.filterInfo[index].flags1 & FilterCaseInfoFlags.PIFilterWorksWithBlankDataBit) != FilterCaseInfoFlags.None);
 
-				if ((filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection) && !worksWithBlankData)
+				if ((filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection) && !worksWithBlankData)
 				{
 					// If the filter does not support processing completely transparent (blank) layers return an error message.
 					if (IsBlankLayer())
@@ -3141,7 +3141,7 @@ namespace PSFilterLoad.PSApi
 
 		private unsafe void PreProcessInputData()
 		{
-			if (inputHandling != FilterDataHandling.filterDataHandlingNone && (filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection))
+			if (inputHandling != FilterDataHandling.filterDataHandlingNone && (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection))
 			{
 				int width = source.Width;
 				int height = source.Height;
@@ -3200,7 +3200,7 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		private unsafe void PostProcessOutputData()
 		{
-			if ((filterCase == FilterCase.filterCaseEditableTransparencyNoSelection || filterCase == FilterCase.filterCaseEditableTransparencyWithSelection) &&
+			if ((filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection) &&
 				outputHandling == FilterDataHandling.filterDataHandlingFillMask)
 			{
 				int width = dest.Width;
