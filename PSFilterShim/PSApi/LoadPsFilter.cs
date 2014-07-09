@@ -336,7 +336,7 @@ namespace PSFilterLoad.PSApi
 #if USEMATTING
 			inputHandling = FilterDataHandling.filterDataHandlingNone;
 #endif			
-			outputHandling = FilterDataHandling.filterDataHandlingNone; 
+			outputHandling = FilterDataHandling.None; 
 
 
 			abortFunc = null;
@@ -1278,9 +1278,9 @@ namespace PSFilterLoad.PSApi
 			{
 				int index = filterCase - 1;
 
-				copyToDest = ((pdata.filterInfo[index].flags1 & FilterCaseInfoFlags.PIFilterDontCopyToDestinationBit) == FilterCaseInfoFlags.None);
+				copyToDest = ((pdata.filterInfo[index].flags1 & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None);
 
-				bool worksWithBlankData = ((pdata.filterInfo[index].flags1 & FilterCaseInfoFlags.PIFilterWorksWithBlankDataBit) != FilterCaseInfoFlags.None);
+				bool worksWithBlankData = ((pdata.filterInfo[index].flags1 & FilterCaseInfoFlags.WorksWithBlankData) != FilterCaseInfoFlags.None);
 
 				if ((filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection) && !worksWithBlankData)
 				{
@@ -1295,7 +1295,8 @@ namespace PSFilterLoad.PSApi
 	
 			if (copyToDest)
 			{
-				dest.CopySurface(source); // copy the source image to the dest image if the filter does not write to all the pixels.
+                // Copy the source image to the dest image if the filter does not write to all the pixels.
+				dest.CopySurface(source); 
 			}
 
 			if (ignoreAlpha)
@@ -2365,7 +2366,7 @@ namespace PSFilterLoad.PSApi
 
 		private unsafe void PreProcessInputData()
 		{
-			if (inputHandling != FilterDataHandling.filterDataHandlingNone && (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection))
+			if (inputHandling != FilterDataHandling.None && (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection))
 			{
 				int width = source.Width;
 				int height = source.Height;
@@ -2381,29 +2382,29 @@ namespace PSFilterLoad.PSApi
 						{
 							switch (inputHandling)
 							{
-								case FilterDataHandling.filterDataHandlingBlackMat:
+								case FilterDataHandling.BlackMat:
 									break;
-								case FilterDataHandling.filterDataHandlingGrayMat:
+								case FilterDataHandling.GrayMat:
 									break;
-								case FilterDataHandling.filterDataHandlingWhiteMat:
+								case FilterDataHandling.WhiteMat:
 									break;
-								case FilterDataHandling.filterDataHandlingDefringe:
+								case FilterDataHandling.Defringe:
 									break;
-								case FilterDataHandling.filterDataHandlingBlackZap:
+								case FilterDataHandling.BlackZap:
 									ptr->B = ptr->G = ptr->R = 0;
 									break;
-								case FilterDataHandling.filterDataHandlingGrayZap:
+								case FilterDataHandling.GrayZap:
 									ptr->B = ptr->G = ptr->R = 128;
 									break;
-								case FilterDataHandling.filterDataHandlingWhiteZap:
+								case FilterDataHandling.WhiteZap:
 									ptr->B = ptr->G = ptr->R = 255;
 									break;
-								case FilterDataHandling.filterDataHandlingBackgroundZap:
+								case FilterDataHandling.BackgroundZap:
 									ptr->R = secondaryColor[0];
 									ptr->G = secondaryColor[1];
 									ptr->B = secondaryColor[2];
 									break;
-								case FilterDataHandling.filterDataHandlingForegroundZap:
+								case FilterDataHandling.ForegroundZap:
 									ptr->R = primaryColor[0];
 									ptr->G = primaryColor[1];
 									ptr->B = primaryColor[2];
@@ -2425,7 +2426,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe void PostProcessOutputData()
 		{
 			if ((filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection) &&
-				outputHandling == FilterDataHandling.filterDataHandlingFillMask)
+				outputHandling == FilterDataHandling.FillMask)
 			{
 				int width = dest.Width;
 				int height = dest.Height;
