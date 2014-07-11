@@ -225,11 +225,11 @@
     <PostBuildEvent>call "$(DevEnvDir)..\tools\vsvars32.bat"
 editbin.exe /NXCOMPAT:NO $(TargetPath) 
 
-copy "$(TargetPath)" "C:\Program Files\Paint.NET\Effects" /y
-if "$(ConfigurationName)" == "Debug" copy "$(TargetDir)$(TargetName).pdb" "C:\Program Files\Paint.NET\Effects" /y</PostBuildEvent>
+copy "$(TargetPath)" "D:\Program Files\Paint.NET\Effects" /y
+if "$(ConfigurationName)" == "Debug" copy "$(TargetDir)$(TargetName).pdb" "D:\Program Files\Paint.NET\Effects" /y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>del "C:\Program Files\Paint.NET\Effects\$(TargetName).pdb"</PreBuildEvent>
+    <PreBuildEvent>del "D:\Program Files\Paint.NET\Effects\$(TargetName).pdb"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
