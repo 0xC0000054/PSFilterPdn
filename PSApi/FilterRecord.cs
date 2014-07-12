@@ -54,7 +54,7 @@ namespace PSFilterLoad.PSApi
         public uint hostSig;
         public IntPtr hostProcs;
 
-        public ImageModes imageMode;
+        public short imageMode;
         public int imageHRes;
         public int imageVRes;
         public Point16 floatCoord;
