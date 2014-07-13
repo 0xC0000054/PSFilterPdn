@@ -1,4 +1,16 @@
-﻿/* Adapted from PIFilter.h
+﻿/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// http://psfilterpdn.codeplex.com/
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2014 Nicholas Hayes
+// 
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+/* Adapted from PIFilter.h
  * Copyright (c) 1990-1991, Thomas Knoll.
  * Copyright (c) 1992-1998, Adobe Systems Incorporated.
  * All rights reserved.
@@ -29,7 +41,7 @@ namespace PSFilterLoad.PSApi
         BackgroundZap = 10,
         ForegroundZap = 11
     }
-    
+
     [Flags]
     internal enum FilterCaseInfoFlags : byte
     {
@@ -44,16 +56,16 @@ namespace PSFilterLoad.PSApi
     [DataContract()]
     internal struct FilterCaseInfo
     {
-        [DataMember]       
+        [DataMember]
         public FilterDataHandling inputHandling;
-    
+
         [DataMember]
         public FilterDataHandling outputHandling;
-    
+
         [DataMember]
         public FilterCaseInfoFlags flags1;
-    
-        [DataMember]       
+
+        [DataMember]
         public byte flags2;
     }
 

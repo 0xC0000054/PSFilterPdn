@@ -1,4 +1,16 @@
-﻿using System;
+﻿/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// http://psfilterpdn.codeplex.com/
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2014 Nicholas Hayes
+// 
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -1296,7 +1308,7 @@ namespace PSFilterLoad.PSApi
 	
 			if (copyToDest)
 			{
-                // Copy the source image to the dest image if the filter does not write to all the pixels.
+				// Copy the source image to the dest image if the filter does not write to all the pixels.
 				dest.CopySurface(source); 
 			}
 
@@ -2521,10 +2533,10 @@ namespace PSFilterLoad.PSApi
 							info.colorComponents[1] = color.G;
 							info.colorComponents[2] = color.B;
 
-                            if (info.resultSpace == ColorSpace.ChosenSpace)
-                            {
-                                info.resultSpace = ColorSpace.RGBSpace;
-                            }
+							if (info.resultSpace == ColorSpace.ChosenSpace)
+							{
+								info.resultSpace = ColorSpace.RGBSpace;
+							}
 
 							err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
 

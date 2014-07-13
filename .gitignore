@@ -1,0 +1,12 @@
+*.user
+*.vsp
+*.psess
+*.suo
+*.Cache
+/obj
+/bin
+/PSFilterShim/bin
+/PSFilterShim/obj
+/References
+/_UpgradeReport_Files
+UpgradeLog*.XML

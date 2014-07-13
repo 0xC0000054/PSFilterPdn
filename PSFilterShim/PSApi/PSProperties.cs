@@ -1,5 +1,17 @@
-﻿/* Adapted from PIProperties.h
- * Copyright (c) 1992-6, Adobe Systems Incorporated.
+﻿/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// http://psfilterpdn.codeplex.com/
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2014 Nicholas Hayes
+// 
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+/* Adapted from PIProperties.h
+ * Copyright (c) 1992-1998, Adobe Systems Incorporated.
  * All rights reserved.
 */
 
@@ -20,6 +32,10 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public const uint propCaption = 0x63617074U;
         /// <summary>
+        /// The new copyright property from 5.0, a get only version of propCopyright - 'cpyR'
+        /// </summary>
+        public const uint propCopyright2 = 0x63707952U;
+        /// <summary>
         /// Channel Name - 'nmch'
         /// </summary>
         public const uint propChannelName = 0x6e6d6368U;
@@ -27,10 +43,6 @@ namespace PSFilterLoad.PSApi
         /// The file copyright - 'cpyr' 
         /// </summary>
         public const uint propCopyright = 0x63707972U;
-        /// <summary>
-        /// The new copyright property from 5.0, a get only version of propCopyright - 'cpyR'
-        /// </summary>
-        public const uint propCopyright2 = 0x63707952U;
         /// <summary>
         /// The file EXIF data - 'EXIF' 
         /// </summary>
@@ -53,7 +65,6 @@ namespace PSFilterLoad.PSApi
         public const uint propImageMode = 0x6d6f6465U;
         /// <summary>
         /// Interpolation Mode - 'intp';
-        /// Uses the InterpolationMethod enum.
         /// </summary>
         public const uint propInterpolationMethod = 0x696E7470U;
         /// <summary>

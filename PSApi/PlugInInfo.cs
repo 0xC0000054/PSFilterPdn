@@ -1,5 +1,5 @@
 ﻿/* Adapted from PIGeneral.h
- * Copyright (c) 1992-6, Adobe Systems Incorporated.
+ * Copyright (c) 1992-1998, Adobe Systems Incorporated.
  * All rights reserved.
 */
 

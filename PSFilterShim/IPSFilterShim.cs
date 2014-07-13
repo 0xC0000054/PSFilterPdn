@@ -1,7 +1,17 @@
-﻿using System.ServiceModel;
+﻿/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// http://psfilterpdn.codeplex.com/
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2014 Nicholas Hayes
+// 
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
+
 using System.Drawing;
-using PSFilterPdn;
-using PSFilterLoad.PSApi;
+using System.ServiceModel;
 
 [ServiceContract(Namespace = "http://PSFilterPdn.shimData")]
 internal interface IPSFilterShim

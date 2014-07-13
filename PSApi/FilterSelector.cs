@@ -1,6 +1,18 @@
-﻿/* Adapted from PIFilter.h
- * Copyright (c) 1990-1, Thomas Knoll.
- * Copyright (c) 1992-6, Adobe Systems Incorporated.
+﻿/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// http://psfilterpdn.codeplex.com/
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2014 Nicholas Hayes
+// 
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+/* Adapted from PIFilter.h
+ * Copyright (c) 1990-1991, Thomas Knoll.
+ * Copyright (c) 1992-1998, Adobe Systems Incorporated.
  * All rights reserved.
 */
 

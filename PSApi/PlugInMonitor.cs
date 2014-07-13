@@ -1,5 +1,17 @@
-﻿/* Adapted from PIGeneral.h
- * Copyright (c) 1992-6, Adobe Systems Incorporated.
+﻿/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// http://psfilterpdn.codeplex.com/
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2014 Nicholas Hayes
+// 
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+/* Adapted from PIGeneral.h
+ * Copyright (c) 1992-1998, Adobe Systems Incorporated.
  * All rights reserved.
 */
 
@@ -13,25 +25,15 @@ namespace PSFilterLoad.PSApi
     [StructLayout(LayoutKind.Sequential)]
     struct PlugInMonitor
     {
-        /// Fixed->int
         public int gamma;
-        /// Fixed->int
         public int redX;
-        /// Fixed->int
         public int redY;
-        /// Fixed->int
         public int greenX;
-        /// Fixed->int
         public int greenY;
-        /// Fixed->int
         public int blueX;
-        /// Fixed->int
         public int blueY;
-        /// Fixed->int
         public int whiteX;
-        /// Fixed->int
         public int whiteY;
-        /// Fixed->int
         public int ambient;
     }
 

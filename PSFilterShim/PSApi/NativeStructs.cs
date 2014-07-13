@@ -1,32 +1,30 @@
-﻿using System.Runtime.InteropServices;
+﻿/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// http://psfilterpdn.codeplex.com/
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2014 Nicholas Hayes
+// 
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
     static class NativeStructs
     {
-        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential)]
         public struct MEMORY_BASIC_INFORMATION
         {
-
-            /// PVOID->void*
             public System.IntPtr BaseAddress;
-
-            /// PVOID->void*
             public System.IntPtr AllocationBase;
-
-            /// DWORD->unsigned int
             public uint AllocationProtect;
-
-            /// SIZE_T->ULONG_PTR->unsigned int
             public System.UIntPtr RegionSize;
-
-            /// DWORD->unsigned int
             public uint State;
-
-            /// DWORD->unsigned int
             public uint Protect;
-
-            /// DWORD->unsigned int
             public uint Type;
         }
     }

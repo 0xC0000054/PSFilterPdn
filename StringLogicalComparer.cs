@@ -1,3 +1,15 @@
+/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// http://psfilterpdn.codeplex.com/
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2014 Nicholas Hayes
+// 
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
+
 // Optimized by Richard Deeming
 // Original code by Vasian Cepa
 // http://www.codeproject.com/Articles/11016/Numeric-String-Sort-in-C

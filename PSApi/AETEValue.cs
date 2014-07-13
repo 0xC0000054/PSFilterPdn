@@ -1,4 +1,16 @@
-﻿using System;
+﻿/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// http://psfilterpdn.codeplex.com/
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2014 Nicholas Hayes
+// 
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+using System;
 
 namespace PSFilterLoad.PSApi
 {
@@ -54,23 +66,23 @@ namespace PSFilterLoad.PSApi
 	[Serializable]
 	public struct UnitFloat
 	{
-        private uint unit;
-        private double value;
+		private uint unit;
+		private double value;
 
 		public uint Unit
 		{
-            get
-            {
-                return unit;
-            }
+			get
+			{
+				return unit;
+			}
 		}
 
 		public double Value
 		{
-            get
-            {
-                return value;
-            }
+			get
+			{
+				return value;
+			}
 		}
 
 		public UnitFloat(uint unit, double value)
