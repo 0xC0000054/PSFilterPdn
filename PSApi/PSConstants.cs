@@ -152,5 +152,16 @@ namespace PSFilterLoad.PSApi
             public const short piLayoutPlanesRowsColumns = 5;
             public const short piLayoutPlanesColumnsRows = 6;
         }
+
+        public const string PICABufferSuite = "Photoshop Buffer Suite for Plug-ins";
+        public const string PICAHandleSuite = "Photoshop Handle Suite for Plug-ins";
+        public const string PICAPropertySuite = "Photoshop Property Suite for Plug-ins";
+        public const string PICAUIHooksSuite = "Photoshop UIHooks Suite for Plug-ins";
+#if PICASUITEDEBUG
+        public const string PICAColorSpaceSuite = "Photoshop ColorSpace Suite for Plug-ins";
+        public const string PICAZStringSuite = "AS ZString Suite";
+        public const string PICAZStringDictonarySuite = "AS ZString Dictionary Suite";
+        public const string PICAPluginsSuite = "SP Plug-ins Suite"; 
+#endif
     }
 }

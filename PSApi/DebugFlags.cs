@@ -32,7 +32,8 @@ namespace PSFilterLoad.PSApi
         MiscCallbacks = (1 << 10),
         PiPL = (1 << 11),
         PropertySuite = (1 << 12),
-        ResourceSuite = (1 << 13)
+        ResourceSuite = (1 << 13),
+        SPBasicSuite = (1 << 14)
     }
 #endif
 }

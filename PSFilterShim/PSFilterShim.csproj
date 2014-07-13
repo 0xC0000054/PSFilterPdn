@@ -133,6 +133,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PSApi\AboutRecord.cs" />
+    <Compile Include="PSApi\ActivePICASuites.cs" />
     <Compile Include="PSApi\AdvanceStateProc.cs" />
     <Compile Include="PSApi\BufferProcs.cs" />
     <Compile Include="PSApi\ChannelPortsProcs.cs" />
@@ -154,6 +155,8 @@
     <Compile Include="PSApi\Memory.cs" />
     <Compile Include="PSApi\NativeConstants.cs" />
     <Compile Include="PSApi\NativeStructs.cs" />
+    <Compile Include="PSApi\PICASuites.cs" />
+    <Compile Include="PSApi\PICASuiteStructs.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\PlatformData.cs" />
     <Compile Include="PSApi\PluginData.cs" />
@@ -176,6 +179,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PSApi\SafeNativeMethods.cs" />
+    <Compile Include="PSApi\SPBasicSuite.cs" />
     <Compile Include="PSApi\UnsafeNativeMethods.cs" />
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />

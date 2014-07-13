@@ -135,6 +135,7 @@
     </Compile>
     <Compile Include="NativeInterfaces.cs" />
     <Compile Include="PluginSupportInfo.cs" />
+    <Compile Include="PSApi\ActivePICASuites.cs" />
     <Compile Include="PSApi\AETEData.cs" />
     <Compile Include="PSApi\AETEValue.cs" />
     <Compile Include="PSApi\ChannelPortsProcs.cs" />
@@ -145,6 +146,8 @@
     <Compile Include="PSApi\LoadPsFilter.cs" />
     <Compile Include="PSApi\Memory.cs" />
     <Compile Include="PSApi\ParameterData.cs" />
+    <Compile Include="PSApi\PICASuites.cs" />
+    <Compile Include="PSApi\PICASuiteStructs.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\PluginAETE.cs" />
     <Compile Include="PSApi\PlugInInfo.cs" />
@@ -154,6 +157,7 @@
     <Compile Include="PSApi\ReadImageDocumentDesc.cs" />
     <Compile Include="PSApi\SafeLibraryHandle.cs" />
     <Compile Include="PSApi\SafeNativeMethods.cs" />
+    <Compile Include="PSApi\SPBasicSuite.cs" />
     <Compile Include="PSApi\UnsafeNativeMethods.cs" />
     <Compile Include="PsFilterPdnConfigToken.cs" />
     <Compile Include="PSFilterPdn.cs" />

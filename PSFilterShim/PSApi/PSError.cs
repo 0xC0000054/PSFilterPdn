@@ -60,6 +60,11 @@ namespace PSFilterLoad.PSApi
         public const short errUnsupportedBitOffset = -30913;
         public const short errUnsupportedDepth = -30914;
         public const short errUnsupportedDepthConversion = -30915;
+        
+        // PICA suite error codes
+        public const int kSPNoErr = 0;
+        public const int kSPNotImplmented = 0x21494d50;
+        public const int kSPSuiteNotFoundError = 0x53214664;
     }
 
 }

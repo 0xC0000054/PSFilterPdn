@@ -6,7 +6,7 @@ Description
 This plugin allows Paint.NET to run 3rd-party Adobe Photoshop-compatible filters.
 
 For more details, or to report bugs, please refer to the website:
-D:\Program Files\paint.net\Effects
+
   http://psfilterpdn.codeplex.com/
 
 Installation

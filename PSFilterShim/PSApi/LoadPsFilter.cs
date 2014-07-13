@@ -154,6 +154,14 @@ namespace PSFilterLoad.PSApi
 		static ReadPixelsProc readPixelsProc;
 		static WriteBasePixelsProc writeBasePixelsProc;
 		static ReadPortForWritePortProc readPortForWritePortProc;
+		// SPBasic Suite
+		static SPBasicSuite_AcquireSuite spAcquireSuite;
+		static SPBasicSuite_AllocateBlock spAllocateBlock;
+		static SPBasicSuite_FreeBlock spFreeBlock;
+		static SPBasicSuite_IsEqual spIsEqual;
+		static SPBasicSuite_ReallocateBlock spReallocateBlock;
+		static SPBasicSuite_ReleaseSuite spReleaseSuite;
+		static SPBasicSuite_Undefined spUndefined;
 		#endregion
 
 		private Dictionary<IntPtr, PSHandle> handles;
@@ -179,6 +187,8 @@ namespace PSFilterLoad.PSApi
 
 		private IntPtr channelPortsPtr;
 		private IntPtr readDocumentPtr;
+
+		private IntPtr basicSuitePtr;
 
 		private AETEData aete;
 		private Dictionary<uint, AETEValue> aeteDict;
@@ -296,20 +306,23 @@ namespace PSFilterLoad.PSApi
 			if (String.IsNullOrEmpty(sourceImage))
 				throw new ArgumentException("sourceImage is null or empty.", "sourceImage");
 
-			dataPtr = IntPtr.Zero;
+			this.dataPtr = IntPtr.Zero;
 
-			phase = PluginPhase.None; 
-			errorMessage = String.Empty;
-			disposed = false;
-			copyToDest = true;
-			sizesSetup = false;
-			frValuesSetup = false;
-			isRepeatEffect = false;
-			globalParameters = new GlobalParameters();
-			pseudoResources = new List<PSResource>();
-			handles = new Dictionary<IntPtr, PSHandle>();
-			channelReadDescPtrs = new List<ReadChannelPtrs>();
-			bufferIDs = new List<IntPtr>();
+			this.phase = PluginPhase.None; 
+			this.errorMessage = String.Empty;
+			this.disposed = false;
+			this.copyToDest = true;
+			this.sizesSetup = false;
+			this.frValuesSetup = false;
+			this.isRepeatEffect = false;
+			this.globalParameters = new GlobalParameters();
+			this.pseudoResources = new List<PSResource>();
+			this.handles = new Dictionary<IntPtr, PSHandle>();
+			this.useChannelPorts = false;
+			this.channelReadDescPtrs = new List<ReadChannelPtrs>();
+			this.bufferIDs = new List<IntPtr>();
+			this.usePICASuites = false;
+			this.activePICASuites = new ActivePICASuites();
 
 			using (Bitmap bmp = new Bitmap(sourceImage))
 			{
@@ -335,63 +348,59 @@ namespace PSFilterLoad.PSApi
 					throw new ImageSizeTooLargeException(message);
 				}
 
-				source = Surface.CopyFromBitmap(bmp);
+				this.source = Surface.CopyFromBitmap(bmp);
 
-				using (Graphics gr = Graphics.FromImage(bmp))
-				{
-					dpiX = gr.DpiX;
-					dpiY = gr.DpiY;
-				}
+				
+				this.dpiX = bmp.HorizontalResolution;
+				this.dpiY = bmp.VerticalResolution;
 			}
-			dest = new Surface(source.Width, source.Height);
+			this.dest = new Surface(source.Width, source.Height);
 
-#if USEMATTING
-			inputHandling = FilterDataHandling.filterDataHandlingNone;
-#endif			
-			outputHandling = FilterDataHandling.None; 
+			this.inputHandling = FilterDataHandling.None;
+			this.outputHandling = FilterDataHandling.None; 
 
 
 			abortFunc = null;
 			progressFunc = null;
 
-			keys = null;
-			aete = null;
-			aeteDict = new Dictionary<uint,AETEValue>();
-			getKey = 0;
-			getKeyIndex = 0;
-			subKeys = null;
-			subKeyIndex = 0;
-			isSubKey = false;
+			this.keys = null;
+			this.aete = null;
+			this.aeteDict = new Dictionary<uint,AETEValue>();
+			this.getKey = 0;
+			this.getKeyIndex = 0;
+			this.subKeys = null;
+			this.subKeyIndex = 0;
+			this.isSubKey = false;
+
 			unsafe
 			{
 				platFormDataPtr = Memory.Allocate(Marshal.SizeOf(typeof(PlatformData)), true);
 				((PlatformData*)platFormDataPtr)->hwnd = owner; 
 			}
 
-			lastOutRect = Rect16.Empty;
-			lastInRect = Rect16.Empty;
-			lastMaskRect = Rect16.Empty;
+			this.lastOutRect = Rect16.Empty;
+			this.lastInRect = Rect16.Empty;
+			this.lastMaskRect = Rect16.Empty;
 
-			maskDataPtr = inDataPtr = outDataPtr = IntPtr.Zero;
+			this.maskDataPtr = inDataPtr = outDataPtr = IntPtr.Zero;
 
-			lastOutRowBytes = 0;
-			lastOutHiPlane = 0;
-			lastOutLoPlane = -1;
-			lastInLoPlane = -1;
+			this.lastOutRowBytes = 0;
+			this.lastOutHiPlane = 0;
+			this.lastOutLoPlane = -1;
+			this.lastInLoPlane = -1;
 
-			secondaryColor = new byte[4] { secondary.R, secondary.G, secondary.B, 0 };
-
-			primaryColor = new byte[4] { primary.R, primary.G, primary.B, 0 };
+			this.secondaryColor = new byte[4] { secondary.R, secondary.G, secondary.B, 0 };
+			this.primaryColor = new byte[4] { primary.R, primary.G, primary.B, 0 };
 
 			if (selection != source.Bounds)
 			{
-				filterCase = FilterCase.EditableTransparencyWithSelection;
-				selectedRegion = selectionRegion.Clone();
+				this.filterCase = FilterCase.EditableTransparencyWithSelection;
+				this.selectedRegion = selectionRegion.Clone();
 			}
 			else
 			{
-				filterCase = FilterCase.EditableTransparencyNoSelection;
-				selectionRegion = null;
+				this.filterCase = FilterCase.EditableTransparencyNoSelection;
+				this.selectedRegion = null;
 			}
 
 #if DEBUG
@@ -1261,6 +1270,21 @@ namespace PSFilterLoad.PSApi
 
 			return true;
 		}
+
+		private static bool EnablePICASuites(PluginData data)
+		{
+#if !PICASUITEDEBUG
+			// Enable the PICA suites for Color Efex 4.
+			if (data.category == "Nik Collection")
+			{
+				return true;
+			}
+
+			return false;
+#else
+			return true;
+#endif
+		}
 	  
 		/// <summary>
 		/// Runs a filter from the specified PluginData
@@ -1284,6 +1308,7 @@ namespace PSFilterLoad.PSApi
 			}
 
 			useChannelPorts = pdata.category == "Amico Perry"; // enable the Channel Ports for Luce 2
+			usePICASuites = EnablePICASuites(pdata);
 
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
 			
@@ -4845,6 +4870,7 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 		}
+
 		private IntPtr ResourceGetProc(uint ofType, short index)
 		{
 #if DEBUG
@@ -4873,6 +4899,231 @@ namespace PSFilterLoad.PSApi
 			}
 
 			return IntPtr.Zero;
+		}
+
+		private ActivePICASuites activePICASuites;
+		private bool usePICASuites;
+
+		private unsafe int SPBasicAcquireSuite(IntPtr name, int version, ref IntPtr suite)
+		{
+
+			string suiteName = Marshal.PtrToStringAnsi(name);
+#if DEBUG
+			Ping(DebugFlags.SPBasicSuite, string.Format("name: {0}, version: {1}", suiteName, version));
+#endif
+
+			string suiteKey = string.Format(CultureInfo.InvariantCulture, "{0},{1}", suiteName, version);
+
+			if (activePICASuites.IsLoaded(suiteKey))
+			{
+				suite = activePICASuites.AddRef(suiteKey);
+			}
+			else
+			{
+				try
+				{
+					if (suiteName == PSConstants.PICABufferSuite)
+					{
+						if (version > 1)
+						{
+							return PSError.kSPSuiteNotFoundError;
+						}
+
+						suite = activePICASuites.AllocateSuite<PSBufferSuite1>(suiteKey);
+
+						PSBufferSuite1 bufferSuite = PICASuites.CreateBufferSuite1();
+
+						Marshal.StructureToPtr(bufferSuite, suite, false);
+					}
+					else if (suiteName == PSConstants.PICAHandleSuite)
+					{
+						if (version > 2)
+						{
+							return PSError.kSPSuiteNotFoundError;
+						}
+
+						if (version == 1)
+						{
+							suite = activePICASuites.AllocateSuite<PSHandleSuite1>(suiteKey);
+
+							PSHandleSuite1 handleSuite = PICASuites.CreateHandleSuite1((HandleProcs*)handleProcsPtr.ToPointer(), handleLockProc, handleUnlockProc);
+
+							Marshal.StructureToPtr(handleSuite, suite, false);
+						}
+						else
+						{
+							suite = activePICASuites.AllocateSuite<PSHandleSuite2>(suiteKey);
+
+							PSHandleSuite2 handleSuite = PICASuites.CreateHandleSuite2((HandleProcs*)handleProcsPtr.ToPointer(), handleLockProc, handleUnlockProc);
+
+							Marshal.StructureToPtr(handleSuite, suite, false);
+						}
+					}
+					else if (suiteName == PSConstants.PICAPropertySuite)
+					{
+						if (version > PSConstants.kCurrentPropertyProcsVersion)
+						{
+							return PSError.kSPSuiteNotFoundError;
+						}
+
+						suite = activePICASuites.AllocateSuite<PropertyProcs>(suiteKey);
+
+						PropertyProcs propertySuite = PICASuites.CreatePropertySuite((PropertyProcs*)propertyProcsPtr.ToPointer());
+
+						Marshal.StructureToPtr(propertySuite, suite, false);
+					}
+					else if (suiteName == PSConstants.PICAUIHooksSuite)
+					{
+						if (version > 1)
+						{
+							return PSError.kSPSuiteNotFoundError;
+						}
+
+						suite = activePICASuites.AllocateSuite<PSUIHooksSuite1>(suiteKey);
+
+						PSUIHooksSuite1 uiHooks = PICASuites.CreateUIHooksSuite1((FilterRecord*)filterRecordPtr.ToPointer());
+
+						Marshal.StructureToPtr(uiHooks, suite, false);
+					}
+#if PICASUITEDEBUG
+					else if (suiteName == PSConstants.PICAColorSpaceSuite)
+					{
+						if (version > 1)
+						{
+							return PSError.kSPSuiteNotFoundError;
+						}
+
+						suite = activePICASuites.AllocateSuite<PSColorSpaceSuite1>(suiteKey);
+
+						PSColorSpaceSuite1 csSuite = PICASuites.CreateColorSpaceSuite1();
+
+						Marshal.StructureToPtr(csSuite, suite, false);
+					}
+					else if (suiteName == PSConstants.PICAPluginsSuite)
+					{
+						if (version > 4)
+						{
+							return PSError.kSPSuiteNotFoundError;
+						}
+
+						suite = activePICASuites.AllocateSuite<SPPluginsSuite4>(suiteKey);
+
+						SPPluginsSuite4 plugs = PICASuites.CreateSPPlugs4();
+
+						Marshal.StructureToPtr(plugs, suite, false);
+					} 
+#endif
+					else
+					{
+						return PSError.kSPSuiteNotFoundError;
+					}
+				}
+				catch (OutOfMemoryException)
+				{
+					return PSError.memFullErr;
+				}
+			}
+
+			return PSError.kSPNoErr;
+		}
+
+		private int SPBasicReleaseSuite(IntPtr name, int version)
+		{
+			string suiteName = Marshal.PtrToStringAnsi(name);
+
+#if DEBUG
+			Ping(DebugFlags.SPBasicSuite, string.Format("name: {0}, version: {1}", suiteName, version));
+#endif
+
+			string suiteKey = string.Format(CultureInfo.InvariantCulture, "{0},{1}", suiteName, version);
+
+			activePICASuites.RemoveRef(suiteKey);
+
+			return PSError.kSPNoErr;
+		}
+
+		private unsafe int SPBasicIsEqual(IntPtr token1, IntPtr token2)
+		{
+#if DEBUG
+			Ping(DebugFlags.SPBasicSuite, string.Format("token1: {0}, token2: {1}", Marshal.PtrToStringAnsi(token1), Marshal.PtrToStringAnsi(token2)));
+#endif
+			if (token1 == IntPtr.Zero)
+			{
+				if (token2 == IntPtr.Zero)
+				{
+					return 1;
+				}
+
+				return 0;
+			}
+
+			// Compare two null-terminated ASCII strings for equality.
+			byte* src = (byte*)token1.ToPointer();
+			byte* dst = (byte*)token2.ToPointer();
+
+			while (*dst != 0)
+			{
+				if ((*src - *dst) != 0)
+				{
+					return 0;
+				}
+				src++;
+				dst++;
+			}
+
+			return 1;
+		}
+
+		private int SPBasicAllocateBlock(int size, ref IntPtr block)
+		{
+#if DEBUG
+			Ping(DebugFlags.SPBasicSuite, string.Format("size: {0}", size));
+#endif
+			try
+			{
+				block = Memory.Allocate(size, false);
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
+
+			return PSError.kSPNoErr;
+		}
+
+		private int SPBasicFreeBlock(IntPtr block)
+		{
+#if DEBUG
+			Ping(DebugFlags.SPBasicSuite, string.Format("block: {0:X8}", block.ToInt64()));
+#endif
+			Memory.Free(block);
+			return PSError.kSPNoErr;
+		}
+
+		private int SPBasicReallocateBlock(IntPtr block, int newSize, ref IntPtr newblock)
+		{
+#if DEBUG
+			Ping(DebugFlags.SPBasicSuite, string.Format("block: {0:X8}, size: {1}", block.ToInt64(), newSize));
+#endif
+			try
+			{
+				newblock = Memory.ReAlloc(block, newSize);
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
+
+			return PSError.kSPNoErr;
+		}
+
+		private int SPBasicUndefined()
+		{
+#if DEBUG
+			Ping(DebugFlags.SPBasicSuite, string.Empty);
+#endif
+
+			return PSError.kSPNoErr;
 		}
 		
 		/// <summary>
@@ -5016,6 +5267,14 @@ namespace PSFilterLoad.PSApi
 			readPixelsProc = new ReadPixelsProc(ReadPixelsProc);
 			writeBasePixelsProc = new WriteBasePixelsProc(WriteBasePixels);
 			readPortForWritePortProc = new ReadPortForWritePortProc(ReadPortForWritePort);
+			// SPBasicSuite
+			spAcquireSuite = new SPBasicSuite_AcquireSuite(SPBasicAcquireSuite);
+			spReleaseSuite = new SPBasicSuite_ReleaseSuite(SPBasicReleaseSuite);
+			spIsEqual = new SPBasicSuite_IsEqual(SPBasicIsEqual);
+			spAllocateBlock = new SPBasicSuite_AllocateBlock(SPBasicAllocateBlock);
+			spFreeBlock = new SPBasicSuite_FreeBlock(SPBasicFreeBlock);
+			spReallocateBlock = new SPBasicSuite_ReallocateBlock(SPBasicReallocateBlock);
+			spUndefined = new SPBasicSuite_Undefined(SPBasicUndefined);
 		}
 
 		private bool useChannelPorts;
@@ -5165,6 +5424,23 @@ namespace PSFilterLoad.PSApi
 				channelPortsPtr = IntPtr.Zero;
 				readDescriptorPtr = IntPtr.Zero;
 			}
+
+			if (usePICASuites)
+			{
+				basicSuitePtr = Memory.Allocate(Marshal.SizeOf(typeof(SPBasicSuite)), true);
+				SPBasicSuite* basicSuite = (SPBasicSuite*)basicSuitePtr.ToPointer();
+				basicSuite->acquireSuite = Marshal.GetFunctionPointerForDelegate(spAcquireSuite);
+				basicSuite->releaseSuite = Marshal.GetFunctionPointerForDelegate(spReleaseSuite);
+				basicSuite->isEqual = Marshal.GetFunctionPointerForDelegate(spIsEqual);
+				basicSuite->allocateBlock = Marshal.GetFunctionPointerForDelegate(spAllocateBlock);
+				basicSuite->freeBlock = Marshal.GetFunctionPointerForDelegate(spFreeBlock);
+				basicSuite->reallocateBlock = Marshal.GetFunctionPointerForDelegate(spReallocateBlock);
+				basicSuite->undefined = Marshal.GetFunctionPointerForDelegate(spUndefined);
+			}
+			else
+			{
+				basicSuitePtr = IntPtr.Zero;
+			}
 		}
 
 		private unsafe void SetupFilterRecord()
@@ -5258,7 +5534,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->channelPortProcs = channelPortsPtr;
 			filterRecord->documentInfo = readDocumentPtr;
 
-			filterRecord->sSPBasic = IntPtr.Zero;
+			filterRecord->sSPBasic = basicSuitePtr;
 			filterRecord->plugInRef = IntPtr.Zero;
 			filterRecord->depth = 8;
 		}
@@ -5436,6 +5712,12 @@ namespace PSFilterLoad.PSApi
 					}
 					channelReadDescPtrs = null;
 				}
+
+                if (basicSuitePtr != IntPtr.Zero)
+                {
+                    Memory.Free(basicSuitePtr);
+                    basicSuitePtr = IntPtr.Zero;
+                }
 
 				if (filterRecordPtr != IntPtr.Zero)
 				{
