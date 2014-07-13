@@ -5,12 +5,12 @@ using System.Runtime.Serialization;
 namespace PSFilterLoad.PSApi
 {
     [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
-    internal delegate void pluginEntryPoint(short selector, IntPtr pluginParamBlock, ref IntPtr pluginData, ref short result);
+    internal delegate void pluginEntryPoint(FilterSelector selector, IntPtr pluginParamBlock, ref IntPtr pluginData, ref short result);
  
 #pragma warning disable 0649
    
     /// <summary>
-    /// The class that encapsulates a Photoshop Filter plugin
+    /// The class that encapsulates an Adobe® Photoshop® filter plugin
     /// </summary>
     [DataContract()]
     internal sealed class PluginData

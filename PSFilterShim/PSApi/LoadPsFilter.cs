@@ -463,11 +463,11 @@ namespace PSFilterLoad.PSApi
 
 			int filterCaseIndex = filterCase - 1;
 
-			if (data.filterInfo[filterCaseIndex].inputHandling == FilterDataHandling.filterDataHandlingCantFilter)
+			if (data.filterInfo[filterCaseIndex].inputHandling == FilterDataHandling.CantFilter)
 			{
 				/* use the flatImage modes if the filter doesn't support the protectedTransparency cases 
 				* or image does not have any transparency */
-				if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.filterDataHandlingCantFilter || !HasTransparentAlpha()) 
+				if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.CantFilter || !HasTransparentAlpha()) 
 				{
 					switch (filterCase)
 					{
@@ -478,6 +478,7 @@ namespace PSFilterLoad.PSApi
 							filterCase = FilterCase.FlatImageWithSelection;
 							break;
 					}
+
 					return true;
 				}
 				else
@@ -874,7 +875,7 @@ namespace PSFilterLoad.PSApi
 			{
 				if (pdata.moduleEntryPoints == null)
 				{
-					pdata.module.entryPoint(FilterSelector.filterSelectorAbout, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
+					pdata.module.entryPoint(FilterSelector.About, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
 				}
 				else
 				{
@@ -885,7 +886,7 @@ namespace PSFilterLoad.PSApi
 
 						pluginEntryPoint ep = (pluginEntryPoint)Marshal.GetDelegateForFunctionPointer(ptr, typeof(pluginEntryPoint));
 
-						ep(FilterSelector.filterSelectorAbout, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
+						ep(FilterSelector.About, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
 
 						GC.KeepAlive(ep);
 					}
@@ -920,7 +921,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before FilterSelectorStart");
 #endif
 
-			pdata.module.entryPoint(FilterSelector.filterSelectorStart, filterRecordPtr, ref dataPtr, ref result);
+			pdata.module.entryPoint(FilterSelector.Start, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After FilterSelectorStart");
@@ -948,7 +949,7 @@ namespace PSFilterLoad.PSApi
 				Ping(DebugFlags.Call, "Before FilterSelectorContinue");
 #endif
 
-				pdata.module.entryPoint(FilterSelector.filterSelectorContinue, filterRecordPtr, ref dataPtr, ref result);
+				pdata.module.entryPoint(FilterSelector.Continue, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 				Ping(DebugFlags.Call, "After FilterSelectorContinue");
@@ -958,25 +959,25 @@ namespace PSFilterLoad.PSApi
 
 				if (result != PSError.noErr)
 				{
-					short saved_result = result;
+					short savedResult = result;
 					result = PSError.noErr;
 
 #if DEBUG
 					Ping(DebugFlags.Call, "Before FilterSelectorFinish");
 #endif
 
-					pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref dataPtr, ref result);
+					pdata.module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 					Ping(DebugFlags.Call, "After FilterSelectorFinish");
 #endif
 
 					FreeLibrary(ref pdata);
-					errorMessage = GetErrorMessage(saved_result);
+					errorMessage = GetErrorMessage(savedResult);
 
 #if DEBUG
 					string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
-					Ping(DebugFlags.Error, string.Format("filterSelectorContinue returned result code: {0}({1})", message, saved_result));
+					Ping(DebugFlags.Error, string.Format("filterSelectorContinue returned result code: {0}({1})", message, savedResult));
 #endif
 
 					return false;
@@ -984,7 +985,7 @@ namespace PSFilterLoad.PSApi
 
 				if (AbortProc() != 0)
 				{
-					pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref dataPtr, ref result);
+					pdata.module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
 
 					if (result != PSError.noErr)
 					{
@@ -1005,7 +1006,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before FilterSelectorFinish");
 #endif
 
-			pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref dataPtr, ref result);
+			pdata.module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After FilterSelectorFinish");
@@ -1030,7 +1031,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before filterSelectorParameters");
 #endif
 
-			pdata.module.entryPoint(FilterSelector.filterSelectorParameters, filterRecordPtr, ref dataPtr, ref result);
+			pdata.module.entryPoint(FilterSelector.Parameters, filterRecordPtr, ref dataPtr, ref result);
 #if DEBUG
 			unsafe
 			{
@@ -1103,7 +1104,7 @@ namespace PSFilterLoad.PSApi
 			else
 			{
 				filterRecord->inLayerPlanes = 3;
-				filterRecord->inTransparencyMask = 1; // Paint.NET is always PixelFormat.Format32bppArgb			
+				filterRecord->inTransparencyMask = 1;
 				filterRecord->inNonLayerPlanes = 0;
 			}
 			filterRecord->inLayerMasks = 0;
@@ -1162,7 +1163,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			Ping(DebugFlags.Call, "Before filterSelectorPrepare");
 #endif
-			pdata.module.entryPoint(FilterSelector.filterSelectorPrepare, filterRecordPtr, ref dataPtr, ref result);
+			pdata.module.entryPoint(FilterSelector.Prepare, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After filterSelectorPrepare");
@@ -2519,6 +2520,11 @@ namespace PSFilterLoad.PSApi
 							info.colorComponents[0] = color.R;
 							info.colorComponents[1] = color.G;
 							info.colorComponents[2] = color.B;
+
+                            if (info.resultSpace == ColorSpace.ChosenSpace)
+                            {
+                                info.resultSpace = ColorSpace.RGBSpace;
+                            }
 
 							err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
 
@@ -5240,7 +5246,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->channelPortProcs = channelPortsPtr;
 			filterRecord->documentInfo = readDocumentPtr;
 
-			filterRecord->sSpBasic = IntPtr.Zero;
+			filterRecord->sSPBasic = IntPtr.Zero;
 			filterRecord->plugInRef = IntPtr.Zero;
 			filterRecord->depth = 8;
 		}

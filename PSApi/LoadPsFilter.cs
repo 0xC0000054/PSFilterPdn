@@ -982,6 +982,7 @@ namespace PSFilterLoad.PSApi
 						filterCase = FilterCase.FlatImageWithSelection;
 						break;
 				}
+
 				return true;
 			}
 
@@ -1002,6 +1003,7 @@ namespace PSFilterLoad.PSApi
 							filterCase = FilterCase.FlatImageWithSelection;
 							break;
 					}
+
 					return true;
 				}
 				else
@@ -1403,7 +1405,7 @@ namespace PSFilterLoad.PSApi
 			{
 				if (pdata.moduleEntryPoints == null)
 				{
-					pdata.module.entryPoint(FilterSelector.filterSelectorAbout, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
+					pdata.module.entryPoint(FilterSelector.About, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
 				}
 				else
 				{
@@ -1414,7 +1416,7 @@ namespace PSFilterLoad.PSApi
 
 						pluginEntryPoint ep = (pluginEntryPoint)Marshal.GetDelegateForFunctionPointer(ptr, typeof(pluginEntryPoint));
 
-						ep(FilterSelector.filterSelectorAbout, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
+						ep(FilterSelector.About, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
 
 						GC.KeepAlive(ep);
 					}
@@ -1449,7 +1451,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before FilterSelectorStart");
 #endif
 
-			pdata.module.entryPoint(FilterSelector.filterSelectorStart, filterRecordPtr, ref dataPtr, ref result);
+			pdata.module.entryPoint(FilterSelector.Start, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After FilterSelectorStart");
@@ -1478,7 +1480,7 @@ namespace PSFilterLoad.PSApi
 				Ping(DebugFlags.Call, "Before FilterSelectorContinue");
 #endif
 
-				pdata.module.entryPoint(FilterSelector.filterSelectorContinue, filterRecordPtr, ref dataPtr, ref result);
+				pdata.module.entryPoint(FilterSelector.Continue, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 				Ping(DebugFlags.Call, "After FilterSelectorContinue");
@@ -1496,7 +1498,7 @@ namespace PSFilterLoad.PSApi
 					Ping(DebugFlags.Call, "Before FilterSelectorFinish");
 #endif
 
-					pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref dataPtr, ref result);
+					pdata.module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 					Ping(DebugFlags.Call, "After FilterSelectorFinish");
@@ -1513,7 +1515,7 @@ namespace PSFilterLoad.PSApi
 
 				if (AbortProc() != 0)
 				{
-					pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref dataPtr, ref result);
+					pdata.module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
 
 					if (result != PSError.noErr)
 					{
@@ -1532,7 +1534,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			result = PSError.noErr;
 
-			pdata.module.entryPoint(FilterSelector.filterSelectorFinish, filterRecordPtr, ref dataPtr, ref result);
+			pdata.module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After FilterSelectorFinish");
@@ -1559,7 +1561,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before filterSelectorParameters");
 #endif
 
-			pdata.module.entryPoint(FilterSelector.filterSelectorParameters, filterRecordPtr, ref dataPtr, ref result);
+			pdata.module.entryPoint(FilterSelector.Parameters, filterRecordPtr, ref dataPtr, ref result);
 #if DEBUG
 			unsafe
 			{
@@ -1689,7 +1691,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			Ping(DebugFlags.Call, "Before filterSelectorPrepare");
 #endif
-			pdata.module.entryPoint(FilterSelector.filterSelectorPrepare, filterRecordPtr, ref dataPtr, ref result);
+			pdata.module.entryPoint(FilterSelector.Prepare, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After filterSelectorPrepare");
@@ -3274,7 +3276,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe short ColorServicesProc(ref ColorServicesInfo info)
 		{
 #if DEBUG
-            Ping(DebugFlags.ColorServices, string.Format("selector: {0}", info.selector));
+			Ping(DebugFlags.ColorServices, string.Format("selector: {0}", info.selector));
 #endif
 
 			short err = PSError.noErr;
@@ -3294,6 +3296,11 @@ namespace PSFilterLoad.PSApi
 							info.colorComponents[0] = color.R;
 							info.colorComponents[1] = color.G;
 							info.colorComponents[2] = color.B;
+
+							if (info.resultSpace == ColorSpace.ChosenSpace)
+							{
+								info.resultSpace = ColorSpace.RGBSpace;
+							}
 
 							err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
 
@@ -5810,7 +5817,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->channelPortProcs = channelPortsPtr;
 			filterRecord->documentInfo = readDocumentPtr;
 
-			filterRecord->sSpBasic = IntPtr.Zero;
+			filterRecord->sSPBasic = IntPtr.Zero;
 			filterRecord->plugInRef = IntPtr.Zero;
 			filterRecord->depth = 8;
 		}
