@@ -919,19 +919,23 @@ namespace PSFilterPdn
 			}
 		}
 
-		private static Version PDNVersion;
-
 		/// <summary>
-		/// Checks if the 64-bit filter is is incompatible, if so use the 32-bit version.
+		/// Checks if the 64-bit filter is incompatible, if so use the 32-bit version will be used.
 		/// </summary>
 		/// <param name="plugin">The plugin to check.</param>
 		/// <returns>
-		///   <c>true</c> if the 64-bit filter is is incompatible; otherwise, <c>false</c>.
+		///   <c>true</c> if the 64-bit filter is incompatible; otherwise, <c>false</c>.
 		/// </returns>
 		private static bool Is64BitFilterIncompatible(PluginData plugin)
 		{
-			// Many Topaz filters crash with a NullReferenceException when run under .NET 3.5, so we use the 32-bit versions unless we are running on Paint.NET 4.0 or later.
-			if (plugin.category == "Topaz Labs" && PDNVersion.Major < 4)
+			// Many Topaz filters crash with a NullReferenceException when run under .NET 3.5, so we use the 32-bit versions unless we are running on .NET 4.0 or later.
+			if (plugin.category == "Topaz Labs" && Environment.Version.Major < 4)
+			{
+				return true;
+			}
+
+			// The 64-bit version of SuperBladePro crashes with an access violation.
+			if (plugin.category == "Flaming Pear" && plugin.title.StartsWith("SuperBladePro", StringComparison.Ordinal))
 			{
 				return true;
 			}
@@ -951,17 +955,24 @@ namespace PSFilterPdn
 			{
 				if (parent.Nodes.ContainsKey(data.title))
 				{
-					if (Is64BitFilterIncompatible(data))
-					{
-						return data.runWith32BitShim;
-					}
-
 					TreeNode node = parent.Nodes[data.title];
 					PluginData menuData = (PluginData)node.Tag;
+					
+					if (Is64BitFilterIncompatible(data))
+					{
+						// If the 64-bit filter in the menu is incompatible remove it and use the 32-bit version.
+						if (!menuData.runWith32BitShim && data.runWith32BitShim)
+						{
+							parent.Nodes.Remove(node);
+						}
 
+						return data.runWith32BitShim;
+					}
+					
 					if (menuData.runWith32BitShim && !data.runWith32BitShim)
 					{
-						parent.Nodes.Remove(node); // if the new plugin is 64-bit and the old one is not remove the old one and use the 64-bit one.
+						// If the new plugin is 64-bit and the old one is not remove the old one and use the 64-bit one.
+						parent.Nodes.Remove(node); 
 
 						return true;
 					}
@@ -1189,7 +1200,6 @@ namespace PSFilterPdn
 		{
 			base.OnLoad(e);
 
-			PDNVersion = base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().AppVersion;
 			try
 			{
 				this.LoadSettings();

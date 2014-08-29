@@ -3256,13 +3256,23 @@ namespace PSFilterLoad.PSApi
 #endif
 
 			if (platformContext == IntPtr.Zero || source.rowBytes == 0 || source.baseAddr == IntPtr.Zero)
+			{
 				return PSError.filterBadParameters;
+			}
 
 			int width = srcRect.right - srcRect.left;
 			int height = srcRect.bottom - srcRect.top;
 			int nplanes = ((FilterRecord*)filterRecordPtr.ToPointer())->planes;
 
-			SetupTempDisplaySurface(width, height, (source.version >= 1 && source.masks != IntPtr.Zero));
+			bool hasTransparencyMask = source.version >= 1 && source.masks != IntPtr.Zero;
+
+			// Ignore the alpha plane if the PSPixelMap does not have a transparency mask.  
+			if (!hasTransparencyMask && nplanes == 4)
+			{
+				nplanes = 3;
+			}
+
+			SetupTempDisplaySurface(width, height, hasTransparencyMask);
 
 			void* baseAddr = source.baseAddr.ToPointer();
 
@@ -5713,11 +5723,11 @@ namespace PSFilterLoad.PSApi
 					channelReadDescPtrs = null;
 				}
 
-                if (basicSuitePtr != IntPtr.Zero)
-                {
-                    Memory.Free(basicSuitePtr);
-                    basicSuitePtr = IntPtr.Zero;
-                }
+				if (basicSuitePtr != IntPtr.Zero)
+				{
+					Memory.Free(basicSuitePtr);
+					basicSuitePtr = IntPtr.Zero;
+				}
 
 				if (filterRecordPtr != IntPtr.Zero)
 				{

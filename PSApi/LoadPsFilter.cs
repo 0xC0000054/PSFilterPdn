@@ -34,19 +34,21 @@ namespace PSFilterLoad.PSApi
 
 		#region EnumRes
 #if DEBUG
-		private static bool IS_INTRESOURCE(IntPtr value)
+		private static DebugFlags debugFlags;
+		static void Ping(DebugFlags flag, string message)
 		{
-			if (value.ToInt64() > ushort.MaxValue)
+			if ((debugFlags & flag) == flag)
 			{
-				return false;
+				StackFrame sf = new StackFrame(1);
+				string name = sf.GetMethod().Name;
+				Debug.WriteLine(string.Format("Function: {0},  {1}\r\n", name, message));
 			}
-			return true;
 		}
-		private static string GET_RESOURCE_NAME(IntPtr value)
+
+		private static string PropToString(uint prop)
 		{
-			if (IS_INTRESOURCE(value))
-				return value.ToString();
-			return Marshal.PtrToStringUni(value);
+			byte[] bytes = BitConverter.GetBytes(prop);
+			return new string(new char[] { (char)bytes[3], (char)bytes[2], (char)bytes[1], (char)bytes[0] });
 		}
 #endif
 		/// <summary>
@@ -283,7 +285,7 @@ namespace PSFilterLoad.PSApi
 			if (hRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("FindResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumFileName));
+				Debug.WriteLine(string.Format("FindResource failed for PiPL in {0}", enumFileName));
 #endif
 				return true;
 			}
@@ -292,7 +294,7 @@ namespace PSFilterLoad.PSApi
 			if (loadRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LoadResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumFileName));
+				Debug.WriteLine(string.Format("LoadResource failed for PiPL in {0}", enumFileName));
 #endif
 				return true;
 			}
@@ -301,7 +303,7 @@ namespace PSFilterLoad.PSApi
 			if (lockRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LockResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumFileName));
+				Debug.WriteLine(string.Format("LockResource failed for PiPL in {0}", enumFileName));
 #endif
 
 				return true;
@@ -466,7 +468,7 @@ namespace PSFilterLoad.PSApi
 			if (hRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("FindResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumFileName));
+				Debug.WriteLine(string.Format("FindResource failed for PiMI in {0}", enumFileName));
 #endif
 				return true;
 			}
@@ -475,7 +477,7 @@ namespace PSFilterLoad.PSApi
 			if (loadRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LoadResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumFileName));
+				Debug.WriteLine(string.Format("LoadResource failed for PiMI in {0}", enumFileName));
 #endif
 				return true;
 			}
@@ -484,7 +486,7 @@ namespace PSFilterLoad.PSApi
 			if (lockRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LockResource failed for {0} in {1}", GET_RESOURCE_NAME(lpszName), enumFileName));
+				Debug.WriteLine(string.Format("LockResource failed for PiMI in {0}", enumFileName));
 #endif
 				return true;
 			}
@@ -542,7 +544,7 @@ namespace PSFilterLoad.PSApi
 			if (filterRes == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("FindResource failed for {0} in {1}", "_8BFM", enumFileName));
+				Debug.WriteLine(string.Format("FindResource failed for _8BFM in {0}", enumFileName));
 #endif
 				return true;
 			}
@@ -552,7 +554,7 @@ namespace PSFilterLoad.PSApi
 			if (filterLoad == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LoadResource failed for {0} in {1}", "_8BFM", enumFileName));
+				Debug.WriteLine(string.Format("LoadResource failed for {_8BFM in {0}", enumFileName));
 #endif
 				return true;
 			}
@@ -562,7 +564,7 @@ namespace PSFilterLoad.PSApi
 			if (filterLock == IntPtr.Zero)
 			{
 #if DEBUG
-				Debug.WriteLine(string.Format("LockResource failed for {0} in {1}", "_8BFM", enumFileName));
+				Debug.WriteLine(string.Format("LockResource failed for _8BFM in {0}", enumFileName));
 #endif
 				return true;
 			}
@@ -588,25 +590,6 @@ namespace PSFilterLoad.PSApi
 		private static string enumFileName;
 
 		#endregion
-
-#if DEBUG
-		private static DebugFlags debugFlags;
-		static void Ping(DebugFlags flag, string message)
-		{
-			if ((debugFlags & flag) == flag)
-			{
-				StackFrame sf = new StackFrame(1);
-				string name = sf.GetMethod().Name;
-				Debug.WriteLine(string.Format("Function: {0},  {1}\r\n", name, message));
-			}
-		}
-
-		private static string PropToString(uint prop)
-		{
-			byte[] bytes = BitConverter.GetBytes(prop);
-			return new string(new char[] { (char)bytes[3], (char)bytes[2], (char)bytes[1], (char)bytes[0] });
-		}
-#endif
 
 		static bool RectNonEmpty(Rect16 rect)
 		{
@@ -1935,11 +1918,9 @@ namespace PSFilterLoad.PSApi
 			}
 
 			List<PluginData> pluginData = new List<PluginData>();
-
+			
+			// Use LOAD_LIBRARY_AS_DATAFILE to prevent a BadImageFormatException from being thrown if the file is a different processor architecture than the parent process.
 			SafeLibraryHandle dll = UnsafeNativeMethods.LoadLibraryExW(fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE);
-			/* Use LOAD_LIBRARY_AS_DATAFILE to prevent a BadImageFormatException from being thrown if the file
-			 * is a different processor architecture than the parent process.
-			 */
 			try
 			{
 				if (!dll.IsInvalid)
@@ -3831,7 +3812,15 @@ namespace PSFilterLoad.PSApi
 			int height = srcRect.bottom - srcRect.top;
 			int nplanes = ((FilterRecord*)filterRecordPtr.ToPointer())->planes;
 
-			SetupTempDisplaySurface(width, height, (source.version >= 1 && source.masks != IntPtr.Zero));
+			bool hasTransparencyMask = source.version >= 1 && source.masks != IntPtr.Zero;
+
+			// Ignore the alpha plane if the PSPixelMap does not have a transparency mask.  
+			if (!hasTransparencyMask && nplanes == 4)
+			{
+				nplanes = 3;
+			}
+
+			SetupTempDisplaySurface(width, height, hasTransparencyMask);
 
 			void* baseAddr = source.baseAddr.ToPointer();
 

@@ -17,7 +17,7 @@ using System.Resources;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Adobe® Photoshop® filter host plugin for Paint.NET")]
+[assembly: AssemblyTitle("Adobe® Photoshop®-compatible filter host plugin for Paint.NET")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("null54")]
@@ -42,6 +42,6 @@ using System.Resources;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.5.0")]
-[assembly: AssemblyFileVersion("1.0.5.0")]
+[assembly: AssemblyVersion("1.0.5.1")]
+[assembly: AssemblyFileVersion("1.0.5.1")]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
