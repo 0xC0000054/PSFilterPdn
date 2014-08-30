@@ -465,9 +465,8 @@ namespace PSFilterLoad.PSApi
 
 		private bool IgnoreAlphaChannel(PluginData data)
 		{
-			// some filters do not handle the alpha channel correctly despite what their filterInfo says.
-			if (data.filterInfo == null || data.category == "L'amico Perry" || data.category == "Imagenomic" || 
-				data.category.Contains("Vizros") && data.title.Contains("Lake") || data.category == "PictureCode" || data.category == "Axion")
+			// Some filters do not handle the alpha channel correctly despite what their filterInfo says.
+			if (data.filterInfo == null || data.category == "Axion")
 			{
 				switch (filterCase)
 				{
@@ -486,8 +485,7 @@ namespace PSFilterLoad.PSApi
 
 			if (data.filterInfo[filterCaseIndex].inputHandling == FilterDataHandling.CantFilter)
 			{
-				/* use the flatImage modes if the filter doesn't support the protectedTransparency cases 
-				* or image does not have any transparency */
+				// Use the flatImage modes if the filter doesn't support the protectedTransparency cases or image does not have any transparency.
 				if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.CantFilter || !HasTransparentAlpha()) 
 				{
 					switch (filterCase)
