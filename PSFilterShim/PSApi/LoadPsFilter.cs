@@ -5064,6 +5064,10 @@ namespace PSFilterLoad.PSApi
 
 				return 0;
 			}
+			else if (token2 == IntPtr.Zero)
+			{
+				return 0;
+			}
 
 			// Compare two null-terminated ASCII strings for equality.
 			byte* src = (byte*)token1.ToPointer();
