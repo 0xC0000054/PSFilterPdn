@@ -3893,7 +3893,8 @@ namespace PSFilterLoad.PSApi
 				}
 				else
 				{
-					if ((source.version >= 1) && source.masks != IntPtr.Zero) // use the mask for the Protected Transparency cases 
+					// Apply the transparency mask for the Protected Transparency cases.
+					if (hasTransparencyMask && (this.filterCase == FilterCase.ProtectedTransparencyNoSelection || this.filterCase == FilterCase.ProtectedTransparencyWithSelection))
 					{
 						PSPixelMask* mask = (PSPixelMask*)source.masks.ToPointer();
 
