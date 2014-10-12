@@ -30,7 +30,7 @@ namespace PaintDotNet.SystemLayer
             IntPtr HeapHandle,
             int HeapInformationClass,
             void* HeapInformation,
-            uint HeapInformationLength
+            UIntPtr HeapInformationLength
             );
 
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
