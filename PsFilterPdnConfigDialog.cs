@@ -1040,7 +1040,7 @@ namespace PSFilterPdn
 							{
 								if (File.Exists(linkPath))
 								{
-									AddFilter(path, ref nodes);
+									AddFilter(linkPath, ref nodes);
 								}
 							}
 						}
