@@ -21,6 +21,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
@@ -29,42 +30,62 @@ namespace PSFilterLoad.PSApi
 	{
 		private static IntPtr hHeap;
 
-		static Memory()
+		/// <summary>
+		/// Initializes the heap.
+		/// </summary>
+		/// <exception cref="System.ComponentModel.Win32Exception">GetProcessHeap returned NULL</exception>
+		private static void InitializeHeap()
 		{
 			hHeap = SafeNativeMethods.GetProcessHeap();
+
+			if (hHeap == IntPtr.Zero)
+			{
+				int error = Marshal.GetLastWin32Error();
+				throw new System.ComponentModel.Win32Exception(error, string.Format(CultureInfo.InvariantCulture, "GetProcessHeap returned NULL, LastError = {0}", error));
+			}
 		}
 
-		public static IntPtr Allocate(long size, bool zeroMemory)
+		/// <summary>
+		/// Allocates a block of memory from the default process heap.
+		/// </summary>
+		/// <param name="size">The size of the memory to allocate.</param>
+		/// <param name="zeroFill">if <c>true</c> the allocated memory will be set to zero.</param>
+		/// <returns>A pointer to the allocated block of memory.</returns>
+		public static IntPtr Allocate(long size, bool zeroFill)
 		{
 			if (hHeap == IntPtr.Zero)
 			{
-				throw new InvalidOperationException("heap has already been destroyed");
+				InitializeHeap();
 			}
 
 			IntPtr block = IntPtr.Zero;
 			try
 			{
 				UIntPtr bytes = new UIntPtr((ulong)size);
-				block = SafeNativeMethods.HeapAlloc(hHeap, zeroMemory ? 8U : 0U, bytes);
+				block = SafeNativeMethods.HeapAlloc(hHeap, zeroFill ? NativeConstants.HEAP_ZERO_MEMORY : 0U, bytes);
 			}
-			catch (OverflowException)
+			catch (OverflowException ex)
 			{
-				throw new OutOfMemoryException();
+				throw new OutOfMemoryException(string.Format(CultureInfo.InvariantCulture, "Overflow while trying to allocate {0:N} bytes", size), ex);
 			}
 			if (block == IntPtr.Zero)
 			{
-				throw new OutOfMemoryException();
+				throw new OutOfMemoryException(string.Format(CultureInfo.InvariantCulture, "HeapAlloc returned a null pointer while trying to allocate {0:N} bytes", size));
 			}
-			
+
 			if (size > 0L)
 			{
-				GC.AddMemoryPressure((long)size);
+				GC.AddMemoryPressure(size);
 			}
-			
-			return block;
 
+			return block;
 		}
 
+		/// <summary>
+		/// Allocates a block of memory with the PAGE_EXECUTE permission.
+		/// </summary>
+		/// <param name="size">The size of the memory to allocate.</param>
+		/// <returns>A pointer to the allocated block of memory.</returns>
 		public static IntPtr AllocateExecutable(long size)
 		{
 			IntPtr block = SafeNativeMethods.VirtualAlloc(IntPtr.Zero, new UIntPtr((ulong)size), NativeConstants.MEM_COMMIT, NativeConstants.PAGE_EXECUTE_READWRITE);
@@ -74,7 +95,7 @@ namespace PSFilterLoad.PSApi
 				throw new OutOfMemoryException("VirtualAlloc returned a null pointer");
 			}
 
-			if (size > 0)
+			if (size > 0L)
 			{
 				GC.AddMemoryPressure(size);
 			}
@@ -82,16 +103,20 @@ namespace PSFilterLoad.PSApi
 			return block;
 		}
 
+		/// <summary>
+		/// Frees the block of memory allocated by Allocate().
+		/// </summary>
+		/// <param name="hMem">The block to free.</param>
 		public static void Free(IntPtr hMem)
 		{
 			if (hHeap != IntPtr.Zero)
 			{
-				long size = (long)SafeNativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
+				long size = Size(hMem);
 				if (!SafeNativeMethods.HeapFree(hHeap, 0, hMem))
 				{
 					int error = Marshal.GetLastWin32Error();
 
-					throw new InvalidOperationException(string.Format("HeapFree returned an error {0}", error.ToString("X8", System.Globalization.CultureInfo.InvariantCulture)));
+					throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "HeapFree returned an error 0x{0:X8}", error));
 				}
 
 				if (size > 0L)
@@ -101,12 +126,17 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
+		/// <summary>
+		/// Frees the block of memory allocated by AllocateExecutable().
+		/// </summary>
+		/// <param name="hMem">The block to free.</param>
+		/// <param name="size">The size of the allocated block.</param>
 		public static void FreeExecutable(IntPtr hMem, long size)
 		{
 			if (!SafeNativeMethods.VirtualFree(hMem, UIntPtr.Zero, NativeConstants.MEM_RELEASE))
 			{
-				int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-				throw new InvalidOperationException("VirtualFree returned an error: " + error.ToString(System.Globalization.CultureInfo.InvariantCulture));
+				int error = Marshal.GetLastWin32Error();
+				throw new InvalidOperationException("VirtualFree returned an error: " + error.ToString(CultureInfo.InvariantCulture));
 			}
 
 			if (size > 0L)
@@ -115,14 +145,20 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
+		/// <summary>
+		/// Resizes the memory block previously allocated by Allocate().
+		/// </summary>
+		/// <param name="pv">The pointer to the block to resize.</param>
+		/// <param name="newSize">The new size of the block.</param>
+		/// <returns>The pointer to the resized block.</returns>
 		public static IntPtr ReAlloc(IntPtr pv, long newSize)
 		{
 			if (hHeap == IntPtr.Zero)
 			{
-				throw new InvalidOperationException("heap has already been destroyed");
+				InitializeHeap();
 			}
-			IntPtr block = IntPtr.Zero;
 
+			IntPtr block = IntPtr.Zero;
 			long oldSize = Size(pv);
 
 			try
@@ -130,13 +166,13 @@ namespace PSFilterLoad.PSApi
 				UIntPtr bytes = new UIntPtr((ulong)newSize);
 				block = SafeNativeMethods.HeapReAlloc(hHeap, 0U, pv, bytes);
 			}
-			catch (OverflowException)
+			catch (OverflowException ex)
 			{
-				throw new OutOfMemoryException();
+				throw new OutOfMemoryException(string.Format(CultureInfo.InvariantCulture, "Overflow while trying to allocate {0:N} bytes", newSize), ex);
 			}
 			if (block == IntPtr.Zero)
 			{
-				throw new OutOfMemoryException();
+				throw new OutOfMemoryException(string.Format(CultureInfo.InvariantCulture, "HeapAlloc returned a null pointer while trying to allocate {0:N} bytes", newSize));
 			}
 
 			if (oldSize > 0L)
@@ -146,15 +182,19 @@ namespace PSFilterLoad.PSApi
 
 			if (newSize > 0)
 			{
-				GC.AddMemoryPressure((long)newSize);
+				GC.AddMemoryPressure(newSize);
 			}
 
 			return block;
 		}
 
+		/// <summary>
+		/// Retrieves the size of the allocated memory block
+		/// </summary>
+		/// <param name="hMem">The block pointer to retrieve the size of.</param>
+		/// <returns>The size of the allocated block.</returns>
 		public static long Size(IntPtr hMem)
 		{
-
 			if (hHeap != IntPtr.Zero)
 			{
 				long size = (long)SafeNativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
