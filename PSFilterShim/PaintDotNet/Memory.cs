@@ -10,11 +10,7 @@
 //#define REPORTLEAKS
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Windows.Forms;
+using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace PaintDotNet.SystemLayer
@@ -27,25 +23,29 @@ namespace PaintDotNet.SystemLayer
     {
         private static IntPtr hHeap;
 
-        static Memory()
+        private static void CreateHeap()
         {
             hHeap = SafeNativeMethods.HeapCreate(0, UIntPtr.Zero, UIntPtr.Zero);
 
+            if (hHeap == IntPtr.Zero)
+            {
+                int error = Marshal.GetLastWin32Error();
+                throw new System.ComponentModel.Win32Exception(error, string.Format(CultureInfo.InvariantCulture, "HeapCreate returned NULL, LastError = {0}", error));
+            }
             uint info = 2;
 
             try
             {
                 // Enable the low-fragmentation heap (LFH)
-                SafeNativeMethods.HeapSetInformation(hHeap, 
+                SafeNativeMethods.HeapSetInformation(hHeap,
                     NativeConstants.HeapCompatibilityInformation,
-                    (void *)&info,
-                    sizeof(uint));
-            } 
-
+                    (void*)&info,
+                    new UIntPtr(4UL));
+            }
             catch (Exception)
             {
                 // If that method isn't available, like on Win2K, don't worry about it.
-            }                    
+            }          
         }
 
         public static void DestroyHeap()
@@ -68,24 +68,21 @@ namespace PaintDotNet.SystemLayer
         {
             if (hHeap == IntPtr.Zero)
             {
-                throw new InvalidOperationException("heap has already been destroyed");
+                CreateHeap();
             }
-            else
+            
+            IntPtr block = SafeNativeMethods.HeapAlloc(hHeap, 0, new UIntPtr(bytes));
+            if (block == IntPtr.Zero)
             {
-                IntPtr block = SafeNativeMethods.HeapAlloc(hHeap, 0, new UIntPtr(bytes));
-
-                if (block == IntPtr.Zero)
-                {
-                    throw new OutOfMemoryException("HeapAlloc returned a null pointer");
-                }
-
-                if (bytes > 0)
-                {
-                    GC.AddMemoryPressure((long)bytes);
-                }
-
-                return block;
+                throw new OutOfMemoryException("HeapAlloc returned a null pointer");
             }
+            
+            if (bytes > 0)
+            {
+                GC.AddMemoryPressure((long)bytes);
+            }
+
+            return block;
         }
 
         /// <summary>
@@ -132,8 +129,8 @@ namespace PaintDotNet.SystemLayer
 
                 if (!result)
                 {
-                    int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-                    throw new InvalidOperationException("HeapFree returned an error: " + error.ToString());
+                    int error = Marshal.GetLastWin32Error();
+                    throw new InvalidOperationException("HeapFree returned an error: " + error.ToString(CultureInfo.InvariantCulture));
                 }
 
                 if (bytes > 0)
@@ -160,8 +157,8 @@ namespace PaintDotNet.SystemLayer
 
             if (!result)
             {
-                int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-                throw new InvalidOperationException("VirtualFree returned an error: " + error.ToString());
+                int error = Marshal.GetLastWin32Error();
+                throw new InvalidOperationException("VirtualFree returned an error: " + error.ToString(CultureInfo.InvariantCulture));
             }
 
             if (bytes > 0)
