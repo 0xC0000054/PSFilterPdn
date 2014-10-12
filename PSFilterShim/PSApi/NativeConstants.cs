@@ -18,6 +18,8 @@ namespace PSFilterLoad.PSApi
 
         public const int LOAD_LIBRARY_AS_DATAFILE = 2;
 
+        public const uint HEAP_ZERO_MEMORY = 8;
+
         public const int PAGE_NOACCESS = 1;
         public const int PAGE_READONLY = 2;
         public const int PAGE_READWRITE = 4;

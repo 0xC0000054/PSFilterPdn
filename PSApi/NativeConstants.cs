@@ -18,6 +18,8 @@ namespace PSFilterLoad.PSApi
 
         public const uint LOAD_LIBRARY_AS_DATAFILE = 2;
 
+        public const uint HEAP_ZERO_MEMORY = 8;
+
         public const int PAGE_NOACCESS = 1;
         public const int PAGE_READONLY = 2;
         public const int PAGE_READWRITE = 4;
@@ -32,7 +34,5 @@ namespace PSFilterLoad.PSApi
 
         public const uint MEM_COMMIT = 0x1000;
         public const uint MEM_RELEASE = 0x8000;
-
-        public const uint SEM_FAILCRITICALERRORS = 1;
     }
 }
