@@ -103,27 +103,45 @@ namespace PSFilterLoad.PSApi
             public const byte hostSupportsFractionalSampling = 2;
         }
 
-        /// <summary>
-        /// The InterpolationMethod constants used by PSProperties.propInterpolationMethod 
-        /// </summary>
-        internal static class InterpolationMethod
-        {
-            public const int NearestNeghbor = 1;
-            public const int Bilinear = 2;
-            public const int Bicubic = 3;
-        }
 
         /// <summary>
-        /// The ruler constants used by PSProperties.propRulerUnits.
+        /// The constants used by the Property suite.
         /// </summary>
-        internal static class RulerUnits
+        internal static class Properties
         {
-            public const int Pixels = 0;
-            public const int Inches = 1;
-            public const int Centimeters = 2;
-            public const int Points = 3;
-            public const int Picas = 4;
-            public const int Percent = 5;
+            /// <summary>
+            /// The default big nudge distance, 10 pixels.
+            /// </summary>
+            public const int BigNudgeDistance = 10;
+            /// <summary>
+            /// The default major grid size.
+            /// </summary>
+            public const int GridMajor = 1;
+            /// <summary>
+            /// The default minor grid size.
+            /// </summary>
+            public const int GridMinor = 4;
+            /// <summary>
+            /// The index that is used when a document does not contain any paths.
+            /// </summary>
+            public const int NoPathIndex = -1;
+
+            internal static class InterpolationMethod
+            {
+                public const int NearestNeghbor = 1;
+                public const int Bilinear = 2;
+                public const int Bicubic = 3;
+            }
+
+            internal static class RulerUnits
+            {
+                public const int Pixels = 0;
+                public const int Inches = 1;
+                public const int Centimeters = 2;
+                public const int Points = 3;
+                public const int Picas = 4;
+                public const int Percent = 5;
+            }
         }
 
         /// <summary>
