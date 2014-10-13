@@ -30,7 +30,6 @@ namespace PSFilterPdn
     [PluginSupportInfo(typeof(PluginSupportInfo))]
     public sealed class PSFilterPdnEffect : Effect
     {
-
         public static string StaticName
         {
             get
@@ -48,6 +47,8 @@ namespace PSFilterPdn
         }
 
         private bool repeatEffect;
+        private Thread filterThread;
+        private static ManualResetEvent filterDone;
 
         public PSFilterPdnEffect()
             : base(PSFilterPdnEffect.StaticName, PSFilterPdnEffect.StaticIcon, EffectFlags.Configurable)
@@ -61,7 +62,7 @@ namespace PSFilterPdn
         /// The function that the Photoshop filters can poll to check if to abort.
         /// </summary>
         /// <returns>The effect's IsCancelRequested property as a byte.</returns>
-        private byte AbortFunc()
+        private byte AbortCallback()
         {
             if (base.IsCancelRequested)
             {
@@ -100,10 +101,9 @@ namespace PSFilterPdn
             return null;
         }
 
-        private const string endpointName = "net.pipe://localhost/PSFilterShim/ShimData";
         private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token, IWin32Window window)
         {
-            // check that PSFilterShim exists first thing and abort if it does not.
+            // Check that PSFilterShim exists first thing and abort if it does not.
             string shimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
 
             if (!File.Exists(shimPath))
@@ -113,10 +113,10 @@ namespace PSFilterPdn
             }
 
             string userDataPath = base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
-            string src = Path.Combine(userDataPath, "proxysourceimg.png");
-            string dest = Path.Combine(userDataPath, "proxyresultimg.png");
-            string parmDataFileName = Path.Combine(userDataPath, "filterParameters.dat");
-            string resourceDataFileName = Path.Combine(userDataPath, "pseudoResources.dat");
+            string srcFileName = Path.Combine(userDataPath, "proxysource.png");
+            string destFileName = Path.Combine(userDataPath, "proxyresult.png");
+            string parameterDataFileName = Path.Combine(userDataPath, "parameters.dat");
+            string resourceDataFileName = Path.Combine(userDataPath, "PseudoResources.dat");
             string regionFileName = string.Empty;
 
             FilterCaseInfo[] fci = GetFilterCaseInfoFromString(token.FilterCaseInfo);
@@ -149,19 +149,19 @@ namespace PSFilterPdn
             bool proxyResult;
             string proxyErrorMessage;
 
-            PSFilterShimService service = new PSFilterShimService(new Func<byte>(AbortFunc))
+            PSFilterShimService service = new PSFilterShimService(new Func<byte>(AbortCallback))
             {
                 isRepeatEffect = true,
                 showAboutDialog = false,
-                sourceFileName = src,
-                destFileName = dest,
+                sourceFileName = srcFileName,
+                destFileName = destFileName,
                 pluginData = pluginData,
                 filterRect = selection,
                 parentHandle = window.Handle,
                 primary = base.EnvironmentParameters.PrimaryColor.ToColor(),
                 secondary = base.EnvironmentParameters.SecondaryColor.ToColor(),
                 regionFileName = regionFileName,
-                parameterDataFileName = parmDataFileName,
+                parameterDataFileName = parameterDataFileName,
                 resourceFileName = resourceDataFileName,
                 errorCallback = delegate(string data)
                                 {
@@ -174,7 +174,7 @@ namespace PSFilterPdn
 
             try
             {
-                using (FileStream fs = new FileStream(src, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (FileStream fs = new FileStream(srcFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     using (Bitmap bmp = base.EnvironmentParameters.SourceSurface.CreateAliasedBitmap())
                     {
@@ -182,7 +182,7 @@ namespace PSFilterPdn
                     }
                 }
 
-                using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     BinaryFormatter bf = new BinaryFormatter();
                     bf.Serialize(fs, token.FilterParameters);
@@ -198,10 +198,9 @@ namespace PSFilterPdn
                     }
                 }
 
+                ProcessStartInfo psi = new ProcessStartInfo(shimPath, PSFilterShimServer.EndpointName) { CreateNoWindow = true, UseShellExecute = false };
 
-                ProcessStartInfo psi = new ProcessStartInfo(shimPath, endpointName) { CreateNoWindow = true, UseShellExecute = false };
-
-                proxyResult = true; // assume the filter succeeded this will be set to false if it failed
+                proxyResult = true;
                 proxyErrorMessage = string.Empty;
 
                 using (Process proxy = Process.Start(psi))
@@ -209,10 +208,9 @@ namespace PSFilterPdn
                     proxy.WaitForExit();
                 }
 
-
-                if (proxyResult && string.IsNullOrEmpty(proxyErrorMessage) && File.Exists(dest))
+                if (proxyResult && File.Exists(destFileName))
                 {
-                    using (Bitmap bmp = new Bitmap(dest))
+                    using (Bitmap bmp = new Bitmap(destFileName))
                     {
                         token.Dest = Surface.CopyFromBitmap(bmp);
                     }
@@ -221,7 +219,6 @@ namespace PSFilterPdn
                 {
                     MessageBox.Show(window, proxyErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-
             }
             catch (ArgumentException ax)
             {
@@ -237,8 +234,9 @@ namespace PSFilterPdn
             }
             finally
             {
-                File.Delete(src);
-                File.Delete(dest);
+                File.Delete(srcFileName);
+                File.Delete(destFileName);
+                File.Delete(parameterDataFileName);
                 File.Delete(resourceDataFileName);
 
                 if (!string.IsNullOrEmpty(regionFileName))
@@ -251,15 +249,13 @@ namespace PSFilterPdn
 
         }
 
-        private static ManualResetEvent filterDone;
-        private Thread filterThread;
         private void RunRepeatFilter(ref PSFilterPdnConfigToken token, IWin32Window window)
         {
             try
             {
                 using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, window.Handle))
                 {
-                    lps.SetAbortCallback(new Func<byte>(AbortFunc));
+                    lps.SetAbortCallback(new Func<byte>(AbortCallback));
 
                     FilterCaseInfo[] fci = GetFilterCaseInfoFromString(token.FilterCaseInfo);
                     PluginData pdata = new PluginData()
@@ -278,7 +274,7 @@ namespace PSFilterPdn
 
                     bool result = lps.RunPlugin(pdata, false);
 
-                    if (result && string.IsNullOrEmpty(lps.ErrorMessage))
+                    if (result)
                     {
                         token.Dest = lps.Dest.Clone();
                     }
@@ -300,9 +296,7 @@ namespace PSFilterPdn
             }
             catch (NullReferenceException nrex)
             {
-                /* the filter probably tried to access an unimplemented callback function 
-                 * without checking if it is valid.
-                */
+                // The filter probably tried to access an unimplemented callback function without checking if it is valid.
                 MessageBox.Show(window, nrex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Win32Exception w32ex)
@@ -319,7 +313,6 @@ namespace PSFilterPdn
             }
 
         }
-
 
         protected override void OnSetRenderInfo(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs)
         {
