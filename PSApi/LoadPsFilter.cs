@@ -905,8 +905,8 @@ namespace PSFilterLoad.PSApi
 
 			this.dest = new Surface(source.Width, source.Height);
 
-			this.secondaryColor = new byte[4] { eep.SecondaryColor.R, eep.SecondaryColor.G, eep.SecondaryColor.B, 0 };
-			this.primaryColor = new byte[4] { eep.PrimaryColor.R, eep.PrimaryColor.G, eep.PrimaryColor.B, 0 };
+			this.backgroundColor = new byte[4] { eep.SecondaryColor.R, eep.SecondaryColor.G, eep.SecondaryColor.B, 0 };
+			this.foregroundColor = new byte[4] { eep.PrimaryColor.R, eep.PrimaryColor.G, eep.PrimaryColor.B, 0 };
 
 			this.dpiX = this.dpiY = 96f; // Paint.NET does not expose the DPI info to Effects, assume standard monitor resolution of 96.
 
@@ -937,11 +937,11 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// The Secondary (background) color in PDN
 		/// </summary>
-		private byte[] secondaryColor;
+		private byte[] backgroundColor;
 		/// <summary>
 		/// The Primary (foreground) color in PDN
 		/// </summary>
-		private byte[] primaryColor;
+		private byte[] foregroundColor;
 
 		/// <summary>
 		/// Determines whether the source image has transparent pixels.
@@ -1802,8 +1802,7 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		/// <param name="proxyData">The PluginData to run</param>
 		/// <param name="showAbout">Show the Filter's About Box</param>
-		/// <returns>True if successful otherwise false</returns>
-		/// <exception cref="PSFilterLoad.PSApi.FilterLoadException">The Exception thrown when there is a problem with loading the Filter PiPl data.</exception>
+		/// <returns><c>true</c> if the filter completed processing; otherwise <c>false</c> if an error occurred.</returns>
 		internal bool RunPlugin(PluginData pdata, bool showAbout)
 		{
 			if (!LoadFilter(ref pdata))
@@ -1971,9 +1970,9 @@ namespace PSFilterLoad.PSApi
 			int count = pluginData.Count;
 			if (count > 1)
 			{
-				/* If the DLL contains more than one filter, add a list of all the entry points to each individual filter. 
-				 * Per the SDK only one entry point in a module will display the about box the rest are dummy calls so we must call all of them. 
-				 */
+				// If the DLL contains more than one filter, add a list of all the entry points to each individual filter. 
+				// Per the SDK only one entry point in a module will display the about box the rest are dummy calls so we must call all of them. 
+
 				string[] entryPoints = new string[count];
 				for (int i = 0; i < count; i++)
 				{
@@ -3198,14 +3197,14 @@ namespace PSFilterLoad.PSApi
 									ptr->B = ptr->G = ptr->R = 255;
 									break;
 								case FilterDataHandling.BackgroundZap:
-									ptr->R = secondaryColor[0];
-									ptr->G = secondaryColor[1];
-									ptr->B = secondaryColor[2];
+									ptr->R = backgroundColor[0];
+									ptr->G = backgroundColor[1];
+									ptr->B = backgroundColor[2];
 									break;
 								case FilterDataHandling.ForegroundZap:
-									ptr->R = primaryColor[0];
-									ptr->G = primaryColor[1];
-									ptr->B = primaryColor[2];
+									ptr->R = foregroundColor[0];
+									ptr->G = foregroundColor[1];
+									ptr->B = foregroundColor[2];
 									break;
 								default:
 									break;
@@ -3289,6 +3288,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.BufferSuite, string.Format("Buffer: {0:X8}", bufferID.ToInt64()));
 #endif
 		}
+
 		private int BufferSpaceProc()
 		{
 			return 1000000000;
@@ -3307,30 +3307,37 @@ namespace PSFilterLoad.PSApi
 
 					string name = StringFromPString(info.selectorParameter.pickerPrompt);
 
-					using (ColorPickerForm picker = new ColorPickerForm(name))
+					if (info.sourceSpace != ColorSpace.RGBSpace)
 					{
-						picker.SetColorString(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
+						err = ColorServicesConvert.Convert(info.sourceSpace, ColorSpace.RGBSpace, ref info.colorComponents);
+					}
 
-						if (picker.ShowDialog() == DialogResult.OK)
+					if (err == PSError.noErr)
+					{
+						using (ColorPickerForm picker = new ColorPickerForm(name))
 						{
-							ColorBgra color = picker.UserPrimaryColor;
-							info.colorComponents[0] = color.R;
-							info.colorComponents[1] = color.G;
-							info.colorComponents[2] = color.B;
+							picker.SetColorString(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
 
-							if (info.resultSpace == ColorSpace.ChosenSpace)
+							if (picker.ShowDialog() == DialogResult.OK)
 							{
-								info.resultSpace = ColorSpace.RGBSpace;
+								ColorBgra color = picker.UserPrimaryColor;
+								info.colorComponents[0] = color.R;
+								info.colorComponents[1] = color.G;
+								info.colorComponents[2] = color.B;
+
+								if (info.resultSpace == ColorSpace.ChosenSpace)
+								{
+									info.resultSpace = ColorSpace.RGBSpace;
+								}
+
+								err = ColorServicesConvert.Convert(ColorSpace.RGBSpace, info.resultSpace, ref info.colorComponents);
+
 							}
-
-							err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
-
-						}
-						else
-						{
-							err = PSError.userCanceledErr;
-						}
-
+							else
+							{
+								err = PSError.userCanceledErr;
+							}
+						} 
 					}
 
 					break;
@@ -3341,14 +3348,14 @@ namespace PSFilterLoad.PSApi
 					break;
 				case ColorServicesSelector.GetSpecialColor:
 
-					FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
+
 					switch (info.selectorParameter.specialColorID)
 					{
 						case SpecialColorID.BackgroundColor:
 
 							for (int i = 0; i < 4; i++)
 							{
-								info.colorComponents[i] = filterRecord->backColor[i];
+								info.colorComponents[i] = backgroundColor[i];
 							}
 
 							break;
@@ -3356,7 +3363,7 @@ namespace PSFilterLoad.PSApi
 
 							for (int i = 0; i < 4; i++)
 							{
-								info.colorComponents[i] = filterRecord->foreColor[i];
+								info.colorComponents[i] = foregroundColor[i];
 							}
 
 							break;
@@ -3364,6 +3371,12 @@ namespace PSFilterLoad.PSApi
 							err = PSError.paramErr;
 							break;
 					}
+
+					if (err == PSError.noErr)
+					{
+						err = ColorServicesConvert.Convert(ColorSpace.RGBSpace, info.resultSpace, ref info.colorComponents);
+					}
+
 					break;
 				case ColorServicesSelector.SamplePoint:
 
@@ -3376,11 +3389,8 @@ namespace PSFilterLoad.PSApi
 						info.colorComponents[1] = pixel.G;
 						info.colorComponents[2] = pixel.B;
 						info.colorComponents[3] = 0;
-						err = ColorServicesConvert.Convert(info.sourceSpace, info.resultSpace, ref info.colorComponents);
-					}
-					else
-					{
-						err = PSError.errInvalidSamplePoint;
+
+						err = ColorServicesConvert.Convert(ColorSpace.RGBSpace, info.resultSpace, ref info.colorComponents);
 					}
 
 					break;
@@ -5097,11 +5107,14 @@ namespace PSFilterLoad.PSApi
 					{
 						hMem = SafeNativeMethods.GlobalReAlloc(h, new UIntPtr((uint)newSize), NativeConstants.GPTR);
 						if (hMem == IntPtr.Zero)
+						{
 							return PSError.nilHandleErr;
+						}
 					}
 
 					return PSError.noErr;
 				}
+				
 				return PSError.nilHandleErr;
 			}
 
@@ -5119,6 +5132,7 @@ namespace PSFilterLoad.PSApi
 			{
 				return PSError.memFullErr;
 			}
+
 			return PSError.noErr;
 		}
 		private void HandleUnlockProc(IntPtr h)
@@ -5190,24 +5204,26 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.PropertySuite, string.Format("Sig: {0}, Key: {1}, Index: {2}", PropToString(signature), PropToString(key), index.ToString()));
 #endif
 			if (signature != PSConstants.kPhotoshopSignature)
+			{
 				return PSError.errPlugInHostInsufficient;
+			}
 
 			byte[] bytes = null;
 
 			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 			switch (key)
 			{
-				case PSProperties.propBigNudgeH:
-				case PSProperties.propBigNudgeV:
-					simpleProperty = new IntPtr(Int32ToFixed(10));
+				case PSProperties.BigNudgeH:
+				case PSProperties.BigNudgeV:
+					simpleProperty = new IntPtr(Int32ToFixed(PSConstants.Properties.BigNudgeDistance));
 					break;
-				case PSProperties.propCaption:
+				case PSProperties.Caption:
 					if (complexProperty != IntPtr.Zero)
 					{
 						complexProperty = HandleNewProc(0);
 					}
 					break;
-				case PSProperties.propChannelName:
+				case PSProperties.ChannelName:
 					if (index < 0 || index > (filterRecord->planes - 1))
 					{
 						return PSError.errPlugInPropertyUndefined;
@@ -5241,43 +5257,49 @@ namespace PSFilterLoad.PSApi
 					Marshal.Copy(bytes, 0, HandleLockProc(complexProperty, 0), bytes.Length);
 					HandleUnlockProc(complexProperty);
 					break;
-				case PSProperties.propCopyright:
-				case PSProperties.propCopyright2:
-					simpleProperty = new IntPtr(0);  // no copyright
+				case PSProperties.Copyright:
+				case PSProperties.Copyright2:
+					simpleProperty = new IntPtr(0);
 					break;
-				case PSProperties.propEXIFData:
-				case PSProperties.propXMPData:
+				case PSProperties.EXIFData:
+				case PSProperties.XMPData:
 					if (complexProperty != IntPtr.Zero)
 					{
+						// If the complexProperty is not IntPtr.Zero we return a valid zero byte handle, otherwise some filters will crash with an access violation.
 						complexProperty = HandleNewProc(0);
 					}
 					break;
-				case PSProperties.propGridMajor:
-					simpleProperty = new IntPtr(Int32ToFixed(1));
+				case PSProperties.GridMajor:
+					simpleProperty = new IntPtr(Int32ToFixed(PSConstants.Properties.GridMajor));
 					break;
-				case PSProperties.propGridMinor:
-					simpleProperty = new IntPtr(4);
+				case PSProperties.GridMinor:
+					simpleProperty = new IntPtr(PSConstants.Properties.GridMinor);
 					break;
-				case PSProperties.propImageMode:
+				case PSProperties.ImageMode:
 					simpleProperty = new IntPtr(filterRecord->imageMode);
 					break;
-				case PSProperties.propInterpolationMethod:
-					simpleProperty = new IntPtr(PSConstants.InterpolationMethod.NearestNeghbor);
+				case PSProperties.InterpolationMethod:
+					simpleProperty = new IntPtr(PSConstants.Properties.InterpolationMethod.NearestNeghbor);
 					break;
-				case PSProperties.propNumberOfChannels:
+				case PSProperties.NumberOfChannels:
 					simpleProperty = new IntPtr(filterRecord->planes);
 					break;
-				case PSProperties.propNumberOfPaths:
+				case PSProperties.NumberOfPaths:
 					simpleProperty = new IntPtr(0);
 					break;
-				case PSProperties.propRulerUnits:
-					simpleProperty = new IntPtr(PSConstants.RulerUnits.Pixels);
+				case PSProperties.WorkPathIndex:
+				case PSProperties.ClippingPathIndex:
+				case PSProperties.TargetPathIndex:
+					simpleProperty = new IntPtr(PSConstants.Properties.NoPathIndex);
 					break;
-				case PSProperties.propRulerOriginH:
-				case PSProperties.propRulerOriginV:
+				case PSProperties.RulerUnits:
+					simpleProperty = new IntPtr(PSConstants.Properties.RulerUnits.Pixels);
+					break;
+				case PSProperties.RulerOriginH:
+				case PSProperties.RulerOriginV:
 					simpleProperty = new IntPtr(Int32ToFixed(0));
 					break;
-				case PSProperties.propSerialString:
+				case PSProperties.SerialString:
 					bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
 					complexProperty = HandleNewProc(bytes.Length);
 
@@ -5289,14 +5311,23 @@ namespace PSFilterLoad.PSApi
 					Marshal.Copy(bytes, 0, HandleLockProc(complexProperty, 0), bytes.Length);
 					HandleUnlockProc(complexProperty);
 					break;
-				case PSProperties.propURL:
+				case PSProperties.URL:
 					if (complexProperty != IntPtr.Zero)
 					{
 						complexProperty = HandleNewProc(0);
 					}
 					break;
-				case PSProperties.propTitle:
-					bytes = Encoding.ASCII.GetBytes("temp.pdn"); // some filters just want a non empty string
+				case PSProperties.Title:
+				case PSProperties.UnicodeTitle:
+					string title = "temp.pdn"; // some filters just want a non empty string
+					if (key == PSProperties.UnicodeTitle)
+					{
+						bytes = Encoding.Unicode.GetBytes(title);
+					}
+					else
+					{
+						bytes = Encoding.ASCII.GetBytes(title); 
+					} 
 					complexProperty = HandleNewProc(bytes.Length);
 
 					if (complexProperty == IntPtr.Zero)
@@ -5307,16 +5338,16 @@ namespace PSFilterLoad.PSApi
 					Marshal.Copy(bytes, 0, HandleLockProc(complexProperty, 0), bytes.Length);
 					HandleUnlockProc(complexProperty);
 					break;
-				case PSProperties.propWatchSuspension:
+				case PSProperties.WatchSuspension:
 					simpleProperty = new IntPtr(0);
 					break;
-				case PSProperties.propDocumentWidth:
+				case PSProperties.DocumentWidth:
 					simpleProperty = new IntPtr(source.Width);
 					break;
-				case PSProperties.propDocumentHeight:
+				case PSProperties.DocumentHeight:
 					simpleProperty = new IntPtr(source.Height);
 					break;
-				case PSProperties.propToolTips:
+				case PSProperties.ToolTips:
 					simpleProperty = new IntPtr(1);
 					break;
 				default:
@@ -5334,22 +5365,24 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.PropertySuite, string.Format("Sig: {0}, Key: {1}, Index: {2}", PropToString(signature), PropToString(key), index.ToString()));
 #endif
 			if (signature != PSConstants.kPhotoshopSignature)
+			{
 				return PSError.errPlugInHostInsufficient;
+			}
 
 			switch (key)
 			{
-				case PSProperties.propBigNudgeH:
-				case PSProperties.propBigNudgeV:
-				case PSProperties.propCaption:
-				case PSProperties.propCopyright:
-				case PSProperties.propEXIFData:
-				case PSProperties.propXMPData:
-				case PSProperties.propGridMajor:
-				case PSProperties.propGridMinor:
-				case PSProperties.propRulerOriginH:
-				case PSProperties.propRulerOriginV:
-				case PSProperties.propURL:
-				case PSProperties.propWatchSuspension:
+				case PSProperties.BigNudgeH:
+				case PSProperties.BigNudgeV:
+				case PSProperties.Caption:
+				case PSProperties.Copyright:
+				case PSProperties.EXIFData:
+				case PSProperties.XMPData:
+				case PSProperties.GridMajor:
+				case PSProperties.GridMinor:
+				case PSProperties.RulerOriginH:
+				case PSProperties.RulerOriginV:
+				case PSProperties.URL:
+				case PSProperties.WatchSuspension:
 					break;
 				default:
 					return PSError.errPlugInPropertyUndefined;
@@ -6021,22 +6054,22 @@ namespace PSFilterLoad.PSApi
 			filterRecord->progressProc = Marshal.GetFunctionPointerForDelegate(progressProc);
 			filterRecord->parameters = IntPtr.Zero;
 
-			filterRecord->background.red = (ushort)((secondaryColor[0] * 65535) / 255);
-			filterRecord->background.green = (ushort)((secondaryColor[1] * 65535) / 255);
-			filterRecord->background.blue = (ushort)((secondaryColor[2] * 65535) / 255);
+			filterRecord->background.red = (ushort)((backgroundColor[0] * 65535) / 255);
+			filterRecord->background.green = (ushort)((backgroundColor[1] * 65535) / 255);
+			filterRecord->background.blue = (ushort)((backgroundColor[2] * 65535) / 255);
 
 			for (int i = 0; i < 4; i++)
 			{
-				filterRecord->backColor[i] = secondaryColor[i];
+				filterRecord->backColor[i] = backgroundColor[i];
 			}
 
-			filterRecord->foreground.red = (ushort)((primaryColor[0] * 65535) / 255);
-			filterRecord->foreground.green = (ushort)((primaryColor[1] * 65535) / 255);
-			filterRecord->foreground.blue = (ushort)((primaryColor[2] * 65535) / 255);
+			filterRecord->foreground.red = (ushort)((foregroundColor[0] * 65535) / 255);
+			filterRecord->foreground.green = (ushort)((foregroundColor[1] * 65535) / 255);
+			filterRecord->foreground.blue = (ushort)((foregroundColor[2] * 65535) / 255);
 
 			for (int i = 0; i < 4; i++)
 			{
-				filterRecord->foreColor[i] = primaryColor[i];
+				filterRecord->foreColor[i] = foregroundColor[i];
 			}
 
 			filterRecord->bufferSpace = BufferSpaceProc();
