@@ -136,7 +136,10 @@ namespace PSFilterPdn
     static class PSFilterShimServer
     {
         private static readonly Uri ServiceUri = new Uri("net.pipe://localhost/PSFilterShim");
-        private static readonly string PipeName = "ShimData";
+        private const string PipeName = "ShimData";
+
+        internal const string EndpointName = "net.pipe://localhost/PSFilterShim/ShimData";
+
 
         private static PSFilterShimService _service = null;
         private static ServiceHost _host = null;
