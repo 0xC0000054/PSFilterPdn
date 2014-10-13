@@ -30,7 +30,7 @@ namespace PSFilterPdn
         {
             get
             {
-                return ((AssemblyCopyrightAttribute)base.GetType().Assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright; 
+                return ((AssemblyCopyrightAttribute)typeof(PSFilterPdnEffect).Assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright; 
             }
         }
 
@@ -46,7 +46,7 @@ namespace PSFilterPdn
         {
             get 
             {
-                return base.GetType().Assembly.GetName().Version;
+                return typeof(PSFilterPdnEffect).Assembly.GetName().Version;
             }
         }
 
