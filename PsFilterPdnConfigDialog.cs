@@ -54,6 +54,33 @@ namespace PSFilterPdn
 		private ProgressBar filterProgressBar;
 		private LinkLabel donateLink;
 		private Button buttonCancel;
+		
+		private Surface destSurface;
+		private string category;
+		private string fileName;
+		private string entryPoint;
+		private string title;
+		private string filterCaseInfo;
+		private ParameterData filterParameters;
+		private AETEData aeteData;
+		private List<PSResource> pseudoResources;
+		private bool runWith32BitShim;
+
+		private bool proxyResult;
+		private string proxyErrorMessage;
+		private Process proxyProcess;
+		private bool proxyRunning;
+		private string srcFileName;
+		private string destFileName;
+		private string parameterDataFileName;
+		private string resourceDataFileName;
+		private string regionFileName;
+		private PluginData proxyData;
+		
+		private bool filterRunning;
+		private bool formClosePending;
+		private Dictionary<TreeNode, string> filterTreeItems;
+		private List<string> expandedNodes;
 
 		public PsFilterPdnConfigDialog()
 		{
@@ -452,7 +479,6 @@ namespace PSFilterPdn
 			this.dirTab.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
-
 		}
 
 		private void buttonOK_Click(object sender, EventArgs e)
@@ -478,15 +504,6 @@ namespace PSFilterPdn
 			}
 		}
 
-		private string category;
-		private string fileName;
-		private string entryPoint;
-		private string title;
-		private string filterCaseInfo;
-		private ParameterData filterParameters;
-		private AETEData aeteData;
-		private List<PSResource> pseudoResources;
-
 		private void UpdateProgress(int done, int total)
 		{
 			double progress = ((double)done / (double)total) * 100.0;
@@ -502,25 +519,11 @@ namespace PSFilterPdn
 			proxyErrorMessage = data;
 		}
 
-		private bool proxyResult;
-		private string proxyErrorMessage;
-
-		private Process proxyProcess;
-		private bool proxyRunning;
-		private const string endpointName = "net.pipe://localhost/PSFilterShim/ShimData";
-
-		private string srcFileName;
-		private string destFileName;
-		private string parameterDataFileName;
-		private string resourceDataFileName;
-		private string regionFileName;
-		private PluginData proxyData;
-
 		private void proxyProcess_Exited(object sender, EventArgs e)
 		{
 			if (proxyRunning)
 			{
-				this.SetProxyResultData();
+				SetProxyResultData();
 
 				File.Delete(srcFileName);
 				File.Delete(destFileName);
@@ -536,9 +539,10 @@ namespace PSFilterPdn
 				proxyRunning = false;
 			}
 		}
+
 		private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
 		{
-			// check that PSFilterShim exists first thing and abort if it does not.
+			// Check that PSFilterShim exists first thing and abort if it does not.
 			string shimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
 
 			if (!File.Exists(shimPath))
@@ -548,12 +552,11 @@ namespace PSFilterPdn
 			}
 
 			string userDataPath = base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
-			srcFileName = Path.Combine(userDataPath, "proxysourceimg.png");
-			destFileName = Path.Combine(userDataPath, "proxyresultimg.png");
-
-			parameterDataFileName = Path.Combine(userDataPath, "filterParameters.dat");
-			resourceDataFileName = Path.Combine(userDataPath, "pseudoResources.dat"); ;
-			regionFileName = string.Empty;
+			this.srcFileName = Path.Combine(userDataPath, "proxysource.png");
+			this.destFileName = Path.Combine(userDataPath, "proxyresult.png");
+			this.parameterDataFileName = Path.Combine(userDataPath, "parameters.dat");
+			this.resourceDataFileName = Path.Combine(userDataPath, "PseudoResources.dat"); ;
+			this.regionFileName = string.Empty;
 
 
 			Rectangle sourceBounds = eep.SourceSurface.Bounds;
@@ -562,7 +565,7 @@ namespace PSFilterPdn
 
 			if (selection != sourceBounds)
 			{
-				regionFileName = Path.Combine(userDataPath, "selection.dat");
+				this.regionFileName = Path.Combine(userDataPath, "selection.dat");
 				RegionDataWrapper selectedRegion = new RegionDataWrapper(eep.GetSelection(sourceBounds).GetRegionData());
 
 				using (FileStream fs = new FileStream(regionFileName, FileMode.Create, FileAccess.Write))
@@ -622,7 +625,7 @@ namespace PSFilterPdn
 				}
 
 
-				ProcessStartInfo psi = new ProcessStartInfo(shimPath, endpointName);
+				ProcessStartInfo psi = new ProcessStartInfo(shimPath, PSFilterShimServer.EndpointName);
 				psi.CreateNoWindow = true;
 				psi.UseShellExecute = false;
 
@@ -636,14 +639,8 @@ namespace PSFilterPdn
 					proxyProcess.Exited += new EventHandler(proxyProcess_Exited);
 				}
 				proxyProcess.StartInfo = psi;
-#if DEBUG
-				bool st = proxyProcess.Start();
-				Debug.WriteLine("Started = " + st.ToString());
-#else
 				proxyProcess.Start();
-#endif
 				proxyRunning = true;
-
 			}
 			catch (ArgumentException ax)
 			{
@@ -691,7 +688,7 @@ namespace PSFilterPdn
 
 				if (File.Exists(parameterDataFileName))
 				{
-					using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+					using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Open, FileAccess.Read, FileShare.None))
 					{
 						SelfBinder binder = new SelfBinder();
 						BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
@@ -701,7 +698,7 @@ namespace PSFilterPdn
 
 				if (File.Exists(resourceDataFileName))
 				{
-					using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+					using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Open, FileAccess.Read, FileShare.None))
 					{
 						SelfBinder binder = new SelfBinder();
 						BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
@@ -739,10 +736,6 @@ namespace PSFilterPdn
 
 			FinishTokenUpdate();
 		}
-
-		private Surface destSurface;
-		private bool runWith32BitShim;
-		private bool filterRunning;
 
 		private void runFilterBtn_Click(object sender, EventArgs e)
 		{
@@ -1065,8 +1058,6 @@ namespace PSFilterPdn
 			this.folderNameLbl.Text = String.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderName_Format, e.UserState);
 		}
 
-		private bool formClosePending;
-		private Dictionary<TreeNode, string> filterTreeItems;
 		private void updateFilterListBw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
 			if (!e.Cancelled)
@@ -1491,7 +1482,6 @@ namespace PSFilterPdn
 			}
 		}
 
-		private List<string> expandedNodes;
 		private void filterTree_AfterCollapse(object sender, TreeViewEventArgs e)
 		{
 			if (e.Action == TreeViewAction.Collapse)
