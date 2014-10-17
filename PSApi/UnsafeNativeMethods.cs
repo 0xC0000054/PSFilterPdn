@@ -36,12 +36,12 @@ namespace PSFilterLoad.PSApi
 
         [DllImport("kernel32.dll", EntryPoint = "LockResource")]
         internal static extern IntPtr LockResource([In()] IntPtr hGlobal);
-
+       
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         [DllImport("kernel32.dll", EntryPoint = "FreeLibrary")]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool FreeLibrary([In()] IntPtr hModule);
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, BestFitMapping = false)]
         internal static extern IntPtr GetProcAddress([In()] SafeLibraryHandle hModule, [In(), MarshalAs(UnmanagedType.LPStr)] string lpProcName);
     }
