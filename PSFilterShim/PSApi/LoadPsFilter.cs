@@ -68,11 +68,20 @@ namespace PSFilterLoad.PSApi
 		private static readonly long OTOFHandleSize = IntPtr.Size + 4L;
 		private const int OTOFSignature = 0x464f544f;
 
-		struct PSHandle
+		private struct PSHandle
 		{
 			public IntPtr pointer;
 			public int size;
+
+			public static readonly int SizeOf = Marshal.SizeOf(typeof(PSHandle));
 		}
+
+		private struct ReadChannelPtrs
+		{
+			public IntPtr address;
+			public IntPtr name;
+		}
+
 
 		#region CallbackDelegates
 
@@ -165,6 +174,8 @@ namespace PSFilterLoad.PSApi
 		#endregion
 
 		private Dictionary<IntPtr, PSHandle> handles;
+		private List<ReadChannelPtrs> channelReadDescPtrs;
+		private List<IntPtr> bufferIDs;
 
 		private IntPtr filterRecordPtr;
 
@@ -2482,8 +2493,6 @@ namespace PSFilterLoad.PSApi
 
 		}
 
-		private List<IntPtr> bufferIDs;
-
 		private short AllocateBufferProc(int size, ref IntPtr bufferID)
 		{
 #if DEBUG
@@ -2900,14 +2909,6 @@ namespace PSFilterLoad.PSApi
 #endif
 			return PSError.memFullErr;
 		}
-
-		struct ReadChannelPtrs
-		{
-			public IntPtr address;
-			public IntPtr name;
-		}
-
-		private List<ReadChannelPtrs> channelReadDescPtrs;
 
 		private unsafe void CreateReadImageDocument()
 		{
@@ -4376,7 +4377,7 @@ namespace PSFilterLoad.PSApi
 
 			try
 			{
-				handle = Memory.Allocate(Marshal.SizeOf(typeof(PSHandle)), true);
+				handle = Memory.Allocate(PSHandle.SizeOf, true);
 
 				PSHandle* hand = (PSHandle*)handle.ToPointer();
 					
@@ -4472,12 +4473,14 @@ namespace PSFilterLoad.PSApi
 					}
 					return SafeNativeMethods.GlobalLock(h);
 				}
-				else if (!IsBadReadPtr(h) && !IsBadWritePtr(h))
-				{
-					return h;
-				}
 				else
+				{
+					if (!IsBadReadPtr(h) && !IsBadWritePtr(h))
+					{
+						return h;
+					}
 					return IntPtr.Zero;
+				}
 			}
 
 #if DEBUG
@@ -4507,10 +4510,8 @@ namespace PSFilterLoad.PSApi
 						return SafeNativeMethods.GlobalSize(h).ToInt32();
 					}
 				}
-				else
-				{
-					return 0;
-				}
+				
+				return 0;
 			}
 
 			return handles[h].size;
@@ -4574,8 +4575,10 @@ namespace PSFilterLoad.PSApi
 			{
 				return PSError.memFullErr;
 			}
+
 			return PSError.noErr;
 		}
+
 		private void HandleUnlockProc(IntPtr h)
 		{
 #if DEBUG
