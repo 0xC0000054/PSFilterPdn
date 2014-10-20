@@ -2503,6 +2503,7 @@ namespace PSFilterLoad.PSApi
 
 			return err;
 		}
+
 		private void BufferFreeProc(IntPtr bufferID)
 		{
 
@@ -2514,6 +2515,7 @@ namespace PSFilterLoad.PSApi
 
 			this.bufferIDs.Remove(bufferID);
 		}
+
 		private IntPtr BufferLockProc(IntPtr bufferID, byte moveHigh)
 		{
 #if DEBUG
@@ -2528,6 +2530,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.BufferSuite, string.Format("Buffer: {0:X8}", bufferID.ToInt64()));
 #endif
 		}
+
 		private int BufferSpaceProc()
 		{
 			return 1000000000;
@@ -5496,22 +5499,18 @@ namespace PSFilterLoad.PSApi
 			filterRecord->background.green = (ushort)((backgroundColor[1] * 65535) / 255);
 			filterRecord->background.blue = (ushort)((backgroundColor[2] * 65535) / 255);
 
-			for (int i = 0; i < 4; i++)
-			{
-				filterRecord->backColor[i] = backgroundColor[i];
-			}
-
 			filterRecord->foreground.red = (ushort)((foregroundColor[0] * 65535) / 255);
 			filterRecord->foreground.green = (ushort)((foregroundColor[1] * 65535) / 255);
 			filterRecord->foreground.blue = (ushort)((foregroundColor[2] * 65535) / 255);
   
 			for (int i = 0; i < 4; i++)
 			{
+				filterRecord->backColor[i] = backgroundColor[i];
 				filterRecord->foreColor[i] = foregroundColor[i];
 			}
 
 			filterRecord->bufferSpace = BufferSpaceProc();
-			filterRecord->maxSpace = 1000000000;
+			filterRecord->maxSpace = filterRecord->bufferSpace;
 			filterRecord->hostSig = BitConverter.ToUInt32(Encoding.ASCII.GetBytes(".PDN"), 0);
 			filterRecord->hostProcs = Marshal.GetFunctionPointerForDelegate(hostProc);
 			filterRecord->platformData = platFormDataPtr;
