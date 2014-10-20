@@ -599,11 +599,20 @@ namespace PSFilterLoad.PSApi
 		private static readonly long OTOFHandleSize = IntPtr.Size + 4L;
 		private const int OTOFSignature = 0x464f544f;
 
-		struct PSHandle
+		private struct PSHandle
 		{
 			public IntPtr pointer;
 			public int size;
+
+			public static readonly int SizeOf = Marshal.SizeOf(typeof(PSHandle));
 		}
+		
+		private struct ReadChannelPtrs
+		{
+			public IntPtr address;
+			public IntPtr name;
+		}
+
 
 		#region CallbackDelegates
 
@@ -695,7 +704,9 @@ namespace PSFilterLoad.PSApi
 		static SPBasicSuite_Undefined spUndefined;
 		#endregion
 
-		private Dictionary<IntPtr, PSHandle> handles;
+		private Dictionary<IntPtr, PSHandle> handles;        
+		private List<ReadChannelPtrs> channelReadDescPtrs;
+		private List<IntPtr> bufferIDs;
 
 		private IntPtr filterRecordPtr;
 
@@ -3243,8 +3254,6 @@ namespace PSFilterLoad.PSApi
 
 		}
 
-		private List<IntPtr> bufferIDs;
-
 		private short AllocateBufferProc(int size, ref IntPtr bufferID)
 		{
 #if DEBUG
@@ -3264,28 +3273,30 @@ namespace PSFilterLoad.PSApi
 
 			return err;
 		}
+
 		private void BufferFreeProc(IntPtr bufferID)
 		{
 
 #if DEBUG
-			long size = Memory.Size(bufferID);
-			Ping(DebugFlags.BufferSuite, string.Format("Buffer: {0:X8}, Size: {1}", bufferID.ToInt64(), size));
+			Ping(DebugFlags.BufferSuite, string.Format("Buffer: 0x{0}, Size: {1}", bufferID.ToHexString(), Memory.Size(bufferID)));
 #endif
 			Memory.Free(bufferID);
 			this.bufferIDs.Remove(bufferID);
 		}
+
 		private IntPtr BufferLockProc(IntPtr bufferID, byte moveHigh)
 		{
 #if DEBUG
-			Ping(DebugFlags.BufferSuite, string.Format("Buffer: {0:X8}", bufferID.ToInt64()));
+			Ping(DebugFlags.BufferSuite, string.Format("Buffer: 0x{0}", bufferID.ToHexString()));
 #endif
 
 			return bufferID;
 		}
+
 		private void BufferUnlockProc(IntPtr bufferID)
 		{
 #if DEBUG
-			Ping(DebugFlags.BufferSuite, string.Format("Buffer: {0:X8}", bufferID.ToInt64()));
+			Ping(DebugFlags.BufferSuite, string.Format("Buffer: 0x{0}", bufferID.ToHexString()));
 #endif
 		}
 
@@ -3659,14 +3670,6 @@ namespace PSFilterLoad.PSApi
 			return PSError.memFullErr;
 		}
 
-		struct ReadChannelPtrs
-		{
-			public IntPtr address;
-			public IntPtr name;
-		}
-
-		private List<ReadChannelPtrs> channelReadDescPtrs;
-
 		private unsafe void CreateReadImageDocument()
 		{
 			readDocumentPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadImageDocumentDesc)), true);
@@ -3810,7 +3813,7 @@ namespace PSFilterLoad.PSApi
 		{
 #if DEBUG
 			Ping(DebugFlags.DisplayPixels, string.Format("source: bounds = {0}, ImageMode = {1}, colBytes = {2}, rowBytes = {3},planeBytes = {4}, BaseAddress = {5}", new object[]{source.bounds.ToString(), ((ImageModes)source.imageMode).ToString("G"),
-			source.colBytes.ToString(), source.rowBytes.ToString(), source.planeBytes.ToString(), source.baseAddr.ToString("X8")}));
+			source.colBytes.ToString(), source.rowBytes.ToString(), source.planeBytes.ToString(), source.baseAddr.ToHexString()}));
 			Ping(DebugFlags.DisplayPixels, string.Format("srcRect = {0} dstCol (x, width) = {1}, dstRow (y, height) = {2}", srcRect.ToString(), dstCol, dstRow));
 #endif
 
@@ -4930,7 +4933,7 @@ namespace PSFilterLoad.PSApi
 
 			try
 			{
-				handle = Memory.Allocate(Marshal.SizeOf(typeof(PSHandle)), true);
+				handle = Memory.Allocate(PSHandle.SizeOf, true);
 
 				PSHandle* hand = (PSHandle*)handle.ToPointer();
 
@@ -4939,7 +4942,7 @@ namespace PSFilterLoad.PSApi
 
 				handles.Add(handle, *hand);
 #if DEBUG
-				Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}, pointer: {1:X8}, size: {1}", handle.ToInt64(), hand->pointer.ToInt64(), size));
+				Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}, pointer: 0x{1}, size: {2}", handle.ToHexString(), hand->pointer.ToHexString(), size));
 #endif
 			}
 			catch (OutOfMemoryException)
@@ -4961,7 +4964,7 @@ namespace PSFilterLoad.PSApi
 			if (h != IntPtr.Zero)
 			{
 #if DEBUG
-				Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}", h.ToInt64()));
+				Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
 #endif
 
 				if (!IsHandleValid(h))
@@ -4993,7 +4996,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe void HandleDisposeRegularProc(IntPtr h)
 		{
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}", h.ToInt64()));
+			Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
 #endif
 			// What is this supposed to do?
 			if (!IsHandleValid(h))
@@ -5009,11 +5012,6 @@ namespace PSFilterLoad.PSApi
 
 
 					SafeNativeMethods.GlobalFree(h);
-					return;
-				}
-				else
-				{
-					return;
 				}
 			}
 		}
@@ -5021,7 +5019,7 @@ namespace PSFilterLoad.PSApi
 		private IntPtr HandleLockProc(IntPtr h, byte moveHigh)
 		{
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}, moveHigh: {1}", h.ToInt64(), moveHigh));
+			Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}, moveHigh: {1}", h.ToHexString(), moveHigh));
 #endif
 			if (!IsHandleValid(h))
 			{
@@ -5035,16 +5033,18 @@ namespace PSFilterLoad.PSApi
 					}
 					return SafeNativeMethods.GlobalLock(h);
 				}
-				else if (!IsBadReadPtr(h) && !IsBadWritePtr(h))
-				{
-					return h;
-				}
 				else
+				{
+					if (!IsBadReadPtr(h) && !IsBadWritePtr(h))
+					{
+						return h;
+					}
 					return IntPtr.Zero;
+				}
 			}
 
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, String.Format("Handle Pointer Address = 0x{0:X8}", handles[h].pointer.ToInt64()));
+			Ping(DebugFlags.HandleSuite, String.Format("Handle Pointer Address: 0x{0}", handles[h].pointer.ToHexString()));
 #endif
 			return handles[h].pointer;
 		}
@@ -5052,7 +5052,7 @@ namespace PSFilterLoad.PSApi
 		private int HandleGetSizeProc(IntPtr h)
 		{
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}", h.ToInt64()));
+			Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
 #endif
 			if (!IsHandleValid(h))
 			{
@@ -5085,7 +5085,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe short HandleSetSizeProc(IntPtr h, int newSize)
 		{
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}", h.ToInt64()));
+			Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
 #endif
 			if (!IsHandleValid(h))
 			{
@@ -5099,7 +5099,7 @@ namespace PSFilterLoad.PSApi
 						hMem = SafeNativeMethods.GlobalReAlloc(hPtr, new UIntPtr((uint)newSize), NativeConstants.GPTR);
 						if (hMem == IntPtr.Zero)
 						{
-							return PSError.nilHandleErr;
+							return PSError.memFullErr;
 						}
 						Marshal.WriteIntPtr(h, hMem);
 					}
@@ -5108,7 +5108,7 @@ namespace PSFilterLoad.PSApi
 						hMem = SafeNativeMethods.GlobalReAlloc(h, new UIntPtr((uint)newSize), NativeConstants.GPTR);
 						if (hMem == IntPtr.Zero)
 						{
-							return PSError.nilHandleErr;
+							return PSError.memFullErr;
 						}
 					}
 
@@ -5138,7 +5138,7 @@ namespace PSFilterLoad.PSApi
 		private void HandleUnlockProc(IntPtr h)
 		{
 #if DEBUG
-			Ping(DebugFlags.HandleSuite, string.Format("Handle: {0:X8}", h.ToInt64()));
+			Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
 #endif
 			if (!IsHandleValid(h))
 			{
@@ -5182,6 +5182,7 @@ namespace PSFilterLoad.PSApi
 		private void ProcessEventProc(IntPtr @event)
 		{
 		}
+
 		private void ProgressProc(int done, int total)
 		{
 			if (done < 0)
@@ -5695,7 +5696,7 @@ namespace PSFilterLoad.PSApi
 		private int SPBasicFreeBlock(IntPtr block)
 		{
 #if DEBUG
-			Ping(DebugFlags.SPBasicSuite, string.Format("block: {0:X8}", block.ToInt64()));
+			Ping(DebugFlags.SPBasicSuite, string.Format("block: 0x{0}", block.ToHexString()));
 #endif
 			Memory.Free(block);
 			return PSError.kSPNoErr;
@@ -5704,7 +5705,7 @@ namespace PSFilterLoad.PSApi
 		private int SPBasicReallocateBlock(IntPtr block, int newSize, ref IntPtr newblock)
 		{
 #if DEBUG
-			Ping(DebugFlags.SPBasicSuite, string.Format("block: {0:X8}, size: {1}", block.ToInt64(), newSize));
+			Ping(DebugFlags.SPBasicSuite, string.Format("block: 0x{0}, size: {1}", block.ToHexString(), newSize));
 #endif
 			try
 			{
@@ -6058,22 +6059,18 @@ namespace PSFilterLoad.PSApi
 			filterRecord->background.green = (ushort)((backgroundColor[1] * 65535) / 255);
 			filterRecord->background.blue = (ushort)((backgroundColor[2] * 65535) / 255);
 
-			for (int i = 0; i < 4; i++)
-			{
-				filterRecord->backColor[i] = backgroundColor[i];
-			}
-
 			filterRecord->foreground.red = (ushort)((foregroundColor[0] * 65535) / 255);
 			filterRecord->foreground.green = (ushort)((foregroundColor[1] * 65535) / 255);
 			filterRecord->foreground.blue = (ushort)((foregroundColor[2] * 65535) / 255);
 
 			for (int i = 0; i < 4; i++)
 			{
+				filterRecord->backColor[i] = backgroundColor[i];
 				filterRecord->foreColor[i] = foregroundColor[i];
 			}
 
 			filterRecord->bufferSpace = BufferSpaceProc();
-			filterRecord->maxSpace = 1000000000;
+			filterRecord->maxSpace = filterRecord->bufferSpace;
 			filterRecord->hostSig = BitConverter.ToUInt32(Encoding.ASCII.GetBytes(".PDN"), 0);
 			filterRecord->hostProcs = Marshal.GetFunctionPointerForDelegate(hostProc);
 			filterRecord->platformData = platFormDataPtr;
