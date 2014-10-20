@@ -143,6 +143,7 @@
     <Compile Include="PSApi\DictionaryExtensions.cs" />
     <Compile Include="PSApi\GlobalParameters.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
+    <Compile Include="PSApi\IntPtrExtensions.cs" />
     <Compile Include="PSApi\LoadPsFilter.cs" />
     <Compile Include="PSApi\Memory.cs" />
     <Compile Include="PSApi\ParameterData.cs" />
