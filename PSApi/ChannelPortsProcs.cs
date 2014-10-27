@@ -69,7 +69,7 @@ namespace PSFilterLoad.PSApi
 		public VPoint tileOrigin;
 		public byte target;
 		public byte shown;
-		public short channelType;
+		public ChannelTypes channelType;
 		public IntPtr contextInfo;
 		public IntPtr name;
 	}
@@ -90,39 +90,37 @@ namespace PSFilterLoad.PSApi
 		public VPoint tileSize;		/* The size of the tiles. */
 		public VPoint tileOrigin;		/* The origin for the tiles. */
 	
-		public short channelType;		/* The channel type. */
+		public ChannelTypes channelType;		/* The channel type. */
 
 		public short padding;			/* Reserved. Defaults to zero. */
 	
 		public IntPtr contextInfo;		/* A pointer to additional info dependent on context. */
 	
 		public IntPtr name;		/* The name of the channel. */
-	
 	}
 
-
-	internal static class ChannelTypes
+	internal enum ChannelTypes : short
 	{
-		public const int ctUnspecified = 0;
-		public const int ctRed = 1;
-		public const int ctGreen = 2;
-		public const int ctBlue = 3;
-		public const int ctCyan = 4;
-		public const int ctMagenta = 5;
-		public const int ctYellow = 6;
-		public const int ctBlack = 7;
-		public const int ctL = 8;
-		public const int ctA = 9;
-		public const int ctB = 10;
-		public const int ctDuotone = 11;
-		public const int ctIndex = 12;
-		public const int ctBitmap = 13;
-		public const int ctColorSelected = 14;
-		public const int ctColorProtected = 15;
-		public const int ctTransparency = 16;
-		public const int ctLayerMask = 17;
-		public const int ctInvertedLayerMask = 18;
-		public const int ctSelectionMask = 19;
+		Unspecified = 0,
+		Red = 1,
+		Green = 2,
+		Blue = 3,
+		Cyan = 4,
+		Magenta = 5,
+		Yellow = 6,
+		Black = 7,
+		L = 8,
+		A = 9,
+		B = 10,
+		Duotone = 11,
+		Index = 12,
+		Bitmap = 13,
+		ColorSelected = 14,
+		ColorProtected = 15,
+		Transparency = 16,
+		LayerMask = 17,
+		InvertedLayerMask = 18,
+		SelectionMask = 19
 	}
 
 }
