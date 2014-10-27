@@ -187,7 +187,7 @@ namespace PSFilterLoad.PSApi
 #if USEIMAGESERVICES
 		private IntPtr imageServicesProcsPtr;
 #endif
-		private IntPtr propertyProcsPtr; 
+		private IntPtr propertyProcsPtr;
 		private IntPtr resourceProcsPtr;
 
 
@@ -234,7 +234,7 @@ namespace PSFilterLoad.PSApi
 
 		private Surface source;
 		private Surface dest;
-		private PluginPhase phase; 
+		private PluginPhase phase;
 
 		private IntPtr dataPtr;
 		private short result;
@@ -319,7 +319,7 @@ namespace PSFilterLoad.PSApi
 
 			this.dataPtr = IntPtr.Zero;
 
-			this.phase = PluginPhase.None; 
+			this.phase = PluginPhase.None;
 			this.errorMessage = String.Empty;
 			this.disposed = false;
 			this.copyToDest = true;
@@ -361,14 +361,14 @@ namespace PSFilterLoad.PSApi
 
 				this.source = Surface.CopyFromBitmap(bmp);
 
-				
+
 				this.dpiX = bmp.HorizontalResolution;
 				this.dpiY = bmp.VerticalResolution;
 			}
 			this.dest = new Surface(source.Width, source.Height);
 
 			this.inputHandling = FilterDataHandling.None;
-			this.outputHandling = FilterDataHandling.None; 
+			this.outputHandling = FilterDataHandling.None;
 
 
 			abortFunc = null;
@@ -376,7 +376,7 @@ namespace PSFilterLoad.PSApi
 
 			this.keys = null;
 			this.aete = null;
-			this.aeteDict = new Dictionary<uint,AETEValue>();
+			this.aeteDict = new Dictionary<uint, AETEValue>();
 			this.getKey = 0;
 			this.getKeyIndex = 0;
 			this.subKeys = null;
@@ -386,7 +386,7 @@ namespace PSFilterLoad.PSApi
 			unsafe
 			{
 				platFormDataPtr = Memory.Allocate(Marshal.SizeOf(typeof(PlatformData)), true);
-				((PlatformData*)platFormDataPtr)->hwnd = owner; 
+				((PlatformData*)platFormDataPtr)->hwnd = owner;
 			}
 
 			this.lastOutRect = Rect16.Empty;
@@ -423,7 +423,7 @@ namespace PSFilterLoad.PSApi
 			debugFlags |= DebugFlags.DisplayPixels;
 			debugFlags |= DebugFlags.Error;
 			debugFlags |= DebugFlags.HandleSuite;
-			debugFlags |= DebugFlags.MiscCallbacks; 
+			debugFlags |= DebugFlags.MiscCallbacks;
 			debugFlags |= DebugFlags.PiPL;
 			debugFlags |= DebugFlags.PropertySuite;
 			debugFlags |= DebugFlags.ResourceSuite;
@@ -472,7 +472,7 @@ namespace PSFilterLoad.PSApi
 
 		private bool ignoreAlpha;
 		private FilterDataHandling inputHandling;
-		private FilterDataHandling outputHandling; 
+		private FilterDataHandling outputHandling;
 
 		private bool IgnoreAlphaChannel(PluginData data)
 		{
@@ -488,7 +488,7 @@ namespace PSFilterLoad.PSApi
 						filterCase = FilterCase.FlatImageWithSelection;
 						break;
 				}
-				
+
 				return true;
 			}
 
@@ -497,7 +497,7 @@ namespace PSFilterLoad.PSApi
 			if (data.filterInfo[filterCaseIndex].inputHandling == FilterDataHandling.CantFilter)
 			{
 				// Use the flatImage modes if the filter doesn't support the protectedTransparency cases or image does not have any transparency.
-				if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.CantFilter || !HasTransparentAlpha()) 
+				if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.CantFilter || !HasTransparentAlpha())
 				{
 					switch (filterCase)
 					{
@@ -525,7 +525,7 @@ namespace PSFilterLoad.PSApi
 
 
 				}
-					
+
 			}
 
 			inputHandling = data.filterInfo[filterCaseIndex].inputHandling;
@@ -634,14 +634,14 @@ namespace PSFilterLoad.PSApi
 				{
 					pdata.module.entryPoint = (pluginEntryPoint)Marshal.GetDelegateForFunctionPointer(entry, typeof(pluginEntryPoint));
 					return true;
-				} 
+				}
 			}
 			else
 			{
 				int hr = Marshal.GetHRForLastWin32Error();
 				Marshal.ThrowExceptionForHR(hr);
 			}
-			
+
 			return false;
 		}
 
@@ -672,7 +672,7 @@ namespace PSFilterLoad.PSApi
 				{
 					int handleSize = HandleGetSizeProc(filterRecord->parameters);
 
-				   
+
 					byte[] buf = new byte[handleSize];
 					Marshal.Copy(HandleLockProc(filterRecord->parameters, 0), buf, 0, buf.Length);
 					HandleUnlockProc(filterRecord->parameters);
@@ -766,7 +766,7 @@ namespace PSFilterLoad.PSApi
 
 						Marshal.Copy(HandleLockProc(ptr, 0), dataBuf, 0, ps);
 						HandleUnlockProc(ptr);
-							
+
 						globalParameters.SetPluginDataBytes(dataBuf);
 						globalParameters.ParameterDataStorageMethod = globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
 					}
@@ -825,7 +825,7 @@ namespace PSFilterLoad.PSApi
 						break;
 					case GlobalParameters.DataStorageMethod.OTOFHandle:
 						filterRecord->parameters = Memory.Allocate(OTOFHandleSize, false);
-						
+
 						if (globalParameters.ParameterDataExecutable)
 						{
 							filterParametersHandle = Memory.AllocateExecutable(parameterDataBytes.Length);
@@ -862,7 +862,7 @@ namespace PSFilterLoad.PSApi
 						break;
 					case GlobalParameters.DataStorageMethod.OTOFHandle:
 						dataPtr = Memory.Allocate(OTOFHandleSize, false);
-						
+
 						if (globalParameters.PluginDataExecutable)
 						{
 							pluginDataHandle = Memory.AllocateExecutable(pluginDataBytes.Length);
@@ -884,11 +884,11 @@ namespace PSFilterLoad.PSApi
 					default:
 						throw new InvalidEnumArgumentException("PluginDataStorageMethod", (int)globalParameters.PluginDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
 				}
-	
+
 			}
 
 		}
-		
+
 		private bool PluginAbout(PluginData pdata)
 		{
 
@@ -1053,9 +1053,9 @@ namespace PSFilterLoad.PSApi
 		private bool PluginParameters(PluginData pdata)
 		{
 			result = PSError.noErr;
-			
+
 			/* Photoshop sets the size info before the filterSelectorParameters call even though the documentation says it does not.*/
-			SetupSizes(); 
+			SetupSizes();
 			SetFilterRecordValues();
 #if DEBUG
 			Ping(DebugFlags.Call, "Before filterSelectorParameters");
@@ -1083,7 +1083,7 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			phase = PluginPhase.Parameters; 
+			phase = PluginPhase.Parameters;
 
 			return true;
 		}
@@ -1184,7 +1184,7 @@ namespace PSFilterLoad.PSApi
 		{
 			SetupSizes();
 			RestoreParameters();
-			SetFilterRecordValues(); 
+			SetFilterRecordValues();
 
 
 			result = PSError.noErr;
@@ -1211,7 +1211,7 @@ namespace PSFilterLoad.PSApi
 			}
 
 #if DEBUG
-			phase = PluginPhase.Prepare; 
+			phase = PluginPhase.Prepare;
 #endif
 
 			return true;
@@ -1294,7 +1294,7 @@ namespace PSFilterLoad.PSApi
 			return true;
 #endif
 		}
-	  
+
 		/// <summary>
 		/// Runs a filter from the specified PluginData
 		/// </summary>
@@ -1320,7 +1320,7 @@ namespace PSFilterLoad.PSApi
 			usePICASuites = EnablePICASuites(pdata);
 
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
-			
+
 			if (pdata.filterInfo != null)
 			{
 				int index = filterCase - 1;
@@ -1339,11 +1339,11 @@ namespace PSFilterLoad.PSApi
 					}
 				}
 			}
-	
+
 			if (copyToDest)
 			{
 				// Copy the source image to the dest image if the filter does not write to all the pixels.
-				dest.CopySurface(source); 
+				dest.CopySurface(source);
 			}
 
 			if (ignoreAlpha)
@@ -1362,8 +1362,8 @@ namespace PSFilterLoad.PSApi
 
 			SetupDelegates();
 			SetupSuites();
-			SetupFilterRecord();			
-			
+			SetupFilterRecord();
+
 			PreProcessInputData();
 
 			if (!isRepeatEffect)
@@ -1376,7 +1376,7 @@ namespace PSFilterLoad.PSApi
 					return false;
 				}
 			}
-			
+
 
 			if (!PluginPrepare(pdata))
 			{
@@ -1400,19 +1400,19 @@ namespace PSFilterLoad.PSApi
 			}
 			catch (Exception)
 			{
-			} 
-			
+			}
+
 			return true;
 		}
 
 		private string GetErrorMessage(short result)
 		{
 			string error = string.Empty;
- 
+
 			// Any positive integer is a plugin handled error message.
 			if (result == PSError.userCanceledErr || result >= 1)
 			{
-				return string.Empty; 
+				return string.Empty;
 			}
 			else if (result == PSError.errReportString)
 			{
@@ -1478,7 +1478,7 @@ namespace PSFilterLoad.PSApi
 						break;
 					case PSError.errUnsupportedRowBits:
 						error = Resources.UnsupportedChannelRowBits;
-						break;                  
+						break;
 					default:
 						error = string.Format(CultureInfo.CurrentCulture, Resources.UnknownErrorCodeFormat, result);
 						break;
@@ -1499,7 +1499,7 @@ namespace PSFilterLoad.PSApi
 
 			return 0;
 		}
-		private Rect16 lastInRect;		
+		private Rect16 lastInRect;
 		private Rect16 lastOutRect;
 		private Rect16 lastMaskRect;
 
@@ -1515,19 +1515,14 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Determines whether the filter uses planar order processing.
 		/// </summary>
-		/// <param name="fr">The FilterRecord to check.</param>
-		/// <param name="outData">if set to <c>true</c> check the output data.</param>
+		/// <param name="loPlane">The lo plane.</param>
+		/// <param name="hiPlane">The hi plane.</param>
 		/// <returns>
 		///   <c>true</c> if a single plane of data is requested; otherwise, <c>false</c>.
 		/// </returns>
-		private static unsafe bool IsSinglePlane(FilterRecord* fr, bool outData)
+		private static unsafe bool IsSinglePlane(short loPlane, short hiPlane)
 		{
-			if (outData)
-			{
-				return (((fr->outHiPlane - fr->outLoPlane) + 1) == 1);
-			}
-
-			return (((fr->inHiPlane - fr->inLoPlane) + 1) == 1);
+			return (((hiPlane - loPlane) + 1) == 1);
 		}
 
 		/// <summary>
@@ -1543,7 +1538,7 @@ namespace PSFilterLoad.PSApi
 			long size = Memory.Size(inData);
 
 			int width = inRect.right - inRect.left;
-			int height = inRect.bottom -inRect.top;
+			int height = inRect.bottom - inRect.top;
 			int nplanes = hiplane - loplane + 1;
 
 			long bufferSize = ((width * nplanes) * height);
@@ -1551,7 +1546,6 @@ namespace PSFilterLoad.PSApi
 			return (bufferSize != size);
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
 		private unsafe short AdvanceStateProc()
 		{
 			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
@@ -1564,13 +1558,12 @@ namespace PSFilterLoad.PSApi
 			short error;
 
 #if DEBUG
-			Ping(DebugFlags.AdvanceState, string.Format("Inrect = {0}, Outrect = {1}, maskRect = {2}", filterRecord->inRect.ToString(), filterRecord->outRect.ToString(), filterRecord->maskRect.ToString()));
+			Ping(DebugFlags.AdvanceState, string.Format("inRect: {0}, outRect: {1}, maskRect: {2}", filterRecord->inRect, filterRecord->outRect, filterRecord->maskRect));
 #endif
 			if (filterRecord->haveMask == 1 && RectNonEmpty(filterRecord->maskRect))
 			{
 				if (!lastMaskRect.Equals(filterRecord->maskRect))
 				{
-
 					if (maskDataPtr != IntPtr.Zero && ResizeBuffer(maskDataPtr, filterRecord->maskRect, 0, 0))
 					{
 						Memory.Free(maskDataPtr);
@@ -1578,12 +1571,12 @@ namespace PSFilterLoad.PSApi
 						filterRecord->maskData = IntPtr.Zero;
 					}
 
-					error =  FillMaskBuffer(ref filterRecord->maskData, ref filterRecord->maskRowBytes, filterRecord->maskRect, filterRecord->maskRate, filterRecord->maskPadding);
+					error = FillMaskBuffer(filterRecord);
 					if (error != PSError.noErr)
 					{
 						return error;
 					}
-					
+
 					lastMaskRect = filterRecord->maskRect;
 				}
 			}
@@ -1599,55 +1592,34 @@ namespace PSFilterLoad.PSApi
 				lastMaskRect = Rect16.Empty;
 			}
 
-
 			if (RectNonEmpty(filterRecord->inRect))
 			{
-				if (!lastInRect.Equals(filterRecord->inRect) || (IsSinglePlane(filterRecord, false) && filterRecord->inLoPlane != lastInLoPlane))
+				if (!lastInRect.Equals(filterRecord->inRect) || (IsSinglePlane(filterRecord->inLoPlane, filterRecord->inHiPlane) && filterRecord->inLoPlane != lastInLoPlane))
 				{
-					if (inDataPtr != IntPtr.Zero &&
-						ResizeBuffer(inDataPtr, filterRecord->inRect, filterRecord->inLoPlane, filterRecord->inHiPlane))
+					if (inDataPtr != IntPtr.Zero && ResizeBuffer(inDataPtr, filterRecord->inRect, filterRecord->inLoPlane, filterRecord->inHiPlane))
 					{
-						try
-						{
-							Memory.Free(inDataPtr);
-						}
-						catch (Exception)
-						{
-						}
-						finally
-						{
-							inDataPtr = IntPtr.Zero;
-							filterRecord->inData = IntPtr.Zero;
-						}
+						Memory.Free(inDataPtr);
+						inDataPtr = IntPtr.Zero;
+						filterRecord->inData = IntPtr.Zero;
 					}
 
-					error = FillInputBuffer(ref filterRecord->inData, ref filterRecord->inRowBytes, filterRecord->inRect, filterRecord->inLoPlane, filterRecord->inHiPlane, filterRecord->inputRate, filterRecord->inputPadding);
+					error = FillInputBuffer(filterRecord);
 					if (error != PSError.noErr)
 					{
 						return error;
 					}
-					
+
 					lastInRect = filterRecord->inRect;
 					lastInLoPlane = filterRecord->inLoPlane;
-					filterRecord->inColumnBytes = (filterRecord->inHiPlane - filterRecord->inLoPlane) + 1;
 				}
 			}
 			else
 			{
 				if (inDataPtr != IntPtr.Zero)
 				{
-					try
-					{
-						Memory.Free(inDataPtr);
-					}
-					catch (Exception)
-					{
-					}
-					finally
-					{
-						inDataPtr = IntPtr.Zero;
-						filterRecord->inData = IntPtr.Zero;
-					}
+					Memory.Free(inDataPtr);
+					inDataPtr = IntPtr.Zero;
+					filterRecord->inData = IntPtr.Zero;
 				}
 				filterRecord->inRowBytes = 0;
 				lastInLoPlane = -1;
@@ -1656,42 +1628,27 @@ namespace PSFilterLoad.PSApi
 
 			if (RectNonEmpty(filterRecord->outRect))
 			{
-				if (!lastOutRect.Equals(filterRecord->outRect) || (IsSinglePlane(filterRecord, true) && filterRecord->outLoPlane != lastOutLoPlane))
+				if (!lastOutRect.Equals(filterRecord->outRect) || (IsSinglePlane(filterRecord->outLoPlane, filterRecord->outHiPlane) && filterRecord->outLoPlane != lastOutLoPlane))
 				{
-					if (outDataPtr != IntPtr.Zero && 
-						ResizeBuffer(outDataPtr, filterRecord->outRect, filterRecord->outLoPlane, filterRecord->outHiPlane))
+					if (outDataPtr != IntPtr.Zero && ResizeBuffer(outDataPtr, filterRecord->outRect, filterRecord->outLoPlane, filterRecord->outHiPlane))
 					{
-						try
-						{
-							Memory.Free(outDataPtr);
-						}
-						catch (Exception)
-						{
-						}
-						finally
-						{
-							outDataPtr = IntPtr.Zero;
-							filterRecord->outData = IntPtr.Zero;
-						}
+						Memory.Free(outDataPtr);
+						outDataPtr = IntPtr.Zero;
+						filterRecord->outData = IntPtr.Zero;
 					}
 
-					error = FillOutputBuffer(ref filterRecord->outData, ref filterRecord->outRowBytes, filterRecord->outRect, filterRecord->outLoPlane, filterRecord->outHiPlane, filterRecord->outputPadding);
+					error = FillOutputBuffer(filterRecord);
 
 					if (error != PSError.noErr)
 					{
 						return error;
 					}
 
-#if DEBUG
-					System.Diagnostics.Debug.WriteLine(string.Format("outRowBytes = {0}", filterRecord->outRowBytes));
-#endif
 					// store previous values
 					lastOutRowBytes = filterRecord->outRowBytes;
 					lastOutRect = filterRecord->outRect;
 					lastOutLoPlane = filterRecord->outLoPlane;
 					lastOutHiPlane = filterRecord->outHiPlane;
-
-					filterRecord->outColumnBytes = (filterRecord->outHiPlane - filterRecord->outLoPlane) + 1;
 				}
 
 			}
@@ -1699,25 +1656,15 @@ namespace PSFilterLoad.PSApi
 			{
 				if (outDataPtr != IntPtr.Zero)
 				{
-					try
-					{
-						Memory.Free(outDataPtr);
-					}
-					catch (Exception)
-					{
-					}
-					finally
-					{
-						outDataPtr = IntPtr.Zero;
-						filterRecord->outData = IntPtr.Zero;
-					}
+					Memory.Free(outDataPtr);
+					outDataPtr = IntPtr.Zero;
+					filterRecord->outData = IntPtr.Zero;
 				}
 				filterRecord->outRowBytes = 0;
 				lastOutRowBytes = 0;
 				lastOutRect = Rect16.Empty;
 				lastOutLoPlane = -1;
 				lastOutHiPlane = 0;
-
 			}
 
 			return PSError.noErr;
@@ -1728,7 +1675,7 @@ namespace PSFilterLoad.PSApi
 		/// Scales the temp surface.
 		/// </summary>
 		/// <param name="lockRect">The rectangle to clamp the size to.</param>
-		private unsafe void ScaleTempSurface(int inputRate, Rectangle lockRect) 
+		private unsafe void ScaleTempSurface(int inputRate, Rectangle lockRect)
 		{
 			int scaleFactor = FixedToInt32(inputRate);
 			if (scaleFactor == 0)
@@ -1756,7 +1703,7 @@ namespace PSFilterLoad.PSApi
 					tempSurface.Dispose();
 					tempSurface = null;
 				}
-			
+
 				if (scaleFactor > 1) // Filter preview?
 				{
 					tempSurface = new Surface(scalew, scaleh);
@@ -1772,270 +1719,238 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Fills the input buffer with data from the source image.
 		/// </summary>
-		/// <param name="inData">The input buffer to fill.</param>
-		/// <param name="inRowBytes">The stride of the input buffer.</param>
-		/// <param name="rect">The rectangle of interest within the image.</param>
-		/// <param name="loplane">The input loPlane.</param>
-		/// <param name="hiplane">The input hiPlane.</param>
-		private unsafe short FillInputBuffer(ref IntPtr inData, ref int inRowBytes, Rect16 rect, short loplane, short hiplane, int inputRate, short inputPadding)
+		/// <param name="filterRecord">The filter record.</param>
+		private unsafe short FillInputBuffer(FilterRecord* filterRecord)
 		{
 #if DEBUG
-			Ping(DebugFlags.AdvanceState, string.Format("inRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { inRowBytes.ToString(), rect.ToString(), loplane.ToString(), hiplane.ToString() }));
-			Ping(DebugFlags.AdvanceState, string.Format("inputRate = {0}", FixedToInt32(inputRate)));
+			Ping(DebugFlags.AdvanceState, string.Format("inRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}, inputRate: {4}", new object[] { filterRecord->inRowBytes, filterRecord->inRect, 
+			filterRecord->inLoPlane, filterRecord->inHiPlane, FixedToInt32(filterRecord->inputRate) }));
 #endif
+			Rect16 rect = filterRecord->inRect;
 
-			int nplanes = hiplane - loplane + 1;
+			int nplanes = filterRecord->inHiPlane - filterRecord->inLoPlane + 1;
 			int width = rect.right - rect.left;
 			int height = rect.bottom - rect.top;
 
-			if (rect.left < source.Width && rect.top < source.Height)
+			Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
+
+			int stride = width * nplanes;
+			if (inDataPtr == IntPtr.Zero)
 			{
-#if DEBUG
-				int bmpw = width;
-				int bmph = height;
-				if ((rect.left + width) > source.Width)
-					bmpw = (source.Width - rect.left);
+				int len = stride * height;
 
-				if ((rect.top + height) > source.Height)
-					bmph = (source.Height - rect.top);
-
-
-				if (bmpw != width || bmph != height)
+				try
 				{
-					Ping(DebugFlags.AdvanceState, string.Format("bmpw = {0}, bmph = {1}", bmpw, bmph));
-				}
-#endif
-				Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
-
-
-				int stride = width * nplanes;
-				if (inDataPtr == IntPtr.Zero)
-				{
-					int len = stride * height;
-
 					inDataPtr = Memory.Allocate(len, false);
-				}                   
-				inData = inDataPtr;
-				inRowBytes = stride;
-
-				if (lockRect.Left < 0 || lockRect.Top < 0)
+				}
+				catch (OutOfMemoryException)
 				{
-					if (lockRect.Left < 0 && lockRect.Top < 0)
-					{
-						lockRect.X = lockRect.Y = 0;
-						lockRect.Width -= -rect.left;
-						lockRect.Height -= -rect.top;
-					}
-					else if (lockRect.Left < 0)
-					{
-						lockRect.X = 0;
-						lockRect.Width -= -rect.left;
-					}
-					else
-					{
-						lockRect.Y = 0;
-						lockRect.Height -= -rect.top;
-					}
+					return PSError.memFullErr;
+				}
+			}
+			filterRecord->inData = inDataPtr;
+			filterRecord->inRowBytes = stride;
+			filterRecord->inColumnBytes = nplanes;
+
+			if (lockRect.Left < 0 || lockRect.Top < 0)
+			{
+				if (lockRect.Left < 0)
+				{
+					lockRect.X = 0;
+					lockRect.Width -= -rect.left;
 				}
 
-				ScaleTempSurface(inputRate, lockRect);
-				   
-
-				short ofs = loplane;
-				switch (loplane) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
+				if (lockRect.Top < 0)
 				{
-					case 0:
-						ofs = 2;
-						break;
-					case 2:
-						ofs = 0;
-						break;
+					lockRect.Y = 0;
+					lockRect.Height -= -rect.top;
 				}
+			}
 
-				short padErr = SetFilterPadding(inData, inRowBytes, rect, nplanes, ofs, inputPadding, lockRect, tempSurface);
-				if (padErr != PSError.noErr)
+			bool validImageBounds = rect.left < source.Width && rect.top < source.Height;
+
+			if (validImageBounds)
+			{
+				ScaleTempSurface(filterRecord->inputRate, lockRect);
+			}
+
+
+			short channelOffset = filterRecord->inLoPlane;
+
+			switch (filterRecord->inLoPlane) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
+			{
+				case 0:
+					channelOffset = 2;
+					break;
+				case 2:
+					channelOffset = 0;
+					break;
+			}
+
+			short padErr = SetFilterPadding(inDataPtr, stride, rect, nplanes, channelOffset, filterRecord->inputPadding, lockRect, tempSurface);
+			if (padErr != PSError.noErr || !validImageBounds)
+			{
+				return padErr;
+			}
+
+			void* ptr = inDataPtr.ToPointer();
+			int top = lockRect.Top;
+			int left = lockRect.Left;
+			int bottom = Math.Min(lockRect.Bottom, tempSurface.Height);
+			int right = Math.Min(lockRect.Right, tempSurface.Width);
+
+			for (int y = top; y < bottom; y++)
+			{
+				byte* src = (byte*)tempSurface.GetPointAddressUnchecked(left, y);
+				byte* dst = (byte*)ptr + ((y - top) * stride);
+				
+				for (int x = left; x < right; x++)
 				{
-					return padErr; // return the parmErr if pluginWantsErrorOnBoundsException is set
-				}
-
-				/* the stride for the source image and destination buffer will almost never match
-				* so copy the data manually swapping the pixel order along the way
-				*/
-
-				void* ptr = inData.ToPointer();
-				int top = lockRect.Top;
-				int left = lockRect.Left;
-				int bottom = Math.Min(lockRect.Bottom, tempSurface.Height);
-				int right = Math.Min(lockRect.Right, tempSurface.Width);
-				for (int y = top; y < bottom; y++)
-				{
-					byte* p = (byte*)tempSurface.GetPointAddressUnchecked(left, y);
-					byte* q = (byte*)ptr + ((y - top) * stride);
-					for (int x = left; x < right; x++)
+					switch (nplanes)
 					{
-						switch (nplanes)
-						{
-							case 1:
-								*q = p[ofs];
-								break;
-							case 2:
-								q[0] = p[ofs];
-								q[1] = p[ofs + 1];
-								break;
-							case 3:
-								q[0] = p[2];
-								q[1] = p[1];
-								q[2] = p[0];
-								break;
-							case 4:
-								q[0] = p[2];
-								q[1] = p[1];
-								q[2] = p[0];
-								q[3] = p[3];
-								break;
+						case 1:
+							*dst = src[channelOffset];
+							break;
+						case 2:
+							dst[0] = src[channelOffset];
+							dst[1] = src[channelOffset + 1];
+							break;
+						case 3:
+							dst[0] = src[2];
+							dst[1] = src[1];
+							dst[2] = src[0];
+							break;
+						case 4:
+							dst[0] = src[2];
+							dst[1] = src[1];
+							dst[2] = src[0];
+							dst[3] = src[3];
+							break;
 
-						}
-
-						p += ColorBgra.SizeOf;
-						q += nplanes;
 					}
+
+					src += ColorBgra.SizeOf;
+					dst += nplanes;
 				}
 			}
 
 			return PSError.noErr;
 		}
-
-		private unsafe short FillOutputBuffer(ref IntPtr outData, ref int outRowBytes, Rect16 rect, short loplane, short hiplane, short outputPadding)
+		
+		/// <summary>
+		/// Fills the output buffer with data from the destination image.
+		/// </summary>
+		/// <param name="filterRecord">The filter record.</param>
+		private unsafe short FillOutputBuffer(FilterRecord* filterRecord)
 		{
-
 #if DEBUG
-			Ping(DebugFlags.AdvanceState, string.Format("outRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { outRowBytes.ToString(), rect.ToString(), loplane.ToString(), hiplane.ToString() }));
-#endif
+			Ping(DebugFlags.AdvanceState, string.Format("outRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}", new object[] { filterRecord->outRowBytes, filterRecord->outRect, filterRecord->outLoPlane, 
+				filterRecord->outHiPlane }));
 
-
-#if DEBUG
 			using (Bitmap dst = dest.CreateAliasedBitmap())
 			{
-
 			}
 #endif
+			Rect16 rect = filterRecord->outRect;
+			int nplanes = filterRecord->outHiPlane - filterRecord->outLoPlane + 1;
+			int width = rect.right - rect.left;
+			int height = rect.bottom - rect.top;
 
-			int nplanes = hiplane - loplane + 1;
-			int width = (rect.right - rect.left);
-			int height = (rect.bottom - rect.top);
+			Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
 
-			if (rect.left < source.Width && rect.top < source.Height)
+			int stride = width * nplanes;
+
+			if (outDataPtr == IntPtr.Zero)
 			{
-#if DEBUG
-				int bmpw = width;
-				int bmph = height;
-				if ((rect.left + width) > source.Width)
-					bmpw = (source.Width - rect.left);
+				int len = stride * height;
 
-				if ((rect.top + height) > source.Height)
-					bmph = (source.Height - rect.top);
-
-
-				if (bmpw != width || bmph != height)
+				try
 				{
-					Ping(DebugFlags.AdvanceState, string.Format("bmpw = {0}, bmph = {1}", bmpw, bmph));
-				}
-#endif
-				Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
-
-
-				int stride = (width * nplanes);
-
-				if (outDataPtr == IntPtr.Zero)
-				{				
-					int len = stride * height;
-
 					outDataPtr = Memory.Allocate(len, false);
-				}                     
+				}
+				catch (OutOfMemoryException)
+				{
+					return PSError.memFullErr;
+				}
+			}
+
+			filterRecord->outData = outDataPtr;
+			filterRecord->outRowBytes = stride;
+			filterRecord->outColumnBytes = nplanes;
+
+			if (lockRect.Left < 0 || lockRect.Top < 0)
+			{
+				if (lockRect.Left < 0)
+				{
+					lockRect.X = 0;
+					lockRect.Width -= -rect.left;
+				}
+
+				if (lockRect.Top < 0)
+				{
+					lockRect.Y = 0;
+					lockRect.Height -= -rect.top;
+				}
+			}
+
+			short channelOffset = filterRecord->outLoPlane;
+
+			switch (filterRecord->outLoPlane) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
+			{
+				case 0:
+					channelOffset = 2;
+					break;
+				case 2:
+					channelOffset = 0;
+					break;
+			}
+
+			bool validImageBounds = rect.left < dest.Width && rect.top < dest.Height;
+			short padErr = SetFilterPadding(outDataPtr, stride, rect, nplanes, channelOffset, filterRecord->outputPadding, lockRect, dest);
+			if (padErr != PSError.noErr || !validImageBounds)
+			{
+				return padErr;
+			}
+
+			void* ptr = outDataPtr.ToPointer();
+			int top = lockRect.Top;
+			int left = lockRect.Left;
+			int bottom = Math.Min(lockRect.Bottom, dest.Height);
+			int right = Math.Min(lockRect.Right, dest.Width);
+
+			for (int y = top; y < bottom; y++)
+			{
+				byte* src = (byte*)dest.GetPointAddressUnchecked(left, y);
+				byte* dst = (byte*)ptr + ((y - top) * stride);
 				
-				outData = outDataPtr;
-
-				outRowBytes = stride;
-
-				if (lockRect.Left < 0 || lockRect.Top < 0)
+				for (int x = left; x < right; x++)
 				{
-					if (lockRect.Left < 0 && lockRect.Top < 0)
+					switch (nplanes)
 					{
-						lockRect.X = lockRect.Y = 0;
-						lockRect.Width -= -rect.left;
-						lockRect.Height -= -rect.top;
+						case 1:
+							*dst = src[channelOffset];
+							break;
+						case 2:
+							dst[0] = src[channelOffset];
+							dst[1] = src[channelOffset + 1];
+							break;
+						case 3:
+							dst[0] = src[2];
+							dst[1] = src[1];
+							dst[2] = src[0];
+							break;
+						case 4:
+							dst[0] = src[2];
+							dst[1] = src[1];
+							dst[2] = src[0];
+							dst[3] = src[3];
+							break;
+
 					}
-					else if (lockRect.Left < 0)
-					{
-						lockRect.X = 0;
-						lockRect.Width -= -rect.left;
-					}
-					else if (lockRect.Top < 0)
-					{
-						lockRect.Y = 0;
-						lockRect.Height -= -rect.top;
-					}
+
+					src += ColorBgra.SizeOf;
+					dst += nplanes;
 				}
-
-				short ofs = loplane;
-				switch (loplane) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
-				{
-					case 0:
-						ofs = 2;
-						break;
-					case 2:
-						ofs = 0;
-						break;
-				}
-
-				short padErr = SetFilterPadding(outData, outRowBytes, rect, nplanes, ofs, outputPadding, lockRect, dest);
-				if (padErr != PSError.noErr)
-				{
-					return padErr;
-				}
-
-				/* the stride for the source image and destination buffer will almost never match
-				* so copy the data manually swapping the pixel order along the way
-				*/
-				void* ptr = outData.ToPointer();
-				int top = lockRect.Top;
-				int left = lockRect.Left;
-				int bottom = Math.Min(lockRect.Bottom, dest.Height);
-				int right = Math.Min(lockRect.Right, dest.Width);
-				for (int y = top; y < bottom; y++)
-				{
-					byte* p = (byte*)dest.GetPointAddressUnchecked(left, y);
-					byte* q = (byte*)ptr + ((y - top) * stride);
-					for (int x = left; x < right; x++)
-					{
-						switch (nplanes)
-						{
-							case 1:
-								*q = p[ofs];
-								break;
-							case 2:
-								q[0] = p[ofs];
-								q[1] = p[ofs + 1];
-								break;
-							case 3:
-								q[0] = p[2];
-								q[1] = p[1];
-								q[2] = p[0];
-								break;
-							case 4:
-								q[0] = p[2];
-								q[1] = p[1];
-								q[2] = p[0];
-								q[3] = p[3];
-								break;
-
-						}
-
-						p += ColorBgra.SizeOf;
-						q += nplanes;
-					}
-				}
-
 			}
 
 			return PSError.noErr;
@@ -2048,21 +1963,24 @@ namespace PSFilterLoad.PSApi
 			int scaleFactor = FixedToInt32(maskRate);
 
 			if (scaleFactor == 0)
+			{
 				scaleFactor = 1;
-
-			int scalew = source.Width / scaleFactor;
-			int scaleh = source.Height / scaleFactor;
-
-			if (lockRect.Width > scalew)
-			{
-				scalew = lockRect.Width;
 			}
 
-			if (lockRect.Height > scaleh)
+			int scaleWidth = source.Width / scaleFactor;
+			int scaleHeight = source.Height / scaleFactor;
+
+			if (lockRect.Width > scaleWidth)
 			{
-				scaleh = lockRect.Height;
+				scaleWidth = lockRect.Width;
 			}
-			if ((tempMask == null) || scalew != tempMask.Width && scaleh != tempMask.Height)
+
+			if (lockRect.Height > scaleHeight)
+			{
+				scaleHeight = lockRect.Height;
+			}
+
+			if ((tempMask == null) || scaleWidth != tempMask.Width && scaleHeight != tempMask.Height)
 			{
 				if (tempMask != null)
 				{
@@ -2070,9 +1988,9 @@ namespace PSFilterLoad.PSApi
 					tempMask = null;
 				}
 
-				if (scaleFactor > 1) // Filter preview?
+				if (scaleFactor > 1) // Filter preview
 				{
-					tempMask = new MaskSurface(scalew, scaleh);
+					tempMask = new MaskSurface(scaleWidth, scaleHeight);
 					tempMask.SuperSampleFitSurface(mask);
 				}
 				else
@@ -2086,197 +2004,80 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Fills the mask buffer with data from the mask image.
 		/// </summary>
-		/// <param name="maskData">The input buffer to fill.</param>
-		/// <param name="maskRowBytes">The stride of the input buffer.</param>
-		/// <param name="rect">The rectangle of interest within the image.</param>
-		private unsafe short FillMaskBuffer(ref IntPtr maskData, ref int maskRowBytes, Rect16 rect, int maskRate, short maskPadding)
+		/// <param name="filterRecord">The filter record.</param>
+		private unsafe short FillMaskBuffer(FilterRecord* filterRecord)
 		{
 #if DEBUG
-			Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes = {0}, Rect = {1}", new object[] { maskRowBytes.ToString(), rect.ToString() }));
-			Ping(DebugFlags.AdvanceState, string.Format("maskRate = {0}", FixedToInt32(maskRate)));
+			Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes: {0}, Rect: {1}, maskRate: {2}", new object[] { filterRecord->maskRowBytes, filterRecord->maskRect, FixedToInt32(filterRecord->maskRate) }));
 #endif
+			Rect16 rect = filterRecord->maskRect;
 			int width = rect.right - rect.left;
 			int height = rect.bottom - rect.top;
 
-			if (rect.left < source.Width && rect.top < source.Height)
+			Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
+
+			if (lockRect.Left < 0 || lockRect.Top < 0)
 			{
+				if (lockRect.Left < 0)
+				{
+					lockRect.X = 0;
+					lockRect.Width -= -rect.left;
+				}
 				
-#if DEBUG
-				int bmpw = width;
-				int bmph = height;
-				if ((rect.left + width) > source.Width)
-					bmpw = (source.Width - rect.left);
-
-				if ((rect.top + height) > source.Height)
-					bmph = (source.Height - rect.top);
-
-				if (bmpw != width || bmph != height)
+				if (lockRect.Top < 0)
 				{
-					Ping(DebugFlags.AdvanceState, string.Format("bmpw = {0}, bmph = {1}", bmpw, bmph));
+					lockRect.Y = 0;
+					lockRect.Height -= -rect.top;
 				}
-#endif
-				Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
+			}
 
-				bool padBuffer = false;
-				if (lockRect.Left < 0 || lockRect.Top < 0)
-				{
-					if (lockRect.Left < 0 && lockRect.Top < 0)
-					{
-						lockRect.X = lockRect.Y = 0;
-						lockRect.Width -= -rect.left;
-						lockRect.Height -= -rect.top;
-					}
-					else if (lockRect.Left < 0)
-					{
-						lockRect.X = 0;
-						lockRect.Width -= -rect.left;
-					}
-					else if (lockRect.Top < 0)
-					{
-						lockRect.Y = 0;
-						lockRect.Height -= -rect.top;
-					}
-					padBuffer = true;
-				}
+			bool validImageBounds = rect.left < mask.Width && rect.top < mask.Height;
 
-				ScaleTempMask(maskRate, lockRect);
-					
+			if (validImageBounds)
+			{
+				ScaleTempMask(filterRecord->maskRate, lockRect);
+			}
+
+			if (maskDataPtr == IntPtr.Zero)
+			{
 				int len = width * height;
 
-				if (maskDataPtr == IntPtr.Zero)
+				try
 				{
 					maskDataPtr = Memory.Allocate(len, false);
-				}					
-				maskData = maskDataPtr;
-				maskRowBytes = width;
+				}
+				catch (OutOfMemoryException)
+				{
+					return PSError.memFullErr;
+				}
+			}
+			filterRecord->maskData = maskDataPtr;
+			filterRecord->maskRowBytes = width;
+
+			short err = SetMaskPadding(maskDataPtr, width, rect, filterRecord->maskPadding, lockRect, tempMask);
+			if (err != PSError.noErr || !validImageBounds)
+			{
+				return err;
+			}
+
+			byte* ptr = (byte*)maskDataPtr.ToPointer();
+			int top = lockRect.Top;
+			int left = lockRect.Left;
+			int bottom = Math.Min(lockRect.Bottom, tempMask.Height);
+			int right = Math.Min(lockRect.Right, tempMask.Width);
+
+			for (int y = top; y < bottom; y++)
+			{
+				byte* src = tempMask.GetPointAddressUnchecked(left, y);
+				byte* dst = ptr + ((y - top) * width);
 				
-				byte* ptr = (byte*)maskData.ToPointer();
-
-				if ((lockRect.Right > tempMask.Width || lockRect.Bottom > tempMask.Height) || padBuffer)
+				for (int x = left; x < right; x++)
 				{
-					switch (maskPadding)
-					{
-						case PSConstants.Padding.plugInWantsEdgeReplication:
+					*dst = *src;
 
-							int top = rect.top < 0 ? -rect.top : 0;
-							int left = rect.left < 0 ? -rect.left : 0;
-
-							int right = lockRect.Right - tempMask.Width;
-							int bottom = lockRect.Bottom - tempMask.Height;
-
-							int sWidth = tempMask.Width;
-							int sHeight = tempMask.Height;
-							int row, col;
-
-							if (top > 0)
-							{
-								for (int y = 0; y < top; y++)
-								{
-									byte* p = tempMask.GetRowAddressUnchecked(0);
-									byte* q = ptr + (y * maskRowBytes);
-
-									for (int x = 0; x < width; x++)
-									{
-										*q = *p;
-
-										p++;
-										q++;
-									}
-								}
-							}
-
-
-							if (left > 0)
-							{
-								for (int y = 0; y < height; y++)
-								{
-									byte* q = ptr + (y * maskRowBytes);
-
-									byte p = tempMask.GetPointUnchecked(0, y);
-
-									for (int x = 0; x < left; x++)
-									{
-										*q = p;
-
-										q++;
-									}
-								}
-							}
-
-
-							if (bottom > 0)
-							{
-								col = sHeight - 1;
-								int lockBottom = height - 1;
-								for (int y = 0; y < bottom; y++)
-								{
-									byte* p = tempMask.GetRowAddressUnchecked(col);
-									byte* q = ptr + ((lockBottom - y) * maskRowBytes);
-
-									for (int x = 0; x < width; x++)
-									{
-										*q = *p;
-
-
-										p++;
-										q++;
-									}
-
-								}
-							}
-
-							if (right > 0)
-							{
-								row = sWidth - 1;
-								int rowEnd = width - right;
-								for (int y = 0; y < height; y++)
-								{
-									byte* q = ptr + (y * maskRowBytes) + rowEnd;
-
-									byte p = tempMask.GetPointUnchecked(row, y);
-
-									for (int x = 0; x < right; x++)
-									{
-
-										*q = p;
-
-										q++;
-									}
-								}
-							}
-
-							break;
-						case PSConstants.Padding.plugInDoesNotWantPadding:
-							break;
-						case PSConstants.Padding.plugInWantsErrorOnBoundsException:
-							return PSError.paramErr;
-						default:
-							// Any other padding value is a constant byte.
-							if (maskPadding < 0 || maskPadding > 255)
-							{
-								return PSError.paramErr;
-							}
-
-							SafeNativeMethods.memset(maskData, maskPadding, new UIntPtr((ulong)len));
-							break;
-					}
+					src++;
+					dst++;
 				}
-				int maskHeight = Math.Min(lockRect.Bottom, tempMask.Height);
-				int maskWidth = Math.Min(lockRect.Right, tempMask.Width);
-
-				for (int y = lockRect.Top; y < maskHeight; y++)
-				{
-					byte* srcRow = tempMask.GetPointAddressUnchecked(lockRect.Left, y);
-					byte* dstRow = ptr + ((y - lockRect.Top) * width);
-					for (int x = lockRect.Left; x < maskWidth; x++)
-					{
-						*dstRow = *srcRow;
-
-						srcRow++;
-						dstRow++;
-					}
-				}
-
 			}
 
 			return PSError.noErr;
@@ -2305,7 +2106,9 @@ namespace PSFilterLoad.PSApi
 			if (RectNonEmpty(rect))
 			{
 				if (rect.left >= source.Width || rect.top >= source.Height)
+				{
 					return;
+				}
 
 				int ofs = loplane;
 				switch (loplane)
@@ -2321,18 +2124,13 @@ namespace PSFilterLoad.PSApi
 
 				if (lockRect.Left < 0 || lockRect.Top < 0)
 				{
-					if (lockRect.Left < 0 && lockRect.Top < 0)
-					{
-						lockRect.X = lockRect.Y = 0;
-						lockRect.Width -= -rect.left;
-						lockRect.Height -= -rect.top;
-					}
-					else if (lockRect.Left < 0)
+					if (lockRect.Left < 0)
 					{
 						lockRect.X = 0;
 						lockRect.Width -= -rect.left;
 					}
-					else if (lockRect.Top < 0)
+					
+					if (lockRect.Top < 0)
 					{
 						lockRect.Y = 0;
 						lockRect.Height -= -rect.top;
@@ -2348,8 +2146,8 @@ namespace PSFilterLoad.PSApi
 
 				for (int y = top; y < bottom; y++)
 				{
-					byte* p = (byte*)outDataPtr + ((y - top) * outRowBytes);
-					byte* q = (byte*)dest.GetPointAddressUnchecked(left, y);
+					byte* src = (byte*)outDataPtr + ((y - top) * outRowBytes);
+					byte* dst = (byte*)dest.GetPointAddressUnchecked(left, y);
 
 					for (int x = left; x < right; x++)
 					{
@@ -2357,51 +2155,31 @@ namespace PSFilterLoad.PSApi
 						switch (nplanes)
 						{
 							case 1:
-								q[ofs] = *p;
+								dst[ofs] = *src;
 								break;
 							case 2:
-								q[ofs] = p[0];
-								q[ofs + 1] = p[1];
+								dst[ofs] = src[0];
+								dst[ofs + 1] = src[1];
 								break;
 							case 3:
-								q[0] = p[2];
-								q[1] = p[1];
-								q[2] = p[0];
+								dst[0] = src[2];
+								dst[1] = src[1];
+								dst[2] = src[0];
 								break;
 							case 4:
-								q[0] = p[2];
-								q[1] = p[1];
-								q[2] = p[0];
-								q[3] = p[3];
+								dst[0] = src[2];
+								dst[1] = src[1];
+								dst[2] = src[0];
+								dst[3] = src[3];
 								break;
 
 						}
 
-#if USEMATTING
-							if (hasTransparency && nplanes < 4 && outputHandling != FilterDataHandling.filterDataHandlingNone && copyToDest)
-							{
-								switch (outputHandling)
-								{
-									case FilterDataHandling.filterDataHandlingBlackMat:
-										break;
-									case FilterDataHandling.filterDataHandlingGrayMat:
-										break;
-									case FilterDataHandling.filterDataHandlingWhiteMat:
-										break;
-									case FilterDataHandling.filterDataHandlingFillMask:
-
-										break;
-
-									default:
-										break;
-								}
-							} 
-#endif
-						p += nplanes;
-						q += ColorBgra.SizeOf;
+						src += nplanes;
+						dst += ColorBgra.SizeOf;
 					}
 				}
-				
+
 
 #if DEBUG
 				using (Bitmap bmp = dest.CreateAliasedBitmap())
@@ -2554,7 +2332,7 @@ namespace PSFilterLoad.PSApi
 			switch (info.selector)
 			{
 				case ColorServicesSelector.ChooseColor:
-					
+
 					string name = StringFromPString(info.selectorParameter.pickerPrompt);
 
 					if (info.sourceSpace != ColorSpace.RGBSpace)
@@ -2586,7 +2364,7 @@ namespace PSFilterLoad.PSApi
 							{
 								err = PSError.userCanceledErr;
 							}
-						}  
+						}
 					}
 
 					break;
@@ -2613,7 +2391,7 @@ namespace PSFilterLoad.PSApi
 							{
 								info.colorComponents[i] = foregroundColor[i];
 							}
-								
+
 							break;
 						default:
 							err = PSError.paramErr;
@@ -2624,12 +2402,12 @@ namespace PSFilterLoad.PSApi
 					{
 						err = ColorServicesConvert.Convert(ColorSpace.RGBSpace, info.resultSpace, ref info.colorComponents);
 					}
-					
+
 					break;
 				case ColorServicesSelector.SamplePoint:
-					
+
 					Point16* point = (Point16*)info.selectorParameter.globalSamplePoint.ToPointer();
-						
+
 					if ((point->h >= 0 && point->h < source.Width) && (point->v >= 0 && point->v < source.Height))
 					{
 						ColorBgra pixel = source.GetPointUnchecked(point->h, point->v);
@@ -2637,7 +2415,7 @@ namespace PSFilterLoad.PSApi
 						info.colorComponents[1] = pixel.G;
 						info.colorComponents[2] = pixel.B;
 						info.colorComponents[3] = 0;
-						
+
 						err = ColorServicesConvert.Convert(ColorSpace.RGBSpace, info.resultSpace, ref info.colorComponents);
 					}
 					else
@@ -2745,7 +2523,7 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
-		} 
+		}
 #endif
 
 		private unsafe static void FillSelectionMask(PixelMemoryDesc destiniation, MaskSurface source, VRect srcRect)
@@ -2925,7 +2703,7 @@ namespace PSFilterLoad.PSApi
 			doc->hResolution = Int32ToFixed((int)(dpiX + 0.5));
 			doc->vResolution = Int32ToFixed((int)(dpiY + 0.5));
 
-			string[] names = new string[3] { Resources.RedChannelName, Resources.GreenChannelName, Resources.BlueChannelName};
+			string[] names = new string[3] { Resources.RedChannelName, Resources.GreenChannelName, Resources.BlueChannelName };
 			ReadChannelPtrs channel = CreateReadChannelDesc(0, names[0], doc->depth, doc->bounds);
 
 			ReadChannelDesc* ch = (ReadChannelDesc*)channel.address.ToPointer();
@@ -2997,10 +2775,131 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
+		/// Sets the mask padding.
+		/// </summary>
+		/// <param name="maskData">The mask data.</param>
+		/// <param name="maskRowBytes">The mask stride.</param>
+		/// <param name="rect">The mask rect.</param>
+		/// <param name="maskPadding">The mask padding mode.</param>
+		/// <param name="lockRect">The lock rect.</param>
+		/// <param name="mask">The mask.</param>
+		private unsafe short SetMaskPadding(IntPtr maskData, int maskRowBytes, Rect16 rect, short maskPadding, Rectangle lockRect, MaskSurface mask)
+		{
+			if ((lockRect.Right > mask.Width || lockRect.Bottom > mask.Height) || rect.top < 0 || rect.left < 0)
+			{
+				switch (maskPadding)
+				{
+					case PSConstants.Padding.plugInWantsEdgeReplication:
+
+						int top = rect.top < 0 ? -rect.top : 0;
+						int left = rect.left < 0 ? -rect.left : 0;
+
+						int right = lockRect.Right - mask.Width;
+						int bottom = lockRect.Bottom - mask.Height;
+
+						int row, col;
+						int width = rect.right - rect.left;
+						int height = rect.bottom - rect.top;
+
+						byte* ptr = (byte*)maskData.ToPointer();
+
+						if (top > 0)
+						{
+							for (int y = 0; y < top; y++)
+							{
+								byte* src = mask.GetRowAddressUnchecked(0);
+								byte* dst = ptr + (y * maskRowBytes);
+
+								for (int x = 0; x < width; x++)
+								{
+									*dst = *src;
+
+									src++;
+									dst++;
+								}
+							}
+						}
+
+						if (left > 0)
+						{
+							for (int y = 0; y < height; y++)
+							{
+								byte src = mask.GetPointUnchecked(0, y);
+								byte* dst = ptr + (y * maskRowBytes);
+
+								for (int x = 0; x < left; x++)
+								{
+									*dst = src;
+
+									dst++;
+								}
+							}
+						}
+
+						if (bottom > 0)
+						{
+							col = mask.Height - 1;
+							int lockBottom = height - 1;
+							for (int y = 0; y < bottom; y++)
+							{
+								byte* src = mask.GetRowAddressUnchecked(col);
+								byte* dst = ptr + ((lockBottom - y) * maskRowBytes);
+
+								for (int x = 0; x < width; x++)
+								{
+									*dst = *src;
+
+									src++;
+									dst++;
+								}
+
+							}
+						}
+
+						if (right > 0)
+						{
+							row = mask.Width - 1;
+							int rowEnd = width - right;
+							for (int y = 0; y < height; y++)
+							{
+								byte src = mask.GetPointUnchecked(row, y);
+								byte* dst = ptr + (y * maskRowBytes) + rowEnd;
+
+								for (int x = 0; x < right; x++)
+								{
+
+									*dst = src;
+
+									dst++;
+								}
+							}
+						}
+						break;
+					case PSConstants.Padding.plugInDoesNotWantPadding:
+						break;
+					case PSConstants.Padding.plugInWantsErrorOnBoundsException:
+						return PSError.paramErr;
+					default:
+						// Any other padding value is a constant byte.
+						if (maskPadding < 0 || maskPadding > 255)
+						{
+							return PSError.paramErr;
+						}
+
+						long dataLength = mask.Width * mask.Height;
+						SafeNativeMethods.memset(maskData, maskPadding, new UIntPtr((ulong)dataLength));
+						break;
+				}
+			}
+
+			return PSError.noErr;
+		}
+
+		/// <summary>
 		/// Sets the filter padding.
 		/// </summary>
 		/// <param name="inData">The input data.</param>
-		/// <param name="inRowBytes">The input row bytes (stride).</param>
+		/// <param name="inRowBytes">The input stride.</param>
 		/// <param name="rect">The input rect.</param>
 		/// <param name="nplanes">The number of channels in the image.</param>
 		/// <param name="ofs">The single channel offset to map to BGRA color space.</param>
@@ -3014,17 +2913,17 @@ namespace PSFilterLoad.PSApi
 			{
 				switch (inputPadding)
 				{
-					case PSConstants.Padding.plugInWantsEdgeReplication: 
-						
+					case PSConstants.Padding.plugInWantsEdgeReplication:
+
 						int top = rect.top < 0 ? -rect.top : 0;
 						int left = rect.left < 0 ? -rect.left : 0;
- 
+
 						int right = lockRect.Right - surface.Width;
 						int bottom = lockRect.Bottom - surface.Height;
 
 						int height = rect.bottom - rect.top;
 						int width = rect.right - rect.left;
-						
+
 						int row, col;
 
 						byte* inDataPtr = (byte*)inData.ToPointer();
@@ -3064,7 +2963,7 @@ namespace PSFilterLoad.PSApi
 									p++;
 									q += nplanes;
 								}
-							} 
+							}
 						}
 
 
@@ -3101,7 +3000,7 @@ namespace PSFilterLoad.PSApi
 									}
 									q += nplanes;
 								}
-							} 
+							}
 						}
 
 
@@ -3142,7 +3041,7 @@ namespace PSFilterLoad.PSApi
 									q += nplanes;
 								}
 
-							} 
+							}
 						}
 
 						if (right > 0)
@@ -3180,13 +3079,13 @@ namespace PSFilterLoad.PSApi
 									}
 									q += nplanes;
 								}
-							} 
+							}
 						}
 
 						break;
 					case PSConstants.Padding.plugInDoesNotWantPadding:
 						break;
-					case PSConstants.Padding.plugInWantsErrorOnBoundsException: 
+					case PSConstants.Padding.plugInWantsErrorOnBoundsException:
 						return PSError.paramErr;
 					default:
 						// Any other padding value is a constant byte.
@@ -3296,13 +3195,13 @@ namespace PSFilterLoad.PSApi
 				bottom = height;
 			}
 
-			for (int y = top; y < bottom; y++)
+			if (source.colBytes == 1)
 			{
-				int surfaceY = y - top;
-				if (source.colBytes == 1)
+				for (int y = top; y < bottom; y++)
 				{
-					byte* row = (byte*)tempDisplaySurface.GetRowAddressUnchecked(surfaceY);
+					byte* row = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y - top);
 					int srcStride = y * source.rowBytes; // cache the destination row and source stride.
+
 					for (int i = 0; i < nplanes; i++)
 					{
 						int ofs = i;
@@ -3315,35 +3214,38 @@ namespace PSFilterLoad.PSApi
 								ofs = 0;
 								break;
 						}
-						byte* p = row + ofs;
-						byte* q = (byte*)baseAddr + srcStride + (i * source.planeBytes) + left;
+						byte* src = row + ofs;
+						byte* dst = (byte*)baseAddr + srcStride + (i * source.planeBytes) + left;
 
 						for (int x = 0; x < width; x++)
 						{
-							*p = *q;
+							*src = *dst;
 
-							p += ColorBgra.SizeOf;
-							q += source.colBytes;
+							src += ColorBgra.SizeOf;
+							dst += source.colBytes;
 						}
 					}
-
 				}
-				else
+			}
+			else
+			{
+				for (int y = top; y < bottom; y++)
 				{
-					byte* p = (byte*)tempDisplaySurface.GetRowAddressUnchecked(surfaceY);
-					byte* q = (byte*)baseAddr + (y * source.rowBytes) + left;
+					byte* src = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y - top);
+					byte* dst = (byte*)baseAddr + (y * source.rowBytes) + left;
+
 					for (int x = 0; x < width; x++)
 					{
-						p[0] = q[2];
-						p[1] = q[1];
-						p[2] = q[0];
+						src[0] = dst[2];
+						src[1] = dst[1];
+						src[2] = dst[0];
 						if (source.colBytes == 4)
 						{
-							p[3] = q[3];
+							src[3] = dst[3];
 						}
 
-						p += ColorBgra.SizeOf;
-						q += source.colBytes;
+						src += ColorBgra.SizeOf;
+						dst += source.colBytes;
 					}
 				}
 			}
@@ -3385,7 +3287,7 @@ namespace PSFilterLoad.PSApi
 						}
 					}
 
-				} 
+				}
 			}
 
 			return PSError.noErr;
@@ -3437,17 +3339,17 @@ namespace PSFilterLoad.PSApi
 
 					if (selectedRegion.IsVisible(x, y))
 					{
-						*p = 255; 
+						*p = 255;
 					}
 					else
 					{
-						*p = 0; 
+						*p = 0;
 					}
 
 					p++;
 				}
 			}
-			
+
 		}
 
 		#region DescriptorParameters
@@ -3474,7 +3376,7 @@ namespace PSFilterLoad.PSApi
 				if (keys == null)
 				{
 					keys = new List<uint>();
-					if (keyArray != IntPtr.Zero) 
+					if (keyArray != IntPtr.Zero)
 					{
 						uint* key = (uint*)keyArray.ToPointer();
 						while (*key != 0U)
@@ -3516,7 +3418,7 @@ namespace PSFilterLoad.PSApi
 					isSubKey = true;
 					subClassDict = null;
 					subClassIndex = 0;
-					
+
 					if (aeteDict.ContainsKey(getKey) && aeteDict[getKey].Value is Dictionary<uint, AETEValue>)
 					{
 						subClassDict = (Dictionary<uint, AETEValue>)aeteDict[getKey].Value;
@@ -3531,7 +3433,7 @@ namespace PSFilterLoad.PSApi
 							{
 								subKeys.Remove(item);
 							}
-						}                        
+						}
 					}
 				}
 
@@ -3596,7 +3498,7 @@ namespace PSFilterLoad.PSApi
 					{
 					}
 
-					subClassIndex++; 
+					subClassIndex++;
 				}
 				else
 				{
@@ -3621,9 +3523,9 @@ namespace PSFilterLoad.PSApi
 					catch (NullReferenceException)
 					{
 					}
-					
-					subKeyIndex++; 
-				}  
+
+					subKeyIndex++;
+				}
 			}
 			else
 			{
@@ -3712,8 +3614,8 @@ namespace PSFilterLoad.PSApi
 			{
 			}
 
-			data = (double)unitFloat.Value; 
-			
+			data = (double)unitFloat.Value;
+
 			return PSError.noErr;
 		}
 		private short GetBooleanProc(IntPtr descriptor, ref byte data)
@@ -3838,7 +3740,7 @@ namespace PSFilterLoad.PSApi
 				data = (PIDescriptorSimpleReference)aeteDict[getKey].Value;
 				return PSError.noErr;
 			}
-		   
+
 			return PSError.errPlugInHostInsufficient;
 		}
 		private short GetObjectProc(IntPtr descriptor, ref uint retType, ref IntPtr data)
@@ -3957,7 +3859,7 @@ namespace PSFilterLoad.PSApi
 			else
 			{
 				count = (uint)aeteDict.Count;
-			} 
+			}
 			return PSError.noErr;
 		}
 		private short GetStringProc(IntPtr descriptor, IntPtr data)
@@ -4175,7 +4077,7 @@ namespace PSFilterLoad.PSApi
 				Marshal.Copy(hPtr, data, 0, size);
 
 				aeteDict.AddOrUpdate(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
-				
+
 				HandleUnlockProc(textHandle);
 			}
 
@@ -4380,7 +4282,7 @@ namespace PSFilterLoad.PSApi
 				handle = Memory.Allocate(PSHandle.SizeOf, true);
 
 				PSHandle* hand = (PSHandle*)handle.ToPointer();
-					
+
 				hand->pointer = Memory.Allocate(size, true);
 				hand->size = size;
 
@@ -4398,8 +4300,8 @@ namespace PSFilterLoad.PSApi
 				}
 
 				return IntPtr.Zero;
-			}				
-			
+			}
+
 			return handle;
 		}
 
@@ -4427,7 +4329,7 @@ namespace PSFilterLoad.PSApi
 #endif
 				handles.Remove(h);
 				PSHandle* handle = (PSHandle*)h.ToPointer();
-					
+
 				Memory.Free(handle->pointer);
 				Memory.Free(h);
 			}
@@ -4452,7 +4354,7 @@ namespace PSFilterLoad.PSApi
 
 
 					SafeNativeMethods.GlobalFree(h);
-				}                   
+				}
 			}
 		}
 
@@ -4510,7 +4412,7 @@ namespace PSFilterLoad.PSApi
 						return SafeNativeMethods.GlobalSize(h).ToInt32();
 					}
 				}
-				
+
 				return 0;
 			}
 
@@ -4556,7 +4458,7 @@ namespace PSFilterLoad.PSApi
 
 					return PSError.noErr;
 				}
-				
+
 				return PSError.nilHandleErr;
 			}
 
@@ -4599,7 +4501,7 @@ namespace PSFilterLoad.PSApi
 						SafeNativeMethods.GlobalUnlock(h);
 					}
 				}
-				
+
 			}
 		}
 
@@ -4848,7 +4750,7 @@ namespace PSFilterLoad.PSApi
 				if (size > 0)
 				{
 					Marshal.Copy(HandleLockProc(data, 0), bytes, 0, size);
-					HandleUnlockProc(data); 
+					HandleUnlockProc(data);
 				}
 
 				pseudoResources.Add(new PSResource(ofType, count, bytes));
@@ -4934,9 +4836,9 @@ namespace PSFilterLoad.PSApi
 				{
 					Marshal.Copy(data, 0, HandleLockProc(h, 0), data.Length);
 					HandleUnlockProc(h);
-				} 
-				   
-				return h; 
+				}
+
+				return h;
 			}
 
 			return IntPtr.Zero;
@@ -5170,7 +5072,7 @@ namespace PSFilterLoad.PSApi
 
 			return PSError.kSPNoErr;
 		}
-		
+
 		/// <summary>
 		/// Converts an Int32 to a 16.16 fixed point value.
 		/// </summary>
@@ -5191,7 +5093,7 @@ namespace PSFilterLoad.PSApi
 			return (value >> 16);
 		}
 
-		private bool sizesSetup; 
+		private bool sizesSetup;
 		private unsafe void SetupSizes()
 		{
 			if (sizesSetup)
@@ -5435,7 +5337,7 @@ namespace PSFilterLoad.PSApi
 
 
 			if (aeteDict.Count > 0)
-			{                    
+			{
 				descriptorParameters->descriptor = HandleNewProc(0);
 
 				if (!isRepeatEffect)
@@ -5462,7 +5364,7 @@ namespace PSFilterLoad.PSApi
 				channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
 				channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);
 
-				CreateReadImageDocument(); 
+				CreateReadImageDocument();
 			}
 			else
 			{
@@ -5505,7 +5407,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->foreground.red = (ushort)((foregroundColor[0] * 65535) / 255);
 			filterRecord->foreground.green = (ushort)((foregroundColor[1] * 65535) / 255);
 			filterRecord->foreground.blue = (ushort)((foregroundColor[2] * 65535) / 255);
-  
+
 			for (int i = 0; i < 4; i++)
 			{
 				filterRecord->backColor[i] = backgroundColor[i];
@@ -5568,7 +5470,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->maskTileWidth = filterRecord->inTileWidth;
 			filterRecord->maskTileOrigin.h = 0;
 			filterRecord->maskTileOrigin.v = 0;
-			
+
 			filterRecord->descriptorParameters = descriptorParametersPtr;
 			errorStringPtr = Memory.Allocate(256, true);
 			filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead. 
@@ -5818,7 +5720,7 @@ namespace PSFilterLoad.PSApi
 					Memory.Free(filterRecordPtr);
 					filterRecordPtr = IntPtr.Zero;
 				}
-			
+
 				if (dataPtr != IntPtr.Zero)
 				{
 					if (isRepeatEffect && !IsHandleValid(dataPtr))
@@ -5841,7 +5743,7 @@ namespace PSFilterLoad.PSApi
 					{
 						BufferFreeProc(dataPtr);
 					}
-					else 
+					else
 					{
 						HandleUnlockProc(dataPtr);
 						HandleDisposeProc(dataPtr);
@@ -5863,7 +5765,7 @@ namespace PSFilterLoad.PSApi
 				{
 					foreach (var item in handles)
 					{
-						Memory.Free(item.Value.pointer); 
+						Memory.Free(item.Value.pointer);
 						Memory.Free(item.Key);
 					}
 					handles = null;
