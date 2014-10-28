@@ -38,13 +38,13 @@ namespace PSFilterLoad.PSApi
 	}
 
 	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-	internal delegate short ReadPixelsProc(System.IntPtr port, ref PSScaling scaling, ref VRect writeRect, ref PixelMemoryDesc destination, ref VRect wroteRect);
+	internal delegate short ReadPixelsProc([In()] IntPtr port, [In()] ref PSScaling scaling, [In()] ref VRect writeRect, [In()] ref PixelMemoryDesc destination, ref VRect wroteRect);
 
 	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-	internal delegate short WriteBasePixelsProc(System.IntPtr port, ref VRect writeRect, PixelMemoryDesc source);
+	internal delegate short WriteBasePixelsProc([In()] IntPtr port, [In()] ref VRect writeRect, [In()] PixelMemoryDesc source);
 
 	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-	internal delegate short ReadPortForWritePortProc(ref System.IntPtr readPort, System.IntPtr writePort);
+	internal delegate short ReadPortForWritePortProc(ref IntPtr readPort, [In()] IntPtr writePort);
 
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct ChannelPortProcs
@@ -103,26 +103,26 @@ namespace PSFilterLoad.PSApi
 
 	internal enum ChannelTypes : short
 	{
-        Unspecified = 0,
-        Red = 1,
-        Green = 2,
-        Blue = 3,
-        Cyan = 4,
-        Magenta = 5,
-        Yellow = 6,
-        Black = 7,
-        L = 8,
-        A = 9,
-        B = 10,
-        Duotone = 11,
-        Index = 12,
-        Bitmap = 13,
-        ColorSelected = 14,
-        ColorProtected = 15,
-        Transparency = 16,
-        LayerMask = 17,
-        InvertedLayerMask = 18,
-        SelectionMask = 19
-    }
+		Unspecified = 0,
+		Red = 1,
+		Green = 2,
+		Blue = 3,
+		Cyan = 4,
+		Magenta = 5,
+		Yellow = 6,
+		Black = 7,
+		L = 8,
+		A = 9,
+		B = 10,
+		Duotone = 11,
+		Index = 12,
+		Bitmap = 13,
+		ColorSelected = 14,
+		ColorProtected = 15,
+		Transparency = 16,
+		LayerMask = 17,
+		InvertedLayerMask = 18,
+		SelectionMask = 19
+	}
 
 }
