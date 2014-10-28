@@ -187,7 +187,7 @@ namespace PSFilterShim
 
 					if (!showAbout)
 					{
-						if (result && string.IsNullOrEmpty(lps.ErrorMessage))
+						if (result)
 						{
 							using (Bitmap dst = lps.Dest.CreateAliasedBitmap())
 							{
