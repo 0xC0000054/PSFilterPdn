@@ -93,6 +93,30 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public const int supportsRGBColor = 8;
 
+        internal static class ChannelPorts
+        {
+             /// <summary>
+            /// The index of the red channel.
+            /// </summary>
+            public const int Red = 0;
+            /// <summary>
+            /// The index of the green channel.
+            /// </summary>
+            public const int Green = 1;
+            /// <summary>
+            /// The index of the blue channel.
+            /// </summary>
+            public const int Blue = 2;
+            /// <summary>
+            /// The index of the alpha channel.
+            /// </summary>
+            public const int Alpha = 3;
+            /// <summary>
+            /// The index of the selection mask.
+            /// </summary>
+            public const int SelectionMask = 4;
+        }
+
         /// <summary>
         /// The host sampling support constants 
         /// </summary>
@@ -102,7 +126,6 @@ namespace PSFilterLoad.PSApi
             public const byte hostSupportsIntegralSampling = 1;
             public const byte hostSupportsFractionalSampling = 2;
         }
-
 
         /// <summary>
         /// The constants used by the Property suite.
