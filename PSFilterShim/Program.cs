@@ -94,7 +94,7 @@ namespace PSFilterShim
 
 		static void RunFilterThread()
 		{
-			string src = serviceProxy.GetSoureImagePath(); 
+			string src = serviceProxy.GetSourceImagePath(); 
 			string dstImg = serviceProxy.GetDestImagePath(); 
 
 			

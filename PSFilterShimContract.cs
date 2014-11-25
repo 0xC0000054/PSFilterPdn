@@ -70,7 +70,7 @@ namespace PSFilterPdn
             return showAboutDialog;
         }
 
-        public string GetSoureImagePath()
+        public string GetSourceImagePath()
         {
             return sourceFileName;
         }

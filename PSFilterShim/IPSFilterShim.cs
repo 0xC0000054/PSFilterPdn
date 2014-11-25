@@ -26,7 +26,7 @@ internal interface IPSFilterShim
     bool ShowAboutDialog();
 
     [OperationContract]
-    string GetSoureImagePath();
+    string GetSourceImagePath();
 
     [OperationContract]
     string GetDestImagePath();
