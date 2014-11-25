@@ -203,6 +203,69 @@ namespace PSFilterLoad.PSApi
 
 		private AETEData aete;
 		private Dictionary<uint, AETEValue> aeteDict;
+        private GlobalParameters globalParameters;
+        private bool isRepeatEffect;
+        private IntPtr pluginDataHandle;
+        private IntPtr filterParametersHandle;
+
+        private Surface source;
+        private Surface dest;
+        private MaskSurface mask;
+        private Surface tempSurface;
+        private MaskSurface tempMask;
+        private Surface tempDisplaySurface;
+        private Surface scaledChannelSurface;
+        private MaskSurface scaledSelectionMask;
+
+        private bool disposed;
+        private PluginPhase phase;
+        private Action<int, int> progressFunc;
+        private IntPtr dataPtr;
+        private short result;
+
+        private Func<byte> abortFunc;
+        private string errorMessage;
+        private short filterCase;
+        private float dpiX;
+        private float dpiY;
+        private Region selectedRegion;
+        private byte[] backgroundColor;
+        private byte[] foregroundColor;
+        private List<PSResource> pseudoResources;
+
+        private bool ignoreAlpha;
+        private FilterDataHandling inputHandling;
+        private FilterDataHandling outputHandling;
+
+        private Rect16 lastInRect;
+        private Rect16 lastOutRect;
+        private Rect16 lastMaskRect;
+        private int lastInLoPlane;
+        private int lastOutRowBytes;
+        private int lastOutLoPlane;
+        private int lastOutHiPlane;
+        private IntPtr maskDataPtr;
+        private IntPtr inDataPtr;
+        private IntPtr outDataPtr;
+
+        private short descErr;
+        private short descErrValue;
+        private uint getKey;
+        private int getKeyIndex;
+        private List<uint> keys;
+        private List<uint> subKeys;
+        private bool isSubKey;
+        private int subKeyIndex;
+        private int subClassIndex;
+        private Dictionary<uint, AETEValue> subClassDict;
+
+        private bool copyToDest; 
+        private bool sizesSetup;
+        private bool frValuesSetup;
+        private bool useChannelPorts;
+        private bool usePICASuites;
+        private ActivePICASuites activePICASuites;
+
 
 		public Surface Dest
 		{
@@ -228,19 +291,6 @@ namespace PSFilterLoad.PSApi
 			abortFunc = abortCallback;
 		}
 
-		private Func<byte> abortFunc;
-		private Action<int, int> progressFunc;
-
-
-		private Surface source;
-		private Surface dest;
-		private PluginPhase phase;
-
-		private IntPtr dataPtr;
-		private short result;
-
-		private string errorMessage;
-
 		public string ErrorMessage
 		{
 			get
@@ -248,9 +298,6 @@ namespace PSFilterLoad.PSApi
 				return errorMessage;
 			}
 		}
-
-		private GlobalParameters globalParameters;
-		private bool isRepeatEffect;
 
 		public ParameterData FilterParameters
 		{
@@ -279,8 +326,6 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private List<PSResource> pseudoResources;
-
 		public List<PSResource> PseudoResources
 		{
 			get
@@ -292,13 +337,6 @@ namespace PSFilterLoad.PSApi
 				pseudoResources = value;
 			}
 		}
-
-		private short filterCase;
-
-		private float dpiX;
-		private float dpiY;
-
-		private Region selectedRegion;
 
 		/// <summary>
 		/// Loads and runs Photoshop Filters
@@ -429,14 +467,6 @@ namespace PSFilterLoad.PSApi
 			debugFlags |= DebugFlags.ResourceSuite;
 #endif
 		}
-		/// <summary>
-		/// The Secondary (background) color in PDN
-		/// </summary>
-		private byte[] backgroundColor;
-		/// <summary>
-		/// The Primary (foreground) color in PDN
-		/// </summary>
-		private byte[] foregroundColor;
 
 		/// <summary>
 		/// The Windows-1252 Western European encoding for StringFromPString(IntPtr)
@@ -469,10 +499,6 @@ namespace PSFilterLoad.PSApi
 
 			return false;
 		}
-
-		private bool ignoreAlpha;
-		private FilterDataHandling inputHandling;
-		private FilterDataHandling outputHandling;
 
 		private bool IgnoreAlphaChannel(PluginData data)
 		{
@@ -799,9 +825,8 @@ namespace PSFilterLoad.PSApi
 
 			}
 		}
-		private IntPtr pluginDataHandle;
-		private IntPtr filterParametersHandle;
-		/// <summary>
+
+        /// <summary>
 		/// Restore the filter parameters for repeat runs.
 		/// </summary>
 		private unsafe void RestoreParameters()
@@ -1088,7 +1113,6 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
-		private bool frValuesSetup;
 		private unsafe void SetFilterRecordValues()
 		{
 			if (frValuesSetup)
@@ -1217,10 +1241,6 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
-		/// <summary>
-		/// True if the source image is copied to the dest image, otherwise false.
-		/// </summary>
-		private bool copyToDest;
 		/// <summary>
 		/// Clears the dest alpha to match the source alpha.
 		/// </summary>
@@ -1499,18 +1519,6 @@ namespace PSFilterLoad.PSApi
 
 			return 0;
 		}
-		private Rect16 lastInRect;
-		private Rect16 lastOutRect;
-		private Rect16 lastMaskRect;
-
-		private int lastInLoPlane;
-		private int lastOutRowBytes;
-		private int lastOutLoPlane;
-		private int lastOutHiPlane;
-
-		private IntPtr maskDataPtr;
-		private IntPtr inDataPtr;
-		private IntPtr outDataPtr;
 
 		/// <summary>
 		/// Determines whether the filter uses planar order processing.
@@ -1670,7 +1678,6 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private Surface tempSurface;
 		/// <summary>
 		/// Scales the temp surface.
 		/// </summary>
@@ -1955,8 +1962,6 @@ namespace PSFilterLoad.PSApi
 
 			return PSError.noErr;
 		}
-
-		private MaskSurface tempMask;
 
 		private unsafe void ScaleTempMask(int maskRate, Rectangle lockRect)
 		{
@@ -2428,9 +2433,6 @@ namespace PSFilterLoad.PSApi
 			}
 			return err;
 		}
-
-		private Surface scaledChannelSurface;
-		private MaskSurface scaledSelectionMask;
 
 		private unsafe static void FillChannelData(int channel, PixelMemoryDesc dest, Surface source, VRect srcRect)
 		{
@@ -3103,7 +3105,6 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private Surface tempDisplaySurface;
 		private void SetupTempDisplaySurface(int width, int height, bool haveMask)
 		{
 			if ((tempDisplaySurface == null) || width != tempDisplaySurface.Width || height != tempDisplaySurface.Height)
@@ -3323,10 +3324,6 @@ namespace PSFilterLoad.PSApi
 
 		}
 
-		/// <summary>
-		/// The selection mask for the image
-		/// </summary>
-		private MaskSurface mask;
 		private unsafe void DrawMask()
 		{
 			mask = new MaskSurface(source.Width, source.Height);
@@ -3353,17 +3350,6 @@ namespace PSFilterLoad.PSApi
 		}
 
 		#region DescriptorParameters
-
-		private short descErr;
-		private short descErrValue;
-		private uint getKey;
-		private int getKeyIndex;
-		private List<uint> keys;
-		private List<uint> subKeys;
-		private bool isSubKey;
-		private int subKeyIndex;
-		private int subClassIndex;
-		private Dictionary<uint, AETEValue> subClassDict;
 
 		private unsafe IntPtr OpenReadDescriptorProc(IntPtr descriptor, IntPtr keyArray)
 		{
@@ -4844,9 +4830,6 @@ namespace PSFilterLoad.PSApi
 			return IntPtr.Zero;
 		}
 
-		private ActivePICASuites activePICASuites;
-		private bool usePICASuites;
-
 		private unsafe int SPBasicAcquireSuite(IntPtr name, int version, ref IntPtr suite)
 		{
 
@@ -5093,7 +5076,6 @@ namespace PSFilterLoad.PSApi
 			return (value >> 16);
 		}
 
-		private bool sizesSetup;
 		private unsafe void SetupSizes()
 		{
 			if (sizesSetup)
@@ -5224,7 +5206,6 @@ namespace PSFilterLoad.PSApi
 			spUndefined = new SPBasicSuite_Undefined(SPBasicUndefined);
 		}
 
-		private bool useChannelPorts;
 		private unsafe void SetupSuites()
 		{
 			bufferProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(BufferProcs)), true);
@@ -5502,7 +5483,6 @@ namespace PSFilterLoad.PSApi
 			Dispose(false);
 		}
 
-		private bool disposed;
 		private unsafe void Dispose(bool disposing)
 		{
 			if (!disposed)
