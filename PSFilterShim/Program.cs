@@ -83,6 +83,7 @@ namespace PSFilterShim
 				filterThread.Start();
 
 				resetEvent.WaitOne();
+				resetEvent.Close();
 
 				filterThread.Join();
 			}

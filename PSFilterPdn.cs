@@ -340,6 +340,8 @@ namespace PSFilterPdn
                     this.filterThread.Start();
 
                     filterDone.WaitOne();
+                    filterDone.Close();
+                    filterDone = null;
 
                     this.filterThread.Join();
                     this.filterThread = null;
