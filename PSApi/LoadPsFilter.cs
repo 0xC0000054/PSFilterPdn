@@ -3263,7 +3263,7 @@ namespace PSFilterLoad.PSApi
 					{
 						using (ColorPickerForm picker = new ColorPickerForm(name))
 						{
-							picker.SetColorString(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
+							picker.SetDefaultColor(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
 
 							if (picker.ShowDialog() == DialogResult.OK)
 							{
@@ -3362,16 +3362,16 @@ namespace PSFilterLoad.PSApi
 				{
 					switch (channel)
 					{
-						case 0:
+						case PSConstants.ChannelPorts.Red:
 							*dst = src->R;
 							break;
-						case 1:
+						case PSConstants.ChannelPorts.Green:
 							*dst = src->G;
 							break;
-						case 2:
+						case PSConstants.ChannelPorts.Blue:
 							*dst = src->B;
 							break;
-						case 3:
+						case PSConstants.ChannelPorts.Alpha:
 							*dst = src->A;
 							break;
 					}
@@ -3379,11 +3379,10 @@ namespace PSFilterLoad.PSApi
 					dst += bpp;
 				}
 			}
-
 		}
 
 #if DEBUG
-		private static unsafe void StoreChannelData(int channel, PixelMemoryDesc source, Surface dest, VRect srcRect)
+		private unsafe void StoreChannelData(int channel, PixelMemoryDesc source, Surface dest, VRect srcRect)
 		{
 			void* srcPtr = source.data.ToPointer();
 			int stride = source.rowBits / 8;
@@ -3419,16 +3418,16 @@ namespace PSFilterLoad.PSApi
 				{
 					switch (channel)
 					{
-						case 0:
+						case PSConstants.ChannelPorts.Red:
 							dst->R = *src;
 							break;
-						case 1:
+						case PSConstants.ChannelPorts.Green:
 							dst->G = *src;
 							break;
-						case 2:
+						case PSConstants.ChannelPorts.Blue:
 							dst->B = *src;
 							break;
-						case 3:
+						case PSConstants.ChannelPorts.Alpha:
 							dst->A = *src;
 							break;
 					}
@@ -3440,7 +3439,7 @@ namespace PSFilterLoad.PSApi
 		}
 #endif
 
-		private unsafe void FillSelectionMask(PixelMemoryDesc destiniation, MaskSurface source, VRect srcRect)
+		private static unsafe void FillSelectionMask(PixelMemoryDesc destiniation, MaskSurface source, VRect srcRect)
 		{
 			byte* dstPtr = (byte*)destiniation.data.ToPointer();
 			int stride = destiniation.rowBits / 8;
@@ -3488,7 +3487,7 @@ namespace PSFilterLoad.PSApi
 
 			int channel = port.ToInt32();
 
-			if (channel < 0 || channel > 4)
+			if (channel < PSConstants.ChannelPorts.Red || channel > PSConstants.ChannelPorts.SelectionMask)
 			{
 				return PSError.errUnknownPort;
 			}
@@ -3501,7 +3500,7 @@ namespace PSFilterLoad.PSApi
 			int dstWidth = dstRect.right - dstRect.left;
 			int dstHeight = dstRect.bottom - dstRect.top;
 
-			if (channel == 4)
+			if (channel == PSConstants.ChannelPorts.SelectionMask)
 			{
 				if (srcWidth == dstWidth && srcHeight == dstHeight)
 				{
@@ -3580,7 +3579,6 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
-
 			wroteRect = dstRect;
 
 			return PSError.noErr;
@@ -3618,12 +3616,12 @@ namespace PSFilterLoad.PSApi
 			doc->vResolution = Int32ToFixed((int)(dpiY + 0.5));
 
 			string[] names = new string[3] { Resources.RedChannelName, Resources.GreenChannelName, Resources.BlueChannelName };
-			ReadChannelPtrs channel = CreateReadChannelDesc(0, names[0], doc->depth, doc->bounds);
+			ReadChannelPtrs channel = CreateReadChannelDesc(PSConstants.ChannelPorts.Red, names[0], doc->depth, doc->bounds);
 
 			ReadChannelDesc* ch = (ReadChannelDesc*)channel.address.ToPointer();
 			channelReadDescPtrs.Add(channel);
 
-			for (int i = 1; i < 3; i++)
+			for (int i = PSConstants.ChannelPorts.Green; i <= PSConstants.ChannelPorts.Blue; i++)
 			{
 				ReadChannelPtrs ptr = CreateReadChannelDesc(i, names[i], doc->depth, doc->bounds);
 				channelReadDescPtrs.Add(ptr);
@@ -3637,14 +3635,14 @@ namespace PSFilterLoad.PSApi
 
 			if (!ignoreAlpha)
 			{
-				ReadChannelPtrs alphaPtr = CreateReadChannelDesc(3, Resources.AlphaChannelName, doc->depth, doc->bounds);
+				ReadChannelPtrs alphaPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.Alpha, Resources.AlphaChannelName, doc->depth, doc->bounds);
 				channelReadDescPtrs.Add(alphaPtr);
 				doc->targetTransparency = doc->mergedTransparency = alphaPtr.address;
 			}
 
 			if (selectedRegion != null)
 			{
-				ReadChannelPtrs selectionPtr = CreateReadChannelDesc(4, Resources.MaskChannelName, doc->depth, doc->bounds);
+				ReadChannelPtrs selectionPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.SelectionMask, Resources.MaskChannelName, doc->depth, doc->bounds);
 				channelReadDescPtrs.Add(selectionPtr);
 				doc->selection = selectionPtr.address;
 			}
@@ -3658,27 +3656,27 @@ namespace PSFilterLoad.PSApi
 			desc->maxVersion = PSConstants.kCurrentMaxVersReadChannelDesc;
 			desc->depth = depth;
 			desc->bounds = bounds;
-			desc->target = (channel < 3) ? (byte)1 : (byte)0;
-			desc->shown = (channel < 4) ? (byte)1 : (byte)0;
+			desc->target = (channel < PSConstants.ChannelPorts.Alpha) ? (byte)1 : (byte)0;
+			desc->shown = (channel < PSConstants.ChannelPorts.SelectionMask) ? (byte)1 : (byte)0;
 			desc->tileSize.h = bounds.right - bounds.left;
 			desc->tileSize.v = bounds.bottom - bounds.top;
 			desc->port = new IntPtr(channel);
 			switch (channel)
 			{
-				case 0:
-					desc->channelType = ChannelTypes.ctRed;
+				case PSConstants.ChannelPorts.Red:
+					desc->channelType = ChannelTypes.Red;
 					break;
-				case 1:
-					desc->channelType = ChannelTypes.ctGreen;
+				case PSConstants.ChannelPorts.Green:
+					desc->channelType = ChannelTypes.Green;
 					break;
-				case 2:
-					desc->channelType = ChannelTypes.ctBlue;
+				case PSConstants.ChannelPorts.Blue:
+					desc->channelType = ChannelTypes.Blue;
 					break;
-				case 3:
-					desc->channelType = ChannelTypes.ctTransparency;
+				case PSConstants.ChannelPorts.Alpha:
+					desc->channelType = ChannelTypes.Transparency;
 					break;
-				case 4:
-					desc->channelType = ChannelTypes.ctSelectionMask;
+				case PSConstants.ChannelPorts.SelectionMask:
+					desc->channelType = ChannelTypes.SelectionMask;
 					break;
 			}
 			IntPtr namePtr = Marshal.StringToHGlobalAnsi(name);
