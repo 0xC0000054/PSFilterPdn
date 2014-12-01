@@ -192,9 +192,11 @@ namespace PaintDotNet
             }
         }
 
-        internal void SetColorString(short r, short g, short b)
+        internal void SetDefaultColor(short r, short g, short b)
         {
-            hexBox.Text = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:X2}{1:X2}{2:X2}", r, g, b);
+            this.redUpDown.Value = r;
+            this.greenUpDown.Value = g;
+            this.blueUpDown.Value = b;
         }
 
         private string GetHexNumericUpDownValue(int red, int green, int blue)
