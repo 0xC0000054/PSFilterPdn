@@ -20,8 +20,8 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    [StructLayoutAttribute(LayoutKind.Sequential)]
-    struct PlatformData
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct PlatformData
     { 
         /// <summary>
         /// The handle of the parent window

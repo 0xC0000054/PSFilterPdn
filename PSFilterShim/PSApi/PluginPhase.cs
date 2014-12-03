@@ -12,7 +12,7 @@
 
 namespace PSFilterLoad.PSApi
 {
-    enum PluginPhase
+    internal enum PluginPhase
     {
         None,
         Parameters,

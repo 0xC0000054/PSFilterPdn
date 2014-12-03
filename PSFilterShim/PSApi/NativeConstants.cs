@@ -12,7 +12,7 @@
 
 namespace PSFilterLoad.PSApi
 {
-    static class NativeConstants
+    internal static class NativeConstants
     {
         public const int GPTR = 64;
 

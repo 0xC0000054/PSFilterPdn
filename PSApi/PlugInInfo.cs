@@ -6,7 +6,7 @@
 namespace PSFilterLoad.PSApi
 {
 #pragma warning disable 0649
-    struct PlugInInfo
+    internal struct PlugInInfo
     {
         /// <summary>
         /// The version number of the interface supported.

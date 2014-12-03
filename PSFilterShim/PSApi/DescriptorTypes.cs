@@ -17,7 +17,7 @@
 
 namespace PSFilterLoad.PSApi
 {
-    static class DescriptorTypes
+    internal static class DescriptorTypes
     {
         public const uint typeAlias = 0x976c6973U; // 'alis'
         public const uint typeBoolean = 0x626f6f6cU; // 'bool'

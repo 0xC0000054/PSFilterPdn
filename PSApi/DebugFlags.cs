@@ -16,7 +16,7 @@ namespace PSFilterLoad.PSApi
 {
 #if DEBUG
     [Flags]
-    enum DebugFlags
+    internal enum DebugFlags
     {
         None = 0,
         AdvanceState = (1 << 0),

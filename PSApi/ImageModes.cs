@@ -18,7 +18,7 @@
 namespace PSFilterLoad.PSApi
 {
 #if DEBUG
-    enum ImageModes
+    internal enum ImageModes
     {
         plugInModeBitmap = 0,
         plugInModeGrayScale = 1,

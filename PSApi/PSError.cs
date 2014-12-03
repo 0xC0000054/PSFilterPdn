@@ -22,7 +22,7 @@ using System.Text;
 
 namespace PSFilterLoad.PSApi
 {
-    static class PSError
+    internal static class PSError
     {
         // Macintosh system errors
         public const short noErr = 0;

@@ -18,12 +18,10 @@
 using System;
 using System.Runtime.InteropServices;
 
-
 namespace PSFilterLoad.PSApi
 { 
-    
     [StructLayout(LayoutKind.Sequential)]
-    struct PlugInMonitor
+    internal struct PlugInMonitor
     {
         public int gamma;
         public int redX;
@@ -36,5 +34,4 @@ namespace PSFilterLoad.PSApi
         public int whiteY;
         public int ambient;
     }
-
 }

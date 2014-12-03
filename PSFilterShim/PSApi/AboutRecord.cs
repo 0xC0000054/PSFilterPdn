@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
     [StructLayout(LayoutKind.Sequential)]
-    unsafe struct AboutRecord
+    internal unsafe struct AboutRecord
     {
         public IntPtr platformData;
         public IntPtr sSPBasic;

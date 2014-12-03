@@ -18,7 +18,7 @@
 
 namespace PSFilterLoad.PSApi
 {
-    static class FilterCase
+    internal static class FilterCase
     {
         public const short Unsupported = -1;
         public const short FlatImageNoSelection = 1;

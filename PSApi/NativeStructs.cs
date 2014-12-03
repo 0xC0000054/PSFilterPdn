@@ -15,7 +15,7 @@ using System;
 
 namespace PSFilterLoad.PSApi
 {
-    static class NativeStructs
+    internal static class NativeStructs
     {
         [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
         public struct MEMORY_BASIC_INFORMATION

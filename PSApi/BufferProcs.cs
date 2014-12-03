@@ -36,7 +36,7 @@ namespace PSFilterLoad.PSApi
     internal delegate int BufferSpaceProc();
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayout(LayoutKind.Sequential)]
-    struct BufferProcs
+    internal struct BufferProcs
     {
         public short bufferProcsVersion;
         public short numBufferProcs;

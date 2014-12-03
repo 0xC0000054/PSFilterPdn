@@ -22,7 +22,7 @@ namespace PSFilterLoad.PSApi
 // Disable CS0649, Field 'field' is never assigned to, and will always have its default value 'value'
 #pragma warning disable 0649 
 
-	struct PIProperty
+	internal struct PIProperty
 	{
 		public uint vendorID;  /* Vendor specific identifier. */
 		public uint propertyKey;		/* Identification key for this property type. */
@@ -32,7 +32,7 @@ namespace PSFilterLoad.PSApi
 		public const int SizeOf = 16;
 	}
 
-	struct PITerminology
+	internal struct PITerminology
 	{
 		public int version;
 		public uint classID;
@@ -46,7 +46,7 @@ namespace PSFilterLoad.PSApi
 
 #pragma warning restore 0649
 
-	static class PIPropertyID
+	internal static class PIPropertyID
 	{
 		/// <summary>
 		/// The property giving the plug-in's kind, 8BFM for Photoshop Filters
