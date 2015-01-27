@@ -970,6 +970,12 @@ namespace PSFilterPdn
 						return true;
 					}
 
+					// If the filter has the same processor architecture and title but is located in a different 8bf file, add it to the menu. 
+					if (menuData.runWith32BitShim == data.runWith32BitShim && menuData.fileName != data.fileName)
+					{
+						return true;
+					}
+
 					return false;
 				}
 
