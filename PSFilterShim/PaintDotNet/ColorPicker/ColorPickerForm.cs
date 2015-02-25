@@ -21,8 +21,8 @@
 
 using System;
 using System.Drawing;
+using System.Globalization;
 using System.Windows.Forms;
-using PaintDotNet.SystemLayer;
 
 namespace PaintDotNet
 {
@@ -209,7 +209,7 @@ namespace PaintDotNet
                 newHexText = "0" + newHexText;
             }
 
-            return newHexText.ToUpper();
+            return newHexText.ToUpperInvariant();
         }
 
         /// <summary>
@@ -1078,7 +1078,7 @@ namespace PaintDotNet
                     {
                         try
                         {
-                            hexInt = int.Parse(hexBox.Text,System.Globalization.NumberStyles.HexNumber);
+                            hexInt = int.Parse(hexBox.Text, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo);
                         }
 
                         // Needs to be changed so it reads what the RGB values were last
@@ -1146,15 +1146,6 @@ namespace PaintDotNet
         private void PopIgnoreChangedEvents()
         {
             --this.ignoreChangedEvents;
-        }
-
-        private ColorBgra GetColorFromUpDowns()
-        {
-            int r = (int)this.redUpDown.Value;
-            int g = (int)this.greenUpDown.Value;
-            int b = (int)this.blueUpDown.Value;
-
-            return ColorBgra.FromBgra((byte)b, (byte)g, (byte)r, 255);
         }
 
         private void swatchControl_ColorClicked(object sender, IndexEventArgs e)
