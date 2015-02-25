@@ -50,11 +50,19 @@ namespace PSFilterLoad.PSApi
 
     internal sealed class PluginAETE
     {
-        public short major;
-        public short minor;
-        public short suiteLevel;
-        public short suiteVersion;
+        public readonly short major;
+        public readonly short minor;
+        public readonly short suiteLevel;
+        public readonly short suiteVersion;
+        public readonly AETEEvent scriptEvent;
 
-        public AETEEvent scriptEvent;
+        public PluginAETE(short major, short minor, short suiteLevel, short suiteVersion, AETEEvent scriptEvent)
+        {
+            this.major = major;
+            this.minor = minor;
+            this.suiteLevel = suiteLevel;
+            this.suiteVersion = suiteVersion;
+            this.scriptEvent = scriptEvent;
+        }
     } 
 }
