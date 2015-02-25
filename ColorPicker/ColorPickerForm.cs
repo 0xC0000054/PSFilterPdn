@@ -209,7 +209,7 @@ namespace PSFilterLoad.ColorPicker
                 newHexText = "0" + newHexText;
             }
 
-            return newHexText.ToUpper();
+            return newHexText.ToUpperInvariant();
         }
 
         /// <summary>
@@ -1015,7 +1015,7 @@ namespace PSFilterLoad.ColorPicker
 
         private void HexUpDown_Leave(object sender, System.EventArgs e)
         {
-            hexBox.Text = hexBox.Text.ToUpper();
+            hexBox.Text = hexBox.Text.ToUpperInvariant();
             UpDown_ValueChanged(sender, e);
         }
 
@@ -1079,7 +1079,7 @@ namespace PSFilterLoad.ColorPicker
                     {
                         try
                         {
-                            hexInt = int.Parse(hexBox.Text,System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
+                            hexInt = int.Parse(hexBox.Text, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
                         }
 
                         // Needs to be changed so it reads what the RGB values were last
