@@ -15,13 +15,13 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-	static class PICASuites
+	internal static class PICASuites
 	{
 		#region BufferSuite1
-		private static PSBufferSuiteNew bufferSuiteNew;
-		private static PSBufferSuiteDispose bufferSuiteDispose;
-		private static PSBufferSuiteGetSize bufferSuiteGetSize;
-		private static PSBufferSuiteGetSpace bufferSuiteGetSpace;
+		private static PSBufferSuiteNew bufferSuiteNew = new PSBufferSuiteNew(PSBufferNew);
+		private static PSBufferSuiteDispose bufferSuiteDispose = new PSBufferSuiteDispose(PSBufferDispose);
+		private static PSBufferSuiteGetSize bufferSuiteGetSize = new PSBufferSuiteGetSize(PSBufferGetSize);
+		private static PSBufferSuiteGetSpace bufferSuiteGetSpace = new PSBufferSuiteGetSpace(PSBufferGetSpace);
 
 		private static IntPtr PSBufferNew(ref uint requestedSize, uint minimumSize)
 		{
@@ -69,88 +69,25 @@ namespace PSFilterLoad.PSApi
 		private static uint PSBufferGetSpace()
 		{
 			return 1000000000;
-		} 
-		#endregion
-
-		#region HandleSuites
-		private static SetPIHandleLockDelegate setHandleLock;
-		private static LockPIHandleProc lockHandleProc;
-		private static UnlockPIHandleProc unlockHandleProc;
-
-		private static void SetHandleLock(IntPtr handle, byte lockHandle, ref IntPtr address, ref byte oldLock)
-		{
-			try
-			{
-				if (lockHandle == 0)
-				{
-					oldLock = 1;
-				}
-				else
-				{
-					oldLock = 0;
-				}
-			}
-			catch (NullReferenceException)
-			{
-				// ignore it
-			}
-
-			if (lockHandle != 0)
-			{
-				address = lockHandleProc(handle, 0);
-			}
-			else
-			{
-				unlockHandleProc(handle);
-				address = IntPtr.Zero;
-			}
-		} 
-		#endregion
-
-		#region UIHooksSuite
-		private static IntPtr hwnd;
-		private static UISuiteMainWindowHandle uiWindowHandle;
-		private static UISuiteHostSetCursor uiSetCursor;
-		private static UISuiteHostTickCount uiTickCount;
-		private static UISuiteGetPluginName uiPluginName;
-
-		private static IntPtr MainWindowHandle()
-		{
-			return hwnd;
-		}
-
-		private static short HostSetCursor(IntPtr cursor)
-		{
-			return PSError.errPlugInHostInsufficient;
-		}
-
-		private static uint HostTickCount()
-		{
-			return 60U;
-		}
-
-		private static short GetPluginName(IntPtr pluginRef, ref IntPtr name)
-		{
-			return PSError.errPlugInHostInsufficient;
 		}
 		#endregion
 
 #if PICASUITEDEBUG
 		#region ColorSpaceSuite1
-		private static CSMake csMake;
-		private static CSDelete csDelete;
-		private static CSStuffComponents csStuffComponent;
-		private static CSExtractComponents csExtractComponent;
-		private static CSStuffXYZ csStuffXYZ;
-		private static CSExtractXYZ csExtractXYZ;
-		private static CSConvert8 csConvert8;
-		private static CSConvert16 csConvert16;
-		private static CSGetNativeSpace csGetNativeSpace;
-		private static CSIsBookColor csIsBookColor;
-		private static CSExtractColorName csExtractColorName;
-		private static CSPickColor csPickColor;
-		private static CSConvert csConvert8to16;
-		private static CSConvert csConvert16to8;
+		private static CSMake csMake = new CSMake(CSMake);
+		private static CSDelete csDelete = new CSDelete(CSDelete);
+		private static CSStuffComponents csStuffComponent = new CSStuffComponents(CSStuffComponents);
+		private static CSExtractComponents csExtractComponent = new CSExtractComponents(CSExtractComponents);
+		private static CSStuffXYZ csStuffXYZ = new CSStuffXYZ(CSStuffXYZ);
+		private static CSExtractXYZ csExtractXYZ = new CSExtractXYZ(CSExtractXYZ);
+		private static CSConvert8 csConvert8 = new CSConvert8(CSConvert8);
+		private static CSConvert16 csConvert16 = new CSConvert16(CSConvert16);
+		private static CSGetNativeSpace csGetNativeSpace = new CSGetNativeSpace(CSGetNativeSpace);
+		private static CSIsBookColor csIsBookColor = new CSIsBookColor(CSIsBookColor);
+		private static CSExtractColorName csExtractColorName = new CSExtractColorName(CSExtractColorName);
+		private static CSPickColor csPickColor = new CSPickColor(CSPickColor);
+		private static CSConvert csConvert8to16 = new CSConvert(CSConvert8to16);
+		private static CSConvert csConvert16to8 = new CSConvert(CSConvert16to8);
 
 		private static short CSMake(IntPtr colorID)
 		{
@@ -178,39 +115,60 @@ namespace PSFilterLoad.PSApi
 		}
 		private unsafe static short CSConvert8(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
 		{
-			byte* ptr = (byte*)colorArray.ToPointer();
-			for (int i = 0; i < count; i++)
-			{
+			byte* ptr = (byte*)colorArray.ToPointer();				
+			short[] convArray = new short[4];
 
+			for (int i = 0; i < count; i++)
+			{				
+				// 0RGB, CMYK, 0HSB , 0HSL, 0LAB, 0XYZ, 000Gray 
 				CS_Color8* color = (CS_Color8*)ptr;
 
-				// 0RGB, CMYK, 0HSB , 0HSL, 0LAB, 0XYZ, 000Gray 
-				short[] convArray = new short[4] { color->c1, color->c2, color->c3, color->c0 };
 
-				// all modes except CMYK begin at the second byte
-				if (inputCSpace == ColorSpace.CMYKSpace)
+				// all modes except CMYK and GrayScale begin at the second byte
+				switch (inputCSpace)
 				{
-					convArray[0] = color->c0;
-					convArray[1] = color->c1;
-					convArray[2] = color->c2;
-					convArray[3] = color->c3;
+					case ColorSpace.CMYKSpace:
+						convArray[0] = color->c0;
+						convArray[1] = color->c1;
+						convArray[2] = color->c2;
+						convArray[3] = color->c3;
+						break;
+					case ColorSpace.GraySpace:
+						convArray[0] = color->c3;
+						convArray[1] = 0;
+						convArray[2] = 0;
+						convArray[3] = 0;
+						break;
+					default:
+						convArray[0] = color->c1;
+						convArray[1] = color->c2;
+						convArray[2] = color->c3;
+						convArray[3] = 0;
+						break;
 				}
 
 				ColorServicesConvert.Convert(inputCSpace, outputCSpace, ref convArray);
 
-				if (inputCSpace != ColorSpace.CMYKSpace)
+				switch (inputCSpace)
 				{
-					color->c0 = (byte)convArray[3];
-					color->c1 = (byte)convArray[0];
-					color->c2 = (byte)convArray[1];
-					color->c3 = (byte)convArray[2];
-				}
-				else
-				{
-					color->c0 = (byte)convArray[0];
-					color->c1 = (byte)convArray[1];
-					color->c2 = (byte)convArray[2];
-					color->c3 = (byte)convArray[3];
+					case ColorSpace.CMYKSpace:
+						color->c0 = (byte)convArray[0];
+						color->c1 = (byte)convArray[1];
+						color->c2 = (byte)convArray[2];
+						color->c3 = (byte)convArray[3];
+						break;
+					case ColorSpace.GraySpace:
+						color->c3 = (byte)convArray[0];
+						convArray[1] = 0;
+						convArray[2] = 0;
+						convArray[3] = 0;
+						break;
+					default:
+						color->c1 = (byte)convArray[0];
+						color->c2 = (byte)convArray[1];
+						color->c3 = (byte)convArray[2];
+						convArray[3] = 0;
+						break;
 				}
 
 				ptr += 4;
@@ -243,50 +201,102 @@ namespace PSFilterLoad.PSApi
 			return PSError.errPlugInHostInsufficient;
 		}
 
-		private static short Convert8to16(IntPtr inputData, IntPtr outputData, short count)
+		private static short CSConvert8to16(IntPtr inputData, IntPtr outputData, short count)
 		{
 			return PSError.errPlugInHostInsufficient;
 		}
 
-		private static short Convert16to8(IntPtr inputData, IntPtr outputData, short count)
+		private static short CSConvert16to8(IntPtr inputData, IntPtr outputData, short count)
+		{
+			return PSError.errPlugInHostInsufficient;
+		}
+		#endregion
+#endif
+
+		#region HandleSuites
+		private static SetPIHandleLockDelegate setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
+		private static LockPIHandleProc lockHandleProc;
+		private static UnlockPIHandleProc unlockHandleProc;
+
+		private static void SetHandleLock(IntPtr handle, byte lockHandle, ref IntPtr address, ref byte oldLock)
+		{
+			try
+			{
+				oldLock = lockHandle == 0 ? (byte)1 : (byte)0;
+			}
+			catch (NullReferenceException)
+			{
+				// ignore it
+			}
+
+			if (lockHandle != 0)
+			{
+				address = lockHandleProc(handle, 0);
+			}
+			else
+			{
+				unlockHandleProc(handle);
+				address = IntPtr.Zero;
+			}
+		}
+		#endregion
+
+		#region UIHooksSuite
+		private static IntPtr hwnd;
+		private static UISuiteMainWindowHandle uiWindowHandle = new UISuiteMainWindowHandle(MainWindowHandle);
+		private static UISuiteHostSetCursor uiSetCursor = new UISuiteHostSetCursor(HostSetCursor);
+		private static UISuiteHostTickCount uiTickCount = new UISuiteHostTickCount(HostTickCount);
+		private static UISuiteGetPluginName uiPluginName = new UISuiteGetPluginName(GetPluginName);
+
+		private static IntPtr MainWindowHandle()
+		{
+			return hwnd;
+		}
+
+		private static short HostSetCursor(IntPtr cursor)
+		{
+			return PSError.errPlugInHostInsufficient;
+		}
+
+		private static uint HostTickCount()
+		{
+			return 60U;
+		}
+
+		private static short GetPluginName(IntPtr pluginRef, ref IntPtr name)
 		{
 			return PSError.errPlugInHostInsufficient;
 		}
 		#endregion
 
-		#region SPPluginsSuite4
-		private static SPAllocatePluginList allocatePluginList;
-		private static SPFreePluginList freePluginList;
-		private static SPGetPluginListNeededSuiteAvailable listNeededSuiteAvailable;
-
-		private static SPAddPlugin addPlugin;
-
-		private static SPNewPluginListIterator newListIterator;
-		private static SPNextPlugin nextPlugin;
-		private static SPDeletePluginListIterator deleteListIterator;
-
-		private static SPGetHostPluginEntry getHostEntry;
-		private static SPGetPluginFileSpecification getPluginFileSpec;
-		private static SPGetPluginPropertyList getPluginPropertyList;
-		private static SPGetPluginGlobals getPluginGlobals;
-		private static SPSetPluginGlobals setPluginGlobals;
-		private static SPGetPluginStarted getPluginStarted;
-		private static SPSetPluginStarted setPluginStarted;
-		private static SPGetPluginSkipShutdown getPluginSkipShutdown;
-		private static SPSetPluginSkipShutdown setPluginSkipShutdown;
-		private static SPGetPluginBroken getPluginBroken;
-		private static SPSetPluginBroken setPluginBroken;
-		private static SPGetPluginAdapter getPluginAdapter;
-		private static SPGetPluginAdapterInfo getPluginAdapterInfo;
-		private static SPSetPluginAdapterInfo setPluginAdapterInfo;
-
-		private static SPFindPluginProperty findPluginProperty;
-
-		private static SPGetPluginName getPluginName;
-		private static SPSetPluginName setPluginName;
-		private static SPGetNamedPlugin getNamedPlugin;
-
-		private static SPSetPluginPropertyList setPluginPropertyList;
+#if PICASUITEDEBUG
+		#region SPPlugs
+		private static SPAllocatePluginList allocatePluginList = new SPAllocatePluginList(SPAllocatePluginList);
+		private static SPFreePluginList freePluginList = new SPFreePluginList(SPFreePluginList);
+		private static SPGetPluginListNeededSuiteAvailable listNeededSuiteAvailable = new SPGetPluginListNeededSuiteAvailable(SPGetNeededSuiteAvailable);
+		private static SPAddPlugin addPlugin = new SPAddPlugin(SPAddPlugin);
+		private static SPNewPluginListIterator newListIterator = new SPNewPluginListIterator(SPNewPluginListIterator);
+		private static SPNextPlugin nextPlugin = new SPNextPlugin(SPNextPlugin);
+		private static SPDeletePluginListIterator deleteListIterator = new SPDeletePluginListIterator(SPDeletePluginListIterator);
+		private static SPGetHostPluginEntry getHostEntry = new SPGetHostPluginEntry(SPGetHostPluginEntry);
+		private static SPGetPluginFileSpecification getPluginFileSpec = new SPGetPluginFileSpecification(SPGetPluginFileSpecification);
+		private static SPGetPluginPropertyList getPluginPropertyList = new SPGetPluginPropertyList(SPGetPluginPropertyList);
+		private static SPGetPluginGlobals getPluginGlobals = new SPGetPluginGlobals(SPGetPluginGlobals);
+		private static SPSetPluginGlobals setPluginGlobals = new SPSetPluginGlobals(SPSetPluginGlobals);
+		private static SPGetPluginStarted getPluginStarted = new SPGetPluginStarted(SPGetPluginStarted);
+		private static SPSetPluginStarted setPluginStarted = new SPSetPluginStarted(SPSetPluginStarted);
+		private static SPGetPluginSkipShutdown getPluginSkipShutdown = new SPGetPluginSkipShutdown(SPGetPluginSkipShutdown);
+		private static SPSetPluginSkipShutdown setPluginSkipShutdown = new SPSetPluginSkipShutdown(SPSetPluginSkipShutdown);
+		private static SPGetPluginBroken getPluginBroken = new SPGetPluginBroken(SPGetPluginBroken);
+		private static SPSetPluginBroken setPluginBroken = new SPSetPluginBroken(SPSetPluginBroken);
+		private static SPGetPluginAdapter getPluginAdapter = new SPGetPluginAdapter(SPGetPluginAdapter);
+		private static SPGetPluginAdapterInfo getPluginAdapterInfo = new SPGetPluginAdapterInfo(SPGetPluginAdapterInfo);
+		private static SPSetPluginAdapterInfo setPluginAdapterInfo = new SPSetPluginAdapterInfo(SPSetPluginAdapterInfo);
+		private static SPFindPluginProperty findPluginProperty = new SPFindPluginProperty(SPFindPluginProperty);
+		private static SPGetPluginName getPluginName = new SPGetPluginName(SPGetPluginName);
+		private static SPSetPluginName setPluginName = new SPSetPluginName(SPSetPluginName);
+		private static SPGetNamedPlugin getNamedPlugin = new SPGetNamedPlugin(SPGetNamedPlugin);
+		private static SPSetPluginPropertyList setPluginPropertyList = new SPSetPluginPropertyList(SPSetPluginPropertyList);
 
 		private static int SPAllocatePluginList(IntPtr strings, ref IntPtr pluginList)
 		{
@@ -401,72 +411,8 @@ namespace PSFilterLoad.PSApi
 			return PSError.kSPNotImplmented;
 		}
 
-		#endregion 
+		#endregion
 #endif
-
-		static PICASuites()
-		{
-			bufferSuiteNew = new PSBufferSuiteNew(PSBufferNew);
-			bufferSuiteDispose = new PSBufferSuiteDispose(PSBufferDispose);
-			bufferSuiteGetSize = new PSBufferSuiteGetSize(PSBufferGetSize);
-			bufferSuiteGetSpace = new PSBufferSuiteGetSpace(PSBufferGetSpace);
-			// ColorSpace suite
-#if PICASUITEDEBUG
-			csMake = new CSMake(CSMake);
-			csDelete = new CSDelete(CSDelete);
-			csStuffComponent = new CSStuffComponents(CSStuffComponents);
-			csExtractComponent = new CSExtractComponents(CSExtractComponents);
-			csStuffXYZ = new CSStuffXYZ(CSStuffXYZ);
-			csExtractXYZ = new CSExtractXYZ(CSExtractXYZ);
-			csConvert8 = new CSConvert8(CSConvert8);
-			csConvert16 = new CSConvert16(CSConvert16);
-			csGetNativeSpace = new CSGetNativeSpace(CSGetNativeSpace);
-			csIsBookColor = new CSIsBookColor(CSIsBookColor);
-			csExtractColorName = new CSExtractColorName(CSExtractColorName);
-			csPickColor = new CSPickColor(CSPickColor);
-			csConvert8to16 = new CSConvert(Convert8to16);
-			csConvert16to8 = new CSConvert(Convert16to8); 
-#endif
-			// Handle Suite
-			setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
-			// UIHooks Suite
-			uiWindowHandle = new UISuiteMainWindowHandle(MainWindowHandle);
-			uiSetCursor = new UISuiteHostSetCursor(HostSetCursor);
-			uiTickCount = new UISuiteHostTickCount(HostTickCount);
-			uiPluginName = new UISuiteGetPluginName(GetPluginName);
-			// SPPlugins
-#if PICASUITEDEBUG
-			allocatePluginList = new SPAllocatePluginList(SPAllocatePluginList);
-			freePluginList = new SPFreePluginList(SPFreePluginList);
-			addPlugin = new SPAddPlugin(SPAddPlugin);
-			newListIterator = new SPNewPluginListIterator(SPNewPluginListIterator);
-			nextPlugin = new SPNextPlugin(SPNextPlugin);
-			deleteListIterator = new SPDeletePluginListIterator(SPDeletePluginListIterator);
-			listNeededSuiteAvailable = new SPGetPluginListNeededSuiteAvailable(SPGetNeededSuiteAvailable);
-			getHostEntry = new SPGetHostPluginEntry(SPGetHostPluginEntry);
-			getPluginFileSpec = new SPGetPluginFileSpecification(SPGetPluginFileSpecification);
-			getPluginPropertyList = new SPGetPluginPropertyList(SPGetPluginPropertyList);
-			getPluginGlobals = new SPGetPluginGlobals(SPGetPluginGlobals);
-			setPluginGlobals = new SPSetPluginGlobals(SPSetPluginGlobals);
-			getPluginStarted = new SPGetPluginStarted(SPGetPluginStarted);
-			setPluginStarted = new SPSetPluginStarted(SPSetPluginStarted);
-			getPluginSkipShutdown = new SPGetPluginSkipShutdown(SPGetPluginSkipShutdown);
-			setPluginSkipShutdown = new SPSetPluginSkipShutdown(SPSetPluginSkipShutdown);
-			getPluginBroken = new SPGetPluginBroken(SPGetPluginBroken);
-			setPluginBroken = new SPSetPluginBroken(SPSetPluginBroken);
-			getPluginAdapter = new SPGetPluginAdapter(SPGetPluginAdapter);
-			getPluginAdapterInfo = new SPGetPluginAdapterInfo(SPGetPluginAdapterInfo);
-			setPluginAdapterInfo = new SPSetPluginAdapterInfo(SPSetPluginAdapterInfo);
-			findPluginProperty = new SPFindPluginProperty(SPFindPluginProperty);
-			getPluginName = new SPGetPluginName(SPGetPluginName);
-			setPluginName = new SPSetPluginName(SPSetPluginName);
-			getNamedPlugin = new SPGetNamedPlugin(SPGetNamedPlugin);
-			setPluginPropertyList = new SPSetPluginPropertyList(SPSetPluginPropertyList); 
-#endif
-			// ChannelPorts
-
-		}
-
 		public static PSBufferSuite1 CreateBufferSuite1()
 		{
 			PSBufferSuite1 suite = new PSBufferSuite1();
@@ -519,6 +465,9 @@ namespace PSFilterLoad.PSApi
 			suite.SetSize = procs->setSizeProc;
 			suite.RecoverSpace = procs->recoverSpaceProc;
 
+			lockHandleProc = lockHandle;
+			unlockHandleProc = unlockHandle;
+
 			return suite;
 		}
 
@@ -552,7 +501,7 @@ namespace PSFilterLoad.PSApi
 		public static unsafe PSUIHooksSuite1 CreateUIHooksSuite1(FilterRecord* filterRecord)
 		{
 			hwnd = ((PlatformData*)filterRecord->platformData.ToPointer())->hwnd;
-			
+
 			PSUIHooksSuite1 suite = new PSUIHooksSuite1();
 			suite.processEvent = filterRecord->processEvent;
 			suite.displayPixels = filterRecord->displayPixels;
