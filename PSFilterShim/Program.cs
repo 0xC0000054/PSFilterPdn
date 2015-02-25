@@ -135,7 +135,7 @@ namespace PSFilterShim
 			{
 				ParameterData filterParameters = null;
 				string parmDataFileName = serviceProxy.GetParameterDataPath();
-				if (!string.IsNullOrEmpty(parmDataFileName) && File.Exists(parmDataFileName))
+				if (File.Exists(parmDataFileName))
 				{
 					using (FileStream fs = new FileStream(parmDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
 					{
@@ -146,7 +146,7 @@ namespace PSFilterShim
 
 				List<PSResource> pseudoResources = null;
 				string resourceFileName = serviceProxy.GetPseudoResourcePath();
-				if (!string.IsNullOrEmpty(resourceFileName) && File.Exists(resourceFileName))
+				if (File.Exists(resourceFileName))
 				{
 					using (FileStream fs = new FileStream(resourceFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
 					{
