@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using System;
 using System.Collections.Generic;
 
 namespace PSFilterLoad.PSApi
@@ -18,6 +19,11 @@ namespace PSFilterLoad.PSApi
     {
         public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
         {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException("dictionary");
+            }
+
             if (!dictionary.ContainsKey(key))
             {
                 dictionary.Add(key, value);
