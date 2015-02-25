@@ -54,7 +54,7 @@ namespace PaintDotNet.SystemLayer
                     (void*)&info,
                     new UIntPtr(4UL));
             }
-            catch (Exception)
+            catch (EntryPointNotFoundException)
             {
                 // If that method isn't available, like on Win2K, don't worry about it.
             }          
