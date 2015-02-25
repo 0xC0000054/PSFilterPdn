@@ -140,7 +140,7 @@ namespace PSFilterLoad.PSApi
 				{
 					int error = Marshal.GetLastWin32Error();
 
-					throw new InvalidOperationException(string.Format("HeapFree returned an error {0}", error.ToString("X8", CultureInfo.InvariantCulture)));
+					throw new InvalidOperationException("HeapFree returned an error: 0x" + error.ToString("X8", CultureInfo.InvariantCulture));
 				}
 
 				if (size > 0L)
@@ -159,8 +159,8 @@ namespace PSFilterLoad.PSApi
 		{
 			if (!SafeNativeMethods.VirtualFree(hMem, UIntPtr.Zero, NativeConstants.MEM_RELEASE))
 			{
-				int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-				throw new InvalidOperationException("VirtualFree returned an error: " + error.ToString(CultureInfo.InvariantCulture));
+				int error = Marshal.GetLastWin32Error();
+				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "HeapFree returned an error 0x{0:X8}", error));
 			}
 
 			if (size > 0L)
@@ -178,7 +178,7 @@ namespace PSFilterLoad.PSApi
 		{
 			if (!SafeNativeMethods.VirtualFree(block, UIntPtr.Zero, NativeConstants.MEM_RELEASE))
 			{
-				int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+				int error = Marshal.GetLastWin32Error();
 				throw new InvalidOperationException("VirtualFree returned an error: " + error.ToString(CultureInfo.InvariantCulture));
 			}
 
