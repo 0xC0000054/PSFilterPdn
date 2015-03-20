@@ -1414,13 +1414,7 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			try
-			{
-				FreeLibrary(ref pdata);
-			}
-			catch (Exception)
-			{
-			}
+			FreeLibrary(ref pdata);
 
 			return true;
 		}
@@ -2782,7 +2776,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="maskPadding">The mask padding mode.</param>
 		/// <param name="lockRect">The lock rect.</param>
 		/// <param name="mask">The mask.</param>
-		private unsafe short SetMaskPadding(IntPtr maskData, int maskRowBytes, Rect16 rect, short maskPadding, Rectangle lockRect, MaskSurface mask)
+		private static unsafe short SetMaskPadding(IntPtr maskData, int maskRowBytes, Rect16 rect, short maskPadding, Rectangle lockRect, MaskSurface mask)
 		{
 			if ((lockRect.Right > mask.Width || lockRect.Bottom > mask.Height) || rect.top < 0 || rect.left < 0)
 			{
@@ -2906,7 +2900,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="lockRect">The lock rect.</param>
 		/// <param name="surface">The surface.</param>
 		/// <returns></returns>
-		private unsafe short SetFilterPadding(IntPtr inData, int inRowBytes, Rect16 rect, int nplanes, short ofs, short inputPadding, Rectangle lockRect, Surface surface)
+		private static unsafe short SetFilterPadding(IntPtr inData, int inRowBytes, Rect16 rect, int nplanes, short ofs, short inputPadding, Rectangle lockRect, Surface surface)
 		{
 			if ((lockRect.Right > surface.Width || lockRect.Bottom > surface.Height) || (rect.top < 0 || rect.left < 0))
 			{
@@ -5543,6 +5537,12 @@ namespace PSFilterLoad.PSApi
 					{
 						scaledSelectionMask.Dispose();
 						scaledSelectionMask = null;
+					}
+
+					if (activePICASuites != null)
+					{
+						activePICASuites.Dispose();
+						activePICASuites = null;
 					}
 				}
 
