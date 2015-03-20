@@ -120,12 +120,12 @@ namespace PSFilterPdn
 			{
 				return (DialogResult)base.Invoke(new Func<string, DialogResult>(delegate(string error)
 					{
-						return MessageBox.Show(this, error, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return MessageBox.Show(this, error, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
 					}), message);
 			}
 			else
 			{
-				return MessageBox.Show(this, message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return MessageBox.Show(this, message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
 			}
 		}
 
@@ -1217,11 +1217,11 @@ namespace PSFilterPdn
 			}
 			catch (IOException ex)
 			{
-				MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				ShowErrorMessage(ex.Message);
 			}
 			catch (UnauthorizedAccessException ex)
 			{
-				MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				ShowErrorMessage(ex.Message);
 			}
 
 			// set the useDEPProxy flag when on a 32-bit OS.
@@ -1361,11 +1361,11 @@ namespace PSFilterPdn
 				}
 				catch (IOException ex)
 				{
-					MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+					ShowErrorMessage(ex.Message);
 				}
 				catch (UnauthorizedAccessException ex)
 				{
-					MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+					ShowErrorMessage(ex.Message);
 				}
 			}
 		}
