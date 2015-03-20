@@ -199,7 +199,7 @@ namespace PaintDotNet
             this.blueUpDown.Value = b;
         }
 
-        private string GetHexNumericUpDownValue(int red, int green, int blue)
+        private static string GetHexNumericUpDownValue(int red, int green, int blue)
         {
             int newHexNumber = (red << 16) | (green << 8) | blue;
             string newHexText = System.Convert.ToString(newHexNumber, 16);
