@@ -82,6 +82,15 @@ namespace PSFilterPdn
 		private Dictionary<TreeNode, string> filterTreeItems;
 		private List<string> expandedNodes;
 
+		private Settings settings;
+		private string lastSelectedFilterTitle;
+		private bool foundEffectsDir;
+		/// <summary>
+		/// If DEP is enabled on a 32-bit OS use the shim process.
+		/// </summary>
+		private bool useDEPProxy;
+
+
 		public PsFilterPdnConfigDialog()
 		{
 			InitializeComponent();
@@ -1187,12 +1196,6 @@ namespace PSFilterPdn
 			}
 		}
 
-		private string lastSelectedFilterTitle;
-		private bool foundEffectsDir;
-		/// <summary>
-		/// If DEP is enabled on a 32-bit OS use the shim process.
-		/// </summary>
-		private bool useDEPProxy;
 		protected override void OnLoad(EventArgs e)
 		{
 			base.OnLoad(e);
@@ -1275,7 +1278,6 @@ namespace PSFilterPdn
 			}
 		}
 
-		private Settings settings;
 		private void LoadSettings()
 		{
 			if (settings == null)
