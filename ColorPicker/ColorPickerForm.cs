@@ -19,10 +19,11 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PaintDotNet;
 using System;
 using System.Drawing;
+using System.Globalization;
 using System.Windows.Forms;
-using PaintDotNet;
 
 namespace PSFilterLoad.ColorPicker
 {
