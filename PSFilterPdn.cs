@@ -119,14 +119,13 @@ namespace PSFilterPdn
             string resourceDataFileName = Path.Combine(userDataPath, "PseudoResources.dat");
             string regionFileName = string.Empty;
 
-            FilterCaseInfo[] fci = GetFilterCaseInfoFromString(token.FilterCaseInfo);
             PluginData pluginData = new PluginData()
             {
                 fileName = token.FileName,
                 entryPoint = token.EntryPoint,
                 title = token.Title,
                 category = token.Category,
-                filterInfo = fci,
+                filterInfo = GetFilterCaseInfoFromString(token.FilterCaseInfo),
                 aete = token.AETE
             };
 
