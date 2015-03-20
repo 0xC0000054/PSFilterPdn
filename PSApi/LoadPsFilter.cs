@@ -122,14 +122,12 @@ namespace PSFilterLoad.PSApi
 					return true;
 				}
 
-				enumAETE = new PluginAETE();
-
 				byte* ptr = (byte*)lockRes.ToPointer() + 2;
 				short version = *(short*)ptr;
 				ptr += 2;
 
-				enumAETE.major = (short)(version & 0xff);
-				enumAETE.minor = (short)((version >> 8) & 0xff);
+				short major = (short)(version & 0xff);
+				short minor = (short)((version >> 8) & 0xff);
 
 				short lang = *(short*)ptr;
 				ptr += 2;
@@ -149,9 +147,9 @@ namespace PSFilterLoad.PSApi
 					propPtr += stringLength;
 					uint suiteID = *(uint*)propPtr;
 					propPtr += 4;
-					enumAETE.suiteLevel = *(short*)propPtr;
+					short suiteLevel = *(short*)propPtr;
 					propPtr += 2;
-					enumAETE.suiteVersion = *(short*)propPtr;
+					short suiteVersion = *(short*)propPtr;
 					propPtr += 2;
 					short eventCount = *(short*)propPtr;
 					propPtr += 2;
@@ -259,17 +257,13 @@ namespace PSFilterLoad.PSApi
 								evnt.enums = enums;
 							}
 						}
-						enumAETE.scriptEvent = evnt;
 
+						if (major == 1 && minor == 0 && suiteLevel == 1 && suiteVersion == 1 && evnt.parameters != null)
+						{
+							enumAETE = new PluginAETE(major, minor, suiteLevel, suiteVersion, evnt);
+						}
 					}
-
 				}
-
-				if ((enumAETE.scriptEvent == null) || enumAETE.scriptEvent.parameters == null)
-				{
-					enumAETE = null; // if the scriptingEvent is null or there are no scripting parameters ignore the AETE resource.
-				}
-
 
 				return false;
 			}
@@ -348,7 +342,7 @@ namespace PSFilterLoad.PSApi
 						return true;
 					}
 				}
-				else if ((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty) // the entrypoint for the current platform, this filters out incompatible processors architectures
+				else if ((IntPtr.Size == 8 && propKey == PIPropertyID.PIWin64X86CodeProperty) || propKey == PIPropertyID.PIWin32X86CodeProperty)
 				{
 					enumData.entryPoint = Marshal.PtrToStringAnsi((IntPtr)dataPtr, pipp->propertyLength).TrimEnd('\0');
 					// If it is a 32-bit plugin on a 64-bit OS run it with the 32-bit shim.
@@ -406,13 +400,9 @@ namespace PSFilterLoad.PSApi
 						// do nothing
 					}
 
-
 					if (enumAETE != null)
 					{
-						if (enumAETE.major == 1 && enumAETE.minor == 0 && enumAETE.suiteLevel == 1 && enumAETE.suiteVersion == 1)
-						{
-							enumData.aete = new AETEData(enumAETE); // Filter out any newer versions.
-						}
+						enumData.aete = new AETEData(enumAETE); // Filter out any newer versions.
 					}
 				}
 				else if (propKey == PIPropertyID.PIRequiredHostProperty)
@@ -820,7 +810,7 @@ namespace PSFilterLoad.PSApi
 		internal void SetAbortCallback(Func<byte> callback)
 		{
 			if (callback == null)
-				throw new ArgumentNullException("abortCallback", "abortCallback is null.");
+				throw new ArgumentNullException("callback", "callback is null.");
 
 			abortFunc = callback;
 		}
@@ -845,7 +835,7 @@ namespace PSFilterLoad.PSApi
 				aeteDict = value.AETEDictionary;
 			}
 		}
-		
+
 		/// <summary>
 		/// Is the filter a repeat Effect.
 		/// </summary>
@@ -2284,7 +2274,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="maskPadding">The mask padding mode.</param>
 		/// <param name="lockRect">The lock rect.</param>
 		/// <param name="mask">The mask.</param>
-		private unsafe short SetMaskPadding(IntPtr maskData, int maskRowBytes, Rect16 rect, short maskPadding, Rectangle lockRect, MaskSurface mask)
+		private static unsafe short SetMaskPadding(IntPtr maskData, int maskRowBytes, Rect16 rect, short maskPadding, Rectangle lockRect, MaskSurface mask)
 		{
 			if ((lockRect.Right > mask.Width || lockRect.Bottom > mask.Height) || rect.top < 0 || rect.left < 0)
 			{
@@ -2408,8 +2398,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="inputPadding">The input padding mode.</param>
 		/// <param name="lockRect">The lock rect.</param>
 		/// <param name="surface">The surface.</param>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-		private unsafe short SetFilterPadding(IntPtr inData, int inRowBytes, Rect16 rect, int nplanes, short ofs, short inputPadding, Rectangle lockRect, Surface surface)
+		private static unsafe short SetFilterPadding(IntPtr inData, int inRowBytes, Rect16 rect, int nplanes, short ofs, short inputPadding, Rectangle lockRect, Surface surface)
 		{
 			if ((lockRect.Right > surface.Width || lockRect.Bottom > surface.Height) || (rect.top < 0 || rect.left < 0))
 			{
@@ -3783,7 +3772,7 @@ namespace PSFilterLoad.PSApi
 				{
 					byte* row = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y - top);
 					int srcStride = y * source.rowBytes; // cache the destination row and source stride.
-					
+
 					for (int i = 0; i < nplanes; i++)
 					{
 						int ofs = i;
@@ -6131,6 +6120,12 @@ namespace PSFilterLoad.PSApi
 					{
 						scaledSelectionMask.Dispose();
 						scaledSelectionMask = null;
+					}
+
+					if (activePICASuites != null)
+					{
+						activePICASuites.Dispose();
+						activePICASuites = null;
 					}
 				}
 
