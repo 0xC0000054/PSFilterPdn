@@ -10,6 +10,10 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PaintDotNet;
+using PaintDotNet.Effects;
+using PSFilterLoad.PSApi;
+using PSFilterPdn.Properties;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -20,10 +24,6 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Windows.Forms;
-using PaintDotNet;
-using PaintDotNet.Effects;
-using PSFilterLoad.PSApi;
-using PSFilterPdn.Properties;
 
 namespace PSFilterPdn
 {
@@ -78,6 +78,11 @@ namespace PSFilterPdn
             return new PsFilterPdnConfigDialog();
         }
 
+        private static DialogResult ShowErrorMessage(IWin32Window window, string message)
+        {
+            return MessageBox.Show(window, message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
+        }
+
         private static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
         {
             if (!string.IsNullOrEmpty(input))
@@ -108,7 +113,7 @@ namespace PSFilterPdn
 
             if (!File.Exists(shimPath))
             {
-                MessageBox.Show(window, Resources.PSFilterShimNotFound, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowErrorMessage(window, Resources.PSFilterShimNotFound);
                 return;
             }
 
@@ -216,20 +221,20 @@ namespace PSFilterPdn
                 }
                 else if (!string.IsNullOrEmpty(proxyErrorMessage))
                 {
-                    MessageBox.Show(window, proxyErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ShowErrorMessage(window, proxyErrorMessage);
                 }
             }
             catch (ArgumentException ax)
             {
-                MessageBox.Show(window, ax.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowErrorMessage(window, ax.Message);
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show(window, ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowErrorMessage(window, ex.Message);
             }
             catch (Win32Exception wx)
             {
-                MessageBox.Show(window, wx.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowErrorMessage(window, wx.Message);
             }
             finally
             {
@@ -256,14 +261,13 @@ namespace PSFilterPdn
                 {
                     lps.SetAbortCallback(new Func<byte>(AbortCallback));
 
-                    FilterCaseInfo[] fci = GetFilterCaseInfoFromString(token.FilterCaseInfo);
                     PluginData pdata = new PluginData()
                     {
                         fileName = token.FileName,
                         entryPoint = token.EntryPoint,
                         title = token.Title,
                         category = token.Category,
-                        filterInfo = fci,
+                        filterInfo = GetFilterCaseInfoFromString(token.FilterCaseInfo),
                         aete = token.AETE
                     };
 
@@ -279,32 +283,30 @@ namespace PSFilterPdn
                     }
                     else if (!string.IsNullOrEmpty(lps.ErrorMessage))
                     {
-                        MessageBox.Show(window, lps.ErrorMessage, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ShowErrorMessage(window, lps.ErrorMessage);
                     }
-
                 }
-
             }
             catch (FileNotFoundException fnfex)
             {
-                MessageBox.Show(window, fnfex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowErrorMessage(window, fnfex.Message);
             }
             catch (ImageSizeTooLargeException ex)
             {
-                MessageBox.Show(window, ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowErrorMessage(window, ex.Message);
             }
             catch (NullReferenceException nrex)
             {
                 // The filter probably tried to access an unimplemented callback function without checking if it is valid.
-                MessageBox.Show(window, nrex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowErrorMessage(window, nrex.Message);
             }
             catch (Win32Exception w32ex)
             {
-                MessageBox.Show(window, w32ex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowErrorMessage(window, w32ex.Message);
             }
             catch (System.Runtime.InteropServices.ExternalException eex)
             {
-                MessageBox.Show(window, eex.Message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowErrorMessage(window, eex.Message);
             }
             finally
             {
