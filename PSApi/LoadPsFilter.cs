@@ -3573,7 +3573,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short WriteBasePixels(IntPtr port, ref VRect writeRect, PixelMemoryDesc source)
+		private short WriteBasePixels(IntPtr port, ref VRect writeRect, PixelMemoryDesc srcDesc)
 		{
 #if DEBUG
 			Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), writeRect.ToString()));
@@ -3727,15 +3727,15 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private unsafe short DisplayPixelsProc(ref PSPixelMap source, ref VRect srcRect, int dstRow, int dstCol, IntPtr platformContext)
+		private unsafe short DisplayPixelsProc(ref PSPixelMap srcPixelMap, ref VRect srcRect, int dstRow, int dstCol, IntPtr platformContext)
 		{
 #if DEBUG
-			Ping(DebugFlags.DisplayPixels, string.Format("source: bounds = {0}, ImageMode = {1}, colBytes = {2}, rowBytes = {3},planeBytes = {4}, BaseAddress = {5}", new object[]{source.bounds.ToString(), ((ImageModes)source.imageMode).ToString("G"),
-			source.colBytes.ToString(), source.rowBytes.ToString(), source.planeBytes.ToString(), source.baseAddr.ToHexString()}));
-			Ping(DebugFlags.DisplayPixels, string.Format("srcRect = {0} dstCol (x, width) = {1}, dstRow (y, height) = {2}", srcRect.ToString(), dstCol, dstRow));
+			Ping(DebugFlags.DisplayPixels, string.Format("source: bounds = {0}, ImageMode = {1}, colBytes = {2}, rowBytes = {3},planeBytes = {4}, BaseAddress = {5}", new object[]{srcPixelMap.bounds, ((ImageModes)srcPixelMap.imageMode).ToString("G"),
+			srcPixelMap.colBytes, srcPixelMap.rowBytes, srcPixelMap.planeBytes, srcPixelMap.baseAddr.ToHexString()}));
+			Ping(DebugFlags.DisplayPixels, string.Format("srcRect = {0} dstCol (x, width) = {1}, dstRow (y, height) = {2}", srcRect, dstCol, dstRow));
 #endif
 
-			if (platformContext == IntPtr.Zero || source.rowBytes == 0 || source.baseAddr == IntPtr.Zero)
+			if (platformContext == IntPtr.Zero || srcPixelMap.rowBytes == 0 || srcPixelMap.baseAddr == IntPtr.Zero)
 			{
 				return PSError.filterBadParameters;
 			}
@@ -3744,7 +3744,7 @@ namespace PSFilterLoad.PSApi
 			int height = srcRect.bottom - srcRect.top;
 			int nplanes = ((FilterRecord*)filterRecordPtr.ToPointer())->planes;
 
-			bool hasTransparencyMask = source.version >= 1 && source.masks != IntPtr.Zero;
+			bool hasTransparencyMask = srcPixelMap.version >= 1 && srcPixelMap.masks != IntPtr.Zero;
 
 			// Ignore the alpha plane if the PSPixelMap does not have a transparency mask.  
 			if (!hasTransparencyMask && nplanes == 4)
@@ -3754,24 +3754,24 @@ namespace PSFilterLoad.PSApi
 
 			SetupTempDisplaySurface(width, height, hasTransparencyMask);
 
-			void* baseAddr = source.baseAddr.ToPointer();
+			void* baseAddr = srcPixelMap.baseAddr.ToPointer();
 
 			int top = srcRect.top;
 			int left = srcRect.left;
 			int bottom = srcRect.bottom;
 			// Some plug-ins set the srcRect incorrectly for 100% or greater zoom.
-			if (source.bounds.Equals(srcRect) && (top > 0 || left > 0))
+			if (srcPixelMap.bounds.Equals(srcRect) && (top > 0 || left > 0))
 			{
 				top = left = 0;
 				bottom = height;
 			}
 
-			if (source.colBytes == 1)
+			if (srcPixelMap.colBytes == 1)
 			{
 				for (int y = top; y < bottom; y++)
 				{
 					byte* row = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y - top);
-					int srcStride = y * source.rowBytes; // cache the destination row and source stride.
+					int srcStride = y * srcPixelMap.rowBytes; // cache the destination row and source stride.
 
 					for (int i = 0; i < nplanes; i++)
 					{
@@ -3786,14 +3786,14 @@ namespace PSFilterLoad.PSApi
 								break;
 						}
 						byte* src = row + ofs;
-						byte* dst = (byte*)baseAddr + srcStride + (i * source.planeBytes) + left;
+						byte* dst = (byte*)baseAddr + srcStride + (i * srcPixelMap.planeBytes) + left;
 
 						for (int x = 0; x < width; x++)
 						{
 							*src = *dst;
 
 							src += ColorBgra.SizeOf;
-							dst += source.colBytes;
+							dst += srcPixelMap.colBytes;
 						}
 					}
 				}
@@ -3803,27 +3803,27 @@ namespace PSFilterLoad.PSApi
 				for (int y = top; y < bottom; y++)
 				{
 					byte* src = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y - top);
-					byte* dst = (byte*)baseAddr + (y * source.rowBytes) + left;
+					byte* dst = (byte*)baseAddr + (y * srcPixelMap.rowBytes) + left;
 
 					for (int x = 0; x < width; x++)
 					{
 						src[0] = dst[2];
 						src[1] = dst[1];
 						src[2] = dst[0];
-						if (source.colBytes == 4)
+						if (srcPixelMap.colBytes == 4)
 						{
 							src[3] = dst[3];
 						}
 
 						src += ColorBgra.SizeOf;
-						dst += source.colBytes;
+						dst += srcPixelMap.colBytes;
 					}
 				}
 			}
 
 			using (Graphics gr = Graphics.FromHdc(platformContext))
 			{
-				if (source.colBytes == 4 || nplanes == 4 && source.colBytes == 1)
+				if (srcPixelMap.colBytes == 4 || nplanes == 4 && srcPixelMap.colBytes == 1)
 				{
 					Display32BitBitmap(gr, dstCol, dstRow);
 				}
@@ -3832,7 +3832,7 @@ namespace PSFilterLoad.PSApi
 					// Apply the transparency mask for the Protected Transparency cases.
 					if (hasTransparencyMask && (this.filterCase == FilterCase.ProtectedTransparencyNoSelection || this.filterCase == FilterCase.ProtectedTransparencyWithSelection))
 					{
-						PSPixelMask* mask = (PSPixelMask*)source.masks.ToPointer();
+						PSPixelMask* mask = (PSPixelMask*)srcPixelMap.masks.ToPointer();
 
 						void* maskPtr = mask->maskData.ToPointer();
 						for (int y = top; y < bottom; y++)
