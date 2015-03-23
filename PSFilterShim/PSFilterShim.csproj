@@ -184,6 +184,7 @@
     <Compile Include="PSApi\UnsafeNativeMethods.cs" />
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
+    <Compile Include="PSApi\RegionExtensions.cs" />
     <EmbeddedResource Include="PaintDotNet\ColorPicker\ColorPickerForm.resx">
       <DependentUpon>ColorPickerForm.cs</DependentUpon>
     </EmbeddedResource>
