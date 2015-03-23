@@ -62,5 +62,19 @@ namespace PSFilterLoad.PSApi
         [DllImport("kernel32.dll", EntryPoint = "GlobalUnlock")]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool GlobalUnlock([In()] System.IntPtr hMem);
+
+        [DllImport("gdi32.dll", ExactSpelling = true)]
+        internal unsafe static extern uint GetRegionData([In()] IntPtr hrgn, [In()] uint nCount, [Out()] NativeStructs.RGNDATA* lpRgnData);
+
+        [DllImport("gdi32.dll", ExactSpelling = true)]
+        internal static extern IntPtr CreateCompatibleDC([In()] IntPtr hdc);
+
+        [DllImport("gdi32.dll", ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool DeleteObject([In()] IntPtr hdc);
+
+        [DllImport("gdi32.dll", ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool DeleteDC([In()] IntPtr hdc);
     }
 }
