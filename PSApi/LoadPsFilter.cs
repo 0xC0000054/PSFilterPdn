@@ -750,7 +750,7 @@ namespace PSFilterLoad.PSApi
 		private short filterCase;
 		private float dpiX;
 		private float dpiY;
-		private Region selectedRegion;
+		private PdnRegion selectedRegion;
 		private byte[] backgroundColor;
 		private byte[] foregroundColor;
 		private List<PSResource> pseudoResources;
@@ -953,7 +953,7 @@ namespace PSFilterLoad.PSApi
 			if (eep.GetSelection(eep.SourceSurface.Bounds).GetBoundsInt() != eep.SourceSurface.Bounds)
 			{
 				this.filterCase = FilterCase.EditableTransparencyWithSelection;
-				this.selectedRegion = eep.GetSelection(eep.SourceSurface.Bounds).GetRegionReadOnly().Clone();
+				this.selectedRegion = eep.GetSelection(eep.SourceSurface.Bounds).Clone();
 			}
 			else
 			{
@@ -3899,26 +3899,26 @@ namespace PSFilterLoad.PSApi
 		{
 			mask = new MaskSurface(source.Width, source.Height);
 
+			SafeNativeMethods.memset(mask.Scan0.Pointer, 0, new UIntPtr((ulong)mask.Scan0.Length));
 
-			for (int y = 0; y < mask.Height; y++)
+			Rectangle[] scans = selectedRegion.GetRegionScansReadOnlyInt();
+
+			for (int i = 0; i < scans.Length; i++)
 			{
-				byte* p = mask.GetRowAddressUnchecked(y);
-				for (int x = 0; x < mask.Width; x++)
+				Rectangle rect = scans[i];
+
+				for (int y = rect.Top; y < rect.Bottom; y++)
 				{
+					byte* ptr = mask.GetPointAddressUnchecked(rect.Left, y);
+					byte* ptrEnd = ptr + rect.Width;
 
-					if (selectedRegion.IsVisible(x, y))
+					while (ptr < ptrEnd)
 					{
-						*p = 255;
+						*ptr = 255;
+						ptr++;
 					}
-					else
-					{
-						*p = 0;
-					}
-
-					p++;
 				}
 			}
-
 		}
 
 		#region DescriptorParameters

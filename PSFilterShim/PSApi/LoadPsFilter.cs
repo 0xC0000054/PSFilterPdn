@@ -3320,25 +3320,26 @@ namespace PSFilterLoad.PSApi
 		{
 			mask = new MaskSurface(source.Width, source.Height);
 
-			for (int y = 0; y < mask.Height; y++)
+			SafeNativeMethods.memset(mask.Scan0.Pointer, 0, new UIntPtr((ulong)mask.Scan0.Length));
+
+			Rectangle[] scans = selectedRegion.GetRegionScansReadOnlyInt();
+
+			for (int i = 0; i < scans.Length; i++)
 			{
-				byte* p = mask.GetRowAddressUnchecked(y);
-				for (int x = 0; x < mask.Width; x++)
+				Rectangle rect = scans[i];
+
+				for (int y = rect.Top; y < rect.Bottom; y++)
 				{
+					byte* ptr = mask.GetPointAddressUnchecked(rect.Left, y);
+					byte* ptrEnd = ptr + rect.Width;
 
-					if (selectedRegion.IsVisible(x, y))
+					while (ptr < ptrEnd)
 					{
-						*p = 255;
+						*ptr = 255;
+						ptr++;
 					}
-					else
-					{
-						*p = 0;
-					}
-
-					p++;
 				}
 			}
-
 		}
 
 		#region DescriptorParameters
