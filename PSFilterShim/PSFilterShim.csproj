@@ -75,6 +75,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="PaintDotNet\ColorPicker\ColorGradientControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
