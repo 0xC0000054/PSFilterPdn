@@ -3,6 +3,7 @@
 *.psess
 *.suo
 *.Cache
+*.GhostDoc.xml
 /obj
 /bin
 /PSFilterShim/bin
