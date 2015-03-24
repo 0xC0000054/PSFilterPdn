@@ -10,6 +10,10 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PaintDotNet;
+using PaintDotNet.Effects;
+using PSFilterLoad.PSApi;
+using PSFilterPdn.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,10 +26,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Windows.Forms;
-using PaintDotNet;
-using PaintDotNet.Effects;
-using PSFilterLoad.PSApi;
-using PSFilterPdn.Properties;
 
 namespace PSFilterPdn
 {
@@ -120,12 +120,12 @@ namespace PSFilterPdn
 			{
 				return (DialogResult)base.Invoke(new Func<string, DialogResult>(delegate(string error)
 					{
-                        return MessageBox.Show(this, error, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
+						return MessageBox.Show(this, error, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
 					}), message);
 			}
 			else
 			{
-                return MessageBox.Show(this, message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
+				return MessageBox.Show(this, message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
 			}
 		}
 
