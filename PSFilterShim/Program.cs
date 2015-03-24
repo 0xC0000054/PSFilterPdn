@@ -44,7 +44,7 @@ namespace PSFilterShim
 		static IPSFilterShim serviceProxy;
 
 		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-		{ 
+		{
 			Exception ex = (Exception)e.ExceptionObject;
 			serviceProxy.SetProxyErrorMessage(ex.ToString());
 
@@ -71,34 +71,28 @@ namespace PSFilterShim
 
 			EndpointAddress address = new EndpointAddress(endpointName);
 			serviceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(new NetNamedPipeBinding(), address);
-			
+
 			resetEvent = new ManualResetEvent(false);
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
-			try
-			{
-				Thread filterThread = new Thread(new ThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
-				filterThread.SetApartmentState(ApartmentState.STA); // Some filters may use OLE which requires Single Threaded Apartment mode.
 
-				filterThread.Start();
+			Thread filterThread = new Thread(new ThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+			filterThread.SetApartmentState(ApartmentState.STA); // Some filters may use OLE which requires Single Threaded Apartment mode.
 
-				resetEvent.WaitOne();
-				resetEvent.Close();
+			filterThread.Start();
 
-				filterThread.Join();
-			}
-			finally
-			{
-				PaintDotNet.SystemLayer.Memory.DestroyHeap();
-			}
+			resetEvent.WaitOne();
+			resetEvent.Close();
+
+			filterThread.Join();
 		}
 
 		static void RunFilterThread()
 		{
-			string src = serviceProxy.GetSourceImagePath(); 
-			string dstImg = serviceProxy.GetDestImagePath(); 
+			string src = serviceProxy.GetSourceImagePath();
+			string dstImg = serviceProxy.GetDestImagePath();
 
-			
+
 			Color primary = serviceProxy.GetPrimaryColor();
 
 			Color secondary = serviceProxy.GetSecondaryColor();
@@ -262,5 +256,5 @@ namespace PSFilterShim
 
 
 
-   
+
 }
