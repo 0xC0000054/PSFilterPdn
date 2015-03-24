@@ -60,16 +60,6 @@ namespace PaintDotNet.SystemLayer
             }          
         }
 
-        public static void DestroyHeap()
-        {
-            if (hHeap != IntPtr.Zero)
-            {
-                IntPtr hHeap2 = hHeap;
-                hHeap = IntPtr.Zero;
-                SafeNativeMethods.HeapDestroy(hHeap2); 
-            }
-        }
-
         /// <summary>
         /// Allocates a block of memory at least as large as the amount requested.
         /// </summary>
