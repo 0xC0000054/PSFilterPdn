@@ -40,7 +40,6 @@ namespace PSFilterShim
 			internal const uint SEM_FAILCRITICALERRORS = 1U;
 		}
 
-		static ManualResetEvent resetEvent;
 		static IPSFilterShim serviceProxy;
 
 		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -72,26 +71,15 @@ namespace PSFilterShim
 			EndpointAddress address = new EndpointAddress(endpointName);
 			serviceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(new NetNamedPipeBinding(), address);
 
-			resetEvent = new ManualResetEvent(false);
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
-
-			Thread filterThread = new Thread(new ThreadStart(RunFilterThread)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
-			filterThread.SetApartmentState(ApartmentState.STA); // Some filters may use OLE which requires Single Threaded Apartment mode.
-
-			filterThread.Start();
-
-			resetEvent.WaitOne();
-			resetEvent.Close();
-
-			filterThread.Join();
+			RunFilter();
 		}
 
-		static void RunFilterThread()
+		static void RunFilter()
 		{
 			string src = serviceProxy.GetSourceImagePath();
 			string dstImg = serviceProxy.GetDestImagePath();
-
 
 			Color primary = serviceProxy.GetPrimaryColor();
 
@@ -248,7 +236,6 @@ namespace PSFilterShim
 					selectionRegion.Dispose();
 					selectionRegion = null;
 				}
-				resetEvent.Set();
 			}
 		}
 
