@@ -635,8 +635,6 @@ namespace PSFilterPdn
 
 
 				ProcessStartInfo psi = new ProcessStartInfo(shimPath, PSFilterShimServer.EndpointName);
-				psi.CreateNoWindow = true;
-				psi.UseShellExecute = false;
 
 				proxyResult = true; // assume the filter succeeded this will be set to false if it failed
 				proxyErrorMessage = string.Empty;

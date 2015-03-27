@@ -202,7 +202,7 @@ namespace PSFilterPdn
                     }
                 }
 
-                ProcessStartInfo psi = new ProcessStartInfo(shimPath, PSFilterShimServer.EndpointName) { CreateNoWindow = true, UseShellExecute = false };
+                ProcessStartInfo psi = new ProcessStartInfo(shimPath, PSFilterShimServer.EndpointName);
 
                 proxyResult = true;
                 proxyErrorMessage = string.Empty;
