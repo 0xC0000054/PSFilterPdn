@@ -1227,10 +1227,10 @@ namespace PSFilterPdn
 			if (IntPtr.Size == 4)
 			{
 				uint depFlags;
-				int protect;
+				int permanent;
 				try
 				{
-					if (SafeNativeMethods.GetProcessDEPPolicy(SafeNativeMethods.GetCurrentProcess(), out depFlags, out protect))
+					if (SafeNativeMethods.GetProcessDEPPolicy(SafeNativeMethods.GetCurrentProcess(), out depFlags, out permanent))
 					{
 						this.useDEPProxy = (depFlags != 0U);
 					}
