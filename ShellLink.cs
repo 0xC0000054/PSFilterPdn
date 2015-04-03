@@ -25,6 +25,7 @@ namespace PSFilterPdn
         private NativeInterfaces.IShellLinkW shellLink;
 
         private const int STGM_READ = 0;
+        private const int S_OK = 0;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ShellLink"/> class.
@@ -53,7 +54,10 @@ namespace PSFilterPdn
             {
                 StringBuilder sb = new StringBuilder(260);
 
-                shellLink.GetPath(sb, sb.MaxCapacity, IntPtr.Zero, 0);
+                if (shellLink.GetPath(sb, sb.MaxCapacity, IntPtr.Zero, 0U) != S_OK)
+                {
+                    return string.Empty;
+                }
 
                 return sb.ToString();
             }
