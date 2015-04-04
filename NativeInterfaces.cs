@@ -82,30 +82,30 @@ namespace PSFilterPdn
         internal interface IPersist
         {
             [PreserveSig]
-            void GetClassID(out Guid pClassID);
+            int GetClassID(out Guid pClassID);
         }
 
 
-        [ComImport(), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("0000010b-0000-0000-C000-000000000046")]
+        [ComImport(), Guid("0000010b-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
         internal interface IPersistFile : IPersist
         {
-            new void GetClassID(out Guid pClassID);
+            [PreserveSig]
+            new int GetClassID(out Guid pClassID);
+
             [PreserveSig]
             int IsDirty();
 
             [PreserveSig]
-            void Load([In, MarshalAs(UnmanagedType.LPWStr)]
-             string pszFileName, uint dwMode);
+            int Load([In, MarshalAs(UnmanagedType.LPWStr)] string pszFileName, uint dwMode);
 
             [PreserveSig]
-            void Save([In, MarshalAs(UnmanagedType.LPWStr)] string pszFileName,
-                [In, MarshalAs(UnmanagedType.Bool)] bool fRemember);
+            int Save([In, MarshalAs(UnmanagedType.LPWStr)] string pszFileName, [In, MarshalAs(UnmanagedType.Bool)] bool fRemember);
 
             [PreserveSig]
-            void SaveCompleted([In, MarshalAs(UnmanagedType.LPWStr)] string pszFileName);
+            int SaveCompleted([In, MarshalAs(UnmanagedType.LPWStr)] string pszFileName);
 
             [PreserveSig]
-            void GetCurFile([In, MarshalAs(UnmanagedType.LPWStr)] string ppszFileName);
+            int GetCurFile([In, MarshalAs(UnmanagedType.LPWStr)] string ppszFileName);
         }
     }
 }
