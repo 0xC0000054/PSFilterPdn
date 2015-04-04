@@ -40,9 +40,9 @@ namespace PSFilterPdn
         /// Loads a shortcut from a file.
         /// </summary>
         /// <param name="linkPath">The shortcut to load.</param>
-        public void Load(string linkPath)
+        public bool Load(string linkPath)
         {
-            ((NativeInterfaces.IPersistFile)shellLink).Load(linkPath, STGM_READ);
+            return (((NativeInterfaces.IPersistFile)shellLink).Load(linkPath, STGM_READ) == S_OK);
         }
 
         /// <summary>
