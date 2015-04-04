@@ -1039,15 +1039,17 @@ namespace PSFilterPdn
 
                         if (path.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
                         {
-                            shortcut.Load(path);
-                            string linkPath = shortcut.Path;
-
-                            if (linkPath.EndsWith(".8bf", StringComparison.OrdinalIgnoreCase))
+                            if (shortcut.Load(path))
                             {
-                                if (File.Exists(linkPath))
+                                string linkPath = shortcut.Path;
+
+                                if (linkPath.EndsWith(".8bf", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    AddFilter(linkPath, ref nodes);
-                                }
+                                    if (File.Exists(linkPath))
+                                    {
+                                        AddFilter(linkPath, ref nodes);
+                                    }
+                                } 
                             }
                         }
                         else
