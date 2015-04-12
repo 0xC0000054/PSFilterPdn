@@ -161,6 +161,7 @@
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\PlatformData.cs" />
     <Compile Include="PSApi\PluginData.cs" />
+    <Compile Include="PSApi\PluginModule.cs" />
     <Compile Include="PSApi\PlugInMonitor.cs" />
     <Compile Include="PSApi\PluginPhase.cs" />
     <Compile Include="PSApi\Point.cs" />

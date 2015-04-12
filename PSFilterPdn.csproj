@@ -153,6 +153,7 @@
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\PluginAETE.cs" />
     <Compile Include="PSApi\PlugInInfo.cs" />
+    <Compile Include="PSApi\PluginModule.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
     <Compile Include="PSApi\PSResource.cs" />
