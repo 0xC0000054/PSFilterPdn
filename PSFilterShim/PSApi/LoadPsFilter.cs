@@ -218,6 +218,7 @@ namespace PSFilterLoad.PSApi
 		private MaskSurface scaledSelectionMask;
 
 		private bool disposed;
+		private PluginModule module;
 		private PluginPhase phase;
 		private Action<int, int> progressFunc;
 		private IntPtr dataPtr;
@@ -643,46 +644,14 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		/// Loads a Photoshop filter from the PluginData.
+		/// Loads a filter from the PluginData.
 		/// </summary>
-		/// <param name="proxyData">The PluginData of the filter to load.</param>
-		/// <returns>True if successful, otherwise false.</returns>
-		/// <exception cref="System.FileNotFoundExecption">The file in the PluginData.fileName</exception>
-		private static bool LoadFilter(ref PluginData pdata)
+		/// <param name="pdata">The PluginData of the filter to load.</param>
+		/// <exception cref="System.EntryPointNotFoundException">The entry point specified by the PluginData.entryPoint field was not found.</exception>
+		/// <exception cref="System.IO.FileNotFoundException">The file specified by the PluginData.fileName field cannot be found.</exception>
+		private void LoadFilter(PluginData pdata)
 		{
-			pdata.module.dll = UnsafeNativeMethods.LoadLibraryW(pdata.fileName);
-
-			if (!pdata.module.dll.IsInvalid)
-			{
-				IntPtr entry = UnsafeNativeMethods.GetProcAddress(pdata.module.dll, pdata.entryPoint);
-
-				if (entry != IntPtr.Zero)
-				{
-					pdata.module.entryPoint = (pluginEntryPoint)Marshal.GetDelegateForFunctionPointer(entry, typeof(pluginEntryPoint));
-					return true;
-				}
-			}
-			else
-			{
-				int hr = Marshal.GetHRForLastWin32Error();
-				Marshal.ThrowExceptionForHR(hr);
-			}
-
-			return false;
-		}
-
-		/// <summary>
-		/// Free the loaded PluginData.
-		/// </summary>
-		/// <param name="proxyData">The PluginData to  free/</param>
-		private static void FreeLibrary(ref PluginData pdata)
-		{
-			if (pdata.module.dll != null)
-			{
-				pdata.module.dll.Dispose();
-				pdata.module.dll = null;
-				pdata.module.entryPoint = null;
-			}
+			module = new PluginModule(pdata.fileName, pdata.entryPoint);
 		}
 
 		/// <summary>
@@ -930,18 +899,21 @@ namespace PSFilterLoad.PSApi
 			{
 				if (pdata.moduleEntryPoints == null)
 				{
-					pdata.module.entryPoint(FilterSelector.About, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
+					module.entryPoint(FilterSelector.About, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
 				}
 				else
 				{
 					// call all the entry points in the module only one should show the about box.
 					foreach (var entryPoint in pdata.moduleEntryPoints)
 					{
-						IntPtr ptr = UnsafeNativeMethods.GetProcAddress(pdata.module.dll, entryPoint);
-
-						pluginEntryPoint ep = (pluginEntryPoint)Marshal.GetDelegateForFunctionPointer(ptr, typeof(pluginEntryPoint));
+						PluginEntryPoint ep = module.GetEntryPoint(entryPoint);
 
 						ep(FilterSelector.About, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
+						
+						if (result != PSError.noErr)
+						{
+							break;
+						}
 
 						GC.KeepAlive(ep);
 					}
@@ -955,17 +927,17 @@ namespace PSFilterLoad.PSApi
 
 			if (result != PSError.noErr)
 			{
-				FreeLibrary(ref pdata);
 #if DEBUG
 				Ping(DebugFlags.Error, string.Format("filterSelectorAbout returned result code {0}", result.ToString()));
 #endif
+				errorMessage = GetErrorMessage(result);
 				return false;
 			}
 
 			return true;
 		}
 
-		private unsafe bool PluginApply(PluginData pdata)
+		private unsafe bool PluginApply()
 		{
 #if DEBUG
 			System.Diagnostics.Debug.Assert(phase == PluginPhase.Prepare);
@@ -976,14 +948,13 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before FilterSelectorStart");
 #endif
 
-			pdata.module.entryPoint(FilterSelector.Start, filterRecordPtr, ref dataPtr, ref result);
+			module.entryPoint(FilterSelector.Start, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After FilterSelectorStart");
 #endif
 			if (result != PSError.noErr)
 			{
-				FreeLibrary(ref pdata);
 				errorMessage = GetErrorMessage(result);
 
 #if DEBUG
@@ -1004,7 +975,7 @@ namespace PSFilterLoad.PSApi
 				Ping(DebugFlags.Call, "Before FilterSelectorContinue");
 #endif
 
-				pdata.module.entryPoint(FilterSelector.Continue, filterRecordPtr, ref dataPtr, ref result);
+				module.entryPoint(FilterSelector.Continue, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 				Ping(DebugFlags.Call, "After FilterSelectorContinue");
@@ -1021,13 +992,12 @@ namespace PSFilterLoad.PSApi
 					Ping(DebugFlags.Call, "Before FilterSelectorFinish");
 #endif
 
-					pdata.module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
+					module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 					Ping(DebugFlags.Call, "After FilterSelectorFinish");
 #endif
 
-					FreeLibrary(ref pdata);
 					errorMessage = GetErrorMessage(savedResult);
 
 #if DEBUG
@@ -1040,14 +1010,12 @@ namespace PSFilterLoad.PSApi
 
 				if (AbortProc() != 0)
 				{
-					pdata.module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
+					module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
 
 					if (result != PSError.noErr)
 					{
 						errorMessage = GetErrorMessage(result);
 					}
-
-					FreeLibrary(ref pdata);
 
 					return false;
 				}
@@ -1061,7 +1029,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before FilterSelectorFinish");
 #endif
 
-			pdata.module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
+			module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After FilterSelectorFinish");
@@ -1075,7 +1043,7 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
-		private bool PluginParameters(PluginData pdata)
+		private bool PluginParameters()
 		{
 			result = PSError.noErr;
 
@@ -1086,7 +1054,7 @@ namespace PSFilterLoad.PSApi
 			Ping(DebugFlags.Call, "Before filterSelectorParameters");
 #endif
 
-			pdata.module.entryPoint(FilterSelector.Parameters, filterRecordPtr, ref dataPtr, ref result);
+			module.entryPoint(FilterSelector.Parameters, filterRecordPtr, ref dataPtr, ref result);
 #if DEBUG
 			unsafe
 			{
@@ -1099,7 +1067,6 @@ namespace PSFilterLoad.PSApi
 
 			if (result != PSError.noErr)
 			{
-				FreeLibrary(ref pdata);
 				errorMessage = GetErrorMessage(result);
 #if DEBUG
 				string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
@@ -1204,7 +1171,7 @@ namespace PSFilterLoad.PSApi
 
 		}
 
-		private bool PluginPrepare(PluginData pdata)
+		private bool PluginPrepare()
 		{
 			SetupSizes();
 			RestoreParameters();
@@ -1217,7 +1184,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			Ping(DebugFlags.Call, "Before filterSelectorPrepare");
 #endif
-			pdata.module.entryPoint(FilterSelector.Prepare, filterRecordPtr, ref dataPtr, ref result);
+			module.entryPoint(FilterSelector.Prepare, filterRecordPtr, ref dataPtr, ref result);
 
 #if DEBUG
 			Ping(DebugFlags.Call, "After filterSelectorPrepare");
@@ -1225,7 +1192,6 @@ namespace PSFilterLoad.PSApi
 
 			if (result != PSError.noErr)
 			{
-				FreeLibrary(ref pdata);
 				errorMessage = GetErrorMessage(result);
 #if DEBUG
 				string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
@@ -1323,13 +1289,7 @@ namespace PSFilterLoad.PSApi
 		/// <returns><c>true</c> if the filter completed processing; otherwise <c>false</c> if an error occurred.</returns>
 		internal bool RunPlugin(PluginData pdata, bool showAbout)
 		{
-			if (!LoadFilter(ref pdata))
-			{
-#if DEBUG
-				System.Diagnostics.Debug.WriteLine("LoadFilter failed");
-#endif
-				return false;
-			}
+			LoadFilter(pdata);
 
 			if (showAbout)
 			{
@@ -1388,7 +1348,7 @@ namespace PSFilterLoad.PSApi
 
 			if (!isRepeatEffect)
 			{
-				if (!PluginParameters(pdata))
+				if (!PluginParameters())
 				{
 #if DEBUG
 					Ping(DebugFlags.Error, "PluginParameters failed");
@@ -1398,7 +1358,7 @@ namespace PSFilterLoad.PSApi
 			}
 
 
-			if (!PluginPrepare(pdata))
+			if (!PluginPrepare())
 			{
 #if DEBUG
 				Ping(DebugFlags.Error, "PluginPrepare failed");
@@ -1406,15 +1366,13 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			if (!PluginApply(pdata))
+			if (!PluginApply())
 			{
 #if DEBUG
 				Ping(DebugFlags.Error, "PluginApply failed");
 #endif
 				return false;
 			}
-
-			FreeLibrary(ref pdata);
 
 			return true;
 		}
@@ -5484,6 +5442,11 @@ namespace PSFilterLoad.PSApi
 
 				if (disposing)
 				{
+					if (module != null)
+					{
+						module.Dispose();
+						module = null;
+					}
 					if (source != null)
 					{
 						source.Dispose();
