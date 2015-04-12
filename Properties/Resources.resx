@@ -268,4 +268,7 @@
   <data name="BlankDataNotSupported" xml:space="preserve">
     <value>The filter does not support processing empty layers.</value>
   </data>
+  <data name="PluginEntryPointNotFound" xml:space="preserve">
+    <value>Unable to find an entry point named '{0}' in  '{1}'</value>
+  </data>
 </root>
