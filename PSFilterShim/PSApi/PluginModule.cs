@@ -12,6 +12,7 @@
 
 using PSFilterShim.Properties;
 using System;
+using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
@@ -54,7 +55,7 @@ namespace PSFilterLoad.PSApi
                     this.handle.Dispose();
                     this.handle = null;
 
-                    throw new EntryPointNotFoundException(string.Format(Resources.PluginEntryPointNotFound, entryPoint, fileName));
+                    throw new EntryPointNotFoundException(string.Format(CultureInfo.CurrentCulture, Resources.PluginEntryPointNotFound, entryPoint, fileName));
                 }
             }
             else
@@ -67,22 +68,22 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Gets a delegate for the plugin entry point.
         /// </summary>
-        /// <param name="entryPoint">The name of the entry point.</param>
+        /// <param name="entryPointName">The name of the entry point.</param>
         /// <returns>A <see cref="PluginEntryPoint" /> delegate.</returns>
-        /// <exception cref="System.EntryPointNotFoundException">The entry point specified by <paramref name="entryPoint" /> was not found.</exception>
+        /// <exception cref="System.EntryPointNotFoundException">The entry point specified by <paramref name="entryPointName" /> was not found.</exception>
         /// <exception cref="System.ObjectDisposedException">The object has been disposed.</exception>
-        public PluginEntryPoint GetEntryPoint(string entryPoint)
+        public PluginEntryPoint GetEntryPoint(string entryPointName)
         {
             if (disposed)
             {
                 throw new ObjectDisposedException("PluginModule");
             }
 
-            IntPtr address = UnsafeNativeMethods.GetProcAddress(handle, entryPoint);
+            IntPtr address = UnsafeNativeMethods.GetProcAddress(handle, entryPointName);
 
             if (address == IntPtr.Zero)
             {
-                throw new EntryPointNotFoundException(string.Format(Resources.PluginEntryPointNotFound, entryPoint, fileName));
+                throw new EntryPointNotFoundException(string.Format(CultureInfo.CurrentCulture, Resources.PluginEntryPointNotFound, entryPointName, fileName));
             }
 
             return (PluginEntryPoint)Marshal.GetDelegateForFunctionPointer(address, typeof(PluginEntryPoint));
