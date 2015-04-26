@@ -84,93 +84,91 @@ namespace PSFilterLoad.PSApi
 
 
 		#region CallbackDelegates
-
-		// AdvanceState
-		static AdvanceStateProc advanceProc;
+		private AdvanceStateProc advanceProc;
 		// BufferProcs
-		static AllocateBufferProc allocProc;
-		static FreeBufferProc freeProc;
-		static LockBufferProc lockProc;
-		static UnlockBufferProc unlockProc;
-		static BufferSpaceProc spaceProc;
+		private AllocateBufferProc allocProc;
+		private FreeBufferProc freeProc;
+		private LockBufferProc lockProc;
+		private UnlockBufferProc unlockProc;
+		private BufferSpaceProc spaceProc;
 		// MiscCallbacks
-		static ColorServicesProc colorProc;
-		static DisplayPixelsProc displayPixelsProc;
-		static HostProcs hostProc;
-		static ProcessEventProc processEventProc;
-		static ProgressProc progressProc;
-		static TestAbortProc abortProc;
+		private ColorServicesProc colorProc;
+		private DisplayPixelsProc displayPixelsProc;
+		private HostProcs hostProc;
+		private ProcessEventProc processEventProc;
+		private ProgressProc progressProc;
+		private TestAbortProc abortProc;
 		// HandleProcs 
-		static NewPIHandleProc handleNewProc;
-		static DisposePIHandleProc handleDisposeProc;
-		static GetPIHandleSizeProc handleGetSizeProc;
-		static SetPIHandleSizeProc handleSetSizeProc;
-		static LockPIHandleProc handleLockProc;
-		static UnlockPIHandleProc handleUnlockProc;
-		static RecoverSpaceProc handleRecoverSpaceProc;
-		static DisposeRegularPIHandleProc handleDisposeRegularProc;
+		private NewPIHandleProc handleNewProc;
+		private DisposePIHandleProc handleDisposeProc;
+		private GetPIHandleSizeProc handleGetSizeProc;
+		private SetPIHandleSizeProc handleSetSizeProc;
+		private LockPIHandleProc handleLockProc;
+		private UnlockPIHandleProc handleUnlockProc;
+		private RecoverSpaceProc handleRecoverSpaceProc;
+		private DisposeRegularPIHandleProc handleDisposeRegularProc;
 		// ImageServicesProc
 #if USEIMAGESERVICES
-		static PIResampleProc resample1DProc;
-		static PIResampleProc resample2DProc; 
+		private PIResampleProc resample1DProc;
+		private PIResampleProc resample2DProc; 
 #endif
 		// PropertyProcs
-		static GetPropertyProc getPropertyProc;
-		static SetPropertyProc setPropertyProc;
+		private GetPropertyProc getPropertyProc;
+		private SetPropertyProc setPropertyProc;
 		// ResourceProcs
-		static CountPIResourcesProc countResourceProc;
-		static GetPIResourceProc getResourceProc;
-		static DeletePIResourceProc deleteResourceProc;
-		static AddPIResourceProc addResourceProc;
+		private CountPIResourcesProc countResourceProc;
+		private GetPIResourceProc getResourceProc;
+		private DeletePIResourceProc deleteResourceProc;
+		private AddPIResourceProc addResourceProc;
 
 		// ReadDescriptorProcs
-		static OpenReadDescriptorProc openReadDescriptorProc;
-		static CloseReadDescriptorProc closeReadDescriptorProc;
-		static GetKeyProc getKeyProc;
-		static GetIntegerProc getIntegerProc;
-		static GetFloatProc getFloatProc;
-		static GetUnitFloatProc getUnitFloatProc;
-		static GetBooleanProc getBooleanProc;
-		static GetTextProc getTextProc;
-		static GetAliasProc getAliasProc;
-		static GetEnumeratedProc getEnumeratedProc;
-		static GetClassProc getClassProc;
-		static GetSimpleReferenceProc getSimpleReferenceProc;
-		static GetObjectProc getObjectProc;
-		static GetCountProc getCountProc;
-		static GetStringProc getStringProc;
-		static GetPinnedIntegerProc getPinnedIntegerProc;
-		static GetPinnedFloatProc getPinnedFloatProc;
-		static GetPinnedUnitFloatProc getPinnedUnitFloatProc;
+		private OpenReadDescriptorProc openReadDescriptorProc;
+		private CloseReadDescriptorProc closeReadDescriptorProc;
+		private GetKeyProc getKeyProc;
+		private GetIntegerProc getIntegerProc;
+		private GetFloatProc getFloatProc;
+		private GetUnitFloatProc getUnitFloatProc;
+		private GetBooleanProc getBooleanProc;
+		private GetTextProc getTextProc;
+		private GetAliasProc getAliasProc;
+		private GetEnumeratedProc getEnumeratedProc;
+		private GetClassProc getClassProc;
+		private GetSimpleReferenceProc getSimpleReferenceProc;
+		private GetObjectProc getObjectProc;
+		private GetCountProc getCountProc;
+		private GetStringProc getStringProc;
+		private GetPinnedIntegerProc getPinnedIntegerProc;
+		private GetPinnedFloatProc getPinnedFloatProc;
+		private GetPinnedUnitFloatProc getPinnedUnitFloatProc;
 		// WriteDescriptorProcs
-		static OpenWriteDescriptorProc openWriteDescriptorProc;
-		static CloseWriteDescriptorProc closeWriteDescriptorProc;
-		static PutIntegerProc putIntegerProc;
-		static PutFloatProc putFloatProc;
-		static PutUnitFloatProc putUnitFloatProc;
-		static PutBooleanProc putBooleanProc;
-		static PutTextProc putTextProc;
-		static PutAliasProc putAliasProc;
-		static PutEnumeratedProc putEnumeratedProc;
-		static PutClassProc putClassProc;
-		static PutSimpleReferenceProc putSimpleReferenceProc;
-		static PutObjectProc putObjectProc;
-		static PutCountProc putCountProc;
-		static PutStringProc putStringProc;
-		static PutScopedClassProc putScopedClassProc;
-		static PutScopedObjectProc putScopedObjectProc;
+		private OpenWriteDescriptorProc openWriteDescriptorProc;
+		private CloseWriteDescriptorProc closeWriteDescriptorProc;
+		private PutIntegerProc putIntegerProc;
+		private PutFloatProc putFloatProc;
+		private PutUnitFloatProc putUnitFloatProc;
+		private PutBooleanProc putBooleanProc;
+		private PutTextProc putTextProc;
+		private PutAliasProc putAliasProc;
+		private PutEnumeratedProc putEnumeratedProc;
+		private PutClassProc putClassProc;
+		private PutSimpleReferenceProc putSimpleReferenceProc;
+		private PutObjectProc putObjectProc;
+		private PutCountProc putCountProc;
+		private PutStringProc putStringProc;
+		private PutScopedClassProc putScopedClassProc;
+		private PutScopedObjectProc putScopedObjectProc;
 		// ChannelPorts
-		static ReadPixelsProc readPixelsProc;
-		static WriteBasePixelsProc writeBasePixelsProc;
-		static ReadPortForWritePortProc readPortForWritePortProc;
+		private ReadPixelsProc readPixelsProc;
+		private WriteBasePixelsProc writeBasePixelsProc;
+		private ReadPortForWritePortProc readPortForWritePortProc;
 		// SPBasic Suite
-		static SPBasicSuite_AcquireSuite spAcquireSuite;
-		static SPBasicSuite_AllocateBlock spAllocateBlock;
-		static SPBasicSuite_FreeBlock spFreeBlock;
-		static SPBasicSuite_IsEqual spIsEqual;
-		static SPBasicSuite_ReallocateBlock spReallocateBlock;
-		static SPBasicSuite_ReleaseSuite spReleaseSuite;
-		static SPBasicSuite_Undefined spUndefined;
+		private SPBasicSuite_AcquireSuite spAcquireSuite;
+		private SPBasicSuite_AllocateBlock spAllocateBlock;
+		private SPBasicSuite_FreeBlock spFreeBlock;
+		private SPBasicSuite_IsEqual spIsEqual;
+		private SPBasicSuite_ReallocateBlock spReallocateBlock;
+		private SPBasicSuite_ReleaseSuite spReleaseSuite;
+		private SPBasicSuite_Undefined spUndefined;
 		#endregion
 
 		private Dictionary<IntPtr, PSHandle> handles;
@@ -1382,47 +1380,38 @@ namespace PSFilterLoad.PSApi
 			string message = string.Empty;
 
 			// Any positive integer is a plugin handled error message.
-			if (error == PSError.userCanceledErr || error >= 1)
-			{
-				return string.Empty; // return an empty string as this message is never shown
-			}
-			else if (error == PSError.errReportString)
-			{
-				message = StringFromPString(errorStringPtr);
-			}
-			else
+			if (error < 0 && error != PSError.userCanceledErr)
 			{
 				switch (error)
 				{
 					case PSError.readErr:
-						message = Resources.FileReadError;
-						break;
 					case PSError.writErr:
-						message = Resources.FileWriteError;
-						break;
 					case PSError.openErr:
-						message = Resources.FileOpenError;
+					case PSError.ioErr:
+						message = Resources.FileIOError;
+						break;
+					case PSError.eofErr:
+						message = Resources.EndOfFileError;
 						break;
 					case PSError.dskFulErr:
 						message = Resources.DiskFullError;
 						break;
-					case PSError.ioErr:
-						message = Resources.FileIOError;
+					case PSError.fLckdErr:
+						message = Resources.FileLockedError;
+						break;
+					case PSError.vLckdErr:
+						message = Resources.VolumeLockedError;
+						break;
+					case PSError.fnfErr:
+						message = Resources.FileNotFoundError;
 						break;
 					case PSError.memFullErr:
-						message = Resources.OutOfMemoryError;
-						break;
 					case PSError.nilHandleErr:
-						message = Resources.NullHandleError;
-						break;
-					case PSError.filterBadParameters:
-						message = Resources.BadParameters;
+					case PSError.memWZErr:
+						message = Resources.OutOfMemoryError;
 						break;
 					case PSError.filterBadMode:
 						message = Resources.UnsupportedImageMode;
-						break;
-					case PSError.errPlugInHostInsufficient:
-						message = Resources.PlugInHostInsufficient;
 						break;
 					case PSError.errPlugInPropertyUndefined:
 						message = Resources.PlugInPropertyUndefined;
@@ -1433,29 +1422,26 @@ namespace PSFilterLoad.PSApi
 					case PSError.errInvalidSamplePoint:
 						message = Resources.InvalidSamplePoint;
 						break;
+					case PSError.errPlugInHostInsufficient:
 					case PSError.errUnknownPort:
-						message = Resources.UnknownChannelPort;
-						break;
 					case PSError.errUnsupportedBitOffset:
-						message = Resources.UnsupportedChannelBitOffset;
-						break;
 					case PSError.errUnsupportedColBits:
-						message = Resources.UnsupportedChannelColumnBits;
-						break;
 					case PSError.errUnsupportedDepth:
-						message = Resources.UnsupportedChannelDepth;
-						break;
 					case PSError.errUnsupportedDepthConversion:
-						message = Resources.UnsupportedChannelDepthConversion;
-						break;
 					case PSError.errUnsupportedRowBits:
-						message = Resources.UnsupportedChannelRowBits;
+						message = Resources.PlugInHostInsufficient;
 						break;
+					case PSError.errReportString:
+						message = StringFromPString(this.errorStringPtr);
+						break;
+					case PSError.paramErr:
+					case PSError.filterBadParameters:
 					default:
-						message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.UnknownErrorCodeFormat, error);
+						message = Resources.FilterBadParameters;
 						break;
 				}
 			}
+
 			return message;
 		}
 
