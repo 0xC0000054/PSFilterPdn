@@ -117,37 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="FileReadError" xml:space="preserve">
-    <value>File read error.</value>
-    <comment>FileReadError description</comment>
-  </data>
-  <data name="FileWriteError" xml:space="preserve">
-    <value>File write error.</value>
-    <comment>FileWriteError description</comment>
-  </data>
-  <data name="FileOpenError" xml:space="preserve">
-    <value>File open error.</value>
-    <comment>FileOpenError description</comment>
-  </data>
   <data name="DiskFullError" xml:space="preserve">
-    <value>Disk full.</value>
+    <value>There is not enough space on the disk.</value>
     <comment>DiskFull description</comment>
   </data>
   <data name="FileIOError" xml:space="preserve">
-    <value>File I/O error.</value>
+    <value>A file I/O error occurred.</value>
     <comment>FileIOError description</comment>
   </data>
   <data name="OutOfMemoryError" xml:space="preserve">
-    <value>Out of memory.</value>
+    <value>Insufficient memory to continue the execution of the plugin.</value>
     <comment>OutOfMemory description</comment>
-  </data>
-  <data name="NullHandleError" xml:space="preserve">
-    <value>Null handle error.</value>
-    <comment>NullHandleError description</comment>
-  </data>
-  <data name="BadParameters" xml:space="preserve">
-    <value>Bad parameters.</value>
-    <comment>BadParameters description</comment>
   </data>
   <data name="UnsupportedImageMode" xml:space="preserve">
     <value>Unsupported image mode.</value>
@@ -166,7 +146,7 @@
     <comment>ThisPlugInDoesNotSupportColBytesOtherThan1 description</comment>
   </data>
   <data name="InvalidSamplePoint" xml:space="preserve">
-    <value>Invalid sample point.</value>
+    <value>The image sample point is not valid.</value>
     <comment>InvalidSamplePoint description</comment>
   </data>
   <data name="ConfigDialog_FilterSearchBox_BackText" xml:space="preserve">
@@ -236,9 +216,6 @@
   <data name="RedChannelName" xml:space="preserve">
     <value>Red</value>
   </data>
-  <data name="UnknownErrorCodeFormat" xml:space="preserve">
-    <value>error code: {0}</value>
-  </data>
   <data name="PiMIDefaultCategoryName" xml:space="preserve">
     <value>Other</value>
     <comment>The default category for PiMI filters that don't specify one.</comment>
@@ -247,28 +224,26 @@
     <value>Selection Mask</value>
     <comment>SelectionMask description</comment>
   </data>
-  <data name="UnknownChannelPort" xml:space="preserve">
-    <value>Unknown port.</value>
-  </data>
-  <data name="UnsupportedChannelBitOffset" xml:space="preserve">
-    <value>Unsupported bit offset.</value>
-  </data>
-  <data name="UnsupportedChannelColumnBits" xml:space="preserve">
-    <value>Unsupported column bits.</value>
-  </data>
-  <data name="UnsupportedChannelDepth" xml:space="preserve">
-    <value>Unsupported depth.</value>
-  </data>
-  <data name="UnsupportedChannelDepthConversion" xml:space="preserve">
-    <value>Unsupported depth conversion.</value>
-  </data>
-  <data name="UnsupportedChannelRowBits" xml:space="preserve">
-    <value>Unsupported row bits.</value>
-  </data>
   <data name="BlankDataNotSupported" xml:space="preserve">
     <value>The filter does not support processing empty layers.</value>
   </data>
   <data name="PluginEntryPointNotFound" xml:space="preserve">
     <value>Unable to find an entry point named '{0}' in  '{1}'</value>
+  </data>
+  <data name="EndOfFileError" xml:space="preserve">
+    <value>Reached the end of the file.</value>
+  </data>
+  <data name="FileLockedError" xml:space="preserve">
+    <value>The file is in use or locked by another process.</value>
+  </data>
+  <data name="FileNotFoundError" xml:space="preserve">
+    <value>The system cannot find the file specified.</value>
+  </data>
+  <data name="FilterBadParameters" xml:space="preserve">
+    <value>A problem with the filter module interface.</value>
+    <comment>BadParameters description</comment>
+  </data>
+  <data name="VolumeLockedError" xml:space="preserve">
+    <value>The disk is in use or locked by another process.</value>
   </data>
 </root>

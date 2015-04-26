@@ -70,15 +70,6 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bad parameters..
-        /// </summary>
-        internal static string BadParameters {
-            get {
-                return ResourceManager.GetString("BadParameters", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The filter does not support processing empty layers..
         /// </summary>
         internal static string BlankDataNotSupported {
@@ -223,7 +214,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Disk full..
+        ///   Looks up a localized string similar to There is not enough space on the disk..
         /// </summary>
         internal static string DiskFullError {
             get {
@@ -232,7 +223,16 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File I/O error..
+        ///   Looks up a localized string similar to Reached the end of the file..
+        /// </summary>
+        internal static string EndOfFileError {
+            get {
+                return ResourceManager.GetString("EndOfFileError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A file I/O error occurred..
         /// </summary>
         internal static string FileIOError {
             get {
@@ -241,29 +241,29 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File open error..
+        ///   Looks up a localized string similar to The file is in use or locked by another process..
         /// </summary>
-        internal static string FileOpenError {
+        internal static string FileLockedError {
             get {
-                return ResourceManager.GetString("FileOpenError", resourceCulture);
+                return ResourceManager.GetString("FileLockedError", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File read error..
+        ///   Looks up a localized string similar to The system cannot find the file specified..
         /// </summary>
-        internal static string FileReadError {
+        internal static string FileNotFoundError {
             get {
-                return ResourceManager.GetString("FileReadError", resourceCulture);
+                return ResourceManager.GetString("FileNotFoundError", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File write error..
+        ///   Looks up a localized string similar to A problem with the filter module interface..
         /// </summary>
-        internal static string FileWriteError {
+        internal static string FilterBadParameters {
             get {
-                return ResourceManager.GetString("FileWriteError", resourceCulture);
+                return ResourceManager.GetString("FilterBadParameters", resourceCulture);
             }
         }
         
@@ -313,7 +313,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid sample point..
+        ///   Looks up a localized string similar to The image sample point is not valid..
         /// </summary>
         internal static string InvalidSamplePoint {
             get {
@@ -331,16 +331,7 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Null handle error..
-        /// </summary>
-        internal static string NullHandleError {
-            get {
-                return ResourceManager.GetString("NullHandleError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Out of memory..
+        ///   Looks up a localized string similar to Insufficient memory to continue the execution of the plugin..
         /// </summary>
         internal static string OutOfMemoryError {
             get {
@@ -403,74 +394,20 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unknown port..
-        /// </summary>
-        internal static string UnknownChannelPort {
-            get {
-                return ResourceManager.GetString("UnknownChannelPort", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to error code: {0}.
-        /// </summary>
-        internal static string UnknownErrorCodeFormat {
-            get {
-                return ResourceManager.GetString("UnknownErrorCodeFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unsupported bit offset..
-        /// </summary>
-        internal static string UnsupportedChannelBitOffset {
-            get {
-                return ResourceManager.GetString("UnsupportedChannelBitOffset", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unsupported column bits..
-        /// </summary>
-        internal static string UnsupportedChannelColumnBits {
-            get {
-                return ResourceManager.GetString("UnsupportedChannelColumnBits", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unsupported depth..
-        /// </summary>
-        internal static string UnsupportedChannelDepth {
-            get {
-                return ResourceManager.GetString("UnsupportedChannelDepth", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unsupported depth conversion..
-        /// </summary>
-        internal static string UnsupportedChannelDepthConversion {
-            get {
-                return ResourceManager.GetString("UnsupportedChannelDepthConversion", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unsupported row bits..
-        /// </summary>
-        internal static string UnsupportedChannelRowBits {
-            get {
-                return ResourceManager.GetString("UnsupportedChannelRowBits", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Unsupported image mode..
         /// </summary>
         internal static string UnsupportedImageMode {
             get {
                 return ResourceManager.GetString("UnsupportedImageMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The disk is in use or locked by another process..
+        /// </summary>
+        internal static string VolumeLockedError {
+            get {
+                return ResourceManager.GetString("VolumeLockedError", resourceCulture);
             }
         }
     }
