@@ -22,9 +22,6 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate byte TestAbortProc();
-
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayout(LayoutKind.Sequential, Pack = 4)]
     internal unsafe struct FilterRecord
     {
