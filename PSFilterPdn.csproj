@@ -161,6 +161,7 @@
     <Compile Include="PSApi\SafeLibraryHandle.cs" />
     <Compile Include="PSApi\SafeNativeMethods.cs" />
     <Compile Include="PSApi\SPBasicSuite.cs" />
+    <Compile Include="PSApi\TestAbortProc.cs" />
     <Compile Include="PSApi\UnsafeNativeMethods.cs" />
     <Compile Include="PsFilterPdnConfigToken.cs" />
     <Compile Include="PSFilterPdn.cs" />

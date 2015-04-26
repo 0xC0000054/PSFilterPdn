@@ -182,6 +182,7 @@
     </Compile>
     <Compile Include="PSApi\SafeNativeMethods.cs" />
     <Compile Include="PSApi\SPBasicSuite.cs" />
+    <Compile Include="PSApi\TestAbortProc.cs" />
     <Compile Include="PSApi\UnsafeNativeMethods.cs" />
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
