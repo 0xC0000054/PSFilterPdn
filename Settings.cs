@@ -26,12 +26,8 @@ namespace PSFilterPdn
 
         public Settings(string path)
         {
-            try 
-            {
-                documentPath = path;
-                xmlDocument.Load(documentPath);
-            }
-            catch { xmlDocument.LoadXml("<settings></settings>"); }
+            documentPath = path;
+            xmlDocument.Load(documentPath);
         }
 
         public string GetSetting(string xPath, string defaultValue)
