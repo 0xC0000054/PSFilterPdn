@@ -23,6 +23,7 @@ namespace PSFilterPdn
     {
         private ShellLinkCoClass shellLinkCoClass;
         private NativeInterfaces.IShellLinkW shellLink;
+        private bool disposed;
 
         private const int STGM_READ = 0;
         private const int S_OK = 0;
@@ -80,7 +81,7 @@ namespace PSFilterPdn
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        private bool disposed;
+        
         private void Dispose(bool disposing)
         {
             if (!disposed)
