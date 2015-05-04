@@ -880,11 +880,18 @@ namespace PSFilterPdn
             }
         }
 
-        private struct UpdateFilterListParam
+        private sealed class UpdateFilterListParam
         {
             public TreeNode[] items;
-            public string[] dirlist;
+            public string[] directories;
             public bool searchSubdirectories;
+
+            public UpdateFilterListParam()
+            {
+                this.items = null;
+                this.directories = null;
+                this.searchSubdirectories = false;
+            }
         }
 
         /// <summary>
@@ -898,10 +905,10 @@ namespace PSFilterPdn
                 {
                     UpdateFilterListParam uflp = new UpdateFilterListParam();
                     int count = this.searchDirListView.Items.Count;
-                    uflp.dirlist = new string[count];
+                    uflp.directories = new string[count];
                     for (int i = 0; i < count; i++)
                     {
-                        uflp.dirlist[i] = this.searchDirListView.Items[i].Text;
+                        uflp.directories[i] = this.searchDirListView.Items[i].Text;
                     }
                     uflp.searchSubdirectories = this.subDirSearchCb.Checked;
 
@@ -1023,9 +1030,9 @@ namespace PSFilterPdn
 
             using (ShellLink shortcut = new ShellLink())
             {
-                for (int i = 0; i < args.dirlist.Length; i++)
+                for (int i = 0; i < args.directories.Length; i++)
                 {
-                    string directory = args.dirlist[i];
+                    string directory = args.directories[i];
 
                     worker.ReportProgress(i, Path.GetFileName(directory));
 
