@@ -54,7 +54,7 @@ namespace PSFilterPdn
         private ProgressBar filterProgressBar;
         private LinkLabel donateLink;
         private Button buttonCancel;
-        
+
         private Surface destSurface;
         private string category;
         private string fileName;
@@ -76,7 +76,7 @@ namespace PSFilterPdn
         private string resourceDataFileName;
         private string regionFileName;
         private PluginData proxyData;
-        
+
         private bool filterRunning;
         private bool formClosePending;
         private Dictionary<TreeNode, string> filterTreeItems;
@@ -94,7 +94,7 @@ namespace PSFilterPdn
         public PsFilterPdnConfigDialog()
         {
             InitializeComponent();
-            this.filterTreeItems = new Dictionary<TreeNode,string>();
+            this.filterTreeItems = new Dictionary<TreeNode, string>();
             this.proxyProcess = null;
             this.destSurface = null;
             this.expandedNodes = new List<string>();
@@ -964,7 +964,7 @@ namespace PSFilterPdn
                 {
                     TreeNode node = parent.Nodes[data.title];
                     PluginData menuData = (PluginData)node.Tag;
-                    
+
                     if (Is64BitFilterIncompatible(data))
                     {
                         // If the 64-bit filter in the menu is incompatible remove it and use the 32-bit version.
@@ -975,11 +975,11 @@ namespace PSFilterPdn
 
                         return data.runWith32BitShim;
                     }
-                    
+
                     if (menuData.runWith32BitShim && !data.runWith32BitShim)
                     {
                         // If the new plugin is 64-bit and the old one is not remove the old one and use the 64-bit one.
-                        parent.Nodes.Remove(node); 
+                        parent.Nodes.Remove(node);
 
                         return true;
                     }
@@ -998,29 +998,6 @@ namespace PSFilterPdn
             return true;
         }
 
-        private static void AddFilter(string path, ref Dictionary<string, TreeNode> nodes)
-        {
-            foreach (var item in LoadPsFilter.QueryPlugin(path))
-            {
-                TreeNode child = new TreeNode(item.title) { Name = item.title, Tag = item };
-
-                if (nodes.ContainsKey(item.category))
-                {
-                    TreeNode parent = nodes[item.category];
-                    if (IsNotDuplicateNode(ref parent, item))
-                    {
-                        parent.Nodes.Add(child);
-                    }
-                }
-                else
-                {
-                    TreeNode node = new TreeNode(item.category, new TreeNode[] { child }) { Name = item.category };
-
-                    nodes.Add(item.category, node);
-                }
-            }
-        }
-
         private void updateFilterListBw_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = (BackgroundWorker)sender;
@@ -1028,15 +1005,15 @@ namespace PSFilterPdn
 
             Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>();
 
-            using (ShellLink shortcut = new ShellLink())
+            for (int i = 0; i < args.directories.Length; i++)
             {
-                for (int i = 0; i < args.directories.Length; i++)
+                string directory = args.directories[i];
+
+                worker.ReportProgress(i, Path.GetFileName(directory));
+
+                using (FileEnumerator enumerator = new FileEnumerator(directory, ".8bf", args.searchSubdirectories, true))
                 {
-                    string directory = args.directories[i];
-
-                    worker.ReportProgress(i, Path.GetFileName(directory));
-
-                    foreach (var path in FileEnumerator.EnumerateFiles(directory, new string[] { ".8bf", ".lnk" }, args.searchSubdirectories))
+                    while (enumerator.MoveNext())
                     {
                         if (worker.CancellationPending)
                         {
@@ -1044,24 +1021,24 @@ namespace PSFilterPdn
                             return;
                         }
 
-                        if (path.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
+                        foreach (var plugin in LoadPsFilter.QueryPlugin(enumerator.Current))
                         {
-                            if (shortcut.Load(path))
-                            {
-                                string linkPath = shortcut.Path;
+                            TreeNode child = new TreeNode(plugin.title) { Name = plugin.title, Tag = plugin };
 
-                                if (linkPath.EndsWith(".8bf", StringComparison.OrdinalIgnoreCase))
+                            if (nodes.ContainsKey(plugin.category))
+                            {
+                                TreeNode parent = nodes[plugin.category];
+                                if (IsNotDuplicateNode(ref parent, plugin))
                                 {
-                                    if (File.Exists(linkPath))
-                                    {
-                                        AddFilter(linkPath, ref nodes);
-                                    }
-                                } 
+                                    parent.Nodes.Add(child);
+                                }
                             }
-                        }
-                        else
-                        {
-                            AddFilter(path, ref nodes);
+                            else
+                            {
+                                TreeNode node = new TreeNode(plugin.category, new TreeNode[] { child }) { Name = plugin.category };
+
+                                nodes.Add(plugin.category, node);
+                            }
                         }
                     }
                 }
