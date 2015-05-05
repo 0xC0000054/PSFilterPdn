@@ -2544,26 +2544,42 @@ namespace PSFilterLoad.PSApi
 		/// <param name="lockRect">The rectangle to clamp the size to.</param>
 		private unsafe void ScaleTempSurface(int inputRate, Rectangle lockRect)
 		{
+			// If the scale rectangle bounds are not valid return a copy of the original surface.
+			if (lockRect.X >= source.Width || lockRect.Y >= source.Height)
+			{
+				if ((tempSurface == null) || tempSurface.Width != source.Width || tempSurface.Height != source.Height)
+				{
+					if (tempSurface != null)
+					{
+						tempSurface.Dispose();
+						tempSurface = null;
+					}
+
+					tempSurface = source.Clone(); 
+				}
+				return;
+			}
+
 			int scaleFactor = FixedToInt32(inputRate);
 			if (scaleFactor == 0) // Photoshop 2.5 filters don't use the host scaling.
 			{
 				scaleFactor = 1;
 			}
 
-			int scalew = source.Width / scaleFactor;
-			int scaleh = source.Height / scaleFactor;
+			int scaleWidth = source.Width / scaleFactor;
+			int scaleHeight = source.Height / scaleFactor;
 
-			if (lockRect.Width > scalew)
+			if (lockRect.Width > scaleWidth)
 			{
-				scalew = lockRect.Width;
+				scaleWidth = lockRect.Width;
 			}
 
-			if (lockRect.Height > scaleh)
+			if (lockRect.Height > scaleHeight)
 			{
-				scaleh = lockRect.Height;
+				scaleHeight = lockRect.Height;
 			}
 
-			if ((tempSurface == null) || scalew != tempSurface.Width && scaleh != tempSurface.Height)
+			if ((tempSurface == null) || scaleWidth != tempSurface.Width && scaleHeight != tempSurface.Height)
 			{
 				if (tempSurface != null)
 				{
@@ -2573,7 +2589,7 @@ namespace PSFilterLoad.PSApi
 
 				if (scaleFactor > 1) // Filter preview
 				{
-					tempSurface = new Surface(scalew, scaleh);
+					tempSurface = new Surface(scaleWidth, scaleHeight);
 					tempSurface.FitSurface(ResamplingAlgorithm.SuperSampling, source);
 				}
 				else
@@ -2634,13 +2650,14 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
-			bool validImageBounds = rect.left < source.Width && rect.top < source.Height;
-
-			if (validImageBounds)
+			try
 			{
 				ScaleTempSurface(filterRecord->inputRate, lockRect);
 			}
-
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}			
 
 			short channelOffset = filterRecord->inLoPlane;
 
@@ -2653,7 +2670,8 @@ namespace PSFilterLoad.PSApi
 					channelOffset = 0;
 					break;
 			}
-
+			
+			bool validImageBounds = rect.left < source.Width && rect.top < source.Height;
 			short padErr = SetFilterPadding(inDataPtr, stride, rect, nplanes, channelOffset, filterRecord->inputPadding, lockRect, tempSurface);
 			if (padErr != PSError.noErr || !validImageBounds)
 			{
@@ -2825,24 +2843,43 @@ namespace PSFilterLoad.PSApi
 
 		private unsafe void ScaleTempMask(int maskRate, Rectangle lockRect)
 		{
+			// If the scale rectangle bounds are not valid return a copy of the original surface.
+			if (lockRect.X >= mask.Width || lockRect.Y >= mask.Height)
+			{
+				if ((tempMask == null) || tempMask.Width != mask.Width || tempMask.Height != mask.Height)
+				{
+					if (tempMask != null)
+					{
+						tempMask.Dispose();
+						tempMask = null;
+					}
+
+					tempMask = mask.Clone();
+				}
+				return;
+			}
+
 			int scaleFactor = FixedToInt32(maskRate);
 
 			if (scaleFactor == 0)
+			{
 				scaleFactor = 1;
-
-			int scalew = source.Width / scaleFactor;
-			int scaleh = source.Height / scaleFactor;
-
-			if (lockRect.Width > scalew)
-			{
-				scalew = lockRect.Width;
 			}
 
-			if (lockRect.Height > scaleh)
+			int scaleWidth = mask.Width / scaleFactor;
+			int scaleHeight = mask.Height / scaleFactor;
+
+			if (lockRect.Width > scaleWidth)
 			{
-				scaleh = lockRect.Height;
+				scaleWidth = lockRect.Width;
 			}
-			if ((tempMask == null) || scalew != tempMask.Width && scaleh != tempMask.Height)
+
+			if (lockRect.Height > scaleHeight)
+			{
+				scaleHeight = lockRect.Height;
+			}
+
+			if ((tempMask == null) || scaleWidth != tempMask.Width && scaleHeight != tempMask.Height)
 			{
 				if (tempMask != null)
 				{
@@ -2850,16 +2887,15 @@ namespace PSFilterLoad.PSApi
 					tempMask = null;
 				}
 
-				if (scaleFactor > 1) // Filter preview?
+				if (scaleFactor > 1) // Filter preview
 				{
-					tempMask = new MaskSurface(scalew, scaleh);
+					tempMask = new MaskSurface(scaleWidth, scaleHeight);
 					tempMask.SuperSampleFitSurface(mask);
 				}
 				else
 				{
 					tempMask = mask.Clone();
 				}
-
 			}
 		}
 
@@ -2893,11 +2929,13 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
-			bool validImageBounds = rect.left < mask.Width && rect.top < mask.Height;
-
-			if (validImageBounds)
+			try
 			{
 				ScaleTempMask(filterRecord->maskRate, lockRect);
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
 			}
 
 			if (maskDataPtr == IntPtr.Zero)
@@ -2916,6 +2954,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->maskData = maskDataPtr;
 			filterRecord->maskRowBytes = width;
 
+			bool validImageBounds = rect.left < mask.Width && rect.top < mask.Height;
 			short err = SetMaskPadding(maskDataPtr, width, rect, filterRecord->maskPadding, lockRect, tempMask);
 			if (err != PSError.noErr || !validImageBounds)
 			{
