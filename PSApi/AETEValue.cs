@@ -64,7 +64,7 @@ namespace PSFilterLoad.PSApi
 	}
 
 	[Serializable]
-	public struct UnitFloat
+	public sealed class UnitFloat
 	{
 		private uint unit;
 		private double value;
