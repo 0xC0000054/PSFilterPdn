@@ -494,6 +494,7 @@ namespace PSFilterPdn
                         this.shellLink = null;
                     }
                     this.current = null;
+                    this.state = -1;
                 }
                 SetErrorModeWrapper(this.oldErrorMode);
             }
