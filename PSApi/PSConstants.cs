@@ -93,6 +93,13 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public const int supportsRGBColor = 8;
 
+        public const int LatestPiPLVersion = 0;
+        public const int LatestTerminologyVersion = 0;
+        public const int AETEMajorVersion = 1;
+        public const int AETEMinorVersion = 0;
+        public const short AETESuiteLevel = 1;
+        public const short AETESuiteVersion = 1;
+
         internal static class ChannelPorts
         {
             /// <summary>
