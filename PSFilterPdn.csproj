@@ -146,6 +146,7 @@
     <Compile Include="PSApi\ImageServicesProc.cs" />
     <Compile Include="PSApi\IntPtrExtensions.cs" />
     <Compile Include="PSApi\LoadPsFilter.cs" />
+    <Compile Include="PSApi\LoadPsFilter.QueryPlugin.cs" />
     <Compile Include="PSApi\Memory.cs" />
     <Compile Include="PSApi\ParameterData.cs" />
     <Compile Include="PSApi\PICASuites.cs" />
