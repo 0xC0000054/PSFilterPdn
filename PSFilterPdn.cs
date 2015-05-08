@@ -124,15 +124,7 @@ namespace PSFilterPdn
             string resourceDataFileName = Path.Combine(userDataPath, "PseudoResources.dat");
             string regionFileName = string.Empty;
 
-            PluginData pluginData = new PluginData()
-            {
-                fileName = token.FileName,
-                entryPoint = token.EntryPoint,
-                title = token.Title,
-                category = token.Category,
-                filterInfo = GetFilterCaseInfoFromString(token.FilterCaseInfo),
-                aete = token.AETE
-            };
+            PluginData pluginData = new PluginData(token.FileName, token.EntryPoint, token.Category, token.Title, GetFilterCaseInfoFromString(token.FilterCaseInfo), token.AETE);
 
             Rectangle sourceBounds = base.EnvironmentParameters.SourceSurface.Bounds;
 
@@ -261,15 +253,7 @@ namespace PSFilterPdn
                 {
                     lps.SetAbortCallback(new Func<byte>(AbortCallback));
 
-                    PluginData pdata = new PluginData()
-                    {
-                        fileName = token.FileName,
-                        entryPoint = token.EntryPoint,
-                        title = token.Title,
-                        category = token.Category,
-                        filterInfo = GetFilterCaseInfoFromString(token.FilterCaseInfo),
-                        aete = token.AETE
-                    };
+                    PluginData pdata = new PluginData(token.FileName, token.EntryPoint, token.Category, token.Title, GetFilterCaseInfoFromString(token.FilterCaseInfo), token.AETE);
 
                     lps.FilterParameters = token.FilterParameters;
                     lps.PseudoResources = token.PesudoResources.ToList();
