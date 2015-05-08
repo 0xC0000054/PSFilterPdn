@@ -41,15 +41,27 @@ namespace PSFilterLoad.PSApi
         [DataMember]
         public string[] moduleEntryPoints;
 
-        public PluginData()
+        public PluginData(string fileName)
         {
-            this.fileName = string.Empty;
+            this.fileName = fileName;
             this.entryPoint = string.Empty;
             this.category = string.Empty;
             this.title = string.Empty;
             this.filterInfo = null;
             this.runWith32BitShim = false;
             this.aete = null;
+            this.moduleEntryPoints = null;
+        }
+
+        public PluginData(string fileName, string entryPoint, string category, string title, FilterCaseInfo[] info, AETEData aete)
+        {
+            this.fileName = fileName;
+            this.entryPoint = entryPoint;
+            this.category = category;
+            this.title = title;
+            this.filterInfo = info;
+            this.runWith32BitShim = false;
+            this.aete = aete;
             this.moduleEntryPoints = null;
         }
 
