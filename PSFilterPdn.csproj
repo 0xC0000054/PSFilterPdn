@@ -149,6 +149,7 @@
     <Compile Include="PSApi\LoadPsFilter.QueryPlugin.cs" />
     <Compile Include="PSApi\Memory.cs" />
     <Compile Include="PSApi\ParameterData.cs" />
+    <Compile Include="PSApi\PEFile.cs" />
     <Compile Include="PSApi\PICASuites.cs" />
     <Compile Include="PSApi\PICASuiteStructs.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
