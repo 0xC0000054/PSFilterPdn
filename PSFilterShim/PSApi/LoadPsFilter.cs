@@ -4702,8 +4702,6 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			Ping(DebugFlags.ResourceSuite, PropToString(ofType));
 #endif
-			short count = ResourceCountProc(ofType);
-
 			int size = HandleGetSizeProc(data);
 			try
 			{
@@ -4715,7 +4713,8 @@ namespace PSFilterLoad.PSApi
 					HandleUnlockProc(data);
 				}
 
-				pseudoResources.Add(new PSResource(ofType, count, bytes));
+				int index = ResourceCountProc(ofType) + 1;
+				pseudoResources.Add(new PSResource(ofType, index, bytes));
 			}
 			catch (OutOfMemoryException)
 			{
