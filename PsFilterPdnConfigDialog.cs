@@ -985,7 +985,7 @@ namespace PSFilterPdn
                     }
 
                     // If the filter has the same processor architecture and title but is located in a different 8bf file, add it to the menu. 
-                    if (menuData.runWith32BitShim == data.runWith32BitShim && menuData.fileName != data.fileName)
+                    if (menuData.runWith32BitShim == data.runWith32BitShim && !menuData.fileName.Equals(data.fileName, StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
                     }
