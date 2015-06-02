@@ -90,6 +90,7 @@ namespace PSFilterPdn
         /// </summary>
         private bool useDEPProxy;
 
+        private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
 
         public PsFilterPdnConfigDialog()
         {
@@ -552,9 +553,7 @@ namespace PSFilterPdn
         private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
         {
             // Check that PSFilterShim exists first thing and abort if it does not.
-            string shimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
-
-            if (!File.Exists(shimPath))
+            if (!File.Exists(PSFilterShimPath))
             {
                 ShowErrorMessage(Resources.PSFilterShimNotFound);
                 return;
@@ -634,7 +633,7 @@ namespace PSFilterPdn
                 }
 
 
-                ProcessStartInfo psi = new ProcessStartInfo(shimPath, PSFilterShimServer.EndpointName);
+                ProcessStartInfo psi = new ProcessStartInfo(PSFilterShimPath, PSFilterShimServer.EndpointName);
 
                 proxyResult = true; // assume the filter succeeded this will be set to false if it failed
                 proxyErrorMessage = string.Empty;
@@ -1234,7 +1233,7 @@ namespace PSFilterPdn
 
             CheckSourceSurfaceSize();
 
-            string effectsDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string effectsDir = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().InstallDirectory, "Effects");
             this.foundEffectsDir = false;
 
             if (!string.IsNullOrEmpty(effectsDir))
@@ -1308,7 +1307,7 @@ namespace PSFilterPdn
                 int lastItem = count - 1;
                 for (int i = 0; i < count; i++)
                 {
-                    if (foundEffectsDir && i == 0)
+                    if (i == 0 && foundEffectsDir)
                         continue;
 
                     dirs.Append(searchDirListView.Items[i].Text);
@@ -1432,7 +1431,7 @@ namespace PSFilterPdn
         {
             if (searchDirListView.SelectedItems.Count > 0)
             {
-                if ((foundEffectsDir && searchDirListView.SelectedItems[0].Index == 0) || searchDirListView.Items.Count == 1)
+                if ((searchDirListView.SelectedItems[0].Index == 0 && foundEffectsDir) || searchDirListView.Items.Count == 1)
                 {
                     this.remDirBtn.Enabled = false;
                 }
