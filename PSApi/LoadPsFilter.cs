@@ -1048,7 +1048,7 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
-		private bool PluginParams()
+		private bool PluginParameters()
 		{
 			result = PSError.noErr;
 
@@ -1348,7 +1348,7 @@ namespace PSFilterLoad.PSApi
 
 			if (!isRepeatEffect)
 			{
-				if (!PluginParams())
+				if (!PluginParameters())
 				{
 #if DEBUG
 					Ping(DebugFlags.Error, "plugin_parms failed");
