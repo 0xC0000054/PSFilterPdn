@@ -1079,6 +1079,7 @@ namespace PSFilterPdn
 
                     this.filterTree.BeginUpdate();
 
+                    this.filterTree.TreeViewNodeSorter = null;
                     this.filterTree.Nodes.AddRange(parm.items);
                     this.filterTree.TreeViewNodeSorter = new TreeNodeItemComparer();
 
