@@ -337,7 +337,6 @@ namespace PSFilterPdn
             base.OnSetRenderInfo(parameters, dstArgs, srcArgs);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "2")]
         public override void Render(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs, Rectangle[] rois, int startIndex, int length)
         {
             PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)parameters;
