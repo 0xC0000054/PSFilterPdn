@@ -89,6 +89,7 @@ namespace PSFilterPdn
         /// If DEP is enabled on a 32-bit OS use the shim process.
         /// </summary>
         private bool useDEPProxy;
+        private bool searchBoxIgnoreTextChanged;
 
         private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
 
@@ -1357,7 +1358,8 @@ namespace PSFilterPdn
         private void filterSearchBox_Enter(object sender, EventArgs e)
         {
             if (filterSearchBox.Text == Resources.ConfigDialog_FilterSearchBox_BackText)
-            {
+            {                
+                this.searchBoxIgnoreTextChanged = true;
                 this.filterSearchBox.Text = string.Empty;
                 this.filterSearchBox.Font = new Font(filterSearchBox.Font, FontStyle.Regular);
                 this.filterSearchBox.ForeColor = SystemColors.WindowText;
@@ -1368,6 +1370,7 @@ namespace PSFilterPdn
         {
             if (string.IsNullOrEmpty(filterSearchBox.Text))
             {
+                this.searchBoxIgnoreTextChanged = true;
                 this.filterSearchBox.Text = Resources.ConfigDialog_FilterSearchBox_BackText;
                 this.filterSearchBox.Font = new Font(filterSearchBox.Font, FontStyle.Italic);
                 this.filterSearchBox.ForeColor = SystemColors.GrayText;
@@ -1381,7 +1384,11 @@ namespace PSFilterPdn
         private void FilterTreeView(string filtertext)
         {
             if (filterTreeItems.Count > 0)
-            {
+            {                
+                this.filterTree.SelectedNode = null;
+                this.runFilterBtn.Enabled = false;
+                this.fileNameLbl.Text = string.Empty;
+
                 Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>();
                 foreach (KeyValuePair<TreeNode, string> item in filterTreeItems)
                 {
@@ -1424,8 +1431,14 @@ namespace PSFilterPdn
 
         private void filterSearchBox_TextChanged(object sender, EventArgs e)
         {
-            string filtertext = filterSearchBox.Focused ? filterSearchBox.Text : string.Empty;
-            FilterTreeView(filtertext); // pass an empty string if the textbox is not focused 
+            // Ignore the TextChanged event sent by the Enter and Leave methods.
+            if (searchBoxIgnoreTextChanged)
+            {
+                searchBoxIgnoreTextChanged = false;
+                return;
+            }
+
+            FilterTreeView(filterSearchBox.Text);
         }
 
         private void searchDirListView_SelectedIndexChanged(object sender, EventArgs e)
