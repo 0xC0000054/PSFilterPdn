@@ -44,7 +44,7 @@ namespace PSFilterPdn
             MaxInfoLevel,
         }
 
-        private enum FindExSearchOps : int
+        private enum FindExSearchOp : int
         {
             NameMatch = 0,
             LimitToDirectories,
@@ -64,7 +64,7 @@ namespace PSFilterPdn
         private static class UnsafeNativeMethods
         {
             [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-            internal static extern SafeFindHandle FindFirstFileExW([In(), MarshalAs(UnmanagedType.LPWStr)] string fileName, [In()] FindExInfoLevel fInfoLevelId, out WIN32_FIND_DATAW data, [In()] FindExSearchOps fSearchOp, [In()] IntPtr lpSearchFilter, [In()] FindExAdditionalFlags dwAdditionalFlags);
+            internal static extern SafeFindHandle FindFirstFileExW([In(), MarshalAs(UnmanagedType.LPWStr)] string fileName, [In()] FindExInfoLevel fInfoLevelId, out WIN32_FIND_DATAW data, [In()] FindExSearchOp fSearchOp, [In()] IntPtr lpSearchFilter, [In()] FindExAdditionalFlags dwAdditionalFlags);
 
             [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
@@ -278,7 +278,7 @@ namespace PSFilterPdn
         {
             WIN32_FIND_DATAW findData;
             string searchPath = Path.Combine(this.searchData.path, "*");
-            this.handle = UnsafeNativeMethods.FindFirstFileExW(searchPath, this.infoLevel, out findData, FindExSearchOps.NameMatch, IntPtr.Zero, this.additionalFlags);
+            this.handle = UnsafeNativeMethods.FindFirstFileExW(searchPath, this.infoLevel, out findData, FindExSearchOp.NameMatch, IntPtr.Zero, this.additionalFlags);
 
             if (this.handle.IsInvalid)
             {
@@ -393,7 +393,7 @@ namespace PSFilterPdn
 
                             new FileIOPermission(FileIOPermissionAccess.PathDiscovery, GetPermissionPath(this.searchData.path, false)).Demand();
                             string searchPath = Path.Combine(this.searchData.path, "*");
-                            this.handle = UnsafeNativeMethods.FindFirstFileExW(searchPath, this.infoLevel, out findData, FindExSearchOps.NameMatch, IntPtr.Zero, this.additionalFlags);
+                            this.handle = UnsafeNativeMethods.FindFirstFileExW(searchPath, this.infoLevel, out findData, FindExSearchOp.NameMatch, IntPtr.Zero, this.additionalFlags);
 
                             if (this.handle.IsInvalid)
                             {
