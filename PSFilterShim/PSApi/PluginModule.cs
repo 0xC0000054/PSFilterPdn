@@ -26,7 +26,7 @@ namespace PSFilterLoad.PSApi
         /// The entry point for the FilterParmBlock and AboutRecord
         /// </summary>
         public readonly PluginEntryPoint entryPoint;
-        private string fileName;
+        private readonly string fileName;
         private SafeLibraryHandle handle;
         private bool disposed;
 
