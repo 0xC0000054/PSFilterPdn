@@ -43,7 +43,7 @@ namespace PSFilterLoad.PSApi
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         internal static extern unsafe void memcpy(void* dst, void* src, UIntPtr length);
 
-        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        [DllImport("kernel32.dll", ExactSpelling = true)]
         internal static extern IntPtr VirtualAlloc(
             IntPtr lpAddress,
             UIntPtr dwSize,

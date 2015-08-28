@@ -40,7 +40,7 @@ namespace PSFilterLoad.PSApi
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         internal static extern IntPtr memset(IntPtr dest, int c, UIntPtr count);
 
-        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        [DllImport("kernel32.dll", ExactSpelling = true)]
         internal static extern IntPtr VirtualAlloc(IntPtr lpAddress, UIntPtr dwSize, uint flAllocationType, uint flProtect);
 
         [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
