@@ -26,6 +26,6 @@ namespace PSFilterLoad.PSApi
         internal static extern bool FreeLibrary(IntPtr hModule);
 
         [DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, BestFitMapping = false)]
-        internal static extern IntPtr GetProcAddress([In()] SafeLibraryHandle hModule, [In(), MarshalAs(UnmanagedType.LPStr)] string lpProcName);
+        internal static extern IntPtr GetProcAddress(SafeLibraryHandle hModule, string lpProcName);
     }
 }

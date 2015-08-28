@@ -16,33 +16,33 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    [System.Security.SuppressUnmanagedCodeSecurity]
-    internal static class UnsafeNativeMethods
-    {
-        internal delegate bool EnumResNameDelegate([In()] IntPtr hModule, [In()] IntPtr lpszType, [In()] IntPtr lpszName, [In()] IntPtr lParam);
+	[System.Security.SuppressUnmanagedCodeSecurity]
+	internal static class UnsafeNativeMethods
+	{
+		internal delegate bool EnumResNameDelegate(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
-        internal static extern SafeLibraryHandle LoadLibraryExW([In()] string lpFileName, IntPtr hFile, uint dwFlags);
+		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+		internal static extern SafeLibraryHandle LoadLibraryExW(string lpFileName, IntPtr hFile, uint dwFlags);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool EnumResourceNamesW([In()] IntPtr hModule, [In()] string lpszType, EnumResNameDelegate lpEnumFunc, [In()] IntPtr lParam);
+		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		internal static extern bool EnumResourceNamesW(IntPtr hModule, string lpszType, EnumResNameDelegate lpEnumFunc, IntPtr lParam);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-        internal static extern IntPtr FindResourceW([In()] IntPtr hModule, [In()] IntPtr lpName, [In()] IntPtr lpType);
+		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+		internal static extern IntPtr FindResourceW(IntPtr hModule, IntPtr lpName, IntPtr lpType);
 
-        [DllImport("kernel32.dll", EntryPoint = "LoadResource")]
-        internal static extern IntPtr LoadResource([In()] IntPtr hModule, [In()] IntPtr hResource);
+		[DllImport("kernel32.dll", EntryPoint = "LoadResource")]
+		internal static extern IntPtr LoadResource(IntPtr hModule, IntPtr hResource);
 
-        [DllImport("kernel32.dll", EntryPoint = "LockResource")]
-        internal static extern IntPtr LockResource([In()] IntPtr hGlobal);
-       
+		[DllImport("kernel32.dll", EntryPoint = "LockResource")]
+		internal static extern IntPtr LockResource(IntPtr hGlobal);
+	   
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        [DllImport("kernel32.dll", EntryPoint = "FreeLibrary")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool FreeLibrary([In()] IntPtr hModule);
+		[DllImport("kernel32.dll", EntryPoint = "FreeLibrary")]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		internal static extern bool FreeLibrary(IntPtr hModule);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, BestFitMapping = false)]
-        internal static extern IntPtr GetProcAddress([In()] SafeLibraryHandle hModule, [In(), MarshalAs(UnmanagedType.LPStr)] string lpProcName);
-    }
+		[DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, BestFitMapping = false)]
+		internal static extern IntPtr GetProcAddress(SafeLibraryHandle hModule, string lpProcName);
+	}
 }
