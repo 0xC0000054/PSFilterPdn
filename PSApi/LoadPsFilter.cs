@@ -1467,7 +1467,7 @@ namespace PSFilterLoad.PSApi
 		/// <returns>
 		///   <c>true</c> if a single plane of data is requested; otherwise, <c>false</c>.
 		/// </returns>
-		private static unsafe bool IsSinglePlane(short loPlane, short hiPlane)
+		private static bool IsSinglePlane(short loPlane, short hiPlane)
 		{
 			return (((hiPlane - loPlane) + 1) == 1);
 		}
@@ -1480,7 +1480,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="loplane">The loplane.</param>
 		/// <param name="hiplane">The hiplane.</param>
 		/// <returns> <c>true</c> if a the buffer needs to be resized; otherwise, <c>false</c></returns>
-		private static unsafe bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loplane, int hiplane)
+		private static bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loplane, int hiplane)
 		{
 			long size = Memory.Size(inData);
 
@@ -2998,41 +2998,49 @@ namespace PSFilterLoad.PSApi
 			doc->vResolution = Int32ToFixed((int)(dpiY + 0.5));
 
 			string[] names = new string[3] { Resources.RedChannelName, Resources.GreenChannelName, Resources.BlueChannelName };
-			ReadChannelPtrs channel = CreateReadChannelDesc(PSConstants.ChannelPorts.Red, names[0], doc->depth, doc->bounds);
+			IntPtr channel = CreateReadChannelDesc(PSConstants.ChannelPorts.Red, names[0], doc->depth, doc->bounds);
 
-			ReadChannelDesc* ch = (ReadChannelDesc*)channel.address.ToPointer();
-			channelReadDescPtrs.Add(channel);
+			ReadChannelDesc* ch = (ReadChannelDesc*)channel.ToPointer();
 
 			for (int i = PSConstants.ChannelPorts.Green; i <= PSConstants.ChannelPorts.Blue; i++)
 			{
-				ReadChannelPtrs ptr = CreateReadChannelDesc(i, names[i], doc->depth, doc->bounds);
-				channelReadDescPtrs.Add(ptr);
+				IntPtr ptr = CreateReadChannelDesc(i, names[i], doc->depth, doc->bounds);
 
-				ch->next = ptr.address;
+				ch->next = ptr;
 
-				ch = (ReadChannelDesc*)ptr.address.ToPointer();
+				ch = (ReadChannelDesc*)ptr.ToPointer();
 			}
 
-			doc->targetCompositeChannels = doc->mergedCompositeChannels = channel.address;
+			doc->targetCompositeChannels = doc->mergedCompositeChannels = channel;
 
 			if (!ignoreAlpha)
 			{
-				ReadChannelPtrs alphaPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.Alpha, Resources.AlphaChannelName, doc->depth, doc->bounds);
-				channelReadDescPtrs.Add(alphaPtr);
-				doc->targetTransparency = doc->mergedTransparency = alphaPtr.address;
+				IntPtr alphaPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.Alpha, Resources.AlphaChannelName, doc->depth, doc->bounds);
+				doc->targetTransparency = doc->mergedTransparency = alphaPtr;
 			}
 
 			if (selectedRegion != null)
 			{
-				ReadChannelPtrs selectionPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.SelectionMask, Resources.MaskChannelName, doc->depth, doc->bounds);
-				channelReadDescPtrs.Add(selectionPtr);
-				doc->selection = selectionPtr.address;
+				IntPtr selectionPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.SelectionMask, Resources.MaskChannelName, doc->depth, doc->bounds);
+				doc->selection = selectionPtr;
 			}
 		}
 
-		private static unsafe ReadChannelPtrs CreateReadChannelDesc(int channel, string name, int depth, VRect bounds)
+		private unsafe IntPtr CreateReadChannelDesc(int channel, string name, int depth, VRect bounds)
 		{
 			IntPtr addressPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadChannelDesc)), true);
+			IntPtr namePtr = IntPtr.Zero;
+			try
+			{
+				namePtr = Marshal.StringToHGlobalAnsi(name);
+			}
+			catch (Exception)
+			{
+				Memory.Free(addressPtr);
+				throw;
+			}
+			this.channelReadDescPtrs.Add(new ReadChannelPtrs() { address = addressPtr, name = namePtr });
+
 			ReadChannelDesc* desc = (ReadChannelDesc*)addressPtr.ToPointer();
 			desc->minVersion = PSConstants.kCurrentMinVersReadChannelDesc;
 			desc->maxVersion = PSConstants.kCurrentMaxVersReadChannelDesc;
@@ -3061,11 +3069,10 @@ namespace PSFilterLoad.PSApi
 					desc->channelType = ChannelTypes.SelectionMask;
 					break;
 			}
-			IntPtr namePtr = Marshal.StringToHGlobalAnsi(name);
 
 			desc->name = namePtr;
 
-			return new ReadChannelPtrs() { address = addressPtr, name = namePtr };
+			return addressPtr;
 		}
 
 		private void SetupTempDisplaySurface(int width, int height, bool haveMask)
