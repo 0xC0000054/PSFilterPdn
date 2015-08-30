@@ -18,7 +18,7 @@ namespace PSFilterLoad.PSApi
     [System.Security.SuppressUnmanagedCodeSecurity]
     internal static class SafeNativeMethods
     {
-        [DllImport("kernel32.dll", ExactSpelling = true)]
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
         internal static extern IntPtr GetProcessHeap();
 
         [DllImport("kernel32.dll", ExactSpelling = true)]
