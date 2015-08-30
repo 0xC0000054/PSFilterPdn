@@ -64,25 +64,31 @@ namespace PSFilterPdn
         private static class UnsafeNativeMethods
         {
             [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-            internal static extern SafeFindHandle FindFirstFileExW([In(), MarshalAs(UnmanagedType.LPWStr)] string fileName, [In()] FindExInfoLevel fInfoLevelId, out WIN32_FIND_DATAW data, [In()] FindExSearchOp fSearchOp, [In()] IntPtr lpSearchFilter, [In()] FindExAdditionalFlags dwAdditionalFlags);
+            internal static extern SafeFindHandle FindFirstFileExW(
+                string fileName,
+                FindExInfoLevel fInfoLevelId,
+                out WIN32_FIND_DATAW data,
+                FindExSearchOp fSearchOp,
+                IntPtr lpSearchFilter,
+                FindExAdditionalFlags dwAdditionalFlags);
 
             [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool FindNextFileW([In()] SafeFindHandle hndFindFile, out WIN32_FIND_DATAW lpFindFileData);
+            internal static extern bool FindNextFileW(SafeFindHandle hndFindFile, out WIN32_FIND_DATAW lpFindFileData);
 
             [DllImport("kernel32.dll", ExactSpelling = true), ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
             [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool FindClose([In()] IntPtr handle);
+            internal static extern bool FindClose(IntPtr handle);
+
+            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+            internal static extern uint GetFileAttributesW(string lpFileName);
 
             [DllImport("kernel32.dll", ExactSpelling = true)]
-            internal static extern uint GetFileAttributesW([In(), MarshalAs(UnmanagedType.LPWStr)] string lpFileName);
-
-            [DllImport("kernel32.dll", ExactSpelling = true)]
-            internal static extern uint SetErrorMode([In()] uint uMode);
+            internal static extern uint SetErrorMode(uint uMode);
 
             [DllImport("kernel32.dll", ExactSpelling = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool SetThreadErrorMode([In()] uint dwNewMode, out uint lpOldMode);
+            internal static extern bool SetThreadErrorMode(uint dwNewMode, out uint lpOldMode);
         }
 
         private static class NativeConstants
