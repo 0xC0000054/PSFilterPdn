@@ -180,6 +180,7 @@ namespace PSFilterLoad.PSApi
                             AETEParameter[] parameters = new AETEParameter[paramCount];
                             for (int p = 0; p < paramCount; p++)
                             {
+                                parameters[p] = new AETEParameter();
                                 parameters[p].name = StringFromPString(propPtr, out stringLength);
                                 propPtr += stringLength;
 
@@ -220,6 +221,7 @@ namespace PSFilterLoad.PSApi
 
                                     for (int e = 0; e < en.count; e++)
                                     {
+                                        en.enums[e] = new AETEEnum();
                                         en.enums[e].name = StringFromPString(propPtr, out stringLength);
                                         propPtr += stringLength;
                                         en.enums[e].type = *(uint*)propPtr;
