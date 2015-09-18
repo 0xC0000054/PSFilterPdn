@@ -801,18 +801,21 @@ namespace PSFilterLoad.PSApi
 			if (phase == PluginPhase.Parameters)
 				return;
 
-			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-
 			byte[] parameterDataBytes = globalParameters.GetParameterDataBytes();
 			if (parameterDataBytes != null)
 			{
+				FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
 				switch (globalParameters.ParameterDataStorageMethod)
 				{
 					case GlobalParameters.DataStorageMethod.HandleSuite:
 						filterRecord->parameters = HandleNewProc(parameterDataBytes.Length);
-						Marshal.Copy(parameterDataBytes, 0, HandleLockProc(filterRecord->parameters, 0), parameterDataBytes.Length);
+						if (filterRecord->parameters == IntPtr.Zero)
+						{
+							throw new OutOfMemoryException(Resources.OutOfMemoryError);
+						}
 
+						Marshal.Copy(parameterDataBytes, 0, HandleLockProc(filterRecord->parameters, 0), parameterDataBytes.Length);
 						HandleUnlockProc(filterRecord->parameters);
 						break;
 					case GlobalParameters.DataStorageMethod.OTOFHandle:
@@ -848,6 +851,10 @@ namespace PSFilterLoad.PSApi
 				{
 					case GlobalParameters.DataStorageMethod.HandleSuite:
 						dataPtr = HandleNewProc(pluginDataBytes.Length);
+						if (dataPtr == IntPtr.Zero)
+						{
+							throw new OutOfMemoryException(Resources.OutOfMemoryError);
+						}
 
 						Marshal.Copy(pluginDataBytes, 0, HandleLockProc(dataPtr, 0), pluginDataBytes.Length);
 						HandleUnlockProc(dataPtr);
