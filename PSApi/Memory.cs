@@ -75,7 +75,7 @@ namespace PSFilterLoad.PSApi
 			
 			if (size > 0L)
 			{
-				GC.AddMemoryPressure((long)size);
+				GC.AddMemoryPressure(size);
 			}
 			
 			return block;
@@ -135,7 +135,7 @@ namespace PSFilterLoad.PSApi
 		{
 			if (hHeap != IntPtr.Zero)
 			{
-				long size = (long)Size(hMem);
+				long size = Size(hMem);
 				if (!SafeNativeMethods.HeapFree(hHeap, 0, hMem))
 				{
 					int error = Marshal.GetLastWin32Error();
@@ -225,7 +225,7 @@ namespace PSFilterLoad.PSApi
 
 			if (newSize > 0)
 			{
-				GC.AddMemoryPressure((long)newSize);
+				GC.AddMemoryPressure(newSize);
 			}
 
 			return block;
