@@ -39,16 +39,14 @@ namespace PSFilterPdn
         private enum FindExInfoLevel : int
         {
             Standard = 0,
-            Basic,
-            MaxInfoLevel,
+            Basic
         }
 
         private enum FindExSearchOp : int
         {
             NameMatch = 0,
             LimitToDirectories,
-            LimitToDevices,
-            MaxSearchOp,
+            LimitToDevices
         }
 
         [Flags]
