@@ -317,7 +317,7 @@ namespace PSFilterLoad.PSApi
                 byte* dataPtr = propPtr + PIProperty.SizeOf;
                 if (propKey == PIPropertyID.PIKindProperty)
                 {
-                    if (*((uint*)dataPtr) != PSConstants.filterKind)
+                    if (*((uint*)dataPtr) != PSConstants.FilterKind)
                     {
 #if DEBUG
                         System.Diagnostics.Debug.WriteLine(string.Format("{0} is not a valid Photoshop Filter.", query.fileName));
@@ -408,7 +408,7 @@ namespace PSFilterLoad.PSApi
                 else if (propKey == PIPropertyID.PIRequiredHostProperty)
                 {
                     uint host = *(uint*)dataPtr;
-                    if (host != PSConstants.kPhotoshopSignature && host != PSConstants.noRequiredHost)
+                    if (host != PSConstants.kPhotoshopSignature && host != PSConstants.AnyHostSignature)
                     {
 #if DEBUG
                         System.Diagnostics.Debug.WriteLine(string.Format("{0} requires host '{1}'.", query.fileName, PropToString(host)));
@@ -510,7 +510,7 @@ namespace PSFilterLoad.PSApi
                 return true;
             }
 
-            if (info->requireHost != PSConstants.kPhotoshopSignature && info->requireHost != PSConstants.noRequiredHost)
+            if (info->requireHost != PSConstants.kPhotoshopSignature && info->requireHost != PSConstants.AnyHostSignature)
             {
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine(string.Format("{0} requires host '{1}'.", query.fileName, PropToString(info->requireHost)));

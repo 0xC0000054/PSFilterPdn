@@ -33,12 +33,12 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// The signature used when a plug-in works with any host.
         /// </summary>
-        public const uint noRequiredHost = 0x20202020U;
+        public const uint AnyHostSignature = 0x20202020U;
 
         /// <summary>
         /// The filter type code - '8BFM'
         /// </summary>
-        public const uint filterKind = 0x3842464dU;
+        public const uint FilterKind = 0x3842464dU;
 
 
         public const int kCurrentBufferProcsVersion = 2;
