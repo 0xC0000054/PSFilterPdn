@@ -12,7 +12,7 @@
 
 namespace PSFilterLoad.PSApi
 {
-    internal struct AETEParameter
+    internal sealed class AETEParameter
     {
         public string name;
         public uint key;
@@ -21,14 +21,14 @@ namespace PSFilterLoad.PSApi
         public short flags;
     }
 
-    internal struct AETEEnums
+    internal sealed class AETEEnums
     {
         public uint type;
         public short count;
         public AETEEnum[] enums;
     }
 
-    internal struct AETEEnum
+    internal sealed class AETEEnum
     {
         public string name;
         public uint type;
