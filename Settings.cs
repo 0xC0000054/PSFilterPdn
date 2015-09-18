@@ -12,9 +12,7 @@
 
 // The following code is adapted from http://www.codeproject.com/Articles/15530/Quick-and-Dirty-Settings-Persistence-with-XML
 
-using System;
 using System.Xml;
-using System.Globalization;
 
 namespace PSFilterPdn
 {
