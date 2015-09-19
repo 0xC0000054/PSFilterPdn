@@ -205,6 +205,8 @@ namespace PSFilterLoad.PSApi
 		private bool isRepeatEffect;
 		private IntPtr pluginDataHandle;
 		private IntPtr filterParametersHandle;
+		private bool parameterDataRestored;
+		private bool pluginDataRestored;
 
 		private Surface source;
 		private Surface dest;
@@ -363,6 +365,8 @@ namespace PSFilterLoad.PSApi
 			this.sizesSetup = false;
 			this.frValuesSetup = false;
 			this.isRepeatEffect = false;
+			this.parameterDataRestored = false;
+			this.pluginDataRestored = false;
 			this.globalParameters = new GlobalParameters();
 			this.pseudoResources = new List<PSResource>();
 			this.handles = new Dictionary<IntPtr, PSHandle>();
@@ -842,6 +846,7 @@ namespace PSFilterLoad.PSApi
 					default:
 						throw new InvalidEnumArgumentException("ParameterDataStorageMethod", (int)globalParameters.ParameterDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
 				}
+				parameterDataRestored = true;
 			}
 			byte[] pluginDataBytes = globalParameters.GetPluginDataBytes();
 			if (pluginDataBytes != null)
@@ -883,7 +888,7 @@ namespace PSFilterLoad.PSApi
 					default:
 						throw new InvalidEnumArgumentException("PluginDataStorageMethod", (int)globalParameters.PluginDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
 				}
-
+				pluginDataRestored = true;
 			}
 
 		}
@@ -1055,6 +1060,7 @@ namespace PSFilterLoad.PSApi
 			/* Photoshop sets the size info before the filterSelectorParameters call even though the documentation says it does not.*/
 			SetupSizes();
 			SetFilterRecordValues();
+			RestoreParameters();
 #if DEBUG
 			Ping(DebugFlags.Call, "Before filterSelectorParameters");
 #endif
@@ -5648,7 +5654,7 @@ namespace PSFilterLoad.PSApi
 
 					if (filterRecord->parameters != IntPtr.Zero)
 					{
-						if (isRepeatEffect && !IsHandleValid(filterRecord->parameters))
+						if (parameterDataRestored && !IsHandleValid(filterRecord->parameters))
 						{
 							if (filterParametersHandle != IntPtr.Zero)
 							{
@@ -5703,7 +5709,7 @@ namespace PSFilterLoad.PSApi
 
 				if (dataPtr != IntPtr.Zero)
 				{
-					if (isRepeatEffect && !IsHandleValid(dataPtr))
+					if (pluginDataRestored && !IsHandleValid(dataPtr))
 					{
 						if (pluginDataHandle != IntPtr.Zero)
 						{

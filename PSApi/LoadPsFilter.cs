@@ -52,7 +52,7 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		private static readonly Encoding Windows1252Encoding = Encoding.GetEncoding(1252);
 		private static readonly char[] TrimChars = new char[] { ' ', '\0' };
-		
+
 		/// <summary>
 		/// Reads a Pascal String into a string.
 		/// </summary>
@@ -68,7 +68,7 @@ namespace PSFilterLoad.PSApi
 
 			return StringFromPString(ptr);
 		}
-		
+
 		/// <summary>
 		/// Reads a Pascal String into a string.
 		/// </summary>
@@ -226,6 +226,8 @@ namespace PSFilterLoad.PSApi
 		private bool isRepeatEffect;
 		private IntPtr pluginDataHandle;
 		private IntPtr filterParametersHandle;
+		private bool parameterDataRestored;
+		private bool pluginDataRestored;
 
 		private Surface source;
 		private Surface dest;
@@ -389,6 +391,8 @@ namespace PSFilterLoad.PSApi
 			this.sizesSetup = false;
 			this.frValuesSetup = false;
 			this.isRepeatEffect = false;
+			this.parameterDataRestored = false;
+			this.pluginDataRestored = false;
 			this.globalParameters = new GlobalParameters();
 			this.pseudoResources = new List<PSResource>();
 			this.handles = new Dictionary<IntPtr, PSHandle>();
@@ -848,6 +852,7 @@ namespace PSFilterLoad.PSApi
 					default:
 						throw new InvalidEnumArgumentException("ParameterDataStorageMethod", (int)globalParameters.ParameterDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
 				}
+				parameterDataRestored = true;
 			}
 			byte[] pluginDataBytes = globalParameters.GetPluginDataBytes();
 			if (pluginDataBytes != null)
@@ -892,7 +897,7 @@ namespace PSFilterLoad.PSApi
 					default:
 						throw new InvalidEnumArgumentException("PluginDataStorageMethod", (int)globalParameters.PluginDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
 				}
-
+				pluginDataRestored = true;
 			}
 
 		}
@@ -1063,6 +1068,7 @@ namespace PSFilterLoad.PSApi
 			/* Photoshop sets the size info before the filterSelectorParameters call even though the documentation says it does not.*/
 			SetupSizes();
 			SetFilterRecordValues();
+			RestoreParameters();
 
 #if DEBUG
 			Ping(DebugFlags.Call, "Before filterSelectorParameters");
@@ -1971,7 +1977,7 @@ namespace PSFilterLoad.PSApi
 						tempSurface = null;
 					}
 
-					tempSurface = source.Clone(); 
+					tempSurface = source.Clone();
 				}
 				return;
 			}
@@ -2073,7 +2079,7 @@ namespace PSFilterLoad.PSApi
 			catch (OutOfMemoryException)
 			{
 				return PSError.memFullErr;
-			}			
+			}
 
 			short channelOffset = filterRecord->inLoPlane;
 
@@ -2086,7 +2092,7 @@ namespace PSFilterLoad.PSApi
 					channelOffset = 0;
 					break;
 			}
-			
+
 			bool validImageBounds = rect.left < source.Width && rect.top < source.Height;
 			short padErr = SetFilterPadding(inDataPtr, stride, rect, nplanes, channelOffset, filterRecord->inputPadding, lockRect, tempSurface);
 			if (padErr != PSError.noErr || !validImageBounds)
@@ -4756,7 +4762,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", PropToString(ofType), index));
 #endif
-			PSResource res = pseudoResources.Find(delegate(PSResource r)
+			PSResource res = pseudoResources.Find(delegate (PSResource r)
 			{
 				return r.Equals(ofType, index);
 			});
@@ -4768,7 +4774,7 @@ namespace PSFilterLoad.PSApi
 
 				while (true) // renumber the index of subsequent items.
 				{
-					int next = pseudoResources.FindIndex(delegate(PSResource r)
+					int next = pseudoResources.FindIndex(delegate (PSResource r)
 					{
 						return r.Equals(ofType, i);
 					});
@@ -4789,7 +4795,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			int length = pseudoResources.Count;
 
-			PSResource res = pseudoResources.Find(delegate(PSResource r)
+			PSResource res = pseudoResources.Find(delegate (PSResource r)
 			{
 				return r.Equals(ofType, index);
 			});
@@ -5638,7 +5644,7 @@ namespace PSFilterLoad.PSApi
 
 					if (filterRecord->parameters != IntPtr.Zero)
 					{
-						if (isRepeatEffect && !IsHandleValid(filterRecord->parameters))
+						if (parameterDataRestored && !IsHandleValid(filterRecord->parameters))
 						{
 							if (filterParametersHandle != IntPtr.Zero)
 							{
@@ -5693,7 +5699,7 @@ namespace PSFilterLoad.PSApi
 
 				if (dataPtr != IntPtr.Zero)
 				{
-					if (isRepeatEffect && !IsHandleValid(dataPtr))
+					if (pluginDataRestored && !IsHandleValid(dataPtr))
 					{
 						if (pluginDataHandle != IntPtr.Zero)
 						{

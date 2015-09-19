@@ -615,7 +615,7 @@ namespace PSFilterPdn
                     }
                 }
 
-                if ((filterParameters != null) && filterParameters.AETEDictionary.Count > 0 && data.fileName == fileName)
+                if ((filterParameters != null) && data.fileName == fileName)
                 {
                     using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
@@ -769,7 +769,7 @@ namespace PSFilterPdn
                             {
                                 lps.SetProgressCallback(new Action<int, int>(UpdateProgress));
 
-                                if ((filterParameters != null) && filterParameters.AETEDictionary.Count > 0 && data.fileName == fileName)
+                                if ((filterParameters != null) && data.fileName == fileName)
                                 {
                                     lps.FilterParameters = this.filterParameters;
                                 }
