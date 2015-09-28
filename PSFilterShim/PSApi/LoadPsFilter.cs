@@ -76,10 +76,16 @@ namespace PSFilterLoad.PSApi
 			public static readonly int SizeOf = Marshal.SizeOf(typeof(PSHandle));
 		}
 
-		private struct ReadChannelPtrs
+		private sealed class ChannelDescPtrs
 		{
-			public IntPtr address;
-			public IntPtr name;
+			public readonly IntPtr address;
+			public readonly IntPtr name;
+
+			public ChannelDescPtrs(IntPtr address, IntPtr name)
+			{
+				this.address = address;
+				this.name = name;
+			}
 		}
 
 
@@ -172,7 +178,7 @@ namespace PSFilterLoad.PSApi
 		#endregion
 
 		private Dictionary<IntPtr, PSHandle> handles;
-		private List<ReadChannelPtrs> channelReadDescPtrs;
+		private List<ChannelDescPtrs> channelReadDescPtrs;
 		private List<IntPtr> bufferIDs;
 
 		private IntPtr filterRecordPtr;
@@ -371,7 +377,7 @@ namespace PSFilterLoad.PSApi
 			this.pseudoResources = new List<PSResource>();
 			this.handles = new Dictionary<IntPtr, PSHandle>();
 			this.useChannelPorts = false;
-			this.channelReadDescPtrs = new List<ReadChannelPtrs>();
+			this.channelReadDescPtrs = new List<ChannelDescPtrs>();
 			this.bufferIDs = new List<IntPtr>();
 			this.usePICASuites = false;
 			this.activePICASuites = new ActivePICASuites();
@@ -2734,7 +2740,7 @@ namespace PSFilterLoad.PSApi
 				Memory.Free(addressPtr);
 				throw;
 			}
-			this.channelReadDescPtrs.Add(new ReadChannelPtrs() { address = addressPtr, name = namePtr });
+			this.channelReadDescPtrs.Add(new ChannelDescPtrs(addressPtr, namePtr));
 
 			ReadChannelDesc* desc = (ReadChannelDesc*)addressPtr.ToPointer();
 			desc->minVersion = PSConstants.kCurrentMinVersReadChannelDesc;
