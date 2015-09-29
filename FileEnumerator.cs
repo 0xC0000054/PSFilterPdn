@@ -180,6 +180,17 @@ namespace PSFilterPdn
             return path + Path.DirectorySeparatorChar; // Demand permission for the current directory and all subdirectories.
         }
 
+        /// <summary>
+        /// Performs a FileIOPermission demand for PathDiscovery on the specified directory.
+        /// </summary>
+        /// <param name="directory">The path.</param>
+        /// <exception cref="SecurityException">The caller does not have the required permission.</exception>
+        private static void DoDemand(string directory)
+        {
+            string demandPath = GetPermissionPath(directory, false);
+            new FileIOPermission(FileIOPermissionAccess.PathDiscovery, demandPath).Demand();
+        }
+
         private static uint SetErrorModeWrapper(uint newMode)
         {
             uint oldMode;
@@ -207,6 +218,7 @@ namespace PSFilterPdn
         private string current;
         private int state;
         private bool disposed;
+        private bool needPathDiscoveryDemand;
 
         private readonly FindExInfoLevel infoLevel;
         private readonly FindExAdditionalFlags additionalFlags;
@@ -242,7 +254,9 @@ namespace PSFilterPdn
             }
 
             string fullPath = Path.GetFullPath(path);
-            new FileIOPermission(FileIOPermissionAccess.PathDiscovery, GetPermissionPath(fullPath, false)).Demand();
+            string demandPath = GetPermissionPath(fullPath, false);
+            new FileIOPermission(FileIOPermissionAccess.PathDiscovery, demandPath).Demand();
+            this.needPathDiscoveryDemand = false;
 
             this.searchData = new SearchData(fullPath, false);
             this.fileExtension = fileExtension;
@@ -394,7 +408,6 @@ namespace PSFilterPdn
                         {
                             this.searchData = this.searchDirectories.Dequeue();
 
-                            new FileIOPermission(FileIOPermissionAccess.PathDiscovery, GetPermissionPath(this.searchData.path, false)).Demand();
                             string searchPath = Path.Combine(this.searchData.path, "*");
                             this.handle = UnsafeNativeMethods.FindFirstFileExW(searchPath, this.infoLevel, out findData, FindExSearchOp.NameMatch, IntPtr.Zero, this.additionalFlags);
 
@@ -413,6 +426,7 @@ namespace PSFilterPdn
                                     goto case STATE_FINISH;
                                 }
                             }
+                            this.needPathDiscoveryDemand = true;
                         }
 
                         while (UnsafeNativeMethods.FindNextFileW(this.handle, out findData))
@@ -444,6 +458,12 @@ namespace PSFilterPdn
                                 }
                                 else if (IsResultIncluded(findData.cFileName))
                                 {
+                                    if (this.needPathDiscoveryDemand)
+                                    {
+                                        DoDemand(this.searchData.path);
+                                        this.needPathDiscoveryDemand = false;
+                                    }
+
                                     this.current = Path.Combine(this.searchData.path, findData.cFileName);
                                     return true;
                                 }
