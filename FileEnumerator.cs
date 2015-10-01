@@ -426,7 +426,19 @@ namespace PSFilterPdn
                                     goto case STATE_FINISH;
                                 }
                             }
-                            this.needPathDiscoveryDemand = true;
+
+                            if ((findData.dwFileAttributes & NativeConstants.FILE_ATTRIBUTE_DIRECTORY) == 0 && IsResultIncluded(findData.cFileName))
+                            {
+                                DoDemand(this.searchData.path);
+                                this.needPathDiscoveryDemand = false;
+
+                                this.current = Path.Combine(this.searchData.path, findData.cFileName);
+                                return true;
+                            }
+                            else
+                            {
+                                this.needPathDiscoveryDemand = true;
+                            }
                         }
 
                         while (UnsafeNativeMethods.FindNextFileW(this.handle, out findData))
