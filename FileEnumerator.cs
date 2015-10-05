@@ -64,14 +64,14 @@ namespace PSFilterPdn
             internal static extern SafeFindHandle FindFirstFileExW(
                 string fileName,
                 FindExInfoLevel fInfoLevelId,
-                out WIN32_FIND_DATAW data,
+                [Out()] WIN32_FIND_DATAW data,
                 FindExSearchOp fSearchOp,
                 IntPtr lpSearchFilter,
                 FindExAdditionalFlags dwAdditionalFlags);
 
             [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool FindNextFileW(SafeFindHandle hndFindFile, out WIN32_FIND_DATAW lpFindFileData);
+            internal static extern bool FindNextFileW(SafeFindHandle hndFindFile, [Out()] WIN32_FIND_DATAW lpFindFileData);
 
             [DllImport("kernel32.dll", ExactSpelling = true), ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
             [return: MarshalAs(UnmanagedType.Bool)]
@@ -97,7 +97,7 @@ namespace PSFilterPdn
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        private struct WIN32_FIND_DATAW
+        private sealed class WIN32_FIND_DATAW
         {
             public uint dwFileAttributes;
             public FILETIME ftCreationTime;
@@ -293,9 +293,9 @@ namespace PSFilterPdn
 
         private void Init()
         {
-            WIN32_FIND_DATAW findData;
+            WIN32_FIND_DATAW findData = new WIN32_FIND_DATAW();
             string searchPath = Path.Combine(this.searchData.path, "*");
-            this.handle = UnsafeNativeMethods.FindFirstFileExW(searchPath, this.infoLevel, out findData, FindExSearchOp.NameMatch, IntPtr.Zero, this.additionalFlags);
+            this.handle = UnsafeNativeMethods.FindFirstFileExW(searchPath, this.infoLevel, findData, FindExSearchOp.NameMatch, IntPtr.Zero, this.additionalFlags);
 
             if (this.handle.IsInvalid)
             {
@@ -307,14 +307,14 @@ namespace PSFilterPdn
             else
             {
                 this.state = STATE_INIT;
-                if ((findData.dwFileAttributes & NativeConstants.FILE_ATTRIBUTE_DIRECTORY) == 0 && IsResultIncluded(findData.cFileName))
+                if ((findData.dwFileAttributes & NativeConstants.FILE_ATTRIBUTE_DIRECTORY) == 0 && FileMatchesFilter(findData.cFileName))
                 {
                     this.current = Path.Combine(this.searchData.path, findData.cFileName);
                 }
             }
         }
         
-        private bool IsResultIncluded(string file)
+        private bool FileMatchesFilter(string file)
         {
             return file.EndsWith(this.fileExtension, StringComparison.OrdinalIgnoreCase);
         }
@@ -386,7 +386,7 @@ namespace PSFilterPdn
         /// </returns>
         public bool MoveNext()
         {
-            WIN32_FIND_DATAW findData;
+            WIN32_FIND_DATAW findData = new WIN32_FIND_DATAW();
 
             switch (this.state)
             {
@@ -409,7 +409,7 @@ namespace PSFilterPdn
                             this.searchData = this.searchDirectories.Dequeue();
 
                             string searchPath = Path.Combine(this.searchData.path, "*");
-                            this.handle = UnsafeNativeMethods.FindFirstFileExW(searchPath, this.infoLevel, out findData, FindExSearchOp.NameMatch, IntPtr.Zero, this.additionalFlags);
+                            this.handle = UnsafeNativeMethods.FindFirstFileExW(searchPath, this.infoLevel, findData, FindExSearchOp.NameMatch, IntPtr.Zero, this.additionalFlags);
 
                             if (this.handle.IsInvalid)
                             {
@@ -427,7 +427,7 @@ namespace PSFilterPdn
                                 }
                             }
 
-                            if ((findData.dwFileAttributes & NativeConstants.FILE_ATTRIBUTE_DIRECTORY) == 0 && IsResultIncluded(findData.cFileName))
+                            if ((findData.dwFileAttributes & NativeConstants.FILE_ATTRIBUTE_DIRECTORY) == 0 && FileMatchesFilter(findData.cFileName))
                             {
                                 DoDemand(this.searchData.path);
                                 this.needPathDiscoveryDemand = false;
@@ -441,7 +441,7 @@ namespace PSFilterPdn
                             }
                         }
 
-                        while (UnsafeNativeMethods.FindNextFileW(this.handle, out findData))
+                        while (UnsafeNativeMethods.FindNextFileW(this.handle, findData))
                         {
                             if ((findData.dwFileAttributes & NativeConstants.FILE_ATTRIBUTE_DIRECTORY) == 0)
                             {
@@ -460,7 +460,7 @@ namespace PSFilterPdn
                                                 // If the shortcut target is a directory, add it to the search list.
                                                 this.searchDirectories.Enqueue(new SearchData(target, true));
                                             }
-                                            else if (IsResultIncluded(target))
+                                            else if (FileMatchesFilter(target))
                                             {
                                                 this.current = target;
                                                 return true;
@@ -468,7 +468,7 @@ namespace PSFilterPdn
                                         }
                                     }
                                 }
-                                else if (IsResultIncluded(findData.cFileName))
+                                else if (FileMatchesFilter(findData.cFileName))
                                 {
                                     if (this.needPathDiscoveryDemand)
                                     {
