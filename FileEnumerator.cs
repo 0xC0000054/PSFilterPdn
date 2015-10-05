@@ -208,7 +208,7 @@ namespace PSFilterPdn
         }
 
         private const int STATE_INIT = 0;
-        private const int STATE_FIND_NEXT_FILE = 1;
+        private const int STATE_FIND_FILES = 1;
         private const int STATE_FINISH = 2;
 
         private SafeFindHandle handle;
@@ -462,7 +462,7 @@ namespace PSFilterPdn
             switch (this.state)
             {
                 case STATE_INIT:
-                    this.state = STATE_FIND_NEXT_FILE;
+                    this.state = STATE_FIND_FILES;
 
                     if (this.current != null)
                     {
@@ -470,9 +470,9 @@ namespace PSFilterPdn
                     }
                     else
                     {
-                        goto case STATE_FIND_NEXT_FILE;
+                        goto case STATE_FIND_FILES;
                     }
-                case STATE_FIND_NEXT_FILE:
+                case STATE_FIND_FILES:
                     do
                     {
                         if (this.handle == null)
@@ -516,7 +516,7 @@ namespace PSFilterPdn
                                     return true;
                                 }
                             }
-                            else if (this.searchSubDirectories && findData.cFileName != "." && findData.cFileName != "..")
+                            else if (this.searchSubDirectories && !findData.cFileName.Equals(".") && !findData.cFileName.Equals(".."))
                             {
                                 this.searchDirectories.Enqueue(new SearchData(Path.Combine(this.searchData.path, findData.cFileName), this.searchData.isShortcut));
                             }
