@@ -335,13 +335,16 @@ namespace PSFilterLoad.PSApi
                 }
                 else if (propKey == PIPropertyID.PIVersionProperty)
                 {
-                    short* fltrVersion = (short*)dataPtr;
-                    if (fltrVersion[1] > PSConstants.latestFilterVersion ||
-                        (fltrVersion[1] == PSConstants.latestFilterVersion && fltrVersion[0] > PSConstants.latestFilterSubVersion))
+                    int packedVersion = *(int*)dataPtr;
+                    int major = (packedVersion >> 16);
+                    int minor = (packedVersion & 0xffff);
+
+                    if (major > PSConstants.latestFilterVersion ||
+                        major == PSConstants.latestFilterVersion && minor > PSConstants.latestFilterSubVersion)
                     {
 #if DEBUG
                         System.Diagnostics.Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported",
-                            new object[] { query.fileName, fltrVersion[1], fltrVersion[0], PSConstants.latestFilterVersion, PSConstants.latestFilterSubVersion }));
+                            new object[] { query.fileName, major, minor, PSConstants.latestFilterVersion, PSConstants.latestFilterSubVersion }));
 #endif
                         return true;
                     }
