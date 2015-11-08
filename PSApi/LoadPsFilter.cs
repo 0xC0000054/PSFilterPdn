@@ -3173,18 +3173,17 @@ namespace PSFilterLoad.PSApi
 
 			int width = srcRect.right - srcRect.left;
 			int height = srcRect.bottom - srcRect.top;
-			int nplanes = ((FilterRecord*)filterRecordPtr.ToPointer())->planes;
 
 			bool hasTransparencyMask = srcPixelMap.version >= 1 && srcPixelMap.masks != IntPtr.Zero;
 
-			// Ignore the alpha plane if the PSPixelMap does not have a transparency mask.  
-			if (!hasTransparencyMask && nplanes == 4)
+			try
 			{
-				nplanes = 3;
+				SetupTempDisplaySurface(width, height, hasTransparencyMask);
 			}
-
-			SetupTempDisplaySurface(width, height, hasTransparencyMask);
-
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
 			void* baseAddr = srcPixelMap.baseAddr.ToPointer();
 
 			int top = srcRect.top;
@@ -3204,7 +3203,7 @@ namespace PSFilterLoad.PSApi
 					byte* row = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y - top);
 					int srcStride = y * srcPixelMap.rowBytes; // cache the destination row and source stride.
 
-					for (int i = 0; i < nplanes; i++)
+					for (int i = 0; i < 3; i++)
 					{
 						int ofs = i;
 						switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
