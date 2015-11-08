@@ -3210,33 +3210,26 @@ namespace PSFilterLoad.PSApi
 
 			if (srcPixelMap.colBytes == 1)
 			{
+				int greenPlaneOffset = srcPixelMap.planeBytes;
+				int bluePlaneOffset = srcPixelMap.planeBytes * 2;
 				for (int y = top; y < bottom; y++)
 				{
-					byte* row = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y - top);
-					int srcStride = y * srcPixelMap.rowBytes; // cache the destination row and source stride.
+					byte* redPlane = (byte*)baseAddr + (y * srcPixelMap.rowBytes) + left;
+					byte* greenPlane = redPlane + greenPlaneOffset;
+					byte* bluePlane = redPlane + bluePlaneOffset;
 
-					for (int i = 0; i < 3; i++)
+					byte* dst = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y - top);
+
+					for (int x = 0; x < width; x++)
 					{
-						int ofs = i;
-						switch (i) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
-						{
-							case 0:
-								ofs = 2;
-								break;
-							case 2:
-								ofs = 0;
-								break;
-						}
-						byte* src = row + ofs;
-						byte* dst = (byte*)baseAddr + srcStride + (i * srcPixelMap.planeBytes) + left;
+						dst[2] = *redPlane;
+						dst[1] = *greenPlane;
+						dst[0] = *bluePlane;
 
-						for (int x = 0; x < width; x++)
-						{
-							*src = *dst;
-
-							src += ColorBgra.SizeOf;
-							dst += srcPixelMap.colBytes;
-						}
+						redPlane++;
+						greenPlane++;
+						bluePlane++;
+						dst += 4;
 					}
 				}
 			}
@@ -3244,7 +3237,7 @@ namespace PSFilterLoad.PSApi
 			{
 				for (int y = top; y < bottom; y++)
 				{
-					byte* src = (byte*)baseAddr + (y * srcPixelMap.rowBytes) + left;
+					byte* src = (byte*)baseAddr + (y * srcPixelMap.rowBytes) + (left * srcPixelMap.colBytes);
 					byte* dst = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y - top);
 
 					for (int x = 0; x < width; x++)
