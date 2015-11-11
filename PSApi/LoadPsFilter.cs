@@ -3131,30 +3131,43 @@ namespace PSFilterLoad.PSApi
 		/// <param name="gr">The Graphics object to render to.</param>
 		/// <param name="dstCol">The column offset to render at.</param>
 		/// <param name="dstRow">The row offset to render at.</param>
-		private void Display32BitBitmap(Graphics gr, int dstCol, int dstRow)
+		/// <param name="allOpaque"><c>true</c> if the alpha channel of the bitmap does not contain any transparency; otherwise, <c>false</c>.</param>
+		private void Display32BitBitmap(Graphics gr, int dstCol, int dstRow, bool allOpaque)
 		{
-			int width = tempDisplaySurface.Width;
-			int height = tempDisplaySurface.Height;
-
-			if (checkerBoardBitmap == null)
+			// Skip the rendering of the checker board if the surface does not contain any transparency.
+			if (allOpaque)
 			{
-				DrawCheckerBoardBitmap();
-			}
-
-			using (Bitmap temp = new Bitmap(width, height, PixelFormat.Format32bppArgb))
-			{
-				Rectangle rect = new Rectangle(0, 0, width, height);
-
-				using (Graphics tempGr = Graphics.FromImage(temp))
+				using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
 				{
-					tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
-					using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
-					{
-						tempGr.DrawImageUnscaled(bmp, rect);
-					}
+					gr.DrawImageUnscaled(bmp, dstCol, dstRow);
+				}
+			}
+			else
+			{
+				int width = tempDisplaySurface.Width;
+				int height = tempDisplaySurface.Height;
+
+				if (checkerBoardBitmap == null)
+				{
+					DrawCheckerBoardBitmap();
 				}
 
-				gr.DrawImageUnscaled(temp, dstCol, dstRow);
+				// Use a temporary bitmap to prevent flickering when the image is rendered over the checker board.
+				using (Bitmap temp = new Bitmap(width, height, PixelFormat.Format32bppArgb))
+				{
+					Rectangle rect = new Rectangle(0, 0, width, height);
+
+					using (Graphics tempGr = Graphics.FromImage(temp))
+					{
+						tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
+						using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
+						{
+							tempGr.DrawImageUnscaled(bmp, rect);
+						}
+					}
+
+					gr.DrawImageUnscaled(temp, dstCol, dstRow);
+				} 
 			}
 		}
 
@@ -3245,6 +3258,7 @@ namespace PSFilterLoad.PSApi
 				// Apply the transparency mask if present.
 				if (hasTransparencyMask)
 				{
+					bool allOpaque = true;
 					PSPixelMask* mask = (PSPixelMask*)srcPixelMap.masks.ToPointer();
 
 					byte* maskPtr = (byte*)mask->maskData.ToPointer();
@@ -3255,13 +3269,17 @@ namespace PSFilterLoad.PSApi
 						for (int x = 0; x < width; x++)
 						{
 							dst->A = *src;
+							if (*src < 255)
+							{
+								allOpaque = false;
+							}
 
 							src += mask->colBytes;
 							dst++;
 						}
 					}
 
-					Display32BitBitmap(gr, dstCol, dstRow);
+					Display32BitBitmap(gr, dstCol, dstRow, allOpaque);
 				}
 				else
 				{
