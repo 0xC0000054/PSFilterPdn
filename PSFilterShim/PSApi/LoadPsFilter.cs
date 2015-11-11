@@ -3259,17 +3259,17 @@ namespace PSFilterLoad.PSApi
 				{
 					PSPixelMask* mask = (PSPixelMask*)srcPixelMap.masks.ToPointer();
 
-					void* maskPtr = mask->maskData.ToPointer();
+					byte* maskPtr = (byte*)mask->maskData.ToPointer();
 					for (int y = top; y < bottom; y++)
 					{
-						ColorBgra* p = tempDisplaySurface.GetRowAddressUnchecked(y - top);
-						byte* q = (byte*)maskPtr + (y * mask->rowBytes) + left;
+						byte* src = maskPtr + (y * mask->rowBytes) + left;
+						ColorBgra* dst = tempDisplaySurface.GetRowAddressUnchecked(y - top);
 						for (int x = 0; x < width; x++)
 						{
-							p->A = *q;
+							dst->A = *src;
 
-							p++;
-							q += mask->colBytes;
+							src += mask->colBytes;
+							dst++;
 						}
 					}
 
