@@ -526,25 +526,11 @@ namespace PSFilterLoad.PSApi
 			// Some filters do not handle the alpha channel correctly despite what their filterInfo says.
 			if (data.filterInfo == null || data.category == "Axion")
 			{
-				switch (filterCase)
+				if (HasTransparentAlpha())
 				{
-					case FilterCase.EditableTransparencyNoSelection:
-						filterCase = FilterCase.FlatImageNoSelection;
-						break;
-					case FilterCase.EditableTransparencyWithSelection:
-						filterCase = FilterCase.FlatImageWithSelection;
-						break;
+					filterCase = FilterCase.FloatingSelection;
 				}
-
-				return true;
-			}
-
-			int filterCaseIndex = filterCase - 1;
-
-			if (data.filterInfo[filterCaseIndex].inputHandling == FilterDataHandling.CantFilter)
-			{
-				// Use the flatImage modes if the filter doesn't support the protectedTransparency cases or image does not have any transparency.
-				if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.CantFilter || !HasTransparentAlpha())
+				else
 				{
 					switch (filterCase)
 					{
@@ -554,6 +540,49 @@ namespace PSFilterLoad.PSApi
 						case FilterCase.EditableTransparencyWithSelection:
 							filterCase = FilterCase.FlatImageWithSelection;
 							break;
+					} 
+				}
+
+				return true;
+			}
+
+			int filterCaseIndex = filterCase - 1;
+
+			if (data.filterInfo[filterCaseIndex].inputHandling == FilterDataHandling.CantFilter)
+			{
+				bool hasTransparency = HasTransparentAlpha();
+				if (!hasTransparency)
+				{
+					switch (filterCase)
+					{
+						case FilterCase.EditableTransparencyNoSelection:
+							filterCase = FilterCase.FlatImageNoSelection;
+							break;
+						case FilterCase.EditableTransparencyWithSelection:
+							filterCase = FilterCase.FlatImageWithSelection;
+							break;
+					}
+
+					return true;
+				}
+				else if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.CantFilter)
+				{
+					// If the protected transparency modes are not supported use the next most appropriate mode.
+					if (hasTransparency && data.filterInfo[FilterCase.FloatingSelection - 1].inputHandling != FilterDataHandling.CantFilter)
+					{
+						filterCase = FilterCase.FloatingSelection;
+					}
+					else
+					{
+						switch (filterCase)
+						{
+							case FilterCase.EditableTransparencyNoSelection:
+								filterCase = FilterCase.FlatImageNoSelection;
+								break;
+							case FilterCase.EditableTransparencyWithSelection:
+								filterCase = FilterCase.FlatImageWithSelection;
+								break;
+						}
 					}
 
 					return true;
@@ -1129,6 +1158,8 @@ namespace PSFilterLoad.PSApi
 			filterRecord->outRowBytes = 0;
 
 			filterRecord->isFloating = 0;
+			filterRecord->haveMask = 0;
+			filterRecord->autoMask = 0;
 
 			if (selectedRegion != null)
 			{
@@ -1137,9 +1168,11 @@ namespace PSFilterLoad.PSApi
 				filterRecord->autoMask = 1;
 				filterRecord->maskRect = filterRecord->filterRect;
 			}
-			else
+			else if (filterCase == FilterCase.FloatingSelection)
 			{
-				filterRecord->haveMask = 0;
+				DrawFloatingSelectionMask();
+				filterRecord->isFloating = 1;
+				filterRecord->haveMask = 1;
 				filterRecord->autoMask = 0;
 			}
 			filterRecord->maskRect = Rect16.Empty;
@@ -3360,6 +3393,32 @@ namespace PSFilterLoad.PSApi
 						*ptr = 255;
 						ptr++;
 					}
+				}
+			}
+		}
+
+		private unsafe void DrawFloatingSelectionMask()
+		{
+			int width = source.Width;
+			int height = source.Height;
+			mask = new MaskSurface(width, height);
+
+			SafeNativeMethods.memset(mask.Scan0.Pointer, 0, new UIntPtr((ulong)mask.Scan0.Length));
+
+			for (int y = 0; y < height; y++)
+			{
+				ColorBgra* src = source.GetRowAddressUnchecked(y);
+				byte* dst = mask.GetRowAddressUnchecked(y);
+
+				for (int x = 0; x < width; x++)
+				{
+					if (src->A > 0)
+					{
+						*dst = 255;
+					}
+
+					src++;
+					dst++;
 				}
 			}
 		}
