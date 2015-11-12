@@ -233,6 +233,7 @@ namespace PSFilterLoad.PSApi
 		private Surface tempDisplaySurface;
 		private Surface scaledChannelSurface;
 		private MaskSurface scaledSelectionMask;
+		private Bitmap checkerBoardBitmap;
 
 		private bool disposed;
 		private PluginModule module;
@@ -3304,7 +3305,7 @@ namespace PSFilterLoad.PSApi
 
 			return PSError.noErr;
 		}
-		private Bitmap checkerBoardBitmap;
+
 		private unsafe void DrawCheckerBoardBitmap()
 		{
 			checkerBoardBitmap = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
