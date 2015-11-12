@@ -575,8 +575,10 @@ namespace PSFilterLoad.PSApi
 
 			}
 
-			inputHandling = data.filterInfo[filterCaseIndex].inputHandling;
-			outputHandling = data.filterInfo[filterCaseIndex].outputHandling;
+			FilterCaseInfo info = data.filterInfo[filterCase - 1];
+
+			inputHandling = info.inputHandling;
+			outputHandling = info.outputHandling;
 
 			return false;
 		}
