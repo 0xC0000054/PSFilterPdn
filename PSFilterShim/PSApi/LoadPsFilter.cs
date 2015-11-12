@@ -3245,7 +3245,7 @@ namespace PSFilterLoad.PSApi
 						redPlane++;
 						greenPlane++;
 						bluePlane++;
-						dst += 4;
+						dst += ColorBgra.SizeOf;
 					}
 				}
 			}
