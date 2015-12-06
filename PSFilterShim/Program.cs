@@ -20,7 +20,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.ServiceModel;
-using System.Threading;
 using PSFilterLoad.PSApi;
 using PSFilterPdn;
 
