@@ -311,9 +311,9 @@ namespace PSFilterLoad.PSApi
                 PIProperty* pipp = (PIProperty*)propPtr;
                 uint propKey = pipp->propertyKey;
 #if DEBUG
-                if ((debugFlags & DebugFlags.PiPL) == DebugFlags.PiPL)
+                if (DebugUtils.DebugFlagEnabled(DebugFlags.PiPL))
                 {
-                    System.Diagnostics.Debug.WriteLine(string.Format("key: {0}({1})", propKey.ToString("X"), PropToString(propKey)));
+                    System.Diagnostics.Debug.WriteLine(string.Format("key: {0}({1})", propKey.ToString("X"), DebugUtils.PropToString(propKey)));
                 }
 #endif
                 byte* dataPtr = propPtr + PIProperty.SizeOf;
@@ -416,7 +416,7 @@ namespace PSFilterLoad.PSApi
                     if (host != PSConstants.kPhotoshopSignature && host != PSConstants.AnyHostSignature)
                     {
 #if DEBUG
-                        System.Diagnostics.Debug.WriteLine(string.Format("{0} requires host '{1}'.", query.fileName, PropToString(host)));
+                        System.Diagnostics.Debug.WriteLine(string.Format("{0} requires host '{1}'.", query.fileName, DebugUtils.PropToString(host)));
 #endif
                         return true;
                     }
@@ -518,7 +518,7 @@ namespace PSFilterLoad.PSApi
             if (info->requireHost != PSConstants.kPhotoshopSignature && info->requireHost != PSConstants.AnyHostSignature)
             {
 #if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("{0} requires host '{1}'.", query.fileName, PropToString(info->requireHost)));
+                System.Diagnostics.Debug.WriteLine(string.Format("{0} requires host '{1}'.", query.fileName, DebugUtils.PropToString(info->requireHost)));
 #endif
                 return true;
             }
@@ -634,7 +634,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                         else
                         {
-                            Ping(DebugFlags.PiPL, string.Format("EnumResourceNames(PiPL, PiMI) failed for {0}", fileName));
+                            DebugUtils.Ping(DebugFlags.PiPL, string.Format("EnumResourceNames(PiPL, PiMI) failed for {0}", fileName));
                         }
 #endif
                     }
