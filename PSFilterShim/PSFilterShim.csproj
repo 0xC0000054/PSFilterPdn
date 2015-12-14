@@ -152,6 +152,7 @@
     <Compile Include="PSApi\ImageModes.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
     <Compile Include="PSApi\Int32Extensions.cs" />
+    <Compile Include="PSApi\IntPtrExtensions.cs" />
     <Compile Include="PSApi\LoadPsFilter.cs" />
     <Compile Include="PSApi\Memory.cs" />
     <Compile Include="PSApi\NativeConstants.cs" />
