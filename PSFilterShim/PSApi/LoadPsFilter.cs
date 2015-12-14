@@ -3324,7 +3324,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			if (signature != PSConstants.kPhotoshopSignature)
 			{
-				return PSError.errPlugInHostInsufficient;
+				return PSError.errPlugInPropertyUndefined;
 			}
 
 			byte[] bytes = null;
@@ -3485,7 +3485,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			if (signature != PSConstants.kPhotoshopSignature)
 			{
-				return PSError.errPlugInHostInsufficient;
+				return PSError.errPlugInPropertyUndefined;
 			}
 
 			switch (key)
