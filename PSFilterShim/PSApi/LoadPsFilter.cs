@@ -1397,10 +1397,6 @@ namespace PSFilterLoad.PSApi
 			{
 				ClearDestAlpha();
 			}
-			else
-			{
-				DrawCheckerBoardBitmap();
-			}
 
 			if (pdata.aete != null)
 			{
