@@ -3181,7 +3181,8 @@ namespace PSFilterLoad.PSApi
 		/// <param name="dstCol">The column offset to render at.</param>
 		/// <param name="dstRow">The row offset to render at.</param>
 		/// <param name="allOpaque"><c>true</c> if the alpha channel of the bitmap does not contain any transparency; otherwise, <c>false</c>.</param>
-		private void Display32BitBitmap(Graphics gr, int dstCol, int dstRow, bool allOpaque)
+		/// <returns><see cref="PSError.noErr"/> on success; or any other PSError constant on failure.</returns>
+		private short Display32BitBitmap(Graphics gr, int dstCol, int dstRow, bool allOpaque)
 		{
 			// Skip the rendering of the checker board if the surface does not contain any transparency.
 			if (allOpaque)
@@ -3196,28 +3197,37 @@ namespace PSFilterLoad.PSApi
 				int width = tempDisplaySurface.Width;
 				int height = tempDisplaySurface.Height;
 
-				if (checkerBoardBitmap == null)
+				try
 				{
-					DrawCheckerBoardBitmap();
-				}
-
-				// Use a temporary bitmap to prevent flickering when the image is rendered over the checker board.
-				using (Bitmap temp = new Bitmap(width, height, PixelFormat.Format32bppArgb))
-				{
-					Rectangle rect = new Rectangle(0, 0, width, height);
-
-					using (Graphics tempGr = Graphics.FromImage(temp))
+					if (checkerBoardBitmap == null)
 					{
-						tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
-						using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
-						{
-							tempGr.DrawImageUnscaled(bmp, rect);
-						}
+						DrawCheckerBoardBitmap();
 					}
 
-					gr.DrawImageUnscaled(temp, dstCol, dstRow);
+					// Use a temporary bitmap to prevent flickering when the image is rendered over the checker board.
+					using (Bitmap temp = new Bitmap(width, height, PixelFormat.Format32bppArgb))
+					{
+						Rectangle rect = new Rectangle(0, 0, width, height);
+
+						using (Graphics tempGr = Graphics.FromImage(temp))
+						{
+							tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
+							using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
+							{
+								tempGr.DrawImageUnscaled(bmp, rect);
+							}
+						}
+
+						gr.DrawImageUnscaled(temp, dstCol, dstRow);
+					}
+				}
+				catch (OutOfMemoryException)
+				{
+					return PSError.memFullErr;
 				}
 			}
+
+			return PSError.noErr;
 		}
 
 		private unsafe short DisplayPixelsProc(ref PSPixelMap srcPixelMap, ref VRect srcRect, int dstRow, int dstCol, IntPtr platformContext)
@@ -3304,6 +3314,7 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
+			short err = PSError.noErr;
 			using (Graphics gr = Graphics.FromHdc(platformContext))
 			{
 				// Apply the transparency mask if present.
@@ -3330,7 +3341,7 @@ namespace PSFilterLoad.PSApi
 						}
 					}
 
-					Display32BitBitmap(gr, dstCol, dstRow, allOpaque);
+					err = Display32BitBitmap(gr, dstCol, dstRow, allOpaque);
 				}
 				else
 				{
@@ -3341,7 +3352,7 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
-			return PSError.noErr;
+			return err;
 		}
 
 		private unsafe void DrawCheckerBoardBitmap()
