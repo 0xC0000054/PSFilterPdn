@@ -137,10 +137,13 @@
     <Compile Include="PSApi\ActivePICASuites.cs" />
     <Compile Include="PSApi\AdvanceStateProc.cs" />
     <Compile Include="PSApi\BufferProcs.cs" />
+    <Compile Include="PSApi\BufferSuite.cs" />
     <Compile Include="PSApi\ChannelPortsProcs.cs" />
     <Compile Include="PSApi\ColorServicesConvert.cs" />
     <Compile Include="PSApi\ColorServicesProc.cs" />
     <Compile Include="PSApi\DebugFlags.cs" />
+    <Compile Include="PSApi\DebugUtils.cs" />
+    <Compile Include="PSApi\DescriptorSuite.cs" />
     <Compile Include="PSApi\DescriptorTypes.cs" />
     <Compile Include="PSApi\DisplayPixelsProc.cs" />
     <Compile Include="PSApi\FilterCase.cs" />
@@ -148,6 +151,7 @@
     <Compile Include="PSApi\FilterRecord.cs" />
     <Compile Include="PSApi\FilterSelector.cs" />
     <Compile Include="PSApi\HandleProc.cs" />
+    <Compile Include="PSApi\HandleSuite.cs" />
     <Compile Include="PSApi\HostProcs.cs" />
     <Compile Include="PSApi\ImageModes.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
@@ -171,6 +175,7 @@
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\PSConstants.cs" />
     <Compile Include="PSApi\PSError.cs" />
+    <Compile Include="PSApi\PseudoResourceSuite.cs" />
     <Compile Include="PSApi\PSImagePlane.cs" />
     <Compile Include="PSApi\PSPixelMap.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
