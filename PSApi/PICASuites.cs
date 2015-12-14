@@ -215,8 +215,6 @@ namespace PSFilterLoad.PSApi
 
 		#region HandleSuites
 		private static SetPIHandleLockDelegate setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
-		private static LockPIHandleProc lockHandleProc;
-		private static UnlockPIHandleProc unlockHandleProc;
 
 		private static void SetHandleLock(IntPtr handle, byte lockHandle, ref IntPtr address, ref byte oldLock)
 		{
@@ -231,11 +229,11 @@ namespace PSFilterLoad.PSApi
 
 			if (lockHandle != 0)
 			{
-				address = lockHandleProc(handle, 0);
+				address = HandleSuite.Instance.LockHandle(handle, 0);
 			}
 			else
 			{
-				unlockHandleProc(handle);
+				HandleSuite.Instance.UnlockHandle(handle);
 				address = IntPtr.Zero;
 			}
 		}
@@ -447,16 +445,8 @@ namespace PSFilterLoad.PSApi
 		} 
 #endif
 
-		private static void SetHandleLockDelegates(LockPIHandleProc lockHandle, UnlockPIHandleProc unlockHandle)
+		public static unsafe PSHandleSuite1 CreateHandleSuite1(HandleProcs* procs)
 		{
-			lockHandleProc = lockHandle;
-			unlockHandleProc = unlockHandle;
-		}
-
-		public static unsafe PSHandleSuite1 CreateHandleSuite1(HandleProcs* procs, LockPIHandleProc lockHandle, UnlockPIHandleProc unlockHandle)
-		{
-			SetHandleLockDelegates(lockHandle, unlockHandle);
-
 			PSHandleSuite1 suite = new PSHandleSuite1();
 			suite.New = procs->newProc;
 			suite.Dispose = procs->disposeProc;
@@ -465,16 +455,11 @@ namespace PSFilterLoad.PSApi
 			suite.SetSize = procs->setSizeProc;
 			suite.RecoverSpace = procs->recoverSpaceProc;
 
-			lockHandleProc = lockHandle;
-			unlockHandleProc = unlockHandle;
-
 			return suite;
 		}
 
-		public static unsafe PSHandleSuite2 CreateHandleSuite2(HandleProcs* procs, LockPIHandleProc lockHandle, UnlockPIHandleProc unlockHandle)
+		public static unsafe PSHandleSuite2 CreateHandleSuite2(HandleProcs* procs)
 		{
-			SetHandleLockDelegates(lockHandle, unlockHandle);
-
 			PSHandleSuite2 suite = new PSHandleSuite2();
 			suite.New = procs->newProc;
 			suite.Dispose = procs->disposeProc;
