@@ -698,6 +698,32 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
+		/// Determines whether the specified address is a fake indirect pointer.
+		/// </summary>
+		/// <param name="address">The address to check.</param>
+		/// <param name="baseAddress">The base address of the memory block.</param>
+		/// <param name="baseAddressSize">The size of the memory block at the base address.</param>
+		/// <param name="size">The size.</param>
+		/// <returns><c>true</c> if the address is a fake indirect pointer; otherwise, <c>false</c></returns>
+		private static bool IsFakeIndirectPointer(IntPtr address, IntPtr baseAddress, long baseAddressSize, out long size)
+		{
+			size = 0L;
+
+			bool result = false;
+
+			// Some plug-ins may use an indirect pointer to the same memory block.
+			IntPtr fakeIndirectAddress = new IntPtr(baseAddress.ToInt64() + IntPtr.Size);
+
+			if (address == fakeIndirectAddress)
+			{
+				result = true;
+				size = baseAddressSize - IntPtr.Size;
+			}
+
+			return result;
+		}
+
+		/// <summary>
 		/// Loads a filter from the PluginData.
 		/// </summary>
 		/// <param name="pdata">The PluginData of the filter to load.</param>
@@ -745,8 +771,8 @@ namespace PSFilterLoad.PSApi
 								long ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64();
 								if (ps > 0L)
 								{
-									byte[] buf = new byte[ps];
-									Marshal.Copy(hPtr, buf, 0, (int)ps);
+									byte[] buf = new byte[(int)ps];
+									Marshal.Copy(hPtr, buf, 0, buf.Length);
 									globalParameters.SetParameterDataBytes(buf);
 									globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.OTOFHandle;
 									// Some plug-ins may have executable code in the parameter block.
@@ -756,17 +782,12 @@ namespace PSFilterLoad.PSApi
 							}
 							else
 							{
-								if (!IsBadReadPtr(hPtr))
+								long pointerSize = SafeNativeMethods.GlobalSize(hPtr).ToInt64();
+								if (pointerSize > 0L || IsFakeIndirectPointer(hPtr, ptr, size, out pointerSize))
 								{
-									int ps = SafeNativeMethods.GlobalSize(hPtr).ToInt32();
-									if (ps == 0)
-									{
-										ps = ((int)size - IntPtr.Size);
-									}
+									byte[] buf = new byte[(int)pointerSize];
 
-									byte[] buf = new byte[ps];
-
-									Marshal.Copy(hPtr, buf, 0, ps);
+									Marshal.Copy(hPtr, buf, 0, buf.Length);
 									globalParameters.SetParameterDataBytes(buf);
 									globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
 								}
@@ -774,7 +795,7 @@ namespace PSFilterLoad.PSApi
 								{
 									byte[] buf = new byte[(int)size];
 
-									Marshal.Copy(filterRecord->parameters, buf, 0, (int)size);
+									Marshal.Copy(filterRecord->parameters, buf, 0, buf.Length);
 									globalParameters.SetParameterDataBytes(buf);
 									globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.RawBytes;
 								}
@@ -813,7 +834,7 @@ namespace PSFilterLoad.PSApi
 						int ps = HandleGetSizeProc(ptr);
 						byte[] dataBuf = new byte[ps];
 
-						Marshal.Copy(HandleLockProc(ptr, 0), dataBuf, 0, ps);
+						Marshal.Copy(HandleLockProc(ptr, 0), dataBuf, 0, dataBuf.Length);
 						HandleUnlockProc(ptr);
 
 						globalParameters.SetPluginDataBytes(dataBuf);
@@ -825,8 +846,8 @@ namespace PSFilterLoad.PSApi
 						long ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64();
 						if (ps > 0L)
 						{
-							byte[] dataBuf = new byte[ps];
-							Marshal.Copy(hPtr, dataBuf, 0, (int)ps);
+							byte[] dataBuf = new byte[(int)ps];
+							Marshal.Copy(hPtr, dataBuf, 0, dataBuf.Length);
 							globalParameters.SetPluginDataBytes(dataBuf);
 							globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.OTOFHandle;
 							globalParameters.PluginDataExecutable = IsMemoryExecutable(hPtr);
@@ -835,8 +856,8 @@ namespace PSFilterLoad.PSApi
 					}
 					else if (pluginDataSize > 0L)
 					{
-						byte[] dataBuf = new byte[pluginDataSize];
-						Marshal.Copy(ptr, dataBuf, 0, (int)pluginDataSize);
+						byte[] dataBuf = new byte[(int)pluginDataSize];
+						Marshal.Copy(ptr, dataBuf, 0, dataBuf.Length);
 						globalParameters.SetPluginDataBytes(dataBuf);
 						globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.RawBytes;
 					}
