@@ -494,65 +494,6 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		/// Determines whether the specified pointer is not valid to read from.
-		/// </summary>
-		/// <param name="ptr">The pointer to check.</param>
-		/// <returns>
-		///   <c>true</c> if the pointer is invalid; otherwise, <c>false</c>.
-		/// </returns>
-		private static bool IsBadReadPtr(IntPtr ptr)
-		{
-			bool result = false;
-			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
-			int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
-
-			if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
-			{
-				return true;
-			}
-
-			result = ((mbi.Protect & NativeConstants.PAGE_READONLY) != 0 || (mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 ||
-			(mbi.Protect & NativeConstants.PAGE_WRITECOPY) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_READ) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_READWRITE) != 0 ||
-			(mbi.Protect & NativeConstants.PAGE_EXECUTE_WRITECOPY) != 0);
-
-			if ((mbi.Protect & NativeConstants.PAGE_GUARD) != 0 || (mbi.Protect & NativeConstants.PAGE_NOACCESS) != 0)
-			{
-				result = false;
-			}
-
-			return !result;
-		}
-
-		/// <summary>
-		/// Determines whether the specified pointer is not valid to write to.
-		/// </summary>
-		/// <param name="ptr">The pointer to check.</param>
-		/// <returns>
-		///   <c>true</c> if the pointer is invalid; otherwise, <c>false</c>.
-		/// </returns>
-		private static bool IsBadWritePtr(IntPtr ptr)
-		{
-			bool result = false;
-			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
-			int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
-
-			if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
-			{
-				return true;
-			}
-
-			result = ((mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 || (mbi.Protect & NativeConstants.PAGE_WRITECOPY) != 0 ||
-				(mbi.Protect & NativeConstants.PAGE_EXECUTE_READWRITE) != 0 || (mbi.Protect & NativeConstants.PAGE_EXECUTE_WRITECOPY) != 0);
-
-			if ((mbi.Protect & NativeConstants.PAGE_GUARD) != 0 || (mbi.Protect & NativeConstants.PAGE_NOACCESS) != 0)
-			{
-				result = false;
-			}
-
-			return !result;
-		}
-
-		/// <summary>
 		/// Determines whether the memory block is marked as executable.
 		/// </summary>
 		/// <param name="ptr">The pointer to check.</param>
