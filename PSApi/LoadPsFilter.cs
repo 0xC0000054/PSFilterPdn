@@ -153,7 +153,7 @@ namespace PSFilterLoad.PSApi
 		private MaskSurface mask;
 		private Surface tempSurface;
 		private MaskSurface tempMask;
-		private Surface tempDisplaySurface;
+		private Surface displaySurface;
 		private Surface scaledChannelSurface;
 		private MaskSurface scaledSelectionMask;
 		private Bitmap checkerBoardBitmap;
@@ -2932,21 +2932,21 @@ namespace PSFilterLoad.PSApi
 			return addressPtr;
 		}
 
-		private void SetupTempDisplaySurface(int width, int height, bool haveMask)
+		private void SetupDisplaySurface(int width, int height, bool haveMask)
 		{
-			if ((tempDisplaySurface == null) || width != tempDisplaySurface.Width || height != tempDisplaySurface.Height)
+			if ((displaySurface == null) || width != displaySurface.Width || height != displaySurface.Height)
 			{
-				if (tempDisplaySurface != null)
+				if (displaySurface != null)
 				{
-					tempDisplaySurface.Dispose();
-					tempDisplaySurface = null;
+					displaySurface.Dispose();
+					displaySurface = null;
 				}
 
-				tempDisplaySurface = new Surface(width, height);
+				displaySurface = new Surface(width, height);
 
 				if (ignoreAlpha || !haveMask)
 				{
-					new UnaryPixelOps.SetAlphaChannelTo255().Apply(tempDisplaySurface, tempDisplaySurface.Bounds);
+					new UnaryPixelOps.SetAlphaChannelTo255().Apply(displaySurface, displaySurface.Bounds);
 				}
 			}
 		}
@@ -2964,15 +2964,15 @@ namespace PSFilterLoad.PSApi
 			// Skip the rendering of the checker board if the surface does not contain any transparency.
 			if (allOpaque)
 			{
-				using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
+				using (Bitmap bmp = displaySurface.CreateAliasedBitmap())
 				{
 					gr.DrawImageUnscaled(bmp, dstCol, dstRow);
 				}
 			}
 			else
 			{
-				int width = tempDisplaySurface.Width;
-				int height = tempDisplaySurface.Height;
+				int width = displaySurface.Width;
+				int height = displaySurface.Height;
 
 				try
 				{
@@ -2989,7 +2989,7 @@ namespace PSFilterLoad.PSApi
 						using (Graphics tempGr = Graphics.FromImage(temp))
 						{
 							tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
-							using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
+							using (Bitmap bmp = displaySurface.CreateAliasedBitmap())
 							{
 								tempGr.DrawImageUnscaled(bmp, rect);
 							}
@@ -3027,7 +3027,7 @@ namespace PSFilterLoad.PSApi
 
 			try
 			{
-				SetupTempDisplaySurface(width, height, hasTransparencyMask);
+				SetupDisplaySurface(width, height, hasTransparencyMask);
 			}
 			catch (OutOfMemoryException)
 			{
@@ -3055,7 +3055,7 @@ namespace PSFilterLoad.PSApi
 					byte* greenPlane = redPlane + greenPlaneOffset;
 					byte* bluePlane = redPlane + bluePlaneOffset;
 
-					byte* dst = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y - top);
+					byte* dst = (byte*)displaySurface.GetRowAddressUnchecked(y - top);
 
 					for (int x = 0; x < width; x++)
 					{
@@ -3075,7 +3075,7 @@ namespace PSFilterLoad.PSApi
 				for (int y = top; y < bottom; y++)
 				{
 					byte* src = (byte*)baseAddr + (y * srcPixelMap.rowBytes) + (left * srcPixelMap.colBytes);
-					byte* dst = (byte*)tempDisplaySurface.GetRowAddressUnchecked(y - top);
+					byte* dst = (byte*)displaySurface.GetRowAddressUnchecked(y - top);
 
 					for (int x = 0; x < width; x++)
 					{
@@ -3102,7 +3102,7 @@ namespace PSFilterLoad.PSApi
 					for (int y = top; y < bottom; y++)
 					{
 						byte* src = maskPtr + (y * mask->rowBytes) + left;
-						ColorBgra* dst = tempDisplaySurface.GetRowAddressUnchecked(y - top);
+						ColorBgra* dst = displaySurface.GetRowAddressUnchecked(y - top);
 						for (int x = 0; x < width; x++)
 						{
 							dst->A = *src;
@@ -3120,7 +3120,7 @@ namespace PSFilterLoad.PSApi
 				}
 				else
 				{
-					using (Bitmap bmp = tempDisplaySurface.CreateAliasedBitmap())
+					using (Bitmap bmp = displaySurface.CreateAliasedBitmap())
 					{
 						gr.DrawImageUnscaled(bmp, dstCol, dstRow);
 					}
@@ -4023,10 +4023,10 @@ namespace PSFilterLoad.PSApi
 						selectedRegion = null;
 					}
 
-					if (tempDisplaySurface != null)
+					if (displaySurface != null)
 					{
-						tempDisplaySurface.Dispose();
-						tempDisplaySurface = null;
+						displaySurface.Dispose();
+						displaySurface = null;
 					}
 
 					if (scaledChannelSurface != null)
