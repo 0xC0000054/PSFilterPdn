@@ -3042,7 +3042,7 @@ namespace PSFilterLoad.PSApi
 				return PSError.memFullErr;
 			}
 
-			void* baseAddr = srcPixelMap.baseAddr.ToPointer();
+			byte* baseAddr = (byte*)srcPixelMap.baseAddr.ToPointer();
 
 			int top = srcRect.top;
 			int left = srcRect.left;
@@ -3060,22 +3060,22 @@ namespace PSFilterLoad.PSApi
 				int bluePlaneOffset = srcPixelMap.planeBytes * 2;
 				for (int y = top; y < bottom; y++)
 				{
-					byte* redPlane = (byte*)baseAddr + (y * srcPixelMap.rowBytes) + left;
+					byte* redPlane = baseAddr + (y * srcPixelMap.rowBytes) + left;
 					byte* greenPlane = redPlane + greenPlaneOffset;
 					byte* bluePlane = redPlane + bluePlaneOffset;
 
-					byte* dst = (byte*)displaySurface.GetRowAddressUnchecked(y - top);
+					ColorBgra* dst = displaySurface.GetRowAddressUnchecked(y - top);
 
 					for (int x = 0; x < width; x++)
 					{
-						dst[2] = *redPlane;
-						dst[1] = *greenPlane;
-						dst[0] = *bluePlane;
+						dst->R = *redPlane;
+						dst->G = *greenPlane;
+						dst->B = *bluePlane;
 
 						redPlane++;
 						greenPlane++;
 						bluePlane++;
-						dst += ColorBgra.SizeOf;
+						dst++;
 					}
 				}
 			}
@@ -3083,17 +3083,17 @@ namespace PSFilterLoad.PSApi
 			{
 				for (int y = top; y < bottom; y++)
 				{
-					byte* src = (byte*)baseAddr + (y * srcPixelMap.rowBytes) + (left * srcPixelMap.colBytes);
-					byte* dst = (byte*)displaySurface.GetRowAddressUnchecked(y - top);
+					byte* src = baseAddr + (y * srcPixelMap.rowBytes) + (left * srcPixelMap.colBytes);
+					ColorBgra* dst = displaySurface.GetRowAddressUnchecked(y - top);
 
 					for (int x = 0; x < width; x++)
 					{
-						dst[0] = src[2];
-						dst[1] = src[1];
-						dst[2] = src[0];
+						dst->B = src[2];
+						dst->G = src[1];
+						dst->R = src[0];
 
 						src += srcPixelMap.colBytes;
-						dst += ColorBgra.SizeOf;
+						dst++;
 					}
 				}
 			}
