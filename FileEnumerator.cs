@@ -435,8 +435,25 @@ namespace PSFilterPdn
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            if (!this.disposed)
+            {
+                this.disposed = true;
+
+                if (this.handle != null)
+                {
+                    this.handle.Dispose();
+                    this.handle = null;
+                }
+
+                if (this.shellLink != null)
+                {
+                    this.shellLink.Dispose();
+                    this.shellLink = null;
+                }
+                this.current = null;
+                this.state = -1;
+                SetErrorModeWrapper(this.oldErrorMode);
+            }
         }
 
         /// <summary>
@@ -544,32 +561,6 @@ namespace PSFilterPdn
         public void Reset()
         {
             throw new NotSupportedException();
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (!this.disposed)
-            {
-                this.disposed = true;
-
-                if (disposing)
-                {
-                    if (this.handle != null)
-                    {
-                        this.handle.Dispose();
-                        this.handle = null;
-                    }
-
-                    if (this.shellLink != null)
-                    {
-                        this.shellLink.Dispose();
-                        this.shellLink = null;
-                    }
-                    this.current = null;
-                    this.state = -1;
-                }
-                SetErrorModeWrapper(this.oldErrorMode);
-            }
         }
     }
 }

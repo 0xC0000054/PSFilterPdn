@@ -95,23 +95,14 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool disposing)
-        {
             if (!disposed)
             {
                 this.disposed = true;
 
-                if (disposing)
+                if (handle != null && !handle.IsClosed)
                 {
-                    if (handle != null && !handle.IsClosed)
-                    {
-                        handle.Dispose();
-                        handle = null;
-                    }
+                    handle.Dispose();
+                    handle = null;
                 }
             }
         }
