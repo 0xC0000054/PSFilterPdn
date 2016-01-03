@@ -1460,7 +1460,7 @@ namespace PSFilterPdn
         {
             if (data.filterInfo != null)
             {
-                System.Text.StringBuilder fici = new System.Text.StringBuilder();
+                StringBuilder fici = new StringBuilder();
 
                 for (int i = 0; i < 7; i++)
                 {
