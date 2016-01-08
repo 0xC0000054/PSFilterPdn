@@ -142,8 +142,8 @@ namespace PSFilterPdn
                 }
             }
 
-            bool proxyResult;
-            string proxyErrorMessage;
+            bool proxyResult = true;
+            string proxyErrorMessage = string.Empty;
 
             PSFilterShimService service = new PSFilterShimService(new Func<byte>(AbortCallback))
             {
@@ -195,9 +195,6 @@ namespace PSFilterPdn
                 }
 
                 ProcessStartInfo psi = new ProcessStartInfo(shimPath, PSFilterShimServer.EndpointName);
-
-                proxyResult = true;
-                proxyErrorMessage = string.Empty;
 
                 using (Process proxy = Process.Start(psi))
                 {
