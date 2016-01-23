@@ -240,18 +240,11 @@ namespace PSFilterLoad.PSApi
 						DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key = {0}", DebugUtils.PropToString(*ptr)));
 #endif
 
-						keys.Add(*ptr);
-						ptr++;
-					}
-
-					// trim the list to the actual values in the dictionary
-					uint[] values = keys.ToArray();
-					foreach (var item in values)
-					{
-						if (!dictionary.ContainsKey(item))
+						if (dictionary.ContainsKey(*ptr))
 						{
-							keys.Remove(item);
+							keys.Add(*ptr);
 						}
+						ptr++;
 					}
 				}
 
