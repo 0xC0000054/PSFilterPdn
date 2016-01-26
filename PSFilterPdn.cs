@@ -51,7 +51,7 @@ namespace PSFilterPdn
         private static ManualResetEvent filterDone;
 
         public PSFilterPdnEffect()
-            : base(PSFilterPdnEffect.StaticName, PSFilterPdnEffect.StaticIcon, EffectFlags.Configurable)
+            : base(StaticName, StaticIcon, EffectFlags.Configurable)
         {
             this.repeatEffect = true;
             this.filterThread = null;
@@ -80,7 +80,7 @@ namespace PSFilterPdn
 
         private static DialogResult ShowErrorMessage(IWin32Window window, string message)
         {
-            return MessageBox.Show(window, message, PSFilterPdnEffect.StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
+            return MessageBox.Show(window, message, StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
         }
 
         private static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
