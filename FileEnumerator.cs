@@ -298,7 +298,13 @@ namespace PSFilterPdn
         {
             WIN32_FIND_DATAW findData = new WIN32_FIND_DATAW();
             string searchPath = Path.Combine(this.searchData.path, "*");
-            this.handle = UnsafeNativeMethods.FindFirstFileExW(searchPath, this.infoLevel, findData, FindExSearchOp.NameMatch, IntPtr.Zero, this.additionalFlags);
+            this.handle = UnsafeNativeMethods.FindFirstFileExW(
+                searchPath,
+                this.infoLevel,
+                findData,
+                FindExSearchOp.NameMatch,
+                IntPtr.Zero,
+                this.additionalFlags);
 
             if (this.handle.IsInvalid)
             {
@@ -498,7 +504,13 @@ namespace PSFilterPdn
                             this.searchData = this.searchDirectories.Dequeue();
 
                             string searchPath = Path.Combine(this.searchData.path, "*");
-                            this.handle = UnsafeNativeMethods.FindFirstFileExW(searchPath, this.infoLevel, findData, FindExSearchOp.NameMatch, IntPtr.Zero, this.additionalFlags);
+                            this.handle = UnsafeNativeMethods.FindFirstFileExW(
+                                searchPath,
+                                this.infoLevel,
+                                findData,
+                                FindExSearchOp.NameMatch,
+                                IntPtr.Zero,
+                                this.additionalFlags);
 
                             if (this.handle.IsInvalid)
                             {
