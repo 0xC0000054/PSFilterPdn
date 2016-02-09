@@ -131,7 +131,7 @@ namespace PSFilterPdn
             /// </summary>
             /// <param name="path">The path.</param>
             /// <param name="isShortcut"><c>true</c> if the path is the target of a shortcut; otherwise, <c>false</c>.</param>
-            /// <exception cref="System.ArgumentNullException"><paramref name="path"/> is null.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
             public SearchData(string path, bool isShortcut)
             {
                 if (path == null)
@@ -261,13 +261,13 @@ namespace PSFilterPdn
         /// <param name="fileExtension">The file extension to search for.</param>
         /// <param name="searchSubDirectories">if set to <c>true</c> search the sub directories of <paramref name="path"/>.</param>
         /// <param name="dereferenceLinks">if set to <c>true</c> search the target of shortcuts.</param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="path"/> in null.
         /// -or-
         /// <paramref name="fileExtension"/> is null.
         /// </exception>
-        /// <exception cref="System.IO.PathTooLongException">The specified path, file name, or combined exceed the system-defined maximum length. For example, on Windows-based platforms, paths must be less than 248 characters and file names must be less than 260 characters.</exception>
-        /// <exception cref="System.Security.SecurityException">The caller does not have the required permission.</exception>
+        /// <exception cref="PathTooLongException">The specified path, file name, or combined exceed the system-defined maximum length.</exception>
+        /// <exception cref="SecurityException">The caller does not have the required permission.</exception>
         public FileEnumerator(string path, string fileExtension, bool searchSubDirectories, bool dereferenceLinks)
         {
             if (path == null)
