@@ -663,7 +663,7 @@ namespace PSFilterLoad.PSApi
 						HandleSuite.Instance.UnlockHandle(ptr);
 
 						globalParameters.SetPluginDataBytes(dataBuf);
-						globalParameters.ParameterDataStorageMethod = globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
+						globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
 					}
 					else if (pluginDataSize == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == OTOFSignature)
 					{
