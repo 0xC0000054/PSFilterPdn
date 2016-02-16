@@ -128,13 +128,13 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		/// Determines whether the specified pointer is not valid to read from.
+		/// Determines whether the specified pointer is valid to read from.
 		/// </summary>
 		/// <param name="ptr">The pointer to check.</param>
 		/// <returns>
-		///   <c>true</c> if the pointer is invalid; otherwise, <c>false</c>.
+		///   <c>true</c> if the pointer is valid; otherwise, <c>false</c>.
 		/// </returns>
-		private static bool IsBadReadPtr(IntPtr ptr)
+		private static bool IsValidReadPtr(IntPtr ptr)
 		{
 			bool result = false;
 			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
@@ -142,7 +142,7 @@ namespace PSFilterLoad.PSApi
 
 			if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
 			{
-				return true;
+				return false;
 			}
 
 			result = ((mbi.Protect & NativeConstants.PAGE_READONLY) != 0 ||
@@ -157,17 +157,17 @@ namespace PSFilterLoad.PSApi
 				result = false;
 			}
 
-			return !result;
+			return result;
 		}
 
 		/// <summary>
-		/// Determines whether the specified pointer is not valid to write to.
+		/// Determines whether the specified pointer is valid to write to.
 		/// </summary>
 		/// <param name="ptr">The pointer to check.</param>
 		/// <returns>
-		///   <c>true</c> if the pointer is invalid; otherwise, <c>false</c>.
+		///   <c>true</c> if the pointer is valid; otherwise, <c>false</c>.
 		/// </returns>
-		private static bool IsBadWritePtr(IntPtr ptr)
+		private static bool IsValidWritePtr(IntPtr ptr)
 		{
 			bool result = false;
 			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
@@ -175,7 +175,7 @@ namespace PSFilterLoad.PSApi
 
 			if (SafeNativeMethods.VirtualQuery(ptr, ref mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
 			{
-				return true;
+				return false;
 			}
 
 			result = ((mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 ||
@@ -188,7 +188,7 @@ namespace PSFilterLoad.PSApi
 				result = false;
 			}
 
-			return !result;
+			return result;
 		}
 
 		internal unsafe IntPtr NewHandle(int size)
@@ -226,7 +226,7 @@ namespace PSFilterLoad.PSApi
 
 		internal unsafe void DisposeHandle(IntPtr h)
 		{
-			if (h != IntPtr.Zero && !IsBadReadPtr(h))
+			if (h != IntPtr.Zero && IsValidReadPtr(h))
 			{
 #if DEBUG
 				DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
@@ -237,7 +237,7 @@ namespace PSFilterLoad.PSApi
 					{
 						IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-						if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+						if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
 						{
 							SafeNativeMethods.GlobalFree(hPtr);
 						}
@@ -269,7 +269,7 @@ namespace PSFilterLoad.PSApi
 				{
 					IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-					if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+					if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
 					{
 						SafeNativeMethods.GlobalFree(hPtr);
 					}
@@ -290,14 +290,14 @@ namespace PSFilterLoad.PSApi
 				{
 					IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-					if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+					if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
 					{
 						return SafeNativeMethods.GlobalLock(hPtr);
 					}
 
 					return SafeNativeMethods.GlobalLock(h);
 				}
-				if (!IsBadReadPtr(h) && !IsBadWritePtr(h)) // Pointer to a pointer?
+				if (IsValidReadPtr(h) && IsValidWritePtr(h)) // Pointer to a pointer?
 				{
 					return h;
 				}
@@ -318,7 +318,7 @@ namespace PSFilterLoad.PSApi
 				{
 					IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-					if (!IsBadReadPtr(hPtr))
+					if (IsValidReadPtr(hPtr))
 					{
 						return SafeNativeMethods.GlobalSize(hPtr).ToInt32();
 					}
@@ -351,7 +351,7 @@ namespace PSFilterLoad.PSApi
 				{
 					IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-					if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+					if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
 					{
 						IntPtr hMem = SafeNativeMethods.GlobalReAlloc(hPtr, new UIntPtr((uint)newSize), NativeConstants.GPTR);
 						if (hMem == IntPtr.Zero)
@@ -401,7 +401,7 @@ namespace PSFilterLoad.PSApi
 				{
 					IntPtr hPtr = Marshal.ReadIntPtr(h);
 
-					if (!IsBadReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+					if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
 					{
 						SafeNativeMethods.GlobalUnlock(hPtr);
 					}
