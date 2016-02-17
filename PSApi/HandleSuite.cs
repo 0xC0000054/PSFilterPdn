@@ -136,7 +136,6 @@ namespace PSFilterLoad.PSApi
 		/// </returns>
 		private static bool IsValidReadPtr(IntPtr ptr)
 		{
-			bool result = false;
 			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
 			int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
 
@@ -145,19 +144,21 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			result = ((mbi.Protect & NativeConstants.PAGE_READONLY) != 0 ||
-					  (mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 ||
-					  (mbi.Protect & NativeConstants.PAGE_WRITECOPY) != 0 ||
-					  (mbi.Protect & NativeConstants.PAGE_EXECUTE_READ) != 0 ||
-					  (mbi.Protect & NativeConstants.PAGE_EXECUTE_READWRITE) != 0 ||
-					  (mbi.Protect & NativeConstants.PAGE_EXECUTE_WRITECOPY) != 0);
-
-			if ((mbi.Protect & NativeConstants.PAGE_GUARD) != 0 || (mbi.Protect & NativeConstants.PAGE_NOACCESS) != 0)
+			if (mbi.State != NativeConstants.MEM_COMMIT ||
+				(mbi.Protect & NativeConstants.PAGE_GUARD) != 0 ||
+				(mbi.Protect & NativeConstants.PAGE_NOACCESS) != 0)
 			{
-				result = false;
+				return false;
 			}
 
-			return result;
+			const int ReadProtect = NativeConstants.PAGE_READONLY |
+									NativeConstants.PAGE_READWRITE |
+									NativeConstants.PAGE_WRITECOPY |
+									NativeConstants.PAGE_EXECUTE_READ |
+									NativeConstants.PAGE_EXECUTE_READWRITE |
+									NativeConstants.PAGE_EXECUTE_WRITECOPY;
+
+			return ((mbi.Protect & ReadProtect) != 0);
 		}
 
 		/// <summary>
@@ -169,7 +170,6 @@ namespace PSFilterLoad.PSApi
 		/// </returns>
 		private static bool IsValidWritePtr(IntPtr ptr)
 		{
-			bool result = false;
 			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
 			int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
 
@@ -178,17 +178,19 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			result = ((mbi.Protect & NativeConstants.PAGE_READWRITE) != 0 ||
-					  (mbi.Protect & NativeConstants.PAGE_WRITECOPY) != 0 ||
-					  (mbi.Protect & NativeConstants.PAGE_EXECUTE_READWRITE) != 0 ||
-					  (mbi.Protect & NativeConstants.PAGE_EXECUTE_WRITECOPY) != 0);
-
-			if ((mbi.Protect & NativeConstants.PAGE_GUARD) != 0 || (mbi.Protect & NativeConstants.PAGE_NOACCESS) != 0)
+			if (mbi.State != NativeConstants.MEM_COMMIT ||
+				(mbi.Protect & NativeConstants.PAGE_GUARD) != 0 ||
+				(mbi.Protect & NativeConstants.PAGE_NOACCESS) != 0)
 			{
-				result = false;
+				return false;
 			}
 
-			return result;
+			const int WriteProtect = NativeConstants.PAGE_READWRITE |
+									 NativeConstants.PAGE_WRITECOPY |
+									 NativeConstants.PAGE_EXECUTE_READWRITE |
+									 NativeConstants.PAGE_EXECUTE_WRITECOPY;
+
+			return ((mbi.Protect & WriteProtect) != 0);
 		}
 
 		internal unsafe IntPtr NewHandle(int size)
