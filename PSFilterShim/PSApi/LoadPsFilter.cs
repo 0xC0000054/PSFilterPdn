@@ -510,12 +510,12 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			bool result = ((mbi.Protect & NativeConstants.PAGE_EXECUTE) != 0 ||
-						   (mbi.Protect & NativeConstants.PAGE_EXECUTE_READ) != 0 ||
-						   (mbi.Protect & NativeConstants.PAGE_EXECUTE_READWRITE) != 0 ||
-						   (mbi.Protect & NativeConstants.PAGE_EXECUTE_WRITECOPY) != 0);
+			const int ExecuteProtect = NativeConstants.PAGE_EXECUTE |
+									   NativeConstants.PAGE_EXECUTE_READ |
+									   NativeConstants.PAGE_EXECUTE_READWRITE |
+									   NativeConstants.PAGE_EXECUTE_WRITECOPY;
 
-			return result;
+			return ((mbi.Protect & ExecuteProtect) != 0);
 		}
 
 		/// <summary>
