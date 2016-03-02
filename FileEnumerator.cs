@@ -452,11 +452,6 @@ namespace PSFilterPdn
         {
             get
             {
-                if (this.current == null)
-                {
-                    throw new InvalidOperationException();
-                }
-
                 return this.current;
             }
         }
@@ -494,7 +489,12 @@ namespace PSFilterPdn
         {
             get
             {
-                return Current;
+                if (this.current == null)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                return this.current;
             }
         }
 
