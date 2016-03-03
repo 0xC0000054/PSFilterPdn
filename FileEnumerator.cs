@@ -12,6 +12,7 @@
 
 using Microsoft.Win32.SafeHandles;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.ConstrainedExecution;
@@ -485,7 +486,7 @@ namespace PSFilterPdn
         /// <summary>
         /// Gets the element in the collection at the current position of the enumerator.
         /// </summary>
-        object System.Collections.IEnumerator.Current
+        object IEnumerator.Current
         {
             get
             {
@@ -595,7 +596,7 @@ namespace PSFilterPdn
         /// <summary>
         /// Sets the enumerator to its initial position, which is before the first element in the collection.
         /// </summary>
-        public void Reset()
+        void IEnumerator.Reset()
         {
             throw new NotSupportedException();
         }
