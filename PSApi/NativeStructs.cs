@@ -10,14 +10,14 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System.Runtime.InteropServices;
 using System;
+using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
     internal static class NativeStructs
     {
-        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential)]
         public struct MEMORY_BASIC_INFORMATION
         {
             public IntPtr BaseAddress;
