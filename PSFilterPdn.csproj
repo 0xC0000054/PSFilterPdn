@@ -159,6 +159,11 @@
     <Compile Include="PSApi\PEFile.cs" />
     <Compile Include="PSApi\PICASuites.cs" />
     <Compile Include="PSApi\PICASuiteStructs.cs" />
+    <Compile Include="PSApi\PICA\PICABufferSuite.cs" />
+    <Compile Include="PSApi\PICA\PICAColorSpaceSuite.cs" />
+    <Compile Include="PSApi\PICA\PICAHandleSuite.cs" />
+    <Compile Include="PSApi\PICA\PICASPPluginsSuite.cs" />
+    <Compile Include="PSApi\PICA\PICAUIHooksSuite.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\PluginAETE.cs" />
     <Compile Include="PSApi\PlugInInfo.cs" />

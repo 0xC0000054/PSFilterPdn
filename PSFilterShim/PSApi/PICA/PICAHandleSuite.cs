@@ -1,0 +1,71 @@
+﻿/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// http://psfilterpdn.codeplex.com/
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2016 Nicholas Hayes
+// 
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+using System;
+using System.Runtime.InteropServices;
+
+namespace PSFilterLoad.PSApi.PICA
+{
+    internal static class PICAHandleSuite
+    {
+        private static SetPIHandleLockDelegate setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
+
+        private static void SetHandleLock(IntPtr handle, byte lockHandle, ref IntPtr address, ref byte oldLock)
+        {
+            try
+            {
+                oldLock = lockHandle == 0 ? (byte)1 : (byte)0;
+            }
+            catch (NullReferenceException)
+            {
+                // ignore it
+            }
+
+            if (lockHandle != 0)
+            {
+                address = HandleSuite.Instance.LockHandle(handle, 0);
+            }
+            else
+            {
+                HandleSuite.Instance.UnlockHandle(handle);
+                address = IntPtr.Zero;
+            }
+        }
+
+        public static unsafe PSHandleSuite1 CreateHandleSuite1(HandleProcs* procs)
+        {
+            PSHandleSuite1 suite = new PSHandleSuite1();
+            suite.New = procs->newProc;
+            suite.Dispose = procs->disposeProc;
+            suite.SetLock = Marshal.GetFunctionPointerForDelegate(setHandleLock);
+            suite.GetSize = procs->getSizeProc;
+            suite.SetSize = procs->setSizeProc;
+            suite.RecoverSpace = procs->recoverSpaceProc;
+
+            return suite;
+        }
+
+        public static unsafe PSHandleSuite2 CreateHandleSuite2(HandleProcs* procs)
+        {
+            PSHandleSuite2 suite = new PSHandleSuite2();
+            suite.New = procs->newProc;
+            suite.Dispose = procs->disposeProc;
+            suite.DisposeRegularHandle = procs->disposeRegularHandleProc;
+            suite.SetLock = Marshal.GetFunctionPointerForDelegate(setHandleLock);
+            suite.GetSize = procs->getSizeProc;
+            suite.SetSize = procs->setSizeProc;
+            suite.RecoverSpace = procs->recoverSpaceProc;
+
+            return suite;
+        }
+    }
+}
