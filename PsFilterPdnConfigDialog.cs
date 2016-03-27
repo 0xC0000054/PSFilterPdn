@@ -1023,21 +1023,25 @@ namespace PSFilterPdn
 
                         foreach (var plugin in LoadPsFilter.QueryPlugin(enumerator.Current))
                         {
-                            TreeNode child = new TreeNode(plugin.title) { Name = plugin.title, Tag = plugin };
-
-                            if (nodes.ContainsKey(plugin.category))
+                            // The **Hidden** category is used for filters that are not directly invoked by the user.
+                            if (!plugin.category.Equals("**Hidden**", StringComparison.Ordinal))
                             {
-                                TreeNode parent = nodes[plugin.category];
-                                if (IsNotDuplicateNode(ref parent, plugin))
+                                TreeNode child = new TreeNode(plugin.title) { Name = plugin.title, Tag = plugin };
+
+                                if (nodes.ContainsKey(plugin.category))
                                 {
-                                    parent.Nodes.Add(child);
+                                    TreeNode parent = nodes[plugin.category];
+                                    if (IsNotDuplicateNode(ref parent, plugin))
+                                    {
+                                        parent.Nodes.Add(child);
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                TreeNode node = new TreeNode(plugin.category, new TreeNode[] { child }) { Name = plugin.category };
+                                else
+                                {
+                                    TreeNode node = new TreeNode(plugin.category, new TreeNode[] { child }) { Name = plugin.category };
 
-                                nodes.Add(plugin.category, node);
+                                    nodes.Add(plugin.category, node);
+                                } 
                             }
                         }
                     }
