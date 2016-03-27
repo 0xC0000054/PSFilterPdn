@@ -406,7 +406,8 @@ namespace PSFilterLoad.PSApi
 		{
 			// Some filters do not handle the alpha channel correctly despite what their filterInfo says.
 			if (data.filterInfo == null || data.category == "Axion" ||
-				data.category.Equals("Vizros 4", StringComparison.Ordinal) && data.title.StartsWith("Lake", StringComparison.Ordinal))
+				data.category.Equals("Vizros 4", StringComparison.Ordinal) && data.title.StartsWith("Lake", StringComparison.Ordinal) ||
+				data.category.Equals("Nik Collection", StringComparison.Ordinal) && data.title.StartsWith("Dfine 2", StringComparison.Ordinal))
 			{
 				if (HasTransparentAlpha())
 				{

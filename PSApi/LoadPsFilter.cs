@@ -410,7 +410,8 @@ namespace PSFilterLoad.PSApi
 		/// <returns><c>true</c> if the alpha channel should be ignored; otherwise <c>false</c>.</returns>
 		private bool IgnoreAlphaChannel(PluginData data)
 		{
-			if (data.filterInfo == null)
+			if (data.filterInfo == null ||
+				data.category.Equals("Nik Collection", StringComparison.Ordinal) && data.title.StartsWith("Dfine 2", StringComparison.Ordinal))
 			{
 				if (HasTransparentAlpha())
 				{
