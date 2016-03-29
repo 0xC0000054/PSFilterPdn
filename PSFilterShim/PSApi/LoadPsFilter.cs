@@ -1175,16 +1175,11 @@ namespace PSFilterLoad.PSApi
 
 		private static bool EnablePICASuites(PluginData data)
 		{
-#if !PICASUITEDEBUG
-			// Enable the PICA suites for Color Efex 4.
-			if (data.category == "Nik Collection")
-			{
-				return true;
-			}
-
-			return false;
-#else
+#if PICASUITEDEBUG
 			return true;
+#else
+			// Enable the PICA suites for Color Efex 4.
+			return data.category.Equals("Nik Collection", StringComparison.Ordinal);
 #endif
 		}
 
@@ -1203,7 +1198,8 @@ namespace PSFilterLoad.PSApi
 				return PluginAbout(pdata);
 			}
 
-			useChannelPorts = pdata.category == "Amico Perry"; // enable the Channel Ports for Luce 2
+			// Enable the channel ports suite for Luce 2.
+			useChannelPorts = pdata.category.Equals("Amico Perry", StringComparison.Ordinal);
 			usePICASuites = EnablePICASuites(pdata);
 
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
