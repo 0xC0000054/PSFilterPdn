@@ -490,11 +490,6 @@ namespace PSFilterLoad.PSApi
 
 			}
 
-			FilterCaseInfo info = data.filterInfo[filterCase - 1];
-
-			inputHandling = info.inputHandling;
-			outputHandling = info.outputHandling;
-
 			return false;
 		}
 
@@ -1219,11 +1214,13 @@ namespace PSFilterLoad.PSApi
 
 			if (pdata.filterInfo != null)
 			{
-				int index = filterCase - 1;
+				FilterCaseInfo info = pdata.filterInfo[filterCase - 1];
+				inputHandling = info.inputHandling;
+				outputHandling = info.outputHandling;
 
-				copyToDest = ((pdata.filterInfo[index].flags1 & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None);
+				copyToDest = ((info.flags1 & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None);
 
-				bool worksWithBlankData = ((pdata.filterInfo[index].flags1 & FilterCaseInfoFlags.WorksWithBlankData) != FilterCaseInfoFlags.None);
+				bool worksWithBlankData = ((info.flags1 & FilterCaseInfoFlags.WorksWithBlankData) != FilterCaseInfoFlags.None);
 
 				if ((filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection) && !worksWithBlankData)
 				{
