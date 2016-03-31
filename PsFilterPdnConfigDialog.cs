@@ -936,13 +936,13 @@ namespace PSFilterPdn
         private static bool Is64BitFilterIncompatible(PluginData plugin)
         {
             // Many Topaz filters crash with a NullReferenceException when run under .NET 3.5, so we use the 32-bit versions unless we are running on .NET 4.0 or later.
-            if (plugin.category == "Topaz Labs" && Environment.Version.Major < 4)
+            if (plugin.category.Equals("Topaz Labs", StringComparison.Ordinal) && Environment.Version.Major < 4)
             {
                 return true;
             }
 
             // The 64-bit version of SuperBladePro crashes with an access violation.
-            if (plugin.category == "Flaming Pear" && plugin.title.StartsWith("SuperBladePro", StringComparison.Ordinal))
+            if (plugin.category.Equals("Flaming Pear", StringComparison.Ordinal) && plugin.title.StartsWith("SuperBladePro", StringComparison.Ordinal))
             {
                 return true;
             }
