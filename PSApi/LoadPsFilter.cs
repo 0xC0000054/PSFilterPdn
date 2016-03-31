@@ -28,40 +28,6 @@ namespace PSFilterLoad.PSApi
 
 	internal sealed partial class LoadPsFilter : IDisposable
 	{
-		/// <summary>
-		/// The Windows-1252 Western European encoding for StringFromPString(byte*)
-		/// </summary>
-		private static readonly Encoding Windows1252Encoding = Encoding.GetEncoding(1252);
-		private static readonly char[] TrimChars = new char[] { ' ', '\0' };
-
-		/// <summary>
-		/// Reads a Pascal String into a string.
-		/// </summary>
-		/// <param name="PString">The PString to read.</param>
-		/// <returns>The resulting string</returns>
-		private static unsafe string StringFromPString(IntPtr PString)
-		{
-			if (PString == IntPtr.Zero)
-			{
-				return string.Empty;
-			}
-			byte* ptr = (byte*)PString.ToPointer();
-
-			return StringFromPString(ptr);
-		}
-
-		/// <summary>
-		/// Reads a Pascal String into a string.
-		/// </summary>
-		/// <param name="PString">The PString to read.</param>
-		/// <returns>The resulting string</returns>
-		private static unsafe string StringFromPString(byte* ptr)
-		{
-			int length = (int)ptr[0];
-
-			return new string((sbyte*)ptr, 1, length, Windows1252Encoding).Trim(TrimChars);
-		}
-
 		static bool RectNonEmpty(Rect16 rect)
 		{
 			return (rect.left < rect.right && rect.top < rect.bottom);
@@ -1337,7 +1303,7 @@ namespace PSFilterLoad.PSApi
 						message = Resources.PlugInHostInsufficient;
 						break;
 					case PSError.errReportString:
-						message = StringFromPString(this.errorStringPtr);
+						message = StringUtil.FromPascalString(this.errorStringPtr, string.Empty);
 						break;
 					case PSError.paramErr:
 					case PSError.filterBadParameters:
@@ -2487,7 +2453,7 @@ namespace PSFilterLoad.PSApi
 			{
 				case ColorServicesSelector.ChooseColor:
 
-					string name = StringFromPString(info.selectorParameter.pickerPrompt);
+					string name = StringUtil.FromPascalString(info.selectorParameter.pickerPrompt, string.Empty);
 
 					if (info.sourceSpace != ColorSpace.RGBSpace)
 					{
