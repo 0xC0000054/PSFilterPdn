@@ -32,19 +32,6 @@ namespace PSFilterLoad.PSApi
 			return (rect.left < rect.right && rect.top < rect.bottom);
 		}
 
-		private static unsafe string StringFromPString(IntPtr PString)
-		{
-			if (PString == IntPtr.Zero)
-			{
-				return string.Empty;
-			}
-			byte* ptr = (byte*)PString.ToPointer();
-
-			int length = (int)ptr[0];
-
-			return new string((sbyte*)ptr, 1, length, windows1252Encoding).Trim(trimChars);
-		}
-
 		private static readonly long OTOFHandleSize = IntPtr.Size + 4L;
 		private const int OTOFSignature = 0x464f544f;
 
@@ -369,13 +356,6 @@ namespace PSFilterLoad.PSApi
 			DebugUtils.GlobalDebugFlags = debugFlags;
 #endif
 		}
-
-		/// <summary>
-		/// The Windows-1252 Western European encoding for StringFromPString(IntPtr)
-		/// </summary>
-		private static readonly Encoding windows1252Encoding = Encoding.GetEncoding(1252);
-		private static readonly char[] trimChars = new char[] { ' ', '\0' };
-
 
 		/// <summary>
 		/// Determines whether the source image has transparent pixels.
@@ -1335,7 +1315,7 @@ namespace PSFilterLoad.PSApi
 						message = Resources.PlugInHostInsufficient;
 						break;
 					case PSError.errReportString:
-						message = StringFromPString(this.errorStringPtr);
+						message = StringUtil.FromPascalString(this.errorStringPtr, string.Empty);
 						break;
 					case PSError.paramErr:
 					case PSError.filterBadParameters:
@@ -2166,7 +2146,7 @@ namespace PSFilterLoad.PSApi
 			{
 				case ColorServicesSelector.ChooseColor:
 
-					string name = StringFromPString(info.selectorParameter.pickerPrompt);
+					string name = StringUtil.FromPascalString(info.selectorParameter.pickerPrompt, string.Empty);
 
 					if (info.sourceSpace != ColorSpace.RGBSpace)
 					{
