@@ -19,7 +19,41 @@ namespace PSFilterLoad.PSApi
 	internal static class StringUtil
 	{
 		private static readonly Encoding Windows1252Encoding = Encoding.GetEncoding(1252);
-		private static readonly char[] TrimChars = new char[] { ' ', '\0' };
+
+		private static string TrimWhiteSpaceAndNull(string value)
+		{
+			int start = 0;
+			int end = value.Length - 1;
+
+			while (start < value.Length)
+			{
+				char ch = value[start];
+				if (!char.IsWhiteSpace(ch) && ch != '\0')
+				{
+					break;
+				}
+				start++;
+			}
+
+			while (end >= start)
+			{
+				char ch = value[end];
+				if (!char.IsWhiteSpace(ch) && ch != '\0')
+				{
+					break;
+				}
+				end--;
+			}
+
+			int trimmedLength = end - start + 1;
+			if (trimmedLength == value.Length)
+			{
+				// Return the existing string if it does not need to be trimmed.
+				return value;
+			}
+
+			return value.Substring(start, trimmedLength);
+		}
 
 		/// <summary>
 		/// Creates a <see cref="string"/> from a Pascal string.
@@ -57,7 +91,7 @@ namespace PSFilterLoad.PSApi
 
 			int length = pascalString[0];
 
-			return new string((sbyte*)pascalString, 1, length, Windows1252Encoding).Trim(TrimChars);
+			return TrimWhiteSpaceAndNull(new string((sbyte*)pascalString, 1, length, Windows1252Encoding));
 		}
 
 		/// <summary>
@@ -98,7 +132,7 @@ namespace PSFilterLoad.PSApi
 				return null;
 			}
 
-			return data.Trim(TrimChars);
+			return data.Trim();
 		}
 
 		/// <summary>
@@ -121,7 +155,7 @@ namespace PSFilterLoad.PSApi
 			// Add the terminating NUL to the total length.
 			lengthWithTerminator = data.Length + 1;
 
-			return data.Trim(TrimChars);
+			return data.Trim();
 		}
 	}
 }
