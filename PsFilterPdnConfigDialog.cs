@@ -1398,7 +1398,7 @@ namespace PSFilterPdn
                 {
                     TreeNode child = item.Key;
                     string title = child.Text;
-                    if ((string.IsNullOrEmpty(filtertext)) || title.ToUpperInvariant().Contains(filtertext.ToUpperInvariant()))
+                    if ((string.IsNullOrEmpty(filtertext)) || title.Contains(filtertext, StringComparison.InvariantCultureIgnoreCase))
                     {
                         if (nodes.ContainsKey(item.Value))
                         {
