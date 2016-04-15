@@ -1003,7 +1003,7 @@ namespace PSFilterPdn
             BackgroundWorker worker = (BackgroundWorker)sender;
             UpdateFilterListParam args = (UpdateFilterListParam)e.Argument;
 
-            Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>();
+            Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>(StringComparer.Ordinal);
 
             for (int i = 0; i < args.directories.Length; i++)
             {
@@ -1393,7 +1393,7 @@ namespace PSFilterPdn
                 this.runFilterBtn.Enabled = false;
                 this.fileNameLbl.Text = string.Empty;
 
-                Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>();
+                Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>(StringComparer.Ordinal);
                 foreach (KeyValuePair<TreeNode, string> item in filterTreeItems)
                 {
                     TreeNode child = item.Key;
