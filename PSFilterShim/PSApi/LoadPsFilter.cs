@@ -3884,7 +3884,7 @@ namespace PSFilterLoad.PSApi
 
 			filterRecord->supportsDummyChannels = 0;
 			filterRecord->supportsAlternateLayouts = 0;
-			filterRecord->wantLayout = PSConstants.Layout.piLayoutTraditional;
+			filterRecord->wantLayout = PSConstants.Layout.Traditional;
 			filterRecord->filterCase = filterCase;
 			filterRecord->dummyPlaneValue = -1;
 			filterRecord->premiereHook = IntPtr.Zero;
