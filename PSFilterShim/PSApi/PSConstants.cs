@@ -185,13 +185,13 @@ namespace PSFilterLoad.PSApi
             /// <summary>
             /// Rows, columns, planes with colbytes = # planes
             /// </summary>
-            public const short piLayoutTraditional = 0;
-            public const short piLayoutRowsColumnsPlanes = 1;
-            public const short piLayoutRowsPlanesColumns = 2;
-            public const short piLayoutColumnsRowsPlanes = 3;
-            public const short piLayoutColumnsPlanesRows = 4;
-            public const short piLayoutPlanesRowsColumns = 5;
-            public const short piLayoutPlanesColumnsRows = 6;
+            public const short Traditional = 0;
+            public const short RowsColumnsPlanes = 1;
+            public const short RowsPlanesColumns = 2;
+            public const short ColumnsRowsPlanes = 3;
+            public const short ColumnsPlanesRows = 4;
+            public const short PlanesRowsColumns = 5;
+            public const short PlanesColumnsRows = 6;
         }
 
         public const string PICABufferSuite = "Photoshop Buffer Suite for Plug-ins";
