@@ -1397,20 +1397,21 @@ namespace PSFilterPdn
                 foreach (KeyValuePair<TreeNode, string> item in filterTreeItems)
                 {
                     TreeNode child = item.Key;
+                    string category = item.Value;
                     string title = child.Text;
                     if ((string.IsNullOrEmpty(filtertext)) || title.Contains(filtertext, StringComparison.InvariantCultureIgnoreCase))
                     {
-                        if (nodes.ContainsKey(item.Value))
+                        if (nodes.ContainsKey(category))
                         {
-                            TreeNode node = nodes[item.Value];
+                            TreeNode node = nodes[category];
                             node.Nodes.Add(child.CloneT<TreeNode>());
                         }
                         else
                         {
-                            TreeNode node = new TreeNode(item.Value); // the parent category
+                            TreeNode node = new TreeNode(category);
                             node.Nodes.Add(child.CloneT<TreeNode>());
 
-                            nodes.Add(item.Value, node);
+                            nodes.Add(category, node);
                         }
 
                     }
