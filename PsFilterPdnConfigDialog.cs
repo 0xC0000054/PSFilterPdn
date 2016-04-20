@@ -1008,10 +1008,16 @@ namespace PSFilterPdn
             for (int i = 0; i < args.directories.Length; i++)
             {
                 string directory = args.directories[i];
+                bool searchSubDirectories = args.searchSubdirectories;
+                if (i == 0 && foundEffectsDir)
+                {
+                    // The sub directories of the Effects are always searched. 
+                    searchSubDirectories = true;
+                }
 
                 worker.ReportProgress(i, Path.GetFileName(directory));
 
-                using (FileEnumerator enumerator = new FileEnumerator(directory, ".8bf", args.searchSubdirectories, true))
+                using (FileEnumerator enumerator = new FileEnumerator(directory, ".8bf", searchSubDirectories, true))
                 {
                     while (enumerator.MoveNext())
                     {
