@@ -20,8 +20,8 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
 #pragma warning disable 0659
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2218:OverrideGetHashCodeOnOverridingEquals"), StructLayout(LayoutKind.Sequential)]
-    internal struct Rect16
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct Rect16 : System.IEquatable<Rect16>
     {
         public short top;
         public short left;
@@ -44,6 +44,31 @@ namespace PSFilterLoad.PSApi
         public bool Equals(Rect16 rect)
         {
             return (this.left == rect.left && this.top == rect.top && this.right == rect.right && this.bottom == rect.bottom);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 23;
+
+                hash = (hash * 127) + this.top.GetHashCode();
+                hash = (hash * 127) + this.left.GetHashCode();
+                hash = (hash * 127) + this.bottom.GetHashCode();
+                hash = (hash * 127) + this.right.GetHashCode();
+
+                return hash;
+            }
+        }
+
+        public static bool operator ==(Rect16 left, Rect16 right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Rect16 left, Rect16 right)
+        {
+            return !left.Equals(right);
         }
 
 #if DEBUG
