@@ -55,7 +55,7 @@ namespace PSFilterPdn
             {
                 StringBuilder sb = new StringBuilder(260);
 
-                if (shellLink.GetPath(sb, sb.MaxCapacity, IntPtr.Zero, 0U) != S_OK)
+                if (shellLink.GetPath(sb, sb.Capacity, IntPtr.Zero, 0U) != S_OK)
                 {
                     return string.Empty;
                 }
