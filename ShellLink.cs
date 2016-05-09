@@ -21,7 +21,6 @@ namespace PSFilterPdn
     /// </summary>
     internal sealed class ShellLink : IDisposable
     {
-        private ShellLinkCoClass shellLinkCoClass;
         private NativeInterfaces.IShellLinkW shellLink;
         private bool disposed;
 
@@ -33,8 +32,7 @@ namespace PSFilterPdn
         /// </summary>
         public ShellLink ()
         {
-            shellLinkCoClass = new ShellLinkCoClass();
-            shellLink = (NativeInterfaces.IShellLinkW)shellLinkCoClass;
+            shellLink = (NativeInterfaces.IShellLinkW)new ShellLinkCoClass();
         }
 
         /// <summary>
@@ -97,12 +95,6 @@ namespace PSFilterPdn
                     Marshal.ReleaseComObject(shellLink);
                     shellLink = null;
                 }
-
-                if (shellLinkCoClass != null)
-                {
-                    Marshal.ReleaseComObject(shellLinkCoClass);
-                    shellLinkCoClass = null;
-                } 
             }
         }
     }
