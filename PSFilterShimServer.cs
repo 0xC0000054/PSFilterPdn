@@ -23,7 +23,6 @@ namespace PSFilterPdn
 
         internal const string EndpointName = "net.pipe://localhost/PSFilterShim/ShimData";
 
-        private static PSFilterShimService _service = null;
         private static ServiceHost _host = null;
 
         /// <summary>
@@ -32,9 +31,7 @@ namespace PSFilterPdn
         /// <param name="service">The service instance to use.</param>
         public static void Start(PSFilterShimService service)
         {
-            _service = service;
-
-            _host = new ServiceHost(_service, ServiceUri);
+            _host = new ServiceHost(service, ServiceUri);
             _host.AddServiceEndpoint(typeof(IPSFilterShim), new NetNamedPipeBinding(), PipeName);
             _host.Open();
         }
