@@ -229,7 +229,6 @@
     <Compile Include="RegionDataWrapper.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ShellLink.cs" />
-    <Compile Include="ShellLinkCoClass.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="StringLogicalComparer.cs" />
     <Compile Include="TreeNodeItemComparer.cs" />
