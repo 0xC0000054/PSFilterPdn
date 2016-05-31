@@ -27,6 +27,11 @@ namespace PSFilterPdn
         private const int STGM_READ = 0;
         private const int S_OK = 0;
 
+        [ComImport(), Guid("00021401-0000-0000-C000-000000000046")]
+        private class ShellLinkCoClass
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ShellLink"/> class.
         /// </summary>
