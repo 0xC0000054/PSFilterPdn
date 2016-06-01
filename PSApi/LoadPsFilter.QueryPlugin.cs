@@ -168,21 +168,22 @@ namespace PSFilterLoad.PSApi
                             AETEParameter[] parameters = new AETEParameter[paramCount];
                             for (int p = 0; p < paramCount; p++)
                             {
-                                parameters[p] = new AETEParameter();
-                                parameters[p].name = StringUtil.FromPascalString(propPtr, out stringLength);
+                                string name = StringUtil.FromPascalString(propPtr, out stringLength);
                                 propPtr += stringLength;
 
-                                parameters[p].key = *(uint*)propPtr;
+                                uint key = *(uint*)propPtr;
                                 propPtr += 4;
 
-                                parameters[p].type = *(uint*)propPtr;
+                                uint type = *(uint*)propPtr;
                                 propPtr += 4;
 
-                                parameters[p].desc = StringUtil.FromPascalString(propPtr, out stringLength);
+                                string description = StringUtil.FromPascalString(propPtr, out stringLength);
                                 propPtr += stringLength;
 
-                                parameters[p].flags = *(short*)propPtr;
+                                short parameterFlags = *(short*)propPtr;
                                 propPtr += 2;
+
+                                parameters[p] = new AETEParameter(name, key, type, description, parameterFlags);
                             }
                             evnt.parameters = parameters;
                         }
@@ -200,25 +201,26 @@ namespace PSFilterLoad.PSApi
                                 AETEEnums[] enums = new AETEEnums[enumCount];
                                 for (int enc = 0; enc < enumCount; enc++)
                                 {
-                                    AETEEnums en = new AETEEnums();
-                                    en.type = *(uint*)propPtr;
+                                    uint type = *(uint*)propPtr;
                                     propPtr += 4;
-                                    en.count = *(short*)propPtr;
+                                    short count = *(short*)propPtr;
                                     propPtr += 2;
-                                    en.enums = new AETEEnum[en.count];
+                                    AETEEnum[] values = new AETEEnum[count];
 
-                                    for (int e = 0; e < en.count; e++)
+                                    for (int e = 0; e < count; e++)
                                     {
-                                        en.enums[e] = new AETEEnum();
-                                        en.enums[e].name = StringUtil.FromPascalString(propPtr, out stringLength);
+                                        string name = StringUtil.FromPascalString(propPtr, out stringLength);
                                         propPtr += stringLength;
-                                        en.enums[e].type = *(uint*)propPtr;
-                                        propPtr += 4;
-                                        en.enums[e].desc = StringUtil.FromPascalString(propPtr, out stringLength);
-                                        propPtr += stringLength;
-                                    }
-                                    enums[enc] = en;
 
+                                        uint key = *(uint*)propPtr;
+                                        propPtr += 4;
+
+                                        string description = StringUtil.FromPascalString(propPtr, out stringLength);
+                                        propPtr += stringLength;
+
+                                        values[e] = new AETEEnum(name, key, description);
+                                    }
+                                    enums[enc] = new AETEEnums(type, count, values);
                                 }
                                 evnt.enums = enums;
                             }
