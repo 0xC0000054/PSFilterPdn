@@ -499,14 +499,10 @@ namespace PSFilterLoad.PSApi
 
             IntPtr filterRes = IntPtr.Zero;
 
-            IntPtr type = Marshal.StringToHGlobalUni("_8BFM");
-            try
+            fixed (char* typePtr = "_8BFM")
             {
-                filterRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, type); // load the _8BFM resource to get the filter title
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(type);
+                // Load the _8BFM resource to get the filter title.
+                filterRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, (IntPtr)typePtr); 
             }
 
             if (filterRes == IntPtr.Zero)
