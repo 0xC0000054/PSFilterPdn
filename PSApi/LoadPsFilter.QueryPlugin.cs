@@ -105,9 +105,9 @@ namespace PSFilterLoad.PSApi
 
                 if (suiteCount == 1) // There should only be one vendor suite
                 {
-                    string vend = StringUtil.FromPascalString(propPtr, out stringLength);
+                    string suiteVendor = StringUtil.FromPascalString(propPtr, out stringLength);
                     propPtr += stringLength;
-                    string desc = StringUtil.FromPascalString(propPtr, out stringLength);
+                    string suiteDescription = StringUtil.FromPascalString(propPtr, out stringLength);
                     propPtr += stringLength;
                     uint suiteID = *(uint*)propPtr;
                     propPtr += 4;
@@ -120,9 +120,9 @@ namespace PSFilterLoad.PSApi
 
                     if (eventCount == 1) // There should only be one scripting event
                     {
-                        string vend2 = StringUtil.FromPascalString(propPtr, out stringLength);
+                        string eventVendor = StringUtil.FromPascalString(propPtr, out stringLength);
                         propPtr += stringLength;
-                        string desc2 = StringUtil.FromPascalString(propPtr, out stringLength);
+                        string eventDescription = StringUtil.FromPascalString(propPtr, out stringLength);
                         propPtr += stringLength;
                         int eventClass = *(int*)propPtr;
                         propPtr += 4;
@@ -147,20 +147,20 @@ namespace PSFilterLoad.PSApi
 
                         uint paramType = BitConverter.ToUInt32(bytes, 0);
 
-                        short flags = *(short*)propPtr;
+                        short eventFlags = *(short*)propPtr;
                         propPtr += 2;
                         short paramCount = *(short*)propPtr;
                         propPtr += 2;
 
                         AETEEvent evnt = new AETEEvent()
                         {
-                            vendor = vend2,
-                            desc = desc2,
+                            vendor = eventVendor,
+                            desc = eventDescription,
                             eventClass = eventClass,
                             type = eventType,
                             replyType = replyType,
                             paramType = paramType,
-                            flags = flags
+                            flags = eventFlags
                         };
 
                         if (paramCount > 0)
