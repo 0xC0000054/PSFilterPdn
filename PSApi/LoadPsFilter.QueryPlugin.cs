@@ -103,7 +103,7 @@ namespace PSFilterLoad.PSApi
 
                 int stringLength = 0;
 
-                if (suiteCount == 1) // There should only be one scripting event
+                if (suiteCount == 1) // There should only be one vendor suite
                 {
                     string vend = StringUtil.FromPascalString(propPtr, out stringLength);
                     propPtr += stringLength;
@@ -118,7 +118,7 @@ namespace PSFilterLoad.PSApi
                     short eventCount = *(short*)propPtr;
                     propPtr += 2;
 
-                    if (eventCount == 1) // There should only be one vendor suite
+                    if (eventCount == 1) // There should only be one scripting event
                     {
                         string vend2 = StringUtil.FromPascalString(propPtr, out stringLength);
                         propPtr += stringLength;
