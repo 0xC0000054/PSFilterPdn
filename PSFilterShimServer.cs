@@ -31,9 +31,12 @@ namespace PSFilterPdn
         /// <param name="service">The service instance to use.</param>
         public static void Start(PSFilterShimService service)
         {
-            _host = new ServiceHost(service, ServiceUri);
-            _host.AddServiceEndpoint(typeof(IPSFilterShim), new NetNamedPipeBinding(), PipeName);
-            _host.Open();
+            if (_host == null)
+            {
+                _host = new ServiceHost(service, ServiceUri);
+                _host.AddServiceEndpoint(typeof(IPSFilterShim), new NetNamedPipeBinding(), PipeName);
+                _host.Open();
+            }
         }
 
         /// <summary>
