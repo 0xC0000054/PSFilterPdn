@@ -29,8 +29,14 @@ namespace PSFilterPdn
         /// Starts the WCF server service.
         /// </summary>
         /// <param name="service">The service instance to use.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="service"/> is null.</exception>
         public static void Start(PSFilterShimService service)
         {
+            if (service == null)
+            {
+                throw new ArgumentNullException("service");
+            }
+
             if (_host == null)
             {
                 _host = new ServiceHost(service, ServiceUri);
