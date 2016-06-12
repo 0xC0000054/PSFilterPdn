@@ -385,10 +385,10 @@ namespace PSFilterLoad.PSApi
 		private bool IgnoreAlphaChannel(PluginData data)
 		{
 			// Some filters do not handle the alpha channel correctly despite what their filterInfo says.
-			if (data.filterInfo == null || 
-				data.category.Equals("Axion", StringComparison.Ordinal) ||
-				data.category.Equals("Vizros 4", StringComparison.Ordinal) && data.title.StartsWith("Lake", StringComparison.Ordinal) ||
-				data.category.Equals("Nik Collection", StringComparison.Ordinal) && data.title.StartsWith("Dfine 2", StringComparison.Ordinal))
+			if (data.FilterInfo == null || 
+				data.Category.Equals("Axion", StringComparison.Ordinal) ||
+				data.Category.Equals("Vizros 4", StringComparison.Ordinal) && data.Title.StartsWith("Lake", StringComparison.Ordinal) ||
+				data.Category.Equals("Nik Collection", StringComparison.Ordinal) && data.Title.StartsWith("Dfine 2", StringComparison.Ordinal))
 			{
 				if (HasTransparentAlpha())
 				{
@@ -411,8 +411,9 @@ namespace PSFilterLoad.PSApi
 			}
 
 			int filterCaseIndex = filterCase - 1;
+			System.Collections.ObjectModel.ReadOnlyCollection<FilterCaseInfo> filterInfo = data.FilterInfo;
 
-			if (data.filterInfo[filterCaseIndex].inputHandling == FilterDataHandling.CantFilter)
+			if (filterInfo[filterCaseIndex].InputHandling == FilterDataHandling.CantFilter)
 			{
 				bool hasTransparency = HasTransparentAlpha();
 				if (!hasTransparency)
@@ -429,10 +430,10 @@ namespace PSFilterLoad.PSApi
 
 					return true;
 				}
-				else if (data.filterInfo[filterCaseIndex + 2].inputHandling == FilterDataHandling.CantFilter)
+				else if (filterInfo[filterCaseIndex + 2].InputHandling == FilterDataHandling.CantFilter)
 				{
 					// If the protected transparency modes are not supported use the next most appropriate mode.
-					if (hasTransparency && data.filterInfo[FilterCase.FloatingSelection - 1].inputHandling != FilterDataHandling.CantFilter)
+					if (hasTransparency && filterInfo[FilterCase.FloatingSelection - 1].InputHandling != FilterDataHandling.CantFilter)
 					{
 						filterCase = FilterCase.FloatingSelection;
 					}
@@ -530,7 +531,7 @@ namespace PSFilterLoad.PSApi
 		/// <exception cref="System.IO.FileNotFoundException">The file specified by the PluginData.fileName field cannot be found.</exception>
 		private void LoadFilter(PluginData pdata)
 		{
-			module = new PluginModule(pdata.fileName, pdata.entryPoint);
+			module = new PluginModule(pdata.FileName, pdata.EntryPoint);
 		}
 
 		/// <summary>
@@ -779,14 +780,14 @@ namespace PSFilterLoad.PSApi
 
 			try
 			{
-				if (pdata.moduleEntryPoints == null)
+				if (pdata.ModuleEntryPoints == null)
 				{
 					module.entryPoint(FilterSelector.About, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
 				}
 				else
 				{
 					// call all the entry points in the module only one should show the about box.
-					foreach (var entryPoint in pdata.moduleEntryPoints)
+					foreach (var entryPoint in pdata.ModuleEntryPoints)
 					{
 						PluginEntryPoint ep = module.GetEntryPoint(entryPoint);
 
@@ -1159,7 +1160,7 @@ namespace PSFilterLoad.PSApi
 			return true;
 #else
 			// Enable the PICA suites for Color Efex 4.
-			return data.category.Equals("Nik Collection", StringComparison.Ordinal);
+			return data.Category.Equals("Nik Collection", StringComparison.Ordinal);
 #endif
 		}
 
@@ -1179,20 +1180,21 @@ namespace PSFilterLoad.PSApi
 			}
 
 			// Enable the channel ports suite for Luce 2.
-			useChannelPorts = pdata.category.Equals("Amico Perry", StringComparison.Ordinal);
+			useChannelPorts = pdata.Category.Equals("Amico Perry", StringComparison.Ordinal);
 			usePICASuites = EnablePICASuites(pdata);
 
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
 
-			if (pdata.filterInfo != null)
+			if (pdata.FilterInfo != null)
 			{
-				FilterCaseInfo info = pdata.filterInfo[filterCase - 1];
-				inputHandling = info.inputHandling;
-				outputHandling = info.outputHandling;
+				FilterCaseInfo info = pdata.FilterInfo[filterCase - 1];
+				inputHandling = info.InputHandling;
+				outputHandling = info.OutputHandling;
+				FilterCaseInfoFlags filterCaseFlags = info.Flags1;
 
-				copyToDest = ((info.flags1 & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None);
+				copyToDest = ((filterCaseFlags & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None);
 
-				bool worksWithBlankData = ((info.flags1 & FilterCaseInfoFlags.WorksWithBlankData) != FilterCaseInfoFlags.None);
+				bool worksWithBlankData = ((filterCaseFlags & FilterCaseInfoFlags.WorksWithBlankData) != FilterCaseInfoFlags.None);
 
 				if ((filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection) && !worksWithBlankData)
 				{
@@ -1216,9 +1218,9 @@ namespace PSFilterLoad.PSApi
 				ClearDestAlpha();
 			}
 
-			if (pdata.aete != null)
+			if (pdata.Aete != null)
 			{
-				descriptorSuite.Aete = pdata.aete;
+				descriptorSuite.Aete = pdata.Aete;
 			}
 
 			SetupDelegates();
