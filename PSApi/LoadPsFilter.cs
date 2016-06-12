@@ -1180,7 +1180,7 @@ namespace PSFilterLoad.PSApi
 				FilterCaseInfo info = pdata.FilterInfo[filterCase - 1];
 				inputHandling = info.InputHandling;
 				outputHandling = info.OutputHandling;
-                FilterCaseInfoFlags filterCaseFlags = info.Flags1;
+				FilterCaseInfoFlags filterCaseFlags = info.Flags1;
 
 				copyToDest = ((filterCaseFlags & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None);
 
