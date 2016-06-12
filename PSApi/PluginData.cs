@@ -10,8 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
-using System.Runtime.InteropServices;
+using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
@@ -20,28 +19,124 @@ namespace PSFilterLoad.PSApi
     /// The class that encapsulates an Adobe® Photoshop® filter plugin
     /// </summary>
     [DataContract()]
-    internal sealed class PluginData
+    public sealed class PluginData
     {
+        private string fileName;
+        private string entryPoint;
+        private string category;
+        private string title;
+        private ReadOnlyCollection<FilterCaseInfo> filterInfo;
+        private bool runWith32BitShim;
+        private AETEData aete;
+        private ReadOnlyCollection<string> moduleEntryPoints;
+
         [DataMember]
-        public string fileName;
+        public string FileName
+        {
+            get
+            {
+                return this.fileName;
+            }
+            private set // Required for DataContract serialization.
+            {
+                this.fileName = value;
+            }
+        }
+
         [DataMember]
-        public string entryPoint;
+        public string EntryPoint
+        {
+            get
+            {
+                return this.entryPoint;
+            }
+            internal set
+            {
+                this.entryPoint = value;
+            }
+        }
+
         [DataMember]
-        public string category;
+        public string Category
+        {
+            get
+            {
+                return this.category;
+            }
+            internal set
+            {
+                this.category = value;
+            }
+        }
+
         [DataMember]
-        public string title;
+        public string Title
+        {
+            get
+            {
+                return this.title;
+            }
+            internal set
+            {
+                this.title = value;
+            }
+        }
+
         [DataMember]
-        public FilterCaseInfo[] filterInfo;
+        public ReadOnlyCollection<FilterCaseInfo> FilterInfo
+        {
+            get
+            {
+                return this.filterInfo;
+            }
+            internal set
+            {
+                this.filterInfo = value;
+            }
+        }
+
         /// <summary>
         /// Used to run 32-bit plugins in 64-bit Paint.NET
         /// </summary>
-        public bool runWith32BitShim;
-        [DataMember]
-        public AETEData aete;
-        [DataMember]
-        public string[] moduleEntryPoints;
+        internal bool RunWith32BitShim
+        {
+            get
+            {
+                return this.runWith32BitShim;
+            }
+            set
+            {
+                this.runWith32BitShim = value;
+            }
+        }
 
-        public PluginData(string fileName)
+        [DataMember]
+        public AETEData Aete
+        {
+            get
+            {
+                return this.aete;
+            }
+            internal set
+            {
+                this.aete = value;
+            }
+        }
+
+        [DataMember]
+        public ReadOnlyCollection<string> ModuleEntryPoints
+        {
+            get
+            {
+                return this.moduleEntryPoints;
+            }
+            internal set
+            {
+                this.moduleEntryPoints = value;
+            }
+        }
+
+        internal PluginData(string fileName)
         {
             this.fileName = fileName;
             this.entryPoint = string.Empty;
@@ -53,19 +148,7 @@ namespace PSFilterLoad.PSApi
             this.moduleEntryPoints = null;
         }
 
-        public PluginData(string fileName, string entryPoint, string category, string title, FilterCaseInfo[] info, AETEData aete)
-        {
-            this.fileName = fileName;
-            this.entryPoint = entryPoint;
-            this.category = category;
-            this.title = title;
-            this.filterInfo = info;
-            this.runWith32BitShim = false;
-            this.aete = aete;
-            this.moduleEntryPoints = null;
-        }
-
-        public bool IsValid()
+        internal bool IsValid()
         {
             return (!string.IsNullOrEmpty(this.category) && !string.IsNullOrEmpty(this.title) && !string.IsNullOrEmpty(this.entryPoint));
         }
