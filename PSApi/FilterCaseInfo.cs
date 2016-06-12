@@ -18,7 +18,6 @@
 
 
 using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
@@ -26,7 +25,7 @@ namespace PSFilterLoad.PSApi
     /// <summary>
     /// The inputHandling and outputHandling Flags for the FilterCaseInfo structure
     /// </summary>
-    internal enum FilterDataHandling : byte
+    public enum FilterDataHandling : byte
     {
         CantFilter = 0,
         None = 1,
@@ -43,7 +42,7 @@ namespace PSFilterLoad.PSApi
     }
 
     [Flags]
-    internal enum FilterCaseInfoFlags : byte
+    public enum FilterCaseInfoFlags : byte
     {
         None = 0,
         DontCopyToDestination = (1 << 0),
@@ -52,21 +51,46 @@ namespace PSFilterLoad.PSApi
         WritesOutsideSelection = (1 << 3)
     }
 
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 1)]
     [DataContract()]
-    internal struct FilterCaseInfo
+    public sealed class FilterCaseInfo
     {
         [DataMember]
-        public FilterDataHandling inputHandling;
+        public FilterDataHandling InputHandling
+        {
+            get;
+            private set;
+        }
 
         [DataMember]
-        public FilterDataHandling outputHandling;
+        public FilterDataHandling OutputHandling
+        {
+            get;
+            private set;
+        }
 
         [DataMember]
-        public FilterCaseInfoFlags flags1;
+        public FilterCaseInfoFlags Flags1
+        {
+            get;
+            private set;
+        }
 
         [DataMember]
-        public byte flags2;
+        public byte Flags2
+        {
+            get;
+            private set;
+        }
+
+        internal const int SizeOf = 4;
+
+        internal unsafe FilterCaseInfo(byte* ptr)
+        {
+            this.InputHandling = (FilterDataHandling)ptr[0];
+            this.OutputHandling = (FilterDataHandling)ptr[1];
+            this.Flags1 = (FilterCaseInfoFlags)ptr[2];
+            this.Flags2 = ptr[3];
+        }
     }
 
 }
