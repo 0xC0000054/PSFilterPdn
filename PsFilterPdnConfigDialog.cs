@@ -56,13 +56,8 @@ namespace PSFilterPdn
         private Button buttonCancel;
 
         private Surface destSurface;
-        private string category;
-        private string fileName;
-        private string entryPoint;
-        private string title;
-        private string filterCaseInfo;
+        private PluginData filterData;
         private ParameterData filterParameters;
-        private AETEData aeteData;
         private List<PSResource> pseudoResources;
         private bool runWith32BitShim;
 
@@ -84,6 +79,7 @@ namespace PSFilterPdn
 
         private Settings settings;
         private string lastSelectedFilterTitle;
+        private string filterParametersPluginFileName;
         private bool foundEffectsDir;
         /// <summary>
         /// If DEP is enabled on a 32-bit OS use the shim process.
@@ -144,22 +140,17 @@ namespace PSFilterPdn
 
         protected override void InitialInitToken()
         {
-            base.theEffectToken = new PSFilterPdnConfigToken(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, null, false, null, null, null, null);
+            base.theEffectToken = new PSFilterPdnConfigToken(null, null, false, null, null, null);
         }
 
         protected override void InitTokenFromDialog()
         {
             PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)base.theEffectToken;
 
-            token.Category = this.category;
             token.Dest = this.destSurface;
-            token.EntryPoint = this.entryPoint;
-            token.FileName = this.fileName;
-            token.FilterCaseInfo = this.filterCaseInfo;
-            token.Title = this.title;
+            token.FilterData = this.filterData;
             token.RunWith32BitShim = this.runWith32BitShim;
             token.FilterParameters = this.filterParameters;
-            token.AETE = this.aeteData;
             token.ExpandedNodes = this.expandedNodes.AsReadOnly();
             token.PesudoResources = new System.Collections.ObjectModel.Collection<PSResource>(this.pseudoResources);
         }
@@ -168,14 +159,14 @@ namespace PSFilterPdn
         {
             PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)effectToken;
 
-            if (!string.IsNullOrEmpty(token.Title))
+            if (token.FilterData != null)
             {
-                this.lastSelectedFilterTitle = token.Title;
+                this.lastSelectedFilterTitle = token.FilterData.Title;
             }
 
-            if (!string.IsNullOrEmpty(token.FileName) && token.FilterParameters != null)
+            if (token.FilterData != null && token.FilterParameters != null)
             {
-                this.fileName = token.FileName;
+                this.filterParametersPluginFileName = token.FilterData.FileName;
                 this.filterParameters = token.FilterParameters;
             }
 
@@ -615,7 +606,7 @@ namespace PSFilterPdn
                     }
                 }
 
-                if ((filterParameters != null) && data.fileName == fileName)
+                if ((filterParameters != null) && data.FileName.Equals(filterParametersPluginFileName, StringComparison.OrdinalIgnoreCase))
                 {
                     using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
@@ -681,12 +672,7 @@ namespace PSFilterPdn
 
             if (proxyResult && !showAbout && File.Exists(destFileName))
             {
-                this.fileName = proxyData.fileName;
-                this.entryPoint = proxyData.entryPoint;
-                this.title = proxyData.title;
-                this.category = proxyData.category;
-                this.filterCaseInfo = GetFilterCaseInfoString(proxyData);
-                this.aeteData = proxyData.aete;
+                this.filterData = proxyData;
 
                 using (Bitmap dst = new Bitmap(destFileName))
                 {
@@ -752,7 +738,7 @@ namespace PSFilterPdn
 
                 if (!proxyRunning && !filterRunning)
                 {
-                    if (data.runWith32BitShim || useDEPProxy)
+                    if (data.RunWith32BitShim || useDEPProxy)
                     {
                         this.runWith32BitShim = true;
                         this.Run32BitFilterProxy(this.Effect.EnvironmentParameters, data);
@@ -769,7 +755,7 @@ namespace PSFilterPdn
                             {
                                 lps.SetProgressCallback(new Action<int, int>(UpdateProgress));
 
-                                if ((filterParameters != null) && data.fileName == fileName)
+                                if ((filterParameters != null) && data.FileName.Equals(lastSelectedFilterTitle, StringComparison.OrdinalIgnoreCase))
                                 {
                                     lps.FilterParameters = this.filterParameters;
                                 }
@@ -785,13 +771,8 @@ namespace PSFilterPdn
                                 if (!showAboutDialog && result)
                                 {
                                     this.destSurface = lps.Dest.Clone();
-                                    this.fileName = data.fileName;
-                                    this.entryPoint = data.entryPoint;
-                                    this.title = data.title;
-                                    this.category = data.category;
-                                    this.filterCaseInfo = GetFilterCaseInfoString(data);
+                                    this.filterData = data;
                                     this.filterParameters = lps.FilterParameters;
-                                    this.aeteData = data.aete;
                                     if (lps.PseudoResources.Count > 0)
                                     {
                                         this.pseudoResources.AddRange(lps.PseudoResources);
@@ -936,13 +917,13 @@ namespace PSFilterPdn
         private static bool Is64BitFilterIncompatible(PluginData plugin)
         {
             // Many Topaz filters crash with a NullReferenceException when run under .NET 3.5, so we use the 32-bit versions unless we are running on .NET 4.0 or later.
-            if (plugin.category.Equals("Topaz Labs", StringComparison.Ordinal) && Environment.Version.Major < 4)
+            if (plugin.Category.Equals("Topaz Labs", StringComparison.Ordinal) && Environment.Version.Major < 4)
             {
                 return true;
             }
 
             // The 64-bit version of SuperBladePro crashes with an access violation.
-            if (plugin.category.Equals("Flaming Pear", StringComparison.Ordinal) && plugin.title.StartsWith("SuperBladePro", StringComparison.Ordinal))
+            if (plugin.Category.Equals("Flaming Pear", StringComparison.Ordinal) && plugin.Title.StartsWith("SuperBladePro", StringComparison.Ordinal))
             {
                 return true;
             }
@@ -960,23 +941,23 @@ namespace PSFilterPdn
         {
             if (IntPtr.Size == 8)
             {
-                if (parent.Nodes.ContainsKey(data.title))
+                if (parent.Nodes.ContainsKey(data.Title))
                 {
-                    TreeNode node = parent.Nodes[data.title];
+                    TreeNode node = parent.Nodes[data.Title];
                     PluginData menuData = (PluginData)node.Tag;
 
                     if (Is64BitFilterIncompatible(data))
                     {
                         // If the 64-bit filter in the menu is incompatible remove it and use the 32-bit version.
-                        if (!menuData.runWith32BitShim && data.runWith32BitShim)
+                        if (!menuData.RunWith32BitShim && data.RunWith32BitShim)
                         {
                             parent.Nodes.Remove(node);
                         }
 
-                        return data.runWith32BitShim;
+                        return data.RunWith32BitShim;
                     }
 
-                    if (menuData.runWith32BitShim && !data.runWith32BitShim)
+                    if (menuData.RunWith32BitShim && !data.RunWith32BitShim)
                     {
                         // If the new plugin is 64-bit and the old one is not remove the old one and use the 64-bit one.
                         parent.Nodes.Remove(node);
@@ -985,7 +966,8 @@ namespace PSFilterPdn
                     }
 
                     // If the filter has the same processor architecture and title but is located in a different 8bf file, add it to the menu. 
-                    if (menuData.runWith32BitShim == data.runWith32BitShim && !menuData.fileName.Equals(data.fileName, StringComparison.OrdinalIgnoreCase))
+                    if (menuData.RunWith32BitShim == data.RunWith32BitShim && 
+                        !menuData.FileName.Equals(data.FileName, StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
                     }
@@ -1030,13 +1012,13 @@ namespace PSFilterPdn
                         foreach (var plugin in LoadPsFilter.QueryPlugin(enumerator.Current))
                         {
                             // The **Hidden** category is used for filters that are not directly invoked by the user.
-                            if (!plugin.category.Equals("**Hidden**", StringComparison.Ordinal))
+                            if (!plugin.Category.Equals("**Hidden**", StringComparison.Ordinal))
                             {
-                                TreeNode child = new TreeNode(plugin.title) { Name = plugin.title, Tag = plugin };
+                                TreeNode child = new TreeNode(plugin.Title) { Name = plugin.Title, Tag = plugin };
 
-                                if (nodes.ContainsKey(plugin.category))
+                                if (nodes.ContainsKey(plugin.Category))
                                 {
-                                    TreeNode parent = nodes[plugin.category];
+                                    TreeNode parent = nodes[plugin.Category];
                                     if (IsNotDuplicateNode(ref parent, plugin))
                                     {
                                         parent.Nodes.Add(child);
@@ -1044,9 +1026,9 @@ namespace PSFilterPdn
                                 }
                                 else
                                 {
-                                    TreeNode node = new TreeNode(plugin.category, new TreeNode[] { child }) { Name = plugin.category };
+                                    TreeNode node = new TreeNode(plugin.Category, new TreeNode[] { child }) { Name = plugin.Category };
 
-                                    nodes.Add(plugin.category, node);
+                                    nodes.Add(plugin.Category, node);
                                 } 
                             }
                         }
@@ -1150,7 +1132,7 @@ namespace PSFilterPdn
             if (e.Node.Tag != null)
             {
                 runFilterBtn.Enabled = true;
-                fileNameLbl.Text = Path.GetFileName(((PluginData)e.Node.Tag).fileName);
+                fileNameLbl.Text = Path.GetFileName(((PluginData)e.Node.Tag).FileName);
             }
             else
             {
@@ -1465,29 +1447,6 @@ namespace PSFilterPdn
                     this.remDirBtn.Enabled = true;
                 }
             }
-        }
-
-        private static string GetFilterCaseInfoString(PluginData data)
-        {
-            if (data.filterInfo != null)
-            {
-                StringBuilder fici = new StringBuilder();
-
-                for (int i = 0; i < 7; i++)
-                {
-                    FilterCaseInfo info = data.filterInfo[i];
-                    fici.AppendFormat(CultureInfo.InvariantCulture, "{0:G}_{1:G}_{2:G}", new object[] { info.inputHandling, info.outputHandling, info.flags1 });
-
-                    if (i < 6)
-                    {
-                        fici.Append(':');
-                    }
-                }
-
-                return fici.ToString();
-            }
-
-            return string.Empty;
         }
 
         private void filterTree_DoubleClick(object sender, EventArgs e)
