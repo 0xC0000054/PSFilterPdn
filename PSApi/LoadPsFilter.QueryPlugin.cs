@@ -12,6 +12,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
@@ -319,9 +320,9 @@ namespace PSFilterLoad.PSApi
                 }
                 else if (propKey == query.platformEntryPoint)
                 {
-                    enumData.entryPoint = Marshal.PtrToStringAnsi((IntPtr)dataPtr, pipp->propertyLength).TrimEnd('\0');
+                    enumData.EntryPoint = Marshal.PtrToStringAnsi((IntPtr)dataPtr, pipp->propertyLength).TrimEnd('\0');
                     // If it is a 32-bit plug-in on a 64-bit OS run it with the 32-bit shim.
-                    enumData.runWith32BitShim = (IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty);
+                    enumData.RunWith32BitShim = (IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty);
                 }
                 else if (propKey == PIPropertyID.PIVersionProperty)
                 {
@@ -351,20 +352,21 @@ namespace PSFilterLoad.PSApi
                 }
                 else if (propKey == PIPropertyID.PICategoryProperty)
                 {
-                    enumData.category = StringUtil.FromPascalString(dataPtr);
+                    enumData.Category = StringUtil.FromPascalString(dataPtr);
                 }
                 else if (propKey == PIPropertyID.PINameProperty)
                 {
-                    enumData.title = StringUtil.FromPascalString(dataPtr);
+                    enumData.Title = StringUtil.FromPascalString(dataPtr);
                 }
                 else if (propKey == PIPropertyID.PIFilterCaseInfoProperty)
                 {
-                    enumData.filterInfo = new FilterCaseInfo[7];
-                    for (int j = 0; j < 7; j++)
+                    FilterCaseInfo[] filterInfo = new FilterCaseInfo[7];
+                    for (int j = 0; j < filterInfo.Length; j++)
                     {
-                        enumData.filterInfo[j] = *(FilterCaseInfo*)dataPtr;
-                        dataPtr += 4;
+                        filterInfo[j] = new FilterCaseInfo(dataPtr);
+                        dataPtr += FilterCaseInfo.SizeOf;
                     }
+                    enumData.FilterInfo = new ReadOnlyCollection<FilterCaseInfo>(filterInfo);
                 }
                 else if (propKey == PIPropertyID.PIHasTerminologyProperty)
                 {
@@ -396,7 +398,7 @@ namespace PSFilterLoad.PSApi
 
                         if (queryAETE.enumAETE != null)
                         {
-                            enumData.aete = new AETEData(queryAETE.enumAETE);
+                            enumData.Aete = new AETEData(queryAETE.enumAETE);
                         }
                     }
                 }
@@ -462,13 +464,13 @@ namespace PSFilterLoad.PSApi
 
             PluginData enumData = new PluginData(query.fileName);
 
-            enumData.category = StringUtil.FromCString((IntPtr)ptr, out length);
+            enumData.Category = StringUtil.FromCString((IntPtr)ptr, out length);
 
             ptr += length;
 
-            if (string.IsNullOrEmpty(enumData.category))
+            if (string.IsNullOrEmpty(enumData.Category))
             {
-                enumData.category = PSFilterPdn.Properties.Resources.PiMIDefaultCategoryName;
+                enumData.Category = PSFilterPdn.Properties.Resources.PiMIDefaultCategoryName;
             }
 
             PlugInInfo* info = (PlugInInfo*)ptr;
@@ -537,12 +539,12 @@ namespace PSFilterLoad.PSApi
 
             IntPtr resPtr = new IntPtr(filterLock.ToInt64() + 2L);
 
-            enumData.title = StringUtil.FromCString(resPtr);
+            enumData.Title = StringUtil.FromCString(resPtr);
 
             // The entry point number is the same as the resource number.
-            enumData.entryPoint = "ENTRYPOINT" + lpszName.ToInt32().ToString(CultureInfo.InvariantCulture);
-            enumData.runWith32BitShim = true; // these filters should always be 32-bit
-            enumData.filterInfo = null;
+            enumData.EntryPoint = "ENTRYPOINT" + lpszName.ToInt32().ToString(CultureInfo.InvariantCulture);
+            enumData.RunWith32BitShim = true; // these filters should always be 32-bit
+            enumData.FilterInfo = null;
 
             if (enumData.IsValid())
             {
@@ -634,12 +636,12 @@ namespace PSFilterLoad.PSApi
                 string[] entryPoints = new string[count];
                 for (int i = 0; i < count; i++)
                 {
-                    entryPoints[i] = pluginData[i].entryPoint;
+                    entryPoints[i] = pluginData[i].EntryPoint;
                 }
 
                 for (int i = 0; i < count; i++)
                 {
-                    pluginData[i].moduleEntryPoints = entryPoints;
+                    pluginData[i].ModuleEntryPoints = new ReadOnlyCollection<string>(entryPoints);
                 }
             }
 
