@@ -147,7 +147,6 @@
     <Compile Include="PSApi\DescriptorTypes.cs" />
     <Compile Include="PSApi\DisplayPixelsProc.cs" />
     <Compile Include="PSApi\FilterCase.cs" />
-    <Compile Include="PSApi\FilterCaseInfo.cs" />
     <Compile Include="PSApi\FilterRecord.cs" />
     <Compile Include="PSApi\FilterSelector.cs" />
     <Compile Include="PSApi\HandleProc.cs" />
@@ -170,7 +169,6 @@
     <Compile Include="PSApi\PICA\PICAUIHooksSuite.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\PlatformData.cs" />
-    <Compile Include="PSApi\PluginData.cs" />
     <Compile Include="PSApi\PluginModule.cs" />
     <Compile Include="PSApi\PlugInMonitor.cs" />
     <Compile Include="PSApi\PluginPhase.cs" />
