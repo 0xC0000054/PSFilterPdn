@@ -19,30 +19,13 @@ namespace PSFilterPdn
 {
     public sealed class PSFilterPdnConfigToken : PaintDotNet.Effects.EffectConfigToken
     {
-        private string category;
         private Surface dest;
-        private string entryPoint;
-        private string fileName;
-        private string title;
-        private string filterCaseInfo;
+        private PluginData filterData;
         private bool runWith32BitShim;
         private ParameterData filterParameters;
-        private AETEData aeteData;
         private ReadOnlyCollection<string> expandedNodes;
         private Collection<PSResource> pseudoResources;
         
-        public string Category
-        {
-            get
-            {
-                return category;
-            }
-            internal set
-            {
-                category = value;
-            }
-        }
-
         public Surface Dest
         {
             get
@@ -55,53 +38,17 @@ namespace PSFilterPdn
             }
         }
 
-        public string EntryPoint
+        public PluginData FilterData
         {
             get
             {
-                return entryPoint;
+                return filterData;
             }
             internal set
             {
-                entryPoint = value;
+                filterData = value;
             }
         }
-
-        public string FileName
-        {
-            get
-            {
-                return fileName;
-            }
-            internal set
-            {
-                fileName = value;
-            }
-        }
-
-        public string FilterCaseInfo
-        {
-            get
-            {
-                return filterCaseInfo;
-            }
-            internal set
-            {
-                filterCaseInfo = value;
-            }
-        }
-
-        public string Title
-        {
-            get
-            {
-                return title;
-            }
-            internal set
-            {
-                title = value;
-            }
-        } 
 
         public bool RunWith32BitShim
         {
@@ -124,18 +71,6 @@ namespace PSFilterPdn
             internal set
             {
                 filterParameters = value;
-            }
-        }
-
-        public AETEData AETE
-        {
-            get
-            {
-                return aeteData;
-            }
-            internal set
-            {
-                aeteData = value;
             }
         }
 
@@ -163,20 +98,14 @@ namespace PSFilterPdn
             }
         }
 
-        public PSFilterPdnConfigToken(string fileName, string entryPoint, string title, string category, 
-            string filterCaseInfo, Surface dest, bool useShim, ParameterData paramData, AETEData aete,
+        public PSFilterPdnConfigToken(Surface dest, PluginData filterData, bool useShim, ParameterData paramData, 
             ReadOnlyCollection<string> nodes, Collection<PSResource> resources)
             : base()
         {
-            this.category = category;
             this.dest = dest;
-            this.entryPoint = entryPoint;
-            this.filterCaseInfo = filterCaseInfo;
-            this.fileName = fileName;
-            this.title = title;
+            this.filterData = filterData;
             this.runWith32BitShim = useShim;
             this.filterParameters = paramData;
-            this.aeteData = aete;
             this.expandedNodes = nodes;
             this.pseudoResources = resources;
         }
@@ -184,15 +113,10 @@ namespace PSFilterPdn
         private PSFilterPdnConfigToken(PSFilterPdnConfigToken copyMe)
             : base(copyMe)
         {
-            this.category = copyMe.category;
             this.dest = copyMe.dest;
-            this.entryPoint = copyMe.entryPoint;
-            this.fileName = copyMe.fileName;
-            this.filterCaseInfo= copyMe.filterCaseInfo;
-            this.title = copyMe.title;
+            this.filterData = copyMe.filterData;
             this.runWith32BitShim = copyMe.runWith32BitShim;
             this.filterParameters = copyMe.filterParameters;
-            this.aeteData = copyMe.aeteData;
             this.expandedNodes = copyMe.expandedNodes;
             this.pseudoResources = copyMe.pseudoResources;
         }
