@@ -83,29 +83,6 @@ namespace PSFilterPdn
             return MessageBox.Show(window, message, StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
         }
 
-        private static FilterCaseInfo[] GetFilterCaseInfoFromString(string input)
-        {
-            if (!string.IsNullOrEmpty(input))
-            {
-                FilterCaseInfo[] info = new FilterCaseInfo[7];
-                string[] split = input.Split(new char[] { ':' });
-
-                for (int i = 0; i < split.Length; i++)
-                {
-                    string[] data = split[i].Split(new char[] { '_' });
-
-                    info[i].inputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[0]);
-                    info[i].outputHandling = (FilterDataHandling)Enum.Parse(typeof(FilterDataHandling), data[1]);
-                    info[i].flags1 = (FilterCaseInfoFlags)Enum.Parse(typeof(FilterCaseInfoFlags), data[2]);
-                    info[i].flags2 = 0;
-                }
-
-                return info;
-            }
-
-            return null;
-        }
-
         private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token, IWin32Window window)
         {
             // Check that PSFilterShim exists first thing and abort if it does not.
@@ -123,8 +100,6 @@ namespace PSFilterPdn
             string parameterDataFileName = Path.Combine(userDataPath, "parameters.dat");
             string resourceDataFileName = Path.Combine(userDataPath, "PseudoResources.dat");
             string regionFileName = string.Empty;
-
-            PluginData pluginData = new PluginData(token.FileName, token.EntryPoint, token.Category, token.Title, GetFilterCaseInfoFromString(token.FilterCaseInfo), token.AETE);
 
             Rectangle sourceBounds = base.EnvironmentParameters.SourceSurface.Bounds;
 
@@ -151,7 +126,7 @@ namespace PSFilterPdn
                 showAboutDialog = false,
                 sourceFileName = srcFileName,
                 destFileName = destFileName,
-                pluginData = pluginData,
+                pluginData = token.FilterData,
                 filterRect = selection,
                 parentHandle = window.Handle,
                 primary = base.EnvironmentParameters.PrimaryColor.ToColor(),
@@ -250,13 +225,11 @@ namespace PSFilterPdn
                 {
                     lps.SetAbortCallback(new Func<byte>(AbortCallback));
 
-                    PluginData pdata = new PluginData(token.FileName, token.EntryPoint, token.Category, token.Title, GetFilterCaseInfoFromString(token.FilterCaseInfo), token.AETE);
-
                     lps.FilterParameters = token.FilterParameters;
                     lps.PseudoResources = token.PesudoResources.ToList();
                     lps.IsRepeatEffect = true;
 
-                    bool result = lps.RunPlugin(pdata, false);
+                    bool result = lps.RunPlugin(token.FilterData, false);
 
                     if (result)
                     {
