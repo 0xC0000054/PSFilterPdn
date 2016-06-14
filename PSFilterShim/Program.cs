@@ -77,28 +77,14 @@ namespace PSFilterShim
 
 		static void RunFilter()
 		{
-			string src = serviceProxy.GetSourceImagePath();
-			string dstImg = serviceProxy.GetDestImagePath();
-
-			Color primary = serviceProxy.GetPrimaryColor();
-
-			Color secondary = serviceProxy.GetSecondaryColor();
-
-			Rectangle selection = serviceProxy.GetFilterRect();
-
-			IntPtr owner = serviceProxy.GetWindowHandle();
-
-			bool repeatEffect = serviceProxy.IsRepeatEffect();
-			bool showAbout = serviceProxy.ShowAboutDialog();
-
 			PluginData pdata = serviceProxy.GetPluginData();
+			PSFilterShimData shimData = serviceProxy.GetShimData();
 
 			Region selectionRegion = null;
 
-			string wrapFileName = serviceProxy.GetRegionDataPath();
-			if (!string.IsNullOrEmpty(wrapFileName))
+			if (!string.IsNullOrEmpty(shimData.RegionDataPath))
 			{
-				using (FileStream fs = new FileStream(wrapFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+				using (FileStream fs = new FileStream(shimData.RegionDataPath, FileMode.Open, FileAccess.Read, FileShare.None))
 				{
 					BinaryFormatter bf = new BinaryFormatter();
 					RegionDataWrapper wrapper = (RegionDataWrapper)bf.Deserialize(fs);
@@ -115,10 +101,9 @@ namespace PSFilterShim
 			try
 			{
 				ParameterData filterParameters = null;
-				string parmDataFileName = serviceProxy.GetParameterDataPath();
-				if (File.Exists(parmDataFileName))
+				if (File.Exists(shimData.ParameterDataPath))
 				{
-					using (FileStream fs = new FileStream(parmDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+					using (FileStream fs = new FileStream(shimData.ParameterDataPath, FileMode.Open, FileAccess.Read, FileShare.None))
 					{
 						BinaryFormatter bf = new BinaryFormatter();
 						filterParameters = (ParameterData)bf.Deserialize(fs);
@@ -126,19 +111,18 @@ namespace PSFilterShim
 				}
 
 				List<PSResource> pseudoResources = null;
-				string resourceFileName = serviceProxy.GetPseudoResourcePath();
-				if (File.Exists(resourceFileName))
+				if (File.Exists(shimData.PseudoResourcePath))
 				{
-					using (FileStream fs = new FileStream(resourceFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
+					using (FileStream fs = new FileStream(shimData.PseudoResourcePath, FileMode.Open, FileAccess.Read, FileShare.None))
 					{
 						BinaryFormatter bf = new BinaryFormatter();
 						pseudoResources = (List<PSResource>)bf.Deserialize(fs);
 					}
 				}
 
-				using (LoadPsFilter lps = new LoadPsFilter(src, primary, secondary, selection, selectionRegion, owner))
+				using (LoadPsFilter lps = new LoadPsFilter(shimData, selectionRegion))
 				{
-					if (repeatEffect)
+					if (shimData.RepeatEffect)
 					{
 						lps.SetAbortCallback(new Func<byte>(serviceProxy.AbortFilter));
 					}
@@ -156,7 +140,7 @@ namespace PSFilterShim
 						if (parameterData != null || filterParameters.AETEDictionary.Count > 0)
 						{
 							lps.FilterParameters = filterParameters;
-							lps.IsRepeatEffect = repeatEffect;
+							lps.IsRepeatEffect = shimData.RepeatEffect;
 						}
 					}
 
@@ -165,26 +149,26 @@ namespace PSFilterShim
 						lps.PseudoResources = pseudoResources;
 					}
 
-					bool result = lps.RunPlugin(pdata, showAbout);
+					bool result = lps.RunPlugin(pdata, shimData.ShowAboutDialog);
 
-					if (!showAbout)
+					if (!shimData.ShowAboutDialog)
 					{
 						if (result)
 						{
 							using (Bitmap dst = lps.Dest.CreateAliasedBitmap())
 							{
-								dst.Save(dstImg, ImageFormat.Png);
+								dst.Save(shimData.DestinationImagePath, ImageFormat.Png);
 							}
 
 							if (!lps.IsRepeatEffect)
 							{
-								using (FileStream fs = new FileStream(parmDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+								using (FileStream fs = new FileStream(shimData.ParameterDataPath, FileMode.Create, FileAccess.Write, FileShare.None))
 								{
 									BinaryFormatter bf = new BinaryFormatter();
 									bf.Serialize(fs, lps.FilterParameters);
 								}
 
-								using (FileStream fs = new FileStream(resourceFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+								using (FileStream fs = new FileStream(shimData.PseudoResourcePath, FileMode.Create, FileAccess.Write, FileShare.None))
 								{
 									BinaryFormatter bf = new BinaryFormatter();
 									bf.Serialize(fs, lps.PseudoResources);
