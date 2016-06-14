@@ -12,7 +12,6 @@
 
 using System.Drawing;
 using System.ServiceModel;
-using PSFilterLoad.PSApi;
 
 [ServiceContract(Namespace = "http://PSFilterPdn.shimData")]
 internal interface IPSFilterShim
@@ -36,7 +35,7 @@ internal interface IPSFilterShim
     Rectangle GetFilterRect();
     
     [OperationContract]
-    PluginData GetPluginData();
+    PSFilterLoad.PSApi.PluginData GetPluginData();
        
     [OperationContract]
     System.IntPtr GetWindowHandle();
