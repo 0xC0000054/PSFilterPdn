@@ -120,26 +120,26 @@ namespace PSFilterPdn
             bool proxyResult = true;
             string proxyErrorMessage = string.Empty;
 
-            PSFilterShimService service = new PSFilterShimService(new Func<byte>(AbortCallback))
+            PSFilterShimData shimData = new PSFilterShimData
             {
-                isRepeatEffect = true,
-                showAboutDialog = false,
-                sourceFileName = srcFileName,
-                destFileName = destFileName,
-                pluginData = token.FilterData,
-                filterRect = selection,
-                parentHandle = window.Handle,
-                primary = base.EnvironmentParameters.PrimaryColor.ToColor(),
-                secondary = base.EnvironmentParameters.SecondaryColor.ToColor(),
-                regionFileName = regionFileName,
-                parameterDataFileName = parameterDataFileName,
-                resourceFileName = resourceDataFileName,
-                errorCallback = delegate(string data)
-                                {
-                                    proxyResult = false;
-                                    proxyErrorMessage = data;
-                                }
+                RepeatEffect = true,
+                ShowAboutDialog = false,
+                SourceImagePath = srcFileName,
+                DestinationImagePath = destFileName,
+                ParentWindowHandle = window.Handle,
+                PrimaryColor = EnvironmentParameters.PrimaryColor.ToColor(),
+                SecondaryColor = EnvironmentParameters.SecondaryColor.ToColor(),
+                RegionDataPath = regionFileName,
+                ParameterDataPath = parameterDataFileName,
+                PseudoResourcePath = resourceDataFileName
             };
+
+            PSFilterShimService service = new PSFilterShimService(
+                AbortCallback, 
+                token.FilterData,
+                shimData,
+                delegate (string data) { proxyResult = false; proxyErrorMessage = data; },
+                null);
 
             PSFilterShimServer.Start(service);
 

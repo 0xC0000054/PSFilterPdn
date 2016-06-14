@@ -575,23 +575,21 @@ namespace PSFilterPdn
                 }
             }
 
-            PSFilterShimService service = new PSFilterShimService()
+            PSFilterShimData shimData = new PSFilterShimData
             {
-                isRepeatEffect = false,
-                showAboutDialog = showAboutBoxCb.Checked,
-                sourceFileName = srcFileName,
-                destFileName = destFileName,
-                pluginData = data,
-                filterRect = selection,
-                parentHandle = this.Handle,
-                primary = eep.PrimaryColor.ToColor(),
-                secondary = eep.SecondaryColor.ToColor(),
-                regionFileName = regionFileName,
-                parameterDataFileName = parameterDataFileName,
-                resourceFileName = resourceDataFileName,
-                errorCallback = new Action<string>(SetProxyErrorResult),
-                progressCallback = new Action<int, int>(UpdateProgress)
+                RepeatEffect = false,
+                ShowAboutDialog = showAboutBoxCb.Checked,
+                SourceImagePath = srcFileName,
+                DestinationImagePath = destFileName,
+                ParentWindowHandle = this.Handle,
+                PrimaryColor = eep.PrimaryColor.ToColor(),
+                SecondaryColor = eep.SecondaryColor.ToColor(),
+                RegionDataPath = regionFileName,
+                ParameterDataPath = parameterDataFileName,
+                PseudoResourcePath = resourceDataFileName
             };
+
+            PSFilterShimService service = new PSFilterShimService(data, shimData, SetProxyErrorResult, UpdateProgress);
 
             PSFilterShimServer.Start(service);
             this.proxyData = data;
