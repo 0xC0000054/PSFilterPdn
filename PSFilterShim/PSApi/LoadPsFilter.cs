@@ -236,19 +236,13 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Loads and runs Photoshop Filters
 		/// </summary>
-		/// <param name="sourceImage">The file name of the source image.</param>
-		/// <param name="primary">The selected primary color.</param>
-		/// <param name="secondary">The selected secondary color.</param>
-		/// <param name="selection">The selected area within the image.</param>
-		/// <param name="owner">The handle of the parent window</param>
-		/// <exception cref="System.ArgumentException">The sourceImage is null or empty.</exception>
-		/// <exception cref="System.ArgumentNullException">The primary color is null.</exception>
-		/// <exception cref="System.ArgumentNullException">The secondary color is null.</exception>
-		/// <exception cref="System.ArgumentNullException">The selection is null.</exception>
-		public LoadPsFilter(string sourceImage, Color primary, Color secondary, Rectangle selection, Region selectionRegion, IntPtr owner)
+		/// <param name="shimData">The execution parameters for the filter.</param>
+		/// <param name="selection">The <see cref="Region"/> describing the selected area within the image.</param>
+		/// <exception cref="System.ArgumentNullException"><paramref name="shimData"/> is null.</exception>
+		public LoadPsFilter(PSFilterPdn.PSFilterShimData shimData, Region selection)
 		{
-			if (String.IsNullOrEmpty(sourceImage))
-				throw new ArgumentException("sourceImage is null or empty.", "sourceImage");
+			if (shimData == null)
+				throw new ArgumentNullException("shimData");
 
 			this.dataPtr = IntPtr.Zero;
 
@@ -269,7 +263,7 @@ namespace PSFilterLoad.PSApi
 			this.descriptorSuite = new DescriptorSuite();
 			this.pseudoResourceSuite = new PseudoResourceSuite();
 
-			using (Bitmap bmp = new Bitmap(sourceImage))
+			using (Bitmap bmp = new Bitmap(shimData.SourceImagePath))
 			{
 				if (bmp.Width > 32000 || bmp.Height > 32000)
 				{
@@ -311,7 +305,7 @@ namespace PSFilterLoad.PSApi
 			unsafe
 			{
 				platFormDataPtr = Memory.Allocate(Marshal.SizeOf(typeof(PlatformData)), true);
-				((PlatformData*)platFormDataPtr)->hwnd = owner;
+				((PlatformData*)platFormDataPtr)->hwnd = shimData.ParentWindowHandle;
 			}
 
 			this.lastOutRect = Rect16.Empty;
@@ -325,13 +319,16 @@ namespace PSFilterLoad.PSApi
 			this.lastOutLoPlane = -1;
 			this.lastInLoPlane = -1;
 
+			Color primary = shimData.PrimaryColor;
+			Color secondary = shimData.SecondaryColor;
+
 			this.backgroundColor = new byte[4] { secondary.R, secondary.G, secondary.B, 0 };
 			this.foregroundColor = new byte[4] { primary.R, primary.G, primary.B, 0 };
 
-			if (selection != source.Bounds)
+			if (selection != null)
 			{
 				this.filterCase = FilterCase.EditableTransparencyWithSelection;
-				this.selectedRegion = selectionRegion.Clone();
+				this.selectedRegion = selection.Clone();
 			}
 			else
 			{
