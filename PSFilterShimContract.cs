@@ -36,12 +36,17 @@ namespace PSFilterPdn
         internal Action<string> errorCallback;
         internal Action<int,int> progressCallback;
 
-        public PSFilterShimService() : this(null)
+        public PSFilterShimService() : this(new Func<byte>(delegate() { return 0; }))
         {
         }
 
         public PSFilterShimService(Func<byte> abort)
         {
+            if (abort == null)
+            {
+                throw new ArgumentNullException("abort");
+            }
+
             this.abortFunc = abort;
             this.isRepeatEffect = false;
             this.showAboutDialog = false;
@@ -122,12 +127,18 @@ namespace PSFilterPdn
 
         public void SetProxyErrorMessage(string errorMessage)
         {
-            errorCallback.Invoke(errorMessage);
+            if (errorCallback != null)
+            {
+                errorCallback.Invoke(errorMessage); 
+            }
         }
 
         public void UpdateFilterProgress(int done, int total)
         {
-            progressCallback.Invoke(done, total);
+            if (progressCallback != null)
+            {
+                progressCallback.Invoke(done, total); 
+            }
         }
      
     }
