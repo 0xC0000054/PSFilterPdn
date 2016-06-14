@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System.Drawing;
 using System.ServiceModel;
 
 [ServiceContract(Namespace = "http://PSFilterPdn.shimData")]
@@ -20,41 +19,11 @@ internal interface IPSFilterShim
     byte AbortFilter();
 
     [OperationContract]
-    bool IsRepeatEffect();
-
-    [OperationContract]
-    bool ShowAboutDialog();
-
-    [OperationContract]
-    string GetSourceImagePath();
-
-    [OperationContract]
-    string GetDestImagePath();
-
-    [OperationContract]
-    Rectangle GetFilterRect();
-
-    [OperationContract]
     PSFilterLoad.PSApi.PluginData GetPluginData();
 
     [OperationContract]
-    System.IntPtr GetWindowHandle();
-    
-    [OperationContract]
-    Color GetPrimaryColor();
+    PSFilterPdn.PSFilterShimData GetShimData();
 
-    [OperationContract]
-    Color GetSecondaryColor();
-
-    [OperationContract]
-    string GetRegionDataPath();
-    
-    [OperationContract]
-    string GetParameterDataPath();
-
-    [OperationContract]
-    string GetPseudoResourcePath();
-    
     [OperationContract(IsOneWay = true)]
     void SetProxyErrorMessage(string errorMessage);
    
