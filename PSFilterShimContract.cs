@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Drawing;
 using System.ServiceModel;
 using PSFilterLoad.PSApi;
 
@@ -21,26 +20,18 @@ namespace PSFilterPdn
     internal sealed class PSFilterShimService : IPSFilterShim
     {
         private Func<byte> abortFunc;
-        internal bool isRepeatEffect;
-        internal bool showAboutDialog;
-        internal string sourceFileName;
-        internal string destFileName;
-        internal PluginData pluginData;
-        internal IntPtr parentHandle;
-        internal Rectangle filterRect;
-        internal Color primary;
-        internal Color secondary;
-        internal string regionFileName;
-        internal string parameterDataFileName;
-        internal string resourceFileName;
-        internal Action<string> errorCallback;
-        internal Action<int,int> progressCallback;
+        private PluginData pluginData;
+        private PSFilterShimData shimData;
+        private Action<string> errorCallback;
+        private Action<int,int> progressCallback;
 
-        public PSFilterShimService() : this(new Func<byte>(delegate() { return 0; }))
+        public PSFilterShimService(PluginData plugin, PSFilterShimData shimData, Action<string> error, Action<int, int> progress) 
+            : this(new Func<byte>(delegate() { return 0; }), plugin, shimData, error, progress)
         {
         }
 
-        public PSFilterShimService(Func<byte> abort)
+        public PSFilterShimService(Func<byte> abort, PluginData plugin, PSFilterShimData shimData, 
+            Action<string> error, Action<int, int> progress)
         {
             if (abort == null)
             {
@@ -48,51 +39,15 @@ namespace PSFilterPdn
             }
 
             this.abortFunc = abort;
-            this.isRepeatEffect = false;
-            this.showAboutDialog = false;
-            this.pluginData = null;
-            this.parentHandle = IntPtr.Zero;
-            this.filterRect = Rectangle.Empty;
-            this.primary = Color.Black;
-            this.secondary = Color.White;
-            this.regionFileName = string.Empty;
-            this.errorCallback = null;
-            this.progressCallback = null;
+            this.pluginData = plugin;
+            this.shimData = shimData;
+            this.errorCallback = error;
+            this.progressCallback = progress;
         }
 
         public byte AbortFilter()
         {
             return abortFunc();
-        }
-
-        public bool IsRepeatEffect()
-        {
-            return isRepeatEffect;
-        }
-
-        public bool ShowAboutDialog()
-        {
-            return showAboutDialog;
-        }
-
-        public string GetSourceImagePath()
-        {
-            return sourceFileName;
-        }
-
-        public string GetDestImagePath()
-        {
-            return destFileName;
-        }
-        
-        public Rectangle GetFilterRect()
-        {
-            return filterRect;
-        }
-
-        public IntPtr GetWindowHandle()
-        {
-            return parentHandle;
         }
         
         public PluginData GetPluginData()
@@ -100,29 +55,9 @@ namespace PSFilterPdn
             return pluginData;
         }
 
-        public Color GetPrimaryColor()
+        public PSFilterShimData GetShimData()
         {
-            return primary;
-        }
-
-        public Color GetSecondaryColor()
-        {
-            return secondary;
-        }
-
-        public string GetRegionDataPath()
-        {
-            return regionFileName;
-        }  
-        
-        public string GetParameterDataPath()
-        {
-           return parameterDataFileName;
-        }
-
-        public string GetPseudoResourcePath()
-        {
-            return resourceFileName;
+            return shimData;
         }
 
         public void SetProxyErrorMessage(string errorMessage)
@@ -140,6 +75,5 @@ namespace PSFilterPdn
                 progressCallback.Invoke(done, total); 
             }
         }
-     
     }
 }
