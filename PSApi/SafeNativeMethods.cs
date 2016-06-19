@@ -35,7 +35,7 @@ namespace PSFilterLoad.PSApi
         internal static extern UIntPtr HeapSize(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
 
         [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern unsafe UIntPtr VirtualQuery(IntPtr address, ref NativeStructs.MEMORY_BASIC_INFORMATION buffer, UIntPtr sizeOfBuffer);
+        internal static extern unsafe UIntPtr VirtualQuery(IntPtr address, out NativeStructs.MEMORY_BASIC_INFORMATION buffer, UIntPtr sizeOfBuffer);
 
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         internal static extern IntPtr memset(IntPtr dest, int c, UIntPtr count);
