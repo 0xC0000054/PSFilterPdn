@@ -753,7 +753,7 @@ namespace PSFilterPdn
                             {
                                 lps.SetProgressCallback(new Action<int, int>(UpdateProgress));
 
-                                if ((filterParameters != null) && data.FileName.Equals(lastSelectedFilterTitle, StringComparison.OrdinalIgnoreCase))
+                                if ((filterParameters != null) && data.FileName.Equals(filterParametersPluginFileName, StringComparison.OrdinalIgnoreCase))
                                 {
                                     lps.FilterParameters = this.filterParameters;
                                 }
