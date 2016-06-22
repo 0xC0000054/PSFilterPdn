@@ -24,7 +24,7 @@ namespace PSFilterPdn
         private bool runWith32BitShim;
         private ParameterData filterParameters;
         private ReadOnlyCollection<string> expandedNodes;
-        private Collection<PSResource> pseudoResources;
+        private ReadOnlyCollection<PSResource> pseudoResources;
         
         public Surface Dest
         {
@@ -86,7 +86,7 @@ namespace PSFilterPdn
             }
         }
 
-        public Collection<PSResource> PesudoResources
+        public ReadOnlyCollection<PSResource> PesudoResources
         {
             get
             {
@@ -99,7 +99,7 @@ namespace PSFilterPdn
         }
 
         public PSFilterPdnConfigToken(Surface dest, PluginData filterData, bool useShim, ParameterData paramData, 
-            ReadOnlyCollection<string> nodes, Collection<PSResource> resources)
+            ReadOnlyCollection<string> nodes, ReadOnlyCollection<PSResource> resources)
             : base()
         {
             this.dest = dest;

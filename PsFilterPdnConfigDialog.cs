@@ -152,7 +152,7 @@ namespace PSFilterPdn
             token.RunWith32BitShim = this.runWith32BitShim;
             token.FilterParameters = this.filterParameters;
             token.ExpandedNodes = this.expandedNodes.AsReadOnly();
-            token.PesudoResources = new System.Collections.ObjectModel.Collection<PSResource>(this.pseudoResources);
+            token.PesudoResources = this.pseudoResources.AsReadOnly();
         }
 
         protected override void InitDialogFromToken(EffectConfigToken effectToken)
