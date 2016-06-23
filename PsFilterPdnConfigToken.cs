@@ -86,7 +86,7 @@ namespace PSFilterPdn
             }
         }
 
-        public ReadOnlyCollection<PSResource> PesudoResources
+        public ReadOnlyCollection<PSResource> PseudoResources
         {
             get
             {

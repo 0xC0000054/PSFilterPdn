@@ -160,12 +160,12 @@ namespace PSFilterPdn
                 }
 
 
-                if (token.PesudoResources.Count > 0)
+                if (token.PseudoResources.Count > 0)
                 {
                     using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
                         BinaryFormatter bf = new BinaryFormatter();
-                        bf.Serialize(fs, token.PesudoResources.ToList());
+                        bf.Serialize(fs, token.PseudoResources.ToList());
                     }
                 }
 
@@ -226,7 +226,7 @@ namespace PSFilterPdn
                     lps.SetAbortCallback(new Func<byte>(AbortCallback));
 
                     lps.FilterParameters = token.FilterParameters;
-                    lps.PseudoResources = token.PesudoResources.ToList();
+                    lps.PseudoResources = token.PseudoResources.ToList();
                     lps.IsRepeatEffect = true;
 
                     bool result = lps.RunPlugin(token.FilterData, false);

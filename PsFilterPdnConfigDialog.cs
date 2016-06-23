@@ -152,7 +152,7 @@ namespace PSFilterPdn
             token.RunWith32BitShim = this.runWith32BitShim;
             token.FilterParameters = this.filterParameters;
             token.ExpandedNodes = this.expandedNodes.AsReadOnly();
-            token.PesudoResources = this.pseudoResources.AsReadOnly();
+            token.PseudoResources = this.pseudoResources.AsReadOnly();
         }
 
         protected override void InitDialogFromToken(EffectConfigToken effectToken)
@@ -175,9 +175,9 @@ namespace PSFilterPdn
                 this.expandedNodes = new List<string>(token.ExpandedNodes);
             }
 
-            if ((token.PesudoResources != null) && token.PesudoResources.Count > 0)
+            if ((token.PseudoResources != null) && token.PseudoResources.Count > 0)
             {
-                this.pseudoResources = new List<PSResource>(token.PesudoResources);
+                this.pseudoResources = new List<PSResource>(token.PseudoResources);
             }
         }
 
