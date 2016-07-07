@@ -57,11 +57,17 @@ namespace PSFilterShim
 		{
 #if DEBUG
 			System.Diagnostics.Debugger.Launch();
-			bool res = NativeMethods.SetProcessDEPPolicy(0U);
-			System.Diagnostics.Debug.WriteLine(string.Format("SetProcessDEPPolicy returned {0}", res));
-#else
-			NativeMethods.SetProcessDEPPolicy(0U); // Kill DEP
 #endif
+			try
+			{
+				// Try to Opt-out of DEP as many filters are not compatible with it.
+				NativeMethods.SetProcessDEPPolicy(0U);
+			}
+			catch (EntryPointNotFoundException)
+			{
+				// This method is only present on Vista SP1 or XP SP3 and later.
+			}
+
 			// Disable the critical-error-handler message box displayed when a filter cannot find a dependency.
 			NativeMethods.SetErrorMode(NativeMethods.SetErrorMode(0U) | NativeMethods.SEM_FAILCRITICALERRORS);
 
