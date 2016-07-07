@@ -74,7 +74,7 @@ namespace PSFilterShim
 			string endpointName = args[0];
 
 			EndpointAddress address = new EndpointAddress(endpointName);
-			serviceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(new NetNamedPipeBinding(), address);
+			serviceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(new NetNamedPipeBinding(NetNamedPipeSecurityMode.None), address);
 
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 

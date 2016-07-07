@@ -40,7 +40,7 @@ namespace PSFilterPdn
             if (_host == null)
             {
                 _host = new ServiceHost(service, ServiceUri);
-                _host.AddServiceEndpoint(typeof(IPSFilterShim), new NetNamedPipeBinding(), PipeName);
+                _host.AddServiceEndpoint(typeof(IPSFilterShim), new NetNamedPipeBinding(NetNamedPipeSecurityMode.None), PipeName);
                 _host.Open();
             }
         }
