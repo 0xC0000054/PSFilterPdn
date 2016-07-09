@@ -290,8 +290,13 @@ namespace PSFilterPdn
                 {
                     filterDone = new ManualResetEvent(false);
 
-                    this.filterThread = new Thread(() => RunRepeatFilter(ref token, win32Window)) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
-                    this.filterThread.SetApartmentState(ApartmentState.STA); // Some filters may use OLE which requires Single Threaded Apartment mode.
+                    this.filterThread = new Thread(() => RunRepeatFilter(ref token, win32Window))
+                    {
+                        IsBackground = true,
+                        Priority = ThreadPriority.AboveNormal
+                    };
+                    // Some filters may use OLE which requires Single Threaded Apartment mode.
+                    this.filterThread.SetApartmentState(ApartmentState.STA);
                     this.filterThread.Start();
 
                     filterDone.WaitOne();
