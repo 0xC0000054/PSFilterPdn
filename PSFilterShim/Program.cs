@@ -157,9 +157,9 @@ namespace PSFilterShim
 
 					bool result = lps.RunPlugin(pdata, shimData.ShowAboutDialog);
 
-					if (!shimData.ShowAboutDialog)
+					if (result)
 					{
-						if (result)
+						if (!shimData.ShowAboutDialog)
 						{
 							using (Bitmap dst = lps.Dest.CreateAliasedBitmap())
 							{
@@ -181,10 +181,10 @@ namespace PSFilterShim
 								}
 							}
 						}
-						else
-						{
-							serviceProxy.SetProxyErrorMessage(lps.ErrorMessage);
-						}
+					}
+					else
+					{
+						serviceProxy.SetProxyErrorMessage(lps.ErrorMessage);
 					}
 				}
 
