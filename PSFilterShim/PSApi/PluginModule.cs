@@ -35,7 +35,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="fileName">The file name of the DLL to load.</param>
         /// <param name="entryPoint">The name of the entry point in the DLL.</param>
-        /// <exception cref="System.EntryPointNotFoundException">The entry point specified by <paramref name="entryPoint"/> was not found in <paramref name="fileName"/>.</exception>
+        /// <exception cref="EntryPointNotFoundException">The entry point specified by <paramref name="entryPoint"/> was not found in <paramref name="fileName"/>.</exception>
         /// <exception cref="System.IO.FileNotFoundException">The file specified by <paramref name="fileName"/> cannot be found.</exception>
         public PluginModule(string fileName, string entryPoint)
         {            
@@ -70,7 +70,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="entryPointName">The name of the entry point.</param>
         /// <returns>A <see cref="PluginEntryPoint" /> delegate.</returns>
-        /// <exception cref="System.EntryPointNotFoundException">The entry point specified by <paramref name="entryPointName" /> was not found.</exception>
+        /// <exception cref="EntryPointNotFoundException">The entry point specified by <paramref name="entryPointName" /> was not found.</exception>
         /// <exception cref="System.ObjectDisposedException">The object has been disposed.</exception>
         public PluginEntryPoint GetEntryPoint(string entryPointName)
         {

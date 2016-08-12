@@ -515,7 +515,7 @@ namespace PSFilterLoad.PSApi
 		/// Loads a filter from the PluginData.
 		/// </summary>
 		/// <param name="pdata">The PluginData of the filter to load.</param>
-		/// <exception cref="System.EntryPointNotFoundException">The entry point specified by the PluginData.entryPoint field was not found.</exception>
+		/// <exception cref="EntryPointNotFoundException">The entry point specified by the PluginData.entryPoint field was not found.</exception>
 		/// <exception cref="System.IO.FileNotFoundException">The file specified by the PluginData.fileName field cannot be found.</exception>
 		private void LoadFilter(PluginData pdata)
 		{
