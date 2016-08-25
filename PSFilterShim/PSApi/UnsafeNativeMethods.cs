@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
@@ -21,6 +22,7 @@ namespace PSFilterLoad.PSApi
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
         internal static extern SafeLibraryHandle LoadLibraryW(string lpFileName);
 
+        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         [DllImport("kernel32.dll", ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool FreeLibrary(IntPtr hModule);
