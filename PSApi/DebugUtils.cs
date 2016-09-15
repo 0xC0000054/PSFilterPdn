@@ -29,11 +29,6 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        internal static bool DebugFlagEnabled(DebugFlags flag)
-        {
-            return (debugFlags & flag) == flag;
-        }
-
         internal static void Ping(DebugFlags flag, string message)
         {
             if ((debugFlags & flag) == flag)
