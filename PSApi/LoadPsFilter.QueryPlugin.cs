@@ -301,12 +301,7 @@ namespace PSFilterLoad.PSApi
             {
                 PIProperty* pipp = (PIProperty*)propPtr;
                 uint propKey = pipp->propertyKey;
-#if DEBUG
-                if (DebugUtils.DebugFlagEnabled(DebugFlags.PiPL))
-                {
-                    System.Diagnostics.Debug.WriteLine(string.Format("key: {0}({1})", propKey.ToString("X"), DebugUtils.PropToString(propKey)));
-                }
-#endif
+
                 byte* dataPtr = propPtr + PIProperty.SizeOf;
                 if (propKey == PIPropertyID.PIKindProperty)
                 {
@@ -413,6 +408,12 @@ namespace PSFilterLoad.PSApi
                         return true;
                     }
                 }
+#if DEBUG
+                else
+                {
+                    DebugUtils.Ping(DebugFlags.PiPL, string.Format("Unsupported property '{0}' in {1}", DebugUtils.PropToString(propKey), query.fileName));
+                }
+#endif
 
                 int propertyDataPaddedLength = (pipp->propertyLength + 3) & ~3;
                 propPtr += (PIProperty.SizeOf + propertyDataPaddedLength);
