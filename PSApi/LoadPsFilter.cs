@@ -1151,7 +1151,18 @@ namespace PSFilterLoad.PSApi
 			return true;
 #else
 			// Enable the PICA suites for Color Efex 4.
-			return data.Category.Equals("Nik Collection", StringComparison.Ordinal);
+			if (data.Category.Equals("Nik Collection", StringComparison.Ordinal))
+			{
+				return true;
+			}
+
+			// Enable the PICA suites for Eye Candy 7.
+			if (data.Category.Equals("Alien Skin", StringComparison.Ordinal))
+			{
+				return true;
+			}
+
+			return false;
 #endif
 		}
 
