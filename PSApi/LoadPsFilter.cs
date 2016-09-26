@@ -340,6 +340,7 @@ namespace PSFilterLoad.PSApi
 			debugFlags |= DebugFlags.MiscCallbacks; // progress callback 
 			debugFlags |= DebugFlags.PropertySuite;
 			debugFlags |= DebugFlags.ResourceSuite;
+			debugFlags |= DebugFlags.SPBasicSuite;
 			DebugUtils.GlobalDebugFlags = debugFlags;
 #endif
 		}

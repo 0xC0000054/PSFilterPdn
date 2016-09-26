@@ -350,6 +350,7 @@ namespace PSFilterLoad.PSApi
 			debugFlags |= DebugFlags.PiPL;
 			debugFlags |= DebugFlags.PropertySuite;
 			debugFlags |= DebugFlags.ResourceSuite;
+			debugFlags |= DebugFlags.SPBasicSuite;
 			DebugUtils.GlobalDebugFlags = debugFlags;
 #endif
 		}
