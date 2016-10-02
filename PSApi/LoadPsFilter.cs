@@ -1145,6 +1145,12 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
+		private static bool EnableChannelPorts(PluginData data)
+		{
+			// Enable the channel ports suite for Luce 2.
+			return data.Category.Equals("Amico Perry", StringComparison.Ordinal);
+		}
+
 		private static bool EnablePICASuites(PluginData data)
 		{
 #if PICASUITEDEBUG
@@ -1181,8 +1187,7 @@ namespace PSFilterLoad.PSApi
 				return PluginAbout(pdata);
 			}
 
-			// Enable the channel ports suite for Luce 2.
-			useChannelPorts = pdata.Category.Equals("Amico Perry", StringComparison.Ordinal); 
+			useChannelPorts = EnableChannelPorts(pdata); 
 			usePICASuites = EnablePICASuites(pdata);
 
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
