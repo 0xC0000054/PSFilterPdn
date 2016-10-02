@@ -163,6 +163,7 @@
     <Compile Include="PSApi\PICA\PICAColorSpaceSuite.cs" />
     <Compile Include="PSApi\PICA\PICAHandleSuite.cs" />
     <Compile Include="PSApi\PICA\PICASPPluginsSuite.cs" />
+    <Compile Include="PSApi\PICA\PICASuiteDelegates.cs" />
     <Compile Include="PSApi\PICA\PICAUIHooksSuite.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\PluginAETE.cs" />
