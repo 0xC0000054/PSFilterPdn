@@ -776,17 +776,8 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-			IntPtr handle = IntPtr.Zero;
-
-			try
-			{
-				handle = CreateWriteDescriptor();
-
-				this.writeDescriptorHandles.Add(handle, new Dictionary<uint, AETEValue>());
-			}
-			catch (OutOfMemoryException)
-			{
-			}
+			IntPtr handle = new IntPtr(this.writeDescriptorHandles.Count + 1);
+			this.writeDescriptorHandles.Add(handle, new Dictionary<uint, AETEValue>());
 
 			return handle;
 		}
@@ -809,7 +800,6 @@ namespace PSFilterLoad.PSApi
 				this.scriptingData = this.writeDescriptorHandles[descriptor];
 			}
 
-			Memory.Free(descriptor);
 			this.writeDescriptorHandles.Remove(descriptor);
 
 			return PSError.noErr;
