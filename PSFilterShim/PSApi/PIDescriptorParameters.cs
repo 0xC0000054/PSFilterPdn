@@ -83,7 +83,7 @@ namespace PSFilterLoad.PSApi
     {
         public uint desiredClass;
         public uint keyForm;
-        public PIDescriptorSimpleReference__keyData Struct1;
+        public PIDescriptorSimpleReference__keyData keyData;
     }
 
     [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
