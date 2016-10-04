@@ -15,11 +15,11 @@
  * All rights reserved.
 */
 
+#if USEIMAGESERVICES
 using System;
 using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
-#if USEIMAGESERVICES
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short PIResampleProc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method);
@@ -33,5 +33,5 @@ namespace PSFilterLoad.PSApi
         public IntPtr interpolate2DProc;
     }
     
-#endif
 }
+#endif
