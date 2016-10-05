@@ -91,5 +91,23 @@ namespace PSFilterLoad.PSApi
 			this.value = value;
 		}
 	}
-  
+
+	[Serializable]
+	public sealed class ActionDescriptorZString
+	{
+		private string value;
+
+		public string Value
+		{
+			get
+			{
+				return value;
+			}
+		}
+
+		public ActionDescriptorZString(string value)
+		{
+			this.value = value;
+		}
+	}
 }

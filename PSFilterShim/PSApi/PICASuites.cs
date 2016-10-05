@@ -16,6 +16,11 @@ namespace PSFilterLoad.PSApi
 {
 	internal static class PICASuites
 	{
+		public static ASZStringSuite1 CreateASZStringSuite1()
+		{
+			return ASZStringSuite.Instance.CreateASZStringSuite1();
+		}
+
 		public static PSBufferSuite1 CreateBufferSuite1()
 		{
 			return PICABufferSuite.CreateBufferSuite1();

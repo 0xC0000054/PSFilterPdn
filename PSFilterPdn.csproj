@@ -139,6 +139,7 @@
     </Compile>
     <Compile Include="NativeInterfaces.cs" />
     <Compile Include="PluginSupportInfo.cs" />
+    <Compile Include="PSApi\ActionDescriptorSuite.cs" />
     <Compile Include="PSApi\ActivePICASuites.cs" />
     <Compile Include="PSApi\AETEData.cs" />
     <Compile Include="PSApi\AETEValue.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="PSApi\PEFile.cs" />
     <Compile Include="PSApi\PICASuites.cs" />
     <Compile Include="PSApi\PICASuiteStructs.cs" />
+    <Compile Include="PSApi\PICA\ASZStringSuite.cs" />
     <Compile Include="PSApi\PICA\PICABufferSuite.cs" />
     <Compile Include="PSApi\PICA\PICAColorSpaceSuite.cs" />
     <Compile Include="PSApi\PICA\PICAHandleSuite.cs" />
@@ -170,6 +172,7 @@
     <Compile Include="PSApi\PlugInInfo.cs" />
     <Compile Include="PSApi\PluginModule.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
+    <Compile Include="PSApi\PSActionDescriptor.cs" />
     <Compile Include="PSApi\PseudoResourceSuite.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
     <Compile Include="PSApi\PSResource.cs" />

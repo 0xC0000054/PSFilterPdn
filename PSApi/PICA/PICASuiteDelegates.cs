@@ -10,7 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-/* Adapted from PIBufferSuite.h, PIColorSpaceSuite.h, PIHandleSuite.h, PIUIHooskSuite.h, SPPlugs.h
+/* Adapted from ASZStringSuite.h, PIBufferSuite.h, PIColorSpaceSuite.h, PIHandleSuite.h, PIUIHooskSuite.h, SPPlugs.h
 *  Copyright 1986 - 2000 Adobe Systems Incorporated              
 *  All Rights Reserved
 */
@@ -140,4 +140,57 @@ namespace PSFilterLoad.PSApi.PICA
     internal delegate int SPSetPluginPropertyList(IntPtr plugin, IntPtr file);
     #endregion
 #endif
+
+    #region ASZStringSuite Delegates
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringMakeFromUnicode(IntPtr src, UIntPtr byteCount, ref IntPtr newZString);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringMakeFromCString(IntPtr src, UIntPtr byteCount, ref IntPtr newZString);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringMakeFromPascalString(IntPtr src, UIntPtr byteCount, ref IntPtr newZString);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringMakeRomanizationOfInteger(int value, ref IntPtr newZString);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringMakeRomanizationOfFixed(int value, short places, [MarshalAs(UnmanagedType.Bool)] bool trim,
+                                                           [MarshalAs(UnmanagedType.Bool)] bool isSigned, ref IntPtr newZString);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringMakeRomanizationOfDouble(double value, ref IntPtr newZString);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate IntPtr ASZStringGetEmpty();
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringCopy(IntPtr source, ref IntPtr copy);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringReplace(IntPtr zstr, uint index, IntPtr replacement);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringTrimEllipsis(IntPtr zstr);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringTrimSpaces(IntPtr zstr);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringRemoveAccelerators(IntPtr zstr);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringAddRef(IntPtr zstr);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringRelease(IntPtr zstr);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal delegate bool ASZStringIsAllWhiteSpace(IntPtr zstr);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal delegate bool ASZStringIsEmpty(IntPtr zstr);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal delegate bool ASZStringWillReplace(IntPtr zstr, uint index);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate uint ASZStringLengthAsUnicodeCString(IntPtr zstr);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringAsUnicodeCString(IntPtr zstr, IntPtr str, uint strSize, [MarshalAs(UnmanagedType.Bool)] bool checkStrSize);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate uint ASZStringLengthAsCString(IntPtr zstr);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringAsCString(IntPtr zstr, IntPtr str, uint strSize, [MarshalAs(UnmanagedType.Bool)] bool checkStrSize);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate uint ASZStringLengthAsPascalString(IntPtr zstr);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringAsPascalString(IntPtr zstr, IntPtr str, uint strBufferSize, [MarshalAs(UnmanagedType.Bool)] bool checkBufferSize);
+    #endregion
 }

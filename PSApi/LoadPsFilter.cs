@@ -164,6 +164,7 @@ namespace PSFilterLoad.PSApi
 
 		private DescriptorSuite descriptorSuite;
 		private PseudoResourceSuite pseudoResourceSuite;
+		private ActionDescriptorSuite actionDescriptorSuite;
 
 		internal Surface Dest
 		{
@@ -204,7 +205,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return new ParameterData(globalParameters, descriptorSuite.ScriptingData);
+				return new ParameterData(globalParameters, GetScriptingData());
 			}
 			set
 			{
@@ -343,6 +344,18 @@ namespace PSFilterLoad.PSApi
 			debugFlags |= DebugFlags.SPBasicSuite;
 			DebugUtils.GlobalDebugFlags = debugFlags;
 #endif
+		}
+
+		private Dictionary<uint, AETEValue> GetScriptingData()
+		{
+			if (actionDescriptorSuite != null && actionDescriptorSuite.HasScriptingData)
+			{
+				return actionDescriptorSuite.ScriptingData;
+			}
+			else
+			{
+				return descriptorSuite.ScriptingData;
+			}
 		}
 
 		/// <summary>
@@ -3505,6 +3518,39 @@ namespace PSFilterLoad.PSApi
 						PSUIHooksSuite1 uiHooks = PICASuites.CreateUIHooksSuite1((FilterRecord*)filterRecordPtr.ToPointer());
 
 						Marshal.StructureToPtr(uiHooks, suite, false);
+					}
+					else if (suiteName == PSConstants.PICAActionDescriptorSuite)
+					{
+						if (version > 2)
+						{
+							return PSError.kSPSuiteNotFoundError;
+						}
+						if (actionDescriptorSuite == null)
+						{
+							actionDescriptorSuite = new ActionDescriptorSuite();
+							actionDescriptorSuite.Aete = descriptorSuite.Aete;
+							actionDescriptorSuite.ScriptingData = descriptorSuite.ScriptingData;
+						}
+
+
+						suite = this.activePICASuites.AllocateSuite<PSActionDescriptorProc>(suiteKey);
+
+						PSActionDescriptorProc actionDescriptor = this.actionDescriptorSuite.CreateActionDescriptorSuite2();
+
+						Marshal.StructureToPtr(actionDescriptor, suite, false);
+					}
+					else if (suiteName == PSConstants.PICAZStringSuite)
+					{
+						if (version > 1)
+						{
+							return PSError.kSPSuiteNotFoundError;
+						}
+
+						suite = this.activePICASuites.AllocateSuite<ASZStringSuite1>(suiteKey);
+
+						ASZStringSuite1 stringSuite = PICASuites.CreateASZStringSuite1();
+
+						Marshal.StructureToPtr(stringSuite, suite, false);
 					}
 #if PICASUITEDEBUG
 					else if (suiteName == PSConstants.PICAColorSpaceSuite)

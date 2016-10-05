@@ -63,8 +63,19 @@ namespace PSFilterLoad.PSApi
         
         // PICA suite error codes
         public const int kSPNoErr = 0;
+        public const int kSPBadParameterError = 0x5061726d;
         public const int kSPNotImplmented = 0x21494d50;
         public const int kSPSuiteNotFoundError = 0x53214664;
+
+        // ASZString suite error codes
+        public const int kASNoErr = 0;
+        public const int kASBadParameter = 0x5041524d;
+        public const int kASBufferTooSmallErr = 0x42554646;
+        public const int kASOutOfMemory = 0x214d454d;
+        public const int kASNotImplmented = 0x21494d50;
+
+        // Scripting error codes
+        public const int errMissingParameter = -1715;
     }
 
 }

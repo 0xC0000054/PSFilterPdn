@@ -10,7 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-/* Adapted from PIBufferSuite.h, PIColorSpaceSuite.h, PIHandleSuite.h, PIUIHooskSuite.h, SPPlugs.h
+/* Adapted from ASZStringSuite.h, PIBufferSuite.h, PIColorSpaceSuite.h, PIHandleSuite.h, PIUIHooskSuite.h, SPPlugs.h
 *  Copyright 1986 - 2000 Adobe Systems Incorporated              
 *  All Rights Reserved
 */
@@ -141,5 +141,30 @@ namespace PSFilterLoad.PSApi
 	} 
 #endif
 
-   
+	internal struct ASZStringSuite1
+	{
+		public IntPtr MakeFromUnicode;
+		public IntPtr MakeFromCString;
+		public IntPtr MakeFromPascalString;
+		public IntPtr MakeRomanizationOfInteger;
+		public IntPtr MakeRomanizationOfFixed;
+		public IntPtr MakeRomanizationOfDouble;
+		public IntPtr GetEmpty;
+		public IntPtr Copy;
+		public IntPtr Replace;
+		public IntPtr TrimEllipsis;
+		public IntPtr TrimSpaces;
+		public IntPtr RemoveAccelerators;
+		public IntPtr AddRef;
+		public IntPtr Release;
+		public IntPtr IsAllWhiteSpace;
+		public IntPtr IsEmpty;
+		public IntPtr WillReplace;
+		public IntPtr LengthAsUnicodeCString;
+		public IntPtr AsUnicodeCString;
+		public IntPtr LengthAsCString;
+		public IntPtr AsCString;
+		public IntPtr LengthAsPascalString;
+		public IntPtr AsPascalString;
+	}
 }

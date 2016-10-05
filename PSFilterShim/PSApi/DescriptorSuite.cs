@@ -89,6 +89,10 @@ namespace PSFilterLoad.PSApi
 
 		public AETEData Aete
 		{
+			get
+			{
+				return this.aete;
+			}
 			set
 			{
 				this.aete = value;

@@ -205,9 +205,10 @@ namespace PSFilterLoad.PSApi
         public const string PICAHandleSuite = "Photoshop Handle Suite for Plug-ins";
         public const string PICAPropertySuite = "Photoshop Property Suite for Plug-ins";
         public const string PICAUIHooksSuite = "Photoshop UIHooks Suite for Plug-ins";
+        public const string PICAActionDescriptorSuite = "df135115-c769-11d0-8079-00c04fd7ec47";
+        public const string PICAZStringSuite = "AS ZString Suite";
 #if PICASUITEDEBUG
         public const string PICAColorSpaceSuite = "Photoshop ColorSpace Suite for Plug-ins";
-        public const string PICAZStringSuite = "AS ZString Suite";
         public const string PICAZStringDictonarySuite = "AS ZString Dictionary Suite";
         public const string PICAPluginsSuite = "SP Plug-ins Suite"; 
 #endif
