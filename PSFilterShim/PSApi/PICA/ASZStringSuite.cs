@@ -436,7 +436,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kASBadParameter;
         }
 
-        private unsafe int AddRef(IntPtr zstr)
+        private int AddRef(IntPtr zstr)
         {
             if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
             {
@@ -448,7 +448,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kASBadParameter;
         }
 
-        private unsafe int Release(IntPtr zstr)
+        private int Release(IntPtr zstr)
         {
             if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
             {
