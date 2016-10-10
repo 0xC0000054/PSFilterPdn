@@ -349,7 +349,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 if (value != null)
                 {
-                    if (value.EndsWith("..."))
+                    if (value.EndsWith("...", StringComparison.Ordinal))
                     {
                         item.Data = value.Substring(0, value.Length - 3);
                     }
