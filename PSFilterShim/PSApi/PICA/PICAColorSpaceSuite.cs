@@ -33,31 +33,31 @@ namespace PSFilterLoad.PSApi.PICA
         private static CSConvert csConvert8to16 = new CSConvert(CSConvert8to16);
         private static CSConvert csConvert16to8 = new CSConvert(CSConvert16to8);
 
-        private static short CSMake(IntPtr colorID)
+        private static int CSMake(IntPtr colorID)
         {
-            return PSError.errPlugInHostInsufficient;
+            return PSError.kSPNotImplmented;
         }
-        private static short CSDelete(IntPtr colorID)
+        private static int CSDelete(IntPtr colorID)
         {
-            return PSError.errPlugInHostInsufficient;
+            return PSError.kSPNotImplmented;
         }
-        private static short CSStuffComponents(IntPtr colorID, short colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3)
+        private static int CSStuffComponents(IntPtr colorID, short colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3)
         {
-            return PSError.errPlugInHostInsufficient;
+            return PSError.kSPNotImplmented;
         }
-        private static short CSExtractComponents(IntPtr colorID, short colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3, ref byte gamutFlag)
+        private static int CSExtractComponents(IntPtr colorID, short colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3, ref byte gamutFlag)
         {
-            return PSError.errPlugInHostInsufficient;
+            return PSError.kSPNotImplmented;
         }
-        private static short CSStuffXYZ(IntPtr colorID, CS_XYZ xyz)
+        private static int CSStuffXYZ(IntPtr colorID, CS_XYZ xyz)
         {
-            return PSError.errPlugInHostInsufficient;
+            return PSError.kSPNotImplmented;
         }
-        private static short CSExtractXYZ(IntPtr colorID, ref CS_XYZ xyz)
+        private static int CSExtractXYZ(IntPtr colorID, ref CS_XYZ xyz)
         {
-            return PSError.errPlugInHostInsufficient;
+            return PSError.kSPNotImplmented;
         }
-        private unsafe static short CSConvert8(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
+        private unsafe static int CSConvert8(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
         {
             byte* ptr = (byte*)colorArray.ToPointer();
             short[] convArray = new short[4];
@@ -118,41 +118,41 @@ namespace PSFilterLoad.PSApi.PICA
                 ptr += 4;
             }
 
-            return PSError.noErr;
+            return PSError.kSPNoErr;
         }
-        private static short CSConvert16(short inputCSpace, short outputCSpace, IntPtr colorArray, short count)
+        private static int CSConvert16(short inputCSpace, short outputCSpace, IntPtr colorArray, short count)
         {
-            return PSError.errPlugInHostInsufficient;
+            return PSError.kSPNotImplmented;
         }
-        private static short CSGetNativeSpace(IntPtr colorID, ref short nativeSpace)
+        private static int CSGetNativeSpace(IntPtr colorID, ref short nativeSpace)
         {
             nativeSpace = 0;
 
-            return PSError.noErr;
+            return PSError.kSPNotImplmented;
         }
-        private static short CSIsBookColor(IntPtr colorID, ref byte isBookColor)
+        private static int CSIsBookColor(IntPtr colorID, ref byte isBookColor)
         {
             isBookColor = 0;
 
-            return PSError.noErr;
+            return PSError.kSPNotImplmented;
         }
-        private static short CSExtractColorName(IntPtr colorID, ref IntPtr colorName)
+        private static int CSExtractColorName(IntPtr colorID, ref IntPtr colorName)
         {
-            return PSError.errPlugInHostInsufficient;
+            return PSError.kSPNotImplmented;
         }
-        private static short CSPickColor(IntPtr colorID, IntPtr promptString)
+        private static int CSPickColor(IntPtr colorID, IntPtr promptString)
         {
-            return PSError.errPlugInHostInsufficient;
-        }
-
-        private static short CSConvert8to16(IntPtr inputData, IntPtr outputData, short count)
-        {
-            return PSError.errPlugInHostInsufficient;
+            return PSError.kSPNotImplmented;
         }
 
-        private static short CSConvert16to8(IntPtr inputData, IntPtr outputData, short count)
+        private static int CSConvert8to16(IntPtr inputData, IntPtr outputData, short count)
         {
-            return PSError.errPlugInHostInsufficient;
+            return PSError.kSPNotImplmented;
+        }
+
+        private static int CSConvert16to8(IntPtr inputData, IntPtr outputData, short count)
+        {
+            return PSError.kSPNotImplmented;
         }
 
         public static PSColorSpaceSuite1 CreateColorSpaceSuite1()
