@@ -519,7 +519,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int AsUnicodeCString(IntPtr zstr, IntPtr str, uint strSize, bool checkStrSize)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
+            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr) && str != IntPtr.Zero)
             {
                 ZString item = this.strings[zstr];
 
@@ -562,7 +562,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int AsCString(IntPtr zstr, IntPtr str, uint strSize, bool checkStrSize)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
+            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr) && str != IntPtr.Zero)
             {
                 ZString item = this.strings[zstr];
 
@@ -604,7 +604,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int AsPascalString(IntPtr zstr, IntPtr str, uint strSize, bool checkStrSize)
         {
-            if (zstr != IntPtr.Zero && strings.ContainsKey(zstr))
+            if (zstr != IntPtr.Zero && strings.ContainsKey(zstr) && str != IntPtr.Zero)
             {
                 ZString item = this.strings[zstr];
 
