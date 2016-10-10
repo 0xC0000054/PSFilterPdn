@@ -71,11 +71,11 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate IntPtr UISuiteMainWindowHandle();
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short UISuiteHostSetCursor(IntPtr cursor);
+    internal delegate int UISuiteHostSetCursor(IntPtr cursor);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate uint UISuiteHostTickCount();
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short UISuiteGetPluginName(IntPtr plugInRef, ref IntPtr plugInName);
+    internal delegate int UISuiteGetPluginName(IntPtr plugInRef, ref IntPtr plugInName);
     #endregion
 
 #if PICASUITEDEBUG
