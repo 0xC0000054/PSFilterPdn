@@ -28,9 +28,9 @@ namespace PSFilterLoad.PSApi.PICA
             return hwnd;
         }
 
-        private static short HostSetCursor(IntPtr cursor)
+        private static int HostSetCursor(IntPtr cursor)
         {
-            return PSError.errPlugInHostInsufficient;
+            return PSError.kSPNotImplmented;
         }
 
         private static uint HostTickCount()
@@ -38,9 +38,9 @@ namespace PSFilterLoad.PSApi.PICA
             return 60U;
         }
 
-        private static short GetPluginName(IntPtr pluginRef, ref IntPtr name)
+        private static int GetPluginName(IntPtr pluginRef, ref IntPtr name)
         {
-            return PSError.errPlugInHostInsufficient;
+            return PSError.kSPNotImplmented;
         }
 
         public static unsafe PSUIHooksSuite1 CreateUIHooksSuite1(FilterRecord* filterRecord)
