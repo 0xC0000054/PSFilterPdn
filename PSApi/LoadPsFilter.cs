@@ -3446,7 +3446,7 @@ namespace PSFilterLoad.PSApi
 			DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("name: {0}, version: {1}", suiteName, version));
 #endif
 
-			string suiteKey = string.Format(CultureInfo.InvariantCulture, "{0},{1}", suiteName, version);
+			string suiteKey = suiteName + "," + version.ToString(CultureInfo.InvariantCulture);
 
 			if (activePICASuites.IsLoaded(suiteKey))
 			{
@@ -3602,7 +3602,7 @@ namespace PSFilterLoad.PSApi
 			DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("name: {0}, version: {1}", suiteName, version));
 #endif
 
-			string suiteKey = string.Format(CultureInfo.InvariantCulture, "{0},{1}", suiteName, version);
+			string suiteKey = suiteName + "," + version.ToString(CultureInfo.InvariantCulture);
 
 			activePICASuites.RemoveRef(suiteKey);
 
