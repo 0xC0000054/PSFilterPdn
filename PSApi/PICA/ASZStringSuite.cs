@@ -220,16 +220,19 @@ namespace PSFilterLoad.PSApi.PICA
             return null;
         }
 
-        public void CreateFromActionDescriptor(ActionDescriptorZString descriptor, out IntPtr newZString)
+        public IntPtr CreateFromActionDescriptor(ActionDescriptorZString descriptor)
         {
             if (descriptor == null)
             {
                 throw new ArgumentNullException("descriptor");
             }
 
+            IntPtr newZString = GenerateDictionaryKey();
+
             ZString zstring = new ZString(descriptor.Value);
-            newZString = GenerateDictionaryKey();
             this.strings.Add(newZString, zstring);
+
+            return newZString;
         }
 
         private IntPtr GenerateDictionaryKey()
