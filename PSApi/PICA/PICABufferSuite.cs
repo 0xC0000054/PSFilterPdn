@@ -11,74 +11,169 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-	internal static class PICABufferSuite
+	internal sealed class PICABufferSuite : IDisposable
 	{
-		private static PSBufferSuiteNew bufferSuiteNew = new PSBufferSuiteNew(PSBufferNew);
-		private static PSBufferSuiteDispose bufferSuiteDispose = new PSBufferSuiteDispose(PSBufferDispose);
-		private static PSBufferSuiteGetSize bufferSuiteGetSize = new PSBufferSuiteGetSize(PSBufferGetSize);
-		private static PSBufferSuiteGetSpace bufferSuiteGetSpace = new PSBufferSuiteGetSpace(PSBufferGetSpace);
+		private readonly PSBufferSuiteNew bufferSuiteNew;
+		private readonly PSBufferSuiteDispose bufferSuiteDispose;
+		private readonly PSBufferSuiteGetSize bufferSuiteGetSize;
+		private readonly PSBufferSuiteGetSpace bufferSuiteGetSpace;
+		private List<IntPtr> buffers;
+		private bool disposed;
 
-		private static IntPtr PSBufferNew(ref uint requestedSize, uint minimumSize)
+		public PICABufferSuite()
 		{
+			this.bufferSuiteNew = new PSBufferSuiteNew(PSBufferNew);
+			this.bufferSuiteDispose = new PSBufferSuiteDispose(PSBufferDispose);
+			this.bufferSuiteGetSize = new PSBufferSuiteGetSize(PSBufferGetSize);
+			this.bufferSuiteGetSpace = new PSBufferSuiteGetSpace(PSBufferGetSpace);
+			this.buffers = new List<IntPtr>();
+			this.disposed = false;
+		}
 
-			IntPtr ptr = IntPtr.Zero;
+		private IntPtr PSBufferNew(ref uint requestedSizePtr, uint minimumSize)
+		{
+			uint? requestedSize = null;
 			try
 			{
-				ptr = Memory.Allocate(requestedSize, false);
-
-				return ptr;
+				// The requested size pointer may be null.
+				requestedSize = requestedSizePtr;
 			}
 			catch (NullReferenceException)
 			{
 			}
-			catch (OutOfMemoryException)
+
+			IntPtr ptr = IntPtr.Zero;
+
+			if (requestedSize.HasValue && requestedSize.Value > minimumSize)
 			{
+				uint allocatedSize = 0;
+				uint size = requestedSize.Value;
+				while (size > minimumSize)
+				{
+					// Allocate the largest buffer we can that is greater than the specified minimum size.
+					ptr = Memory.Allocate(size, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
+					if (ptr != IntPtr.Zero)
+					{
+						this.buffers.Add(ptr);
+						allocatedSize = size;
+						break;
+					}
+
+					size /= 2;
+				}
+
+				if (ptr == IntPtr.Zero)
+				{
+					// If we cannot allocate a buffer larger than the minimum size
+					// attempt to allocate a buffer at the minimum size.
+
+					ptr = Memory.Allocate(minimumSize, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
+					if (ptr != IntPtr.Zero)
+					{
+						this.buffers.Add(ptr);
+						allocatedSize = minimumSize;
+					}
+				}
+
+				// The requested size pointer is used as an output parameter to return the actual number of bytes allocated.
+				requestedSizePtr = allocatedSize;
+			}
+			else
+			{
+				ptr = Memory.Allocate(minimumSize, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
+				if (ptr != IntPtr.Zero)
+				{
+					this.buffers.Add(ptr);
+				}
 			}
 
+			return ptr;
+		}
 
+		private void PSBufferDispose(ref IntPtr bufferPtr)
+		{
+			IntPtr buffer = IntPtr.Zero;
 			try
 			{
-				ptr = Memory.Allocate(minimumSize, false);
-
-				return ptr;
+				// The buffer pointer may be null.
+				buffer = bufferPtr;
 			}
-			catch (OutOfMemoryException)
+			catch (NullReferenceException)
 			{
 			}
 
-
-			return IntPtr.Zero;
+			if (buffer != IntPtr.Zero)
+			{
+				Memory.Free(buffer);
+				this.buffers.Remove(buffer);
+				// This method is documented to set the pointer to null after it has been freed.
+				bufferPtr = IntPtr.Zero;
+			}
 		}
 
-		private static void PSBufferDispose(ref IntPtr buffer)
+		private uint PSBufferGetSize(IntPtr buffer)
 		{
-			Memory.Free(buffer);
-			buffer = IntPtr.Zero;
+			if (buffer != IntPtr.Zero)
+			{
+				return (uint)Memory.Size(buffer); 
+			}
+
+			return 0;
 		}
 
-		private static uint PSBufferGetSize(IntPtr buffer)
+		private uint PSBufferGetSpace()
 		{
-			return (uint)Memory.Size(buffer);
+			return 1000000000;
 		}
 
-		private static uint PSBufferGetSpace()
+		public PSBufferSuite1 CreateBufferSuite1()
 		{
-		    return 1000000000;
-		}
+			if (this.disposed)
+			{
+				throw new ObjectDisposedException("PICABufferSuite");
+			}
 
-		public static PSBufferSuite1 CreateBufferSuite1()
-		{
 			PSBufferSuite1 suite = new PSBufferSuite1();
-			suite.New = Marshal.GetFunctionPointerForDelegate(bufferSuiteNew);
-			suite.Dispose = Marshal.GetFunctionPointerForDelegate(bufferSuiteDispose);
-			suite.GetSize = Marshal.GetFunctionPointerForDelegate(bufferSuiteGetSize);
-			suite.GetSpace = Marshal.GetFunctionPointerForDelegate(bufferSuiteGetSpace);
+			suite.New = Marshal.GetFunctionPointerForDelegate(this.bufferSuiteNew);
+			suite.Dispose = Marshal.GetFunctionPointerForDelegate(this.bufferSuiteDispose);
+			suite.GetSize = Marshal.GetFunctionPointerForDelegate(this.bufferSuiteGetSize);
+			suite.GetSpace = Marshal.GetFunctionPointerForDelegate(this.bufferSuiteGetSpace);
 
 			return suite;
+		}
+	   
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		~PICABufferSuite()
+		{
+			Dispose(false);
+		}
+
+		private void Dispose(bool disposing)
+		{
+			if (!disposed)
+			{
+				if (disposing)
+				{
+				}
+
+				for (int i = 0; i < this.buffers.Count; i++)
+				{
+					Memory.Free(this.buffers[i]);
+				}
+				this.buffers = null;
+
+				disposed = true;
+			}
 		}
 	}
 }
