@@ -235,6 +235,29 @@ namespace PSFilterLoad.PSApi.PICA
             return newZString;
         }
 
+        public IntPtr CreateFromString(string value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException("value");
+            }
+
+            IntPtr newZString = IntPtr.Zero;
+
+            if (value.Length == 0)
+            {
+                newZString = GetEmpty();
+            }
+            else
+            {
+                ZString zstring = new ZString(value);
+                newZString = GenerateDictionaryKey();
+                this.strings.Add(newZString, zstring);
+            }
+
+            return newZString;
+        }
+
         private IntPtr GenerateDictionaryKey()
         {
             return new IntPtr(this.strings.Count + 1);
