@@ -15,47 +15,66 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal static class PICAUIHooksSuite
+    internal sealed class PICAUIHooksSuite
     {
-        private static IntPtr hwnd;
-        private static UISuiteMainWindowHandle uiWindowHandle = new UISuiteMainWindowHandle(MainWindowHandle);
-        private static UISuiteHostSetCursor uiSetCursor = new UISuiteHostSetCursor(HostSetCursor);
-        private static UISuiteHostTickCount uiTickCount = new UISuiteHostTickCount(HostTickCount);
-        private static UISuiteGetPluginName uiPluginName = new UISuiteGetPluginName(GetPluginName);
+        private readonly IntPtr hwnd;
+        private readonly string pluginName;
+        private readonly UISuiteMainWindowHandle uiWindowHandle;
+        private readonly UISuiteHostSetCursor uiSetCursor;
+        private readonly UISuiteHostTickCount uiTickCount;
+        private readonly UISuiteGetPluginName uiPluginName;
 
-        private static IntPtr MainWindowHandle()
+        public unsafe PICAUIHooksSuite(FilterRecord* filterRecord, string name)
         {
-            return hwnd;
+            this.hwnd = ((PlatformData*)filterRecord->platformData.ToPointer())->hwnd;
+            if (name != null)
+            {
+                this.pluginName = name;
+            }
+            else
+            {
+                this.pluginName = string.Empty;
+            }
+
+            this.uiWindowHandle = new UISuiteMainWindowHandle(MainWindowHandle);
+            this.uiSetCursor = new UISuiteHostSetCursor(HostSetCursor);
+            this.uiTickCount = new UISuiteHostTickCount(HostTickCount);
+            this.uiPluginName = new UISuiteGetPluginName(GetPluginName);
         }
 
-        private static int HostSetCursor(IntPtr cursor)
+        private IntPtr MainWindowHandle()
+        {
+            return this.hwnd;
+        }
+
+        private int HostSetCursor(IntPtr cursor)
         {
             return PSError.kSPNotImplmented;
         }
 
-        private static uint HostTickCount()
+        private uint HostTickCount()
         {
             return 60U;
         }
 
-        private static int GetPluginName(IntPtr pluginRef, ref IntPtr name)
+        private int GetPluginName(IntPtr pluginRef, ref IntPtr name)
         {
-            return PSError.kSPNotImplmented;
+            name = ASZStringSuite.Instance.CreateFromString(this.pluginName);
+
+            return PSError.kSPNoErr;
         }
 
-        public static unsafe PSUIHooksSuite1 CreateUIHooksSuite1(FilterRecord* filterRecord)
+        public unsafe PSUIHooksSuite1 CreateUIHooksSuite1(FilterRecord* filterRecord)
         {
-            hwnd = ((PlatformData*)filterRecord->platformData.ToPointer())->hwnd;
-
             PSUIHooksSuite1 suite = new PSUIHooksSuite1();
             suite.processEvent = filterRecord->processEvent;
             suite.displayPixels = filterRecord->displayPixels;
             suite.progressBar = filterRecord->progressProc;
             suite.testAbort = filterRecord->abortProc;
-            suite.MainAppWindow = Marshal.GetFunctionPointerForDelegate(uiWindowHandle);
-            suite.SetCursor = Marshal.GetFunctionPointerForDelegate(uiSetCursor);
-            suite.TickCount = Marshal.GetFunctionPointerForDelegate(uiTickCount);
-            suite.GetPluginName = Marshal.GetFunctionPointerForDelegate(uiPluginName);
+            suite.MainAppWindow = Marshal.GetFunctionPointerForDelegate(this.uiWindowHandle);
+            suite.SetCursor = Marshal.GetFunctionPointerForDelegate(this.uiSetCursor);
+            suite.TickCount = Marshal.GetFunctionPointerForDelegate(this.uiTickCount);
+            suite.GetPluginName = Marshal.GetFunctionPointerForDelegate(this.uiPluginName);
 
             return suite;
         }
