@@ -10,20 +10,28 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using System;
 using PSFilterLoad.PSApi.PICA;
 
 namespace PSFilterLoad.PSApi
 {
-	internal static class PICASuites
+	internal sealed class PICASuites : IDisposable
 	{
+		private PICABufferSuite bufferSuite;
+
 		public static ASZStringSuite1 CreateASZStringSuite1()
 		{
 			return ASZStringSuite.Instance.CreateASZStringSuite1();
 		}
 
-		public static PSBufferSuite1 CreateBufferSuite1()
+		public PSBufferSuite1 CreateBufferSuite1()
 		{
-			return PICABufferSuite.CreateBufferSuite1();
+			if (this.bufferSuite == null)
+			{
+				this.bufferSuite = new PICABufferSuite();
+			}
+
+			return this.bufferSuite.CreateBufferSuite1();
 		}
 
 #if PICASUITEDEBUG
@@ -66,6 +74,13 @@ namespace PSFilterLoad.PSApi
 		} 
 #endif
 
-
+		public void Dispose()
+		{
+			if (this.bufferSuite != null)
+			{
+				this.bufferSuite.Dispose();
+				this.bufferSuite = null;
+			}
+		}
 	}
 }
