@@ -51,7 +51,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="size">The size of the memory to allocate.</param>
 		/// <param name="zeroFill">if <c>true</c> the allocated memory will be set to zero.</param>
 		/// <returns>A pointer to the allocated block of memory.</returns>
-		public static IntPtr Allocate(long size, bool zeroMemory)
+		public static IntPtr Allocate(long size, bool zeroFill)
 		{
 			if (hHeap == IntPtr.Zero)
 			{
@@ -62,7 +62,7 @@ namespace PSFilterLoad.PSApi
 			try
 			{
 				UIntPtr bytes = new UIntPtr((ulong)size);
-				block = SafeNativeMethods.HeapAlloc(hHeap, zeroMemory ? NativeConstants.HEAP_ZERO_MEMORY : 0U, bytes);
+				block = SafeNativeMethods.HeapAlloc(hHeap, zeroFill ? NativeConstants.HEAP_ZERO_MEMORY : 0U, bytes);
 			}
 			catch (OverflowException)
 			{
