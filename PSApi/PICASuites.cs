@@ -18,6 +18,33 @@ namespace PSFilterLoad.PSApi
 	internal sealed class PICASuites : IDisposable
 	{
 		private PICABufferSuite bufferSuite;
+		private PICAUIHooksSuite uiHooksSuite;
+		private string pluginName;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PICASuites"/> class.
+		/// </summary>
+		public PICASuites()
+		{
+			this.bufferSuite = null;
+			this.uiHooksSuite = null;
+			this.pluginName = string.Empty;
+		}
+
+		/// <summary>
+		/// Sets the name of the plug-in used by the <see cref="PSUIHooksSuite1.GetPluginName"/> callback.
+		/// </summary>
+		/// <param name="name">The name.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="pluginName"/> is null.</exception>
+		public void SetPluginName(string name)
+		{
+			if (name == null)
+			{
+				throw new ArgumentNullException("pluginName");
+			}
+
+			this.pluginName = name;
+		}
 
 		public static ASZStringSuite1 CreateASZStringSuite1()
 		{
@@ -62,9 +89,14 @@ namespace PSFilterLoad.PSApi
 			return suite;
 		}
 
-		public static unsafe PSUIHooksSuite1 CreateUIHooksSuite1(FilterRecord* filterRecord)
+		public unsafe PSUIHooksSuite1 CreateUIHooksSuite1(FilterRecord* filterRecord)
 		{
-			return PICAUIHooksSuite.CreateUIHooksSuite1(filterRecord);
+			if (uiHooksSuite == null)
+			{
+				this.uiHooksSuite = new PICAUIHooksSuite(filterRecord, this.pluginName);
+			}
+
+			return this.uiHooksSuite.CreateUIHooksSuite1(filterRecord);
 		}
 
 #if PICASUITEDEBUG
