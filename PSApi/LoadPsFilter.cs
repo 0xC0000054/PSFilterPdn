@@ -161,6 +161,7 @@ namespace PSFilterLoad.PSApi
 		private bool useChannelPorts;
 		private bool usePICASuites;
 		private ActivePICASuites activePICASuites;
+		private PICASuites picaSuites;
 
 		private DescriptorSuite descriptorSuite;
 		private PseudoResourceSuite pseudoResourceSuite;
@@ -267,6 +268,7 @@ namespace PSFilterLoad.PSApi
 			this.channelReadDescPtrs = new List<ChannelDescPtrs>();
 			this.usePICASuites = false;
 			this.activePICASuites = new ActivePICASuites();
+			this.picaSuites = new PICASuites();
 			this.descriptorSuite = new DescriptorSuite();
 			this.pseudoResourceSuite = new PseudoResourceSuite();
 
@@ -3465,7 +3467,7 @@ namespace PSFilterLoad.PSApi
 
 						suite = activePICASuites.AllocateSuite<PSBufferSuite1>(suiteKey);
 
-						PSBufferSuite1 bufferSuite = PICASuites.CreateBufferSuite1();
+						PSBufferSuite1 bufferSuite = this.picaSuites.CreateBufferSuite1();
 
 						Marshal.StructureToPtr(bufferSuite, suite, false);
 					}
@@ -4072,6 +4074,12 @@ namespace PSFilterLoad.PSApi
 					{
 						activePICASuites.Dispose();
 						activePICASuites = null;
+					}
+
+					if (picaSuites != null)
+					{
+						picaSuites.Dispose();
+						picaSuites = null;
 					}
 				}
 
