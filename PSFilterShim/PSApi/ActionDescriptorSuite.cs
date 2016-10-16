@@ -1064,7 +1064,7 @@ namespace PSFilterLoad.PSApi
             {
                 ActionDescriptorZString value = (ActionDescriptorZString)item.Value;
 
-                PICA.ASZStringSuite.Instance.CreateFromActionDescriptor(value, out zstring);
+                zstring = PICA.ASZStringSuite.Instance.CreateFromActionDescriptor(value);
                 
                 return PSError.kSPNoErr;
             }
