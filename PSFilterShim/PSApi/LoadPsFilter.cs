@@ -1211,6 +1211,7 @@ namespace PSFilterLoad.PSApi
 
 			useChannelPorts = EnableChannelPorts(pdata);
 			usePICASuites = EnablePICASuites(pdata);
+			this.picaSuites.SetPluginName(pdata.Title.TrimEnd('.'));
 
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
 
@@ -3537,7 +3538,7 @@ namespace PSFilterLoad.PSApi
 
 						suite = activePICASuites.AllocateSuite<PSUIHooksSuite1>(suiteKey);
 
-						PSUIHooksSuite1 uiHooks = PICASuites.CreateUIHooksSuite1((FilterRecord*)filterRecordPtr.ToPointer());
+						PSUIHooksSuite1 uiHooks = this.picaSuites.CreateUIHooksSuite1((FilterRecord*)filterRecordPtr.ToPointer());
 
 						Marshal.StructureToPtr(uiHooks, suite, false);
 					}
