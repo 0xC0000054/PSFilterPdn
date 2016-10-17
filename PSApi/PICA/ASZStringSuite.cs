@@ -348,25 +348,34 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Copy(IntPtr source, ref IntPtr copy)
         {
-            if (source != IntPtr.Zero && this.strings.ContainsKey(source))
+            // IntPtr.Zero is valid for an empty string.
+            if (source == IntPtr.Zero)
             {
-                ZString existing = this.strings[source];
-
-                try
+                copy = IntPtr.Zero;
+            }
+            else
+            {
+                ZString existing;
+                if (this.strings.TryGetValue(source, out existing))
                 {
-                    ZString zstring = new ZString(string.Copy(existing.Data));
-                    copy = GenerateDictionaryKey();
-                    this.strings.Add(copy, zstring);
+                    try
+                    {
+                        ZString zstring = new ZString(string.Copy(existing.Data));
+                        copy = GenerateDictionaryKey();
+                        this.strings.Add(copy, zstring);
+                    }
+                    catch (OutOfMemoryException)
+                    {
+                        return PSError.kASOutOfMemory;
+                    }
                 }
-                catch (OutOfMemoryException)
+                else
                 {
-                    return PSError.kASOutOfMemory;
+                    return PSError.kASBadParameter;
                 }
-
-                return PSError.kASNoErr;
             }
 
-            return PSError.kASBadParameter;
+            return PSError.kASNoErr;
         }
 
         private int Replace(IntPtr zstr, uint index, IntPtr replacement)
@@ -376,8 +385,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int TrimEllipsis(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
+            if (zstr != IntPtr.Zero)
             {
+                if (!this.strings.ContainsKey(zstr))
+                {
+                    return PSError.kASBadParameter;
+                }
+
                 ZString item = this.strings[zstr];
                 string value = item.Data;
 
@@ -388,17 +402,20 @@ namespace PSFilterLoad.PSApi.PICA
                         item.Data = value.Substring(0, value.Length - 3);
                     }
                 }
-
-                return PSError.kASNoErr;
             }
 
-            return PSError.kASBadParameter;
+            return PSError.kASNoErr;
         }
 
         private int TrimSpaces(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
+            if (zstr != IntPtr.Zero)
             {
+                if (!this.strings.ContainsKey(zstr))
+                {
+                    return PSError.kASBadParameter;
+                }
+
                 ZString item = this.strings[zstr];
                 string value = item.Data;
 
@@ -406,17 +423,19 @@ namespace PSFilterLoad.PSApi.PICA
                 {
                     item.Data = value.Trim(' ');
                 }
-
-                return PSError.kASNoErr;
             }
 
-            return PSError.kASBadParameter;
+            return PSError.kASNoErr;
         }
 
         private int RemoveAccelerators(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
+            if (zstr != IntPtr.Zero)
             {
+                if (!this.strings.ContainsKey(zstr))
+                {
+                    return PSError.kASBadParameter;
+                }
                 ZString item = this.strings[zstr];
                 string value = item.Data;
 
@@ -463,41 +482,44 @@ namespace PSFilterLoad.PSApi.PICA
                         }
                     }
                 }
-
-                return PSError.kASNoErr;
             }
 
-            return PSError.kASBadParameter;
+            return PSError.kASNoErr;
         }
 
         private int AddRef(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
+            if (zstr != IntPtr.Zero)
             {
-                this.strings[zstr].RefCount += 1;
+                if (!this.strings.ContainsKey(zstr))
+                {
+                    return PSError.kASBadParameter;
+                }
 
-                return PSError.kASNoErr;
+                this.strings[zstr].RefCount += 1;
             }
 
-            return PSError.kASBadParameter;
+            return PSError.kASNoErr;
         }
 
         private int Release(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
+            if (zstr != IntPtr.Zero)
             {
-                ZString value =  this.strings[zstr];
+                if (!this.strings.ContainsKey(zstr))
+                {
+                    return PSError.kASBadParameter;
+                }
+                ZString value = this.strings[zstr];
                 value.RefCount -= 1;
 
                 if (value.RefCount == 0)
                 {
                     this.strings.Remove(zstr);
                 }
-
-                return PSError.kASNoErr;
             }
 
-            return PSError.kASBadParameter;
+            return PSError.kASNoErr;
         }
 
         private bool IsAllWhiteSpace(IntPtr zstr)
@@ -534,17 +556,24 @@ namespace PSFilterLoad.PSApi.PICA
 
         private uint LengthAsUnicodeCString(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
+            if (zstr == IntPtr.Zero)
             {
-                ZString item = this.strings[zstr];
-
-                if (item.Data != null)
+                // If the string is empty return only the length of the null terminator.
+                return 1;
+            }
+            else
+            {
+                ZString item;
+                if (this.strings.TryGetValue(zstr, out item))
                 {
-                    // This method returns a length in UTF-16 characters not bytes.
-                    int charLength = Encoding.Unicode.GetByteCount(item.Data) / UnicodeEncoding.CharSize;
+                    if (item.Data != null)
+                    {
+                        // This method returns a length in UTF-16 characters not bytes.
+                        int charLength = Encoding.Unicode.GetByteCount(item.Data) / UnicodeEncoding.CharSize;
 
-                    // Add the null terminator to the total length.
-                    return (uint)(charLength + 1);
+                        // Add the null terminator to the total length.
+                        return (uint)(charLength + 1);
+                    } 
                 }
             }
 
@@ -553,11 +582,23 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int AsUnicodeCString(IntPtr zstr, IntPtr str, uint strSize, bool checkStrSize)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr) && str != IntPtr.Zero)
+            if (str != IntPtr.Zero)
             {
-                ZString item = this.strings[zstr];
+                string value = string.Empty;
+                if (zstr != IntPtr.Zero)
+                {
+                    ZString item;
+                    if (this.strings.TryGetValue(zstr, out item))
+                    {
+                        value = item.Data;
+                    }
+                    else
+                    {
+                        return PSError.kASBadParameter;
+                    }
+                }
 
-                byte[] bytes = Encoding.Unicode.GetBytes(item.Data);
+                byte[] bytes = Encoding.Unicode.GetBytes(value);
 
                 int lengthInChars = bytes.Length / UnicodeEncoding.CharSize;
                 int lengthWithTerminator = lengthInChars + 1;
@@ -578,16 +619,23 @@ namespace PSFilterLoad.PSApi.PICA
 
         private uint LengthAsCString(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
+            if (zstr == IntPtr.Zero)
             {
-                ZString item = this.strings[zstr];
-
-                if (item.Data != null)
+                // If the string is empty return only the length of the null terminator.
+                return 1;
+            }
+            else
+            {
+                ZString item;
+                if (this.strings.TryGetValue(zstr, out item))
                 {
-                    // Add the null terminator to the total length.
-                    int length = Encoding.ASCII.GetByteCount(item.Data) + 1;
+                    if (item.Data != null)
+                    {
+                        // Add the null terminator to the total length.
+                        int length = Encoding.ASCII.GetByteCount(item.Data) + 1;
 
-                    return (uint)length;
+                        return (uint)length;
+                    }
                 }
             }
 
@@ -596,11 +644,23 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int AsCString(IntPtr zstr, IntPtr str, uint strSize, bool checkStrSize)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr) && str != IntPtr.Zero)
+            if (str != IntPtr.Zero)
             {
-                ZString item = this.strings[zstr];
+                string value = string.Empty;
+                if (zstr != IntPtr.Zero)
+                {
+                    ZString item;
+                    if (this.strings.TryGetValue(zstr, out item))
+                    {
+                        value = item.Data;
+                    }
+                    else
+                    {
+                        return PSError.kASBadParameter;
+                    }
+                }
 
-                byte[] bytes = Encoding.ASCII.GetBytes(item.Data);
+                byte[] bytes = Encoding.ASCII.GetBytes(value);
 
                 int lengthWithTerminator = bytes.Length + 1;
 
@@ -620,16 +680,23 @@ namespace PSFilterLoad.PSApi.PICA
 
         private uint LengthAsPascalString(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
+            if (zstr == IntPtr.Zero)
             {
-                ZString item = this.strings[zstr];
-
-                if (item.Data != null)
+                // If the string is empty return only the length of the prefix byte.
+                return 1;
+            }
+            else
+            {
+                ZString item;
+                if (this.strings.TryGetValue(zstr, out item))
                 {
-                    // Add the length prefix byte to the total length.
-                    int length = Encoding.ASCII.GetByteCount(item.Data) + 1;
+                    if (item.Data != null)
+                    {
+                        // Add the length prefix byte to the total length.
+                        int length = Encoding.ASCII.GetByteCount(item.Data) + 1;
 
-                    return (uint)length;
+                        return (uint)length;
+                    }
                 }
             }
 
@@ -638,11 +705,23 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int AsPascalString(IntPtr zstr, IntPtr str, uint strSize, bool checkStrSize)
         {
-            if (zstr != IntPtr.Zero && strings.ContainsKey(zstr) && str != IntPtr.Zero)
+            if (str != IntPtr.Zero)
             {
-                ZString item = this.strings[zstr];
+                string value = string.Empty;
+                if (zstr != IntPtr.Zero)
+                {
+                    ZString item;
+                    if (this.strings.TryGetValue(zstr, out item))
+                    {
+                        value = item.Data;
+                    }
+                    else
+                    {
+                        return PSError.kASBadParameter;
+                    }
+                }
 
-                byte[] bytes = Encoding.ASCII.GetBytes(item.Data);
+                byte[] bytes = Encoding.ASCII.GetBytes(value);
 
                 int lengthWithPrefixByte = bytes.Length + 1;
 
@@ -652,7 +731,10 @@ namespace PSFilterLoad.PSApi.PICA
                 }
 
                 Marshal.WriteByte(str, (byte)bytes.Length);
-                Marshal.Copy(bytes, 0, new IntPtr(str.ToInt64() + 1L), bytes.Length);
+                if (bytes.Length > 0)
+                {
+                    Marshal.Copy(bytes, 0, new IntPtr(str.ToInt64() + 1L), bytes.Length); 
+                }
 
                 return PSError.kASNoErr;
             }
