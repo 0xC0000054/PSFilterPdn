@@ -208,29 +208,37 @@ namespace PSFilterLoad.PSApi.PICA
             return suite;
         }
 
-        public ActionDescriptorZString ConvertToActionDescriptor(IntPtr zstring)
+        public bool ConvertToActionDescriptor(IntPtr zstring, out ActionDescriptorZString descriptor)
         {
-            if (zstring != IntPtr.Zero && this.strings.ContainsKey(zstring))
-            {
-                ZString value = this.strings[zstring];
+            descriptor = null;
 
-                return new ActionDescriptorZString(value.Data);
+            // IntPtr.Zero is valid for an empty string.
+            if (zstring != IntPtr.Zero)
+            {
+                ZString value;
+                if (this.strings.TryGetValue(zstring, out value))
+                {
+                    descriptor = new ActionDescriptorZString(value.Data);
+                }
+                else
+                {
+                    return false;
+                }
             }
 
-            return null;
+            return true;
         }
 
         public IntPtr CreateFromActionDescriptor(ActionDescriptorZString descriptor)
         {
-            if (descriptor == null)
+            IntPtr newZString = IntPtr.Zero;
+
+            if (descriptor != null)
             {
-                throw new ArgumentNullException("descriptor");
+                newZString = GenerateDictionaryKey();
+                ZString zstring = new ZString(descriptor.Value);
+                this.strings.Add(newZString, zstring); 
             }
-
-            IntPtr newZString = GenerateDictionaryKey();
-
-            ZString zstring = new ZString(descriptor.Value);
-            this.strings.Add(newZString, zstring);
 
             return newZString;
         }
