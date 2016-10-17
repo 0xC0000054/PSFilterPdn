@@ -687,8 +687,8 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            ActionDescriptorZString value = PICA.ASZStringSuite.Instance.ConvertToActionDescriptor(zstring);
-            if (value != null)
+            ActionDescriptorZString value;
+            if (PICA.ASZStringSuite.Instance.ConvertToActionDescriptor(zstring, out value))
             {
                 this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), 0, value));
 
