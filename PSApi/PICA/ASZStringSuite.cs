@@ -387,20 +387,20 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (zstr != IntPtr.Zero)
             {
-                if (!this.strings.ContainsKey(zstr))
+                ZString item;
+                if (this.strings.TryGetValue(zstr, out item))
                 {
-                    return PSError.kASBadParameter;
-                }
+                    string value = item.Data;
 
-                ZString item = this.strings[zstr];
-                string value = item.Data;
-
-                if (value != null)
-                {
-                    if (value.EndsWith("...", StringComparison.Ordinal))
+                    if (value != null && value.EndsWith("...", StringComparison.Ordinal))
                     {
                         item.Data = value.Substring(0, value.Length - 3);
-                    }
+                        this.strings[zstr] = item;
+                    } 
+                }
+                else
+                {
+                    return PSError.kASBadParameter;
                 }
             }
 
@@ -411,17 +411,20 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (zstr != IntPtr.Zero)
             {
-                if (!this.strings.ContainsKey(zstr))
+                ZString item;
+                if (this.strings.TryGetValue(zstr, out item))
+                {
+                    string value = item.Data;
+
+                    if (value != null)
+                    {
+                        item.Data = value.Trim(' ');
+                        this.strings[zstr] = item;
+                    } 
+                }
+                else
                 {
                     return PSError.kASBadParameter;
-                }
-
-                ZString item = this.strings[zstr];
-                string value = item.Data;
-
-                if (value != null)
-                {
-                    item.Data = value.Trim(' ');
                 }
             }
 
@@ -432,16 +435,12 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (zstr != IntPtr.Zero)
             {
-                if (!this.strings.ContainsKey(zstr))
+                ZString item;
+                if (this.strings.TryGetValue(zstr, out item))
                 {
-                    return PSError.kASBadParameter;
-                }
-                ZString item = this.strings[zstr];
-                string value = item.Data;
+                    string value = item.Data;
 
-                if (value != null)
-                {
-                    if (value.IndexOf('&') >= 0)
+                    if (value != null && value.IndexOf('&') >= 0)
                     {
                         try
                         {
@@ -475,12 +474,17 @@ namespace PSFilterLoad.PSApi.PICA
                             }
 
                             item.Data = sb.ToString();
+                            this.strings[zstr] = item;
                         }
                         catch (OutOfMemoryException)
                         {
                             return PSError.kASOutOfMemory;
                         }
-                    }
+                    } 
+                }
+                else
+                {
+                    return PSError.kASBadParameter;
                 }
             }
 
@@ -491,12 +495,16 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (zstr != IntPtr.Zero)
             {
-                if (!this.strings.ContainsKey(zstr))
+                ZString item;
+                if (this.strings.TryGetValue(zstr, out item))
+                {
+                    item.RefCount += 1;
+                    this.strings[zstr] = item; 
+                }
+                else
                 {
                     return PSError.kASBadParameter;
                 }
-
-                this.strings[zstr].RefCount += 1;
             }
 
             return PSError.kASNoErr;
@@ -506,16 +514,23 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (zstr != IntPtr.Zero)
             {
-                if (!this.strings.ContainsKey(zstr))
+                ZString item;
+                if (this.strings.TryGetValue(zstr, out item))
+                {
+                    item.RefCount -= 1;
+
+                    if (item.RefCount == 0)
+                    {
+                        this.strings.Remove(zstr);
+                    }
+                    else
+                    {
+                        this.strings[zstr] = item;
+                    } 
+                }
+                else
                 {
                     return PSError.kASBadParameter;
-                }
-                ZString value = this.strings[zstr];
-                value.RefCount -= 1;
-
-                if (value.RefCount == 0)
-                {
-                    this.strings.Remove(zstr);
                 }
             }
 
@@ -524,20 +539,23 @@ namespace PSFilterLoad.PSApi.PICA
 
         private bool IsAllWhiteSpace(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero && this.strings.ContainsKey(zstr))
+            if (zstr != IntPtr.Zero)
             {
-                ZString item = this.strings[zstr];
-                string value = item.Data;
-
-                if (value != null)
+                ZString item;
+                if (this.strings.TryGetValue(zstr, out item))
                 {
-                    for (int i = 0; i < value.Length; i++)
+                    string value = item.Data;
+
+                    if (value != null)
                     {
-                        if (!char.IsWhiteSpace(value[i]))
+                        for (int i = 0; i < value.Length; i++)
                         {
-                            return false;
+                            if (!char.IsWhiteSpace(value[i]))
+                            {
+                                return false;
+                            }
                         }
-                    }
+                    } 
                 }
             }
 
