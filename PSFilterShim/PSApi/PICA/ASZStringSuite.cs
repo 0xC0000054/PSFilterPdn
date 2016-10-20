@@ -167,7 +167,7 @@ namespace PSFilterLoad.PSApi.PICA
             this.lengthAsPascalString = new ASZStringLengthAsPascalString(LengthAsPascalString);
             this.asPascalString = new ASZStringAsPascalString(AsPascalString);
 
-            this.strings = new Dictionary<IntPtr, ZString>();
+            this.strings = new Dictionary<IntPtr, ZString>(IntPtrEqualityComparer.Instance);
         }
 
         public static ASZStringSuite Instance
