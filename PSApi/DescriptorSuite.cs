@@ -145,9 +145,9 @@ namespace PSFilterLoad.PSApi
 			this.putUnitFloatProc = new PutUnitFloatProc(PutUnitFloatProc);
 
 			this.lastDescriptorError = PSError.noErr;
-			this.readDescriptorHandles = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>();
-			this.descriptorSubKeys = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>();
-			this.writeDescriptorHandles = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>();
+			this.readDescriptorHandles = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
+			this.descriptorSubKeys = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
+			this.writeDescriptorHandles = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
 			this.scriptingData = new Dictionary<uint, AETEValue>();
 		}
 
