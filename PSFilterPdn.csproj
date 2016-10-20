@@ -152,6 +152,7 @@
     <Compile Include="PSApi\GlobalParameters.cs" />
     <Compile Include="PSApi\HandleSuite.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
+    <Compile Include="PSApi\IntPtrEqualityComparer.cs" />
     <Compile Include="PSApi\IntPtrExtensions.cs" />
     <Compile Include="PSApi\LoadPsFilter.cs" />
     <Compile Include="PSApi\LoadPsFilter.QueryPlugin.cs" />
