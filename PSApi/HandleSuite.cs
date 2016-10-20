@@ -286,7 +286,12 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}, moveHigh: {1}", h.ToHexString(), moveHigh));
 #endif
-			if (!AllocatedBySuite(h))
+			HandleEntry item;
+			if (this.handles.TryGetValue(h, out item))
+			{
+				return item.pointer;
+			}
+			else
 			{
 				if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
 				{
@@ -305,8 +310,6 @@ namespace PSFilterLoad.PSApi
 				}
 				return IntPtr.Zero;
 			}
-
-			return this.handles[h].pointer;
 		}
 
 		internal int GetHandleSize(IntPtr h)
@@ -314,7 +317,12 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
 #endif
-			if (!AllocatedBySuite(h))
+			HandleEntry item;
+			if (this.handles.TryGetValue(h, out item))
+			{
+				return item.size;
+			}
+			else
 			{
 				if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
 				{
@@ -331,8 +339,6 @@ namespace PSFilterLoad.PSApi
 				}
 				return 0;
 			}
-
-			return this.handles[h].size;
 		}
 
 		private void RecoverHandleSpace(int size)
