@@ -72,7 +72,7 @@ namespace PSFilterLoad.PSApi
 			this.handleUnlockProc = new UnlockPIHandleProc(UnlockHandle);
 			this.handleRecoverSpaceProc = new RecoverSpaceProc(RecoverHandleSpace);
 			this.handleDisposeRegularProc = new DisposeRegularPIHandleProc(DisposeRegularHandle);
-			this.handles = new Dictionary<IntPtr, HandleEntry>();
+			this.handles = new Dictionary<IntPtr, HandleEntry>(IntPtrEqualityComparer.Instance);
 		}
 
 		public static HandleSuite Instance
