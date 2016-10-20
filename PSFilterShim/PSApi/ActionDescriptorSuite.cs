@@ -227,7 +227,7 @@ namespace PSFilterLoad.PSApi
 
             this.scriptingData = new ScriptingDataCollection();
             this.aete = null;
-            this.openDescriptorHandles = new Dictionary<IntPtr, ScriptingDataCollection>();
+            this.openDescriptorHandles = new Dictionary<IntPtr, ScriptingDataCollection>(IntPtrEqualityComparer.Instance);
         }
 
         public PSActionDescriptorProc CreateActionDescriptorSuite2()
