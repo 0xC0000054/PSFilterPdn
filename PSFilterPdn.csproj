@@ -149,6 +149,7 @@
     <Compile Include="PSApi\DescriptorSuite.cs" />
     <Compile Include="PSApi\DescriptorTypes.cs" />
     <Compile Include="PSApi\DictionaryExtensions.cs" />
+    <Compile Include="PSApi\ErrorSuite.cs" />
     <Compile Include="PSApi\GlobalParameters.cs" />
     <Compile Include="PSApi\HandleSuite.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
@@ -174,6 +175,7 @@
     <Compile Include="PSApi\PluginModule.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\PSActionDescriptor.cs" />
+    <Compile Include="PSApi\PSErrorSuite.cs" />
     <Compile Include="PSApi\PseudoResourceSuite.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
     <Compile Include="PSApi\PSResource.cs" />

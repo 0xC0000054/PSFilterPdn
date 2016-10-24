@@ -166,6 +166,7 @@ namespace PSFilterLoad.PSApi
 		private DescriptorSuite descriptorSuite;
 		private PseudoResourceSuite pseudoResourceSuite;
 		private ActionDescriptorSuite actionDescriptorSuite;
+		private ErrorSuite errorSuite;
 
 		internal Surface Dest
 		{
@@ -1288,63 +1289,74 @@ namespace PSFilterLoad.PSApi
 			// Any positive integer is a plugin handled error message.
 			if (error < 0 && error != PSError.userCanceledErr)
 			{
-				switch (error)
+				if (error == PSError.errReportString)
 				{
-					case PSError.readErr:
-					case PSError.writErr:
-					case PSError.openErr:
-					case PSError.ioErr:
-						message = Resources.FileIOError;
-						break;
-					case PSError.eofErr:
-						message = Resources.EndOfFileError;
-						break;
-					case PSError.dskFulErr:
-						message = Resources.DiskFullError;
-						break;
-					case PSError.fLckdErr:
-						message = Resources.FileLockedError;
-						break;
-					case PSError.vLckdErr:
-						message = Resources.VolumeLockedError;
-						break;
-					case PSError.fnfErr:
-						message = Resources.FileNotFoundError;
-						break;
-					case PSError.memFullErr:
-					case PSError.nilHandleErr:
-					case PSError.memWZErr:
-						message = Resources.OutOfMemoryError;
-						break;
-					case PSError.filterBadMode:
-						message = Resources.UnsupportedImageMode;
-						break;
-					case PSError.errPlugInPropertyUndefined:
-						message = Resources.PlugInPropertyUndefined;
-						break;
-					case PSError.errHostDoesNotSupportColStep:
-						message = Resources.HostDoesNotSupportColStep;
-						break;
-					case PSError.errInvalidSamplePoint:
-						message = Resources.InvalidSamplePoint;
-						break;
-					case PSError.errPlugInHostInsufficient:
-					case PSError.errUnknownPort:
-					case PSError.errUnsupportedBitOffset:
-					case PSError.errUnsupportedColBits:
-					case PSError.errUnsupportedDepth:
-					case PSError.errUnsupportedDepthConversion:
-					case PSError.errUnsupportedRowBits:
-						message = Resources.PlugInHostInsufficient;
-						break;
-					case PSError.errReportString:
+					if (errorSuite != null && errorSuite.HasErrorMessage)
+					{
+						message = this.errorSuite.ErrorMessage;
+					}
+					else
+					{
 						message = StringUtil.FromPascalString(this.errorStringPtr, string.Empty);
-						break;
-					case PSError.paramErr:
-					case PSError.filterBadParameters:
-					default:
-						message = Resources.FilterBadParameters;
-						break;
+					}
+				}
+				else
+				{
+					switch (error)
+					{
+						case PSError.readErr:
+						case PSError.writErr:
+						case PSError.openErr:
+						case PSError.ioErr:
+							message = Resources.FileIOError;
+							break;
+						case PSError.eofErr:
+							message = Resources.EndOfFileError;
+							break;
+						case PSError.dskFulErr:
+							message = Resources.DiskFullError;
+							break;
+						case PSError.fLckdErr:
+							message = Resources.FileLockedError;
+							break;
+						case PSError.vLckdErr:
+							message = Resources.VolumeLockedError;
+							break;
+						case PSError.fnfErr:
+							message = Resources.FileNotFoundError;
+							break;
+						case PSError.memFullErr:
+						case PSError.nilHandleErr:
+						case PSError.memWZErr:
+							message = Resources.OutOfMemoryError;
+							break;
+						case PSError.filterBadMode:
+							message = Resources.UnsupportedImageMode;
+							break;
+						case PSError.errPlugInPropertyUndefined:
+							message = Resources.PlugInPropertyUndefined;
+							break;
+						case PSError.errHostDoesNotSupportColStep:
+							message = Resources.HostDoesNotSupportColStep;
+							break;
+						case PSError.errInvalidSamplePoint:
+							message = Resources.InvalidSamplePoint;
+							break;
+						case PSError.errPlugInHostInsufficient:
+						case PSError.errUnknownPort:
+						case PSError.errUnsupportedBitOffset:
+						case PSError.errUnsupportedColBits:
+						case PSError.errUnsupportedDepth:
+						case PSError.errUnsupportedDepthConversion:
+						case PSError.errUnsupportedRowBits:
+							message = Resources.PlugInHostInsufficient;
+							break;
+						case PSError.paramErr:
+						case PSError.filterBadParameters:
+						default:
+							message = Resources.FilterBadParameters;
+							break;
+					} 
 				}
 			}
 
@@ -3557,6 +3569,23 @@ namespace PSFilterLoad.PSApi
 						ASZStringSuite1 stringSuite = PICASuites.CreateASZStringSuite1();
 
 						Marshal.StructureToPtr(stringSuite, suite, false);
+					}
+					else if (suiteName == PSConstants.PICAErrorSuite)
+					{
+						if (version != 1)
+						{
+							return PSError.kSPSuiteNotFoundError;
+						}
+						if (errorSuite == null)
+						{
+							this.errorSuite = new ErrorSuite();
+						}
+
+						suite = this.activePICASuites.AllocateSuite<PSErrorSuite1>(suiteKey);
+
+						PSErrorSuite1 error = this.errorSuite.CreateErrorSuite1();
+
+						Marshal.StructureToPtr(error, suite, false);
 					}
 #if PICASUITEDEBUG
 					else if (suiteName == PSConstants.PICAColorSpaceSuite)

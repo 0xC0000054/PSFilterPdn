@@ -147,6 +147,7 @@
     <Compile Include="PSApi\DescriptorSuite.cs" />
     <Compile Include="PSApi\DescriptorTypes.cs" />
     <Compile Include="PSApi\DisplayPixelsProc.cs" />
+    <Compile Include="PSApi\ErrorSuite.cs" />
     <Compile Include="PSApi\FilterCase.cs" />
     <Compile Include="PSApi\FilterRecord.cs" />
     <Compile Include="PSApi\FilterSelector.cs" />
@@ -183,6 +184,7 @@
     <Compile Include="PSApi\PSActionDescriptor.cs" />
     <Compile Include="PSApi\PSConstants.cs" />
     <Compile Include="PSApi\PSError.cs" />
+    <Compile Include="PSApi\PSErrorSuite.cs" />
     <Compile Include="PSApi\PseudoResourceSuite.cs" />
     <Compile Include="PSApi\PSImagePlane.cs" />
     <Compile Include="PSApi\PSPixelMap.cs" />

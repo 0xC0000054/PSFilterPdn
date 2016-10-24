@@ -195,6 +195,7 @@ namespace PSFilterLoad.PSApi
         }
 
         public const string PICABufferSuite = "Photoshop Buffer Suite for Plug-ins";
+        public const string PICAErrorSuite = "Photoshop Error Suite for Plug-ins";
         public const string PICAHandleSuite = "Photoshop Handle Suite for Plug-ins";
         public const string PICAPropertySuite = "Photoshop Property Suite for Plug-ins";
         public const string PICAUIHooksSuite = "Photoshop UIHooks Suite for Plug-ins";
