@@ -3445,6 +3445,10 @@ namespace PSFilterLoad.PSApi
 		{
 
 			string suiteName = Marshal.PtrToStringAnsi(name);
+			if (suiteName == null)
+			{
+				return PSError.kSPBadParameterError;
+			}
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("name: {0}, version: {1}", suiteName, version));
 #endif
@@ -3461,7 +3465,7 @@ namespace PSFilterLoad.PSApi
 				{
 					if (suiteName == PSConstants.PICABufferSuite)
 					{
-						if (version > 1)
+						if (version != 1)
 						{
 							return PSError.kSPSuiteNotFoundError;
 						}
@@ -3474,11 +3478,6 @@ namespace PSFilterLoad.PSApi
 					}
 					else if (suiteName == PSConstants.PICAHandleSuite)
 					{
-						if (version > 2)
-						{
-							return PSError.kSPSuiteNotFoundError;
-						}
-
 						if (version == 1)
 						{
 							suite = activePICASuites.AllocateSuite<PSHandleSuite1>(suiteKey);
@@ -3487,7 +3486,7 @@ namespace PSFilterLoad.PSApi
 
 							Marshal.StructureToPtr(handleSuite, suite, false);
 						}
-						else
+						else if (version == 2)
 						{
 							suite = activePICASuites.AllocateSuite<PSHandleSuite2>(suiteKey);
 
@@ -3495,10 +3494,14 @@ namespace PSFilterLoad.PSApi
 
 							Marshal.StructureToPtr(handleSuite, suite, false);
 						}
+						else
+						{
+							return PSError.kSPSuiteNotFoundError;
+						}
 					}
 					else if (suiteName == PSConstants.PICAPropertySuite)
 					{
-						if (version > PSConstants.kCurrentPropertyProcsVersion)
+						if (version != PSConstants.kCurrentPropertyProcsVersion)
 						{
 							return PSError.kSPSuiteNotFoundError;
 						}
@@ -3511,7 +3514,7 @@ namespace PSFilterLoad.PSApi
 					}
 					else if (suiteName == PSConstants.PICAUIHooksSuite)
 					{
-						if (version > 1)
+						if (version != 1)
 						{
 							return PSError.kSPSuiteNotFoundError;
 						}
@@ -3524,7 +3527,7 @@ namespace PSFilterLoad.PSApi
 					}
 					else if (suiteName == PSConstants.PICAActionDescriptorSuite)
 					{
-						if (version > 2)
+						if (version != 2)
 						{
 							return PSError.kSPSuiteNotFoundError;
 						}
@@ -3544,7 +3547,7 @@ namespace PSFilterLoad.PSApi
 					}
 					else if (suiteName == PSConstants.PICAZStringSuite)
 					{
-						if (version > 1)
+						if (version != 1)
 						{
 							return PSError.kSPSuiteNotFoundError;
 						}
@@ -3558,7 +3561,7 @@ namespace PSFilterLoad.PSApi
 #if PICASUITEDEBUG
 					else if (suiteName == PSConstants.PICAColorSpaceSuite)
 					{
-						if (version > 1)
+						if (version != 1)
 						{
 							return PSError.kSPSuiteNotFoundError;
 						}
@@ -3571,7 +3574,7 @@ namespace PSFilterLoad.PSApi
 					}
 					else if (suiteName == PSConstants.PICAPluginsSuite)
 					{
-						if (version > 4)
+						if (version != 4)
 						{
 							return PSError.kSPSuiteNotFoundError;
 						}
