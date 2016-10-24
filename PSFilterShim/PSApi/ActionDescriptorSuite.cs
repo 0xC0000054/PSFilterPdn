@@ -12,79 +12,79 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
     internal sealed class ActionDescriptorSuite
     {
-        private sealed class ScriptingParameters : Collection<KeyValuePair<uint, AETEValue>>
+        private sealed class ScriptingParameters
         {
-            public ScriptingParameters() : base()
+            private Dictionary<uint, AETEValue> parameters;
+            private List<uint> keys;
+
+            public ScriptingParameters()
             {
+                this.parameters = new Dictionary<uint, AETEValue>();
+                this.keys = new List<uint>();
             }
-            public ScriptingParameters(IEnumerable<KeyValuePair<uint, AETEValue>> items) : base(new List<KeyValuePair<uint, AETEValue>>(items))
+            public ScriptingParameters(IDictionary<uint, AETEValue> dict)
             {
+                this.parameters = new Dictionary<uint, AETEValue>(dict);
+                this.keys = new List<uint>(dict.Keys);
+            }
+
+            public int Count
+            {
+                get
+                {
+                    return this.parameters.Count;
+                }
             }
 
             public void Add(uint key, AETEValue value)
             {
-                Add(new KeyValuePair<uint, AETEValue>(key, value));
+                if (this.parameters.ContainsKey(key))
+                {
+                    this.parameters[key] = value;
+                }
+                else
+                {
+                    this.parameters.Add(key, value);
+                    this.keys.Add(key);
+                }
+            }
+
+            public void Clear()
+            {
+                this.parameters.Clear();
+                this.keys.Clear();
             }
 
             public bool ContainsKey(uint key)
             {
-                return IndexOfKey(key) >= 0;
+                return this.parameters.ContainsKey(key);
             }
 
-            public int IndexOfKey(uint key)
+            public uint GetKeyAtIndex(int index)
             {
-                for (int i = 0; i < Items.Count; i++)
-                {
-                    if (Items[i].Key == key)
-                    {
-                        return i;
-                    }
-                }
-
-                return -1;
+                return this.keys[index];
             }
 
             public void Remove(uint key)
             {
-                int index = IndexOfKey(key);
-                if (index >= 0)
-                {
-                    Items.RemoveAt(index);
-                }
+                this.parameters.Remove(key);
+                this.keys.Remove(key);
             }
 
             public bool TryGetValue(uint key, out AETEValue value)
             {
-                value = null;
-
-                foreach (var item in Items)
-                {
-                    if (item.Key == key)
-                    {
-                        value = item.Value;
-                        return true;
-                    }
-                }
-
-                return false;
+                return this.parameters.TryGetValue(key, out value);
             }
 
             public Dictionary<uint, AETEValue> ToDictionary()
             {
-                Dictionary<uint, AETEValue> data = new Dictionary<uint, AETEValue>(Items.Count);
-                foreach (KeyValuePair<uint, AETEValue> item in Items)
-                {
-                    data.Add(item.Key, item.Value);
-                }
-
-                return data;
+                return new Dictionary<uint, AETEValue>(this.parameters);
             }
         }
 
@@ -386,7 +386,7 @@ namespace PSFilterLoad.PSApi
 
             if (index >= 0 && index < parameters.Count)
             {
-                key = parameters[(int)index].Key;
+                key = parameters.GetKeyAtIndex((int)index);
                 return PSError.kSPNoError;
             }
 
