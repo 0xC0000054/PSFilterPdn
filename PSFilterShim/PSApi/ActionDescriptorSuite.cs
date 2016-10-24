@@ -311,11 +311,6 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: 0x{0}", descriptor.ToHexString()));
 #endif
-            if (openDescriptorHandles.Count == 1)
-            {
-                this.scriptingData = openDescriptorHandles[descriptor];
-            }
-
             this.openDescriptorHandles.Remove(descriptor);
 
             return PSError.kSPNoError;
@@ -349,6 +344,7 @@ namespace PSFilterLoad.PSApi
             {
                 return PSError.memFullErr;
             }
+            this.scriptingData = this.openDescriptorHandles[descriptor];
 
             return PSError.kSPNoError;
         }
