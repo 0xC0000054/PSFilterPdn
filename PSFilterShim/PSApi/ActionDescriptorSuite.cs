@@ -559,46 +559,28 @@ namespace PSFilterLoad.PSApi
             return PSError.kSPNotImplmented;
         }
 
-        private int PutObject(IntPtr descriptor, uint key, uint type, IntPtr handle)
+        private int PutObject(IntPtr descriptor, uint key, uint type, IntPtr descriptorHandle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            // If the handle is a sub key add it to the parent descriptor.
+            // Attach the sub key to the parent descriptor.
             ScriptingParameters subKeys;
-            if (this.openDescriptorHandles.TryGetValue(handle, out subKeys))
+            if (this.openDescriptorHandles.TryGetValue(descriptorHandle, out subKeys))
             {
                 this.openDescriptorHandles[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
             }
             else
             {
-                switch (type)
-                {
-
-                    case DescriptorTypes.typeAlias:
-                    case DescriptorTypes.typePath:
-                    case DescriptorTypes.typeChar:
-                        int size = HandleSuite.Instance.GetHandleSize(handle);
-                        byte[] bytes = new byte[size];
-
-                        if (size > 0)
-                        {
-                            Marshal.Copy(HandleSuite.Instance.LockHandle(handle, 0), bytes, 0, size);
-                            HandleSuite.Instance.UnlockHandle(handle);
-                        }
-                        this.openDescriptorHandles[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, bytes));
-                        break;
-                    default:
-                        break;
-                }
+                return PSError.errMissingParameter;
             }
 
             return PSError.kSPNoError;
         }
 
-        private int PutGlobalObject(IntPtr descriptor, uint key, uint type, IntPtr handle)
+        private int PutGlobalObject(IntPtr descriptor, uint key, uint type, IntPtr descriptorHandle)
         {
-            return PutObject(descriptor, key, type, handle);
+            return PutObject(descriptor, key, type, descriptorHandle);
         }
 
         private int PutEnumerated(IntPtr descriptor, uint key, uint type, uint data)
@@ -852,7 +834,7 @@ namespace PSFilterLoad.PSApi
             return PSError.kSPNotImplmented;
         }
 
-        private int GetObject(IntPtr descriptor, uint key, ref uint retType, ref IntPtr data)
+        private int GetObject(IntPtr descriptor, uint key, ref uint retType, ref IntPtr descriptorHandle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -871,98 +853,22 @@ namespace PSFilterLoad.PSApi
                     // ignore it
                 }
 
-                if (item.Value is ScriptingParameters)
+                ScriptingParameters parameters = item.Value as ScriptingParameters;
+                if (parameters != null)
                 {
-                    data = GenerateDictionaryKey();
-                    this.openDescriptorHandles.Add(data, (ScriptingParameters)item.Value);
+                    descriptorHandle = GenerateDictionaryKey();
+                    this.openDescriptorHandles.Add(descriptorHandle, parameters);
+
+                    return PSError.kSPNoError;
                 }
-                else
-                {
-                    switch (type)
-                    {
-
-                        case DescriptorTypes.typeAlias:
-                        case DescriptorTypes.typePath:
-                        case DescriptorTypes.typeChar:
-
-                            if (item.Value is ActionDescriptorZString)
-                            {
-                                return PSError.kSPBadParameterError;
-                            }
-                            else
-                            {
-                                int size = item.Size;
-                                data = HandleSuite.Instance.NewHandle(size);
-
-                                if (data == IntPtr.Zero)
-                                {
-                                    return PSError.memFullErr;
-                                }
-
-                                Marshal.Copy((byte[])item.Value, 0, HandleSuite.Instance.LockHandle(data, 0), size);
-                                HandleSuite.Instance.UnlockHandle(data); 
-                            }
-                            break;
-                        case DescriptorTypes.typeBoolean:
-                            data = HandleSuite.Instance.NewHandle(sizeof(byte));
-
-                            if (data == IntPtr.Zero)
-                            {
-                                return PSError.memFullErr;
-                            }
-
-                            Marshal.WriteByte(HandleSuite.Instance.LockHandle(data, 0), (byte)item.Value);
-                            HandleSuite.Instance.UnlockHandle(data);
-                            break;
-                        case DescriptorTypes.typeInteger:
-                            data = HandleSuite.Instance.NewHandle(sizeof(int));
-
-                            if (data == IntPtr.Zero)
-                            {
-                                return PSError.memFullErr;
-                            }
-
-                            Marshal.WriteInt32(HandleSuite.Instance.LockHandle(data, 0), (int)item.Value);
-                            HandleSuite.Instance.UnlockHandle(data);
-                            break;
-                        case DescriptorTypes.typeFloat:
-                        case DescriptorTypes.typeUintFloat:
-                            data = HandleSuite.Instance.NewHandle(sizeof(double));
-
-                            if (data == IntPtr.Zero)
-                            {
-                                return PSError.memFullErr;
-                            }
-
-                            double value;
-                            if (type == DescriptorTypes.typeUintFloat)
-                            {
-                                UnitFloat unitFloat = (UnitFloat)item.Value;
-                                value = unitFloat.Value;
-                            }
-                            else
-                            {
-                                value = (double)item.Value;
-                            }
-
-                            Marshal.Copy(new double[] { value }, 0, HandleSuite.Instance.LockHandle(data, 0), 1);
-                            HandleSuite.Instance.UnlockHandle(data);
-                            break;
-
-                        default:
-                            return PSError.kSPBadParameterError;
-                    }
-                }
-
-                return PSError.kSPNoError; 
             }
 
             return PSError.errMissingParameter;
         }
 
-        private int GetGlobalObject(IntPtr descriptor, uint key, ref uint retType, ref IntPtr data)
+        private int GetGlobalObject(IntPtr descriptor, uint key, ref uint retType, ref IntPtr descriptorHandle)
         {
-            return GetObject(descriptor, key, ref retType, ref data);
+            return GetObject(descriptor, key, ref retType, ref descriptorHandle);
         }
 
         private int GetEnumerated(IntPtr descriptor, uint key, ref uint type, ref uint data)
