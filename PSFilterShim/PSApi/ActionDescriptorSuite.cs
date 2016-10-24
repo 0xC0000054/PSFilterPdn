@@ -303,7 +303,7 @@ namespace PSFilterLoad.PSApi
                 return PSError.memFullErr;
             }
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int Free(IntPtr descriptor)
@@ -318,7 +318,7 @@ namespace PSFilterLoad.PSApi
 
             this.openDescriptorHandles.Remove(descriptor);
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int HandleToDescriptor(IntPtr handle, ref IntPtr descriptor)
@@ -336,7 +336,7 @@ namespace PSFilterLoad.PSApi
                 return PSError.memFullErr;
             }
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int AsHandle(IntPtr descriptor, ref IntPtr handle)
@@ -350,7 +350,7 @@ namespace PSFilterLoad.PSApi
                 return PSError.memFullErr;
             }
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int GetType(IntPtr descriptor, uint key, ref uint type)
@@ -362,7 +362,7 @@ namespace PSFilterLoad.PSApi
             if (this.openDescriptorHandles[descriptor].TryGetValue(key, out value))
             {
                 type = value.Type;
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -378,7 +378,7 @@ namespace PSFilterLoad.PSApi
             if (index >= 0 && index < collection.Count)
             {
                 key = collection[(int)index].Key;
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -391,7 +391,7 @@ namespace PSFilterLoad.PSApi
 #endif
             hasKey = this.openDescriptorHandles[descriptor].ContainsKey(key) ? (byte)1 : (byte)0;
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int GetCount(IntPtr descriptor, ref uint count)
@@ -403,7 +403,7 @@ namespace PSFilterLoad.PSApi
 
             count = (uint)collection.Count;
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int IsEqual(IntPtr firstDescriptor, IntPtr secondDescriptor, ref byte isEqual)
@@ -423,7 +423,7 @@ namespace PSFilterLoad.PSApi
 #endif
             this.openDescriptorHandles[descriptor].RemoveKey(key);
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int Clear(IntPtr descriptor)
@@ -433,7 +433,7 @@ namespace PSFilterLoad.PSApi
 #endif
             this.openDescriptorHandles[descriptor].Clear();
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int HasKeys(IntPtr descriptor, IntPtr keyArray, ref byte hasKeys)
@@ -468,7 +468,7 @@ namespace PSFilterLoad.PSApi
             }
             hasKeys = result ? (byte)1 : (byte)0;
            
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         #region  Descriptor write methods
@@ -495,7 +495,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeInteger, GetAETEParamFlags(key), 0, data));
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int PutFloat(IntPtr descriptor, uint key, double data)
@@ -504,7 +504,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeFloat, GetAETEParamFlags(key), 0, data));
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int PutUnitFloat(IntPtr descriptor, uint key, uint unit, double data)
@@ -515,7 +515,7 @@ namespace PSFilterLoad.PSApi
             UnitFloat item = new UnitFloat(unit, data);
 
             this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeUintFloat, GetAETEParamFlags(key), 0, item));
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
 
@@ -530,7 +530,7 @@ namespace PSFilterLoad.PSApi
 
             this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int PutBoolean(IntPtr descriptor, uint key, byte data)
@@ -539,7 +539,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeBoolean, GetAETEParamFlags(key), 0, data));
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int PutList(IntPtr descriptor, uint key, IntPtr data)
@@ -584,7 +584,7 @@ namespace PSFilterLoad.PSApi
                 }
             }
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int PutGlobalObject(IntPtr descriptor, uint key, uint type, IntPtr handle)
@@ -598,7 +598,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             this.openDescriptorHandles[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int PutReference(IntPtr descriptor, uint key, IntPtr value)
@@ -617,7 +617,7 @@ namespace PSFilterLoad.PSApi
 #endif
             this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int PutGlobalClass(IntPtr descriptor, uint key, uint data)
@@ -627,7 +627,7 @@ namespace PSFilterLoad.PSApi
 #endif
             this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeGlobalClass, GetAETEParamFlags(key), 0, data));
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int PutAlias(IntPtr descriptor, uint key, IntPtr aliasHandle)
@@ -649,7 +649,7 @@ namespace PSFilterLoad.PSApi
             {
                 HandleSuite.Instance.UnlockHandle(aliasHandle);
             }
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int PutIntegers(IntPtr descriptor, uint key, uint count, IntPtr arrayPointer)
@@ -679,7 +679,7 @@ namespace PSFilterLoad.PSApi
                 return PSError.memFullErr;
             }
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         private int PutZString(IntPtr descriptor, uint key, IntPtr zstring)
@@ -692,7 +692,7 @@ namespace PSFilterLoad.PSApi
             {
                 this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), 0, value));
 
-                return PSError.kSPNoErr; 
+                return PSError.kSPNoError; 
             }
 
             return PSError.kSPBadParameterError;
@@ -716,7 +716,7 @@ namespace PSFilterLoad.PSApi
                 return PSError.memFullErr;
             }
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
         #endregion
 
@@ -731,7 +731,7 @@ namespace PSFilterLoad.PSApi
             {
                 data = (int)item.Value;
 
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -747,7 +747,7 @@ namespace PSFilterLoad.PSApi
             {
                 data = (double)item.Value;
 
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -773,7 +773,7 @@ namespace PSFilterLoad.PSApi
 
                 data = unitFloat.Value;
 
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -791,7 +791,7 @@ namespace PSFilterLoad.PSApi
 
                 length = (uint)bytes.Length;
 
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -813,7 +813,7 @@ namespace PSFilterLoad.PSApi
                 }
 
                 Marshal.Copy((byte[])item.Value, 0, cstrValue, size);
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -829,7 +829,7 @@ namespace PSFilterLoad.PSApi
             {
                 data = (byte)item.Value;
 
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -945,7 +945,7 @@ namespace PSFilterLoad.PSApi
                     }
                 }
 
-                return PSError.kSPNoErr; 
+                return PSError.kSPNoError; 
             }
 
             return PSError.errMissingParameter;
@@ -974,7 +974,7 @@ namespace PSFilterLoad.PSApi
 
                 data = (uint)item.Value;
 
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -998,7 +998,7 @@ namespace PSFilterLoad.PSApi
             {
                 data = (uint)item.Value;
 
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -1028,7 +1028,7 @@ namespace PSFilterLoad.PSApi
                 Marshal.Copy((byte[])item.Value, 0, HandleSuite.Instance.LockHandle(data, 0), size);
                 HandleSuite.Instance.UnlockHandle(data);
 
-                return PSError.kSPNoErr; 
+                return PSError.kSPNoError; 
             }
 
             return PSError.errMissingParameter;
@@ -1047,7 +1047,7 @@ namespace PSFilterLoad.PSApi
                 int[] values = (int[])item.Value;
                 Marshal.Copy(values, 0, data, values.Length);
 
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -1066,7 +1066,7 @@ namespace PSFilterLoad.PSApi
 
                 zstring = PICA.ASZStringSuite.Instance.CreateFromActionDescriptor(value);
                 
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -1085,7 +1085,7 @@ namespace PSFilterLoad.PSApi
 
                 length = bytes.Length;
 
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -1103,7 +1103,7 @@ namespace PSFilterLoad.PSApi
 
                 Marshal.Copy(data, 0, blob, data.Length);
 
-                return PSError.kSPNoErr;
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;

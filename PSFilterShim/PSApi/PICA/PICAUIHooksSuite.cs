@@ -61,7 +61,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             name = ASZStringSuite.Instance.CreateFromString(this.pluginName);
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
 
         public unsafe PSUIHooksSuite1 CreateUIHooksSuite1(FilterRecord* filterRecord)

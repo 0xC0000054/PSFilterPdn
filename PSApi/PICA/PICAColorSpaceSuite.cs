@@ -118,7 +118,7 @@ namespace PSFilterLoad.PSApi.PICA
                 ptr += 4;
             }
 
-            return PSError.kSPNoErr;
+            return PSError.kSPNoError;
         }
         private static int CSConvert16(short inputCSpace, short outputCSpace, IntPtr colorArray, short count)
         {
