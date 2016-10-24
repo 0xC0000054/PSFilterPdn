@@ -51,7 +51,7 @@ namespace PSFilterLoad.PSApi
                 return -1;
             }
 
-            public void RemoveKey(uint key)
+            public void Remove(uint key)
             {
                 int index = IndexOfKey(key);
                 if (index >= 0)
@@ -76,7 +76,7 @@ namespace PSFilterLoad.PSApi
                 return false;
             }
 
-            public Dictionary<uint, AETEValue> ToDictonary()
+            public Dictionary<uint, AETEValue> ToDictionary()
             {
                 Dictionary<uint, AETEValue> data = new Dictionary<uint, AETEValue>(Items.Count);
                 foreach (KeyValuePair<uint, AETEValue> item in Items)
@@ -146,7 +146,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.scriptingData.ToDictonary();
+                return this.scriptingData.ToDictionary();
             }
             set
             {
@@ -421,7 +421,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            this.openDescriptorHandles[descriptor].RemoveKey(key);
+            this.openDescriptorHandles[descriptor].Remove(key);
 
             return PSError.kSPNoError;
         }
