@@ -358,10 +358,19 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            AETEValue value = null;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out value))
+            AETEValue item = null;
+            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
             {
-                type = value.Type;
+                // If the value is a sub-descriptor it must be retrieved with GetObject.
+                if (item.Value is ScriptingParameters)
+                {
+                    type = DescriptorTypes.typeObject;
+                }
+                else
+                {
+                    type = item.Type;
+                }
+
                 return PSError.kSPNoError;
             }
 
