@@ -243,6 +243,31 @@ namespace PSFilterLoad.PSApi.PICA
             return newZString;
         }
 
+        public bool ConvertToString(IntPtr zstring, out string value)
+        {
+            value = null;
+
+            // IntPtr.Zero is valid for an empty string.
+            if (zstring == IntPtr.Zero)
+            {
+                value = string.Empty;
+            }
+            else
+            {
+                ZString item;
+                if (this.strings.TryGetValue(zstring, out item))
+                {
+                    value = item.Data;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public IntPtr CreateFromString(string value)
         {
             if (value == null)
