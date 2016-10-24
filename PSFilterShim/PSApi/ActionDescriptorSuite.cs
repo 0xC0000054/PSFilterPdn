@@ -19,12 +19,12 @@ namespace PSFilterLoad.PSApi
 {
     internal sealed class ActionDescriptorSuite
     {
-        private sealed class ScriptingDataCollection : Collection<KeyValuePair<uint, AETEValue>>
+        private sealed class ScriptingParameters : Collection<KeyValuePair<uint, AETEValue>>
         {
-            public ScriptingDataCollection() : base()
+            public ScriptingParameters() : base()
             {
             }
-            public ScriptingDataCollection(IEnumerable<KeyValuePair<uint, AETEValue>> items) : base(new List<KeyValuePair<uint, AETEValue>>(items))
+            public ScriptingParameters(IEnumerable<KeyValuePair<uint, AETEValue>> items) : base(new List<KeyValuePair<uint, AETEValue>>(items))
             {
             }
 
@@ -88,10 +88,10 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private ScriptingDataCollection scriptingData;
+        private ScriptingParameters scriptingData;
         private AETEData aete;
 
-        private Dictionary<IntPtr, ScriptingDataCollection> openDescriptorHandles;
+        private Dictionary<IntPtr, ScriptingParameters> openDescriptorHandles;
 
         #region Callbacks
         private readonly ActionDescriptorMake make;
@@ -155,7 +155,7 @@ namespace PSFilterLoad.PSApi
                     throw new ArgumentNullException("value");
                 }
 
-                this.scriptingData = new ScriptingDataCollection(value); 
+                this.scriptingData = new ScriptingParameters(value); 
             }
         }
 
@@ -225,9 +225,9 @@ namespace PSFilterLoad.PSApi
             this.getData = new ActionDescriptorGetData(GetData);
 
 
-            this.scriptingData = new ScriptingDataCollection();
+            this.scriptingData = new ScriptingParameters();
             this.aete = null;
-            this.openDescriptorHandles = new Dictionary<IntPtr, ScriptingDataCollection>(IntPtrEqualityComparer.Instance);
+            this.openDescriptorHandles = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
         }
 
         public PSActionDescriptorProc CreateActionDescriptorSuite2()
@@ -296,7 +296,7 @@ namespace PSFilterLoad.PSApi
             try
             {
                 descriptor = GenerateDictionaryKey();
-                this.openDescriptorHandles.Add(descriptor, new ScriptingDataCollection());
+                this.openDescriptorHandles.Add(descriptor, new ScriptingParameters());
             }
             catch (OutOfMemoryException)
             {
@@ -373,11 +373,11 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("index: {0}", index));
 #endif
-            ScriptingDataCollection collection = this.openDescriptorHandles[descriptor];
+            ScriptingParameters parameters = this.openDescriptorHandles[descriptor];
 
-            if (index >= 0 && index < collection.Count)
+            if (index >= 0 && index < parameters.Count)
             {
-                key = collection[(int)index].Key;
+                key = parameters[(int)index].Key;
                 return PSError.kSPNoError;
             }
 
@@ -399,9 +399,9 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-            ScriptingDataCollection collection = this.openDescriptorHandles[descriptor];
+            ScriptingParameters parameters = this.openDescriptorHandles[descriptor];
 
-            count = (uint)collection.Count;
+            count = (uint)parameters.Count;
 
             return PSError.kSPNoError;
         }
@@ -446,7 +446,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (keyArray != IntPtr.Zero)
                 {
-                    ScriptingDataCollection collection = this.openDescriptorHandles[descriptor];
+                    ScriptingParameters parameters = this.openDescriptorHandles[descriptor];
                     uint* key = (uint*)keyArray.ToPointer();
 
                     if (*key != 0U)
@@ -455,7 +455,7 @@ namespace PSFilterLoad.PSApi
 
                         do
                         {
-                            if (!collection.ContainsKey(*key))
+                            if (!parameters.ContainsKey(*key))
                             {
                                 result = false;
                                 break;
@@ -556,7 +556,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             // If the handle is a sub key add it to the parent descriptor.
-            ScriptingDataCollection subKeys;
+            ScriptingParameters subKeys;
             if (this.openDescriptorHandles.TryGetValue(handle, out subKeys))
             {
                 this.openDescriptorHandles[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
@@ -862,10 +862,10 @@ namespace PSFilterLoad.PSApi
                     // ignore it
                 }
 
-                if (item.Value is ScriptingDataCollection)
+                if (item.Value is ScriptingParameters)
                 {
                     data = GenerateDictionaryKey();
-                    this.openDescriptorHandles.Add(data, (ScriptingDataCollection)item.Value);
+                    this.openDescriptorHandles.Add(data, (ScriptingParameters)item.Value);
                 }
                 else
                 {
