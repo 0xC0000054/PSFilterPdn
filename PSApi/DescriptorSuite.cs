@@ -214,19 +214,19 @@ namespace PSFilterLoad.PSApi
 		}
 
 		#region ReadDescriptorProcs
-		private unsafe IntPtr OpenReadDescriptorProc(IntPtr descriptor, IntPtr keyArray)
+		private unsafe IntPtr OpenReadDescriptorProc(IntPtr descriptorHandle, IntPtr keyArray)
 		{
 #if DEBUG
-			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: 0x{0}", descriptor.ToHexString()));
+			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: 0x{0}", descriptorHandle.ToHexString()));
 #endif
-			if (descriptor != IntPtr.Zero)
+			if (descriptorHandle != IntPtr.Zero)
 			{
 				Dictionary<uint, AETEValue> dictionary;
 				if (this.descriptorSubKeys.Count > 0)
 				{
 					// If the current descriptor is a sub key, grab the data and remove it from the list of sub keys.
-					dictionary = this.descriptorSubKeys[descriptor];
-					this.descriptorSubKeys.Remove(descriptor);
+					dictionary = this.descriptorSubKeys[descriptorHandle];
+					this.descriptorSubKeys.Remove(descriptorHandle);
 				}
 				else
 				{
