@@ -66,26 +66,9 @@ namespace PSFilterLoad.PSApi
 
 		private short lastDescriptorError;
 		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> readDescriptors;
-		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> descriptorSubKeys;
+		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> descriptorHandles;
 		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> writeDescriptors;
-		private Dictionary<uint, AETEValue> scriptingData;
 		private AETEData aete;
-
-		public Dictionary<uint, AETEValue> ScriptingData
-		{
-			get
-			{
-				return this.scriptingData;
-			}
-			set
-			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("value");
-				}
-				this.scriptingData = value;
-			}
-		}
 
 		public AETEData Aete
 		{
@@ -96,14 +79,6 @@ namespace PSFilterLoad.PSApi
 			set
 			{
 				this.aete = value;
-			}
-		}
-
-		public bool HasScriptingData
-		{
-			get
-			{
-				return this.scriptingData.Count > 0;
 			}
 		}
 
@@ -146,9 +121,8 @@ namespace PSFilterLoad.PSApi
 
 			this.lastDescriptorError = PSError.noErr;
 			this.readDescriptors = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
-			this.descriptorSubKeys = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
+			this.descriptorHandles = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
 			this.writeDescriptors = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
-			this.scriptingData = new Dictionary<uint, AETEValue>();
 		}
 
 		public IntPtr CreateReadDescriptor()
@@ -213,6 +187,26 @@ namespace PSFilterLoad.PSApi
 			return writeDescriptorPtr;
 		}
 
+		public bool TryGetScriptingData(IntPtr descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
+		{
+			scriptingData = null;
+
+			Dictionary<uint, AETEValue> data;
+			if (this.descriptorHandles.TryGetValue(descriptorHandle, out data))
+			{
+				scriptingData = data;
+
+				return true;
+			}
+
+			return false;
+		}
+
+		public void SetScriptingData(IntPtr descriptorHandle, Dictionary<uint, AETEValue> scriptingData)
+		{
+			this.descriptorHandles.Add(descriptorHandle, scriptingData);
+		}
+
 		#region ReadDescriptorProcs
 		private unsafe IntPtr OpenReadDescriptorProc(IntPtr descriptorHandle, IntPtr keyArray)
 		{
@@ -221,18 +215,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			if (descriptorHandle != IntPtr.Zero)
 			{
-				Dictionary<uint, AETEValue> dictionary;
-				if (this.descriptorSubKeys.Count > 0)
-				{
-					// If the current descriptor is a sub key, grab the data and remove it from the list of sub keys.
-					dictionary = this.descriptorSubKeys[descriptorHandle];
-					this.descriptorSubKeys.Remove(descriptorHandle);
-				}
-				else
-				{
-					dictionary = this.scriptingData;
-				}
-
+				Dictionary<uint, AETEValue> dictionary = this.descriptorHandles[descriptorHandle];
 
 				List<uint> keys = new List<uint>();
 				if (keyArray != IntPtr.Zero)
@@ -564,7 +547,7 @@ namespace PSFilterLoad.PSApi
 			if (item.Value is Dictionary<uint, AETEValue>)
 			{
 				data = HandleSuite.Instance.NewHandle(0); // assign a zero byte handle to allow it to work correctly in the OpenReadDescriptorProc(). 
-				this.descriptorSubKeys.Add(data, (Dictionary<uint, AETEValue>)item.Value);
+				this.descriptorHandles.Add(data, (Dictionary<uint, AETEValue>)item.Value);
 			}
 			else
 			{
@@ -792,17 +775,13 @@ namespace PSFilterLoad.PSApi
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
 			descriptorHandle = HandleSuite.Instance.NewHandle(0);
-
-			if (this.writeDescriptors.Count > 1)
+			if (descriptorHandle == IntPtr.Zero)
 			{
-				// Add the items to the sub key dictionary.
-				// The plug-in will attach the sub keys to a parent descriptor by calling PutObjectProc.
-				this.descriptorSubKeys.Add(descriptorHandle, this.writeDescriptors[descriptor]);
+				return PSError.memFullErr;
 			}
-			else
-			{
-				this.scriptingData = this.writeDescriptors[descriptor];
-			}
+			// Add the items to the descriptor handle dictionary.
+			// If the descriptor is a sub key the plug-in will attach it to a parent descriptor by calling PutObjectProc.
+			this.descriptorHandles.Add(descriptorHandle, this.writeDescriptors[descriptor]);
 
 			this.writeDescriptors.Remove(descriptor);
 
@@ -948,10 +927,10 @@ namespace PSFilterLoad.PSApi
 #endif
 			// If the handle is a sub key add it to the parent descriptor.
 			Dictionary<uint, AETEValue> subKeys;
-			if (this.descriptorSubKeys.TryGetValue(handle, out subKeys))
+			if (this.descriptorHandles.TryGetValue(handle, out subKeys))
 			{
 				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
-				this.descriptorSubKeys.Remove(handle);
+				this.descriptorHandles.Remove(handle);
 			}
 			else
 			{
