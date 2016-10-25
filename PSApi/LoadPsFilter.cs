@@ -108,6 +108,7 @@ namespace PSFilterLoad.PSApi
 		private IntPtr basicSuitePtr;
 
 		private GlobalParameters globalParameters;
+		private Dictionary<uint, AETEValue> scriptingData;
 		private bool isRepeatEffect;
 		private IntPtr pluginDataHandle;
 		private IntPtr filterParametersHandle;
@@ -207,12 +208,12 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return new ParameterData(globalParameters, GetScriptingData());
+				return new ParameterData(globalParameters, scriptingData);
 			}
 			set
 			{
 				globalParameters = value.GlobalParameters;
-				descriptorSuite.ScriptingData = value.AETEDictionary;
+				scriptingData = value.AETEDictionary;
 			}
 		}
 
@@ -265,6 +266,7 @@ namespace PSFilterLoad.PSApi
 			this.parameterDataRestored = false;
 			this.pluginDataRestored = false;
 			this.globalParameters = new GlobalParameters();
+			this.scriptingData = null;
 			this.useChannelPorts = false;
 			this.channelReadDescPtrs = new List<ChannelDescPtrs>();
 			this.usePICASuites = false;
@@ -347,18 +349,6 @@ namespace PSFilterLoad.PSApi
 			debugFlags |= DebugFlags.SPBasicSuite;
 			DebugUtils.GlobalDebugFlags = debugFlags;
 #endif
-		}
-
-		private Dictionary<uint, AETEValue> GetScriptingData()
-		{
-			if (actionDescriptorSuite != null && actionDescriptorSuite.HasScriptingData)
-			{
-				return actionDescriptorSuite.ScriptingData;
-			}
-			else
-			{
-				return descriptorSuite.ScriptingData;
-			}
 		}
 
 		/// <summary>
@@ -537,6 +527,29 @@ namespace PSFilterLoad.PSApi
 		private void LoadFilter(PluginData pdata)
 		{
 			module = new PluginModule(pdata.FileName, pdata.EntryPoint);
+		}
+
+		/// <summary>
+		/// Saves the filter scripting parameters for repeat runs.
+		/// </summary>
+		private unsafe void SaveScriptingParameters()
+		{
+			PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
+			if (descriptorParameters->descriptor != IntPtr.Zero)
+			{
+				Dictionary<uint, AETEValue> data;
+				if (actionDescriptorSuite != null && actionDescriptorSuite.TryGetScriptingData(descriptorParameters->descriptor, out data))
+				{
+					this.scriptingData = data;
+				}
+				else if (descriptorSuite.TryGetScriptingData(descriptorParameters->descriptor, out data))
+				{
+					this.scriptingData = data;
+				}
+				HandleSuite.Instance.UnlockHandle(descriptorParameters->descriptor);
+				HandleSuite.Instance.DisposeHandle(descriptorParameters->descriptor);
+				descriptorParameters->descriptor = IntPtr.Zero;
+			}
 		}
 
 		/// <summary>
@@ -932,6 +945,7 @@ namespace PSFilterLoad.PSApi
 			if (!isRepeatEffect && result == PSError.noErr)
 			{
 				SaveParameterHandles();
+				SaveScriptingParameters();
 			}
 
 			return true;
@@ -3547,7 +3561,10 @@ namespace PSFilterLoad.PSApi
 						{
 							actionDescriptorSuite = new ActionDescriptorSuite();
 							actionDescriptorSuite.Aete = descriptorSuite.Aete;
-							actionDescriptorSuite.ScriptingData = descriptorSuite.ScriptingData;
+							if (scriptingData != null)
+							{
+								actionDescriptorSuite.SetScriptingData((PIDescriptorParameters*)descriptorParametersPtr.ToPointer(), scriptingData);
+							}
 						}
 
 
@@ -3869,9 +3886,10 @@ namespace PSFilterLoad.PSApi
 			}
 
 
-			if (descriptorSuite.HasScriptingData)
+			if (scriptingData != null)
 			{
 				descriptorParameters->descriptor = HandleSuite.Instance.NewHandle(0);
+				descriptorSuite.SetScriptingData(descriptorParameters->descriptor, scriptingData);
 				if (!isRepeatEffect)
 				{
 					descriptorParameters->playInfo = PlayInfo.plugInDialogDisplay;
