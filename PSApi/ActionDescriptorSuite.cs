@@ -88,10 +88,10 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private ScriptingParameters scriptingData;
         private AETEData aete;
 
         private Dictionary<IntPtr, ScriptingParameters> actionDescriptors;
+        private Dictionary<IntPtr, ScriptingParameters> descriptorHandles;
 
         #region Callbacks
         private readonly ActionDescriptorMake make;
@@ -141,31 +141,6 @@ namespace PSFilterLoad.PSApi
         private readonly ActionDescriptorGetDataLength getDataLength;
         private readonly ActionDescriptorGetData getData;
         #endregion
-
-        public Dictionary<uint, AETEValue> ScriptingData
-        {
-            get
-            {
-                return this.scriptingData.ToDictionary();
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-
-                this.scriptingData = new ScriptingParameters(value); 
-            }
-        }
-
-        public bool HasScriptingData
-        {
-            get
-            {
-                return this.scriptingData.Count > 0;
-            }
-        }
 
         public AETEData Aete
         {
@@ -224,10 +199,9 @@ namespace PSFilterLoad.PSApi
             this.getDataLength = new ActionDescriptorGetDataLength(GetDataLength);
             this.getData = new ActionDescriptorGetData(GetData);
 
-
-            this.scriptingData = new ScriptingParameters();
             this.aete = null;
             this.actionDescriptors = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
+            this.descriptorHandles = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
         }
 
         public PSActionDescriptorProc CreateActionDescriptorSuite2()
@@ -283,6 +257,29 @@ namespace PSFilterLoad.PSApi
             return suite;
         }
 
+        public bool TryGetScriptingData(IntPtr descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
+        {
+            scriptingData = null;
+
+            ScriptingParameters parameters;
+            if (this.descriptorHandles.TryGetValue(descriptorHandle, out parameters))
+            {
+                scriptingData = parameters.ToDictionary();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public unsafe void SetScriptingData(PIDescriptorParameters* descriptorParameters, Dictionary<uint, AETEValue> scriptingData)
+        {
+            if (descriptorParameters->descriptor != IntPtr.Zero)
+            {
+                this.descriptorHandles.Add(descriptorParameters->descriptor, new ScriptingParameters(scriptingData));
+            }
+        }
+
         private IntPtr GenerateDictionaryKey()
         {
             return new IntPtr(this.actionDescriptors.Count + 1);
@@ -321,17 +318,23 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("handle: 0x{0}", handle.ToHexString()));
 #endif
-            try
+            ScriptingParameters parameters;
+            if (this.descriptorHandles.TryGetValue(handle, out parameters))
             {
-                descriptor = GenerateDictionaryKey();
-                this.actionDescriptors.Add(descriptor, this.scriptingData);
-            }
-            catch (OutOfMemoryException)
-            {
-                return PSError.memFullErr;
+                try
+                {
+                    descriptor = GenerateDictionaryKey();
+                    this.actionDescriptors.Add(descriptor, parameters);
+                }
+                catch (OutOfMemoryException)
+                {
+                    return PSError.memFullErr;
+                }
+
+                return PSError.kSPNoError;
             }
 
-            return PSError.kSPNoError;
+            return PSError.kSPBadParameterError;
         }
 
         private int AsHandle(IntPtr descriptor, ref IntPtr handle)
@@ -344,7 +347,7 @@ namespace PSFilterLoad.PSApi
             {
                 return PSError.memFullErr;
             }
-            this.scriptingData = this.actionDescriptors[descriptor];
+            this.descriptorHandles.Add(handle, this.actionDescriptors[descriptor]);
 
             return PSError.kSPNoError;
         }
