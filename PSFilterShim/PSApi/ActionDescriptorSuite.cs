@@ -91,7 +91,7 @@ namespace PSFilterLoad.PSApi
         private ScriptingParameters scriptingData;
         private AETEData aete;
 
-        private Dictionary<IntPtr, ScriptingParameters> openDescriptorHandles;
+        private Dictionary<IntPtr, ScriptingParameters> actionDescriptors;
 
         #region Callbacks
         private readonly ActionDescriptorMake make;
@@ -227,7 +227,7 @@ namespace PSFilterLoad.PSApi
 
             this.scriptingData = new ScriptingParameters();
             this.aete = null;
-            this.openDescriptorHandles = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
+            this.actionDescriptors = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
         }
 
         public PSActionDescriptorProc CreateActionDescriptorSuite2()
@@ -285,7 +285,7 @@ namespace PSFilterLoad.PSApi
 
         private IntPtr GenerateDictionaryKey()
         {
-            return new IntPtr(this.openDescriptorHandles.Count + 1);
+            return new IntPtr(this.actionDescriptors.Count + 1);
         }
 
         private int Make(ref IntPtr descriptor)
@@ -296,7 +296,7 @@ namespace PSFilterLoad.PSApi
             try
             {
                 descriptor = GenerateDictionaryKey();
-                this.openDescriptorHandles.Add(descriptor, new ScriptingParameters());
+                this.actionDescriptors.Add(descriptor, new ScriptingParameters());
             }
             catch (OutOfMemoryException)
             {
@@ -311,7 +311,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: 0x{0}", descriptor.ToHexString()));
 #endif
-            this.openDescriptorHandles.Remove(descriptor);
+            this.actionDescriptors.Remove(descriptor);
 
             return PSError.kSPNoError;
         }
@@ -324,7 +324,7 @@ namespace PSFilterLoad.PSApi
             try
             {
                 descriptor = GenerateDictionaryKey();
-                this.openDescriptorHandles.Add(descriptor, this.scriptingData);
+                this.actionDescriptors.Add(descriptor, this.scriptingData);
             }
             catch (OutOfMemoryException)
             {
@@ -344,7 +344,7 @@ namespace PSFilterLoad.PSApi
             {
                 return PSError.memFullErr;
             }
-            this.scriptingData = this.openDescriptorHandles[descriptor];
+            this.scriptingData = this.actionDescriptors[descriptor];
 
             return PSError.kSPNoError;
         }
@@ -355,7 +355,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item = null;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 // If the value is a sub-descriptor it must be retrieved with GetObject.
                 if (item.Value is ScriptingParameters)
@@ -378,7 +378,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("index: {0}", index));
 #endif
-            ScriptingParameters parameters = this.openDescriptorHandles[descriptor];
+            ScriptingParameters parameters = this.actionDescriptors[descriptor];
 
             if (index >= 0 && index < parameters.Count)
             {
@@ -394,7 +394,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            hasKey = this.openDescriptorHandles[descriptor].ContainsKey(key) ? (byte)1 : (byte)0;
+            hasKey = this.actionDescriptors[descriptor].ContainsKey(key) ? (byte)1 : (byte)0;
 
             return PSError.kSPNoError;
         }
@@ -404,7 +404,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-            ScriptingParameters parameters = this.openDescriptorHandles[descriptor];
+            ScriptingParameters parameters = this.actionDescriptors[descriptor];
 
             count = (uint)parameters.Count;
 
@@ -426,7 +426,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            this.openDescriptorHandles[descriptor].Remove(key);
+            this.actionDescriptors[descriptor].Remove(key);
 
             return PSError.kSPNoError;
         }
@@ -436,7 +436,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-            this.openDescriptorHandles[descriptor].Clear();
+            this.actionDescriptors[descriptor].Clear();
 
             return PSError.kSPNoError;
         }
@@ -451,7 +451,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (keyArray != IntPtr.Zero)
                 {
-                    ScriptingParameters parameters = this.openDescriptorHandles[descriptor];
+                    ScriptingParameters parameters = this.actionDescriptors[descriptor];
                     uint* key = (uint*)keyArray.ToPointer();
 
                     if (*key != 0U)
@@ -499,7 +499,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeInteger, GetAETEParamFlags(key), 0, data));
+            this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeInteger, GetAETEParamFlags(key), 0, data));
             return PSError.kSPNoError;
         }
 
@@ -508,7 +508,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeFloat, GetAETEParamFlags(key), 0, data));
+            this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeFloat, GetAETEParamFlags(key), 0, data));
             return PSError.kSPNoError;
         }
 
@@ -519,7 +519,7 @@ namespace PSFilterLoad.PSApi
 #endif
             UnitFloat item = new UnitFloat(unit, data);
 
-            this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeUintFloat, GetAETEParamFlags(key), 0, item));
+            this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeUintFloat, GetAETEParamFlags(key), 0, item));
             return PSError.kSPNoError;
         }
 
@@ -533,7 +533,7 @@ namespace PSFilterLoad.PSApi
             byte[] data = new byte[size];
             Marshal.Copy(new IntPtr(stringHandle.ToInt64() + 1L), data, 0, size);
 
-            this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
+            this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
 
             return PSError.kSPNoError;
         }
@@ -543,7 +543,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeBoolean, GetAETEParamFlags(key), 0, data));
+            this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeBoolean, GetAETEParamFlags(key), 0, data));
             return PSError.kSPNoError;
         }
 
@@ -562,9 +562,9 @@ namespace PSFilterLoad.PSApi
 #endif
             // Attach the sub key to the parent descriptor.
             ScriptingParameters subKeys;
-            if (this.openDescriptorHandles.TryGetValue(descriptorHandle, out subKeys))
+            if (this.actionDescriptors.TryGetValue(descriptorHandle, out subKeys))
             {
-                this.openDescriptorHandles[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
+                this.actionDescriptors[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
             }
             else
             {
@@ -584,7 +584,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            this.openDescriptorHandles[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
+            this.actionDescriptors[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
             return PSError.kSPNoError;
         }
 
@@ -602,7 +602,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
+            this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
 
             return PSError.kSPNoError;
         }
@@ -612,7 +612,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeGlobalClass, GetAETEParamFlags(key), 0, data));
+            this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeGlobalClass, GetAETEParamFlags(key), 0, data));
 
             return PSError.kSPNoError;
         }
@@ -630,7 +630,7 @@ namespace PSFilterLoad.PSApi
                 byte[] data = new byte[size];
                 Marshal.Copy(hPtr, data, 0, size);
 
-                this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeAlias, GetAETEParamFlags(key), size, data));
+                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeAlias, GetAETEParamFlags(key), size, data));
             }
             finally
             {
@@ -659,7 +659,7 @@ namespace PSFilterLoad.PSApi
                     }
                 }
 
-                this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeInteger, GetAETEParamFlags(key), 0, data));
+                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeInteger, GetAETEParamFlags(key), 0, data));
             }
             catch (OutOfMemoryException)
             {
@@ -677,7 +677,7 @@ namespace PSFilterLoad.PSApi
             ActionDescriptorZString value;
             if (PICA.ASZStringSuite.Instance.ConvertToActionDescriptor(zstring, out value))
             {
-                this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), 0, value));
+                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), 0, value));
 
                 return PSError.kSPNoError; 
             }
@@ -696,7 +696,7 @@ namespace PSFilterLoad.PSApi
 
                 Marshal.Copy(blob, data, 0, length);
 
-                this.openDescriptorHandles[descriptor].Add(key, new AETEValue(DescriptorTypes.typeRawData, GetAETEParamFlags(key), length, data));
+                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeRawData, GetAETEParamFlags(key), length, data));
             }
             catch (OutOfMemoryException)
             {
@@ -714,7 +714,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 data = (int)item.Value;
 
@@ -730,7 +730,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 data = (double)item.Value;
 
@@ -746,7 +746,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 UnitFloat unitFloat = (UnitFloat)item.Value;
 
@@ -772,7 +772,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 byte[] bytes = (byte[])item.Value;
 
@@ -790,7 +790,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 int size = item.Size;
 
@@ -812,7 +812,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 data = (byte)item.Value;
 
@@ -836,7 +836,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 uint type = item.Type;
 
@@ -853,7 +853,7 @@ namespace PSFilterLoad.PSApi
                 if (parameters != null)
                 {
                     descriptorHandle = GenerateDictionaryKey();
-                    this.openDescriptorHandles.Add(descriptorHandle, parameters);
+                    this.actionDescriptors.Add(descriptorHandle, parameters);
 
                     return PSError.kSPNoError;
                 }
@@ -873,7 +873,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 try
                 {
@@ -905,7 +905,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 data = (uint)item.Value;
 
@@ -926,7 +926,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 int size = item.Size;
                 data = HandleSuite.Instance.NewHandle(size);
@@ -953,7 +953,7 @@ namespace PSFilterLoad.PSApi
 #endif
 
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 int[] values = (int[])item.Value;
                 Marshal.Copy(values, 0, data, values.Length);
@@ -971,7 +971,7 @@ namespace PSFilterLoad.PSApi
 #endif
 
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 ActionDescriptorZString value = (ActionDescriptorZString)item.Value;
 
@@ -990,7 +990,7 @@ namespace PSFilterLoad.PSApi
 #endif
 
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 byte[] bytes = (byte[])item.Value;
 
@@ -1008,7 +1008,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.openDescriptorHandles[descriptor].TryGetValue(key, out item))
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 byte[] data = (byte[])item.Value;
 
