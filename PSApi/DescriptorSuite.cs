@@ -65,9 +65,9 @@ namespace PSFilterLoad.PSApi
 		private readonly PutScopedObjectProc putScopedObjectProc;
 
 		private short lastDescriptorError;
-		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> readDescriptorHandles;
+		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> readDescriptors;
 		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> descriptorSubKeys;
-		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> writeDescriptorHandles;
+		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> writeDescriptors;
 		private Dictionary<uint, AETEValue> scriptingData;
 		private AETEData aete;
 
@@ -145,9 +145,9 @@ namespace PSFilterLoad.PSApi
 			this.putUnitFloatProc = new PutUnitFloatProc(PutUnitFloatProc);
 
 			this.lastDescriptorError = PSError.noErr;
-			this.readDescriptorHandles = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
+			this.readDescriptors = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
 			this.descriptorSubKeys = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
-			this.writeDescriptorHandles = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
+			this.writeDescriptors = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
 			this.scriptingData = new Dictionary<uint, AETEValue>();
 		}
 
@@ -276,7 +276,7 @@ namespace PSFilterLoad.PSApi
 						ptr++;
 					}
 
-					this.readDescriptorHandles.Add(handle, dictionary);
+					this.readDescriptors.Add(handle, dictionary);
 
 					return handle;
 				}
@@ -313,7 +313,7 @@ namespace PSFilterLoad.PSApi
 						Memory.Free(keys);
 					}
 				}
-				this.readDescriptorHandles.Remove(descriptor);
+				this.readDescriptors.Remove(descriptor);
 				Memory.Free(descriptor);
 			}
 
@@ -346,7 +346,7 @@ namespace PSFilterLoad.PSApi
 				state->currentKey = key = keyArray[state->keyArrayIndex];
 				state->keyArrayIndex++;
 
-				Dictionary<uint, AETEValue> items = this.readDescriptorHandles[descriptor];
+				Dictionary<uint, AETEValue> items = this.readDescriptors[descriptor];
 
 				AETEValue value = items[key];
 				try
@@ -378,7 +378,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 			data = (int)item.Value;
@@ -393,7 +393,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 			data = (double)item.Value;
@@ -408,7 +408,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 			UnitFloat unitFloat = (UnitFloat)item.Value;
@@ -433,7 +433,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 			data = (byte)item.Value;
@@ -448,7 +448,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 			int size = item.Size;
@@ -473,7 +473,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 			int size = item.Size;
@@ -498,7 +498,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 			type = (uint)item.Value;
@@ -513,7 +513,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 			type = (uint)item.Value;
@@ -528,7 +528,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = null;
 
 			if (dictionary.TryGetValue(state->currentKey, out item))
@@ -546,7 +546,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 
@@ -649,7 +649,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", ((ReadDescriptorState*)descriptor.ToPointer())->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 
 			count = (uint)dictionary.Count;
 
@@ -663,7 +663,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 			int size = item.Size;
@@ -681,7 +681,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state->currentKey));
 #endif
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 			short descErr = PSError.noErr;
@@ -714,7 +714,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			short descErr = PSError.noErr;
 
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 			double amount = (double)item.Value;
@@ -744,7 +744,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			short descErr = PSError.noErr;
 
-			Dictionary<uint, AETEValue> dictionary = this.readDescriptorHandles[descriptor];
+			Dictionary<uint, AETEValue> dictionary = this.readDescriptors[descriptor];
 			AETEValue item = dictionary[state->currentKey];
 
 			UnitFloat unitFloat = (UnitFloat)item.Value;
@@ -780,8 +780,8 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-			IntPtr handle = new IntPtr(this.writeDescriptorHandles.Count + 1);
-			this.writeDescriptorHandles.Add(handle, new Dictionary<uint, AETEValue>());
+			IntPtr handle = new IntPtr(this.writeDescriptors.Count + 1);
+			this.writeDescriptors.Add(handle, new Dictionary<uint, AETEValue>());
 
 			return handle;
 		}
@@ -793,18 +793,18 @@ namespace PSFilterLoad.PSApi
 #endif
 			descriptorHandle = HandleSuite.Instance.NewHandle(0);
 
-			if (this.writeDescriptorHandles.Count > 1)
+			if (this.writeDescriptors.Count > 1)
 			{
 				// Add the items to the sub key dictionary.
 				// The plug-in will attach the sub keys to a parent descriptor by calling PutObjectProc.
-				this.descriptorSubKeys.Add(descriptorHandle, this.writeDescriptorHandles[descriptor]);
+				this.descriptorSubKeys.Add(descriptorHandle, this.writeDescriptors[descriptor]);
 			}
 			else
 			{
-				this.scriptingData = this.writeDescriptorHandles[descriptor];
+				this.scriptingData = this.writeDescriptors[descriptor];
 			}
 
-			this.writeDescriptorHandles.Remove(descriptor);
+			this.writeDescriptors.Remove(descriptor);
 
 			return PSError.noErr;
 		}
@@ -831,7 +831,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-			this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeInteger, GetAETEParamFlags(key), 0, data));
+			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeInteger, GetAETEParamFlags(key), 0, data));
 			return PSError.noErr;
 		}
 
@@ -840,7 +840,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeFloat, GetAETEParamFlags(key), 0, data));
+			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeFloat, GetAETEParamFlags(key), 0, data));
 			return PSError.noErr;
 		}
 
@@ -851,7 +851,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			UnitFloat item = new UnitFloat(unit, data);
 
-			this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeUintFloat, GetAETEParamFlags(key), 0, item));
+			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeUintFloat, GetAETEParamFlags(key), 0, item));
 			return PSError.noErr;
 		}
 
@@ -860,7 +860,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeBoolean, GetAETEParamFlags(key), 0, data));
+			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeBoolean, GetAETEParamFlags(key), 0, data));
 			return PSError.noErr;
 		}
 
@@ -880,7 +880,7 @@ namespace PSFilterLoad.PSApi
 					byte[] data = new byte[size];
 					Marshal.Copy(hPtr, data, 0, size);
 
-					this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
+					this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
 				}
 				finally
 				{
@@ -904,7 +904,7 @@ namespace PSFilterLoad.PSApi
 				byte[] data = new byte[size];
 				Marshal.Copy(hPtr, data, 0, size);
 
-				this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeAlias, GetAETEParamFlags(key), size, data));
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeAlias, GetAETEParamFlags(key), size, data));
 			}
 			finally
 			{
@@ -918,7 +918,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
+			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
 			return PSError.noErr;
 		}
 
@@ -927,7 +927,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
+			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
 
 			return PSError.noErr;
 		}
@@ -937,7 +937,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeObjectRefrence, GetAETEParamFlags(key), 0, data));
+			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeObjectRefrence, GetAETEParamFlags(key), 0, data));
 			return PSError.noErr;
 		}
 
@@ -950,7 +950,7 @@ namespace PSFilterLoad.PSApi
 			Dictionary<uint, AETEValue> subKeys;
 			if (this.descriptorSubKeys.TryGetValue(handle, out subKeys))
 			{
-				this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
 				this.descriptorSubKeys.Remove(handle);
 			}
 			else
@@ -969,7 +969,7 @@ namespace PSFilterLoad.PSApi
 							Marshal.Copy(HandleSuite.Instance.LockHandle(handle, 0), bytes, 0, size);
 							HandleSuite.Instance.UnlockHandle(handle);
 						}
-						this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, bytes));
+						this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, bytes));
 						break;
 					default:
 						break;
@@ -997,7 +997,7 @@ namespace PSFilterLoad.PSApi
 			byte[] data = new byte[size];
 			Marshal.Copy(new IntPtr(stringHandle.ToInt64() + 1L), data, 0, size);
 
-			this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
+			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
 
 			return PSError.noErr;
 		}
@@ -1007,7 +1007,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
+			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
 
 			return PSError.noErr;
 		}
@@ -1025,7 +1025,7 @@ namespace PSFilterLoad.PSApi
 				byte[] data = new byte[size];
 				Marshal.Copy(hPtr, data, 0, size);
 
-				this.writeDescriptorHandles[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), size, data));
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), size, data));
 			}
 			finally
 			{
