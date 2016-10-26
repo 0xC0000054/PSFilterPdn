@@ -47,13 +47,16 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <typeparam name="TSuite">The type of the suite.</typeparam>
         /// <param name="key">The string specifying the suite name and version.</param>
+        /// <param name="suite">The suite to be marshaled to unmanaged memory.</param>
         /// <returns>The pointer to the allocated suite.</returns>
-        public IntPtr AllocateSuite<TSuite>(string key)
+        public IntPtr AllocateSuite<TSuite>(string key, TSuite suite)
         {
-            IntPtr suite = Memory.Allocate(Marshal.SizeOf(typeof(TSuite)), false);
-            this.activeSuites.Add(key, new PICASuite(suite));
+            IntPtr suitePointer = Memory.Allocate(Marshal.SizeOf(typeof(TSuite)), false);
+            Marshal.StructureToPtr(suite, suitePointer, false);
 
-            return suite;
+            this.activeSuites.Add(key, new PICASuite(suitePointer));
+
+            return suitePointer;
         }
 
         /// <summary>
