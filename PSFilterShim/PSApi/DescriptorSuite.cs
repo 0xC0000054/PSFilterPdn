@@ -547,6 +547,11 @@ namespace PSFilterLoad.PSApi
 			if (item.Value is Dictionary<uint, AETEValue>)
 			{
 				data = HandleSuite.Instance.NewHandle(0); // assign a zero byte handle to allow it to work correctly in the OpenReadDescriptorProc(). 
+				if (data == IntPtr.Zero)
+				{
+					state->lastReadError = PSError.memFullErr;
+					return PSError.memFullErr;
+				}
 				this.descriptorHandles.Add(data, (Dictionary<uint, AETEValue>)item.Value);
 			}
 			else
