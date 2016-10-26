@@ -3516,29 +3516,23 @@ namespace PSFilterLoad.PSApi
 							return PSError.kSPSuiteNotFoundError;
 						}
 
-						suite = activePICASuites.AllocateSuite<PSBufferSuite1>(suiteKey);
-
 						PSBufferSuite1 bufferSuite = this.picaSuites.CreateBufferSuite1();
 
-						Marshal.StructureToPtr(bufferSuite, suite, false);
+						suite = activePICASuites.AllocateSuite(suiteKey, bufferSuite);
 					}
 					else if (suiteName == PSConstants.PICAHandleSuite)
 					{
 						if (version == 1)
 						{
-							suite = activePICASuites.AllocateSuite<PSHandleSuite1>(suiteKey);
-
 							PSHandleSuite1 handleSuite = PICASuites.CreateHandleSuite1((HandleProcs*)handleProcsPtr.ToPointer());
 
-							Marshal.StructureToPtr(handleSuite, suite, false);
+							suite = activePICASuites.AllocateSuite(suiteKey, handleSuite);
 						}
 						else if (version == 2)
 						{
-							suite = activePICASuites.AllocateSuite<PSHandleSuite2>(suiteKey);
-
 							PSHandleSuite2 handleSuite = PICASuites.CreateHandleSuite2((HandleProcs*)handleProcsPtr.ToPointer());
 
-							Marshal.StructureToPtr(handleSuite, suite, false);
+							suite = activePICASuites.AllocateSuite(suiteKey, handleSuite);
 						}
 						else
 						{
@@ -3552,11 +3546,9 @@ namespace PSFilterLoad.PSApi
 							return PSError.kSPSuiteNotFoundError;
 						}
 
-						suite = activePICASuites.AllocateSuite<PropertyProcs>(suiteKey);
-
 						PropertyProcs propertySuite = PICASuites.CreatePropertySuite((PropertyProcs*)propertyProcsPtr.ToPointer());
 
-						Marshal.StructureToPtr(propertySuite, suite, false);
+						suite = activePICASuites.AllocateSuite(suiteKey, propertySuite);
 					}
 					else if (suiteName == PSConstants.PICAUIHooksSuite)
 					{
@@ -3565,11 +3557,9 @@ namespace PSFilterLoad.PSApi
 							return PSError.kSPSuiteNotFoundError;
 						}
 
-						suite = activePICASuites.AllocateSuite<PSUIHooksSuite1>(suiteKey);
-
 						PSUIHooksSuite1 uiHooks = this.picaSuites.CreateUIHooksSuite1((FilterRecord*)filterRecordPtr.ToPointer());
 
-						Marshal.StructureToPtr(uiHooks, suite, false);
+						suite = activePICASuites.AllocateSuite(suiteKey, uiHooks);
 					}
 					else if (suiteName == PSConstants.PICAActionDescriptorSuite)
 					{
@@ -3587,12 +3577,9 @@ namespace PSFilterLoad.PSApi
 							}
 						}
 
-
-						suite = this.activePICASuites.AllocateSuite<PSActionDescriptorProc>(suiteKey);
-
 						PSActionDescriptorProc actionDescriptor = this.actionDescriptorSuite.CreateActionDescriptorSuite2();
 
-						Marshal.StructureToPtr(actionDescriptor, suite, false);
+						suite = this.activePICASuites.AllocateSuite(suiteKey, actionDescriptor);
 					}
 					else if (suiteName == PSConstants.PICAZStringSuite)
 					{
@@ -3601,11 +3588,9 @@ namespace PSFilterLoad.PSApi
 							return PSError.kSPSuiteNotFoundError;
 						}
 
-						suite = this.activePICASuites.AllocateSuite<ASZStringSuite1>(suiteKey);
-
 						ASZStringSuite1 stringSuite = PICASuites.CreateASZStringSuite1();
 
-						Marshal.StructureToPtr(stringSuite, suite, false);
+						suite = this.activePICASuites.AllocateSuite(suiteKey, stringSuite);
 					}
 					else if (suiteName == PSConstants.PICAErrorSuite)
 					{
@@ -3618,11 +3603,9 @@ namespace PSFilterLoad.PSApi
 							this.errorSuite = new ErrorSuite();
 						}
 
-						suite = this.activePICASuites.AllocateSuite<PSErrorSuite1>(suiteKey);
-
 						PSErrorSuite1 error = this.errorSuite.CreateErrorSuite1();
 
-						Marshal.StructureToPtr(error, suite, false);
+						suite = this.activePICASuites.AllocateSuite(suiteKey, error);
 					}
 #if PICASUITEDEBUG
 					else if (suiteName == PSConstants.PICAColorSpaceSuite)
@@ -3632,11 +3615,9 @@ namespace PSFilterLoad.PSApi
 							return PSError.kSPSuiteNotFoundError;
 						}
 
-						suite = activePICASuites.AllocateSuite<PSColorSpaceSuite1>(suiteKey);
-
 						PSColorSpaceSuite1 csSuite = PICASuites.CreateColorSpaceSuite1();
 
-						Marshal.StructureToPtr(csSuite, suite, false);
+						suite = activePICASuites.AllocateSuite(suiteKey, csSuite);
 					}
 					else if (suiteName == PSConstants.PICAPluginsSuite)
 					{
@@ -3645,11 +3626,9 @@ namespace PSFilterLoad.PSApi
 							return PSError.kSPSuiteNotFoundError;
 						}
 
-						suite = activePICASuites.AllocateSuite<SPPluginsSuite4>(suiteKey);
-
 						SPPluginsSuite4 plugs = PICASuites.CreateSPPlugs4();
 
-						Marshal.StructureToPtr(plugs, suite, false);
+						suite = activePICASuites.AllocateSuite(suiteKey, plugs);
 					} 
 #endif
 					else
