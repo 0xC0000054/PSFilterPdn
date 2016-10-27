@@ -449,32 +449,32 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-            bool result = false;
-            unsafe
+            if (keyArray != IntPtr.Zero)
             {
-                if (keyArray != IntPtr.Zero)
+                ScriptingParameters parameters = this.actionDescriptors[descriptor];
+                bool result = true;
+
+                unsafe
                 {
-                    ScriptingParameters parameters = this.actionDescriptors[descriptor];
                     uint* key = (uint*)keyArray.ToPointer();
 
-                    if (*key != 0U)
+                    while (*key != 0U)
                     {
-                        result = true;
-
-                        do
+                        if (!parameters.ContainsKey(*key))
                         {
-                            if (!parameters.ContainsKey(*key))
-                            {
-                                result = false;
-                                break;
-                            }
+                            result = false;
+                            break;
+                        }
 
-                            key++;
-                        } while (*key != 0U);
+                        key++;
                     }
                 }
+                hasKeys = result ? (byte)1 : (byte)0;
             }
-            hasKeys = result ? (byte)1 : (byte)0;
+            else
+            {
+                return PSError.kSPBadParameterError;
+            }
            
             return PSError.kSPNoError;
         }
