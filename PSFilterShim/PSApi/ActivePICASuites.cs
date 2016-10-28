@@ -38,7 +38,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public ActivePICASuites()
         {
-            this.activeSuites = new Dictionary<string, PICASuite>();
+            this.activeSuites = new Dictionary<string, PICASuite>(StringComparer.Ordinal);
             this.disposed = false;
         }
 
