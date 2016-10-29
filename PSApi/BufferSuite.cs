@@ -18,27 +18,14 @@ namespace PSFilterLoad.PSApi
 {
 	internal sealed class BufferSuite
 	{
-		private class BufferSuiteSingleton
-		{
-			// Explicit static constructor to tell C# compiler
-			// not to mark type as beforefieldinit
-			static BufferSuiteSingleton()
-			{
-			}
-
-			private BufferSuiteSingleton()
-			{
-			}
-
-			internal static readonly BufferSuite Instance = new BufferSuite();
-		}
-
 		private readonly AllocateBufferProc allocProc;
 		private readonly FreeBufferProc freeProc;
 		private readonly LockBufferProc lockProc;
 		private readonly UnlockBufferProc unlockProc;
 		private readonly BufferSpaceProc spaceProc;
 		private readonly List<IntPtr> bufferIDs;
+
+		private static readonly BufferSuite instance = new BufferSuite();
 
 		private BufferSuite()
 		{
@@ -54,7 +41,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return BufferSuiteSingleton.Instance;
+				return instance;
 			}
 		}
 
