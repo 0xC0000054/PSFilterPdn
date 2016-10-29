@@ -37,21 +37,6 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		private class HandleSuiteSingleton
-		{
-			// Explicit static constructor to tell C# compiler
-			// not to mark type as beforefieldinit
-			static HandleSuiteSingleton()
-			{
-			}
-
-			private HandleSuiteSingleton()
-			{
-			}
-
-			internal static readonly HandleSuite Instance = new HandleSuite();
-		}
-
 		private readonly NewPIHandleProc handleNewProc;
 		private readonly DisposePIHandleProc handleDisposeProc;
 		private readonly GetPIHandleSizeProc handleGetSizeProc;
@@ -61,6 +46,8 @@ namespace PSFilterLoad.PSApi
 		private readonly RecoverSpaceProc handleRecoverSpaceProc;
 		private readonly DisposeRegularPIHandleProc handleDisposeRegularProc;
 		private readonly Dictionary<IntPtr, HandleEntry> handles;
+
+		private static readonly HandleSuite instance = new HandleSuite();
 
 		private HandleSuite()
 		{
@@ -79,7 +66,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return HandleSuiteSingleton.Instance;
+				return instance;
 			}
 		}
 
