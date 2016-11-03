@@ -255,6 +255,15 @@ namespace PSFilterLoad.PSApi
 			{
 				if (handle != IntPtr.Zero)
 				{
+					// Free the handle pointer if it has been allocated.
+					// This would occur if the framework throws an OutOfMemoryException when adding to the handles dictionary.
+					PSHandle* hand = (PSHandle*)handle.ToPointer();
+					if (hand->pointer != IntPtr.Zero)
+					{
+						Memory.Free(hand->pointer);
+						hand->pointer = IntPtr.Zero;
+					}
+
 					Memory.Free(handle);
 					handle = IntPtr.Zero;
 				}
