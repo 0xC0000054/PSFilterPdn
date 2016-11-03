@@ -49,46 +49,58 @@ namespace PSFilterLoad.PSApi.PICA
 
 			IntPtr ptr = IntPtr.Zero;
 
-			if (requestedSize.HasValue && requestedSize.Value > minimumSize)
+			try
 			{
-				uint allocatedSize = 0;
-				uint size = requestedSize.Value;
-				while (size > minimumSize)
+				if (requestedSize.HasValue && requestedSize.Value > minimumSize)
 				{
-					// Allocate the largest buffer we can that is greater than the specified minimum size.
-					ptr = Memory.Allocate(size, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
-					if (ptr != IntPtr.Zero)
+					uint allocatedSize = 0;
+					uint size = requestedSize.Value;
+					while (size > minimumSize)
 					{
-						this.buffers.Add(ptr);
-						allocatedSize = size;
-						break;
+						// Allocate the largest buffer we can that is greater than the specified minimum size.
+						ptr = Memory.Allocate(size, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
+						if (ptr != IntPtr.Zero)
+						{
+							this.buffers.Add(ptr);
+							allocatedSize = size;
+							break;
+						}
+
+						size /= 2;
 					}
 
-					size /= 2;
+					if (ptr == IntPtr.Zero)
+					{
+						// If we cannot allocate a buffer larger than the minimum size
+						// attempt to allocate a buffer at the minimum size.
+
+						ptr = Memory.Allocate(minimumSize, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
+						if (ptr != IntPtr.Zero)
+						{
+							this.buffers.Add(ptr);
+							allocatedSize = minimumSize;
+						}
+					}
+
+					// The requested size pointer is used as an output parameter to return the actual number of bytes allocated.
+					requestedSizePtr = allocatedSize;
 				}
-
-				if (ptr == IntPtr.Zero)
+				else
 				{
-					// If we cannot allocate a buffer larger than the minimum size
-					// attempt to allocate a buffer at the minimum size.
-
 					ptr = Memory.Allocate(minimumSize, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
 					if (ptr != IntPtr.Zero)
 					{
 						this.buffers.Add(ptr);
-						allocatedSize = minimumSize;
 					}
 				}
-
-				// The requested size pointer is used as an output parameter to return the actual number of bytes allocated.
-				requestedSizePtr = allocatedSize;
 			}
-			else
+			catch (OutOfMemoryException)
 			{
-				ptr = Memory.Allocate(minimumSize, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
+				// Free the buffer memory if the framework throws an OutOfMemoryException when adding to the buffers list.
 				if (ptr != IntPtr.Zero)
 				{
-					this.buffers.Add(ptr);
+					Memory.Free(ptr);
+					ptr = IntPtr.Zero;
 				}
 			}
 
