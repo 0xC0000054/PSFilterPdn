@@ -102,7 +102,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.BufferSuite, string.Format("Size: {0}", size));
 #endif
-			short err = PSError.noErr;
+			bufferID = IntPtr.Zero;
 			try
 			{
 				bufferID = Memory.Allocate(size, false);
@@ -111,10 +111,17 @@ namespace PSFilterLoad.PSApi
 			}
 			catch (OutOfMemoryException)
 			{
-				err = PSError.memFullErr;
+				// Free the buffer memory if the framework throws an OutOfMemoryException when adding to the bufferIDs list.
+				if (bufferID != IntPtr.Zero)
+				{
+					Memory.Free(bufferID);
+					bufferID = IntPtr.Zero;
+				}
+
+				return PSError.memFullErr;
 			}
 
-			return err;
+			return PSError.noErr;
 		}
 
 		private void BufferFreeProc(IntPtr bufferID)
