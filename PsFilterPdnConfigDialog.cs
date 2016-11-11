@@ -74,7 +74,7 @@ namespace PSFilterPdn
 
         private bool filterRunning;
         private bool formClosePending;
-        private Dictionary<TreeNode, string> filterTreeItems;
+        private List<FilterTreeItem> filterTreeItems;
         private List<string> expandedNodes;
 
         private Settings settings;
@@ -89,10 +89,22 @@ namespace PSFilterPdn
 
         private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
 
+        private sealed class FilterTreeItem
+        {
+            public readonly TreeNode childNode;
+            public readonly string parentCategory;
+
+            public FilterTreeItem(TreeNode child, string category)
+            {
+                this.childNode = child;
+                this.parentCategory = category;
+            }
+        }
+
         public PsFilterPdnConfigDialog()
         {
             InitializeComponent();
-            this.filterTreeItems = new Dictionary<TreeNode, string>();
+            this.filterTreeItems = new List<FilterTreeItem>();
             this.proxyProcess = null;
             this.destSurface = null;
             this.expandedNodes = new List<string>();
@@ -1064,7 +1076,7 @@ namespace PSFilterPdn
                     {
                         foreach (TreeNode item in baseNode.Nodes)
                         {
-                            this.filterTreeItems.Add(item, baseNode.Text);
+                            this.filterTreeItems.Add(new FilterTreeItem(item, baseNode.Text));
                         }
                     }
 
@@ -1380,10 +1392,10 @@ namespace PSFilterPdn
                 this.fileNameLbl.Text = string.Empty;
 
                 Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>(StringComparer.Ordinal);
-                foreach (KeyValuePair<TreeNode, string> item in filterTreeItems)
+                foreach (FilterTreeItem item in filterTreeItems)
                 {
-                    TreeNode child = item.Key;
-                    string category = item.Value;
+                    TreeNode child = item.childNode;
+                    string category = item.parentCategory;
                     string title = child.Text;
                     if ((string.IsNullOrEmpty(filtertext)) || title.Contains(filtertext, StringComparison.InvariantCultureIgnoreCase))
                     {
