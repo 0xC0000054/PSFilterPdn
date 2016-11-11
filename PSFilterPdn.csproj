@@ -231,9 +231,9 @@
     <Compile Include="PSApi\RGBColor.cs" />
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
-    <Compile Include="PSFilterShimContract.cs" />
     <Compile Include="PSFilterShimData.cs" />
     <Compile Include="PSFilterShimServer.cs" />
+    <Compile Include="PSFilterShimService.cs" />
     <Compile Include="RegionDataWrapper.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ShellLink.cs" />
