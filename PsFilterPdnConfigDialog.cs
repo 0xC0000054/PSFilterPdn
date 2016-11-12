@@ -1382,8 +1382,8 @@ namespace PSFilterPdn
         /// <summary>
         /// Filters the filter tree view Items by the specified text
         /// </summary>
-        /// <param name="filtertext">The keyword text to filter by</param>
-        private void FilterTreeView(string filtertext)
+        /// <param name="keyword">The text to filter by</param>
+        private void FilterTreeView(string keyword)
         {
             if (filterTreeItems.Count > 0)
             {                
@@ -1397,7 +1397,7 @@ namespace PSFilterPdn
                     TreeNode child = item.childNode;
                     string category = item.parentCategory;
                     string title = child.Text;
-                    if ((string.IsNullOrEmpty(filtertext)) || title.Contains(filtertext, StringComparison.InvariantCultureIgnoreCase))
+                    if ((string.IsNullOrEmpty(keyword)) || title.Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
                     {
                         if (nodes.ContainsKey(category))
                         {
@@ -1422,7 +1422,7 @@ namespace PSFilterPdn
                 {
                     int index = this.filterTree.Nodes.Add(item.Value);
 
-                    if (!string.IsNullOrEmpty(filtertext))
+                    if (!string.IsNullOrEmpty(keyword))
                     {
                         this.filterTree.Nodes[index].Expand();
                     }
