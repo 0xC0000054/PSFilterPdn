@@ -1072,11 +1072,11 @@ namespace PSFilterPdn
                     UpdateFilterListParam parm = (UpdateFilterListParam)e.Result;
 
                     this.filterTreeItems.Clear();
-                    foreach (var baseNode in parm.items)
+                    foreach (var parentNode in parm.items)
                     {
-                        foreach (TreeNode item in baseNode.Nodes)
+                        foreach (TreeNode item in parentNode.Nodes)
                         {
-                            this.filterTreeItems.Add(new FilterTreeItem(item, baseNode.Text));
+                            this.filterTreeItems.Add(new FilterTreeItem(item, parentNode.Text));
                         }
                     }
 
