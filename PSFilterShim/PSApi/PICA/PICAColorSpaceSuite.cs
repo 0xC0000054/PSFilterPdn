@@ -93,7 +93,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 ColorServicesConvert.Convert(inputCSpace, outputCSpace, ref convArray);
 
-                switch (inputCSpace)
+                switch (outputCSpace)
                 {
                     case ColorSpace.CMYKSpace:
                         color->c0 = (byte)convArray[0];
@@ -103,15 +103,11 @@ namespace PSFilterLoad.PSApi.PICA
                         break;
                     case ColorSpace.GraySpace:
                         color->c3 = (byte)convArray[0];
-                        convArray[1] = 0;
-                        convArray[2] = 0;
-                        convArray[3] = 0;
                         break;
                     default:
                         color->c1 = (byte)convArray[0];
                         color->c2 = (byte)convArray[1];
                         color->c3 = (byte)convArray[2];
-                        convArray[3] = 0;
                         break;
                 }
 
