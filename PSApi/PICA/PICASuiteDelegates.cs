@@ -34,13 +34,13 @@ namespace PSFilterLoad.PSApi.PICA
 #if PICASUITEDEBUG
     #region ColorSpaceSuite Delegates
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSMake(IntPtr colorID);
+    internal delegate int CSMake(ref IntPtr colorID);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSDelete(IntPtr colorID);
+    internal delegate int CSDelete(ref IntPtr colorID);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSStuffComponents(IntPtr colorID, short colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3);
+    internal delegate int CSStuffComponents(IntPtr colorID, ColorSpace colorSpace, byte c0, byte c1, byte c2, byte c3);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSExtractComponents(IntPtr colorID, short colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3, ref byte gamutFlag);
+    internal delegate int CSExtractComponents(IntPtr colorID, ColorSpace colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3, ref byte gamutFlag);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSStuffXYZ(IntPtr colorID, CS_XYZ xyz);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -48,15 +48,15 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSConvert8(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSConvert16(short inputCSpace, short outputCSpace, IntPtr colorArray, short count);
+    internal delegate int CSConvert16(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSGetNativeSpace(IntPtr colorID, ref short nativeSpace);
+    internal delegate int CSGetNativeSpace(IntPtr colorID, ref ColorSpace nativeSpace);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSIsBookColor(IntPtr colorID, ref byte isBookColor);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSExtractColorName(IntPtr colorID, ref IntPtr colorName);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSPickColor(IntPtr colorID, IntPtr promptString);
+    internal delegate int CSPickColor(ref IntPtr colorID, IntPtr promptString);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSConvert(IntPtr inputData, IntPtr outputData, short count);
     #endregion
