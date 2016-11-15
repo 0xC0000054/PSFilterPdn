@@ -61,6 +61,7 @@ namespace PSFilterLoad.PSApi
         public const int kSPBadParameterError = 0x5061726d;
         public const int kSPNotImplmented = 0x21494d50;
         public const int kSPSuiteNotFoundError = 0x53214664;
+        public const int kSPUserCanceledError = 0x73746f70;
 
         // ASZString suite error codes
         public const int kASNoErr = 0;
