@@ -20,6 +20,7 @@ namespace PSFilterLoad.PSApi
 		private PICABufferSuite bufferSuite;
 		private PICAUIHooksSuite uiHooksSuite;
 		private string pluginName;
+		private PICAColorSpaceSuite colorSpaceSuite;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="PICASuites"/> class.
@@ -29,6 +30,7 @@ namespace PSFilterLoad.PSApi
 			this.bufferSuite = null;
 			this.uiHooksSuite = null;
 			this.pluginName = string.Empty;
+			this.colorSpaceSuite = null;
 		}
 
 		/// <summary>
@@ -62,9 +64,14 @@ namespace PSFilterLoad.PSApi
 		}
 
 #if PICASUITEDEBUG
-		public static PSColorSpaceSuite1 CreateColorSpaceSuite1()
+		public PSColorSpaceSuite1 CreateColorSpaceSuite1()
 		{
-			return PICAColorSpaceSuite.CreateColorSpaceSuite1();
+			if (colorSpaceSuite == null)
+			{
+				this.colorSpaceSuite = new PICAColorSpaceSuite();
+			}
+
+			return this.colorSpaceSuite.CreateColorSpaceSuite1();
 		} 
 #endif
 
