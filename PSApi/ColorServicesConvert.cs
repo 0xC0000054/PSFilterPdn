@@ -10,24 +10,46 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
 using Devcorp.Controls.Design;
+using System.ComponentModel;
 
 namespace PSFilterLoad.PSApi
 {
     static class ColorServicesConvert
     {
+        private struct ColorResult
+        {
+            public readonly double component0;
+            public readonly double component1;
+            public readonly double component2;
+            public readonly double component3;
+
+            public ColorResult(double component0) : this(component0, 0.0, 0.0, 0.0)
+            {
+            }
+
+            public ColorResult(double component0, double component1, double component2) : this(component0, component1, component2, 0.0)
+            {
+            }
+
+            public ColorResult(double component0, double component1, double component2, double component3)
+            {
+                this.component0 = component0;
+                this.component1 = component1;
+                this.component2 = component2;
+                this.component3 = component3;
+            }
+        }
+
         /// <summary>
         /// Converts between the specified color spaces.
         /// </summary>
         /// <param name="sourceSpace">The source space.</param>
         /// <param name="resultSpace">The result space.</param>
-        /// <param name="color">The color to convert.</param>
+        /// <param name="colorComponents">The color to convert.</param>
         /// <returns>The status of the conversion</returns>
-        public static short Convert(ColorSpace sourceSpace, ColorSpace resultSpace, ref short[] color)
+        public static short Convert(ColorSpace sourceSpace, ColorSpace resultSpace, ref short[] colorComponents)
         {
-            short err = PSError.noErr;
-
             // TODO: CMYK, LAB and XYZ conversions are different than Photoshop
             if (sourceSpace != resultSpace)
             {
@@ -40,372 +62,321 @@ namespace PSFilterLoad.PSApi
                     return PSError.noErr;
                 }
 
+                ColorResult result;
                 switch (sourceSpace)
                 {
                     case ColorSpace.RGBSpace:
-                        ConvertRGB(resultSpace, ref color);
+                        ConvertRGB(resultSpace, colorComponents[0], colorComponents[1], colorComponents[2], out result);
                         break;
                     case ColorSpace.HSBSpace:
-                        ConvertHSB(resultSpace, ref color);
+                        ConvertHSB(resultSpace, colorComponents[0], colorComponents[1], colorComponents[2], out result);
                         break;
                     case ColorSpace.CMYKSpace:
-                        ConvertCMYK(resultSpace, ref color);
+                        ConvertCMYK(resultSpace, colorComponents[0], colorComponents[1], colorComponents[2], colorComponents[3], out result);
                         break;
                     case ColorSpace.LabSpace:
-                        ConvertLAB(resultSpace, ref color);
+                        ConvertLAB(resultSpace, colorComponents[0], colorComponents[1], colorComponents[2], out result);
                         break;
                     case ColorSpace.GraySpace:
-                        ConvertGray(resultSpace, ref color);
+                        ConvertGray(resultSpace, colorComponents[0], out result);
                         break;
                     case ColorSpace.HSLSpace:
-                        ConvertHSL(resultSpace, ref color);
+                        ConvertHSL(resultSpace, colorComponents[0], colorComponents[1], colorComponents[2], out result);
                         break;
                     case ColorSpace.XYZSpace:
-                        ConvertXYZ(resultSpace, ref color);
+                        ConvertXYZ(resultSpace, colorComponents[0], colorComponents[1], colorComponents[2], out result);
                         break;
                     default:
-                        err = PSError.paramErr;
-                        break;
+                        return PSError.paramErr;
                 }
 
+                switch (resultSpace)
+                {
+                    case ColorSpace.RGBSpace:
+                        colorComponents[0] = (short)result.component0;
+                        colorComponents[1] = (short)result.component1;
+                        colorComponents[2] = (short)result.component2;
+                        break;
+                    case ColorSpace.GraySpace:
+                        colorComponents[0] = (short)result.component0;
+                        break;
+                    case ColorSpace.HSBSpace:
+                    case ColorSpace.HSLSpace:
+                        // The hue range documented as [0, 359].
+                        colorComponents[0] = result.component0 == 360.0 ? (short)0 : (short)result.component0;
+                        colorComponents[1] = (short)(result.component1 * 255.0);
+                        colorComponents[2] = (short)(result.component2 * 255.0);
+                        break;
+                    case ColorSpace.LabSpace:
+                    case ColorSpace.XYZSpace:
+                        colorComponents[0] = (short)(result.component0 * 255.0);
+                        colorComponents[1] = (short)(result.component1 * 255.0);
+                        colorComponents[2] = (short)(result.component2 * 255.0);
+                        break;
+                    case ColorSpace.CMYKSpace:
+                        colorComponents[0] = (short)(result.component0 * 255.0);
+                        colorComponents[1] = (short)(result.component1 * 255.0);
+                        colorComponents[2] = (short)(result.component2 * 255.0);
+                        colorComponents[3] = (short)(result.component3 * 255.0);
+                        break;
+                    default:
+                        throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
+                }
             }
 
-            return err;
+            return PSError.noErr;
         }
 
-        private static void ConvertRGB(ColorSpace resultSpace, ref short[] color)
+        private static void ConvertRGB(ColorSpace resultSpace, short red, short green, short blue, out ColorResult color)
         {
             switch (resultSpace)
             {
                 case ColorSpace.CMYKSpace:
-                    CMYK cmyk = ColorSpaceHelper.RGBtoCMYK(color[0], color[1], color[2]);
-                    color[0] = (short)(cmyk.Cyan * 255.0);
-                    color[1] = (short)(cmyk.Magenta * 255.0);
-                    color[2] = (short)(cmyk.Yellow * 255.0);
-                    color[3] = (short)(cmyk.Black * 255.0);
-
+                    CMYK cmyk = ColorSpaceHelper.RGBtoCMYK(red, green, blue);
+                    color = new ColorResult(cmyk.Cyan, cmyk.Magenta, cmyk.Yellow, cmyk.Black);
                     break;
                 case ColorSpace.GraySpace:
-                    color[0] = (short)(0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]);
-                    color[1] = color[2] = color[3] = 0;
+                    color = new ColorResult(0.299 * red + 0.587 * green + 0.114 * blue);
                     break;
                 case ColorSpace.HSBSpace:
-                    HSB hsb = ColorSpaceHelper.RGBtoHSB(color[0], color[1], color[2]);
-                    color[0] = (short)hsb.Hue;
-                    color[1] = (short)(hsb.Saturation * 255.0); // scale to the range of [0, 255].
-                    color[2] = (short)(hsb.Brightness * 255.0);
+                    HSB hsb = ColorSpaceHelper.RGBtoHSB(red, green, blue);
+                    color = new ColorResult(hsb.Hue, hsb.Saturation, hsb.Brightness);
                     break;
                 case ColorSpace.HSLSpace:
-                    HSL hsl = ColorSpaceHelper.RGBtoHSL(color[0], color[1], color[2]);
-                    color[0] = (short)hsl.Hue;
-                    color[1] = (short)(hsl.Saturation * 255.0);
-                    color[2] = (short)Math.Round(hsl.Luminance * 255.0);
+                    HSL hsl = ColorSpaceHelper.RGBtoHSL(red, green, blue);
+                    color = new ColorResult(hsl.Hue, hsl.Saturation, hsl.Luminance);
                     break;
                 case ColorSpace.LabSpace:
-                    CIELab lab = ColorSpaceHelper.RGBtoLab(color[0], color[1], color[2]);
-                    color[0] = (short)lab.L;
-                    color[1] = (short)lab.A;
-                    color[2] = (short)lab.B;
-
+                    CIELab lab = ColorSpaceHelper.RGBtoLab(red, green, blue);
+                    color = new ColorResult(lab.L, lab.A, lab.B);
                     break;
                 case ColorSpace.XYZSpace:
-                    CIEXYZ xyz = ColorSpaceHelper.RGBtoXYZ(color[0], color[1], color[2]);
-                    color[0] = (short)xyz.X;
-                    color[1] = (short)xyz.Y;
-                    color[2] = (short)xyz.Z;
+                    CIEXYZ xyz = ColorSpaceHelper.RGBtoXYZ(red, green, blue);
+                    color = new ColorResult(xyz.X, xyz.Y, xyz.Z);
                     break;
-
+                default:
+                    throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
             }
         }
 
-        private static void ConvertCMYK(ColorSpace resultSpace, ref short[] color)
+        private static void ConvertCMYK(ColorSpace resultSpace, short cyan, short magenta, short yellow, short black, out ColorResult color)
         {
-            double c = color[0] / 255.0;
-            double m = color[1] / 255.0;
-            double y = color[2] / 255.0;
-            double k = color[3] / 255.0;
+            double c = cyan / 255.0;
+            double m = magenta / 255.0;
+            double y = yellow / 255.0;
+            double k = black / 255.0;
 
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
                     RGB rgb = ColorSpaceHelper.CMYKtoRGB(c, m, y, k);
-                    color[0] = (short)rgb.Red;
-                    color[1] = (short)rgb.Green;
-                    color[2] = (short)rgb.Blue;
+                    color = new ColorResult(rgb.Red, rgb.Green, rgb.Blue);
                     break;
                 case ColorSpace.HSBSpace:
                     HSB hsb = ColorSpaceHelper.CMYKtoHSB(c, m, y, k);
-                    color[0] = (short)hsb.Hue;
-                    color[1] = (short)hsb.Saturation;
-                    color[2] = (short)hsb.Brightness;
+                    color = new ColorResult(hsb.Hue, hsb.Saturation, hsb.Brightness);
                     break;
                 case ColorSpace.HSLSpace:
                     HSL hsl = ColorSpaceHelper.CMYKtoHSL(c, m, y, k);
-                    color[0] = (short)hsl.Hue;
-                    color[1] = (short)hsl.Saturation;
-                    color[2] = (short)hsl.Luminance;
+                    color = new ColorResult(hsl.Hue, hsl.Saturation, hsl.Luminance);
                     break;
                 case ColorSpace.LabSpace:
                     CIELab lab = CMYKtoLab(c, m, y, k);
-                    color[0] = (short)lab.L;
-                    color[1] = (short)lab.A;
-                    color[2] = (short)lab.B;
+                    color = new ColorResult(lab.L, lab.A, lab.B);
                     break;
                 case ColorSpace.XYZSpace:
                     CIEXYZ xyz = CMYKtoXYZ(c, m, y, k);
-                    color[0] = (short)xyz.X;
-                    color[1] = (short)xyz.Y;
-                    color[2] = (short)xyz.Z;
+                    color = new ColorResult(xyz.X, xyz.Y, xyz.Z);
                     break;
                 case ColorSpace.GraySpace:
                     rgb = ColorSpaceHelper.CMYKtoRGB(c, m, y, k);
-                    color[0] = (short)(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
-                    color[1] = color[2] = color[3] = 0;
-
+                    color = new ColorResult(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
                     break;
+                default:
+                    throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
             }
         }
 
-        private static void ConvertHSB(ColorSpace resultSpace, ref short[] color)
+        private static void ConvertHSB(ColorSpace resultSpace, short hue, short saturation, short brightness, out ColorResult color)
         {
-            double h = color[0];
-            double s = (double)color[1] / 255.0; // scale to the range of [0, 1].
-            double b = (double)color[2] / 255.0;
+            double h = hue;
+            double s = saturation / 255.0; // scale to the range of [0, 1].
+            double b = brightness / 255.0;
+
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
                     RGB rgb = ColorSpaceHelper.HSBtoRGB(h, s, b);
-                    color[0] = (short)rgb.Red;
-                    color[1] = (short)rgb.Green;
-                    color[2] = (short)rgb.Blue;
+                    color = new ColorResult(rgb.Red, rgb.Green, rgb.Blue);
                     break;
 
                 case ColorSpace.CMYKSpace:
                     CMYK cmyk = ColorSpaceHelper.HSBtoCMYK(h, s, b);
-                    color[0] = (short)cmyk.Cyan;
-                    color[1] = (short)cmyk.Magenta;
-                    color[2] = (short)cmyk.Yellow;
-                    color[3] = (short)cmyk.Black;
+                    color = new ColorResult(cmyk.Cyan, cmyk.Magenta, cmyk.Yellow, cmyk.Black);
                     break;
                 case ColorSpace.HSLSpace:
                     HSL hsl = ColorSpaceHelper.HSBtoHSL(h, s, b);
-                    color[0] = (short)hsl.Hue;
-                    color[1] = (short)hsl.Saturation;
-                    color[2] = (short)hsl.Luminance;
+                    color = new ColorResult(hsl.Hue, hsl.Saturation, hsl.Luminance);
                     break;
                 case ColorSpace.LabSpace:
                     CIELab lab = HSBToLab(h, s, b);
-                    color[0] = (short)lab.L;
-                    color[1] = (short)lab.A;
-                    color[2] = (short)lab.B;
-
+                    color = new ColorResult(lab.L, lab.A, lab.B);
                     break;
                 case ColorSpace.XYZSpace:
                     CIEXYZ xyz = HSBtoXYZ(h, s, b);
-                    color[0] = (short)xyz.X;
-                    color[1] = (short)xyz.Y;
-                    color[2] = (short)xyz.Z;
+                    color = new ColorResult(xyz.X, xyz.Y, xyz.Z);
                     break;
                 case ColorSpace.GraySpace:
                     rgb = ColorSpaceHelper.HSBtoRGB(h, s, b);
-                    color[0] = (short)(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
-                    color[1] = color[2] = color[3] = 0;
-
+                    color = new ColorResult(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
                     break;
+                default:
+                    throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
             }
         }
 
-        private static void ConvertHSL(ColorSpace resultSpace, ref short[] color)
+        private static void ConvertHSL(ColorSpace resultSpace, short hue, short saturation, short luminance, out ColorResult color)
         {
-            double h = color[0];
-            double s = (double)color[1] / 255.0;
-            double l = (double)color[2] / 255.0;
+            double h = hue;
+            double s = saturation / 255.0;
+            double l = luminance / 255.0;
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
                     RGB rgb = ColorSpaceHelper.HSLtoRGB(h, s, l);
-                    color[0] = (short)rgb.Red;
-                    color[1] = (short)rgb.Green;
-                    color[2] = (short)rgb.Blue;
+                    color = new ColorResult(rgb.Red, rgb.Green, rgb.Blue);
                     break;
 
                 case ColorSpace.CMYKSpace:
                     CMYK cmyk = ColorSpaceHelper.HSLtoCMYK(h, s, l);
-                    color[0] = (short)cmyk.Cyan;
-                    color[1] = (short)cmyk.Magenta;
-                    color[2] = (short)cmyk.Yellow;
-                    color[3] = (short)cmyk.Black;
+                    color = new ColorResult(cmyk.Cyan, cmyk.Magenta, cmyk.Yellow, cmyk.Black);
                     break;
                 case ColorSpace.HSBSpace:
                     HSB hsb = ColorSpaceHelper.HSLtoHSB(h, s, l);
-                    color[0] = (short)hsb.Hue;
-                    color[1] = (short)hsb.Saturation;
-                    color[2] = (short)hsb.Brightness;
+                    color = new ColorResult(hsb.Hue, hsb.Saturation, hsb.Brightness);
                     break;
                 case ColorSpace.LabSpace:
                     CIELab lab = HSLToLab(h, s, l);
-                    color[0] = (short)lab.L;
-                    color[1] = (short)lab.A;
-                    color[2] = (short)lab.B;
-
+                    color = new ColorResult(lab.L, lab.A, lab.B);
                     break;
                 case ColorSpace.XYZSpace:
                     CIEXYZ xyz = HSLtoXYZ(h, s, l);
-                    color[0] = (short)xyz.X;
-                    color[1] = (short)xyz.Y;
-                    color[2] = (short)xyz.Z;
+                    color = new ColorResult(xyz.X, xyz.Y, xyz.Z);
                     break;
                 case ColorSpace.GraySpace:
                     rgb = ColorSpaceHelper.HSLtoRGB(h, s, l);
-                    color[0] = (short)(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
-                    color[1] = color[2] = color[3] = 0;
-
+                    color = new ColorResult(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
                     break;
+                default:
+                    throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
             }
         }
 
-        private static void ConvertLAB(ColorSpace resultSpace, ref short[] color)
+        private static void ConvertLAB(ColorSpace resultSpace, short lComponent, short aComponent, short bComponent, out ColorResult color)
         {
-            double l = color[0] / 255.0;
-            double a = color[1] / 255.0;
-            double b = color[2] / 255.0;
+            double l = lComponent / 255.0;
+            double a = aComponent / 255.0;
+            double b = bComponent / 255.0;
 
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
                     RGB rgb = ColorSpaceHelper.LabtoRGB(l, a, b);
-                    color[0] = (short)rgb.Red;
-                    color[1] = (short)rgb.Green;
-                    color[2] = (short)rgb.Blue;
+                    color = new ColorResult(rgb.Red, rgb.Green, rgb.Blue);
                     break;
 
                 case ColorSpace.CMYKSpace:
                     CMYK cmyk = LabtoCMYK(l, a, b);
-                    color[0] = (short)cmyk.Cyan;
-                    color[1] = (short)cmyk.Magenta;
-                    color[2] = (short)cmyk.Yellow;
-                    color[3] = (short)cmyk.Black;
+                    color = new ColorResult(cmyk.Cyan, cmyk.Magenta, cmyk.Yellow, cmyk.Black);
                     break;
                 case ColorSpace.HSBSpace:
                     HSB hsb = LabtoHSB(l, a, b);
-                    color[0] = (short)hsb.Hue;
-                    color[1] = (short)hsb.Saturation;
-                    color[2] = (short)hsb.Brightness;
+                    color = new ColorResult(hsb.Hue, hsb.Saturation, hsb.Brightness);
                     break;
                 case ColorSpace.HSLSpace:
                     HSL hsl = LabtoHSL(l, a, b);
-                    color[0] = (short)hsl.Hue;
-                    color[1] = (short)hsl.Saturation;
-                    color[2] = (short)hsl.Luminance;
-
+                    color = new ColorResult(hsl.Hue, hsl.Saturation, hsl.Luminance);
                     break;
                 case ColorSpace.XYZSpace:
                     CIEXYZ xyz = ColorSpaceHelper.LabtoXYZ(l, a, b);
-                    color[0] = (short)xyz.X;
-                    color[1] = (short)xyz.Y;
-                    color[2] = (short)xyz.Z;
+                    color = new ColorResult(xyz.X, xyz.Y, xyz.Z);
                     break;
                 case ColorSpace.GraySpace:
                     rgb = ColorSpaceHelper.LabtoRGB(l, a, b);
-                    color[0] = (short)(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
-                    color[1] = color[2] = color[3] = 0;
-
+                    color = new ColorResult(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
                     break;
+                default:
+                    throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
             }
         }
 
-        private static void ConvertXYZ(ColorSpace resultSpace, ref short[] color)
+        private static void ConvertXYZ(ColorSpace resultSpace, short xComponent, short yComponent, short zComponent, out ColorResult color)
         {
-            double x = color[0] / 255.0;
-            double y = color[1] / 255.0;
-            double z = color[2] / 255.0;
+            double x = xComponent / 255.0;
+            double y = yComponent / 255.0;
+            double z = zComponent / 255.0;
 
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
                     RGB rgb = ColorSpaceHelper.XYZtoRGB(x, y, z);
-                    color[0] = (short)rgb.Red;
-                    color[1] = (short)rgb.Green;
-                    color[2] = (short)rgb.Blue;
+                    color = new ColorResult(rgb.Red, rgb.Green, rgb.Blue);
                     break;
 
                 case ColorSpace.CMYKSpace:
                     CMYK cmyk = XYZtoCMYK(x, y, z);
-                    color[0] = (short)cmyk.Cyan;
-                    color[1] = (short)cmyk.Magenta;
-                    color[2] = (short)cmyk.Yellow;
-                    color[3] = (short)cmyk.Black;
+                    color = new ColorResult(cmyk.Cyan, cmyk.Magenta, cmyk.Yellow, cmyk.Black);
                     break;
                 case ColorSpace.HSBSpace:
                     HSB hsb = XYZtoHSB(x, y, z);
-                    color[0] = (short)hsb.Hue;
-                    color[1] = (short)hsb.Saturation;
-                    color[2] = (short)hsb.Brightness;
+                    color = new ColorResult(hsb.Hue, hsb.Saturation, hsb.Brightness);
                     break;
                 case ColorSpace.HSLSpace:
                     HSL hsl = XYZtoHSL(x, y, z);
-                    color[0] = (short)hsl.Hue;
-                    color[1] = (short)hsl.Saturation;
-                    color[2] = (short)hsl.Luminance;
-
+                    color = new ColorResult(hsl.Hue, hsl.Saturation, hsl.Luminance);
                     break;
                 case ColorSpace.LabSpace:
                     CIELab lab = ColorSpaceHelper.XYZtoLab(x, y, z);
-                    color[0] = (short)lab.L;
-                    color[1] = (short)lab.A;
-                    color[2] = (short)lab.B;
+                    color = new ColorResult(lab.L, lab.A, lab.B);
                     break;
                 case ColorSpace.GraySpace:
                     rgb = ColorSpaceHelper.XYZtoRGB(x, y, z);
-                    color[0] = (short)(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
-                    color[1] = color[2] = color[3] = 0;
-
+                    color = new ColorResult(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
                     break;
+                default:
+                    throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
             }
         }
 
-        private static void ConvertGray(ColorSpace resultSpace, ref short[] color)
+        private static void ConvertGray(ColorSpace resultSpace, short gray, out ColorResult color)
         {
-            short gray = color[0];
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
-                    color[0] = color[1] = color[2] = gray;
+                    color = new ColorResult(gray, gray, gray);
                     break;
                 case ColorSpace.CMYKSpace:
                     CMYK cmyk = ColorSpaceHelper.RGBtoCMYK(gray, gray, gray);
-                    color[0] = (short)(cmyk.Cyan * 255.0);
-                    color[1] = (short)(cmyk.Magenta * 255.0);
-                    color[2] = (short)(cmyk.Yellow * 255.0);
-                    color[3] = (short)(cmyk.Black * 255.0);
-
+                    color = new ColorResult(cmyk.Cyan, cmyk.Magenta, cmyk.Yellow, cmyk.Black);
                     break;
                 case ColorSpace.HSBSpace:
                     HSB hsb = ColorSpaceHelper.RGBtoHSB(gray, gray, gray);
-                    color[0] = (short)hsb.Hue;
-                    color[1] = (short)(hsb.Saturation * 255.0); // scale to the range of [0, 255].
-                    color[2] = (short)(hsb.Brightness * 255.0);
+                    color = new ColorResult(hsb.Hue, hsb.Saturation, hsb.Brightness);
                     break;
                 case ColorSpace.HSLSpace:
                     HSL hsl = ColorSpaceHelper.RGBtoHSL(gray, gray, gray);
-                    color[0] = (short)hsl.Hue;
-                    color[1] = (short)(hsl.Saturation * 255.0);
-                    color[2] = (short)Math.Round(hsl.Luminance * 255.0);
+                    color = new ColorResult(hsl.Hue, hsl.Saturation, hsl.Luminance);
                     break;
                 case ColorSpace.LabSpace:
                     CIELab lab = ColorSpaceHelper.RGBtoLab(gray, gray, gray);
-                    color[0] = (short)lab.L;
-                    color[1] = (short)lab.A;
-                    color[2] = (short)lab.B;
-
+                    color = new ColorResult(lab.L, lab.A, lab.B);
                     break;
                 case ColorSpace.XYZSpace:
                     CIEXYZ xyz = ColorSpaceHelper.RGBtoXYZ(gray, gray, gray);
-                    color[0] = (short)xyz.X;
-                    color[1] = (short)xyz.Y;
-                    color[2] = (short)xyz.Z;
+                    color = new ColorResult(xyz.X, xyz.Y, xyz.Z);
                     break;
-
+                default:
+                    throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
             }
         }
 
