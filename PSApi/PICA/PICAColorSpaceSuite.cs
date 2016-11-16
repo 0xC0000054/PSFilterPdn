@@ -16,48 +16,72 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal static class PICAColorSpaceSuite
+    internal sealed class PICAColorSpaceSuite
     {
-        private static CSMake csMake = new CSMake(CSMake);
-        private static CSDelete csDelete = new CSDelete(CSDelete);
-        private static CSStuffComponents csStuffComponent = new CSStuffComponents(CSStuffComponents);
-        private static CSExtractComponents csExtractComponent = new CSExtractComponents(CSExtractComponents);
-        private static CSStuffXYZ csStuffXYZ = new CSStuffXYZ(CSStuffXYZ);
-        private static CSExtractXYZ csExtractXYZ = new CSExtractXYZ(CSExtractXYZ);
-        private static CSConvert8 csConvert8 = new CSConvert8(CSConvert8);
-        private static CSConvert16 csConvert16 = new CSConvert16(CSConvert16);
-        private static CSGetNativeSpace csGetNativeSpace = new CSGetNativeSpace(CSGetNativeSpace);
-        private static CSIsBookColor csIsBookColor = new CSIsBookColor(CSIsBookColor);
-        private static CSExtractColorName csExtractColorName = new CSExtractColorName(CSExtractColorName);
-        private static CSPickColor csPickColor = new CSPickColor(CSPickColor);
-        private static CSConvert csConvert8to16 = new CSConvert(CSConvert8to16);
-        private static CSConvert csConvert16to8 = new CSConvert(CSConvert16to8);
+        private readonly CSMake csMake;
+        private readonly CSDelete csDelete;
+        private readonly CSStuffComponents csStuffComponent;
+        private readonly CSExtractComponents csExtractComponent;
+        private readonly CSStuffXYZ csStuffXYZ;
+        private readonly CSExtractXYZ csExtractXYZ;
+        private readonly CSConvert8 csConvert8;
+        private readonly CSConvert16 csConvert16;
+        private readonly CSGetNativeSpace csGetNativeSpace;
+        private readonly CSIsBookColor csIsBookColor;
+        private readonly CSExtractColorName csExtractColorName;
+        private readonly CSPickColor csPickColor;
+        private readonly CSConvert csConvert8to16;
+        private readonly CSConvert csConvert16to8;
 
-        private static int CSMake(ref IntPtr colorID)
+        public PICAColorSpaceSuite()
+        {
+            this.csMake = new CSMake(Make);
+            this.csDelete = new CSDelete(Delete);
+            this.csStuffComponent = new CSStuffComponents(StuffComponents);
+            this.csExtractComponent = new CSExtractComponents(ExtractComponents);
+            this.csStuffXYZ = new CSStuffXYZ(StuffXYZ);
+            this.csExtractXYZ = new CSExtractXYZ(ExtractXYZ);
+            this.csConvert8 = new CSConvert8(Convert8);
+            this.csConvert16 = new CSConvert16(Convert16);
+            this.csGetNativeSpace = new CSGetNativeSpace(GetNativeSpace);
+            this.csIsBookColor = new CSIsBookColor(IsBookColor);
+            this.csExtractColorName = new CSExtractColorName(ExtractColorName);
+            this.csPickColor = new CSPickColor(PickColor);
+            this.csConvert8to16 = new CSConvert(Convert8to16);
+            this.csConvert16to8 = new CSConvert(Convert16to8);
+        }
+
+        private int Make(ref IntPtr colorID)
         {
             return PSError.kSPNotImplmented;
         }
-        private static int CSDelete(ref IntPtr colorID)
+
+        private int Delete(ref IntPtr colorID)
         {
             return PSError.kSPNotImplmented;
         }
-        private static int CSStuffComponents(IntPtr colorID, ColorSpace colorSpace, byte c0, byte c1, byte c2, byte c3)
+
+        private int StuffComponents(IntPtr colorID, ColorSpace colorSpace, byte c0, byte c1, byte c2, byte c3)
         {
             return PSError.kSPNotImplmented;
         }
-        private static int CSExtractComponents(IntPtr colorID, ColorSpace colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3, ref byte gamutFlag)
+
+        private int ExtractComponents(IntPtr colorID, ColorSpace colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3, ref byte gamutFlag)
         {
             return PSError.kSPNotImplmented;
         }
-        private static int CSStuffXYZ(IntPtr colorID, CS_XYZ xyz)
+
+        private int StuffXYZ(IntPtr colorID, CS_XYZ xyz)
         {
             return PSError.kSPNotImplmented;
         }
-        private static int CSExtractXYZ(IntPtr colorID, ref CS_XYZ xyz)
+
+        private int ExtractXYZ(IntPtr colorID, ref CS_XYZ xyz)
         {
             return PSError.kSPNotImplmented;
         }
-        private unsafe static int CSConvert8(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
+
+        private unsafe int Convert8(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
         {
             byte* ptr = (byte*)colorArray.ToPointer();
             short[] convArray = new short[4];
@@ -116,58 +140,63 @@ namespace PSFilterLoad.PSApi.PICA
 
             return PSError.kSPNoError;
         }
-        private static int CSConvert16(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
+
+        private int Convert16(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
         {
             return PSError.kSPNotImplmented;
         }
-        private static int CSGetNativeSpace(IntPtr colorID, ref ColorSpace nativeSpace)
+
+        private int GetNativeSpace(IntPtr colorID, ref ColorSpace nativeSpace)
         {
             nativeSpace = 0;
 
             return PSError.kSPNotImplmented;
         }
-        private static int CSIsBookColor(IntPtr colorID, ref byte isBookColor)
+
+        private int IsBookColor(IntPtr colorID, ref byte isBookColor)
         {
             isBookColor = 0;
 
             return PSError.kSPNotImplmented;
         }
-        private static int CSExtractColorName(IntPtr colorID, ref IntPtr colorName)
-        {
-            return PSError.kSPNotImplmented;
-        }
-        private static int CSPickColor(ref IntPtr colorID, IntPtr promptString)
+
+        private int ExtractColorName(IntPtr colorID, ref IntPtr colorName)
         {
             return PSError.kSPNotImplmented;
         }
 
-        private static int CSConvert8to16(IntPtr inputData, IntPtr outputData, short count)
+        private int PickColor(ref IntPtr colorID, IntPtr promptString)
         {
             return PSError.kSPNotImplmented;
         }
 
-        private static int CSConvert16to8(IntPtr inputData, IntPtr outputData, short count)
+        private int Convert8to16(IntPtr inputData, IntPtr outputData, short count)
         {
             return PSError.kSPNotImplmented;
         }
 
-        public static PSColorSpaceSuite1 CreateColorSpaceSuite1()
+        private int Convert16to8(IntPtr inputData, IntPtr outputData, short count)
+        {
+            return PSError.kSPNotImplmented;
+        }
+
+        public PSColorSpaceSuite1 CreateColorSpaceSuite1()
         {
             PSColorSpaceSuite1 suite = new PSColorSpaceSuite1();
-            suite.Make = Marshal.GetFunctionPointerForDelegate(csMake);
-            suite.Delete = Marshal.GetFunctionPointerForDelegate(csDelete);
-            suite.StuffComponents = Marshal.GetFunctionPointerForDelegate(csStuffComponent);
-            suite.ExtractComponents = Marshal.GetFunctionPointerForDelegate(csExtractComponent);
-            suite.StuffXYZ = Marshal.GetFunctionPointerForDelegate(csStuffXYZ);
-            suite.ExtractXYZ = Marshal.GetFunctionPointerForDelegate(csExtractXYZ);
-            suite.Convert8 = Marshal.GetFunctionPointerForDelegate(csConvert8);
-            suite.Convert16 = Marshal.GetFunctionPointerForDelegate(csConvert16);
-            suite.GetNativeSpace = Marshal.GetFunctionPointerForDelegate(csGetNativeSpace);
-            suite.IsBookColor = Marshal.GetFunctionPointerForDelegate(csIsBookColor);
-            suite.ExtractColorName = Marshal.GetFunctionPointerForDelegate(csExtractColorName);
-            suite.PickColor = Marshal.GetFunctionPointerForDelegate(csPickColor);
-            suite.Convert8to16 = Marshal.GetFunctionPointerForDelegate(csConvert8to16);
-            suite.Convert16to8 = Marshal.GetFunctionPointerForDelegate(csConvert16to8);
+            suite.Make = Marshal.GetFunctionPointerForDelegate(this.csMake);
+            suite.Delete = Marshal.GetFunctionPointerForDelegate(this.csDelete);
+            suite.StuffComponents = Marshal.GetFunctionPointerForDelegate(this.csStuffComponent);
+            suite.ExtractComponents = Marshal.GetFunctionPointerForDelegate(this.csExtractComponent);
+            suite.StuffXYZ = Marshal.GetFunctionPointerForDelegate(this.csStuffXYZ);
+            suite.ExtractXYZ = Marshal.GetFunctionPointerForDelegate(this.csExtractXYZ);
+            suite.Convert8 = Marshal.GetFunctionPointerForDelegate(this.csConvert8);
+            suite.Convert16 = Marshal.GetFunctionPointerForDelegate(this.csConvert16);
+            suite.GetNativeSpace = Marshal.GetFunctionPointerForDelegate(this.csGetNativeSpace);
+            suite.IsBookColor = Marshal.GetFunctionPointerForDelegate(this.csIsBookColor);
+            suite.ExtractColorName = Marshal.GetFunctionPointerForDelegate(this.csExtractColorName);
+            suite.PickColor = Marshal.GetFunctionPointerForDelegate(this.csPickColor);
+            suite.Convert8to16 = Marshal.GetFunctionPointerForDelegate(this.csConvert8to16);
+            suite.Convert16to8 = Marshal.GetFunctionPointerForDelegate(this.csConvert16to8);
 
             return suite;
         }
