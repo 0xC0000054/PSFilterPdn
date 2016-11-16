@@ -33,19 +33,19 @@ namespace PSFilterLoad.PSApi.PICA
         private static CSConvert csConvert8to16 = new CSConvert(CSConvert8to16);
         private static CSConvert csConvert16to8 = new CSConvert(CSConvert16to8);
 
-        private static int CSMake(IntPtr colorID)
+        private static int CSMake(ref IntPtr colorID)
         {
             return PSError.kSPNotImplmented;
         }
-        private static int CSDelete(IntPtr colorID)
+        private static int CSDelete(ref IntPtr colorID)
         {
             return PSError.kSPNotImplmented;
         }
-        private static int CSStuffComponents(IntPtr colorID, short colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3)
+        private static int CSStuffComponents(IntPtr colorID, ColorSpace colorSpace, byte c0, byte c1, byte c2, byte c3)
         {
             return PSError.kSPNotImplmented;
         }
-        private static int CSExtractComponents(IntPtr colorID, short colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3, ref byte gamutFlag)
+        private static int CSExtractComponents(IntPtr colorID, ColorSpace colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3, ref byte gamutFlag)
         {
             return PSError.kSPNotImplmented;
         }
@@ -116,11 +116,11 @@ namespace PSFilterLoad.PSApi.PICA
 
             return PSError.kSPNoError;
         }
-        private static int CSConvert16(short inputCSpace, short outputCSpace, IntPtr colorArray, short count)
+        private static int CSConvert16(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
         {
             return PSError.kSPNotImplmented;
         }
-        private static int CSGetNativeSpace(IntPtr colorID, ref short nativeSpace)
+        private static int CSGetNativeSpace(IntPtr colorID, ref ColorSpace nativeSpace)
         {
             nativeSpace = 0;
 
@@ -136,7 +136,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             return PSError.kSPNotImplmented;
         }
-        private static int CSPickColor(IntPtr colorID, IntPtr promptString)
+        private static int CSPickColor(ref IntPtr colorID, IntPtr promptString)
         {
             return PSError.kSPNotImplmented;
         }
