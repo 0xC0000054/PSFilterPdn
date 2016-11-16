@@ -120,40 +120,45 @@ namespace PSFilterLoad.PSApi
 
         private static void ConvertCMYK(ColorSpace resultSpace, ref short[] color)
         {
+            double c = color[0] / 255.0;
+            double m = color[1] / 255.0;
+            double y = color[2] / 255.0;
+            double k = color[3] / 255.0;
+
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
-                    RGB rgb = ColorSpaceHelper.CMYKtoRGB(color[0], color[1], color[2], color[3]);
+                    RGB rgb = ColorSpaceHelper.CMYKtoRGB(c, m, y, k);
                     color[0] = (short)rgb.Red;
                     color[1] = (short)rgb.Green;
                     color[2] = (short)rgb.Blue;
                     break;
                 case ColorSpace.HSBSpace:
-                    HSB hsb = ColorSpaceHelper.CMYKtoHSB(color[0], color[1], color[2], color[3]);
+                    HSB hsb = ColorSpaceHelper.CMYKtoHSB(c, m, y, k);
                     color[0] = (short)hsb.Hue;
                     color[1] = (short)hsb.Saturation;
                     color[2] = (short)hsb.Brightness;
                     break;
                 case ColorSpace.HSLSpace:
-                    HSL hsl = ColorSpaceHelper.CMYKtoHSL(color[0], color[1], color[2], color[3]);
+                    HSL hsl = ColorSpaceHelper.CMYKtoHSL(c, m, y, k);
                     color[0] = (short)hsl.Hue;
                     color[1] = (short)hsl.Saturation;
                     color[2] = (short)hsl.Luminance;
                     break;
                 case ColorSpace.LabSpace:
-                    CIELab lab = CMYKtoLab(color);
+                    CIELab lab = CMYKtoLab(c, m, y, k);
                     color[0] = (short)lab.L;
                     color[1] = (short)lab.A;
                     color[2] = (short)lab.B;
                     break;
                 case ColorSpace.XYZSpace:
-                    CIEXYZ xyz = CMYKtoXYZ(color);
+                    CIEXYZ xyz = CMYKtoXYZ(c, m, y, k);
                     color[0] = (short)xyz.X;
                     color[1] = (short)xyz.Y;
                     color[2] = (short)xyz.Z;
                     break;
                 case ColorSpace.GraySpace:
-                    rgb = ColorSpaceHelper.CMYKtoRGB(color[0], color[1], color[2], color[3]);
+                    rgb = ColorSpaceHelper.CMYKtoRGB(c, m, y, k);
                     color[0] = (short)(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
                     color[1] = color[2] = color[3] = 0;
 
@@ -189,20 +194,20 @@ namespace PSFilterLoad.PSApi
                     color[2] = (short)hsl.Luminance;
                     break;
                 case ColorSpace.LabSpace:
-                    CIELab lab = HSBToLab(color);
+                    CIELab lab = HSBToLab(h, s, b);
                     color[0] = (short)lab.L;
                     color[1] = (short)lab.A;
                     color[2] = (short)lab.B;
 
                     break;
                 case ColorSpace.XYZSpace:
-                    CIEXYZ xyz = HSBtoXYZ(color);
+                    CIEXYZ xyz = HSBtoXYZ(h, s, b);
                     color[0] = (short)xyz.X;
                     color[1] = (short)xyz.Y;
                     color[2] = (short)xyz.Z;
                     break;
                 case ColorSpace.GraySpace:
-                    rgb = ColorSpaceHelper.HSBtoRGB(color[0], color[1], color[2]);
+                    rgb = ColorSpaceHelper.HSBtoRGB(h, s, b);
                     color[0] = (short)(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
                     color[1] = color[2] = color[3] = 0;
 
@@ -238,20 +243,20 @@ namespace PSFilterLoad.PSApi
                     color[2] = (short)hsb.Brightness;
                     break;
                 case ColorSpace.LabSpace:
-                    CIELab lab = HSLToLab(color);
+                    CIELab lab = HSLToLab(h, s, l);
                     color[0] = (short)lab.L;
                     color[1] = (short)lab.A;
                     color[2] = (short)lab.B;
 
                     break;
                 case ColorSpace.XYZSpace:
-                    CIEXYZ xyz = HSLtoXYZ(color);
+                    CIEXYZ xyz = HSLtoXYZ(h, s, l);
                     color[0] = (short)xyz.X;
                     color[1] = (short)xyz.Y;
                     color[2] = (short)xyz.Z;
                     break;
                 case ColorSpace.GraySpace:
-                    rgb = ColorSpaceHelper.HSLtoRGB(color[0], color[1], color[2]);
+                    rgb = ColorSpaceHelper.HSLtoRGB(h, s, l);
                     color[0] = (short)(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
                     color[1] = color[2] = color[3] = 0;
 
@@ -261,43 +266,47 @@ namespace PSFilterLoad.PSApi
 
         private static void ConvertLAB(ColorSpace resultSpace, ref short[] color)
         {
+            double l = color[0] / 255.0;
+            double a = color[1] / 255.0;
+            double b = color[2] / 255.0;
+
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
-                    RGB rgb = ColorSpaceHelper.LabtoRGB(color[0], color[1], color[2]);
+                    RGB rgb = ColorSpaceHelper.LabtoRGB(l, a, b);
                     color[0] = (short)rgb.Red;
                     color[1] = (short)rgb.Green;
                     color[2] = (short)rgb.Blue;
                     break;
 
                 case ColorSpace.CMYKSpace:
-                    CMYK cmyk = LabtoCMYK(color);
+                    CMYK cmyk = LabtoCMYK(l, a, b);
                     color[0] = (short)cmyk.Cyan;
                     color[1] = (short)cmyk.Magenta;
                     color[2] = (short)cmyk.Yellow;
                     color[3] = (short)cmyk.Black;
                     break;
                 case ColorSpace.HSBSpace:
-                    HSB hsb = LabtoHSB(color);
+                    HSB hsb = LabtoHSB(l, a, b);
                     color[0] = (short)hsb.Hue;
                     color[1] = (short)hsb.Saturation;
                     color[2] = (short)hsb.Brightness;
                     break;
                 case ColorSpace.HSLSpace:
-                    HSL hsl = LabtoHSL(color);
+                    HSL hsl = LabtoHSL(l, a, b);
                     color[0] = (short)hsl.Hue;
                     color[1] = (short)hsl.Saturation;
                     color[2] = (short)hsl.Luminance;
 
                     break;
                 case ColorSpace.XYZSpace:
-                    CIEXYZ xyz = ColorSpaceHelper.LabtoXYZ(color[0], color[1], color[2]);
+                    CIEXYZ xyz = ColorSpaceHelper.LabtoXYZ(l, a, b);
                     color[0] = (short)xyz.X;
                     color[1] = (short)xyz.Y;
                     color[2] = (short)xyz.Z;
                     break;
                 case ColorSpace.GraySpace:
-                    rgb = ColorSpaceHelper.LabtoRGB(color[0], color[1], color[2]);
+                    rgb = ColorSpaceHelper.LabtoRGB(l, a, b);
                     color[0] = (short)(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
                     color[1] = color[2] = color[3] = 0;
 
@@ -307,43 +316,47 @@ namespace PSFilterLoad.PSApi
 
         private static void ConvertXYZ(ColorSpace resultSpace, ref short[] color)
         {
+            double x = color[0] / 255.0;
+            double y = color[1] / 255.0;
+            double z = color[2] / 255.0;
+
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
-                    RGB rgb = ColorSpaceHelper.XYZtoRGB(color[0], color[1], color[2]);
+                    RGB rgb = ColorSpaceHelper.XYZtoRGB(x, y, z);
                     color[0] = (short)rgb.Red;
                     color[1] = (short)rgb.Green;
                     color[2] = (short)rgb.Blue;
                     break;
 
                 case ColorSpace.CMYKSpace:
-                    CMYK cmyk = XYZtoCMYK(color);
+                    CMYK cmyk = XYZtoCMYK(x, y, z);
                     color[0] = (short)cmyk.Cyan;
                     color[1] = (short)cmyk.Magenta;
                     color[2] = (short)cmyk.Yellow;
                     color[3] = (short)cmyk.Black;
                     break;
                 case ColorSpace.HSBSpace:
-                    HSB hsb = XYZtoHSB(color);
+                    HSB hsb = XYZtoHSB(x, y, z);
                     color[0] = (short)hsb.Hue;
                     color[1] = (short)hsb.Saturation;
                     color[2] = (short)hsb.Brightness;
                     break;
                 case ColorSpace.HSLSpace:
-                    HSL hsl = XYZtoHSL(color);
+                    HSL hsl = XYZtoHSL(x, y, z);
                     color[0] = (short)hsl.Hue;
                     color[1] = (short)hsl.Saturation;
                     color[2] = (short)hsl.Luminance;
 
                     break;
                 case ColorSpace.LabSpace:
-                    CIELab lab = ColorSpaceHelper.XYZtoLab(color[0], color[1], color[2]);
+                    CIELab lab = ColorSpaceHelper.XYZtoLab(x, y, z);
                     color[0] = (short)lab.L;
                     color[1] = (short)lab.A;
                     color[2] = (short)lab.B;
                     break;
                 case ColorSpace.GraySpace:
-                    rgb = ColorSpaceHelper.XYZtoRGB(color[0], color[1], color[2]);
+                    rgb = ColorSpaceHelper.XYZtoRGB(x, y, z);
                     color[0] = (short)(0.299 * rgb.Red + 0.587 * rgb.Green + 0.114 * rgb.Blue);
                     color[1] = color[2] = color[3] = 0;
 
@@ -396,79 +409,75 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private static CIELab CMYKtoLab(short[] cmyk)
+        private static CIELab CMYKtoLab(double c, double m, double y, double k)
         {
-            CIEXYZ xyz = CMYKtoXYZ(cmyk);
+            CIEXYZ xyz = CMYKtoXYZ(c, m, y, k);
             return ColorSpaceHelper.XYZtoLab(xyz);
         }
 
-        private static CIEXYZ CMYKtoXYZ(short[] cmyk)
+        private static CIEXYZ CMYKtoXYZ(double c, double m, double y, double k)
         {
-            RGB rgb = ColorSpaceHelper.XYZtoRGB(cmyk[0], cmyk[1], cmyk[2]);
+            RGB rgb = ColorSpaceHelper.CMYKtoRGB(c, m, y, k);
             return ColorSpaceHelper.RGBtoXYZ(rgb);
         }
 
-        private static CMYK LabtoCMYK(short[] lab)
+        private static CMYK LabtoCMYK(double l, double a, double b)
         {
-            RGB rgb = ColorSpaceHelper.LabtoRGB(lab[0], lab[1], lab[2]);
+            RGB rgb = ColorSpaceHelper.LabtoRGB(l, a, b);
             return ColorSpaceHelper.RGBtoCMYK(rgb);
         }
 
-        private static CMYK XYZtoCMYK(short[] xyz)
+        private static CMYK XYZtoCMYK(double x, double y, double z)
         {
-            RGB rgb = ColorSpaceHelper.XYZtoRGB(xyz[0], xyz[1], xyz[2]);
+            RGB rgb = ColorSpaceHelper.XYZtoRGB(x, y, z);
             return ColorSpaceHelper.RGBtoCMYK(rgb);
         }
 
-        private static CIELab HSBToLab(short[] hsb)
+        private static CIELab HSBToLab(double h, double s, double b)
         {
-            CIEXYZ xyz = HSBtoXYZ(hsb);
+            CIEXYZ xyz = HSBtoXYZ(h, s, b);
             return ColorSpaceHelper.XYZtoLab(xyz);
         }
-        private static CIEXYZ HSBtoXYZ(short[] hsb)
+
+        private static CIEXYZ HSBtoXYZ(double h, double s, double b)
         {
-            double h = hsb[0];
-            double s = (double)hsb[1] / 255d;
-            double b = (double)hsb[2] / 255d;
-
-
             RGB rgb = ColorSpaceHelper.HSBtoRGB(h, s, b);
             return ColorSpaceHelper.RGBtoXYZ(rgb);
         }
 
-        private static HSB LabtoHSB(short[] lab)
+        private static HSB LabtoHSB(double l, double a, double b)
         {
-            RGB rgb = ColorSpaceHelper.LabtoRGB(lab[0], lab[1], lab[2]);
-            return ColorSpaceHelper.RGBtoHSB(rgb);
-        }
-        private static HSB XYZtoHSB(short[] lab)
-        {
-            RGB rgb = ColorSpaceHelper.XYZtoRGB(lab[0], lab[1], lab[2]);
+            RGB rgb = ColorSpaceHelper.LabtoRGB(l, a, b);
             return ColorSpaceHelper.RGBtoHSB(rgb);
         }
 
-        private static CIELab HSLToLab(short[] hsl)
+        private static HSB XYZtoHSB(double l, double a, double b)
         {
-            CIEXYZ xyz = HSLtoXYZ(hsl);
+            RGB rgb = ColorSpaceHelper.XYZtoRGB(l, a, b);
+            return ColorSpaceHelper.RGBtoHSB(rgb);
+        }
+
+        private static CIELab HSLToLab(double h, double s, double l)
+        {
+            CIEXYZ xyz = HSLtoXYZ(h, s, l);
             return ColorSpaceHelper.XYZtoLab(xyz);
         }
-        private static CIEXYZ HSLtoXYZ(short[] hsl)
+
+        private static CIEXYZ HSLtoXYZ(double h, double s, double l)
         {
-            double h = hsl[0];
-            double s = (double)hsl[1] / 255d;
-            double l = (double)hsl[2] / 255d;
             RGB rgb = ColorSpaceHelper.HSBtoRGB(h, s, l);
             return ColorSpaceHelper.RGBtoXYZ(rgb);
         }
 
-        private static HSL LabtoHSL(short[] lab)
+        private static HSL LabtoHSL(double l, double a, double b)
         {
-            RGB rgb = ColorSpaceHelper.LabtoRGB(lab[0], lab[1], lab[2]);
+            RGB rgb = ColorSpaceHelper.LabtoRGB(l, a, b);
             return ColorSpaceHelper.RGBtoHSL(rgb);
         }
-        private static HSL XYZtoHSL(short[] lab)
+
+        private static HSL XYZtoHSL(double l, double a, double b)
         {
-            RGB rgb = ColorSpaceHelper.XYZtoRGB(lab[0], lab[1], lab[2]);
+            RGB rgb = ColorSpaceHelper.XYZtoRGB(l, a, b);
             return ColorSpaceHelper.RGBtoHSL(rgb);
         }
     }
