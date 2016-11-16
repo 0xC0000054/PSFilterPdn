@@ -3601,7 +3601,7 @@ namespace PSFilterLoad.PSApi
 							return PSError.kSPSuiteNotFoundError;
 						}
 
-						PSColorSpaceSuite1 csSuite = PICASuites.CreateColorSpaceSuite1();
+						PSColorSpaceSuite1 csSuite = this.picaSuites.CreateColorSpaceSuite1();
 
 						suite = activePICASuites.AllocateSuite(suiteKey, csSuite);
 					}
