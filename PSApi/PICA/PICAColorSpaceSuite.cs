@@ -83,62 +83,74 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int Convert8(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
         {
-            byte* ptr = (byte*)colorArray.ToPointer();
-            short[] convArray = new short[4];
+            int error = PSError.kSPNoError;
+            byte c0 = 0;
+            byte c1 = 0;
+            byte c2 = 0;
+            byte c3 = 0;
+            CS_Color8* color = (CS_Color8*)colorArray.ToPointer();
 
             for (int i = 0; i < count; i++)
             {
                 // 0RGB, CMYK, 0HSB , 0HSL, 0LAB, 0XYZ, 000Gray 
-                CS_Color8* color = (CS_Color8*)ptr;
-
-
                 // all modes except CMYK and GrayScale begin at the second byte
                 switch (inputCSpace)
                 {
-                    case ColorSpace.CMYKSpace:
-                        convArray[0] = color->c0;
-                        convArray[1] = color->c1;
-                        convArray[2] = color->c2;
-                        convArray[3] = color->c3;
-                        break;
                     case ColorSpace.GraySpace:
-                        convArray[0] = color->c3;
-                        convArray[1] = 0;
-                        convArray[2] = 0;
-                        convArray[3] = 0;
+                        c0 = color->c3;
                         break;
+                    case ColorSpace.CMYKSpace:
+                        c0 = color->c0;
+                        c1 = color->c1;
+                        c2 = color->c2;
+                        c3 = color->c3;
+                        break;
+                    case ColorSpace.RGBSpace:
+                    case ColorSpace.HSBSpace:
+                    case ColorSpace.HSLSpace:
+                    case ColorSpace.LabSpace:
+                    case ColorSpace.XYZSpace:
                     default:
-                        convArray[0] = color->c1;
-                        convArray[1] = color->c2;
-                        convArray[2] = color->c3;
-                        convArray[3] = 0;
+                        c0 = color->c1;
+                        c1 = color->c2;
+                        c2 = color->c3;
                         break;
                 }
 
-                ColorServicesConvert.Convert(inputCSpace, outputCSpace, ref convArray);
+
+                error = ColorServicesConvert.Convert(inputCSpace, outputCSpace, ref c0, ref c1, ref c2, ref c3);
+                if (error != PSError.kSPNoError)
+                {
+                    break;
+                }
 
                 switch (outputCSpace)
                 {
                     case ColorSpace.CMYKSpace:
-                        color->c0 = (byte)convArray[0];
-                        color->c1 = (byte)convArray[1];
-                        color->c2 = (byte)convArray[2];
-                        color->c3 = (byte)convArray[3];
+                        color->c0 = c0;
+                        color->c1 = c1;
+                        color->c2 = c2;
+                        color->c3 = c3;
                         break;
                     case ColorSpace.GraySpace:
-                        color->c3 = (byte)convArray[0];
+                        color->c3 = c0;
                         break;
+                    case ColorSpace.RGBSpace:
+                    case ColorSpace.HSBSpace:
+                    case ColorSpace.HSLSpace:
+                    case ColorSpace.LabSpace:
+                    case ColorSpace.XYZSpace:
                     default:
-                        color->c1 = (byte)convArray[0];
-                        color->c2 = (byte)convArray[1];
-                        color->c3 = (byte)convArray[2];
+                        color->c1 = c0;
+                        color->c2 = c1;
+                        color->c3 = c2;
                         break;
                 }
 
-                ptr += 4;
+                color++;
             }
 
-            return PSError.kSPNoError;
+            return error;
         }
 
         private int Convert16(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
