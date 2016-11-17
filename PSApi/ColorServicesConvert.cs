@@ -127,6 +127,122 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
+        /// <summary>
+        /// Converts between the specified color spaces.
+        /// </summary>
+        /// <param name="sourceSpace">The source space.</param>
+        /// <param name="resultSpace">The result space.</param>
+        /// <param name="c0">The first component.</param>
+        /// <param name="c1">The second component.</param>
+        /// <param name="c2">The third component.</param>
+        /// <param name="c3">The fourth component.</param>
+        /// <returns>The status of the conversion</returns>
+        public static int Convert(ColorSpace sourceSpace, ColorSpace resultSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3)
+        {
+            if (sourceSpace != resultSpace)
+            {
+                if (resultSpace == ColorSpace.ChosenSpace)
+                {
+                    resultSpace = sourceSpace;
+                    return PSError.kSPNoError;
+                }
+
+                if (resultSpace < ColorSpace.RGBSpace || resultSpace > ColorSpace.XYZSpace)
+                {
+                    return PSError.kSPBadParameterError;
+                }
+
+                short component0 = 0;
+                short component1 = 0;
+                short component2 = 0;
+                short component3 = 0;
+
+                switch (sourceSpace)
+                {
+                    case ColorSpace.HSBSpace:
+                    case ColorSpace.HSLSpace:
+                        component0 = (short)((c0 / 255.0) * 360.0);
+                        component1 = c1;
+                        component2 = c2;
+                        break;
+                    case ColorSpace.GraySpace:
+                        component0 = c0;
+                        break;
+                    case ColorSpace.CMYKSpace:
+                        component0 = c0;
+                        component1 = c1;
+                        component2 = c2;
+                        component3 = c3;
+                        break;
+                    case ColorSpace.RGBSpace:
+                    case ColorSpace.LabSpace:
+                    case ColorSpace.XYZSpace:
+                    default:
+                        component0 = c0;
+                        component1 = c1;
+                        component2 = c2;
+                        break;
+                }
+
+                ColorResult result;
+                switch (sourceSpace)
+                {
+                    case ColorSpace.RGBSpace:
+                        ConvertRGB(resultSpace, component0, component1, component2, out result);
+                        break;
+                    case ColorSpace.HSBSpace:
+                        ConvertHSB(resultSpace, component0, component1, component2, out result);
+                        break;
+                    case ColorSpace.CMYKSpace:
+                        ConvertCMYK(resultSpace, component0, component1, component2, component3, out result);
+                        break;
+                    case ColorSpace.LabSpace:
+                        ConvertLAB(resultSpace, component0, component1, component2, out result);
+                        break;
+                    case ColorSpace.GraySpace:
+                        ConvertGray(resultSpace, component0, out result);
+                        break;
+                    case ColorSpace.HSLSpace:
+                        ConvertHSL(resultSpace, component0, component1, component2, out result);
+                        break;
+                    case ColorSpace.XYZSpace:
+                        ConvertXYZ(resultSpace, component0, component1, component2, out result);
+                        break;
+                    default:
+                        return PSError.kSPBadParameterError;
+                }
+
+                switch (resultSpace)
+                {
+                    case ColorSpace.HSBSpace:
+                    case ColorSpace.HSLSpace:
+                        c0 = (byte)((result.component0 / 360.0) * 255.0);
+                        c1 = (byte)(result.component1 * 255.0);
+                        c2 = (byte)(result.component2 * 255.0);
+                        break;
+                    case ColorSpace.GraySpace:
+                        c0 = (byte)result.component0;
+                        break;
+                    case ColorSpace.RGBSpace:
+                        c0 = (byte)result.component0;
+                        c1 = (byte)result.component1;
+                        c2 = (byte)result.component2;
+                        break;
+                    case ColorSpace.CMYKSpace:
+                    case ColorSpace.LabSpace:
+                    case ColorSpace.XYZSpace:
+                    default:
+                        c0 = (byte)(result.component0 * 255.0);
+                        c1 = (byte)(result.component1 * 255.0);
+                        c2 = (byte)(result.component2 * 255.0);
+                        c3 = (byte)(result.component3 * 255.0);
+                        break;
+                }
+            }
+
+            return PSError.kSPNoError;
+        }
+
         private static void ConvertRGB(ColorSpace resultSpace, short red, short green, short blue, out ColorResult color)
         {
             switch (resultSpace)
