@@ -1,5 +1,5 @@
 /* This file is from http://www.codeproject.com/Articles/19045/Manipulating-colors-in-NET-Part-1/
- * it is distrubeted under the CPOL http://www.codeproject.com/info/cpol10.aspx
+ * it is distributed under the CPOL http://www.codeproject.com/info/cpol10.aspx
  */
 
 using System;
