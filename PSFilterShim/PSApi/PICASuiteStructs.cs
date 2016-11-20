@@ -68,7 +68,8 @@ namespace PSFilterLoad.PSApi
 		public IntPtr PickColor;
 		public IntPtr Convert8to16;
 		public IntPtr Convert16to8;
-	}  
+		public IntPtr ConvertToMonitorRGB;
+	}
 #endif
 
 	internal struct PSHandleSuite1
