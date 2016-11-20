@@ -52,7 +52,7 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSGetNativeSpace(IntPtr colorID, ref ColorSpace nativeSpace);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSIsBookColor(IntPtr colorID, ref byte isBookColor);
+    internal delegate int CSIsBookColor(IntPtr colorID, [MarshalAs(UnmanagedType.U1)] ref bool isBookColor);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSExtractColorName(IntPtr colorID, ref IntPtr colorName);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
