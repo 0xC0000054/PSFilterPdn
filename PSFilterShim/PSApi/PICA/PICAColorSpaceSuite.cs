@@ -165,9 +165,9 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNotImplmented;
         }
 
-        private int IsBookColor(IntPtr colorID, ref byte isBookColor)
+        private int IsBookColor(IntPtr colorID, ref bool isBookColor)
         {
-            isBookColor = 0;
+            isBookColor = false;
 
             return PSError.kSPNotImplmented;
         }
