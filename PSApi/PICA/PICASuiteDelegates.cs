@@ -59,6 +59,8 @@ namespace PSFilterLoad.PSApi.PICA
     internal delegate int CSPickColor(ref IntPtr colorID, IntPtr promptString);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSConvert(IntPtr inputData, IntPtr outputData, short count);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int CSConvertToMonitorRGB(ColorSpace inputCSpace, IntPtr inputData, IntPtr outputData, short count);
     #endregion
 #endif
 
