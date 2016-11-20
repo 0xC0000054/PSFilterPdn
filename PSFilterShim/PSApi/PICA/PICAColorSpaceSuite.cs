@@ -32,6 +32,7 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly CSPickColor csPickColor;
         private readonly CSConvert csConvert8to16;
         private readonly CSConvert csConvert16to8;
+        private readonly CSConvertToMonitorRGB csConvertToMonitorRGB;
 
         public PICAColorSpaceSuite()
         {
@@ -49,6 +50,7 @@ namespace PSFilterLoad.PSApi.PICA
             this.csPickColor = new CSPickColor(PickColor);
             this.csConvert8to16 = new CSConvert(Convert8to16);
             this.csConvert16to8 = new CSConvert(Convert16to8);
+            this.csConvertToMonitorRGB = new CSConvertToMonitorRGB(ConvertToMonitorRGB);
         }
 
         private int Make(ref IntPtr colorID)
@@ -192,6 +194,11 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNotImplmented;
         }
 
+        private int ConvertToMonitorRGB(ColorSpace inputCSpace, IntPtr inputData, IntPtr outputData, short count)
+        {
+            return PSError.kSPNotImplmented;
+        }
+
         public PSColorSpaceSuite1 CreateColorSpaceSuite1()
         {
             PSColorSpaceSuite1 suite = new PSColorSpaceSuite1();
@@ -209,6 +216,7 @@ namespace PSFilterLoad.PSApi.PICA
             suite.PickColor = Marshal.GetFunctionPointerForDelegate(this.csPickColor);
             suite.Convert8to16 = Marshal.GetFunctionPointerForDelegate(this.csConvert8to16);
             suite.Convert16to8 = Marshal.GetFunctionPointerForDelegate(this.csConvert16to8);
+            suite.ConvertToMonitorRGB = Marshal.GetFunctionPointerForDelegate(this.csConvertToMonitorRGB);
 
             return suite;
         }
