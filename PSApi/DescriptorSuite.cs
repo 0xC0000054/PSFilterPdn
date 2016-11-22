@@ -769,7 +769,14 @@ namespace PSFilterLoad.PSApi
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
 			IntPtr handle = new IntPtr(this.writeDescriptors.Count + 1);
-			this.writeDescriptors.Add(handle, new Dictionary<uint, AETEValue>());
+			try
+			{
+				this.writeDescriptors.Add(handle, new Dictionary<uint, AETEValue>());
+			}
+			catch (OutOfMemoryException)
+			{
+				return IntPtr.Zero;
+			}
 
 			return handle;
 		}
@@ -784,11 +791,18 @@ namespace PSFilterLoad.PSApi
 			{
 				return PSError.memFullErr;
 			}
-			// Add the items to the descriptor handle dictionary.
-			// If the descriptor is a sub key the plug-in will attach it to a parent descriptor by calling PutObjectProc.
-			this.descriptorHandles.Add(descriptorHandle, this.writeDescriptors[descriptor]);
+			try
+			{
+				// Add the items to the descriptor handle dictionary.
+				// If the descriptor is a sub key the plug-in will attach it to a parent descriptor by calling PutObjectProc.
+				this.descriptorHandles.Add(descriptorHandle, this.writeDescriptors[descriptor]);
 
-			this.writeDescriptors.Remove(descriptor);
+				this.writeDescriptors.Remove(descriptor);
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
 
 			return PSError.noErr;
 		}
@@ -815,7 +829,15 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeInteger, GetAETEParamFlags(key), 0, data));
+			try
+			{
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeInteger, GetAETEParamFlags(key), 0, data));
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
+
 			return PSError.noErr;
 		}
 
@@ -824,7 +846,15 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeFloat, GetAETEParamFlags(key), 0, data));
+			try
+			{
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeFloat, GetAETEParamFlags(key), 0, data));
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
+
 			return PSError.noErr;
 		}
 
@@ -833,9 +863,17 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			UnitFloat item = new UnitFloat(unit, data);
+			try
+			{
+				UnitFloat item = new UnitFloat(unit, data);
 
-			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeUintFloat, GetAETEParamFlags(key), 0, item));
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeUintFloat, GetAETEParamFlags(key), 0, item));
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
+
 			return PSError.noErr;
 		}
 
@@ -844,7 +882,15 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeBoolean, GetAETEParamFlags(key), 0, data));
+			try
+			{
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeBoolean, GetAETEParamFlags(key), 0, data));
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
+
 			return PSError.noErr;
 		}
 
@@ -856,19 +902,26 @@ namespace PSFilterLoad.PSApi
 
 			if (textHandle != IntPtr.Zero)
 			{
-				IntPtr hPtr = HandleSuite.Instance.LockHandle(textHandle, 0);
-
 				try
 				{
-					int size = HandleSuite.Instance.GetHandleSize(textHandle);
-					byte[] data = new byte[size];
-					Marshal.Copy(hPtr, data, 0, size);
+					IntPtr hPtr = HandleSuite.Instance.LockHandle(textHandle, 0);
 
-					this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
+					try
+					{
+						int size = HandleSuite.Instance.GetHandleSize(textHandle);
+						byte[] data = new byte[size];
+						Marshal.Copy(hPtr, data, 0, size);
+
+						this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
+					}
+					finally
+					{
+						HandleSuite.Instance.UnlockHandle(textHandle);
+					}
 				}
-				finally
+				catch (OutOfMemoryException)
 				{
-					HandleSuite.Instance.UnlockHandle(textHandle);
+					return PSError.memFullErr;
 				}
 			}
 
@@ -880,20 +933,28 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			IntPtr hPtr = HandleSuite.Instance.LockHandle(aliasHandle, 0);
-
 			try
 			{
-				int size = HandleSuite.Instance.GetHandleSize(aliasHandle);
-				byte[] data = new byte[size];
-				Marshal.Copy(hPtr, data, 0, size);
+				IntPtr hPtr = HandleSuite.Instance.LockHandle(aliasHandle, 0);
 
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeAlias, GetAETEParamFlags(key), size, data));
+				try
+				{
+					int size = HandleSuite.Instance.GetHandleSize(aliasHandle);
+					byte[] data = new byte[size];
+					Marshal.Copy(hPtr, data, 0, size);
+
+					this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeAlias, GetAETEParamFlags(key), size, data));
+				}
+				finally
+				{
+					HandleSuite.Instance.UnlockHandle(aliasHandle);
+				}
 			}
-			finally
+			catch (OutOfMemoryException)
 			{
-				HandleSuite.Instance.UnlockHandle(aliasHandle);
+				return PSError.memFullErr;
 			}
+
 			return PSError.noErr;
 		}
 
@@ -902,7 +963,15 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
+			try
+			{
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
+
 			return PSError.noErr;
 		}
 
@@ -911,7 +980,14 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
+			try
+			{
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
 
 			return PSError.noErr;
 		}
@@ -921,7 +997,15 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeObjectRefrence, GetAETEParamFlags(key), 0, data));
+			try
+			{
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeObjectRefrence, GetAETEParamFlags(key), 0, data));
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
+
 			return PSError.noErr;
 		}
 
@@ -930,34 +1014,41 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0}, type: {1}", DebugUtils.PropToString(key), DebugUtils.PropToString(type)));
 #endif
-			// If the handle is a sub key add it to the parent descriptor.
-			Dictionary<uint, AETEValue> subKeys;
-			if (this.descriptorHandles.TryGetValue(handle, out subKeys))
+			try
 			{
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
-				this.descriptorHandles.Remove(handle);
-			}
-			else
-			{
-				switch (type)
+				// If the handle is a sub key add it to the parent descriptor.
+				Dictionary<uint, AETEValue> subKeys;
+				if (this.descriptorHandles.TryGetValue(handle, out subKeys))
 				{
-
-					case DescriptorTypes.typeAlias:
-					case DescriptorTypes.typePath:
-					case DescriptorTypes.typeChar:
-						int size = HandleSuite.Instance.GetHandleSize(handle);
-						byte[] bytes = new byte[size];
-
-						if (size > 0)
-						{
-							Marshal.Copy(HandleSuite.Instance.LockHandle(handle, 0), bytes, 0, size);
-							HandleSuite.Instance.UnlockHandle(handle);
-						}
-						this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, bytes));
-						break;
-					default:
-						break;
+					this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
+					this.descriptorHandles.Remove(handle);
 				}
+				else
+				{
+					switch (type)
+					{
+
+						case DescriptorTypes.typeAlias:
+						case DescriptorTypes.typePath:
+						case DescriptorTypes.typeChar:
+							int size = HandleSuite.Instance.GetHandleSize(handle);
+							byte[] bytes = new byte[size];
+
+							if (size > 0)
+							{
+								Marshal.Copy(HandleSuite.Instance.LockHandle(handle, 0), bytes, 0, size);
+								HandleSuite.Instance.UnlockHandle(handle);
+							}
+							this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, bytes));
+							break;
+						default:
+							break;
+					}
+				}
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
 			}
 
 			return PSError.noErr;
@@ -977,11 +1068,18 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-			int size = Marshal.ReadByte(stringHandle);
-			byte[] data = new byte[size];
-			Marshal.Copy(new IntPtr(stringHandle.ToInt64() + 1L), data, 0, size);
+			try
+			{
+				int size = Marshal.ReadByte(stringHandle);
+				byte[] data = new byte[size];
+				Marshal.Copy(new IntPtr(stringHandle.ToInt64() + 1L), data, 0, size);
 
-			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
 
 			return PSError.noErr;
 		}
@@ -991,7 +1089,14 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
-			this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
+			try
+			{
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeClass, GetAETEParamFlags(key), 0, data));
+			}
+			catch (OutOfMemoryException)
+			{
+				return PSError.memFullErr;
+			}
 
 			return PSError.noErr;
 		}
@@ -1005,15 +1110,22 @@ namespace PSFilterLoad.PSApi
 
 			try
 			{
-				int size = HandleSuite.Instance.GetHandleSize(handle);
-				byte[] data = new byte[size];
-				Marshal.Copy(hPtr, data, 0, size);
+				try
+				{
+					int size = HandleSuite.Instance.GetHandleSize(handle);
+					byte[] data = new byte[size];
+					Marshal.Copy(hPtr, data, 0, size);
 
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), size, data));
+					this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), size, data));
+				}
+				finally
+				{
+					HandleSuite.Instance.UnlockHandle(handle);
+				}
 			}
-			finally
+			catch (OutOfMemoryException)
 			{
-				HandleSuite.Instance.UnlockHandle(handle);
+				return PSError.memFullErr;
 			}
 
 			return PSError.noErr;
