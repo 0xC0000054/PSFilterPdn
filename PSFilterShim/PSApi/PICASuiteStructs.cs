@@ -28,7 +28,6 @@ namespace PSFilterLoad.PSApi
 	}
 
 
-#if PICASUITEDEBUG
 	internal struct CS_XYZ
 	{
 		public ushort x; // all clamped to between 0 and 255, why is a ushort used instead of a byte?
@@ -70,7 +69,6 @@ namespace PSFilterLoad.PSApi
 		public IntPtr Convert16to8;
 		public IntPtr ConvertToMonitorRGB;
 	}
-#endif
 
 	internal struct PSHandleSuite1
 	{
