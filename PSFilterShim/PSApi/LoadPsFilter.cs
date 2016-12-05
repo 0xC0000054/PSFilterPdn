@@ -3621,7 +3621,6 @@ namespace PSFilterLoad.PSApi
 
 					suite = this.activePICASuites.AllocateSuite(suiteKey, error);
 				}
-#if PICASUITEDEBUG
 				else if (suiteName.Equals(PSConstants.PICA.ColorSpaceSuite, StringComparison.Ordinal))
 				{
 					if (version != 1)
@@ -3633,6 +3632,7 @@ namespace PSFilterLoad.PSApi
 
 					suite = activePICASuites.AllocateSuite(suiteKey, csSuite);
 				}
+#if PICASUITEDEBUG
 				else if (suiteName.Equals(PSConstants.PICA.SPPluginsSuite, StringComparison.Ordinal))
 				{
 					if (version != 4)
