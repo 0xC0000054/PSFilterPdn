@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-#if PICASUITEDEBUG
 using PSFilterLoad.ColorPicker;
 using System;
 using System.Collections.Generic;
@@ -405,4 +404,3 @@ namespace PSFilterLoad.PSApi.PICA
         }
     }
 }
-#endif
