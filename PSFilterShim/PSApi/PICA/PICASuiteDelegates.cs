@@ -31,7 +31,6 @@ namespace PSFilterLoad.PSApi.PICA
     internal delegate uint PSBufferSuiteGetSpace();
     #endregion
 
-#if PICASUITEDEBUG
     #region ColorSpaceSuite Delegates
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSMake(ref IntPtr colorID);
@@ -62,7 +61,6 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSConvertToMonitorRGB(ColorSpace inputCSpace, IntPtr inputData, IntPtr outputData, short count);
     #endregion
-#endif
 
     #region HandleSuite Delegates
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
