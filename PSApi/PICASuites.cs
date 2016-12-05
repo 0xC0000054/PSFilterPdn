@@ -63,7 +63,6 @@ namespace PSFilterLoad.PSApi
 			return this.bufferSuite.CreateBufferSuite1();
 		}
 
-#if PICASUITEDEBUG
 		public PSColorSpaceSuite1 CreateColorSpaceSuite1()
 		{
 			if (colorSpaceSuite == null)
@@ -73,7 +72,6 @@ namespace PSFilterLoad.PSApi
 
 			return this.colorSpaceSuite.CreateColorSpaceSuite1();
 		} 
-#endif
 
 		public static unsafe PSHandleSuite1 CreateHandleSuite1(HandleProcs* procs)
 		{
