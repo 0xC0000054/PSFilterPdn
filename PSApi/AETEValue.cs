@@ -93,6 +93,35 @@ namespace PSFilterLoad.PSApi
 	}
 
 	[Serializable]
+	public sealed class EnumeratedValue
+	{
+		private readonly uint type;
+		private readonly uint value;
+
+		public uint Type
+		{
+			get
+			{
+				return this.type;
+			}
+		}
+
+		public uint Value
+		{
+			get
+			{
+				return this.value;
+			}
+		}
+
+		public EnumeratedValue(uint type, uint value)
+		{
+			this.type = type;
+			this.value = value;
+		}
+	}
+
+	[Serializable]
 	public sealed class ActionDescriptorZString
 	{
 		private string value;
