@@ -587,7 +587,8 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            this.actionDescriptors[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
+            EnumeratedValue item = new EnumeratedValue(type, data);
+            this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeEnumerated, GetAETEParamFlags(key), 0, item));
             return PSError.kSPNoError;
         }
 
@@ -878,15 +879,16 @@ namespace PSFilterLoad.PSApi
             AETEValue item;
             if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
+                EnumeratedValue enumerated = (EnumeratedValue)item.Value;
                 try
                 {
-                    type = item.Type;
+                    type = enumerated.Type;
                 }
                 catch (NullReferenceException)
                 {
                 }
 
-                data = (uint)item.Value;
+                data = enumerated.Value;
 
                 return PSError.kSPNoError;
             }
