@@ -1086,7 +1086,14 @@ namespace PSFilterLoad.PSApi
             {
                 ActionDescriptorZString value = (ActionDescriptorZString)item.Value;
 
-                zstring = PICA.ASZStringSuite.Instance.CreateFromActionDescriptor(value);
+                try
+                {
+                    zstring = PICA.ASZStringSuite.Instance.CreateFromActionDescriptor(value);
+                }
+                catch (OutOfMemoryException)
+                {
+                    return PSError.memFullErr;
+                }
                 
                 return PSError.kSPNoError;
             }
