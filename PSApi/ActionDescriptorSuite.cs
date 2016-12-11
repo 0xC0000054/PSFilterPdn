@@ -1062,7 +1062,12 @@ namespace PSFilterLoad.PSApi
             if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 int[] values = (int[])item.Value;
-                Marshal.Copy(values, 0, data, values.Length);
+                if (count > values.Length)
+                {
+                    return PSError.kSPBadParameterError;
+                }
+
+                Marshal.Copy(values, 0, data, (int)count);
 
                 return PSError.kSPNoError;
             }
