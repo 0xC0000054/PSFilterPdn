@@ -548,23 +548,23 @@ namespace PSFilterLoad.PSApi
         }
 
 
-        private int PutString(IntPtr descriptor, uint key, IntPtr stringHandle)
+        private int PutString(IntPtr descriptor, uint key, IntPtr cstrValue)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            if (stringHandle == IntPtr.Zero)
+            if (cstrValue == IntPtr.Zero)
             {
                 return PSError.kSPBadParameterError;
             }
 
             try
             {
-                int size = Marshal.ReadByte(stringHandle);
-                byte[] data = new byte[size];
-                Marshal.Copy(new IntPtr(stringHandle.ToInt64() + 1L), data, 0, size);
+                int length = SafeNativeMethods.lstrlenA(cstrValue);
+                byte[] data = new byte[length];
+                Marshal.Copy(cstrValue, data, 0, length);
 
-                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), size, data));
+                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), length, data));
             }
             catch (OutOfMemoryException)
             {
@@ -893,14 +893,16 @@ namespace PSFilterLoad.PSApi
             AETEValue item;
             if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
-                int size = item.Size;
-
-                if (size > maxLength)
+                if (maxLength > 0)
                 {
-                    size = (int)maxLength;
-                }
+                    byte[] bytes = (byte[])item.Value;
 
-                Marshal.Copy((byte[])item.Value, 0, cstrValue, size);
+                    // Ensure that the buffer has room for the null terminator.
+                    int length = (int)Math.Min(bytes.Length, maxLength - 1);
+
+                    Marshal.Copy(bytes, 0, cstrValue, length);
+                    Marshal.WriteByte(cstrValue, length, 0);
+                }
                 return PSError.kSPNoError;
             }
 
