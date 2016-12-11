@@ -76,5 +76,8 @@ namespace PSFilterLoad.PSApi
         [DllImport("gdi32.dll", ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool DeleteDC(IntPtr hdc);
+
+        [DllImport("kernel32.dll", ExactSpelling = true)]
+        internal static extern int lstrlenA(IntPtr ptr);
     }
 }

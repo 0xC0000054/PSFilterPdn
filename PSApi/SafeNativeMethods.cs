@@ -72,5 +72,8 @@ namespace PSFilterLoad.PSApi
         [DllImport("kernel32.dll", ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool GlobalUnlock(IntPtr hMem);
+
+        [DllImport("kernel32.dll", ExactSpelling = true)]
+        internal static extern int lstrlenA(IntPtr ptr);
     }
 }
