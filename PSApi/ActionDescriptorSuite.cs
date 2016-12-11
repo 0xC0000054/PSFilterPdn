@@ -553,6 +553,11 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (stringHandle == IntPtr.Zero)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             try
             {
                 int size = Marshal.ReadByte(stringHandle);
@@ -718,6 +723,11 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (arrayPointer == IntPtr.Zero)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             try
             {
                 int[] data = new int[count];
@@ -771,6 +781,11 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (blob == IntPtr.Zero || length < 0)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             try
             {
                 byte[] data = new byte[length];
@@ -870,6 +885,11 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (cstrValue == IntPtr.Zero)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
@@ -1033,6 +1053,10 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (data == IntPtr.Zero)
+            {
+                return PSError.kSPBadParameterError;
+            }
 
             AETEValue item;
             if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
@@ -1089,6 +1113,11 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (blob == IntPtr.Zero)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
