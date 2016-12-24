@@ -1023,6 +1023,7 @@ namespace PSFilterLoad.PSApi
 			else if (selectedRegion != null)
 			{
 				DrawMask();
+				filterRecord->isFloating = 0;
 				filterRecord->haveMask = 1;
 				filterRecord->autoMask = 1;
 				filterRecord->maskRect = filterRecord->filterRect;
