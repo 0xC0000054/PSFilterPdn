@@ -99,7 +99,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private AETEData aete;
+        private readonly AETEData aete;
 
         private Dictionary<IntPtr, ScriptingParameters> actionDescriptors;
         private Dictionary<IntPtr, ScriptingParameters> descriptorHandles;
@@ -153,15 +153,7 @@ namespace PSFilterLoad.PSApi
         private readonly ActionDescriptorGetData getData;
         #endregion
 
-        public AETEData Aete
-        {
-            set
-            {
-                this.aete = value;
-            }
-        }
-
-        public ActionDescriptorSuite()
+        public ActionDescriptorSuite(AETEData aete)
         {
             this.make = new ActionDescriptorMake(Make);
             this.free = new ActionDescriptorFree(Free);
@@ -210,7 +202,7 @@ namespace PSFilterLoad.PSApi
             this.getDataLength = new ActionDescriptorGetDataLength(GetDataLength);
             this.getData = new ActionDescriptorGetData(GetData);
 
-            this.aete = null;
+            this.aete = aete;
             this.actionDescriptors = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
             this.descriptorHandles = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
         }
