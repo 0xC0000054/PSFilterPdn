@@ -350,7 +350,14 @@ namespace PSFilterLoad.PSApi
             {
                 return PSError.memFullErr;
             }
-            this.descriptorHandles.Add(handle, this.actionDescriptors[descriptor]);
+            try
+            {
+                this.descriptorHandles.Add(handle, this.actionDescriptors[descriptor]);
+            }
+            catch (OutOfMemoryException)
+            {
+                return PSError.memFullErr;
+            }
 
             return PSError.kSPNoError;
         }
