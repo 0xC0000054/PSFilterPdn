@@ -3488,7 +3488,7 @@ namespace PSFilterLoad.PSApi
 			DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("name: {0}, version: {1}", suiteName, version));
 #endif
 			int error = PSError.kSPNoError;
-			string suiteKey = suiteName + "," + version.ToString(CultureInfo.InvariantCulture);
+			ActivePICASuites.PICASuiteKey suiteKey = new ActivePICASuites.PICASuiteKey(suiteName, version);
 
 			if (activePICASuites.IsLoaded(suiteKey))
 			{
@@ -3502,7 +3502,7 @@ namespace PSFilterLoad.PSApi
 			return error;
 		}
 
-		private unsafe int AllocatePICASuite(string suiteName, int version, string suiteKey, ref IntPtr suite)
+		private unsafe int AllocatePICASuite(string suiteName, int version, ActivePICASuites.PICASuiteKey suiteKey, ref IntPtr suite)
 		{
 			try
 			{
@@ -3648,7 +3648,7 @@ namespace PSFilterLoad.PSApi
 			DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("name: {0}, version: {1}", suiteName, version));
 #endif
 
-			string suiteKey = suiteName + "," + version.ToString(CultureInfo.InvariantCulture);
+			ActivePICASuites.PICASuiteKey suiteKey = new ActivePICASuites.PICASuiteKey(suiteName, version);
 
 			activePICASuites.RemoveRef(suiteKey);
 
