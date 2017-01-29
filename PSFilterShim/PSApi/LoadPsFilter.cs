@@ -3516,16 +3516,19 @@ namespace PSFilterLoad.PSApi
 			}
 			else
 			{
-				error = AllocatePICASuite(suiteName, version, suiteKey, ref suite);
+				error = AllocatePICASuite(suiteKey, ref suite);
 			}
 
 			return error;
 		}
 
-		private unsafe int AllocatePICASuite(string suiteName, int version, ActivePICASuites.PICASuiteKey suiteKey, ref IntPtr suite)
+		private unsafe int AllocatePICASuite(ActivePICASuites.PICASuiteKey suiteKey, ref IntPtr suite)
 		{
 			try
 			{
+				string suiteName = suiteKey.Name;
+				int version = suiteKey.Version;
+
 				if (suiteName.Equals(PSConstants.PICA.BufferSuite, StringComparison.Ordinal))
 				{
 					if (version != 1)
