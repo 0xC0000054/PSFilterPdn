@@ -999,7 +999,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			try
 			{
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeObjectRefrence, GetAETEParamFlags(key), 0, data));
+				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.typeObjectReference, GetAETEParamFlags(key), 0, data));
 			}
 			catch (OutOfMemoryException)
 			{
