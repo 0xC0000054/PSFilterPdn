@@ -29,7 +29,7 @@ namespace PSFilterLoad.PSApi
         public const uint typeInteger = 0x6c6f6e67U; // 'long'
         public const uint typeNull = 0x6e756c6cU; // 'null'
         public const uint typeObject = 0x4f626a63U; // 'Objc'
-        public const uint typeObjectRefrence = 0x6f626a20U; // 'obj '
+        public const uint typeObjectReference = 0x6f626a20U; // 'obj '
         public const uint typePath = 0x50617420U; // 'Pat '
         public const uint typeRawData = 0x74647461U; // 'tdta'
         public const uint typeUintFloat = 0x556e7446; // 'UntF'
