@@ -180,6 +180,7 @@
     <Compile Include="PSApi\PSProperties.cs" />
     <Compile Include="PSApi\PSResource.cs" />
     <Compile Include="PSApi\ReadImageDocumentDesc.cs" />
+    <Compile Include="PSApi\ReadOnlyDictionary.cs" />
     <Compile Include="PSApi\SafeLibraryHandle.cs" />
     <Compile Include="PSApi\SafeNativeMethods.cs" />
     <Compile Include="PSApi\SPBasicSuite.cs" />
