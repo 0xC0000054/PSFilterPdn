@@ -23,8 +23,8 @@ namespace PSFilterLoad.PSApi
 		{
 			public uint currentKey;
 			public short lastReadError;
-			public int keyArrayIndex;
-			public readonly int keyArrayCount;
+			public int keyIndex;
+			public readonly int keyCount;
 			public readonly ReadOnlyCollection<uint> keys;
 			public readonly ReadOnlyDictionary<uint, AETEValue> items;
 
@@ -32,8 +32,8 @@ namespace PSFilterLoad.PSApi
 			{
 				this.currentKey = 0;
 				this.lastReadError = PSError.noErr;
-				this.keyArrayIndex = 0;
-				this.keyArrayCount = keys.Count;
+				this.keyIndex = 0;
+				this.keyCount = keys.Count;
 				this.keys = new ReadOnlyCollection<uint>(keys);
 				this.items = new ReadOnlyDictionary<uint, AETEValue>(dictionary);
 			}
@@ -291,13 +291,13 @@ namespace PSFilterLoad.PSApi
 			{
 				ReadDescriptorState state = this.readDescriptors[descriptor];
 
-				if (state.keyArrayIndex >= state.keyArrayCount)
+				if (state.keyIndex >= state.keyCount)
 				{
 					return 0;
 				}
 
-				state.currentKey = key = state.keys[state.keyArrayIndex];
-				state.keyArrayIndex++;
+				state.currentKey = key = state.keys[state.keyIndex];
+				state.keyIndex++;
 
 				AETEValue value = state.items[key];
 				try
