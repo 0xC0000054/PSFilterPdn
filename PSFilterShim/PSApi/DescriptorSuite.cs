@@ -74,7 +74,6 @@ namespace PSFilterLoad.PSApi
 		private readonly PutScopedClassProc putScopedClassProc;
 		private readonly PutScopedObjectProc putScopedObjectProc;
 
-		private short lastDescriptorError;
 		private Dictionary<IntPtr, ReadDescriptorState> readDescriptors;
 		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> descriptorHandles;
 		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> writeDescriptors;
@@ -129,7 +128,6 @@ namespace PSFilterLoad.PSApi
 			this.putTextProc = new PutTextProc(PutTextProc);
 			this.putUnitFloatProc = new PutUnitFloatProc(PutUnitFloatProc);
 
-			this.lastDescriptorError = PSError.noErr;
 			this.readDescriptors = new Dictionary<IntPtr, ReadDescriptorState>(IntPtrEqualityComparer.Instance);
 			this.descriptorHandles = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
 			this.writeDescriptors = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
@@ -272,12 +270,15 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
+			short error = PSError.noErr;
+
 			if (descriptor != IntPtr.Zero)
 			{
+				error = this.readDescriptors[descriptor].lastReadError;
 				this.readDescriptors.Remove(descriptor);
 			}
 
-			return this.lastDescriptorError;
+			return error;
 		}
 
 		private byte GetKeyProc(IntPtr descriptor, ref uint key, ref uint type, ref int flags)
@@ -289,12 +290,6 @@ namespace PSFilterLoad.PSApi
 			if (descriptor != IntPtr.Zero)
 			{
 				ReadDescriptorState state = this.readDescriptors[descriptor];
-
-				if (state.lastReadError != PSError.noErr)
-				{
-					this.lastDescriptorError = (short)state.lastReadError;
-					state.lastReadError = PSError.noErr;
-				}
 
 				if (state.keyArrayIndex >= state.keyArrayCount)
 				{
