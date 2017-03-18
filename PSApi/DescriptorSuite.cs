@@ -22,7 +22,7 @@ namespace PSFilterLoad.PSApi
 		private sealed class ReadDescriptorState
 		{
 			public uint currentKey;
-			public int lastReadError;
+			public short lastReadError;
 			public int keyArrayIndex;
 			public readonly int keyArrayCount;
 			public readonly ReadOnlyCollection<uint> keys;
