@@ -299,10 +299,10 @@ namespace PSFilterLoad.PSApi
 				state.currentKey = key = state.keys[state.keyIndex];
 				state.keyIndex++;
 
-				AETEValue value = state.items[key];
+				AETEValue item = state.items[key];
 				try
 				{
-					type = value.Type;
+					type = item.Type;
 				}
 				catch (NullReferenceException)
 				{
@@ -310,7 +310,7 @@ namespace PSFilterLoad.PSApi
 
 				try
 				{
-					flags = value.Flags;
+					flags = item.Flags;
 				}
 				catch (NullReferenceException)
 				{
