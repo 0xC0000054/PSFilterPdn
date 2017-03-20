@@ -302,7 +302,15 @@ namespace PSFilterLoad.PSApi
 				AETEValue item = state.items[key];
 				try
 				{
-					type = item.Type;
+					// If the value is a sub-descriptor it must be retrieved with GetObjectProc.
+					if (item.Value is Dictionary<uint, AETEValue>)
+					{
+						type = DescriptorTypes.typeObject;
+					}
+					else
+					{
+						type = item.Type;
+					}
 				}
 				catch (NullReferenceException)
 				{
