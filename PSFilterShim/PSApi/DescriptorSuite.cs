@@ -975,34 +975,9 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short PutScopedObjectProc(IntPtr descriptor, uint key, uint type, IntPtr handle)
+		private short PutScopedObjectProc(IntPtr descriptor, uint key, uint type, IntPtr descriptorHandle)
 		{
-#if DEBUG
-			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
-#endif
-			IntPtr hPtr = HandleSuite.Instance.LockHandle(handle, 0);
-
-			try
-			{
-				try
-				{
-					int size = HandleSuite.Instance.GetHandleSize(handle);
-					byte[] data = new byte[size];
-					Marshal.Copy(hPtr, data, 0, size);
-
-					this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), size, data));
-				}
-				finally
-				{
-					HandleSuite.Instance.UnlockHandle(handle);
-				}
-			}
-			catch (OutOfMemoryException)
-			{
-				return PSError.memFullErr;
-			}
-
-			return PSError.noErr;
+			return PutObjectProc(descriptor, key, type, descriptorHandle);
 		}
 		#endregion
 	}
