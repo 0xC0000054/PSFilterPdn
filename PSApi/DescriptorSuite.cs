@@ -486,7 +486,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short GetObjectProc(IntPtr descriptor, ref uint retType, ref IntPtr data)
+		private short GetObjectProc(IntPtr descriptor, ref uint retType, ref IntPtr descriptorHandle)
 		{
 			ReadDescriptorState state = this.readDescriptors[descriptor];
 
@@ -507,89 +507,21 @@ namespace PSFilterLoad.PSApi
 				// ignore it
 			}
 
-			if (item.Value is Dictionary<uint, AETEValue>)
+			Dictionary<uint, AETEValue> value = item.Value as Dictionary<uint, AETEValue>;
+			if (value != null)
 			{
-				data = HandleSuite.Instance.NewHandle(0); // assign a zero byte handle to allow it to work correctly in the OpenReadDescriptorProc(). 
-				if (data == IntPtr.Zero)
+				descriptorHandle = HandleSuite.Instance.NewHandle(0); // assign a zero byte handle to allow it to work correctly in the OpenReadDescriptorProc(). 
+				if (descriptorHandle == IntPtr.Zero)
 				{
 					state.lastReadError = PSError.memFullErr;
 					return PSError.memFullErr;
 				}
-				this.descriptorHandles.Add(data, (Dictionary<uint, AETEValue>)item.Value);
+				this.descriptorHandles.Add(descriptorHandle, value);
 			}
 			else
 			{
-				switch (type)
-				{
-
-					case DescriptorTypes.typeAlias:
-					case DescriptorTypes.typePath:
-					case DescriptorTypes.typeChar:
-
-						int size = item.Size;
-						data = HandleSuite.Instance.NewHandle(size);
-
-						if (data == IntPtr.Zero)
-						{
-							state.lastReadError = PSError.memFullErr;
-							return PSError.memFullErr;
-						}
-
-						Marshal.Copy((byte[])item.Value, 0, HandleSuite.Instance.LockHandle(data, 0), size);
-						HandleSuite.Instance.UnlockHandle(data);
-						break;
-					case DescriptorTypes.typeBoolean:
-						data = HandleSuite.Instance.NewHandle(sizeof(byte));
-
-						if (data == IntPtr.Zero)
-						{
-							state.lastReadError = PSError.memFullErr;
-							return PSError.memFullErr;
-						}
-
-						Marshal.WriteByte(HandleSuite.Instance.LockHandle(data, 0), (byte)item.Value);
-						HandleSuite.Instance.UnlockHandle(data);
-						break;
-					case DescriptorTypes.typeInteger:
-						data = HandleSuite.Instance.NewHandle(sizeof(int));
-
-						if (data == IntPtr.Zero)
-						{
-							state.lastReadError = PSError.memFullErr;
-							return PSError.memFullErr;
-						}
-
-						Marshal.WriteInt32(HandleSuite.Instance.LockHandle(data, 0), (int)item.Value);
-						HandleSuite.Instance.UnlockHandle(data);
-						break;
-					case DescriptorTypes.typeFloat:
-					case DescriptorTypes.typeUintFloat:
-						data = HandleSuite.Instance.NewHandle(sizeof(double));
-
-						if (data == IntPtr.Zero)
-						{
-							state.lastReadError = PSError.memFullErr;
-							return PSError.memFullErr;
-						}
-
-						double value;
-						if (type == DescriptorTypes.typeUintFloat)
-						{
-							UnitFloat unitFloat = (UnitFloat)item.Value;
-							value = unitFloat.Value;
-						}
-						else
-						{
-							value = (double)item.Value;
-						}
-
-						Marshal.Copy(new double[] { value }, 0, HandleSuite.Instance.LockHandle(data, 0), 1);
-						HandleSuite.Instance.UnlockHandle(data);
-						break;
-
-					default:
-						break;
-				}
+				state.lastReadError = PSError.paramErr;
+				return PSError.paramErr;
 			}
 
 			return PSError.noErr;
@@ -969,7 +901,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private short PutObjectProc(IntPtr descriptor, uint key, uint type, IntPtr handle)
+		private short PutObjectProc(IntPtr descriptor, uint key, uint type, IntPtr descriptorHandle)
 		{
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0}, type: {1}", DebugUtils.PropToString(key), DebugUtils.PropToString(type)));
@@ -978,32 +910,14 @@ namespace PSFilterLoad.PSApi
 			{
 				// If the handle is a sub key add it to the parent descriptor.
 				Dictionary<uint, AETEValue> subKeys;
-				if (this.descriptorHandles.TryGetValue(handle, out subKeys))
+				if (this.descriptorHandles.TryGetValue(descriptorHandle, out subKeys))
 				{
 					this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
-					this.descriptorHandles.Remove(handle);
+					this.descriptorHandles.Remove(descriptorHandle);
 				}
 				else
 				{
-					switch (type)
-					{
-
-						case DescriptorTypes.typeAlias:
-						case DescriptorTypes.typePath:
-						case DescriptorTypes.typeChar:
-							int size = HandleSuite.Instance.GetHandleSize(handle);
-							byte[] bytes = new byte[size];
-
-							if (size > 0)
-							{
-								Marshal.Copy(HandleSuite.Instance.LockHandle(handle, 0), bytes, 0, size);
-								HandleSuite.Instance.UnlockHandle(handle);
-							}
-							this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, bytes));
-							break;
-						default:
-							break;
-					}
+					return PSError.paramErr;
 				}
 			}
 			catch (OutOfMemoryException)
