@@ -140,6 +140,7 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly ASZStringAsPascalString asPascalString;
 
         private static readonly ASZStringSuite instance = new ASZStringSuite();
+        private static readonly IntPtr Empty = IntPtr.Zero;
 
         private ASZStringSuite()
         {
@@ -212,8 +213,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             descriptor = null;
 
-            // IntPtr.Zero is valid for an empty string.
-            if (zstring != IntPtr.Zero)
+            if (zstring != Empty)
             {
                 ZString value;
                 if (this.strings.TryGetValue(zstring, out value))
@@ -231,7 +231,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         public IntPtr CreateFromActionDescriptor(ActionDescriptorZString descriptor)
         {
-            IntPtr newZString = IntPtr.Zero;
+            IntPtr newZString = Empty;
 
             if (descriptor != null)
             {
@@ -247,8 +247,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             value = null;
 
-            // IntPtr.Zero is valid for an empty string.
-            if (zstring == IntPtr.Zero)
+            if (zstring == Empty)
             {
                 value = string.Empty;
             }
@@ -368,15 +367,14 @@ namespace PSFilterLoad.PSApi.PICA
 
         private IntPtr GetEmpty()
         {
-            return IntPtr.Zero;
+            return Empty;
         }
 
         private int Copy(IntPtr source, ref IntPtr copy)
         {
-            // IntPtr.Zero is valid for an empty string.
-            if (source == IntPtr.Zero)
+            if (source == Empty)
             {
-                copy = IntPtr.Zero;
+                copy = Empty;
             }
             else
             {
@@ -410,7 +408,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int TrimEllipsis(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero)
+            if (zstr != Empty)
             {
                 ZString item;
                 if (this.strings.TryGetValue(zstr, out item))
@@ -434,7 +432,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int TrimSpaces(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero)
+            if (zstr != Empty)
             {
                 ZString item;
                 if (this.strings.TryGetValue(zstr, out item))
@@ -458,7 +456,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int RemoveAccelerators(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero)
+            if (zstr != Empty)
             {
                 ZString item;
                 if (this.strings.TryGetValue(zstr, out item))
@@ -518,7 +516,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int AddRef(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero)
+            if (zstr != Empty)
             {
                 ZString item;
                 if (this.strings.TryGetValue(zstr, out item))
@@ -537,7 +535,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Release(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero)
+            if (zstr != Empty)
             {
                 ZString item;
                 if (this.strings.TryGetValue(zstr, out item))
@@ -564,7 +562,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private bool IsAllWhiteSpace(IntPtr zstr)
         {
-            if (zstr != IntPtr.Zero)
+            if (zstr != Empty)
             {
                 ZString item;
                 if (this.strings.TryGetValue(zstr, out item))
@@ -589,7 +587,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private bool IsEmpty(IntPtr zstr)
         {
-            return zstr == IntPtr.Zero;
+            return zstr == Empty;
         }
 
         private bool WillReplace(IntPtr zstr, uint index)
@@ -599,7 +597,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private uint LengthAsUnicodeCString(IntPtr zstr)
         {
-            if (zstr == IntPtr.Zero)
+            if (zstr == Empty)
             {
                 // If the string is empty return only the length of the null terminator.
                 return 1;
@@ -628,7 +626,7 @@ namespace PSFilterLoad.PSApi.PICA
             if (str != IntPtr.Zero)
             {
                 string value = string.Empty;
-                if (zstr != IntPtr.Zero)
+                if (zstr != Empty)
                 {
                     ZString item;
                     if (this.strings.TryGetValue(zstr, out item))
@@ -662,7 +660,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private uint LengthAsCString(IntPtr zstr)
         {
-            if (zstr == IntPtr.Zero)
+            if (zstr == Empty)
             {
                 // If the string is empty return only the length of the null terminator.
                 return 1;
@@ -690,7 +688,7 @@ namespace PSFilterLoad.PSApi.PICA
             if (str != IntPtr.Zero)
             {
                 string value = string.Empty;
-                if (zstr != IntPtr.Zero)
+                if (zstr != Empty)
                 {
                     ZString item;
                     if (this.strings.TryGetValue(zstr, out item))
@@ -723,7 +721,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private uint LengthAsPascalString(IntPtr zstr)
         {
-            if (zstr == IntPtr.Zero)
+            if (zstr == Empty)
             {
                 // If the string is empty return only the length of the prefix byte.
                 return 1;
@@ -751,7 +749,7 @@ namespace PSFilterLoad.PSApi.PICA
             if (str != IntPtr.Zero)
             {
                 string value = string.Empty;
-                if (zstr != IntPtr.Zero)
+                if (zstr != Empty)
                 {
                     ZString item;
                     if (this.strings.TryGetValue(zstr, out item))
