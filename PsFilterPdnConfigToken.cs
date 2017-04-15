@@ -2,7 +2,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
 // Photoshop-compatible filter host Effect plugin for Paint.NET
-// http://psfilterpdn.codeplex.com/
+// https://github.com/0xC0000054/PSFilterPdn
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
