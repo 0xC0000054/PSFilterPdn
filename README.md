@@ -1,4 +1,4 @@
-# PSFilterPdn
+# Paint.NET 8bf filter plugin
 
 PSFilterPdn is a [Paint.NET](http://www.getpaint.net) effect plugin that enables the use of 3<sup>rd</sup> party Adobe® Photoshop®-compatible filters.
 
