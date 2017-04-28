@@ -260,7 +260,7 @@ namespace PSFilterLoad.PSApi
         /// Decrements the reference count and removes the specified suite if it is zero.
         /// </summary>
         /// <param name="key">The <see cref="PICASuiteKey"/> specifying the suite name and version.</param>
-        public void RemoveRef(PICASuiteKey key)
+        public void Release(PICASuiteKey key)
         {
             if (disposed)
             {
