@@ -3653,7 +3653,7 @@ namespace PSFilterLoad.PSApi
 
 			ActivePICASuites.PICASuiteKey suiteKey = new ActivePICASuites.PICASuiteKey(suiteName, version);
 
-			activePICASuites.RemoveRef(suiteKey);
+			activePICASuites.Release(suiteKey);
 
 			return PSError.kSPNoError;
 		}
