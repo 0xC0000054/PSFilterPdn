@@ -75,6 +75,11 @@ namespace PSFilterLoad.PSApi
                     return false;
                 }
 
+                if (ReferenceEquals(this, obj))
+                {
+                    return true;
+                }
+
                 PICASuiteKey key = obj as PICASuiteKey;
                 if (key == null)
                 {
@@ -109,9 +114,14 @@ namespace PSFilterLoad.PSApi
 
             public static bool operator ==(PICASuiteKey p1, PICASuiteKey p2)
             {
+                if (ReferenceEquals(p1, p2))
+                {
+                    return true;
+                }
+
                 if (((object)p1) == null || ((object)p2) == null)
                 {
-                    return Object.Equals(p1, p2);
+                    return false;
                 }
 
                 return p1.Equals(p2);
