@@ -248,8 +248,8 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>call "$(DevEnvDir)..\tools\vsvars32.bat"
-editbin.exe /NXCOMPAT:NO $(TargetPath) 
+    <PostBuildEvent>call "$(DevEnvDir)..\tools\VsDevCmd.bat"
+editbin.exe /NXCOMPAT:NO "$(TargetPath)" 
 
 copy "$(TargetPath)" "D:\Program Files\Paint.NET\Effects" /y
 if "$(ConfigurationName)" == "Debug" copy "$(TargetDir)$(TargetName).pdb" "D:\Program Files\Paint.NET\Effects" /y</PostBuildEvent>
