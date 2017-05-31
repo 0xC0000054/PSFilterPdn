@@ -37,12 +37,12 @@ namespace PSFilterLoad.PSApi
 		/// Sets the name of the plug-in used by the <see cref="PSUIHooksSuite1.GetPluginName"/> callback.
 		/// </summary>
 		/// <param name="name">The name.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="pluginName"/> is null.</exception>
+		/// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
 		public void SetPluginName(string name)
 		{
 			if (name == null)
 			{
-				throw new ArgumentNullException("pluginName");
+				throw new ArgumentNullException("name");
 			}
 
 			this.pluginName = name;
