@@ -85,11 +85,13 @@ namespace PSFilterLoad.PSApi
 
 		public static unsafe PropertyProcs CreatePropertySuite(PropertyProcs* procs)
 		{
-			PropertyProcs suite = new PropertyProcs();
-			suite.propertyProcsVersion = procs->propertyProcsVersion;
-			suite.numPropertyProcs = procs->numPropertyProcs;
-			suite.getPropertyProc = procs->getPropertyProc;
-			suite.setPropertyProc = procs->setPropertyProc;
+			PropertyProcs suite = new PropertyProcs
+			{
+				propertyProcsVersion = procs->propertyProcsVersion,
+				numPropertyProcs = procs->numPropertyProcs,
+				getPropertyProc = procs->getPropertyProc,
+				setPropertyProc = procs->setPropertyProc
+			};
 
 			return suite;
 		}

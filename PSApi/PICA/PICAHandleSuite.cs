@@ -43,27 +43,31 @@ namespace PSFilterLoad.PSApi.PICA
 
         public static unsafe PSHandleSuite1 CreateHandleSuite1(HandleProcs* procs)
         {
-            PSHandleSuite1 suite = new PSHandleSuite1();
-            suite.New = procs->newProc;
-            suite.Dispose = procs->disposeProc;
-            suite.SetLock = Marshal.GetFunctionPointerForDelegate(setHandleLock);
-            suite.GetSize = procs->getSizeProc;
-            suite.SetSize = procs->setSizeProc;
-            suite.RecoverSpace = procs->recoverSpaceProc;
+            PSHandleSuite1 suite = new PSHandleSuite1
+            {
+                New = procs->newProc,
+                Dispose = procs->disposeProc,
+                SetLock = Marshal.GetFunctionPointerForDelegate(setHandleLock),
+                GetSize = procs->getSizeProc,
+                SetSize = procs->setSizeProc,
+                RecoverSpace = procs->recoverSpaceProc
+            };
 
             return suite;
         }
 
         public static unsafe PSHandleSuite2 CreateHandleSuite2(HandleProcs* procs)
         {
-            PSHandleSuite2 suite = new PSHandleSuite2();
-            suite.New = procs->newProc;
-            suite.Dispose = procs->disposeProc;
-            suite.DisposeRegularHandle = procs->disposeRegularHandleProc;
-            suite.SetLock = Marshal.GetFunctionPointerForDelegate(setHandleLock);
-            suite.GetSize = procs->getSizeProc;
-            suite.SetSize = procs->setSizeProc;
-            suite.RecoverSpace = procs->recoverSpaceProc;
+            PSHandleSuite2 suite = new PSHandleSuite2
+            {
+                New = procs->newProc,
+                Dispose = procs->disposeProc,
+                DisposeRegularHandle = procs->disposeRegularHandleProc,
+                SetLock = Marshal.GetFunctionPointerForDelegate(setHandleLock),
+                GetSize = procs->getSizeProc,
+                SetSize = procs->setSizeProc,
+                RecoverSpace = procs->recoverSpaceProc
+            };
 
             return suite;
         }

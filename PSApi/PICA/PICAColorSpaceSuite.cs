@@ -383,22 +383,24 @@ namespace PSFilterLoad.PSApi.PICA
 
         public PSColorSpaceSuite1 CreateColorSpaceSuite1()
         {
-            PSColorSpaceSuite1 suite = new PSColorSpaceSuite1();
-            suite.Make = Marshal.GetFunctionPointerForDelegate(this.csMake);
-            suite.Delete = Marshal.GetFunctionPointerForDelegate(this.csDelete);
-            suite.StuffComponents = Marshal.GetFunctionPointerForDelegate(this.csStuffComponent);
-            suite.ExtractComponents = Marshal.GetFunctionPointerForDelegate(this.csExtractComponent);
-            suite.StuffXYZ = Marshal.GetFunctionPointerForDelegate(this.csStuffXYZ);
-            suite.ExtractXYZ = Marshal.GetFunctionPointerForDelegate(this.csExtractXYZ);
-            suite.Convert8 = Marshal.GetFunctionPointerForDelegate(this.csConvert8);
-            suite.Convert16 = Marshal.GetFunctionPointerForDelegate(this.csConvert16);
-            suite.GetNativeSpace = Marshal.GetFunctionPointerForDelegate(this.csGetNativeSpace);
-            suite.IsBookColor = Marshal.GetFunctionPointerForDelegate(this.csIsBookColor);
-            suite.ExtractColorName = Marshal.GetFunctionPointerForDelegate(this.csExtractColorName);
-            suite.PickColor = Marshal.GetFunctionPointerForDelegate(this.csPickColor);
-            suite.Convert8to16 = Marshal.GetFunctionPointerForDelegate(this.csConvert8to16);
-            suite.Convert16to8 = Marshal.GetFunctionPointerForDelegate(this.csConvert16to8);
-            suite.ConvertToMonitorRGB = Marshal.GetFunctionPointerForDelegate(this.csConvertToMonitorRGB);
+            PSColorSpaceSuite1 suite = new PSColorSpaceSuite1
+            {
+                Make = Marshal.GetFunctionPointerForDelegate(this.csMake),
+                Delete = Marshal.GetFunctionPointerForDelegate(this.csDelete),
+                StuffComponents = Marshal.GetFunctionPointerForDelegate(this.csStuffComponent),
+                ExtractComponents = Marshal.GetFunctionPointerForDelegate(this.csExtractComponent),
+                StuffXYZ = Marshal.GetFunctionPointerForDelegate(this.csStuffXYZ),
+                ExtractXYZ = Marshal.GetFunctionPointerForDelegate(this.csExtractXYZ),
+                Convert8 = Marshal.GetFunctionPointerForDelegate(this.csConvert8),
+                Convert16 = Marshal.GetFunctionPointerForDelegate(this.csConvert16),
+                GetNativeSpace = Marshal.GetFunctionPointerForDelegate(this.csGetNativeSpace),
+                IsBookColor = Marshal.GetFunctionPointerForDelegate(this.csIsBookColor),
+                ExtractColorName = Marshal.GetFunctionPointerForDelegate(this.csExtractColorName),
+                PickColor = Marshal.GetFunctionPointerForDelegate(this.csPickColor),
+                Convert8to16 = Marshal.GetFunctionPointerForDelegate(this.csConvert8to16),
+                Convert16to8 = Marshal.GetFunctionPointerForDelegate(this.csConvert16to8),
+                ConvertToMonitorRGB = Marshal.GetFunctionPointerForDelegate(this.csConvertToMonitorRGB)
+            };
 
             return suite;
         }

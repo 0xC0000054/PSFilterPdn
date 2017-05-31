@@ -66,15 +66,17 @@ namespace PSFilterLoad.PSApi.PICA
 
         public unsafe PSUIHooksSuite1 CreateUIHooksSuite1(FilterRecord* filterRecord)
         {
-            PSUIHooksSuite1 suite = new PSUIHooksSuite1();
-            suite.processEvent = filterRecord->processEvent;
-            suite.displayPixels = filterRecord->displayPixels;
-            suite.progressBar = filterRecord->progressProc;
-            suite.testAbort = filterRecord->abortProc;
-            suite.MainAppWindow = Marshal.GetFunctionPointerForDelegate(this.uiWindowHandle);
-            suite.SetCursor = Marshal.GetFunctionPointerForDelegate(this.uiSetCursor);
-            suite.TickCount = Marshal.GetFunctionPointerForDelegate(this.uiTickCount);
-            suite.GetPluginName = Marshal.GetFunctionPointerForDelegate(this.uiPluginName);
+            PSUIHooksSuite1 suite = new PSUIHooksSuite1
+            {
+                processEvent = filterRecord->processEvent,
+                displayPixels = filterRecord->displayPixels,
+                progressBar = filterRecord->progressProc,
+                testAbort = filterRecord->abortProc,
+                MainAppWindow = Marshal.GetFunctionPointerForDelegate(this.uiWindowHandle),
+                SetCursor = Marshal.GetFunctionPointerForDelegate(this.uiSetCursor),
+                TickCount = Marshal.GetFunctionPointerForDelegate(this.uiTickCount),
+                GetPluginName = Marshal.GetFunctionPointerForDelegate(this.uiPluginName)
+            };
 
             return suite;
         }

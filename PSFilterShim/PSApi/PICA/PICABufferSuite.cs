@@ -150,11 +150,13 @@ namespace PSFilterLoad.PSApi.PICA
 				throw new ObjectDisposedException("PICABufferSuite");
 			}
 
-			PSBufferSuite1 suite = new PSBufferSuite1();
-			suite.New = Marshal.GetFunctionPointerForDelegate(this.bufferSuiteNew);
-			suite.Dispose = Marshal.GetFunctionPointerForDelegate(this.bufferSuiteDispose);
-			suite.GetSize = Marshal.GetFunctionPointerForDelegate(this.bufferSuiteGetSize);
-			suite.GetSpace = Marshal.GetFunctionPointerForDelegate(this.bufferSuiteGetSpace);
+			PSBufferSuite1 suite = new PSBufferSuite1
+			{
+				New = Marshal.GetFunctionPointerForDelegate(this.bufferSuiteNew),
+				Dispose = Marshal.GetFunctionPointerForDelegate(this.bufferSuiteDispose),
+				GetSize = Marshal.GetFunctionPointerForDelegate(this.bufferSuiteGetSize),
+				GetSpace = Marshal.GetFunctionPointerForDelegate(this.bufferSuiteGetSpace)
+			};
 
 			return suite;
 		}

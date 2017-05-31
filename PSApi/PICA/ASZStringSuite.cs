@@ -181,30 +181,32 @@ namespace PSFilterLoad.PSApi.PICA
 
         public ASZStringSuite1 CreateASZStringSuite1()
         {
-            ASZStringSuite1 suite = new ASZStringSuite1();
-            suite.MakeFromUnicode = Marshal.GetFunctionPointerForDelegate(this.makeFromUnicode);
-            suite.MakeFromCString = Marshal.GetFunctionPointerForDelegate(this.makeFromCString);
-            suite.MakeFromPascalString = Marshal.GetFunctionPointerForDelegate(this.makeFromPascalString);
-            suite.MakeRomanizationOfInteger = Marshal.GetFunctionPointerForDelegate(this.makeRomanizationOfInteger);
-            suite.MakeRomanizationOfFixed = Marshal.GetFunctionPointerForDelegate(this.makeRomanizationOfFixed);
-            suite.MakeRomanizationOfDouble = Marshal.GetFunctionPointerForDelegate(this.makeRomanizationOfDouble);
-            suite.GetEmpty = Marshal.GetFunctionPointerForDelegate(this.getEmpty);
-            suite.Copy = Marshal.GetFunctionPointerForDelegate(this.copy);
-            suite.Replace = Marshal.GetFunctionPointerForDelegate(this.replace);
-            suite.TrimEllipsis = Marshal.GetFunctionPointerForDelegate(this.trimEllpsis);
-            suite.TrimSpaces = Marshal.GetFunctionPointerForDelegate(this.trimSpaces);
-            suite.RemoveAccelerators = Marshal.GetFunctionPointerForDelegate(this.removeAccelerators);
-            suite.AddRef = Marshal.GetFunctionPointerForDelegate(this.addRef);
-            suite.Release = Marshal.GetFunctionPointerForDelegate(this.release);
-            suite.IsAllWhiteSpace = Marshal.GetFunctionPointerForDelegate(this.isAllWhitespace);
-            suite.IsEmpty = Marshal.GetFunctionPointerForDelegate(this.isEmpty);
-            suite.WillReplace = Marshal.GetFunctionPointerForDelegate(this.willReplace);
-            suite.LengthAsUnicodeCString = Marshal.GetFunctionPointerForDelegate(this.lengthAsUnicodeCString);
-            suite.AsUnicodeCString = Marshal.GetFunctionPointerForDelegate(this.asUnicodeCString);
-            suite.LengthAsCString = Marshal.GetFunctionPointerForDelegate(this.lengthAsCString);
-            suite.AsCString = Marshal.GetFunctionPointerForDelegate(this.asCString);
-            suite.LengthAsPascalString = Marshal.GetFunctionPointerForDelegate(this.lengthAsPascalString);
-            suite.AsPascalString = Marshal.GetFunctionPointerForDelegate(this.asPascalString);
+            ASZStringSuite1 suite = new ASZStringSuite1
+            {
+                MakeFromUnicode = Marshal.GetFunctionPointerForDelegate(this.makeFromUnicode),
+                MakeFromCString = Marshal.GetFunctionPointerForDelegate(this.makeFromCString),
+                MakeFromPascalString = Marshal.GetFunctionPointerForDelegate(this.makeFromPascalString),
+                MakeRomanizationOfInteger = Marshal.GetFunctionPointerForDelegate(this.makeRomanizationOfInteger),
+                MakeRomanizationOfFixed = Marshal.GetFunctionPointerForDelegate(this.makeRomanizationOfFixed),
+                MakeRomanizationOfDouble = Marshal.GetFunctionPointerForDelegate(this.makeRomanizationOfDouble),
+                GetEmpty = Marshal.GetFunctionPointerForDelegate(this.getEmpty),
+                Copy = Marshal.GetFunctionPointerForDelegate(this.copy),
+                Replace = Marshal.GetFunctionPointerForDelegate(this.replace),
+                TrimEllipsis = Marshal.GetFunctionPointerForDelegate(this.trimEllpsis),
+                TrimSpaces = Marshal.GetFunctionPointerForDelegate(this.trimSpaces),
+                RemoveAccelerators = Marshal.GetFunctionPointerForDelegate(this.removeAccelerators),
+                AddRef = Marshal.GetFunctionPointerForDelegate(this.addRef),
+                Release = Marshal.GetFunctionPointerForDelegate(this.release),
+                IsAllWhiteSpace = Marshal.GetFunctionPointerForDelegate(this.isAllWhitespace),
+                IsEmpty = Marshal.GetFunctionPointerForDelegate(this.isEmpty),
+                WillReplace = Marshal.GetFunctionPointerForDelegate(this.willReplace),
+                LengthAsUnicodeCString = Marshal.GetFunctionPointerForDelegate(this.lengthAsUnicodeCString),
+                AsUnicodeCString = Marshal.GetFunctionPointerForDelegate(this.asUnicodeCString),
+                LengthAsCString = Marshal.GetFunctionPointerForDelegate(this.lengthAsCString),
+                AsCString = Marshal.GetFunctionPointerForDelegate(this.asCString),
+                LengthAsPascalString = Marshal.GetFunctionPointerForDelegate(this.lengthAsPascalString),
+                AsPascalString = Marshal.GetFunctionPointerForDelegate(this.asPascalString)
+            };
 
             return suite;
         }

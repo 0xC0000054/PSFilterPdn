@@ -160,38 +160,35 @@ namespace PSFilterLoad.PSApi.PICA
 
         public static unsafe SPPluginsSuite4 CreateSPPluginsSuite4()
         {
-            SPPluginsSuite4 suite = new SPPluginsSuite4();
-            suite.AllocatePluginList = Marshal.GetFunctionPointerForDelegate(allocatePluginList);
-            suite.FreePluginList = Marshal.GetFunctionPointerForDelegate(freePluginList);
-            suite.AddPlugin = Marshal.GetFunctionPointerForDelegate(addPlugin);
-
-            suite.NewPluginListIterator = Marshal.GetFunctionPointerForDelegate(newListIterator);
-            suite.NextPlugin = Marshal.GetFunctionPointerForDelegate(nextPlugin);
-            suite.DeletePluginListIterator = Marshal.GetFunctionPointerForDelegate(deleteListIterator);
-            suite.GetPluginListNeededSuiteAvailable = Marshal.GetFunctionPointerForDelegate(listNeededSuiteAvailable);
-
-            suite.GetPluginHostEntry = Marshal.GetFunctionPointerForDelegate(getHostEntry);
-            suite.GetPluginFileSpecification = Marshal.GetFunctionPointerForDelegate(getPluginFileSpec);
-            suite.GetPluginPropertyList = Marshal.GetFunctionPointerForDelegate(getPluginPropertyList);
-            suite.GetPluginGlobals = Marshal.GetFunctionPointerForDelegate(getPluginGlobals);
-            suite.SetPluginGlobals = Marshal.GetFunctionPointerForDelegate(setPluginGlobals);
-            suite.GetPluginStarted = Marshal.GetFunctionPointerForDelegate(getPluginStarted);
-            suite.SetPluginStarted = Marshal.GetFunctionPointerForDelegate(setPluginStarted);
-            suite.GetPluginSkipShutdown = Marshal.GetFunctionPointerForDelegate(getPluginSkipShutdown);
-            suite.SetPluginSkipShutdown = Marshal.GetFunctionPointerForDelegate(setPluginSkipShutdown);
-            suite.GetPluginBroken = Marshal.GetFunctionPointerForDelegate(getPluginBroken);
-            suite.SetPluginBroken = Marshal.GetFunctionPointerForDelegate(setPluginBroken);
-            suite.GetPluginAdapter = Marshal.GetFunctionPointerForDelegate(getPluginAdapter);
-            suite.GetPluginAdapterInfo = Marshal.GetFunctionPointerForDelegate(getPluginAdapterInfo);
-            suite.SetPluginAdapterInfo = Marshal.GetFunctionPointerForDelegate(setPluginAdapterInfo);
-
-            suite.FindPluginProperty = Marshal.GetFunctionPointerForDelegate(findPluginProperty);
-
-            suite.GetPluginName = Marshal.GetFunctionPointerForDelegate(getPluginName);
-            suite.SetPluginName = Marshal.GetFunctionPointerForDelegate(setPluginName);
-            suite.GetNamedPlugin = Marshal.GetFunctionPointerForDelegate(getNamedPlugin);
-
-            suite.SetPluginPropertyList = Marshal.GetFunctionPointerForDelegate(setPluginPropertyList);
+            SPPluginsSuite4 suite = new SPPluginsSuite4
+            {
+                AllocatePluginList = Marshal.GetFunctionPointerForDelegate(allocatePluginList),
+                FreePluginList = Marshal.GetFunctionPointerForDelegate(freePluginList),
+                AddPlugin = Marshal.GetFunctionPointerForDelegate(addPlugin),
+                NewPluginListIterator = Marshal.GetFunctionPointerForDelegate(newListIterator),
+                NextPlugin = Marshal.GetFunctionPointerForDelegate(nextPlugin),
+                DeletePluginListIterator = Marshal.GetFunctionPointerForDelegate(deleteListIterator),
+                GetPluginListNeededSuiteAvailable = Marshal.GetFunctionPointerForDelegate(listNeededSuiteAvailable),
+                GetPluginHostEntry = Marshal.GetFunctionPointerForDelegate(getHostEntry),
+                GetPluginFileSpecification = Marshal.GetFunctionPointerForDelegate(getPluginFileSpec),
+                GetPluginPropertyList = Marshal.GetFunctionPointerForDelegate(getPluginPropertyList),
+                GetPluginGlobals = Marshal.GetFunctionPointerForDelegate(getPluginGlobals),
+                SetPluginGlobals = Marshal.GetFunctionPointerForDelegate(setPluginGlobals),
+                GetPluginStarted = Marshal.GetFunctionPointerForDelegate(getPluginStarted),
+                SetPluginStarted = Marshal.GetFunctionPointerForDelegate(setPluginStarted),
+                GetPluginSkipShutdown = Marshal.GetFunctionPointerForDelegate(getPluginSkipShutdown),
+                SetPluginSkipShutdown = Marshal.GetFunctionPointerForDelegate(setPluginSkipShutdown),
+                GetPluginBroken = Marshal.GetFunctionPointerForDelegate(getPluginBroken),
+                SetPluginBroken = Marshal.GetFunctionPointerForDelegate(setPluginBroken),
+                GetPluginAdapter = Marshal.GetFunctionPointerForDelegate(getPluginAdapter),
+                GetPluginAdapterInfo = Marshal.GetFunctionPointerForDelegate(getPluginAdapterInfo),
+                SetPluginAdapterInfo = Marshal.GetFunctionPointerForDelegate(setPluginAdapterInfo),
+                FindPluginProperty = Marshal.GetFunctionPointerForDelegate(findPluginProperty),
+                GetPluginName = Marshal.GetFunctionPointerForDelegate(getPluginName),
+                SetPluginName = Marshal.GetFunctionPointerForDelegate(setPluginName),
+                GetNamedPlugin = Marshal.GetFunctionPointerForDelegate(getNamedPlugin),
+                SetPluginPropertyList = Marshal.GetFunctionPointerForDelegate(setPluginPropertyList)
+            };
 
             return suite;
         }

@@ -642,8 +642,10 @@ namespace PSFilterPdn
 
                 if (proxyProcess == null)
                 {
-                    proxyProcess = new Process();
-                    proxyProcess.EnableRaisingEvents = true;
+                    proxyProcess = new Process
+                    {
+                        EnableRaisingEvents = true
+                    };
                     proxyProcess.Exited += new EventHandler(proxyProcess_Exited);
                 }
                 proxyProcess.StartInfo = psi;
