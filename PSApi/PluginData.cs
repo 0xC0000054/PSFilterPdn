@@ -148,6 +148,18 @@ namespace PSFilterLoad.PSApi
             this.moduleEntryPoints = null;
         }
 
+        internal PluginData(string fileName, string entryPoint, string category, string title)
+        {
+            this.fileName = fileName;
+            this.entryPoint = entryPoint;
+            this.category = category;
+            this.title = title;
+            this.filterInfo = null;
+            this.runWith32BitShim = true;
+            this.aete = null;
+            this.moduleEntryPoints = null;
+        }
+
         internal bool IsValid()
         {
             return (!string.IsNullOrEmpty(this.category) && !string.IsNullOrEmpty(this.title) && !string.IsNullOrEmpty(this.entryPoint));
