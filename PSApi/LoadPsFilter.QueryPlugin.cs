@@ -463,15 +463,13 @@ namespace PSFilterLoad.PSApi
             int length = 0;
             byte* ptr = (byte*)lockRes.ToPointer() + 2;
 
-            PluginData enumData = new PluginData(query.fileName);
-
-            enumData.Category = StringUtil.FromCString((IntPtr)ptr, out length);
+            string category = StringUtil.FromCString((IntPtr)ptr, out length);
 
             ptr += length;
 
-            if (string.IsNullOrEmpty(enumData.Category))
+            if (string.IsNullOrEmpty(category))
             {
-                enumData.Category = PSFilterPdn.Properties.Resources.PiMIDefaultCategoryName;
+                category = PSFilterPdn.Properties.Resources.PiMIDefaultCategoryName;
             }
 
             PlugInInfo* info = (PlugInInfo*)ptr;
@@ -540,12 +538,11 @@ namespace PSFilterLoad.PSApi
 
             IntPtr resPtr = new IntPtr(filterLock.ToInt64() + 2L);
 
-            enumData.Title = StringUtil.FromCString(resPtr);
-
+            string title = StringUtil.FromCString(resPtr);
             // The entry point number is the same as the resource number.
-            enumData.EntryPoint = "ENTRYPOINT" + lpszName.ToInt32().ToString(CultureInfo.InvariantCulture);
-            enumData.RunWith32BitShim = true; // these filters should always be 32-bit
-            enumData.FilterInfo = null;
+            string entryPoint = "ENTRYPOINT" + lpszName.ToInt32().ToString(CultureInfo.InvariantCulture);
+            
+            PluginData enumData = new PluginData(query.fileName, entryPoint, category, title);
 
             if (enumData.IsValid())
             {
