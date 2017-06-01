@@ -12,12 +12,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
     internal sealed class ActivePICASuites : IDisposable
     {
+        [DebuggerDisplay("{DebuggerDisplay,nq}")]
         internal sealed class PICASuiteKey : IEquatable<PICASuiteKey>
         {
             private readonly string name;
@@ -65,6 +68,14 @@ namespace PSFilterLoad.PSApi
                 get
                 {
                     return this.version;
+                }
+            }
+
+            private string DebuggerDisplay
+            {
+                get
+                {
+                    return string.Format(CultureInfo.CurrentCulture, "{0}, version {1}", this.name, this.version);
                 }
             }
 
