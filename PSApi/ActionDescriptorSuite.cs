@@ -103,6 +103,7 @@ namespace PSFilterLoad.PSApi
 
         private Dictionary<IntPtr, ScriptingParameters> actionDescriptors;
         private Dictionary<IntPtr, ScriptingParameters> descriptorHandles;
+        private int actionDescriptorsIndex;
 
         #region Callbacks
         private readonly ActionDescriptorMake make;
@@ -205,6 +206,7 @@ namespace PSFilterLoad.PSApi
             this.aete = aete;
             this.actionDescriptors = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
             this.descriptorHandles = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
+            this.actionDescriptorsIndex = 0;
         }
 
         public PSActionDescriptorProc CreateActionDescriptorSuite2()
@@ -287,7 +289,9 @@ namespace PSFilterLoad.PSApi
 
         private IntPtr GenerateDictionaryKey()
         {
-            return new IntPtr(this.actionDescriptors.Count + 1);
+            this.actionDescriptorsIndex++;
+
+            return new IntPtr(this.actionDescriptorsIndex);
         }
 
         private int Make(ref IntPtr descriptor)
@@ -314,6 +318,10 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: 0x{0}", descriptor.ToHexString()));
 #endif
             this.actionDescriptors.Remove(descriptor);
+            if (this.actionDescriptorsIndex == descriptor.ToInt32())
+            {
+                this.actionDescriptorsIndex--;
+            }
 
             return PSError.kSPNoError;
         }

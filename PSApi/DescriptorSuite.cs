@@ -78,6 +78,8 @@ namespace PSFilterLoad.PSApi
 		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> descriptorHandles;
 		private Dictionary<IntPtr, Dictionary<uint, AETEValue>> writeDescriptors;
 		private AETEData aete;
+		private int readDescriptorsIndex;
+		private int writeDescriptorsIndex;
 
 		public AETEData Aete
 		{
@@ -131,6 +133,8 @@ namespace PSFilterLoad.PSApi
 			this.readDescriptors = new Dictionary<IntPtr, ReadDescriptorState>(IntPtrEqualityComparer.Instance);
 			this.descriptorHandles = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
 			this.writeDescriptors = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
+			this.readDescriptorsIndex = 0;
+			this.writeDescriptorsIndex = 0;
 		}
 
 		public IntPtr CreateReadDescriptor()
@@ -249,7 +253,8 @@ namespace PSFilterLoad.PSApi
 					keys.AddRange(dictionary.Keys);
 				}
 
-				IntPtr handle = new IntPtr(this.readDescriptors.Count + 1);
+				this.readDescriptorsIndex++;
+				IntPtr handle = new IntPtr(this.readDescriptorsIndex);
 				try
 				{
 					this.readDescriptors.Add(handle, new ReadDescriptorState(dictionary, keys));
@@ -276,6 +281,10 @@ namespace PSFilterLoad.PSApi
 			{
 				error = this.readDescriptors[descriptor].lastReadError;
 				this.readDescriptors.Remove(descriptor);
+				if (this.readDescriptorsIndex == descriptor.ToInt32())
+				{
+					this.readDescriptorsIndex--;
+				}
 			}
 
 			return error;
@@ -660,7 +669,8 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-			IntPtr handle = new IntPtr(this.writeDescriptors.Count + 1);
+			this.writeDescriptorsIndex++;
+			IntPtr handle = new IntPtr(this.writeDescriptorsIndex);
 			try
 			{
 				this.writeDescriptors.Add(handle, new Dictionary<uint, AETEValue>());
@@ -690,6 +700,10 @@ namespace PSFilterLoad.PSApi
 				this.descriptorHandles.Add(descriptorHandle, this.writeDescriptors[descriptor]);
 
 				this.writeDescriptors.Remove(descriptor);
+				if (this.writeDescriptorsIndex == descriptor.ToInt32())
+				{
+					this.writeDescriptorsIndex--;
+				}
 			}
 			catch (OutOfMemoryException)
 			{
