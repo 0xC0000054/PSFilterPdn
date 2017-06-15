@@ -1,6 +1,8 @@
-/* This file is from http://www.codeproject.com/Articles/19045/Manipulating-colors-in-NET-Part-1/
- * it is distributed under the CPOL http://www.codeproject.com/info/cpol10.aspx
- */
+// This file is from Manipulating colors in .NET - Part 1
+// http://www.codeproject.com/Articles/19045/Manipulating-colors-in-NET-Part-1/
+//
+// It is distributed under the terms of the Code Project Open License
+// http://www.codeproject.com/info/cpol10.aspx
 
 using System;
 
