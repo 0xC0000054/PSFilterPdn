@@ -381,7 +381,7 @@ namespace PSFilterLoad.PSApi
             if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 // If the value is a sub-descriptor it must be retrieved with GetObject.
-                if (item.Value is ScriptingParameters)
+                if (item.Value is Dictionary<uint, AETEValue>)
                 {
                     type = DescriptorTypes.typeObject;
                 }
@@ -629,7 +629,7 @@ namespace PSFilterLoad.PSApi
             {
                 try
                 {
-                    this.actionDescriptors[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys.Clone()));
+                    this.actionDescriptors[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys.ToDictionary()));
                 }
                 catch (OutOfMemoryException)
                 {
@@ -972,11 +972,11 @@ namespace PSFilterLoad.PSApi
                     // ignore it
                 }
 
-                ScriptingParameters parameters = item.Value as ScriptingParameters;
+                Dictionary<uint, AETEValue> parameters = item.Value as Dictionary<uint, AETEValue>;
                 if (parameters != null)
                 {
                     descriptorHandle = GenerateDictionaryKey();
-                    this.actionDescriptors.Add(descriptorHandle, parameters);
+                    this.actionDescriptors.Add(descriptorHandle, new ScriptingParameters(parameters));
 
                     return PSError.kSPNoError;
                 }
