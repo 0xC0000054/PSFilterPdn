@@ -167,6 +167,8 @@ namespace PSFilterLoad.PSApi
 		private DescriptorSuite descriptorSuite;
 		private PseudoResourceSuite pseudoResourceSuite;
 		private ActionDescriptorSuite actionDescriptorSuite;
+		private ActionListSuite actionListSuite;
+		private ActionReferenceSuite actionReferenceSuite;
 		private ErrorSuite errorSuite;
 
 		internal Surface Dest
@@ -3569,7 +3571,17 @@ namespace PSFilterLoad.PSApi
 					}
 					if (actionDescriptorSuite == null)
 					{
-						actionDescriptorSuite = new ActionDescriptorSuite(this.descriptorSuite.Aete);
+						if (actionReferenceSuite == null)
+						{
+							actionReferenceSuite = new ActionReferenceSuite();
+						}
+						if (actionListSuite == null)
+						{
+							actionListSuite = new ActionListSuite(actionReferenceSuite);
+						}
+
+						actionDescriptorSuite = new ActionDescriptorSuite(this.descriptorSuite.Aete, this.actionListSuite, this.actionReferenceSuite);
+						actionListSuite.ActionDescriptorSuite = actionDescriptorSuite;
 						if (scriptingData != null)
 						{
 							actionDescriptorSuite.SetScriptingData((PIDescriptorParameters*)descriptorParametersPtr.ToPointer(), scriptingData);
@@ -3579,6 +3591,38 @@ namespace PSFilterLoad.PSApi
 					PSActionDescriptorProc actionDescriptor = this.actionDescriptorSuite.CreateActionDescriptorSuite2();
 
 					suite = this.activePICASuites.AllocateSuite(suiteKey, actionDescriptor);
+				}
+				else if (suiteName.Equals(PSConstants.PICA.ActionListSuite, StringComparison.Ordinal))
+				{
+					if (version != 1)
+					{
+						return PSError.kSPSuiteNotFoundError;
+					}
+					if (actionListSuite == null)
+					{
+						if (actionReferenceSuite == null)
+						{
+							this.actionReferenceSuite = new ActionReferenceSuite();
+						}
+						this.actionListSuite = new ActionListSuite(this.actionReferenceSuite);
+					}
+
+					PSActionListProcs listSuite = this.actionListSuite.CreateActionListSuite1();
+					suite = this.activePICASuites.AllocateSuite(suiteKey, listSuite);
+				}
+				else if (suiteName.Equals(PSConstants.PICA.ActionReferenceSuite, StringComparison.Ordinal))
+				{
+					if (version != 2)
+					{
+						return PSError.kSPSuiteNotFoundError;
+					}
+					if (actionReferenceSuite == null)
+					{
+						this.actionReferenceSuite = new ActionReferenceSuite();
+					}
+
+					PSActionReferenceProcs referenceSuite = this.actionReferenceSuite.CreateActionReferenceSuite2();
+					suite = this.activePICASuites.AllocateSuite(suiteKey, referenceSuite);
 				}
 				else if (suiteName.Equals(PSConstants.PICA.ASZStringSuite, StringComparison.Ordinal))
 				{

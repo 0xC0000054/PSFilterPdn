@@ -135,6 +135,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PSApi\AboutRecord.cs" />
     <Compile Include="PSApi\ActionDescriptorSuite.cs" />
+    <Compile Include="PSApi\ActionListSuite.cs" />
+    <Compile Include="PSApi\ActionReferenceSuite.cs" />
     <Compile Include="PSApi\ActivePICASuites.cs" />
     <Compile Include="PSApi\AdvanceStateProc.cs" />
     <Compile Include="PSApi\BufferProcs.cs" />
@@ -154,6 +156,9 @@
     <Compile Include="PSApi\HandleProc.cs" />
     <Compile Include="PSApi\HandleSuite.cs" />
     <Compile Include="PSApi\HostProcs.cs" />
+    <Compile Include="PSApi\IActionDescriptorSuite.cs" />
+    <Compile Include="PSApi\IActionListSuite.cs" />
+    <Compile Include="PSApi\IActionReferenceSuite.cs" />
     <Compile Include="PSApi\ImageModes.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
     <Compile Include="PSApi\Int32Extensions.cs" />
@@ -182,6 +187,8 @@
     <Compile Include="PSApi\ProgressProc.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\PSActionDescriptor.cs" />
+    <Compile Include="PSApi\PSActionList.cs" />
+    <Compile Include="PSApi\PSActionReference.cs" />
     <Compile Include="PSApi\PSConstants.cs" />
     <Compile Include="PSApi\PSError.cs" />
     <Compile Include="PSApi\PSErrorSuite.cs" />

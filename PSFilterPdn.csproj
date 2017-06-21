@@ -140,6 +140,11 @@
     <Compile Include="NativeInterfaces.cs" />
     <Compile Include="PluginSupportInfo.cs" />
     <Compile Include="PSApi\ActionDescriptorSuite.cs" />
+    <Compile Include="PSApi\ActionListDescriptor.cs" />
+    <Compile Include="PSApi\ActionListItem.cs" />
+    <Compile Include="PSApi\ActionListSuite.cs" />
+    <Compile Include="PSApi\ActionReferenceItem.cs" />
+    <Compile Include="PSApi\ActionReferenceSuite.cs" />
     <Compile Include="PSApi\ActivePICASuites.cs" />
     <Compile Include="PSApi\AETEData.cs" />
     <Compile Include="PSApi\AETEValue.cs" />
@@ -152,6 +157,9 @@
     <Compile Include="PSApi\ErrorSuite.cs" />
     <Compile Include="PSApi\GlobalParameters.cs" />
     <Compile Include="PSApi\HandleSuite.cs" />
+    <Compile Include="PSApi\IActionDescriptorSuite.cs" />
+    <Compile Include="PSApi\IActionListSuite.cs" />
+    <Compile Include="PSApi\IActionReferenceSuite.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
     <Compile Include="PSApi\IntPtrEqualityComparer.cs" />
     <Compile Include="PSApi\IntPtrExtensions.cs" />
@@ -175,6 +183,8 @@
     <Compile Include="PSApi\PluginModule.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\PSActionDescriptor.cs" />
+    <Compile Include="PSApi\PSActionList.cs" />
+    <Compile Include="PSApi\PSActionReference.cs" />
     <Compile Include="PSApi\PSErrorSuite.cs" />
     <Compile Include="PSApi\PseudoResourceSuite.cs" />
     <Compile Include="PSApi\PSProperties.cs" />

@@ -33,5 +33,6 @@ namespace PSFilterLoad.PSApi
         public const uint typePath = 0x50617420U; // 'Pat '
         public const uint typeRawData = 0x74647461U; // 'tdta'
         public const uint typeUintFloat = 0x556e7446; // 'UntF'
+        public const uint typeValueList = 0x566c4c73; // 'VlLs'
     }
 }

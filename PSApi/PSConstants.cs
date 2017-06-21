@@ -213,6 +213,8 @@ namespace PSFilterLoad.PSApi
             public const string PropertySuite = "Photoshop Property Suite for Plug-ins";
             public const string UIHooksSuite = "Photoshop UIHooks Suite for Plug-ins";
             public const string ActionDescriptorSuite = "df135115-c769-11d0-8079-00c04fd7ec47";
+            public const string ActionListSuite = "df135116-c769-11d0-8079-00c04fd7ec47";
+            public const string ActionReferenceSuite = "df135117-c769-11d0-8079-00c04fd7ec47";
             public const string ASZStringSuite = "AS ZString Suite";
 #if PICASUITEDEBUG
             public const string ASZStringDictonarySuite = "AS ZString Dictionary Suite";

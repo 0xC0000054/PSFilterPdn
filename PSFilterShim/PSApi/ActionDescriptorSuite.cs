@@ -12,11 +12,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class ActionDescriptorSuite
+    internal sealed class ActionDescriptorSuite : IActionDescriptorSuite
     {
         private sealed class ScriptingParameters
         {
@@ -100,6 +101,8 @@ namespace PSFilterLoad.PSApi
         }
 
         private readonly AETEData aete;
+        private readonly IActionListSuite actionListSuite;
+        private readonly IActionReferenceSuite actionReferenceSuite;
 
         private Dictionary<IntPtr, ScriptingParameters> actionDescriptors;
         private Dictionary<IntPtr, ScriptingParameters> descriptorHandles;
@@ -154,7 +157,7 @@ namespace PSFilterLoad.PSApi
         private readonly ActionDescriptorGetData getData;
         #endregion
 
-        public ActionDescriptorSuite(AETEData aete)
+        public ActionDescriptorSuite(AETEData aete, IActionListSuite actionListSuite, IActionReferenceSuite actionReferenceSuite)
         {
             this.make = new ActionDescriptorMake(Make);
             this.free = new ActionDescriptorFree(Free);
@@ -204,9 +207,37 @@ namespace PSFilterLoad.PSApi
             this.getData = new ActionDescriptorGetData(GetData);
 
             this.aete = aete;
+            this.actionListSuite = actionListSuite;
+            this.actionReferenceSuite = actionReferenceSuite;
             this.actionDescriptors = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
             this.descriptorHandles = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
             this.actionDescriptorsIndex = 0;
+        }
+
+        bool IActionDescriptorSuite.TryGetDescriptorValues(IntPtr descriptor, out Dictionary<uint, AETEValue> values)
+        {
+            values = null;
+            ScriptingParameters scriptingData;
+            if (this.actionDescriptors.TryGetValue(descriptor, out scriptingData))
+            {
+                values = scriptingData.ToDictionary();
+                return true;
+            }
+
+            return false;
+        }
+
+        IntPtr IActionDescriptorSuite.CreateDescriptor(Dictionary<uint, AETEValue> values)
+        {
+            if (values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            IntPtr descriptor = GenerateDictionaryKey();
+            this.actionDescriptors.Add(descriptor, new ScriptingParameters(values));
+
+            return descriptor;
         }
 
         public PSActionDescriptorProc CreateActionDescriptorSuite2()
@@ -610,12 +641,29 @@ namespace PSFilterLoad.PSApi
             return PSError.kSPNoError;
         }
 
-        private int PutList(IntPtr descriptor, uint key, IntPtr data)
+        private int PutList(IntPtr descriptor, uint key, IntPtr list)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            return PSError.kSPNotImplmented;
+            try
+            {
+                ReadOnlyCollection<ActionListItem> values;
+                if (this.actionListSuite.TryGetListValues(list, out values))
+                {
+                    this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeValueList, GetAETEParamFlags(key), 0, values));
+                }
+                else
+                {
+                    return PSError.kSPBadParameterError;
+                }
+            }
+            catch (OutOfMemoryException)
+            {
+                return PSError.memFullErr;
+            }
+
+            return PSError.kSPNoError;
         }
 
         private int PutObject(IntPtr descriptor, uint key, uint type, IntPtr descriptorHandle)
@@ -666,13 +714,29 @@ namespace PSFilterLoad.PSApi
             return PSError.kSPNoError;
         }
 
-        private int PutReference(IntPtr descriptor, uint key, IntPtr value)
+        private int PutReference(IntPtr descriptor, uint key, IntPtr reference)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            try
+            {
+                ReadOnlyCollection<ActionReferenceItem> values;
+                if (this.actionReferenceSuite.TryGetReferenceValues(reference, out values))
+                {
+                    this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeObjectReference, GetAETEParamFlags(key), 0, values));
+                }
+                else
+                {
+                    return PSError.kSPBadParameterError;
+                }
+            }
+            catch (OutOfMemoryException)
+            {
+                return PSError.memFullErr;
+            }
 
-            return PSError.kSPNotImplmented;
+            return PSError.kSPNoError;
         }
 
         private int PutClass(IntPtr descriptor, uint key, uint data)
@@ -945,12 +1009,29 @@ namespace PSFilterLoad.PSApi
             return PSError.errMissingParameter;
         }
 
-        private int GetList(IntPtr descriptor, uint key, ref IntPtr data)
+        private int GetList(IntPtr descriptor, uint key, ref IntPtr list)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            return PSError.kSPNotImplmented;
+            AETEValue item;
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            {
+                ReadOnlyCollection<ActionListItem> values = (ReadOnlyCollection<ActionListItem>)item.Value;
+
+                try
+                {
+                    list = this.actionListSuite.CreateList(values);
+                }
+                catch (OutOfMemoryException)
+                {
+                    return PSError.memFullErr;
+                }
+
+                return PSError.kSPNoError;
+            }
+
+            return PSError.errMissingParameter;
         }
 
         private int GetObject(IntPtr descriptor, uint key, ref uint retType, ref IntPtr descriptorHandle)
@@ -1015,12 +1096,29 @@ namespace PSFilterLoad.PSApi
             return PSError.errMissingParameter;
         }
 
-        private int GetReference(IntPtr descriptor, uint key, ref IntPtr data)
+        private int GetReference(IntPtr descriptor, uint key, ref IntPtr reference)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            return PSError.kSPNotImplmented;
+            AETEValue item;
+            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            {
+                ReadOnlyCollection<ActionReferenceItem> values = (ReadOnlyCollection<ActionReferenceItem>)item.Value;
+
+                try
+                {
+                    reference = this.actionReferenceSuite.CreateReference(values);
+                }
+                catch (OutOfMemoryException)
+                {
+                    return PSError.memFullErr;
+                }
+
+                return PSError.kSPNoError;
+            }
+
+            return PSError.errMissingParameter;
         }
 
         private int GetClass(IntPtr descriptor, uint key, ref uint data)
