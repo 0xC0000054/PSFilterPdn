@@ -157,7 +157,6 @@ namespace PSFilterLoad.PSApi
 		private bool sizesSetup;
 		private bool frValuesSetup;
 		private bool useChannelPorts;
-		private bool usePICASuites;
 		private ActivePICASuites activePICASuites;
 		private PICASuites picaSuites;
 
@@ -265,7 +264,6 @@ namespace PSFilterLoad.PSApi
 			this.scriptingData = null;
 			this.useChannelPorts = false;
 			this.channelReadDescPtrs = new List<ChannelDescPtrs>();
-			this.usePICASuites = false;
 			this.activePICASuites = new ActivePICASuites();
 			this.picaSuites = new PICASuites();
 			this.descriptorSuite = new DescriptorSuite();
@@ -1193,27 +1191,6 @@ namespace PSFilterLoad.PSApi
 			return data.Category.Equals("Amico Perry", StringComparison.Ordinal);
 		}
 
-		private static bool EnablePICASuites(PluginData data)
-		{
-#if PICASUITEDEBUG
-			return true;
-#else
-			// Enable the PICA suites for Color Efex 4.
-			if (data.Category.Equals("Nik Collection", StringComparison.Ordinal))
-			{
-				return true;
-			}
-
-			// Enable the PICA suites for Eye Candy 7.
-			if (data.Category.Equals("Alien Skin", StringComparison.Ordinal))
-			{
-				return true;
-			}
-
-			return false;
-#endif
-		}
-
 		/// <summary>
 		/// Runs a filter from the specified PluginData
 		/// </summary>
@@ -1230,7 +1207,6 @@ namespace PSFilterLoad.PSApi
 			}
 
 			useChannelPorts = EnableChannelPorts(pdata);
-			usePICASuites = EnablePICASuites(pdata);
 			this.picaSuites.SetPluginName(pdata.Title.TrimEnd('.'));
 
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
@@ -3988,22 +3964,15 @@ namespace PSFilterLoad.PSApi
 				readDescriptorPtr = IntPtr.Zero;
 			}
 
-			if (usePICASuites)
-			{
-				basicSuitePtr = Memory.Allocate(Marshal.SizeOf(typeof(SPBasicSuite)), true);
-				SPBasicSuite* basicSuite = (SPBasicSuite*)basicSuitePtr.ToPointer();
-				basicSuite->acquireSuite = Marshal.GetFunctionPointerForDelegate(spAcquireSuite);
-				basicSuite->releaseSuite = Marshal.GetFunctionPointerForDelegate(spReleaseSuite);
-				basicSuite->isEqual = Marshal.GetFunctionPointerForDelegate(spIsEqual);
-				basicSuite->allocateBlock = Marshal.GetFunctionPointerForDelegate(spAllocateBlock);
-				basicSuite->freeBlock = Marshal.GetFunctionPointerForDelegate(spFreeBlock);
-				basicSuite->reallocateBlock = Marshal.GetFunctionPointerForDelegate(spReallocateBlock);
-				basicSuite->undefined = Marshal.GetFunctionPointerForDelegate(spUndefined);
-			}
-			else
-			{
-				basicSuitePtr = IntPtr.Zero;
-			}
+			basicSuitePtr = Memory.Allocate(Marshal.SizeOf(typeof(SPBasicSuite)), true);
+			SPBasicSuite* basicSuite = (SPBasicSuite*)basicSuitePtr.ToPointer();
+			basicSuite->acquireSuite = Marshal.GetFunctionPointerForDelegate(spAcquireSuite);
+			basicSuite->releaseSuite = Marshal.GetFunctionPointerForDelegate(spReleaseSuite);
+			basicSuite->isEqual = Marshal.GetFunctionPointerForDelegate(spIsEqual);
+			basicSuite->allocateBlock = Marshal.GetFunctionPointerForDelegate(spAllocateBlock);
+			basicSuite->freeBlock = Marshal.GetFunctionPointerForDelegate(spFreeBlock);
+			basicSuite->reallocateBlock = Marshal.GetFunctionPointerForDelegate(spReallocateBlock);
+			basicSuite->undefined = Marshal.GetFunctionPointerForDelegate(spUndefined);
 		}
 
 		private unsafe void SetupFilterRecord()
