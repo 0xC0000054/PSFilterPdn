@@ -940,6 +940,12 @@ namespace PSFilterPdn
                 return true;
             }
 
+            // The 64-bit version of NormalMapFilter crashes with an access violation.
+            if (plugin.Category.Equals("NVIDIA Tools", StringComparison.Ordinal) && plugin.Title.StartsWith("NormalMapFilter", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
             return false;
         }
 
