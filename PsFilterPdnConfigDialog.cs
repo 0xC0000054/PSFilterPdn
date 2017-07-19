@@ -1027,7 +1027,7 @@ namespace PSFilterPdn
                             return;
                         }
 
-                        foreach (var plugin in LoadPsFilter.QueryPlugin(enumerator.Current))
+                        foreach (var plugin in PluginLoader.LoadFiltersFromFile(enumerator.Current))
                         {
                             // The **Hidden** category is used for filters that are not directly invoked by the user.
                             if (!plugin.Category.Equals("**Hidden**", StringComparison.Ordinal))

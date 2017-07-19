@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    internal partial class LoadPsFilter
+    internal static class PluginLoader
     {
         private sealed class QueryAETE
         {
@@ -555,12 +555,12 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
-        /// Queries a 8bf plug-in
+        /// Loads the 8bf filters from the specified file.
         /// </summary>
-        /// <param name="fileName">The file to query.</param>
+        /// <param name="fileName">The plug-in file name.</param>
         /// <returns>An enumerable collection containing the filters within the plug-in.</returns>
         /// <exception cref="System.ArgumentNullException"><paramref name="fileName"/> is null.</exception>
-        internal static IEnumerable<PluginData> QueryPlugin(string fileName)
+        internal static IEnumerable<PluginData> LoadFiltersFromFile(string fileName)
         {
             if (fileName == null)
             {
