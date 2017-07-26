@@ -567,7 +567,7 @@ namespace PSFilterPdn
             this.srcFileName = Path.Combine(userDataPath, "proxysource.png");
             this.destFileName = Path.Combine(userDataPath, "proxyresult.png");
             this.parameterDataFileName = Path.Combine(userDataPath, "parameters.dat");
-            this.resourceDataFileName = Path.Combine(userDataPath, "PseudoResources.dat"); ;
+            this.resourceDataFileName = Path.Combine(userDataPath, "PseudoResources.dat");
             this.regionFileName = string.Empty;
 
 
