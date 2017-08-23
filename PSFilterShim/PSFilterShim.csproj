@@ -197,7 +197,6 @@
     <Compile Include="PSApi\PSPixelMap.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
     <Compile Include="PSApi\ReadImageDocumentDesc.cs" />
-    <Compile Include="PSApi\ReadOnlyDictionary.cs" />
     <Compile Include="PSApi\Rect.cs" />
     <Compile Include="PSApi\ResourceProc.cs" />
     <Compile Include="PSApi\RGBColor.cs" />
