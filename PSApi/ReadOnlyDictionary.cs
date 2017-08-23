@@ -25,7 +25,7 @@ namespace PSFilterLoad.PSApi
     /// <seealso cref="System.Collections.Generic.IDictionary{TKey, TValue}"/>
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
-    internal sealed class ReadOnlyDictionary<TKey, TValue> : IDictionary<TKey, TValue>  
+    public sealed class ReadOnlyDictionary<TKey, TValue> : IDictionary<TKey, TValue>  
     {
         private readonly IDictionary<TKey, TValue> dictionary;
 
