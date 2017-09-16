@@ -179,12 +179,53 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int StuffXYZ(IntPtr colorID, CS_XYZ xyz)
         {
-            return PSError.kSPUnimplementedError;
+            // Clamp the values to the range of [0, 255].
+            ushort x = xyz.x;
+            if (x > 255)
+            {
+                x = 255;
+            }
+
+            ushort y = xyz.y;
+            if (y > 255)
+            {
+                y = 255;
+            }
+
+            ushort z = xyz.z;
+            if (z > 255)
+            {
+                z = 255;
+            }
+
+            this.colors[colorID] = new Color(ColorSpace.XYZSpace, (byte)x, (byte)y, (byte)z, 0);
+
+            return PSError.kSPNoError;
         }
 
         private int ExtractXYZ(IntPtr colorID, ref CS_XYZ xyz)
         {
-            return PSError.kSPUnimplementedError;
+            Color item = this.colors[colorID];
+
+            byte c0 = item.Component0;
+            byte c1 = item.Component1;
+            byte c2 = item.Component2;
+            byte c3 = item.Component3;
+
+            if (item.ColorSpace != ColorSpace.XYZSpace)
+            {
+                int error = ColorServicesConvert.Convert(item.ColorSpace, ColorSpace.XYZSpace, ref c0, ref c1, ref c2, ref c3);
+                if (error != PSError.kSPNoError)
+                {
+                    return error;
+                }
+            }
+
+            xyz.x = c0;
+            xyz.y = c1;
+            xyz.z = c2;
+
+            return PSError.kSPNoError;
         }
 
         private unsafe int Convert8(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
