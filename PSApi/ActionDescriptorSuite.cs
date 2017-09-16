@@ -472,7 +472,7 @@ namespace PSFilterLoad.PSApi
 #endif
             isEqual = 0;
 
-            return PSError.kSPNotImplmented;
+            return PSError.kSPUnimplementedError;
         }
 
         private int Erase(IntPtr descriptor, uint key)

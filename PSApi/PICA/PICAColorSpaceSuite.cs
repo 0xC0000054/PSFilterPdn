@@ -179,12 +179,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int StuffXYZ(IntPtr colorID, CS_XYZ xyz)
         {
-            return PSError.kSPNotImplmented;
+            return PSError.kSPUnimplementedError;
         }
 
         private int ExtractXYZ(IntPtr colorID, ref CS_XYZ xyz)
         {
-            return PSError.kSPNotImplmented;
+            return PSError.kSPUnimplementedError;
         }
 
         private unsafe int Convert8(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
@@ -261,7 +261,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Convert16(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
         {
-            return PSError.kSPNotImplmented;
+            return PSError.kSPUnimplementedError;
         }
 
         private int GetNativeSpace(IntPtr colorID, ref ColorSpace nativeSpace)
@@ -385,7 +385,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int ConvertToMonitorRGB(ColorSpace inputCSpace, IntPtr inputData, IntPtr outputData, short count)
         {
-            return PSError.kSPNotImplmented;
+            return PSError.kSPUnimplementedError;
         }
 
         public PSColorSpaceSuite1 CreateColorSpaceSuite1()

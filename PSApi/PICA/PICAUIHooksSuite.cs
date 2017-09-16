@@ -49,7 +49,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int HostSetCursor(IntPtr cursor)
         {
-            return PSError.kSPNotImplmented;
+            return PSError.kSPUnimplementedError;
         }
 
         private uint HostTickCount()
