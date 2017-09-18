@@ -22,6 +22,7 @@ namespace PSFilterPdn
     internal sealed class StringLogicalComparer : IComparer
     {
         private static readonly IComparer _default = new StringLogicalComparer();
+        private static readonly CultureInfo culture = CultureInfo.CurrentCulture;
 
         private StringLogicalComparer()
         {
@@ -90,8 +91,8 @@ namespace PSFilterPdn
 
                         if (letter1 && letter2)
                         {
-                            c1 = char.ToUpper(c1, CultureInfo.CurrentCulture);
-                            c2 = char.ToUpper(c2, CultureInfo.CurrentCulture);
+                            c1 = char.ToUpper(c1, culture);
+                            c2 = char.ToUpper(c2, culture);
 
                             r = c1 - c2;
                             if (0 != r) return r;
