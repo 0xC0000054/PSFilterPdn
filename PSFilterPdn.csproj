@@ -251,6 +251,9 @@
     <Compile Include="StringExtensions.cs" />
     <Compile Include="StringLogicalComparer.cs" />
     <Compile Include="TreeNodeItemComparer.cs" />
+    <Compile Include="DoubleBufferedTreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ColorPicker\ColorPickerForm.resx">

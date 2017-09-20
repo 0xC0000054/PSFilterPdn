@@ -34,7 +34,7 @@ namespace PSFilterPdn
         private Button buttonOK;
         private TabControl tabControl1;
         private TabPage filterTab;
-        private TreeView filterTree;
+        private DoubleBufferedTreeView filterTree;
         private TabPage dirTab;
         private Button remDirBtn;
         private Button addDirBtn;
@@ -209,7 +209,7 @@ namespace PSFilterPdn
             this.fldrLoadProgLbl = new System.Windows.Forms.Label();
             this.folderLoadProgress = new System.Windows.Forms.ProgressBar();
             this.runFilterBtn = new System.Windows.Forms.Button();
-            this.filterTree = new System.Windows.Forms.TreeView();
+            this.filterTree = new DoubleBufferedTreeView();
             this.dirTab = new System.Windows.Forms.TabPage();
             this.subDirSearchCb = new System.Windows.Forms.CheckBox();
             this.remDirBtn = new System.Windows.Forms.Button();
