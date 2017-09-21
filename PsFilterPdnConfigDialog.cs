@@ -88,7 +88,7 @@ namespace PSFilterPdn
         private bool useDEPProxy;
         private bool searchBoxIgnoreTextChanged;
 
-        private const string DummyTreeNodeName = "dummy";
+        private const string DummyTreeNodeName = "dummyTreeNode";
 
         private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
 
