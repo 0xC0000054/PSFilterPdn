@@ -75,7 +75,6 @@ namespace PSFilterPdn
 
         private bool filterRunning;
         private bool formClosePending;
-        private List<FilterTreeItem> filterTreeItems;
         private List<string> expandedNodes;
         private FilterTreeNodes filterTreeNodes;
 
@@ -93,22 +92,9 @@ namespace PSFilterPdn
 
         private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
 
-        private sealed class FilterTreeItem
-        {
-            public readonly TreeNode childNode;
-            public readonly string parentCategory;
-
-            public FilterTreeItem(TreeNode child, string category)
-            {
-                this.childNode = child;
-                this.parentCategory = category;
-            }
-        }
-
         public PsFilterPdnConfigDialog()
         {
             InitializeComponent();
-            this.filterTreeItems = new List<FilterTreeItem>();
             this.proxyProcess = null;
             this.destSurface = null;
             this.expandedNodes = new List<string>();
@@ -1088,15 +1074,6 @@ namespace PSFilterPdn
 
                     this.filterTreeNodes = new FilterTreeNodes(parm.items);
 
-                    this.filterTreeItems.Clear();
-                    foreach (var parentNode in parm.items)
-                    {
-                        foreach (TreeNode item in parentNode.Value)
-                        {
-                            this.filterTreeItems.Add(new FilterTreeItem(item, parentNode.Key));
-                        }
-                    }
-
                     this.filterTree.BeginUpdate();
 
                     this.filterTree.TreeViewNodeSorter = null;
@@ -1409,33 +1386,37 @@ namespace PSFilterPdn
         /// <param name="keyword">The text to filter by</param>
         private void FilterTreeView(string keyword)
         {
-            if (filterTreeItems.Count > 0)
+            if (filterTreeNodes.Count > 0)
             {                
                 this.filterTree.SelectedNode = null;
                 this.runFilterBtn.Enabled = false;
                 this.fileNameLbl.Text = string.Empty;
 
                 Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>(StringComparer.Ordinal);
-                foreach (FilterTreeItem item in filterTreeItems)
+                foreach (var item in filterTreeNodes)
                 {
-                    TreeNode child = item.childNode;
-                    string category = item.parentCategory;
-                    string title = child.Text;
-                    if ((string.IsNullOrEmpty(keyword)) || title.Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                    string category = item.Key;
+                    ReadOnlyCollection<TreeNode> childNodes = item.Value;
+
+                    for (int i = 0; i < childNodes.Count; i++)
                     {
-                        if (nodes.ContainsKey(category))
+                        TreeNode child = childNodes[i];
+                        if ((string.IsNullOrEmpty(keyword)) || child.Text.Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
                         {
-                            TreeNode node = nodes[category];
-                            node.Nodes.Add(child.CloneT<TreeNode>());
-                        }
-                        else
-                        {
-                            TreeNode node = new TreeNode(category);
-                            node.Nodes.Add(child.CloneT<TreeNode>());
+                            if (nodes.ContainsKey(category))
+                            {
+                                TreeNode node = nodes[category];
+                                node.Nodes.Add(child.CloneT<TreeNode>());
+                            }
+                            else
+                            {
+                                TreeNode node = new TreeNode(category);
+                                node.Nodes.Add(child.CloneT<TreeNode>());
 
-                            nodes.Add(category, node);
-                        }
+                                nodes.Add(category, node);
+                            }
 
+                        } 
                     }
                 }
 
