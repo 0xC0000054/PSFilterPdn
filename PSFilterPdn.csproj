@@ -131,6 +131,7 @@
     <Compile Include="ColorSpace\HSL.cs" />
     <Compile Include="ColorSpace\RGB.cs" />
     <Compile Include="FileEnumerator.cs" />
+    <Compile Include="FilterTreeNodes.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IPSFilterShim.cs" />
     <Compile Include="MaskSurface\MaskSurface.cs" />

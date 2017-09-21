@@ -16,6 +16,7 @@ using PSFilterLoad.PSApi;
 using PSFilterPdn.Properties;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -76,6 +77,7 @@ namespace PSFilterPdn
         private bool formClosePending;
         private List<FilterTreeItem> filterTreeItems;
         private List<string> expandedNodes;
+        private FilterTreeNodes filterTreeNodes;
 
         private Settings settings;
         private string lastSelectedFilterTitle;
@@ -86,6 +88,8 @@ namespace PSFilterPdn
         /// </summary>
         private bool useDEPProxy;
         private bool searchBoxIgnoreTextChanged;
+
+        private const string DummyTreeNodeName = "dummy";
 
         private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
 
@@ -378,6 +382,7 @@ namespace PSFilterPdn
             this.filterTree.Size = new System.Drawing.Size(230, 260);
             this.filterTree.TabIndex = 0;
             this.filterTree.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(this.filterTree_AfterCollapse);
+            this.filterTree.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.filterTree_BeforeExpand);
             this.filterTree.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.filterTree_AfterExpand);
             this.filterTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.filterTree_AfterSelect);
             this.filterTree.DoubleClick += new System.EventHandler(this.filterTree_DoubleClick);
@@ -875,7 +880,7 @@ namespace PSFilterPdn
 
         private sealed class UpdateFilterListParam
         {
-            public TreeNode[] items;
+            public Dictionary<string, List<TreeNode>> items;
             public string[] directories;
             public bool searchSubdirectories;
 
@@ -955,13 +960,15 @@ namespace PSFilterPdn
         /// <param name="parent">The parent TreeNode to check</param>
         /// <param name="data">The PluginData to check.</param>
         /// <returns>True if the item is not a duplicate; otherwise false.</returns>
-        private static bool IsNotDuplicateNode(ref TreeNode parent, PluginData data)
+        private static bool IsNotDuplicateNode(ref List<TreeNode> parent, PluginData data)
         {
             if (IntPtr.Size == 8)
             {
-                if (parent.Nodes.ContainsKey(data.Title))
+                int index = parent.FindIndex(t => t.Text == data.Title);
+
+                if (index >= 0)
                 {
-                    TreeNode node = parent.Nodes[data.Title];
+                    TreeNode node = parent[index];
                     PluginData menuData = (PluginData)node.Tag;
 
                     if (Is64BitFilterIncompatible(data))
@@ -969,7 +976,7 @@ namespace PSFilterPdn
                         // If the 64-bit filter in the menu is incompatible remove it and use the 32-bit version.
                         if (!menuData.RunWith32BitShim && data.RunWith32BitShim)
                         {
-                            parent.Nodes.Remove(node);
+                            parent.RemoveAt(index);
                         }
 
                         return data.RunWith32BitShim;
@@ -978,7 +985,7 @@ namespace PSFilterPdn
                     if (menuData.RunWith32BitShim && !data.RunWith32BitShim)
                     {
                         // If the new plugin is 64-bit and the old one is not remove the old one and use the 64-bit one.
-                        parent.Nodes.Remove(node);
+                        parent.RemoveAt(index);
 
                         return true;
                     }
@@ -1003,7 +1010,7 @@ namespace PSFilterPdn
             BackgroundWorker worker = (BackgroundWorker)sender;
             UpdateFilterListParam args = (UpdateFilterListParam)e.Argument;
 
-            Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>(StringComparer.Ordinal);
+            Dictionary<string, List<TreeNode>> nodes = new Dictionary<string, List<TreeNode>>(StringComparer.Ordinal);
 
             for (int i = 0; i < args.directories.Length; i++)
             {
@@ -1036,17 +1043,18 @@ namespace PSFilterPdn
 
                                 if (nodes.ContainsKey(plugin.Category))
                                 {
-                                    TreeNode parent = nodes[plugin.Category];
+                                    List<TreeNode> parent = nodes[plugin.Category];
                                     if (IsNotDuplicateNode(ref parent, plugin))
                                     {
-                                        parent.Nodes.Add(child);
+                                        parent.Add(child);
                                     }
                                 }
                                 else
                                 {
-                                    TreeNode node = new TreeNode(plugin.Category, new TreeNode[] { child }) { Name = plugin.Category };
+                                    List<TreeNode> items = new List<TreeNode>();
+                                    items.Add(child);
 
-                                    nodes.Add(plugin.Category, node);
+                                    nodes.Add(plugin.Category, items);
                                 } 
                             }
                         }
@@ -1054,8 +1062,7 @@ namespace PSFilterPdn
                 }
             }
 
-            args.items = new TreeNode[nodes.Values.Count];
-            nodes.Values.CopyTo(args.items, 0);
+            args.items = nodes;
 
             e.Result = args;
         }
@@ -1079,19 +1086,28 @@ namespace PSFilterPdn
                 {
                     UpdateFilterListParam parm = (UpdateFilterListParam)e.Result;
 
+                    this.filterTreeNodes = new FilterTreeNodes(parm.items);
+
                     this.filterTreeItems.Clear();
                     foreach (var parentNode in parm.items)
                     {
-                        foreach (TreeNode item in parentNode.Nodes)
+                        foreach (TreeNode item in parentNode.Value)
                         {
-                            this.filterTreeItems.Add(new FilterTreeItem(item, parentNode.Text));
+                            this.filterTreeItems.Add(new FilterTreeItem(item, parentNode.Key));
                         }
                     }
 
                     this.filterTree.BeginUpdate();
 
                     this.filterTree.TreeViewNodeSorter = null;
-                    this.filterTree.Nodes.AddRange(parm.items);
+                    
+                    foreach (var item in parm.items)
+                    {
+                        TreeNode dummy = new TreeNode() { Name = DummyTreeNodeName };
+
+                        this.filterTree.Nodes.Add(new TreeNode(item.Key, new TreeNode[] { dummy }) { Name = item.Key });
+                    }
+
                     this.filterTree.TreeViewNodeSorter = new TreeNodeItemComparer();
 
                     this.filterTree.EndUpdate();
@@ -1514,6 +1530,29 @@ namespace PSFilterPdn
         private void donateLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             base.Services.GetService<PaintDotNet.AppModel.IShellService>().LaunchUrl(this, @"http://forums.getpaint.net/index.php?showtopic=20622");
+        }
+
+        private void filterTree_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        {
+            if (e.Action == TreeViewAction.Expand)
+            {
+                TreeNode item = e.Node;
+
+                if (item.Nodes.Count == 1 && item.Nodes[0].Name.Equals(DummyTreeNodeName, StringComparison.Ordinal))
+                {
+                    TreeNode parent = this.filterTree.Nodes[item.Name];
+
+                    // Remove the placeholder node and add the real nodes.
+                    parent.Nodes.RemoveAt(0);
+
+                    ReadOnlyCollection<TreeNode> values = this.filterTreeNodes[item.Text];
+
+                    for (int i = 0; i < values.Count; i++)
+                    {
+                        parent.Nodes.Add(values[i].CloneT());
+                    }
+                }  
+            }
         }
     }
 }
