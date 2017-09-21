@@ -90,6 +90,7 @@ namespace PSFilterPdn
             public const int TVS_EX_DOUBLEBUFFER = 0x0004;
         }
 
+        [System.Security.SuppressUnmanagedCodeSecurity]
         private static class SafeNativeMethods
         {
             [DllImport("user32.dll")]
