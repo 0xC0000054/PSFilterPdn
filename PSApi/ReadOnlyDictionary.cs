@@ -28,6 +28,10 @@ namespace PSFilterLoad.PSApi
     public sealed class ReadOnlyDictionary<TKey, TValue> : IDictionary<TKey, TValue>  
     {
         private readonly IDictionary<TKey, TValue> dictionary;
+        [NonSerialized]
+        private KeyCollection keys;
+        [NonSerialized]
+        private ValueCollection values;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReadOnlyDictionary{TKey, TValue}"/> class.
@@ -36,6 +40,8 @@ namespace PSFilterLoad.PSApi
         public ReadOnlyDictionary(IDictionary<TKey, TValue> dictionary)
         {
             this.dictionary = dictionary;
+            this.keys = null;
+            this.values = null;
         }
 
         /// <summary>
@@ -56,7 +62,12 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return new KeyCollection(this.dictionary.Keys);
+                if (this.keys == null)
+                {
+                    this.keys = new KeyCollection(this.dictionary.Keys);
+                }
+
+                return this.keys;
             }
         }
 
@@ -67,7 +78,12 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return new ValueCollection(this.dictionary.Values);
+                if (this.values == null)
+                {
+                    this.values = new ValueCollection(this.dictionary.Values);
+                }
+
+                return this.values;
             }
         }
 
