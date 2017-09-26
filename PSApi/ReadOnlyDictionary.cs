@@ -234,6 +234,12 @@ namespace PSFilterLoad.PSApi
         } 
         #endregion
 
+        /// <summary>
+        /// Represents a read-only collection of keys in the <see cref="ReadOnlyDictionary{TKey, TValue}"/>
+        /// </summary>
+        /// <seealso cref="System.Collections.Generic.ICollection{T}" />
+        [DebuggerDisplay("Count = {Count}")]
+        [Serializable]
         public sealed class KeyCollection : ICollection<TKey>
         {
             private readonly ICollection<TKey> items;
@@ -320,6 +326,12 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        /// <summary>
+        /// Represents a read-only collection of values in the <see cref="ReadOnlyDictionary{TKey, TValue}"/>
+        /// </summary>
+        /// <seealso cref="System.Collections.Generic.ICollection{T}" />
+        [DebuggerDisplay("Count = {Count}")]
+        [Serializable]
         public sealed class ValueCollection : ICollection<TValue>
         {
             private readonly ICollection<TValue> items;
