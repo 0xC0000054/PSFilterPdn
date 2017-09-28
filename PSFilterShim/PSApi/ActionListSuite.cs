@@ -404,7 +404,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                Dictionary<uint, AETEValue> descriptorValues;
+                ReadOnlyDictionary<uint, AETEValue> descriptorValues;
                 if (this.actionDescriptorSuite.TryGetDescriptorValues(descriptor, out descriptorValues))
                 {
                     ActionListDescriptor item = new ActionListDescriptor(type, descriptorValues);

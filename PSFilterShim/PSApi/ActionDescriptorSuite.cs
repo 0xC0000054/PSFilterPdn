@@ -214,20 +214,20 @@ namespace PSFilterLoad.PSApi
             this.actionDescriptorsIndex = 0;
         }
 
-        bool IActionDescriptorSuite.TryGetDescriptorValues(IntPtr descriptor, out Dictionary<uint, AETEValue> values)
+        bool IActionDescriptorSuite.TryGetDescriptorValues(IntPtr descriptor, out ReadOnlyDictionary<uint, AETEValue> values)
         {
             values = null;
             ScriptingParameters scriptingData;
             if (this.actionDescriptors.TryGetValue(descriptor, out scriptingData))
             {
-                values = scriptingData.ToDictionary();
+                values = new ReadOnlyDictionary<uint, AETEValue>(scriptingData.ToDictionary());
                 return true;
             }
 
             return false;
         }
 
-        IntPtr IActionDescriptorSuite.CreateDescriptor(Dictionary<uint, AETEValue> values)
+        IntPtr IActionDescriptorSuite.CreateDescriptor(ReadOnlyDictionary<uint, AETEValue> values)
         {
             if (values == null)
             {

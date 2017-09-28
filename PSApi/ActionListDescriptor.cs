@@ -19,7 +19,7 @@ namespace PSFilterLoad.PSApi
     public sealed class ActionListDescriptor
     {
         private readonly uint type;
-        private readonly Dictionary<uint, AETEValue> descriptorValues;
+        private readonly ReadOnlyDictionary<uint, AETEValue> descriptorValues;
 
         public uint Type
         {
@@ -29,7 +29,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public Dictionary<uint, AETEValue> DescriptorValues
+        public ReadOnlyDictionary<uint, AETEValue> DescriptorValues
         {
             get
             {
@@ -37,7 +37,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public ActionListDescriptor(uint type, Dictionary<uint, AETEValue> descriptorValues)
+        public ActionListDescriptor(uint type, ReadOnlyDictionary<uint, AETEValue> descriptorValues)
         {
             this.type = type;
             this.descriptorValues = descriptorValues;
