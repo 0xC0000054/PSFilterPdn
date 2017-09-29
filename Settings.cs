@@ -18,13 +18,13 @@ namespace PSFilterPdn
 {
     internal sealed class Settings
     {
-        XmlDocument xmlDocument = new XmlDocument();
-                
-        string documentPath = null;
+        XmlDocument xmlDocument;
+        string documentPath;
 
         public Settings(string path)
         {
             documentPath = path;
+            xmlDocument = new XmlDocument();
             xmlDocument.Load(documentPath);
         }
 
