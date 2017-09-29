@@ -19,7 +19,7 @@ namespace PSFilterPdn
     internal sealed class Settings
     {
         XmlDocument xmlDocument;
-        string documentPath;
+        readonly string documentPath;
 
         public Settings(string path)
         {
