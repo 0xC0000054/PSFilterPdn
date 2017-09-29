@@ -1136,6 +1136,10 @@ namespace PSFilterPdn
                 e.Cancel = true;
             }
 
+            if (!e.Cancel && settings != null)
+            {
+                settings.Flush();
+            }
         }
 
         private void filterTree_AfterSelect(object sender, TreeViewEventArgs e)
