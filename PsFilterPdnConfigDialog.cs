@@ -552,15 +552,6 @@ namespace PSFilterPdn
             {
                 SetProxyResultData();
 
-                File.Delete(srcFileName);
-                File.Delete(destFileName);
-                if (!string.IsNullOrEmpty(regionFileName))
-                {
-                    File.Delete(regionFileName);
-                }
-                File.Delete(parameterDataFileName);
-                File.Delete(resourceDataFileName);
-
                 PSFilterShimServer.Stop();
 
                 proxyRunning = false;
