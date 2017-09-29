@@ -1192,30 +1192,6 @@ namespace PSFilterPdn
         {
             base.OnLoad(e);
 
-            try
-            {
-                this.LoadSettings();
-
-                bool searchSubDirs;
-                if (bool.TryParse(settings.GetSetting("searchSubDirs", bool.TrueString), out searchSubDirs))
-                {
-                    this.subDirSearchCb.Checked = searchSubDirs;
-                }
-                else
-                {
-                    this.subDirSearchCb.Checked = true;
-                }
-
-            }
-            catch (IOException ex)
-            {
-                ShowErrorMessage(ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                ShowErrorMessage(ex.Message);
-            }
-
             // set the useDEPProxy flag when on a 32-bit OS.
             this.useDEPProxy = false;
             if (IntPtr.Size == 4)
@@ -1241,6 +1217,30 @@ namespace PSFilterPdn
             base.OnShown(e);
 
             CheckSourceSurfaceSize();
+
+            try
+            {
+                this.LoadSettings();
+
+                bool searchSubDirs;
+                if (bool.TryParse(settings.GetSetting("searchSubDirs", bool.TrueString), out searchSubDirs))
+                {
+                    this.subDirSearchCb.Checked = searchSubDirs;
+                }
+                else
+                {
+                    this.subDirSearchCb.Checked = true;
+                }
+
+            }
+            catch (IOException ex)
+            {
+                ShowErrorMessage(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                ShowErrorMessage(ex.Message);
+            }
 
             string effectsDir = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().InstallDirectory, "Effects");
             this.foundEffectsDir = false;
