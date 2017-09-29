@@ -72,6 +72,7 @@ namespace PSFilterPdn
         private string resourceDataFileName;
         private string regionFileName;
         private PluginData proxyData;
+        private readonly string proxyTempDir;
 
         private bool filterRunning;
         private bool formClosePending;
@@ -101,14 +102,35 @@ namespace PSFilterPdn
             this.pseudoResources = new List<PSResource>();
             this.fileNameLbl.Text = string.Empty;
             this.folderNameLbl.Text = string.Empty;
+            this.proxyTempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && proxyProcess != null)
+            if (disposing)
             {
-                proxyProcess.Dispose();
-                proxyProcess = null;
+                if (proxyProcess != null)
+                {
+                    proxyProcess.Dispose();
+                    proxyProcess = null; 
+                }
+
+                if (Directory.Exists(proxyTempDir))
+                {
+                    try
+                    {
+                        Directory.Delete(proxyTempDir, true);
+                    }
+                    catch (ArgumentException)
+                    {
+                    }
+                    catch (IOException)
+                    {
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                    }
+                }
             }
 
             base.Dispose(disposing);
@@ -545,6 +567,35 @@ namespace PSFilterPdn
             }
         }
 
+        private bool CreateProxyTempDirectory()
+        {
+            try
+            {
+                DirectoryInfo info = new DirectoryInfo(proxyTempDir);
+
+                if (!info.Exists)
+                {
+                    info.Create();
+                }
+
+                return true;
+            }
+            catch (ArgumentException ex)
+            {
+                ShowErrorMessage(ex.Message);
+            }
+            catch (IOException ex)
+            {
+                ShowErrorMessage(ex.Message);
+            }
+            catch (System.Security.SecurityException ex)
+            {
+                ShowErrorMessage(ex.Message);
+            }
+
+            return false;
+        }
+
         private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
         {
             // Check that PSFilterShim exists first thing and abort if it does not.
@@ -554,11 +605,15 @@ namespace PSFilterPdn
                 return;
             }
 
-            string userDataPath = base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
-            this.srcFileName = Path.Combine(userDataPath, "proxysource.png");
-            this.destFileName = Path.Combine(userDataPath, "proxyresult.png");
-            this.parameterDataFileName = Path.Combine(userDataPath, "parameters.dat");
-            this.resourceDataFileName = Path.Combine(userDataPath, "PseudoResources.dat");
+            if (!CreateProxyTempDirectory())
+            {
+                return;
+            }
+
+            this.srcFileName = Path.Combine(proxyTempDir, "proxysource.png");
+            this.destFileName = Path.Combine(proxyTempDir, "proxyresult.png");
+            this.parameterDataFileName = Path.Combine(proxyTempDir, "parameters.dat");
+            this.resourceDataFileName = Path.Combine(proxyTempDir, "PseudoResources.dat");
             this.regionFileName = string.Empty;
 
 
@@ -568,7 +623,7 @@ namespace PSFilterPdn
 
             if (selection != sourceBounds)
             {
-                this.regionFileName = Path.Combine(userDataPath, "selection.dat");
+                this.regionFileName = Path.Combine(proxyTempDir, "selection.dat");
                 RegionDataWrapper selectedRegion = new RegionDataWrapper(eep.GetSelection(sourceBounds).GetRegionData());
 
                 using (FileStream fs = new FileStream(regionFileName, FileMode.Create, FileAccess.Write))

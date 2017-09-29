@@ -94,57 +94,59 @@ namespace PSFilterPdn
                 return;
             }
 
-            string userDataPath = base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
-            string srcFileName = Path.Combine(userDataPath, "proxysource.png");
-            string destFileName = Path.Combine(userDataPath, "proxyresult.png");
-            string parameterDataFileName = Path.Combine(userDataPath, "parameters.dat");
-            string resourceDataFileName = Path.Combine(userDataPath, "PseudoResources.dat");
-            string regionFileName = string.Empty;
-
-            Rectangle sourceBounds = base.EnvironmentParameters.SourceSurface.Bounds;
-
-            Rectangle selection = base.EnvironmentParameters.GetSelection(sourceBounds).GetBoundsInt();
-
-            if (selection != sourceBounds)
-            {
-                regionFileName = Path.Combine(userDataPath, "selection.dat");
-                RegionDataWrapper selectedRegion = new RegionDataWrapper(base.EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
-
-                using (FileStream fs = new FileStream(regionFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    BinaryFormatter bf = new BinaryFormatter();
-                    bf.Serialize(fs, selectedRegion);
-                }
-            }
-
-            bool proxyResult = true;
-            string proxyErrorMessage = string.Empty;
-
-            PSFilterShimData shimData = new PSFilterShimData
-            {
-                RepeatEffect = true,
-                ShowAboutDialog = false,
-                SourceImagePath = srcFileName,
-                DestinationImagePath = destFileName,
-                ParentWindowHandle = window.Handle,
-                PrimaryColor = EnvironmentParameters.PrimaryColor.ToColor(),
-                SecondaryColor = EnvironmentParameters.SecondaryColor.ToColor(),
-                RegionDataPath = regionFileName,
-                ParameterDataPath = parameterDataFileName,
-                PseudoResourcePath = resourceDataFileName
-            };
-
-            PSFilterShimService service = new PSFilterShimService(
-                AbortCallback, 
-                token.FilterData,
-                shimData,
-                delegate (string data) { proxyResult = false; proxyErrorMessage = data; },
-                null);
-
-            PSFilterShimServer.Start(service);
-
+            string proxyTempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             try
             {
+                Directory.CreateDirectory(proxyTempDir);
+
+                string srcFileName = Path.Combine(proxyTempDir, "proxysource.png");
+                string destFileName = Path.Combine(proxyTempDir, "proxyresult.png");
+                string parameterDataFileName = Path.Combine(proxyTempDir, "parameters.dat");
+                string resourceDataFileName = Path.Combine(proxyTempDir, "PseudoResources.dat");
+                string regionFileName = string.Empty;
+
+                Rectangle sourceBounds = base.EnvironmentParameters.SourceSurface.Bounds;
+
+                Rectangle selection = base.EnvironmentParameters.GetSelection(sourceBounds).GetBoundsInt();
+
+                if (selection != sourceBounds)
+                {
+                    regionFileName = Path.Combine(proxyTempDir, "selection.dat");
+                    RegionDataWrapper selectedRegion = new RegionDataWrapper(base.EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
+
+                    using (FileStream fs = new FileStream(regionFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        BinaryFormatter bf = new BinaryFormatter();
+                        bf.Serialize(fs, selectedRegion);
+                    }
+                }
+
+                bool proxyResult = true;
+                string proxyErrorMessage = string.Empty;
+
+                PSFilterShimData shimData = new PSFilterShimData
+                {
+                    RepeatEffect = true,
+                    ShowAboutDialog = false,
+                    SourceImagePath = srcFileName,
+                    DestinationImagePath = destFileName,
+                    ParentWindowHandle = window.Handle,
+                    PrimaryColor = EnvironmentParameters.PrimaryColor.ToColor(),
+                    SecondaryColor = EnvironmentParameters.SecondaryColor.ToColor(),
+                    RegionDataPath = regionFileName,
+                    ParameterDataPath = parameterDataFileName,
+                    PseudoResourcePath = resourceDataFileName
+                };
+
+                PSFilterShimService service = new PSFilterShimService(
+                    AbortCallback, 
+                    token.FilterData,
+                    shimData,
+                    delegate (string data) { proxyResult = false; proxyErrorMessage = data; },
+                    null);
+
+                PSFilterShimServer.Start(service);
+
                 using (FileStream fs = new FileStream(srcFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     using (Bitmap bmp = base.EnvironmentParameters.SourceSurface.CreateAliasedBitmap())
@@ -192,6 +194,14 @@ namespace PSFilterPdn
             {
                 ShowErrorMessage(window, ax.Message);
             }
+            catch (IOException ex)
+            {
+                ShowErrorMessage(window, ex.Message);
+            }
+            catch (NotSupportedException ex)
+            {
+                ShowErrorMessage(window, ex.Message);
+            }
             catch (UnauthorizedAccessException ex)
             {
                 ShowErrorMessage(window, ex.Message);
@@ -202,14 +212,21 @@ namespace PSFilterPdn
             }
             finally
             {
-                File.Delete(srcFileName);
-                File.Delete(destFileName);
-                File.Delete(parameterDataFileName);
-                File.Delete(resourceDataFileName);
-
-                if (!string.IsNullOrEmpty(regionFileName))
+                if (Directory.Exists(proxyTempDir))
                 {
-                    File.Delete(regionFileName);
+                    try
+                    {
+                        Directory.Delete(proxyTempDir, true);
+                    }
+                    catch (ArgumentException)
+                    {
+                    }
+                    catch (IOException)
+                    {
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                    }
                 }
 
                 PSFilterShimServer.Stop();
