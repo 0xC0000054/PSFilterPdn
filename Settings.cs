@@ -20,12 +20,23 @@ namespace PSFilterPdn
     {
         XmlDocument xmlDocument;
         readonly string documentPath;
+        bool changed;
 
         public Settings(string path)
         {
             documentPath = path;
             xmlDocument = new XmlDocument();
             xmlDocument.Load(documentPath);
+            changed = false;
+        }
+
+        public void Flush()
+        {
+            if (changed)
+            {
+                xmlDocument.Save(documentPath);
+                changed = false;
+            }
         }
 
         public string GetSetting(string xPath, string defaultValue)
@@ -40,7 +51,7 @@ namespace PSFilterPdn
             XmlNode xmlNode = xmlDocument.SelectSingleNode("settings/" + xPath);
             if (xmlNode == null) { xmlNode = createMissingNode("settings/" + xPath); }
             xmlNode.InnerText = value;
-            xmlDocument.Save(documentPath);
+            changed = true;
         }
 
         private XmlNode createMissingNode(string xPath)
