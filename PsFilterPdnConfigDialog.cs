@@ -1578,10 +1578,15 @@ namespace PSFilterPdn
 
                     ReadOnlyCollection<TreeNode> values = this.filterTreeNodes[item.Text];
 
+                    TreeNode[] nodes = new TreeNode[values.Count];
                     for (int i = 0; i < values.Count; i++)
                     {
-                        parent.Nodes.Add(values[i].CloneT());
+                        // The TreeNode values must be cloned to prevent the Handle property
+                        // from being set in the underlying collection.
+                        nodes[i] = values[i].CloneT();
                     }
+
+                    parent.Nodes.AddRange(nodes);
                 }  
             }
         }
