@@ -1131,7 +1131,7 @@ namespace PSFilterPdn
                         this.filterTree.Nodes.Add(new TreeNode(item.Key, new TreeNode[] { dummy }) { Name = item.Key });
                     }
 
-                    this.filterTree.TreeViewNodeSorter = new TreeNodeItemComparer();
+                    this.filterTree.TreeViewNodeSorter = TreeNodeItemComparer.Instance;
 
                     this.filterTree.EndUpdate();
 
@@ -1482,7 +1482,7 @@ namespace PSFilterPdn
                         this.filterTree.Nodes[index].Expand();
                     }
                 }
-                this.filterTree.TreeViewNodeSorter = new TreeNodeItemComparer();
+                this.filterTree.TreeViewNodeSorter = TreeNodeItemComparer.Instance;
                 this.filterTree.EndUpdate();
             }
         }
