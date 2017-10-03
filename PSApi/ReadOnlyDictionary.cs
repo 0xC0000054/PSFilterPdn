@@ -37,8 +37,14 @@ namespace PSFilterLoad.PSApi
         /// Initializes a new instance of the <see cref="ReadOnlyDictionary{TKey, TValue}"/> class.
         /// </summary>
         /// <param name="dictionary">The dictionary to wrap.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="dictionary"/> is null.</exception>
         public ReadOnlyDictionary(IDictionary<TKey, TValue> dictionary)
         {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException("dictionary");
+            }
+
             this.dictionary = dictionary;
             this.keys = null;
             this.values = null;
