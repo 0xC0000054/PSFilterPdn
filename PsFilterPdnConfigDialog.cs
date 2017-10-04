@@ -79,7 +79,7 @@ namespace PSFilterPdn
         private List<string> expandedNodes;
         private FilterTreeNodes filterTreeNodes;
 
-        private Settings settings;
+        private PSFilterPdnSettings settings;
         private string lastSelectedFilterTitle;
         private string filterParametersPluginFileName;
         private bool foundEffectsDir;
@@ -1267,17 +1267,6 @@ namespace PSFilterPdn
             try
             {
                 this.LoadSettings();
-
-                bool searchSubDirs;
-                if (bool.TryParse(settings.GetSetting("searchSubDirs", bool.TrueString), out searchSubDirs))
-                {
-                    this.subDirSearchCb.Checked = searchSubDirs;
-                }
-                else
-                {
-                    this.subDirSearchCb.Checked = true;
-                }
-
             }
             catch (IOException ex)
             {
@@ -1299,12 +1288,12 @@ namespace PSFilterPdn
 
             if (settings != null)
             {
-                string dirs = this.settings.GetSetting("searchDirs", string.Empty).Trim();
+                this.subDirSearchCb.Checked = this.settings.SearchSubdirectories;
+                SearchDirectoryCollection dirs = this.settings.SearchDirectories;
 
-                if (!string.IsNullOrEmpty(dirs))
+                if (dirs != null)
                 {
-                    string[] dirlist = dirs.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (string dir in dirlist)
+                    foreach (string dir in dirs)
                     {
                         if (Directory.Exists(dir))
                         {
@@ -1313,6 +1302,11 @@ namespace PSFilterPdn
                     }
                 }
             }
+            else
+            {
+                this.subDirSearchCb.Checked = true;
+            }
+
             UpdateFilterList();
         }
 
@@ -1328,28 +1322,8 @@ namespace PSFilterPdn
                 }
 
                 string path = Path.Combine(userDataPath, @"PSFilterPdn.xml");
-                if (!File.Exists(path))
-                {
-                    using (Stream res = Assembly.GetAssembly(typeof(PSFilterPdnEffect)).GetManifestResourceStream(@"PSFilterPdn.PSFilterPdn.xml"))
-                    {
-                        byte[] bytes = new byte[res.Length];
-                        int numBytesToRead = (int)res.Length;
-                        int numBytesRead = 0;
-                        while (numBytesToRead > 0)
-                        {
-                            // Read may return anything from 0 to numBytesToRead.
-                            int n = res.Read(bytes, numBytesRead, numBytesToRead);
-                            // The end of the file is reached.
-                            if (n == 0)
-                                break;
-                            numBytesRead += n;
-                            numBytesToRead -= n;
-                        }
-                        File.WriteAllBytes(path, bytes);
-                    }
-                }
 
-                settings = new Settings(path);
+                settings = new PSFilterPdnSettings(path);
             }
         }
 
@@ -1357,34 +1331,25 @@ namespace PSFilterPdn
         {
             if (settings != null)
             {
-                StringBuilder dirs = new StringBuilder();
+                int startIndex = 0;
                 int count = searchDirListView.Items.Count;
-                int lastItem = count - 1;
-                for (int i = 0; i < count; i++)
-                {
-                    if (i == 0 && foundEffectsDir)
-                        continue;
+                int dirCount = count;
 
-                    dirs.Append(searchDirListView.Items[i].Text);
+                if (foundEffectsDir)
+                {
+                    // The Paint.NET Effects directory is not included in the saved search directories. 
+                    startIndex = 1;
+                    dirCount--;
+                }
 
-                    if (i < lastItem)
-                    {
-                        dirs.Append(',');
-                    }
-                }
-                try
-                {
-                    settings.PutSetting("searchDirs", dirs.ToString());
+                List<string> dirs = new List<string>(dirCount);
 
-                }
-                catch (IOException ex)
+                for (int i = startIndex; i < count; i++)
                 {
-                    ShowErrorMessage(ex.Message);
+                    dirs.Add(searchDirListView.Items[i].Text);
                 }
-                catch (UnauthorizedAccessException ex)
-                {
-                    ShowErrorMessage(ex.Message);
-                }
+                
+                settings.SearchDirectories = new SearchDirectoryCollection(dirs);
             }
         }
 
@@ -1392,20 +1357,9 @@ namespace PSFilterPdn
         {
             if (settings != null)
             {
-                try
-                {
-                    this.settings.PutSetting("searchSubDirs", subDirSearchCb.Checked.ToString(CultureInfo.InvariantCulture));
-                    this.UpdateFilterList();
-                }
-                catch (IOException ex)
-                {
-                    ShowErrorMessage(ex.Message);
-                }
-                catch (UnauthorizedAccessException ex)
-                {
-                    ShowErrorMessage(ex.Message);
-                }
+                this.settings.SearchSubdirectories = subDirSearchCb.Checked;
             }
+            UpdateFilterList();
         }
 
         private void filterSearchBox_Enter(object sender, EventArgs e)
