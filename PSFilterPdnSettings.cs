@@ -50,6 +50,11 @@ namespace PSFilterPdn
         [DataMember(Name = "SearchSubdirectories")]
         private bool searchSubdirectories;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PSFilterPdnSettings"/> class.
+        /// </summary>
+        /// <param name="path">The path of the settings file.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
         public PSFilterPdnSettings(string path)
         {
             if (path == null)
@@ -75,6 +80,13 @@ namespace PSFilterPdn
             }
         }
 
+        /// <summary>
+        /// Gets or sets the search directories.
+        /// </summary>
+        /// <value>
+        /// The search directories.
+        /// </value>
+        /// <exception cref="ArgumentNullException"><paramref name="value"/> is null</exception>
         public SearchDirectoryCollection SearchDirectories
         {
             get
@@ -93,6 +105,12 @@ namespace PSFilterPdn
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether subdirectories are searched.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if subdirectories are searched; otherwise, <c>false</c>.
+        /// </value>
         public bool SearchSubdirectories
         {
             get
@@ -109,7 +127,9 @@ namespace PSFilterPdn
             }
         }
 
-
+        /// <summary>
+        /// Saves any changes to this instance.
+        /// </summary>
         public void Flush()
         {
             if (this.changed)
