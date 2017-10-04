@@ -1295,10 +1295,7 @@ namespace PSFilterPdn
                 {
                     foreach (string dir in dirs)
                     {
-                        if (Directory.Exists(dir))
-                        {
-                            this.searchDirListView.Items.Add(dir);
-                        }
+                        this.searchDirListView.Items.Add(dir);
                     }
                 }
             }
