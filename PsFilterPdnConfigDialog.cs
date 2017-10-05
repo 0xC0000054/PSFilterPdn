@@ -1266,7 +1266,16 @@ namespace PSFilterPdn
 
             try
             {
-                this.LoadSettings();
+                string userDataPath = base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
+
+                if (!Directory.Exists(userDataPath))
+                {
+                    Directory.CreateDirectory(userDataPath);
+                }
+
+                string path = Path.Combine(userDataPath, @"PSFilterPdn.xml");
+
+                this.settings = new PSFilterPdnSettings(path);
             }
             catch (IOException ex)
             {
@@ -1305,23 +1314,6 @@ namespace PSFilterPdn
             }
 
             UpdateFilterList();
-        }
-
-        private void LoadSettings()
-        {
-            if (settings == null)
-            {
-                string userDataPath = base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
-
-                if (!Directory.Exists(userDataPath))
-                {
-                    Directory.CreateDirectory(userDataPath);
-                }
-
-                string path = Path.Combine(userDataPath, @"PSFilterPdn.xml");
-
-                settings = new PSFilterPdnSettings(path);
-            }
         }
 
         private void UpdateSearchList()
