@@ -140,78 +140,86 @@ namespace PSFilterPdn
 
         private void Load(Stream stream)
         {
-            XmlReader xmlReader = XmlReader.Create(stream);
-
-            // Detect the old settings format and convert it to the new format.
-            if (xmlReader.MoveToContent() == XmlNodeType.Element &&
-                xmlReader.Name == OldXmlSettings.RootNodeName)
+            XmlReaderSettings readerSettings = new XmlReaderSettings
             {
-                XmlDocument xmlDocument = new XmlDocument();
-                xmlDocument.Load(xmlReader);
+                CloseInput = false,
+                IgnoreComments = true,
+                XmlResolver = null
+            };
 
-                XmlNode searchSubDirNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchSubdirectoriesPath);
-                if (searchSubDirNode != null)
+            using (XmlReader xmlReader = XmlReader.Create(stream, readerSettings))
+            {
+                // Detect the old settings format and convert it to the new format.
+                if (xmlReader.MoveToContent() == XmlNodeType.Element &&
+                    xmlReader.Name == OldXmlSettings.RootNodeName)
                 {
-                    bool result;
-                    if (bool.TryParse(searchSubDirNode.InnerText.Trim(), out result))
+                    XmlDocument xmlDocument = new XmlDocument();
+                    xmlDocument.Load(xmlReader);
+
+                    XmlNode searchSubDirNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchSubdirectoriesPath);
+                    if (searchSubDirNode != null)
                     {
-                        this.searchSubdirectories = result;
-                    }
-                }
-                XmlNode searchDirsNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchDirectoriesPath);
-                if (searchDirsNode != null)
-                {
-                    string dirs = searchDirsNode.InnerText.Trim();
-
-                    if (!string.IsNullOrEmpty(dirs))
-                    {
-                        List<string> directories = new List<string>();
-
-                        string[] splitDirs = dirs.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-                        for (int i = 0; i < splitDirs.Length; i++)
+                        bool result;
+                        if (bool.TryParse(searchSubDirNode.InnerText.Trim(), out result))
                         {
-                            string dir = splitDirs[i];
-
-                            try
-                            {
-                                if (Path.IsPathRooted(dir))
-                                {
-                                    directories.Add(dir);
-                                }
-                                else
-                                {
-                                    // If the path contains a comma it will not be rooted
-                                    // append it to the previous path with a comma added.
-
-                                    int index = directories.Count - 1;
-                                    string lastPath = directories[index];
-
-                                    directories[index] = lastPath + "," + dir;
-                                }
-
-                            }
-                            catch (ArgumentException)
-                            {
-                            }
-                        }
-
-                        if (directories.Count > 0)
-                        {
-                            this.searchDirectories = new SearchDirectoryCollection(directories);
+                            this.searchSubdirectories = result;
                         }
                     }
+                    XmlNode searchDirsNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchDirectoriesPath);
+                    if (searchDirsNode != null)
+                    {
+                        string dirs = searchDirsNode.InnerText.Trim();
+
+                        if (!string.IsNullOrEmpty(dirs))
+                        {
+                            List<string> directories = new List<string>();
+
+                            string[] splitDirs = dirs.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                            for (int i = 0; i < splitDirs.Length; i++)
+                            {
+                                string dir = splitDirs[i];
+
+                                try
+                                {
+                                    if (Path.IsPathRooted(dir))
+                                    {
+                                        directories.Add(dir);
+                                    }
+                                    else
+                                    {
+                                        // If the path contains a comma it will not be rooted
+                                        // append it to the previous path with a comma added.
+
+                                        int index = directories.Count - 1;
+                                        string lastPath = directories[index];
+
+                                        directories[index] = lastPath + "," + dir;
+                                    }
+
+                                }
+                                catch (ArgumentException)
+                                {
+                                }
+                            }
+
+                            if (directories.Count > 0)
+                            {
+                                this.searchDirectories = new SearchDirectoryCollection(directories);
+                            }
+                        }
+                    }
+
+                    this.changed = true;
                 }
+                else
+                {
+                    DataContractSerializer serializer = new DataContractSerializer(typeof(PSFilterPdnSettings));
+                    PSFilterPdnSettings settings = (PSFilterPdnSettings)serializer.ReadObject(xmlReader);
 
-                this.changed = true;
-            }
-            else
-            {
-                DataContractSerializer serializer = new DataContractSerializer(typeof(PSFilterPdnSettings));
-                PSFilterPdnSettings settings = (PSFilterPdnSettings)serializer.ReadObject(xmlReader);
-
-                this.searchDirectories = settings.searchDirectories;
-                this.searchSubdirectories = settings.searchSubdirectories;
+                    this.searchDirectories = settings.searchDirectories;
+                    this.searchSubdirectories = settings.searchSubdirectories;
+                }
             }
         }
 
