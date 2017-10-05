@@ -140,8 +140,6 @@ namespace PSFilterPdn
 
         private void Load(Stream stream)
         {
-            long oldPosition = stream.Position;
-
             XmlReader xmlReader = XmlReader.Create(stream);
 
             // Detect the old settings format and convert it to the new format.
@@ -209,10 +207,8 @@ namespace PSFilterPdn
             }
             else
             {
-                stream.Position = oldPosition;
-
                 DataContractSerializer serializer = new DataContractSerializer(typeof(PSFilterPdnSettings));
-                PSFilterPdnSettings settings = (PSFilterPdnSettings)serializer.ReadObject(stream);
+                PSFilterPdnSettings settings = (PSFilterPdnSettings)serializer.ReadObject(xmlReader);
 
                 this.searchDirectories = settings.searchDirectories;
                 this.searchSubdirectories = settings.searchSubdirectories;
