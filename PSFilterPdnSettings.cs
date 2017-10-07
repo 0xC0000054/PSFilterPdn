@@ -12,41 +12,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Xml;
 
 namespace PSFilterPdn
 {
-    [CollectionDataContract(ItemName = "Path", Namespace = "")]
-    internal sealed class SearchDirectoryCollection : Collection<string>
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SearchDirectoryCollection"/> class.
-        /// </summary>
-        public SearchDirectoryCollection()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SearchDirectoryCollection"/> class.
-        /// </summary>
-        /// <param name="items">The items.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="items"/> is null.</exception>
-        public SearchDirectoryCollection(IList<string> items) : base(items)
-        {
-        }
-    }
-
     [DataContract(Name = "PSFilterPdnSettings", Namespace = "")]
-    [KnownType(typeof(SearchDirectoryCollection))]
     internal sealed class PSFilterPdnSettings
     {
         private readonly string path;
         private bool changed;
         [DataMember(Name = "DirectoryList")]
-        private SearchDirectoryCollection searchDirectories;
+        private HashSet<string> searchDirectories;
         [DataMember(Name = "SearchSubdirectories")]
         private bool searchSubdirectories;
 
@@ -87,7 +65,7 @@ namespace PSFilterPdn
         /// The search directories.
         /// </value>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null</exception>
-        public SearchDirectoryCollection SearchDirectories
+        public HashSet<string> SearchDirectories
         {
             get
             {
@@ -205,7 +183,7 @@ namespace PSFilterPdn
 
                             if (directories.Count > 0)
                             {
-                                this.searchDirectories = new SearchDirectoryCollection(directories);
+                                this.searchDirectories = new HashSet<string>(directories, StringComparer.OrdinalIgnoreCase);
                             }
                         }
                     }

@@ -1298,7 +1298,7 @@ namespace PSFilterPdn
             if (settings != null)
             {
                 this.subDirSearchCb.Checked = this.settings.SearchSubdirectories;
-                SearchDirectoryCollection dirs = this.settings.SearchDirectories;
+                HashSet<string> dirs = this.settings.SearchDirectories;
 
                 if (dirs != null)
                 {
@@ -1322,23 +1322,21 @@ namespace PSFilterPdn
             {
                 int startIndex = 0;
                 int count = searchDirListView.Items.Count;
-                int dirCount = count;
 
                 if (foundEffectsDir)
                 {
                     // The Paint.NET Effects directory is not included in the saved search directories. 
                     startIndex = 1;
-                    dirCount--;
                 }
 
-                List<string> dirs = new List<string>(dirCount);
+                HashSet<string> dirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
                 for (int i = startIndex; i < count; i++)
                 {
                     dirs.Add(searchDirListView.Items[i].Text);
                 }
                 
-                settings.SearchDirectories = new SearchDirectoryCollection(dirs);
+                settings.SearchDirectories = dirs;
             }
         }
 
