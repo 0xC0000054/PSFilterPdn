@@ -1316,10 +1316,7 @@ namespace PSFilterPdn
 
                 if (dirs != null)
                 {
-                    foreach (string dir in dirs)
-                    {
-                        this.searchDirectories.Add(dir);
-                    }
+                    this.searchDirectories.AddRange(dirs);
                 }
             }
             else
