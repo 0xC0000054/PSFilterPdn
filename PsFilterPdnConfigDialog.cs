@@ -39,7 +39,7 @@ namespace PSFilterPdn
         private TabPage dirTab;
         private Button remDirBtn;
         private Button addDirBtn;
-        private ListView searchDirListView;
+        private DoubleBufferedListView searchDirListView;
         private ColumnHeader dirHeader;
         private Button runFilterBtn;
         private BackgroundWorker updateFilterListBw;
@@ -226,7 +226,7 @@ namespace PSFilterPdn
             this.subDirSearchCb = new System.Windows.Forms.CheckBox();
             this.remDirBtn = new System.Windows.Forms.Button();
             this.addDirBtn = new System.Windows.Forms.Button();
-            this.searchDirListView = new System.Windows.Forms.ListView();
+            this.searchDirListView = new DoubleBufferedListView();
             this.dirHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.updateFilterListBw = new System.ComponentModel.BackgroundWorker();
             this.donateLink = new System.Windows.Forms.LinkLabel();
