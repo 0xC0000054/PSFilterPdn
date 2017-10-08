@@ -1184,14 +1184,11 @@ namespace PSFilterPdn
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            base.OnFormClosing(e);
-
             if (updateFilterListBw.IsBusy && searchDirectories.Count > 0)
             {
                 this.updateFilterListBw.CancelAsync();
                 this.formClosePending = true;
                 e.Cancel = true;
-                return;
             }
 
             if (proxyRunning)
@@ -1203,6 +1200,8 @@ namespace PSFilterPdn
             {
                 settings.Flush();
             }
+
+            base.OnFormClosing(e);
         }
 
         private void filterTree_AfterSelect(object sender, TreeViewEventArgs e)
