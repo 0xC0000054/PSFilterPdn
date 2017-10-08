@@ -1134,38 +1134,7 @@ namespace PSFilterPdn
 
                     this.filterTreeNodes = new FilterTreeNodes(parm.items);
 
-                    this.filterTree.BeginUpdate();
-
-                    this.filterTree.TreeViewNodeSorter = null;
-                    
-                    foreach (var item in parm.items)
-                    {
-                        TreeNode dummy = new TreeNode() { Name = DummyTreeNodeName };
-
-                        this.filterTree.Nodes.Add(new TreeNode(item.Key, new TreeNode[] { dummy }) { Name = item.Key });
-                    }
-
-                    this.filterTree.TreeViewNodeSorter = TreeNodeItemComparer.Instance;
-
-                    this.filterTree.EndUpdate();
-
-                    if (expandedNodes.Count > 0)
-                    {
-                        foreach (var item in expandedNodes)
-                        {
-                            if (filterTree.Nodes.ContainsKey(item))
-                            {
-                                TreeNode node = this.filterTree.Nodes[item];
-                                node.Expand();
-
-                                if (!string.IsNullOrEmpty(lastSelectedFilterTitle) && node.Nodes.ContainsKey(lastSelectedFilterTitle))
-                                {
-                                    node.EnsureVisible(); // make sure the last used category is visible
-                                }
-                            }
-                        }
-                    }
-
+                    PopulateFilterTreeCategories(true);
 
                     this.folderLoadProgress.Value = 0;
                     this.folderLoadPanel.Visible = false;
@@ -1176,6 +1145,40 @@ namespace PSFilterPdn
             if (formClosePending)
             {
                 this.Close();
+            }
+        }
+
+        private void PopulateFilterTreeCategories(bool expandLastUsedCategories)
+        {
+            this.filterTree.BeginUpdate();
+            this.filterTree.Nodes.Clear();
+            this.filterTree.TreeViewNodeSorter = null;
+
+            foreach (var item in filterTreeNodes)
+            {
+                TreeNode dummy = new TreeNode() { Name = DummyTreeNodeName };
+
+                this.filterTree.Nodes.Add(new TreeNode(item.Key, new TreeNode[] { dummy }) { Name = item.Key });
+            }
+
+            this.filterTree.TreeViewNodeSorter = TreeNodeItemComparer.Instance;
+            this.filterTree.EndUpdate();
+
+            if (expandLastUsedCategories && expandedNodes.Count > 0)
+            {
+                foreach (var item in expandedNodes)
+                {
+                    if (filterTree.Nodes.ContainsKey(item))
+                    {
+                        TreeNode node = this.filterTree.Nodes[item];
+                        node.Expand();
+
+                        if (!string.IsNullOrEmpty(lastSelectedFilterTitle) && node.Nodes.ContainsKey(lastSelectedFilterTitle))
+                        {
+                            node.EnsureVisible(); // make sure the last used category is visible
+                        }
+                    }
+                }
             }
         }
 
@@ -1394,48 +1397,51 @@ namespace PSFilterPdn
                 this.runFilterBtn.Enabled = false;
                 this.fileNameLbl.Text = string.Empty;
 
-                Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>(StringComparer.Ordinal);
-                foreach (var item in filterTreeNodes)
+                if (string.IsNullOrEmpty(keyword))
                 {
-                    string category = item.Key;
-                    ReadOnlyCollection<TreeNode> childNodes = item.Value;
-
-                    for (int i = 0; i < childNodes.Count; i++)
-                    {
-                        TreeNode child = childNodes[i];
-                        if ((string.IsNullOrEmpty(keyword)) || child.Text.Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            if (nodes.ContainsKey(category))
-                            {
-                                TreeNode node = nodes[category];
-                                node.Nodes.Add(child.CloneT<TreeNode>());
-                            }
-                            else
-                            {
-                                TreeNode node = new TreeNode(category);
-                                node.Nodes.Add(child.CloneT<TreeNode>());
-
-                                nodes.Add(category, node);
-                            }
-
-                        } 
-                    }
+                    PopulateFilterTreeCategories(false);
                 }
-
-                this.filterTree.BeginUpdate();
-                this.filterTree.Nodes.Clear();
-                this.filterTree.TreeViewNodeSorter = null;
-                foreach (var item in nodes)
+                else
                 {
-                    int index = this.filterTree.Nodes.Add(item.Value);
-
-                    if (!string.IsNullOrEmpty(keyword))
+                    Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>(StringComparer.Ordinal);
+                    foreach (var item in filterTreeNodes)
                     {
+                        string category = item.Key;
+                        ReadOnlyCollection<TreeNode> childNodes = item.Value;
+
+                        for (int i = 0; i < childNodes.Count; i++)
+                        {
+                            TreeNode child = childNodes[i];
+                            if (child.Text.Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                if (nodes.ContainsKey(category))
+                                {
+                                    TreeNode node = nodes[category];
+                                    node.Nodes.Add(child.CloneT<TreeNode>());
+                                }
+                                else
+                                {
+                                    TreeNode node = new TreeNode(category);
+                                    node.Nodes.Add(child.CloneT<TreeNode>());
+
+                                    nodes.Add(category, node);
+                                }
+
+                            }
+                        }
+                    }
+
+                    this.filterTree.BeginUpdate();
+                    this.filterTree.Nodes.Clear();
+                    this.filterTree.TreeViewNodeSorter = null;
+                    foreach (var item in nodes)
+                    {
+                        int index = this.filterTree.Nodes.Add(item.Value);
                         this.filterTree.Nodes[index].Expand();
                     }
+                    this.filterTree.TreeViewNodeSorter = TreeNodeItemComparer.Instance;
+                    this.filterTree.EndUpdate(); 
                 }
-                this.filterTree.TreeViewNodeSorter = TreeNodeItemComparer.Instance;
-                this.filterTree.EndUpdate();
             }
         }
 
