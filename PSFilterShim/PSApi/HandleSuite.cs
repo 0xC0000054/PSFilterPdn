@@ -299,35 +299,10 @@ namespace PSFilterLoad.PSApi
 
 		internal unsafe void DisposeHandle(IntPtr h)
 		{
-			if (h != IntPtr.Zero && IsValidReadPtr(h))
-			{
 #if DEBUG
-				DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
+			DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
 #endif
-				HandleEntry item;
-				if (this.handles.TryGetValue(h, out item))
-				{
-					item.Dispose();
-					this.handles.Remove(h);
-					OnSuiteHandleDisposed(h);
-				}
-				else
-				{
-					if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
-					{
-						IntPtr hPtr = Marshal.ReadIntPtr(h);
-
-						if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
-						{
-							SafeNativeMethods.GlobalFree(hPtr);
-						}
-
-						SafeNativeMethods.GlobalFree(h);
-					}
-
-					return;
-				}
-			}
+			DisposeHandleImpl(h);
 		}
 
 		private unsafe void DisposeRegularHandle(IntPtr h)
@@ -335,20 +310,34 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
 #endif
-			// What is this supposed to do?
-			if (!AllocatedBySuite(h))
+			DisposeHandleImpl(h);
+		}
+
+		private unsafe void DisposeHandleImpl(IntPtr handle)
+		{
+			if (handle != IntPtr.Zero && IsValidReadPtr(handle))
 			{
-				if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
+				HandleEntry item;
+				if (this.handles.TryGetValue(handle, out item))
 				{
-					IntPtr hPtr = Marshal.ReadIntPtr(h);
-
-					if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
-					{
-						SafeNativeMethods.GlobalFree(hPtr);
-					}
-
-					SafeNativeMethods.GlobalFree(h);
+					item.Dispose();
+					this.handles.Remove(handle);
+					OnSuiteHandleDisposed(handle);
 				}
+				else
+				{
+					if (SafeNativeMethods.GlobalSize(handle).ToInt64() > 0L)
+					{
+						IntPtr hPtr = Marshal.ReadIntPtr(handle);
+
+						if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+						{
+							SafeNativeMethods.GlobalFree(hPtr);
+						}
+
+						SafeNativeMethods.GlobalFree(handle);
+					}
+				} 
 			}
 		}
 
