@@ -4146,6 +4146,18 @@ namespace PSFilterLoad.PSApi
 						picaSuites.Dispose();
 						picaSuites = null;
 					}
+
+					if (descriptorSuite != null)
+					{
+						descriptorSuite.Dispose();
+						descriptorSuite = null;
+					}
+
+					if (actionDescriptorSuite != null)
+					{
+						actionDescriptorSuite.Dispose();
+						actionDescriptorSuite = null;
+					}
 				}
 
 				if (platFormDataPtr != IntPtr.Zero)

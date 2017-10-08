@@ -16,6 +16,24 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
+	internal sealed class HandleDisposedEventArgs : EventArgs
+	{
+		private readonly IntPtr handle;
+
+		public HandleDisposedEventArgs(IntPtr handle)
+		{
+			this.handle = handle;
+		}
+
+		public IntPtr Handle
+		{
+			get
+			{
+				return this.handle;
+			}
+		}
+	}
+
 	internal sealed class HandleSuite
 	{
 		private struct PSHandle
@@ -114,6 +132,11 @@ namespace PSFilterLoad.PSApi
 			this.handleDisposeRegularProc = new DisposeRegularPIHandleProc(DisposeRegularHandle);
 			this.handles = new Dictionary<IntPtr, HandleEntry>(IntPtrEqualityComparer.Instance);
 		}
+
+		/// <summary>
+		/// Occurs when a handle allocated by the suite is disposed.
+		/// </summary>
+		public event EventHandler<HandleDisposedEventArgs> SuiteHandleDisposed;
 
 		public static HandleSuite Instance
 		{
@@ -286,6 +309,7 @@ namespace PSFilterLoad.PSApi
 				{
 					item.Dispose();
 					this.handles.Remove(h);
+					OnSuiteHandleDisposed(h);
 				}
 				else
 				{
@@ -465,6 +489,16 @@ namespace PSFilterLoad.PSApi
 						SafeNativeMethods.GlobalUnlock(h);
 					}
 				}
+			}
+		}
+
+		private void OnSuiteHandleDisposed(IntPtr handle)
+		{
+			EventHandler<HandleDisposedEventArgs> handler = SuiteHandleDisposed;
+
+			if (handler != null)
+			{
+				handler(this, new HandleDisposedEventArgs(handle));
 			}
 		}
 	}

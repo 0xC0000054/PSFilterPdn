@@ -17,7 +17,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class ActionDescriptorSuite : IActionDescriptorSuite
+    internal sealed class ActionDescriptorSuite : IActionDescriptorSuite, IDisposable
     {
         private sealed class ScriptingParameters
         {
@@ -107,6 +107,7 @@ namespace PSFilterLoad.PSApi
         private Dictionary<IntPtr, ScriptingParameters> actionDescriptors;
         private Dictionary<IntPtr, ScriptingParameters> descriptorHandles;
         private int actionDescriptorsIndex;
+        private bool disposed;
 
         #region Callbacks
         private readonly ActionDescriptorMake make;
@@ -212,6 +213,8 @@ namespace PSFilterLoad.PSApi
             this.actionDescriptors = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
             this.descriptorHandles = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
             this.actionDescriptorsIndex = 0;
+            HandleSuite.Instance.SuiteHandleDisposed += SuiteHandleDisposed;
+            this.disposed = false;
         }
 
         bool IActionDescriptorSuite.TryGetDescriptorValues(IntPtr descriptor, out ReadOnlyDictionary<uint, AETEValue> values)
@@ -295,6 +298,16 @@ namespace PSFilterLoad.PSApi
             return suite;
         }
 
+        public void Dispose()
+        {
+            if (!this.disposed)
+            {
+                this.disposed = true;
+
+                HandleSuite.Instance.SuiteHandleDisposed -= SuiteHandleDisposed;
+            }
+        }
+
         public bool TryGetScriptingData(IntPtr descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
         {
             scriptingData = null;
@@ -316,6 +329,11 @@ namespace PSFilterLoad.PSApi
             {
                 this.descriptorHandles.Add(descriptorParameters->descriptor, new ScriptingParameters(scriptingData));
             }
+        }
+
+        private void SuiteHandleDisposed(object sender, HandleDisposedEventArgs e)
+        {
+            this.descriptorHandles.Remove(e.Handle);
         }
 
         private IntPtr GenerateDictionaryKey()

@@ -104,6 +104,7 @@ namespace PSFilterLoad.PSApi
 		private AETEData aete;
 		private int readDescriptorsIndex;
 		private int writeDescriptorsIndex;
+		private bool disposed;
 
 		public AETEData Aete
 		{
@@ -159,6 +160,8 @@ namespace PSFilterLoad.PSApi
 			this.writeDescriptors = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
 			this.readDescriptorsIndex = 0;
 			this.writeDescriptorsIndex = 0;
+			HandleSuite.Instance.SuiteHandleDisposed += SuiteHandleDisposed;
+			this.disposed = false;
 		}
 
 		public IntPtr CreateReadDescriptor()
@@ -223,6 +226,16 @@ namespace PSFilterLoad.PSApi
 			return writeDescriptorPtr;
 		}
 
+		public void Dispose()
+		{
+			if (!this.disposed)
+			{
+				this.disposed = true;
+
+				HandleSuite.Instance.SuiteHandleDisposed -= SuiteHandleDisposed;
+			}
+		}
+	   
 		public bool TryGetScriptingData(IntPtr descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
 		{
 			scriptingData = null;
@@ -241,6 +254,11 @@ namespace PSFilterLoad.PSApi
 		public void SetScriptingData(IntPtr descriptorHandle, Dictionary<uint, AETEValue> scriptingData)
 		{
 			this.descriptorHandles.Add(descriptorHandle, scriptingData);
+		}
+
+		private void SuiteHandleDisposed(object sender, HandleDisposedEventArgs e)
+		{
+			this.descriptorHandles.Remove(e.Handle);
 		}
 
 		#region ReadDescriptorProcs
