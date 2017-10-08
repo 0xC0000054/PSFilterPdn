@@ -1333,7 +1333,6 @@ namespace PSFilterPdn
             if (settings != null)
             {
                 int startIndex = 0;
-                int count = searchDirectories.Count;
 
                 if (foundEffectsDir)
                 {
@@ -1343,7 +1342,7 @@ namespace PSFilterPdn
 
                 HashSet<string> dirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                for (int i = startIndex; i < count; i++)
+                for (int i = startIndex; i < searchDirectories.Count; i++)
                 {
                     dirs.Add(searchDirectories[i]);
                 }
