@@ -753,7 +753,7 @@ namespace PSFilterPdn
                     this.destSurface = Surface.CopyFromBitmap(dst);
                 }
 
-                if (File.Exists(parameterDataFileName))
+                try
                 {
                     using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Open, FileAccess.Read, FileShare.None))
                     {
@@ -762,8 +762,11 @@ namespace PSFilterPdn
                         this.filterParameters = (ParameterData)bf.Deserialize(fs);
                     }
                 }
+                catch (FileNotFoundException)
+                {
+                }
 
-                if (File.Exists(resourceDataFileName))
+                try
                 {
                     using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Open, FileAccess.Read, FileShare.None))
                     {
@@ -772,6 +775,9 @@ namespace PSFilterPdn
                         List<PSResource> items = (List<PSResource>)bf.Deserialize(fs);
                         this.pseudoResources.AddRange(items);
                     }
+                }
+                catch (FileNotFoundException)
+                {
                 }
 
                 try

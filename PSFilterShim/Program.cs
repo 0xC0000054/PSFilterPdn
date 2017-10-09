@@ -107,7 +107,7 @@ namespace PSFilterShim
 			try
 			{
 				ParameterData filterParameters = null;
-				if (File.Exists(shimData.ParameterDataPath))
+				try
 				{
 					using (FileStream fs = new FileStream(shimData.ParameterDataPath, FileMode.Open, FileAccess.Read, FileShare.None))
 					{
@@ -115,15 +115,21 @@ namespace PSFilterShim
 						filterParameters = (ParameterData)bf.Deserialize(fs);
 					}
 				}
+				catch (FileNotFoundException)
+				{
+				}
 
 				List<PSResource> pseudoResources = null;
-				if (File.Exists(shimData.PseudoResourcePath))
+				try
 				{
 					using (FileStream fs = new FileStream(shimData.PseudoResourcePath, FileMode.Open, FileAccess.Read, FileShare.None))
 					{
 						BinaryFormatter bf = new BinaryFormatter();
 						pseudoResources = (List<PSResource>)bf.Deserialize(fs);
 					}
+				}
+				catch (FileNotFoundException)
+				{
 				}
 
 				DescriptorRegistryValues registryValues = null;
