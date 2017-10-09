@@ -105,7 +105,7 @@ namespace PSFilterPdn
             {
                 return descriptorRegistry;
             }
-            set
+            internal set
             {
                 descriptorRegistry = value;
             }
