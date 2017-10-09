@@ -126,6 +126,23 @@ namespace PSFilterShim
 					}
 				}
 
+				DescriptorRegistryValues registryValues = null;
+				try
+				{
+					using (FileStream fs = new FileStream(shimData.DescriptorRegistryPath, FileMode.Open, FileAccess.Read, FileShare.None))
+					{
+						BinaryFormatter bf = new BinaryFormatter();
+						registryValues = (DescriptorRegistryValues)bf.Deserialize(fs);
+						if (registryValues != null)
+						{
+							registryValues.Changed = false;
+						}
+					}
+				}
+				catch (FileNotFoundException)
+				{
+				}
+
 				using (LoadPsFilter lps = new LoadPsFilter(shimData, selectionRegion))
 				{
 					if (shimData.RepeatEffect)
@@ -155,6 +172,11 @@ namespace PSFilterShim
 						lps.PseudoResources = pseudoResources;
 					}
 
+					if (registryValues != null)
+					{
+						lps.SetRegistryValues(registryValues);
+					}
+
 					bool result = lps.RunPlugin(pdata, shimData.ShowAboutDialog);
 
 					if (result)
@@ -178,6 +200,16 @@ namespace PSFilterShim
 								{
 									BinaryFormatter bf = new BinaryFormatter();
 									bf.Serialize(fs, lps.PseudoResources);
+								}
+
+								registryValues = lps.GetRegistryValues();
+								if (registryValues != null && registryValues.Changed)
+								{
+									using (FileStream fs = new FileStream(shimData.DescriptorRegistryPath, FileMode.Create, FileAccess.Write, FileShare.None))
+									{
+										BinaryFormatter bf = new BinaryFormatter();
+										bf.Serialize(fs, registryValues);
+									}
 								}
 							}
 						}

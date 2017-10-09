@@ -155,6 +155,9 @@
     <Compile Include="PSApi\BufferSuite.cs" />
     <Compile Include="PSApi\ChannelPortsProcs.cs" />
     <Compile Include="PSApi\DebugUtils.cs" />
+    <Compile Include="PSApi\DescriptorRegistryItem.cs" />
+    <Compile Include="PSApi\DescriptorRegistrySuite.cs" />
+    <Compile Include="PSApi\DescriptorRegistryValues.cs" />
     <Compile Include="PSApi\DescriptorSuite.cs" />
     <Compile Include="PSApi\DescriptorTypes.cs" />
     <Compile Include="PSApi\DictionaryExtensions.cs" />
@@ -189,6 +192,7 @@
     <Compile Include="PSApi\PSActionDescriptor.cs" />
     <Compile Include="PSApi\PSActionList.cs" />
     <Compile Include="PSApi\PSActionReference.cs" />
+    <Compile Include="PSApi\PSDescriptorRegistry.cs" />
     <Compile Include="PSApi\PSErrorSuite.cs" />
     <Compile Include="PSApi\PseudoResourceSuite.cs" />
     <Compile Include="PSApi\PSProperties.cs" />

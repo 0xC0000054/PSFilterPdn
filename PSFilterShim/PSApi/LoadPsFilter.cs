@@ -165,6 +165,7 @@ namespace PSFilterLoad.PSApi
 		private ActionDescriptorSuite actionDescriptorSuite;
 		private ActionListSuite actionListSuite;
 		private ActionReferenceSuite actionReferenceSuite;
+		private DescriptorRegistrySuite descriptorRegistrySuite;
 		private ErrorSuite errorSuite;
 
 		public Surface Dest
@@ -189,6 +190,27 @@ namespace PSFilterLoad.PSApi
 				throw new ArgumentNullException("abortCallback", "abortCallback is null.");
 
 			abortFunc = abortCallback;
+		}
+
+		/// <summary>
+		/// Gets the plug-in settings for the current session.
+		/// </summary>
+		/// <returns>
+		/// The plug-in settings for the current session, or <c>null</c> if the current session does not contain any plug-in settings.
+		/// </returns>
+		internal DescriptorRegistryValues GetRegistryValues()
+		{
+			return descriptorRegistrySuite.GetRegistryValues();
+		}
+
+		/// <summary>
+		/// Sets the plug-in settings for the current session.
+		/// </summary>
+		/// <param name="settings">The plug-in settings.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="settings"/> is null.</exception>
+		internal void SetRegistryValues(DescriptorRegistryValues values)
+		{
+			descriptorRegistrySuite.SetRegistryValues(values);
 		}
 
 		public string ErrorMessage
@@ -268,6 +290,7 @@ namespace PSFilterLoad.PSApi
 			this.picaSuites = new PICASuites();
 			this.descriptorSuite = new DescriptorSuite();
 			this.pseudoResourceSuite = new PseudoResourceSuite();
+			this.descriptorRegistrySuite = new DescriptorRegistrySuite();
 
 			using (Bitmap bmp = new Bitmap(shimData.SourceImagePath))
 			{
@@ -3578,6 +3601,7 @@ namespace PSFilterLoad.PSApi
 
 						actionDescriptorSuite = new ActionDescriptorSuite(this.descriptorSuite.Aete, this.actionListSuite, this.actionReferenceSuite);
 						actionListSuite.ActionDescriptorSuite = actionDescriptorSuite;
+						descriptorRegistrySuite.ActionDescriptorSuite = actionDescriptorSuite;
 						if (scriptingData != null)
 						{
 							actionDescriptorSuite.SetScriptingData((PIDescriptorParameters*)descriptorParametersPtr.ToPointer(), scriptingData);
@@ -3630,6 +3654,17 @@ namespace PSFilterLoad.PSApi
 					ASZStringSuite1 stringSuite = PICASuites.CreateASZStringSuite1();
 
 					suite = this.activePICASuites.AllocateSuite(suiteKey, stringSuite);
+				}
+				else if (suiteName.Equals(PSConstants.PICA.DescriptorRegistrySuite, StringComparison.Ordinal))
+				{
+					if (version != 1)
+					{
+						return PSError.kSPSuiteNotFoundError;
+					}
+
+					PSDescriptorRegistryProcs registrySuite = this.descriptorRegistrySuite.CreateDescriptorRegistrySuite1();
+
+					suite = this.activePICASuites.AllocateSuite(suiteKey, registrySuite);
 				}
 				else if (suiteName.Equals(PSConstants.PICA.ErrorSuite, StringComparison.Ordinal))
 				{

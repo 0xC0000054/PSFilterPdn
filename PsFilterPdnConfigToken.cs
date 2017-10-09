@@ -25,6 +25,7 @@ namespace PSFilterPdn
         private ParameterData filterParameters;
         private ReadOnlyCollection<string> expandedNodes;
         private ReadOnlyCollection<PSResource> pseudoResources;
+        private DescriptorRegistryValues descriptorRegistry;
         
         public Surface Dest
         {
@@ -98,8 +99,20 @@ namespace PSFilterPdn
             }
         }
 
+        public DescriptorRegistryValues DescriptorRegistry
+        {
+            get
+            {
+                return descriptorRegistry;
+            }
+            set
+            {
+                descriptorRegistry = value;
+            }
+        }
+
         public PSFilterPdnConfigToken(Surface dest, PluginData filterData, bool useShim, ParameterData paramData, 
-            ReadOnlyCollection<string> nodes, ReadOnlyCollection<PSResource> resources)
+            ReadOnlyCollection<string> nodes, ReadOnlyCollection<PSResource> resources, DescriptorRegistryValues registryValues)
             : base()
         {
             this.dest = dest;
@@ -108,6 +121,7 @@ namespace PSFilterPdn
             this.filterParameters = paramData;
             this.expandedNodes = nodes;
             this.pseudoResources = resources;
+            this.descriptorRegistry = registryValues;
         }
 
         private PSFilterPdnConfigToken(PSFilterPdnConfigToken copyMe)
@@ -119,6 +133,7 @@ namespace PSFilterPdn
             this.filterParameters = copyMe.filterParameters;
             this.expandedNodes = copyMe.expandedNodes;
             this.pseudoResources = copyMe.pseudoResources;
+            this.descriptorRegistry = copyMe.descriptorRegistry;
         }
 
         public override object Clone()

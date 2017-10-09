@@ -146,6 +146,7 @@
     <Compile Include="PSApi\ColorServicesProc.cs" />
     <Compile Include="PSApi\DebugFlags.cs" />
     <Compile Include="PSApi\DebugUtils.cs" />
+    <Compile Include="PSApi\DescriptorRegistrySuite.cs" />
     <Compile Include="PSApi\DescriptorSuite.cs" />
     <Compile Include="PSApi\DescriptorTypes.cs" />
     <Compile Include="PSApi\DisplayPixelsProc.cs" />
@@ -190,6 +191,7 @@
     <Compile Include="PSApi\PSActionList.cs" />
     <Compile Include="PSApi\PSActionReference.cs" />
     <Compile Include="PSApi\PSConstants.cs" />
+    <Compile Include="PSApi\PSDescriptorRegistry.cs" />
     <Compile Include="PSApi\PSError.cs" />
     <Compile Include="PSApi\PSErrorSuite.cs" />
     <Compile Include="PSApi\PseudoResourceSuite.cs" />

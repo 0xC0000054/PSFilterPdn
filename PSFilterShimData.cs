@@ -89,6 +89,13 @@ namespace PSFilterPdn
             internal set;
         }
 
+        [DataMember]
+        public string DescriptorRegistryPath
+        {
+            get;
+            internal set;
+        }
+
         internal PSFilterShimData()
         {
         }

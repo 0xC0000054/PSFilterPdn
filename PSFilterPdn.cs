@@ -103,6 +103,7 @@ namespace PSFilterPdn
                 string destFileName = Path.Combine(proxyTempDir, "proxyresult.png");
                 string parameterDataFileName = Path.Combine(proxyTempDir, "parameters.dat");
                 string resourceDataFileName = Path.Combine(proxyTempDir, "PseudoResources.dat");
+                string descriptorRegistryFileName = Path.Combine(proxyTempDir, "registry.dat");
                 string regionFileName = string.Empty;
 
                 Rectangle sourceBounds = base.EnvironmentParameters.SourceSurface.Bounds;
@@ -135,7 +136,8 @@ namespace PSFilterPdn
                     SecondaryColor = EnvironmentParameters.SecondaryColor.ToColor(),
                     RegionDataPath = regionFileName,
                     ParameterDataPath = parameterDataFileName,
-                    PseudoResourcePath = resourceDataFileName
+                    PseudoResourcePath = resourceDataFileName,
+                    DescriptorRegistryPath = descriptorRegistryFileName
                 };
 
                 PSFilterShimService service = new PSFilterShimService(
@@ -168,6 +170,15 @@ namespace PSFilterPdn
                     {
                         BinaryFormatter bf = new BinaryFormatter();
                         bf.Serialize(fs, token.PseudoResources.ToList());
+                    }
+                }
+
+                if (token.DescriptorRegistry != null)
+                {
+                    using (FileStream fs = new FileStream(descriptorRegistryFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        BinaryFormatter bf = new BinaryFormatter();
+                        bf.Serialize(fs, token.DescriptorRegistry);
                     }
                 }
 
@@ -241,6 +252,10 @@ namespace PSFilterPdn
                 using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, window.Handle))
                 {
                     lps.SetAbortCallback(new Func<byte>(AbortCallback));
+                    if (token.DescriptorRegistry != null)
+                    {
+                        lps.SetRegistryValues(token.DescriptorRegistry);
+                    }
 
                     lps.FilterParameters = token.FilterParameters;
                     lps.PseudoResources = token.PseudoResources.ToList();

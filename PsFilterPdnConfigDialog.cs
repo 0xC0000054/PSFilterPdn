@@ -61,6 +61,7 @@ namespace PSFilterPdn
         private ParameterData filterParameters;
         private List<PSResource> pseudoResources;
         private bool runWith32BitShim;
+        private DescriptorRegistryValues descriptorRegistry;
 
         private bool proxyResult;
         private string proxyErrorMessage;
@@ -71,6 +72,7 @@ namespace PSFilterPdn
         private string parameterDataFileName;
         private string resourceDataFileName;
         private string regionFileName;
+        private string descriptorRegistryFileName;
         private PluginData proxyData;
         private readonly string proxyTempDir;
 
@@ -168,7 +170,7 @@ namespace PSFilterPdn
 
         protected override void InitialInitToken()
         {
-            base.theEffectToken = new PSFilterPdnConfigToken(null, null, false, null, null, null);
+            base.theEffectToken = new PSFilterPdnConfigToken(null, null, false, null, null, null, null);
         }
 
         protected override void InitTokenFromDialog()
@@ -181,6 +183,7 @@ namespace PSFilterPdn
             token.FilterParameters = this.filterParameters;
             token.ExpandedNodes = this.expandedNodes.AsReadOnly();
             token.PseudoResources = this.pseudoResources.AsReadOnly();
+            token.DescriptorRegistry = this.descriptorRegistry;
         }
 
         protected override void InitDialogFromToken(EffectConfigToken effectToken)
@@ -206,6 +209,11 @@ namespace PSFilterPdn
             if ((token.PseudoResources != null) && token.PseudoResources.Count > 0)
             {
                 this.pseudoResources = new List<PSResource>(token.PseudoResources);
+            }
+
+            if (token.DescriptorRegistry != null)
+            {
+                this.descriptorRegistry = token.DescriptorRegistry;
             }
         }
 
@@ -612,6 +620,7 @@ namespace PSFilterPdn
             this.destFileName = Path.Combine(proxyTempDir, "proxyresult.png");
             this.parameterDataFileName = Path.Combine(proxyTempDir, "parameters.dat");
             this.resourceDataFileName = Path.Combine(proxyTempDir, "PseudoResources.dat");
+            this.descriptorRegistryFileName = Path.Combine(proxyTempDir, "registry.dat");
             this.regionFileName = string.Empty;
 
 
@@ -642,7 +651,8 @@ namespace PSFilterPdn
                 SecondaryColor = eep.SecondaryColor.ToColor(),
                 RegionDataPath = regionFileName,
                 ParameterDataPath = parameterDataFileName,
-                PseudoResourcePath = resourceDataFileName
+                PseudoResourcePath = resourceDataFileName,
+                DescriptorRegistryPath = descriptorRegistryFileName
             };
 
             PSFilterShimService service = new PSFilterShimService(data, shimData, SetProxyErrorResult, UpdateProgress);
@@ -678,6 +688,14 @@ namespace PSFilterPdn
                     }
                 }
 
+                if (descriptorRegistry != null)
+                {
+                    using (FileStream fs = new FileStream(descriptorRegistryFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        BinaryFormatter bf = new BinaryFormatter();
+                        bf.Serialize(fs, this.descriptorRegistry);
+                    }
+                }
 
                 ProcessStartInfo psi = new ProcessStartInfo(PSFilterShimPath, PSFilterShimServer.EndpointName);
 
@@ -756,6 +774,18 @@ namespace PSFilterPdn
                     }
                 }
 
+                try
+                {
+                    using (FileStream fs = new FileStream(descriptorRegistryFileName, FileMode.Open, FileAccess.Read, FileShare.None))
+                    {
+                        SelfBinder binder = new SelfBinder();
+                        BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
+                        this.descriptorRegistry = (DescriptorRegistryValues)bf.Deserialize(fs);
+                    }
+                }
+                catch (FileNotFoundException)
+                {
+                }
             }
             else
             {
@@ -811,6 +841,11 @@ namespace PSFilterPdn
                             {
                                 lps.SetProgressCallback(new Action<int, int>(UpdateProgress));
 
+                                if (descriptorRegistry != null)
+                                {
+                                    lps.SetRegistryValues(descriptorRegistry);
+                                }
+
                                 if ((filterParameters != null) && data.FileName.Equals(filterParametersPluginFileName, StringComparison.OrdinalIgnoreCase))
                                 {
                                     lps.FilterParameters = this.filterParameters;
@@ -833,7 +868,7 @@ namespace PSFilterPdn
                                     {
                                         this.pseudoResources.AddRange(lps.PseudoResources);
                                     }
-
+                                    this.descriptorRegistry = lps.GetRegistryValues();
                                 }
                                 else if (!string.IsNullOrEmpty(lps.ErrorMessage))
                                 {
@@ -1196,9 +1231,13 @@ namespace PSFilterPdn
                 e.Cancel = true;
             }
 
-            if (!e.Cancel && settings != null)
+            if (!e.Cancel)
             {
-                settings.Flush();
+                if (settings != null)
+                {
+                    settings.Flush(); 
+                }
+                SaveDescriptorRegistry();
             }
 
             base.OnFormClosing(e);
@@ -1292,6 +1331,19 @@ namespace PSFilterPdn
                 string path = Path.Combine(userDataPath, @"PSFilterPdn.xml");
 
                 this.settings = new PSFilterPdnSettings(path);
+            }
+            catch (IOException ex)
+            {
+                ShowErrorMessage(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                ShowErrorMessage(ex.Message);
+            }
+
+            try
+            {
+                LoadDescriptorRegistry();
             }
             catch (IOException ex)
             {
@@ -1596,6 +1648,67 @@ namespace PSFilterPdn
                 }
 
                 searchDirListView.Invalidate(); 
+            }
+        }
+
+        private void LoadDescriptorRegistry()
+        {
+            if (descriptorRegistry == null)
+            {
+                string userDataPath = Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
+                string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
+
+                try
+                {
+                    using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+                    {
+                        SelfBinder binder = new SelfBinder();
+                        BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
+                        ReadOnlyDictionary<string, DescriptorRegistryItem> values = (ReadOnlyDictionary<string, DescriptorRegistryItem>)bf.Deserialize(fs);
+
+                        if (values != null && values.Count > 0)
+                        {
+                            this.descriptorRegistry = new DescriptorRegistryValues(values)
+                            {
+                                Changed = false
+                            };
+                        }
+                    }
+                }
+                catch (FileNotFoundException)
+                {
+                    // This file would only exist if a plugin has persisted settings.
+                }
+            }
+        }
+
+        private void SaveDescriptorRegistry()
+        {
+            if (descriptorRegistry != null && descriptorRegistry.Changed)
+            {
+                if (descriptorRegistry.HasPersistedData)
+                {
+                    string userDataPath = Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
+                    string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
+
+                    try
+                    {
+                        using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            SelfBinder binder = new SelfBinder();
+                            BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
+                            bf.Serialize(fs, descriptorRegistry.PersistedValues);
+                        }
+                    }
+                    catch (IOException ex)
+                    {
+                        ShowErrorMessage(ex.Message);
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        ShowErrorMessage(ex.Message);
+                    }
+                }
             }
         }
     }
