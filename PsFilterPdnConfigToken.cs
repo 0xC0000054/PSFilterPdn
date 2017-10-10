@@ -23,9 +23,9 @@ namespace PSFilterPdn
         private PluginData filterData;
         private bool runWith32BitShim;
         private ParameterData filterParameters;
-        private ReadOnlyCollection<string> expandedNodes;
         private ReadOnlyCollection<PSResource> pseudoResources;
         private DescriptorRegistryValues descriptorRegistry;
+        private ConfigDialogState dialogState;
         
         public Surface Dest
         {
@@ -75,18 +75,6 @@ namespace PSFilterPdn
             }
         }
 
-        public ReadOnlyCollection<string> ExpandedNodes
-        {
-            get
-            {
-                return expandedNodes;
-            }
-            internal set
-            {
-                expandedNodes = value;
-            }
-        }
-
         public ReadOnlyCollection<PSResource> PseudoResources
         {
             get
@@ -111,17 +99,29 @@ namespace PSFilterPdn
             }
         }
 
+        public ConfigDialogState DialogState
+        {
+            get
+            {
+                return dialogState;
+            }
+            internal set
+            {
+                dialogState = value;
+            }
+        }
+
         public PSFilterPdnConfigToken(Surface dest, PluginData filterData, bool useShim, ParameterData paramData, 
-            ReadOnlyCollection<string> nodes, ReadOnlyCollection<PSResource> resources, DescriptorRegistryValues registryValues)
+            ReadOnlyCollection<PSResource> resources, DescriptorRegistryValues registryValues, ConfigDialogState configDialog)
             : base()
         {
             this.dest = dest;
             this.filterData = filterData;
             this.runWith32BitShim = useShim;
             this.filterParameters = paramData;
-            this.expandedNodes = nodes;
             this.pseudoResources = resources;
             this.descriptorRegistry = registryValues;
+            this.dialogState = configDialog;
         }
 
         private PSFilterPdnConfigToken(PSFilterPdnConfigToken copyMe)
@@ -131,9 +131,9 @@ namespace PSFilterPdn
             this.filterData = copyMe.filterData;
             this.runWith32BitShim = copyMe.runWith32BitShim;
             this.filterParameters = copyMe.filterParameters;
-            this.expandedNodes = copyMe.expandedNodes;
             this.pseudoResources = copyMe.pseudoResources;
             this.descriptorRegistry = copyMe.descriptorRegistry;
+            this.dialogState = copyMe.dialogState;
         }
 
         public override object Clone()

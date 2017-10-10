@@ -181,9 +181,9 @@ namespace PSFilterPdn
             token.FilterData = this.filterData;
             token.RunWith32BitShim = this.runWith32BitShim;
             token.FilterParameters = this.filterParameters;
-            token.ExpandedNodes = this.expandedNodes.AsReadOnly();
             token.PseudoResources = this.pseudoResources.AsReadOnly();
             token.DescriptorRegistry = this.descriptorRegistry;
+            token.DialogState = new ConfigDialogState(this.expandedNodes.AsReadOnly());
         }
 
         protected override void InitDialogFromToken(EffectConfigToken effectToken)
@@ -201,11 +201,6 @@ namespace PSFilterPdn
                 this.filterParameters = token.FilterParameters;
             }
 
-            if ((token.ExpandedNodes != null) && token.ExpandedNodes.Count > 0)
-            {
-                this.expandedNodes = new List<string>(token.ExpandedNodes);
-            }
-
             if ((token.PseudoResources != null) && token.PseudoResources.Count > 0)
             {
                 this.pseudoResources = new List<PSResource>(token.PseudoResources);
@@ -214,6 +209,18 @@ namespace PSFilterPdn
             if (token.DescriptorRegistry != null)
             {
                 this.descriptorRegistry = token.DescriptorRegistry;
+            }
+
+            if (token.DialogState != null)
+            {
+                ConfigDialogState state = token.DialogState;
+
+                if (expandedNodes.Count == 0 && 
+                    state.ExpandedNodes != null &&
+                    state.ExpandedNodes.Count > 0)
+                {
+                    this.expandedNodes = new List<string>(state.ExpandedNodes);
+                }
             }
         }
 
