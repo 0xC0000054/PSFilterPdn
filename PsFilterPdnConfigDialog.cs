@@ -1722,6 +1722,7 @@ namespace PSFilterPdn
                         ShowErrorMessage(ex.Message);
                     }
                 }
+                descriptorRegistry.Changed = false;
             }
         }
     }
