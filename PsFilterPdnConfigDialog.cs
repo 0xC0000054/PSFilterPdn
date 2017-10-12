@@ -95,6 +95,7 @@ namespace PSFilterPdn
 
         private const string DummyTreeNodeName = "dummyTreeNode";
 
+        private static readonly string EffectsFolderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
 
         public PsFilterPdnConfigDialog()
@@ -1366,14 +1367,9 @@ namespace PSFilterPdn
                 ShowErrorMessage(ex.Message);
             }
 
-            string effectsDir = Path.Combine(base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().InstallDirectory, "Effects");
-            this.foundEffectsDir = false;
 
-            if (!string.IsNullOrEmpty(effectsDir))
-            {
-                this.searchDirectories.Add(effectsDir);
-                this.foundEffectsDir = true;
-            }
+            this.searchDirectories.Add(EffectsFolderPath);
+            this.foundEffectsDir = true;
 
             if (settings != null)
             {
