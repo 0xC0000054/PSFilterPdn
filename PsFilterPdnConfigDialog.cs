@@ -25,7 +25,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Windows.Forms;
 
 namespace PSFilterPdn
