@@ -15,7 +15,6 @@
  * All rights reserved.
 */
 
-using System;
 
 namespace PSFilterLoad.PSApi
 {
