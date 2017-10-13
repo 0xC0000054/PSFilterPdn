@@ -95,8 +95,8 @@ namespace PSFilterPdn
 
         private const string DummyTreeNodeName = "dummyTreeNode";
 
-        private static readonly string EffectsFolderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
+        private static readonly string EffectsFolderPath = Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location);
+        private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location), "PSFilterShim.exe");
 
         public PsFilterPdnConfigDialog()
         {

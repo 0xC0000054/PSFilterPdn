@@ -86,7 +86,7 @@ namespace PSFilterPdn
         private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token, IWin32Window window)
         {
             // Check that PSFilterShim exists first thing and abort if it does not.
-            string shimPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PSFilterShim.exe");
+            string shimPath = Path.Combine(Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location), "PSFilterShim.exe");
 
             if (!File.Exists(shimPath))
             {
