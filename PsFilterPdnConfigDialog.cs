@@ -1145,8 +1145,10 @@ namespace PSFilterPdn
                                 }
                                 else
                                 {
-                                    List<TreeNode> items = new List<TreeNode>();
-                                    items.Add(child);
+                                    List<TreeNode> items = new List<TreeNode>
+                                    {
+                                        child
+                                    };
 
                                     nodes.Add(plugin.Category, items);
                                 } 
