@@ -10,12 +10,10 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
-
 namespace PSFilterLoad.PSApi
 {
 #if DEBUG
-    [Flags]
+    [System.Flags]
     internal enum DebugFlags
     {
         None = 0,

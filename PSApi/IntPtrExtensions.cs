@@ -10,8 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
-
 namespace PSFilterLoad.PSApi
 {
 #if DEBUG
@@ -22,9 +20,9 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="pointer">The pointer.</param>
         /// <returns></returns>
-        public static string ToHexString(this IntPtr pointer)
+        public static string ToHexString(this System.IntPtr pointer)
         {
-            if (IntPtr.Size == 8)
+            if (System.IntPtr.Size == 8)
             {
                 return pointer.ToString("X16");
             }
