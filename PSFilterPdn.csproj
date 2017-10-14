@@ -134,6 +134,7 @@
     <Compile Include="DoubleBufferedListView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ListExtensions.cs" />
     <Compile Include="FileEnumerator.cs" />
     <Compile Include="FilterTreeNodes.cs" />
     <Compile Include="GlobalSuppressions.cs" />

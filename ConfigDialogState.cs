@@ -22,14 +22,18 @@ namespace PSFilterPdn
     public sealed class ConfigDialogState
     {
         private readonly ReadOnlyCollection<string> expandedNodes;
+        private readonly FilterTreeNodes filterTreeNodes;
+        private readonly ReadOnlyCollection<string> searchDirectories;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigDialogState"/> class.
         /// </summary>
         /// <param name="expandedNodes">The expanded nodes.</param>
-        public ConfigDialogState(ReadOnlyCollection<string> expandedNodes)
+        public ConfigDialogState(ReadOnlyCollection<string> expandedNodes, FilterTreeNodes nodes, ReadOnlyCollection<string> directories)
         {
             this.expandedNodes = expandedNodes;
+            this.filterTreeNodes = nodes;
+            this.searchDirectories = directories;
         }
 
         /// <summary>
@@ -43,6 +47,34 @@ namespace PSFilterPdn
             get
             {
                 return this.expandedNodes;
+            }
+        }
+
+        /// <summary>
+        /// Gets the filter tree nodes.
+        /// </summary>
+        /// <value>
+        /// The filter tree nodes.
+        /// </value>
+        public FilterTreeNodes FilterTreeNodes
+        {
+            get
+            {
+                return this.filterTreeNodes;
+            }
+        }
+
+        /// <summary>
+        /// Gets the search directories.
+        /// </summary>
+        /// <value>
+        /// The search directories.
+        /// </value>
+        public ReadOnlyCollection<string> SearchDirectories
+        {
+            get
+            {
+                return this.searchDirectories;
             }
         }
     }

@@ -182,7 +182,7 @@ namespace PSFilterPdn
             token.FilterParameters = this.filterParameters;
             token.PseudoResources = this.pseudoResources.AsReadOnly();
             token.DescriptorRegistry = this.descriptorRegistry;
-            token.DialogState = new ConfigDialogState(this.expandedNodes.AsReadOnly());
+            token.DialogState = new ConfigDialogState(this.expandedNodes.AsReadOnly(), this.filterTreeNodes, this.searchDirectories.AsReadOnly());
         }
 
         protected override void InitDialogFromToken(EffectConfigToken effectToken)
@@ -219,6 +219,19 @@ namespace PSFilterPdn
                     state.ExpandedNodes.Count > 0)
                 {
                     this.expandedNodes = new List<string>(state.ExpandedNodes);
+                }
+
+                if (filterTreeNodes == null &&
+                    state.FilterTreeNodes != null)
+                {
+                    this.filterTreeNodes = state.FilterTreeNodes;
+                }
+
+                if (searchDirectories.Count == 0 &&
+                    state.SearchDirectories != null &&
+                    state.SearchDirectories.Count > 0)
+                {
+                    this.searchDirectories = new List<string>(state.SearchDirectories);
                 }
             }
         }
@@ -1368,8 +1381,10 @@ namespace PSFilterPdn
                 ShowErrorMessage(ex.Message);
             }
 
-
-            this.searchDirectories.Add(EffectsFolderPath);
+            List<string> directories = new List<string>
+            {
+                EffectsFolderPath
+            };
             this.foundEffectsDir = true;
 
             if (settings != null)
@@ -1379,16 +1394,29 @@ namespace PSFilterPdn
 
                 if (dirs != null)
                 {
-                    this.searchDirectories.AddRange(dirs);
+                    directories.AddRange(dirs);
                 }
             }
             else
             {
                 this.subDirSearchCb.Checked = true;
             }
-            this.searchDirListView.VirtualListSize = searchDirectories.Count;
 
-            UpdateFilterList();
+            // Scan the search directories for filters when there are not any cached filters
+            // or if the search directories have changed since the filters were cached.
+
+            if (filterTreeNodes == null ||
+                !searchDirectories.SetEqual(directories, StringComparer.OrdinalIgnoreCase))
+            {
+                this.searchDirectories = directories;
+                this.searchDirListView.VirtualListSize = directories.Count;
+                UpdateFilterList();
+            }
+            else
+            {
+                this.searchDirListView.VirtualListSize = searchDirectories.Count;
+                PopulateFilterTreeCategories(true);
+            }
         }
 
         private void UpdateSearchList()
