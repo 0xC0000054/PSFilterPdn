@@ -113,6 +113,7 @@ namespace PSFilterPdn
             if (this.changed)
             {
                 Save();
+                this.changed = false;
             }
         }
 
