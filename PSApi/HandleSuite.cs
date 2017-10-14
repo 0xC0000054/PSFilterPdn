@@ -260,7 +260,7 @@ namespace PSFilterLoad.PSApi
 			IntPtr handle = IntPtr.Zero;
 			try
 			{
-				// The Photoshop API 'Handle' is a double indirect pointer.
+				// The Photoshop API 'Handle' is an indirect pointer.
 				// As some plug-ins may dereference the pointer instead of calling HandleLockProc we recreate that implementation.
 				handle = Memory.Allocate(PSHandle.SizeOf, true);
 
