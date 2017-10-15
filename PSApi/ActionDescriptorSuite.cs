@@ -158,8 +158,28 @@ namespace PSFilterLoad.PSApi
         private readonly ActionDescriptorGetData getData;
         #endregion
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ActionDescriptorSuite"/> class.
+        /// </summary>
+        /// <param name="aete">The AETE scripting parameters.</param>
+        /// <param name="actionListSuite">The action list suite instance.</param>
+        /// <param name="actionReferenceSuite">The action reference suite instance.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="actionListSuite"/> is null.
+        /// or
+        /// <paramref name="actionReferenceSuite"/> is null.
+        /// </exception>  
         public ActionDescriptorSuite(AETEData aete, IActionListSuite actionListSuite, IActionReferenceSuite actionReferenceSuite)
         {
+            if (actionListSuite == null)
+            {
+                throw new ArgumentNullException("actionListSuite");
+            }
+            if (actionReferenceSuite == null)
+            {
+                throw new ArgumentNullException("actionReferenceSuite");
+            }
+
             this.make = new ActionDescriptorMake(Make);
             this.free = new ActionDescriptorFree(Free);
             this.handleToDescriptor = new ActionDescriptorHandleToDescriptor(HandleToDescriptor);
