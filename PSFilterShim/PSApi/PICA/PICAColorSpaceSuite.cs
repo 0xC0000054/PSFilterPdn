@@ -80,14 +80,24 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly CSConvert csConvert8to16;
         private readonly CSConvert csConvert16to8;
         private readonly CSConvertToMonitorRGB csConvertToMonitorRGB;
+        private readonly IASZStringSuite zstringSuite;
 
         private Dictionary<IntPtr, Color> colors;
         private int colorsIndex;
         private byte[] lookup16To8;
         private ushort[] lookup8To16;
 
-        public PICAColorSpaceSuite()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PICAColorSpaceSuite"/> class.
+        /// </summary>
+        /// <param name="zstringSuite">The ASZString suite.</param>
+        public PICAColorSpaceSuite(IASZStringSuite zstringSuite)
         {
+            if (zstringSuite == null)
+            {
+                throw new ArgumentNullException("zstringSuite");
+            }
+
             this.csMake = new CSMake(Make);
             this.csDelete = new CSDelete(Delete);
             this.csStuffComponent = new CSStuffComponents(StuffComponents);
@@ -103,6 +113,7 @@ namespace PSFilterLoad.PSApi.PICA
             this.csConvert8to16 = new CSConvert(Convert8to16);
             this.csConvert16to8 = new CSConvert(Convert16to8);
             this.csConvertToMonitorRGB = new CSConvertToMonitorRGB(ConvertToMonitorRGB);
+            this.zstringSuite = zstringSuite;
             this.colors = new Dictionary<IntPtr, Color>(IntPtrEqualityComparer.Instance);
             this.colorsIndex = 0;
             this.lookup16To8 = null;
@@ -321,7 +332,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int ExtractColorName(IntPtr colorID, ref IntPtr colorName)
         {
-            colorName = ASZStringSuite.Instance.CreateFromString(string.Empty);
+            colorName = zstringSuite.CreateFromString(string.Empty);
 
             return PSError.kSPNoError;
         }
@@ -331,7 +342,7 @@ namespace PSFilterLoad.PSApi.PICA
             int error = PSError.kSPNoError;
 
             string prompt;
-            if (ASZStringSuite.Instance.ConvertToString(promptZString, out prompt))
+            if (zstringSuite.ConvertToString(promptZString, out prompt))
             {
                 using (ColorPickerForm dialog = new ColorPickerForm(prompt))
                 {

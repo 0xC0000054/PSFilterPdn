@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.PICA;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -103,6 +104,7 @@ namespace PSFilterLoad.PSApi
         private readonly AETEData aete;
         private readonly IActionListSuite actionListSuite;
         private readonly IActionReferenceSuite actionReferenceSuite;
+        private readonly IASZStringSuite zstringSuite;
 
         private Dictionary<IntPtr, ScriptingParameters> actionDescriptors;
         private Dictionary<IntPtr, ScriptingParameters> descriptorHandles;
@@ -164,12 +166,16 @@ namespace PSFilterLoad.PSApi
         /// <param name="aete">The AETE scripting parameters.</param>
         /// <param name="actionListSuite">The action list suite instance.</param>
         /// <param name="actionReferenceSuite">The action reference suite instance.</param>
+        /// <param name="zstringSuite">The ASZString suite instance.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="actionListSuite"/> is null.
         /// or
         /// <paramref name="actionReferenceSuite"/> is null.
+        /// or
+        /// <paramref name="zstringSuite"/> is null.
         /// </exception>  
-        public ActionDescriptorSuite(AETEData aete, IActionListSuite actionListSuite, IActionReferenceSuite actionReferenceSuite)
+        public ActionDescriptorSuite(AETEData aete, IActionListSuite actionListSuite, IActionReferenceSuite actionReferenceSuite,
+            IASZStringSuite zstringSuite)
         {
             if (actionListSuite == null)
             {
@@ -178,6 +184,10 @@ namespace PSFilterLoad.PSApi
             if (actionReferenceSuite == null)
             {
                 throw new ArgumentNullException("actionReferenceSuite");
+            }
+            if (zstringSuite == null)
+            {
+                throw new ArgumentNullException("zstringSuite");
             }
 
             this.make = new ActionDescriptorMake(Make);
@@ -230,6 +240,7 @@ namespace PSFilterLoad.PSApi
             this.aete = aete;
             this.actionListSuite = actionListSuite;
             this.actionReferenceSuite = actionReferenceSuite;
+            this.zstringSuite = zstringSuite;
             this.actionDescriptors = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
             this.descriptorHandles = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
             this.actionDescriptorsIndex = 0;
@@ -883,7 +894,7 @@ namespace PSFilterLoad.PSApi
             try
             {
                 ActionDescriptorZString value;
-                if (PICA.ASZStringSuite.Instance.ConvertToActionDescriptor(zstring, out value))
+                if (zstringSuite.ConvertToActionDescriptor(zstring, out value))
                 {
                     this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.typeChar, GetAETEParamFlags(key), 0, value));
 
@@ -1246,7 +1257,7 @@ namespace PSFilterLoad.PSApi
 
                 try
                 {
-                    zstring = PICA.ASZStringSuite.Instance.CreateFromActionDescriptor(value);
+                    zstring = zstringSuite.CreateFromActionDescriptor(value);
                 }
                 catch (OutOfMemoryException)
                 {

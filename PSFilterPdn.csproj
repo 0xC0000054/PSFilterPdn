@@ -179,6 +179,7 @@
     <Compile Include="PSApi\PICASuites.cs" />
     <Compile Include="PSApi\PICASuiteStructs.cs" />
     <Compile Include="PSApi\PICA\ASZStringSuite.cs" />
+    <Compile Include="PSApi\PICA\IASZStringSuite.cs" />
     <Compile Include="PSApi\PICA\PICABufferSuite.cs" />
     <Compile Include="PSApi\PICA\PICAColorSpaceSuite.cs" />
     <Compile Include="PSApi\PICA\PICAHandleSuite.cs" />

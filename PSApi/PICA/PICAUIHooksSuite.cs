@@ -23,9 +23,15 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly UISuiteHostSetCursor uiSetCursor;
         private readonly UISuiteHostTickCount uiTickCount;
         private readonly UISuiteGetPluginName uiPluginName;
+        private readonly IASZStringSuite zstringSuite;
 
-        public unsafe PICAUIHooksSuite(FilterRecord* filterRecord, string name)
+        public unsafe PICAUIHooksSuite(FilterRecord* filterRecord, string name, IASZStringSuite zstringSuite)
         {
+            if (zstringSuite == null)
+            {
+                throw new ArgumentNullException("zstringSuite");
+            }
+
             this.hwnd = ((PlatformData*)filterRecord->platformData.ToPointer())->hwnd;
             if (name != null)
             {
@@ -40,6 +46,7 @@ namespace PSFilterLoad.PSApi.PICA
             this.uiSetCursor = new UISuiteHostSetCursor(HostSetCursor);
             this.uiTickCount = new UISuiteHostTickCount(HostTickCount);
             this.uiPluginName = new UISuiteGetPluginName(GetPluginName);
+            this.zstringSuite = zstringSuite;
         }
 
         private IntPtr MainWindowHandle()
@@ -59,7 +66,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetPluginName(IntPtr pluginRef, ref IntPtr name)
         {
-            name = ASZStringSuite.Instance.CreateFromString(this.pluginName);
+            name = zstringSuite.CreateFromString(this.pluginName);
 
             return PSError.kSPNoError;
         }

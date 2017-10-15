@@ -18,7 +18,7 @@ using System.Text;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal sealed class ASZStringSuite
+    internal sealed class ASZStringSuite : IASZStringSuite
     {
         private enum ZStringFormat
         {
@@ -140,10 +140,12 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly ASZStringLengthAsPascalString lengthAsPascalString;
         private readonly ASZStringAsPascalString asPascalString;
 
-        private static readonly ASZStringSuite instance = new ASZStringSuite();
         private static readonly IntPtr Empty = IntPtr.Zero;
 
-        private ASZStringSuite()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ASZStringSuite"/> class.
+        /// </summary>
+        public ASZStringSuite()
         {
             this.makeFromUnicode = new ASZStringMakeFromUnicode(MakeFromUnicode);
             this.makeFromCString = new ASZStringMakeFromCString(MakeFromCString);
@@ -171,14 +173,6 @@ namespace PSFilterLoad.PSApi.PICA
 
             this.strings = new Dictionary<IntPtr, ZString>(IntPtrEqualityComparer.Instance);
             this.stringsIndex = 0;
-        }
-
-        public static ASZStringSuite Instance
-        {
-            get
-            {
-                return instance;
-            }
         }
 
         public ASZStringSuite1 CreateASZStringSuite1()
@@ -213,7 +207,7 @@ namespace PSFilterLoad.PSApi.PICA
             return suite;
         }
 
-        public bool ConvertToActionDescriptor(IntPtr zstring, out ActionDescriptorZString descriptor)
+        bool IASZStringSuite.ConvertToActionDescriptor(IntPtr zstring, out ActionDescriptorZString descriptor)
         {
             descriptor = null;
 
@@ -233,7 +227,7 @@ namespace PSFilterLoad.PSApi.PICA
             return true;
         }
 
-        public IntPtr CreateFromActionDescriptor(ActionDescriptorZString descriptor)
+        IntPtr IASZStringSuite.CreateFromActionDescriptor(ActionDescriptorZString descriptor)
         {
             IntPtr newZString = Empty;
 
@@ -247,7 +241,7 @@ namespace PSFilterLoad.PSApi.PICA
             return newZString;
         }
 
-        public bool ConvertToString(IntPtr zstring, out string value)
+        bool IASZStringSuite.ConvertToString(IntPtr zstring, out string value)
         {
             value = null;
 
@@ -271,7 +265,7 @@ namespace PSFilterLoad.PSApi.PICA
             return true;
         }
 
-        public IntPtr CreateFromString(string value)
+        IntPtr IASZStringSuite.CreateFromString(string value)
         {
             if (value == null)
             {

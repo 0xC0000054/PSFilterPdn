@@ -3596,10 +3596,11 @@ namespace PSFilterLoad.PSApi
 						}
 						if (actionListSuite == null)
 						{
-							actionListSuite = new ActionListSuite(actionReferenceSuite);
+							actionListSuite = new ActionListSuite(actionReferenceSuite, this.picaSuites.ASZStringSuite);
 						}
 
-						actionDescriptorSuite = new ActionDescriptorSuite(this.descriptorSuite.Aete, this.actionListSuite, this.actionReferenceSuite);
+						actionDescriptorSuite = new ActionDescriptorSuite(this.descriptorSuite.Aete, this.actionListSuite,
+							this.actionReferenceSuite, this.picaSuites.ASZStringSuite);
 						actionListSuite.ActionDescriptorSuite = actionDescriptorSuite;
 						descriptorRegistrySuite.ActionDescriptorSuite = actionDescriptorSuite;
 						if (scriptingData != null)
@@ -3624,7 +3625,7 @@ namespace PSFilterLoad.PSApi
 						{
 							this.actionReferenceSuite = new ActionReferenceSuite();
 						}
-						this.actionListSuite = new ActionListSuite(this.actionReferenceSuite);
+						this.actionListSuite = new ActionListSuite(this.actionReferenceSuite, this.picaSuites.ASZStringSuite);
 					}
 
 					PSActionListProcs listSuite = this.actionListSuite.CreateActionListSuite1();
@@ -3651,7 +3652,7 @@ namespace PSFilterLoad.PSApi
 						return PSError.kSPSuiteNotFoundError;
 					}
 
-					ASZStringSuite1 stringSuite = PICASuites.CreateASZStringSuite1();
+					ASZStringSuite1 stringSuite = this.picaSuites.ASZStringSuite.CreateASZStringSuite1();
 
 					suite = this.activePICASuites.AllocateSuite(suiteKey, stringSuite);
 				}
@@ -3674,7 +3675,7 @@ namespace PSFilterLoad.PSApi
 					}
 					if (errorSuite == null)
 					{
-						this.errorSuite = new ErrorSuite();
+						this.errorSuite = new ErrorSuite(this.picaSuites.ASZStringSuite);
 					}
 
 					PSErrorSuite1 error = this.errorSuite.CreateErrorSuite1();

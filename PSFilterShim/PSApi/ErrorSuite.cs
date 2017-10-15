@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.PICA;
 using System;
 using System.Runtime.InteropServices;
 
@@ -20,6 +21,7 @@ namespace PSFilterLoad.PSApi
         private readonly ErrorSuiteSetErrorFromPString setErrorFromPString;
         private readonly ErrorSuiteSetErrorFromCString setErrorFromCString;
         private readonly ErrorSuiteSetErrorFromZString setErrorFromZString;
+        private readonly IASZStringSuite zstringSuite;
         private string errorMessage;
 
         public string ErrorMessage
@@ -38,11 +40,22 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public ErrorSuite()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ErrorSuite"/> class.
+        /// </summary>
+        /// <param name="zstringSuite">The ASZString suite instance.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="zstringSuite"/> is null.</exception>
+        public ErrorSuite(IASZStringSuite zstringSuite)
         {
+            if (zstringSuite == null)
+            {
+                throw new ArgumentNullException("zstringSuite");
+            }
+
             this.setErrorFromPString = new ErrorSuiteSetErrorFromPString(SetErrorFromPString);
             this.setErrorFromCString = new ErrorSuiteSetErrorFromCString(SetErrorFromCString);
             this.setErrorFromZString = new ErrorSuiteSetErrorFromZString(SetErrorFromZString);
+            this.zstringSuite = zstringSuite;
             this.errorMessage = null;
         }
 
@@ -85,7 +98,7 @@ namespace PSFilterLoad.PSApi
         private int SetErrorFromZString(IntPtr str)
         {
             string value;
-            if (PICA.ASZStringSuite.Instance.ConvertToString(str, out value))
+            if (zstringSuite.ConvertToString(str, out value))
             {
                 this.errorMessage = value;
 
