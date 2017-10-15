@@ -3611,7 +3611,8 @@ namespace PSFilterLoad.PSApi
 						descriptorRegistrySuite.ActionDescriptorSuite = actionDescriptorSuite;
 						if (scriptingData != null)
 						{
-							actionDescriptorSuite.SetScriptingData((PIDescriptorParameters*)descriptorParametersPtr.ToPointer(), scriptingData);
+							PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
+							actionDescriptorSuite.SetScriptingData(descriptorParameters->descriptor, scriptingData);
 						}
 					}
 

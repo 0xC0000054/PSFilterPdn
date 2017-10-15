@@ -354,11 +354,11 @@ namespace PSFilterLoad.PSApi
             return false;
         }
 
-        public unsafe void SetScriptingData(PIDescriptorParameters* descriptorParameters, Dictionary<uint, AETEValue> scriptingData)
+        public void SetScriptingData(IntPtr descriptorHandle, Dictionary<uint, AETEValue> scriptingData)
         {
-            if (descriptorParameters->descriptor != IntPtr.Zero)
+            if (descriptorHandle != IntPtr.Zero)
             {
-                this.descriptorHandles.Add(descriptorParameters->descriptor, new ScriptingParameters(scriptingData));
+                this.descriptorHandles.Add(descriptorHandle, new ScriptingParameters(scriptingData));
             }
         }
 
