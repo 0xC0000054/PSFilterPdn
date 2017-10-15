@@ -194,24 +194,21 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		/// Gets the plug-in settings for the current session.
+		/// Gets or sets the plug-in settings for the current session.
 		/// </summary>
 		/// <returns>
-		/// The plug-in settings for the current session, or <c>null</c> if the current session does not contain any plug-in settings.
+		/// The plug-in settings for the current session.
 		/// </returns>
-		internal DescriptorRegistryValues GetRegistryValues()
+		internal DescriptorRegistryValues RegistryValues
 		{
-			return registryValues;
-		}
-
-		/// <summary>
-		/// Sets the plug-in settings for the current session.
-		/// </summary>
-		/// <param name="settings">The plug-in settings.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="settings"/> is null.</exception>
-		internal void SetRegistryValues(DescriptorRegistryValues values)
-		{
-			registryValues = values;
+			get
+			{
+				return registryValues;
+			}
+			set
+			{
+				registryValues = value;
+			}
 		}
 
 		public string ErrorMessage

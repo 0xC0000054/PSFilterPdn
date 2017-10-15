@@ -253,7 +253,7 @@ namespace PSFilterPdn
                     lps.SetAbortCallback(new Func<byte>(AbortCallback));
                     if (token.DescriptorRegistry != null)
                     {
-                        lps.SetRegistryValues(token.DescriptorRegistry);
+                        lps.RegistryValues = token.DescriptorRegistry;
                     }
 
                     lps.FilterParameters = token.FilterParameters;

@@ -180,7 +180,7 @@ namespace PSFilterShim
 
 					if (registryValues != null)
 					{
-						lps.SetRegistryValues(registryValues);
+						lps.RegistryValues = registryValues;
 					}
 
 					bool result = lps.RunPlugin(pdata, shimData.ShowAboutDialog);
@@ -208,7 +208,7 @@ namespace PSFilterShim
 									bf.Serialize(fs, lps.PseudoResources);
 								}
 
-								registryValues = lps.GetRegistryValues();
+								registryValues = lps.RegistryValues;
 								if (registryValues != null && registryValues.Changed)
 								{
 									using (FileStream fs = new FileStream(shimData.DescriptorRegistryPath, FileMode.Create, FileAccess.Write, FileShare.None))

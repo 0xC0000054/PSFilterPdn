@@ -868,7 +868,7 @@ namespace PSFilterPdn
 
                                 if (descriptorRegistry != null)
                                 {
-                                    lps.SetRegistryValues(descriptorRegistry);
+                                    lps.RegistryValues = descriptorRegistry;
                                 }
 
                                 if ((filterParameters != null) && data.FileName.Equals(filterParametersPluginFileName, StringComparison.OrdinalIgnoreCase))
@@ -893,7 +893,7 @@ namespace PSFilterPdn
                                     {
                                         this.pseudoResources.AddRange(lps.PseudoResources);
                                     }
-                                    this.descriptorRegistry = lps.GetRegistryValues();
+                                    this.descriptorRegistry = lps.RegistryValues;
                                 }
                                 else if (!string.IsNullOrEmpty(lps.ErrorMessage))
                                 {
