@@ -106,6 +106,7 @@ namespace PSFilterLoad.PSApi
 
 		private GlobalParameters globalParameters;
 		private Dictionary<uint, AETEValue> scriptingData;
+		private DescriptorRegistryValues registryValues;
 		private bool isRepeatEffect;
 		private IntPtr pluginDataHandle;
 		private IntPtr filterParametersHandle;
@@ -200,7 +201,7 @@ namespace PSFilterLoad.PSApi
 		/// </returns>
 		internal DescriptorRegistryValues GetRegistryValues()
 		{
-			return descriptorRegistrySuite.GetRegistryValues();
+			return registryValues;
 		}
 
 		/// <summary>
@@ -210,7 +211,7 @@ namespace PSFilterLoad.PSApi
 		/// <exception cref="ArgumentNullException"><paramref name="settings"/> is null.</exception>
 		internal void SetRegistryValues(DescriptorRegistryValues values)
 		{
-			descriptorRegistrySuite.SetRegistryValues(values);
+			registryValues = values;
 		}
 
 		public string ErrorMessage
@@ -290,7 +291,6 @@ namespace PSFilterLoad.PSApi
 			this.picaSuites = new PICASuites();
 			this.descriptorSuite = new DescriptorSuite();
 			this.pseudoResourceSuite = new PseudoResourceSuite();
-			this.descriptorRegistrySuite = new DescriptorRegistrySuite();
 
 			using (Bitmap bmp = new Bitmap(shimData.SourceImagePath))
 			{
@@ -561,6 +561,14 @@ namespace PSFilterLoad.PSApi
 			module = new PluginModule(pdata.FileName, pdata.EntryPoint);
 		}
 		
+		private void SaveRegistryValues()
+		{
+			if (descriptorRegistrySuite != null)
+			{
+				this.registryValues = descriptorRegistrySuite.GetRegistryValues();
+			}
+		}
+
 		/// <summary>
 		/// Saves the filter scripting parameters for repeat runs.
 		/// </summary>
@@ -971,6 +979,7 @@ namespace PSFilterLoad.PSApi
 			{
 				SaveParameterHandles();
 				SaveScriptingParameters();
+				SaveRegistryValues();
 			}
 			PostProcessOutputData();
 
@@ -3661,6 +3670,15 @@ namespace PSFilterLoad.PSApi
 					if (version != 1)
 					{
 						return PSError.kSPSuiteNotFoundError;
+					}
+
+					if (descriptorRegistrySuite == null)
+					{
+						this.descriptorRegistrySuite = new DescriptorRegistrySuite();
+						if (registryValues != null)
+						{
+							this.descriptorRegistrySuite.SetRegistryValues(registryValues);
+						}
 					}
 
 					PSDescriptorRegistryProcs registrySuite = this.descriptorRegistrySuite.CreateDescriptorRegistrySuite1();
