@@ -77,7 +77,7 @@ namespace PSFilterLoad.PSApi
 		{
 			if (colorSpaceSuite == null)
 			{
-				this.colorSpaceSuite = new PICAColorSpaceSuite(this.ASZStringSuite);
+				this.colorSpaceSuite = new PICAColorSpaceSuite(ASZStringSuite);
 			}
 
 			return this.colorSpaceSuite.CreateColorSpaceSuite1();
@@ -110,7 +110,7 @@ namespace PSFilterLoad.PSApi
 		{
 			if (uiHooksSuite == null)
 			{
-				this.uiHooksSuite = new PICAUIHooksSuite(filterRecord, this.pluginName, this.ASZStringSuite);
+				this.uiHooksSuite = new PICAUIHooksSuite(filterRecord, this.pluginName, ASZStringSuite);
 			}
 
 			return this.uiHooksSuite.CreateUIHooksSuite1(filterRecord);
