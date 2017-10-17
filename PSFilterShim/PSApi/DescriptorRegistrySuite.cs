@@ -28,33 +28,20 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Initializes a new instance of the <see cref="DescriptorRegistrySuite"/> class.
         /// </summary>
-        public DescriptorRegistrySuite()
+        /// <param name="actionDescriptorSuite">The action descriptor suite instance.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="actionDescriptorSuite"/> is null.</exception>
+        public DescriptorRegistrySuite(IActionDescriptorSuite actionDescriptorSuite)
         {
-            this.actionDescriptorSuite = null;
+            if (actionDescriptorSuite == null)
+            {
+                throw new ArgumentNullException("actionDescriptorSuite");
+            }
+
+            this.actionDescriptorSuite = actionDescriptorSuite;
             this.register = new DescriptorRegistryRegister(Register);
             this.erase = new DescriptorRegistryErase(Erase);
             this.get = new DescriptorRegistryGet(Get);
             this.registry = new Dictionary<string, DescriptorRegistryItem>(StringComparer.Ordinal);
-        }
-
-        /// <summary>
-        /// Sets the action descriptor suite instance.
-        /// </summary>
-        /// <value>
-        /// The action descriptor suite instance.
-        /// </value>
-        /// <exception cref="ArgumentNullException">value is null.</exception>
-        public IActionDescriptorSuite ActionDescriptorSuite
-        {
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-
-                this.actionDescriptorSuite = value;
-            }
         }
 
         /// <summary>
