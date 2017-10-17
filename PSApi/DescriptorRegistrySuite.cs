@@ -94,27 +94,30 @@ namespace PSFilterLoad.PSApi
         /// Sets the plug-in settings for the current session.
         /// </summary>
         /// <param name="values">The plug-in settings.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="values"/> is null.</exception>
         public void SetRegistryValues(DescriptorRegistryValues values)
         {
-            if (values != null)
+            if (values == null)
             {
-                ReadOnlyDictionary<string, DescriptorRegistryItem> persistedValues = values.PersistedValues;
-                ReadOnlyDictionary<string, DescriptorRegistryItem> sessionValues = values.SessionValues;
+                throw new ArgumentNullException("values");
+            }
 
-                if (persistedValues != null)
+            ReadOnlyDictionary<string, DescriptorRegistryItem> persistedValues = values.PersistedValues;
+            ReadOnlyDictionary<string, DescriptorRegistryItem> sessionValues = values.SessionValues;
+
+            if (persistedValues != null)
+            {
+                foreach (var item in persistedValues)
                 {
-                    foreach (var item in persistedValues)
-                    {
-                        this.registry.Add(item.Key, item.Value);
-                    }
+                    this.registry.Add(item.Key, item.Value);
                 }
+            }
 
-                if (sessionValues != null)
+            if (sessionValues != null)
+            {
+                foreach (var item in sessionValues)
                 {
-                    foreach (var item in sessionValues)
-                    {
-                        this.registry.Add(item.Key, item.Value);
-                    }
+                    this.registry.Add(item.Key, item.Value);
                 }
             }
         }
