@@ -151,6 +151,7 @@
     <Compile Include="PSApi\ActionListSuite.cs" />
     <Compile Include="PSApi\ActionReferenceItem.cs" />
     <Compile Include="PSApi\ActionReferenceSuite.cs" />
+    <Compile Include="PSApi\ActionSuiteProvider.cs" />
     <Compile Include="PSApi\ActivePICASuites.cs" />
     <Compile Include="PSApi\AETEData.cs" />
     <Compile Include="PSApi\AETEValue.cs" />

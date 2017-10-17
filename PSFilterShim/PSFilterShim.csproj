@@ -137,6 +137,7 @@
     <Compile Include="PSApi\ActionDescriptorSuite.cs" />
     <Compile Include="PSApi\ActionListSuite.cs" />
     <Compile Include="PSApi\ActionReferenceSuite.cs" />
+    <Compile Include="PSApi\ActionSuiteProvider.cs" />
     <Compile Include="PSApi\ActivePICASuites.cs" />
     <Compile Include="PSApi\AdvanceStateProc.cs" />
     <Compile Include="PSApi\BufferProcs.cs" />
