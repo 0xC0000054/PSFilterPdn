@@ -111,12 +111,6 @@ namespace PSFilterLoad.PSApi
 
         private int Register(IntPtr key, IntPtr descriptor, bool isPersistent)
         {
-            if (this.actionDescriptorSuite == null)
-            {
-                // The plug-in called this method before acquiring the Action Descriptor suite.
-                return PSError.kSPLogicError;
-            }
-
             try
             {
                 string registryKey = Marshal.PtrToStringAnsi(key);
@@ -166,12 +160,6 @@ namespace PSFilterLoad.PSApi
 
         private int Get(IntPtr key, ref IntPtr descriptor)
         {
-            if (this.actionDescriptorSuite == null)
-            {
-                // The plug-in called this method before acquiring the Action Descriptor suite.
-                return PSError.kSPLogicError;
-            }
-
             try
             {
                 string registryKey = Marshal.PtrToStringAnsi(key);
