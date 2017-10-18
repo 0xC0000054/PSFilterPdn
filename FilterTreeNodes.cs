@@ -23,8 +23,18 @@ namespace PSFilterPdn
     {
         private readonly Dictionary<string, ReadOnlyCollection<TreeNode>> nodes;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FilterTreeNodes"/> class.
+        /// </summary>
+        /// <param name="items">The items.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="items"/> is null.</exception>
         public FilterTreeNodes(IDictionary<string, List<TreeNode>> items)
         {
+            if (items == null)
+            {
+                throw new ArgumentNullException("items");
+            }
+
             this.nodes = new Dictionary<string, ReadOnlyCollection<TreeNode>>(items.Count, StringComparer.Ordinal);
 
             foreach (var item in items)
