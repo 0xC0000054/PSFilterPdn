@@ -131,6 +131,12 @@
     <Compile Include="ColorSpace\HSL.cs" />
     <Compile Include="ColorSpace\RGB.cs" />
     <Compile Include="ConfigDialogState.cs" />
+    <Compile Include="Dialogs\PlatformFolderBrowserDialog.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Dialogs\VistaFolderBrowserDialog.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="DoubleBufferedListView.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -143,7 +149,10 @@
     <Compile Include="MaskSurface\MemoryBlock.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="NativeConstants.cs" />
+    <Compile Include="NativeEnums.cs" />
     <Compile Include="NativeInterfaces.cs" />
+    <Compile Include="NativeStructs.cs" />
     <Compile Include="PluginSupportInfo.cs" />
     <Compile Include="PSApi\ActionDescriptorSuite.cs" />
     <Compile Include="PSApi\ActionListDescriptor.cs" />
@@ -259,6 +268,7 @@
     <Compile Include="PSFilterShimServer.cs" />
     <Compile Include="PSFilterShimService.cs" />
     <Compile Include="RegionDataWrapper.cs" />
+    <Compile Include="SafeNativeMethods.cs" />
     <Compile Include="ShellLink.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="StringLogicalComparer.cs" />

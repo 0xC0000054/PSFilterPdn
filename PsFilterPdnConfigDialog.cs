@@ -950,7 +950,7 @@ namespace PSFilterPdn
 
         private void addDirBtn_Click(object sender, EventArgs e)
         {
-            using (FolderBrowserDialog fbd = new FolderBrowserDialog())
+            using (PlatformFolderBrowserDialog fbd = new PlatformFolderBrowserDialog())
             {
                 fbd.RootFolder = Environment.SpecialFolder.Desktop;
                 if (fbd.ShowDialog(this) == DialogResult.OK)
