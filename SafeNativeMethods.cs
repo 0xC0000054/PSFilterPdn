@@ -25,5 +25,12 @@ namespace PSFilterPdn
             [In()] ref Guid riid,
             [MarshalAs(UnmanagedType.Interface, IidParameterIndex = 2)] out NativeInterfaces.IShellItem ppv
             );
+
+        [DllImport("kernel32.dll", EntryPoint = "GetProcessDEPPolicy")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool GetProcessDEPPolicy([In()] IntPtr hProcess, [Out()] out uint lpFlags, [Out()] out int lpPermanent);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = false, ExactSpelling = true)]
+        internal static extern IntPtr GetCurrentProcess();
     }
 }
