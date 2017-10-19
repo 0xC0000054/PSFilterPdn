@@ -170,15 +170,6 @@ namespace PSFilterPdn
             }
         }
 
-        private static readonly bool IsWindows7OrLater = CheckIsWindows7OrLater();
-
-        private static bool CheckIsWindows7OrLater()
-        {
-            OperatingSystem os = Environment.OSVersion;
-
-            return (os.Platform == PlatformID.Win32NT && ((os.Version.Major == 6 && os.Version.Minor >= 1) || os.Version.Major > 6));
-        }
-
         /// <summary>
         /// Gets the demand path for the FileIOPermission.
         /// </summary>
@@ -222,7 +213,7 @@ namespace PSFilterPdn
         {
             uint oldMode;
 
-            if (IsWindows7OrLater)
+            if (OS.IsWindows7OrLater)
             {
                 UnsafeNativeMethods.SetThreadErrorMode(newMode, out oldMode);
             }
@@ -302,7 +293,7 @@ namespace PSFilterPdn
             }
             this.shellLinkTarget = null;
 
-            if (IsWindows7OrLater)
+            if (OS.IsWindows7OrLater)
             {
                 // Suppress the querying of short filenames and use a larger buffer on Windows 7 and later.
                 this.infoLevel = FindExInfoLevel.Basic;

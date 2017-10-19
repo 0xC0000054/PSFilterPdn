@@ -20,22 +20,13 @@ namespace PSFilterPdn
 
     internal sealed class DoubleBufferedTreeView : TreeView
     {
-        private static readonly bool IsVistaOrLater = CheckIsVistaOrLater();
-
-        private static bool CheckIsVistaOrLater()
-        {
-            OperatingSystem os = Environment.OSVersion;
-
-            return (os.Platform == PlatformID.Win32NT && os.Version.Major >= 6);
-        }
-
         public DoubleBufferedTreeView()
         {
             // Enable default double buffering processing (DoubleBuffered returns true)
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
 
             // Disable default CommCtrl painting on non-Vista systems
-            if (!IsVistaOrLater)
+            if (!OS.IsVistaOrLater)
             {
                 SetStyle(ControlStyles.UserPaint, true);
             }
@@ -45,7 +36,7 @@ namespace PSFilterPdn
         {
             base.OnHandleCreated(e);
 
-            if (IsVistaOrLater)
+            if (OS.IsVistaOrLater)
             {
                 SafeNativeMethods.SendMessage(
                     this.Handle,

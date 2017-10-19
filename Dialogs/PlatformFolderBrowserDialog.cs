@@ -227,8 +227,7 @@ namespace PSFilterPdn
         {
             try
             {
-                OperatingSystem os = Environment.OSVersion;
-                if (os.Platform == PlatformID.Win32NT && os.Version.Major >= 6)
+                if (OS.IsVistaOrLater)
                 {
                     // Check that visual styles are enabled and the OS is not in safe mode.
                     VisualStyleState state = Application.VisualStyleState;

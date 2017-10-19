@@ -153,6 +153,7 @@
     <Compile Include="NativeEnums.cs" />
     <Compile Include="NativeInterfaces.cs" />
     <Compile Include="NativeStructs.cs" />
+    <Compile Include="OS.cs" />
     <Compile Include="PluginSupportInfo.cs" />
     <Compile Include="PSApi\ActionDescriptorSuite.cs" />
     <Compile Include="PSApi\ActionListDescriptor.cs" />

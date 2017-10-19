@@ -37,7 +37,7 @@ namespace PSFilterPdn
         /// <exception cref="PlatformNotSupportedException">Only supported on Windows Vista or newer.</exception>
         public VistaFolderBrowserDialog()
         {
-            if (Environment.OSVersion.Version.Major < 6)
+            if (!OS.IsVistaOrLater)
             {
                 throw new PlatformNotSupportedException("Only supported on Windows Vista or newer.");
             }
