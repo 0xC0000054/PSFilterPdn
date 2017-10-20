@@ -14,8 +14,12 @@ namespace PSFilterPdn
 {
     internal static class NativeConstants
     {
+        internal const int MAX_PATH = 260;
+
         internal const int S_OK = 0;
         internal const int S_FALSE = 1;
+
+        internal const int STGM_READ = 0;
 
         internal const string CLSID_FileOpenDialog = "DC1C5A9C-E88A-4dde-A5A1-60F82A20AEF7";
 
