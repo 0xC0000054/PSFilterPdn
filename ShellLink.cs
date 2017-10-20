@@ -24,9 +24,6 @@ namespace PSFilterPdn
         private NativeInterfaces.IShellLinkW shellLink;
         private bool disposed;
 
-        private const int STGM_READ = 0;
-        private const int S_OK = 0;
-
         [ComImport(), Guid("00021401-0000-0000-C000-000000000046")]
         private class ShellLinkCoClass
         {
@@ -46,7 +43,7 @@ namespace PSFilterPdn
         /// <param name="linkPath">The shortcut to load.</param>
         public bool Load(string linkPath)
         {
-            return (((NativeInterfaces.IPersistFile)shellLink).Load(linkPath, STGM_READ) == S_OK);
+            return (((NativeInterfaces.IPersistFile)shellLink).Load(linkPath, NativeConstants.STGM_READ) == NativeConstants.S_OK);
         }
 
         /// <summary>
@@ -56,9 +53,9 @@ namespace PSFilterPdn
         {
             get
             {
-                StringBuilder sb = new StringBuilder(260);
+                StringBuilder sb = new StringBuilder(NativeConstants.MAX_PATH);
 
-                if (shellLink.GetPath(sb, sb.Capacity, IntPtr.Zero, 0U) != S_OK)
+                if (shellLink.GetPath(sb, sb.Capacity, IntPtr.Zero, 0U) != NativeConstants.S_OK)
                 {
                     return string.Empty;
                 }
