@@ -28,7 +28,11 @@ namespace PSFilterPdn
 
         [DllImport("kernel32.dll", EntryPoint = "GetProcessDEPPolicy")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool GetProcessDEPPolicy([In()] IntPtr hProcess, [Out()] out uint lpFlags, [Out()] out int lpPermanent);
+        internal static extern bool GetProcessDEPPolicy(
+            [In()] IntPtr hProcess,
+            [Out()] out NativeEnums.ProcessDEPPolicy lpFlags,
+            [Out()] out int lpPermanent
+            );
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = false, ExactSpelling = true)]
         internal static extern IntPtr GetCurrentProcess();

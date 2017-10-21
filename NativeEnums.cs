@@ -127,6 +127,14 @@ namespace PSFilterPdn
             CDCS_ENABLED = 0x00000001,
             CDCS_VISIBLE = 0x00000002
         }
+
+        [Flags]
+        internal enum ProcessDEPPolicy : uint
+        {
+            PROCESS_DEP_DISABLED = 0,
+            PROCESS_DEP_ENABLE = 1,
+            PROCESS_DEP_DISABLE_ATL_THUNK_EMULATION = 2
+        }
     }
 }
 

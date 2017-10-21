@@ -1313,13 +1313,13 @@ namespace PSFilterPdn
             this.useDEPProxy = false;
             if (IntPtr.Size == 4)
             {
-                uint depFlags;
+                NativeEnums.ProcessDEPPolicy depFlags;
                 int permanent;
                 try
                 {
                     if (SafeNativeMethods.GetProcessDEPPolicy(SafeNativeMethods.GetCurrentProcess(), out depFlags, out permanent))
                     {
-                        this.useDEPProxy = (depFlags != 0U);
+                        this.useDEPProxy = (depFlags != NativeEnums.ProcessDEPPolicy.PROCESS_DEP_DISABLED);
                     }
                 }
                 catch (EntryPointNotFoundException)
