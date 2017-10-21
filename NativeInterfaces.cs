@@ -19,7 +19,7 @@ namespace PSFilterPdn
     static class NativeInterfaces
     {
         /// <summary>The IShellLink interface allows Shell links to be created, modified, and resolved</summary>
-        [ComImport(), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("000214F9-0000-0000-C000-000000000046")]
+        [ComImport(), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid(NativeConstants.IID_IShellLinkW)]
         internal interface IShellLinkW
         {
             /// <summary>Retrieves the path and file name of a Shell link object</summary>
@@ -78,7 +78,7 @@ namespace PSFilterPdn
             int SetPath([MarshalAs(UnmanagedType.LPWStr)] string pszFile);
         }
 
-        [ComImport(), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("0000010c-0000-0000-c000-000000000046")]
+        [ComImport(), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid(NativeConstants.IID_IPersist)]
         internal interface IPersist
         {
             [PreserveSig]
@@ -86,7 +86,7 @@ namespace PSFilterPdn
         }
 
 
-        [ComImport(), Guid("0000010b-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        [ComImport(), Guid(NativeConstants.IID_IPersistFile), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
         internal interface IPersistFile : IPersist
         {
             [PreserveSig]
