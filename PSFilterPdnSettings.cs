@@ -153,7 +153,7 @@ namespace PSFilterPdn
                         {
                             List<string> directories = new List<string>();
 
-                            string[] splitDirs = dirs.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                            string[] splitDirs = dirs.Split(new char[] { ',' }, StringSplitOptions.None);
 
                             for (int i = 0; i < splitDirs.Length; i++)
                             {
