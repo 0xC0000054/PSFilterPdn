@@ -1136,12 +1136,13 @@ namespace PSFilterPdn
                             {
                                 TreeNode child = new TreeNode(plugin.Title) { Name = plugin.Title, Tag = plugin };
 
-                                if (nodes.ContainsKey(plugin.Category))
+                                List<TreeNode> childNodes;
+                                if (nodes.TryGetValue(plugin.Category, out childNodes))
                                 {
-                                    List<TreeNode> parent = nodes[plugin.Category];
-                                    if (IsNotDuplicateNode(ref parent, plugin))
+                                    if (IsNotDuplicateNode(ref childNodes, plugin))
                                     {
-                                        parent.Add(child);
+                                        childNodes.Add(child);
+                                        nodes[plugin.Category] = childNodes;
                                     }
                                 }
                                 else
