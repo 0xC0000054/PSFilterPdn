@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ namespace PSFilterLoad.PSApi
 		// ImageServicesProc
 #if USEIMAGESERVICES
 		private PIResampleProc resample1DProc;
-		private PIResampleProc resample2DProc; 
+		private PIResampleProc resample2DProc;
 #endif
 		// PropertyProcs
 		private GetPropertyProc getPropertyProc;
@@ -154,7 +154,7 @@ namespace PSFilterLoad.PSApi
 		private IntPtr inDataPtr;
 		private IntPtr outDataPtr;
 
-		private bool copyToDest; 
+		private bool copyToDest;
 		private bool sizesSetup;
 		private bool frValuesSetup;
 		private bool useChannelPorts;
@@ -408,7 +408,7 @@ namespace PSFilterLoad.PSApi
 		private bool IgnoreAlphaChannel(PluginData data)
 		{
 			// Some filters do not handle the alpha channel correctly despite what their filterInfo says.
-			if (data.FilterInfo == null || 
+			if (data.FilterInfo == null ||
 				data.Category.Equals("Axion", StringComparison.Ordinal) ||
 				data.Category.Equals("Vizros 4", StringComparison.Ordinal) && data.Title.StartsWith("Lake", StringComparison.Ordinal) ||
 				data.Category.Equals("Nik Collection", StringComparison.Ordinal) && data.Title.StartsWith("Dfine 2", StringComparison.Ordinal))
@@ -427,7 +427,7 @@ namespace PSFilterLoad.PSApi
 						case FilterCase.EditableTransparencyWithSelection:
 							filterCase = FilterCase.FlatImageWithSelection;
 							break;
-					} 
+					}
 				}
 
 				return true;
@@ -556,7 +556,7 @@ namespace PSFilterLoad.PSApi
 		{
 			module = new PluginModule(pdata.FileName, pdata.EntryPoint);
 		}
-		
+
 		private void SaveRegistryValues()
 		{
 			if (descriptorRegistrySuite != null)
@@ -847,7 +847,7 @@ namespace PSFilterLoad.PSApi
 						PluginEntryPoint ep = module.GetEntryPoint(entryPoint);
 
 						ep(FilterSelector.About, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
-						
+
 						if (result != PSError.noErr)
 						{
 							break;
@@ -1067,7 +1067,7 @@ namespace PSFilterLoad.PSApi
 			if (ignoreAlpha)
 			{
 				filterRecord->inLayerPlanes = 0;
-				filterRecord->inTransparencyMask = 0; // Paint.NET is always PixelFormat.Format32bppArgb			
+				filterRecord->inTransparencyMask = 0; // Paint.NET is always PixelFormat.Format32bppArgb
 				filterRecord->inNonLayerPlanes = 3;
 			}
 			else
@@ -1635,7 +1635,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe short FillInputBuffer(FilterRecord* filterRecord)
 		{
 #if DEBUG
-			DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("inRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}, inputRate: {4}", new object[] { filterRecord->inRowBytes, filterRecord->inRect, 
+			DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("inRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}, inputRate: {4}", new object[] { filterRecord->inRowBytes, filterRecord->inRect,
 			filterRecord->inLoPlane, filterRecord->inHiPlane, FixedToInt32(filterRecord->inputRate) }));
 #endif
 			Rect16 rect = filterRecord->inRect;
@@ -1701,7 +1701,7 @@ namespace PSFilterLoad.PSApi
 					channelOffset = 0;
 					break;
 			}
-			
+
 			bool validImageBounds = rect.left < source.Width && rect.top < source.Height;
 			short padErr = SetFilterPadding(inDataPtr, stride, rect, nplanes, channelOffset, filterRecord->inputPadding, lockRect, tempSurface);
 			if (padErr != PSError.noErr || !validImageBounds)
@@ -1719,7 +1719,7 @@ namespace PSFilterLoad.PSApi
 			{
 				byte* src = (byte*)tempSurface.GetPointAddressUnchecked(left, y);
 				byte* dst = (byte*)ptr + ((y - top) * stride);
-				
+
 				for (int x = left; x < right; x++)
 				{
 					switch (nplanes)
@@ -1752,7 +1752,7 @@ namespace PSFilterLoad.PSApi
 
 			return PSError.noErr;
 		}
-		
+
 		/// <summary>
 		/// Fills the output buffer with data from the destination image.
 		/// </summary>
@@ -1760,7 +1760,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe short FillOutputBuffer(FilterRecord* filterRecord)
 		{
 #if DEBUG
-			DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("outRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}", new object[] { filterRecord->outRowBytes, filterRecord->outRect, filterRecord->outLoPlane, 
+			DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("outRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}", new object[] { filterRecord->outRowBytes, filterRecord->outRect, filterRecord->outLoPlane,
 				filterRecord->outHiPlane }));
 
 			using (Bitmap dst = dest.CreateAliasedBitmap())
@@ -1838,7 +1838,7 @@ namespace PSFilterLoad.PSApi
 			{
 				byte* src = (byte*)dest.GetPointAddressUnchecked(left, y);
 				byte* dst = (byte*)ptr + ((y - top) * stride);
-				
+
 				for (int x = left; x < right; x++)
 				{
 					switch (nplanes)
@@ -1953,7 +1953,7 @@ namespace PSFilterLoad.PSApi
 					lockRect.X = 0;
 					lockRect.Width -= -rect.left;
 				}
-				
+
 				if (lockRect.Top < 0)
 				{
 					lockRect.Y = 0;
@@ -2003,7 +2003,7 @@ namespace PSFilterLoad.PSApi
 			{
 				byte* src = tempMask.GetPointAddressUnchecked(left, y);
 				byte* dst = ptr + ((y - top) * width);
-				
+
 				for (int x = left; x < right; x++)
 				{
 					*dst = *src;
@@ -2062,7 +2062,7 @@ namespace PSFilterLoad.PSApi
 						lockRect.X = 0;
 						lockRect.Width -= -rect.left;
 					}
-					
+
 					if (lockRect.Top < 0)
 					{
 						lockRect.Y = 0;
@@ -3069,8 +3069,8 @@ namespace PSFilterLoad.PSApi
 		private unsafe short DisplayPixelsProc(ref PSPixelMap srcPixelMap, ref VRect srcRect, int dstRow, int dstCol, IntPtr platformContext)
 		{
 #if DEBUG
-			DebugUtils.Ping(DebugFlags.DisplayPixels, string.Format("source: version = {0} bounds = {1}, ImageMode = {2}, colBytes = {3}, rowBytes = {4},planeBytes = {5}, BaseAddress = 0x{6:X8}, mat = 0x{7:X8}, masks = 0x{8:X8}", 
-				new object[]{ srcPixelMap.version, srcPixelMap.bounds, ((ImageModes)srcPixelMap.imageMode).ToString("G"), srcPixelMap.colBytes, srcPixelMap.rowBytes, srcPixelMap.planeBytes, srcPixelMap.baseAddr, 
+			DebugUtils.Ping(DebugFlags.DisplayPixels, string.Format("source: version = {0} bounds = {1}, ImageMode = {2}, colBytes = {3}, rowBytes = {4},planeBytes = {5}, BaseAddress = 0x{6:X8}, mat = 0x{7:X8}, masks = 0x{8:X8}",
+				new object[]{ srcPixelMap.version, srcPixelMap.bounds, ((ImageModes)srcPixelMap.imageMode).ToString("G"), srcPixelMap.colBytes, srcPixelMap.rowBytes, srcPixelMap.planeBytes, srcPixelMap.baseAddr,
 					srcPixelMap.mat, srcPixelMap.masks}));
 			DebugUtils.Ping(DebugFlags.DisplayPixels, string.Format("srcRect = {0} dstCol (x, width) = {1}, dstRow (y, height) = {2}", srcRect, dstCol, dstRow));
 #endif
@@ -3289,7 +3289,7 @@ namespace PSFilterLoad.PSApi
 		private short image_services_interpolate_2d_proc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
 		{
 			return PSError.memFullErr;
-		} 
+		}
 #endif
 
 		private void ProcessEventProc(IntPtr @event)
@@ -3901,7 +3901,7 @@ namespace PSFilterLoad.PSApi
 			// ImageServicesProc
 #if USEIMAGESERVICES
 			resample1DProc = new PIResampleProc(image_services_interpolate_1d_proc);
-			resample2DProc = new PIResampleProc(image_services_interpolate_2d_proc); 
+			resample2DProc = new PIResampleProc(image_services_interpolate_2d_proc);
 #endif
 
 			// PropertyProc
@@ -4102,7 +4102,7 @@ namespace PSFilterLoad.PSApi
 
 			filterRecord->descriptorParameters = descriptorParametersPtr;
 			errorStringPtr = Memory.Allocate(256, true);
-			filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead. 
+			filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead.
 			filterRecord->channelPortProcs = channelPortsPtr;
 			filterRecord->documentInfo = readDocumentPtr;
 

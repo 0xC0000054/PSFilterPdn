@@ -29,8 +29,8 @@ namespace Devcorp.Controls.Design
 		public static bool operator ==(HSL item1, HSL item2)
 		{
 			return (
-				item1.Hue == item2.Hue 
-				&& item1.Saturation == item2.Saturation 
+				item1.Hue == item2.Hue
+				&& item1.Saturation == item2.Saturation
 				&& item1.Luminance == item2.Luminance
 				);
 		}
@@ -38,8 +38,8 @@ namespace Devcorp.Controls.Design
 		public static bool operator !=(HSL item1, HSL item2)
 		{
 			return (
-				item1.Hue != item2.Hue 
-				|| item1.Saturation != item2.Saturation 
+				item1.Hue != item2.Hue
+				|| item1.Saturation != item2.Saturation
 				|| item1.Luminance != item2.Luminance
 				);
 		}
@@ -51,36 +51,36 @@ namespace Devcorp.Controls.Design
 		/// Gets or sets the hue component.
 		/// </summary>
 		[Description("Hue component"),]
-		public double Hue 
-		{ 
+		public double Hue
+		{
 			get
 			{
 				return hue;
-			} 
-		} 
+			}
+		}
 
 		/// <summary>
 		/// Gets or sets saturation component.
 		/// </summary>
 		[Description("Saturation component"),]
-		public double Saturation 
-		{ 
+		public double Saturation
+		{
 			get
 			{
 				return saturation;
-			} 
-		} 
+			}
+		}
 
 		/// <summary>
 		/// Gets or sets the luminance component.
 		/// </summary>
 		[Description("Luminance component"),]
-		public double Luminance 
-		{ 
+		public double Luminance
+		{
 			get
 			{
 				return luminance;
-			} 
+			}
 		}
 
 		#endregion
@@ -91,22 +91,22 @@ namespace Devcorp.Controls.Design
 		/// <param name="h">Hue value.</param>
 		/// <param name="s">Saturation value.</param>
 		/// <param name="l">Lightness value.</param>
-		public HSL(double h, double s, double l) 
+		public HSL(double h, double s, double l)
 		{
-			hue = (h>360)? 360 : ((h<0)?0:h); 
+			hue = (h>360)? 360 : ((h<0)?0:h);
 			saturation = (s>1)? 1 : ((s<0)?0:s);
 			luminance = (l>1)? 1 : ((l<0)?0:l);
 		}
 
 		#region Methods
-		public override bool Equals(Object obj) 
+		public override bool Equals(Object obj)
 		{
 			if(obj==null || GetType()!=obj.GetType()) return false;
 
 			return (this == (HSL)obj);
 		}
 
-		public override int GetHashCode() 
+		public override int GetHashCode()
 		{
 			return Hue.GetHashCode() ^ Saturation.GetHashCode() ^ Luminance.GetHashCode();
 		}

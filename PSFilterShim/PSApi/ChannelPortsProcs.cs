@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -79,25 +79,25 @@ namespace PSFilterLoad.PSApi
 	{
 		public int minVersion;		/* The minimum and maximum version which */
 		public int maxVersion;		/* can be used to interpret this record. */
-	
+
 		public IntPtr next;	/* The next descriptor in the list. */
-	
+
 		public IntPtr port;	/* The port to use for reading. */
-	
+
 		public VRect bounds;			/* The bounds of the channel data. */
 		public int depth;			/* The depth of the data. */
-	
+
 		public VPoint tileSize;		/* The size of the tiles. */
 		public VPoint tileOrigin;		/* The origin for the tiles. */
-	
+
 		public ChannelTypes channelType;		/* The channel type. */
 
 		public short padding;			/* Reserved. Defaults to zero. */
-	
+
 		public IntPtr contextInfo;		/* A pointer to additional info dependent on context. */
-	
+
 		public IntPtr name;		/* The name of the channel. */
-	
+
 	}
 
 

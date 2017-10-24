@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    
+
     [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
     internal delegate int SPBasicSuite_AcquireSuite(System.IntPtr name, int version, ref System.IntPtr suite);
 
@@ -52,6 +52,6 @@ namespace PSFilterLoad.PSApi
         public IntPtr freeBlock;
         public IntPtr reallocateBlock;
         public IntPtr undefined;
-    } 
+    }
 
 }

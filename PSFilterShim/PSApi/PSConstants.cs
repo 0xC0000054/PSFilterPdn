@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ namespace PSFilterLoad.PSApi
     internal static class PSConstants
     {
         /// <summary>
-        /// The signature of Adobe Photoshop - 8BIM 
+        /// The signature of Adobe Photoshop - 8BIM
         /// </summary>
         public const uint kPhotoshopSignature = 0x3842494dU;
 
@@ -38,14 +38,14 @@ namespace PSFilterLoad.PSApi
 
 
         public const int kCurrentBufferProcsVersion = 2;
-        public const int kCurrentBufferProcsCount = 5; 
-        
+        public const int kCurrentBufferProcsCount = 5;
+
         public const int kCurrentHandleProcsVersion = 1;
         public const short kCurrentHandleProcsCount = 8;
 
 #if USEIMAGESERVICES
         public const int kCurrentImageServicesProcsVersion = 1;
-        public const short kCurrentImageServicesProcsCount = 2; 
+        public const short kCurrentImageServicesProcsCount = 2;
 #endif
 
         public const int kCurrentPropertyProcsVersion = 1;
@@ -79,13 +79,13 @@ namespace PSFilterLoad.PSApi
         public const int latestFilterSubVersion = 0;
 
         public const int plugInModeRGBColor = 3;
- 
+
         /// <summary>
         /// PiPL FlagSet, the fourth bit in the first byte is RGB.
         /// </summary>
         public const int flagSupportsRGBColor = 16;
         /// <summary>
-        /// PiMI resource, the third bit in the imageModes short is RGB. 
+        /// PiMI resource, the third bit in the imageModes short is RGB.
         /// </summary>
         public const int supportsRGBColor = 8;
 
@@ -114,7 +114,7 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
-        /// The host sampling support constants 
+        /// The host sampling support constants
         /// </summary>
         internal static class SamplingSupport
         {

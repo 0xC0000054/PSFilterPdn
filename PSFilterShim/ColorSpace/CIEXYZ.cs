@@ -34,8 +34,8 @@ namespace Devcorp.Controls.Design
 		public static bool operator ==(CIEXYZ item1, CIEXYZ item2)
 		{
 			return (
-				item1.X == item2.X 
-				&& item1.Y == item2.Y 
+				item1.X == item2.X
+				&& item1.Y == item2.Y
 				&& item1.Z == item2.Z
 				);
 		}
@@ -43,8 +43,8 @@ namespace Devcorp.Controls.Design
 		public static bool operator !=(CIEXYZ item1, CIEXYZ item2)
 		{
 			return (
-				item1.X != item2.X 
-				|| item1.Y != item2.Y 
+				item1.X != item2.X
+				|| item1.Y != item2.Y
 				|| item1.Z != item2.Z
 				);
 		}
@@ -87,7 +87,7 @@ namespace Devcorp.Controls.Design
 
 		#endregion
 
-		public CIEXYZ(double x, double y, double z) 
+		public CIEXYZ(double x, double y, double z)
 		{
 			this.x = (x>0.9505)? 0.9505 : ((x<0)? 0 : x);
 			this.y = (y>1.0)? 1.0 : ((y<0)? 0 : y);
@@ -95,18 +95,18 @@ namespace Devcorp.Controls.Design
 		}
 
 		#region Methods
-		public override bool Equals(Object obj) 
+		public override bool Equals(Object obj)
 		{
 			if(obj==null || GetType()!=obj.GetType()) return false;
 
 			return (this == (CIEXYZ)obj);
 		}
 
-		public override int GetHashCode() 
+		public override int GetHashCode()
 		{
 			return X.GetHashCode() ^ Y.GetHashCode() ^ Z.GetHashCode();
 		}
 
 		#endregion
-	} 
+	}
 }

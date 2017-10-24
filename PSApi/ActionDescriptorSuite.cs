@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -173,7 +173,7 @@ namespace PSFilterLoad.PSApi
         /// <paramref name="actionReferenceSuite"/> is null.
         /// or
         /// <paramref name="zstringSuite"/> is null.
-        /// </exception>  
+        /// </exception>
         public ActionDescriptorSuite(AETEData aete, IActionListSuite actionListSuite, IActionReferenceSuite actionReferenceSuite,
             IASZStringSuite zstringSuite)
         {
@@ -575,7 +575,7 @@ namespace PSFilterLoad.PSApi
             {
                 return PSError.kSPBadParameterError;
             }
-           
+
             return PSError.kSPNoError;
         }
 
@@ -1210,7 +1210,7 @@ namespace PSFilterLoad.PSApi
                 Marshal.Copy((byte[])item.Value, 0, HandleSuite.Instance.LockHandle(data, 0), size);
                 HandleSuite.Instance.UnlockHandle(data);
 
-                return PSError.kSPNoError; 
+                return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
@@ -1263,7 +1263,7 @@ namespace PSFilterLoad.PSApi
                 {
                     return PSError.memFullErr;
                 }
-                
+
                 return PSError.kSPNoError;
             }
 

@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@ using System.ServiceModel;
 
 namespace PSFilterPdn
 {
-    // Adapted from: http://www.jmedved.com/2010/03/named-pipes-in-wcf/ 
+    // Adapted from: http://www.jmedved.com/2010/03/named-pipes-in-wcf/
     internal static class PSFilterShimServer
     {
         private static readonly Uri ServiceUri = new Uri("net.pipe://localhost/PSFilterShim");

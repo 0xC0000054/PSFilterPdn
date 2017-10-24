@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 
 
 namespace PSFilterLoad.PSApi
-{ 
+{
     [StructLayout(LayoutKind.Sequential)]
     internal struct PlugInMonitor
     {

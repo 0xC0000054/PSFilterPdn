@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -505,7 +505,7 @@ namespace PSFilterLoad.PSApi
             fixed (char* typePtr = "_8BFM")
             {
                 // Load the _8BFM resource to get the filter title.
-                filterRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, (IntPtr)typePtr); 
+                filterRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, (IntPtr)typePtr);
             }
 
             if (filterRes == IntPtr.Zero)
@@ -541,7 +541,7 @@ namespace PSFilterLoad.PSApi
             string title = StringUtil.FromCString(resPtr);
             // The entry point number is the same as the resource number.
             string entryPoint = "ENTRYPOINT" + lpszName.ToInt32().ToString(CultureInfo.InvariantCulture);
-            
+
             PluginData enumData = new PluginData(query.fileName, entryPoint, category, title);
 
             if (enumData.IsValid())
@@ -628,8 +628,8 @@ namespace PSFilterLoad.PSApi
             int count = pluginData.Count;
             if (count > 1)
             {
-                // If the DLL contains more than one filter, add a list of all the entry points to each individual filter. 
-                // Per the SDK only one entry point in a module will display the about box the rest are dummy calls so we must call all of them. 
+                // If the DLL contains more than one filter, add a list of all the entry points to each individual filter.
+                // Per the SDK only one entry point in a module will display the about box the rest are dummy calls so we must call all of them.
 
                 string[] entryPoints = new string[count];
                 for (int i = 0; i < count; i++)

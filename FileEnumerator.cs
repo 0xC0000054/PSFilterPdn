@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +143,7 @@ namespace PSFilterPdn
                 this.path = path;
                 this.isShortcut = isShortcut;
             }
-            
+
             /// <summary>
             /// Initializes a new instance of the <see cref="SearchData"/> class with a sub directory of the parent <c>SearchData</c>.
             /// </summary>
@@ -339,7 +339,7 @@ namespace PSFilterPdn
                 }
             }
         }
-        
+
         private bool FileMatchesFilter(string file)
         {
             return file.EndsWith(this.fileExtension, StringComparison.OrdinalIgnoreCase);

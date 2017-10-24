@@ -16,7 +16,7 @@ using System.Windows.Forms;
 
 namespace PSFilterLoad.ColorPicker
 {
-    internal class ColorRectangleControl 
+    internal class ColorRectangleControl
         : UserControl
     {
         private Color rectangleColor;

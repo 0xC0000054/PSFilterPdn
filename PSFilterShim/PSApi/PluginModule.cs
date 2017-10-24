@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@ namespace PSFilterLoad.PSApi
     internal delegate void PluginEntryPoint(FilterSelector selector, IntPtr pluginParamBlock, ref IntPtr pluginData, ref short result);
 
     internal sealed class PluginModule : IDisposable
-    {     
+    {
         /// <summary>
         /// The entry point for the FilterParmBlock and AboutRecord
         /// </summary>
@@ -38,7 +38,7 @@ namespace PSFilterLoad.PSApi
         /// <exception cref="EntryPointNotFoundException">The entry point specified by <paramref name="entryPoint"/> was not found in <paramref name="fileName"/>.</exception>
         /// <exception cref="System.IO.FileNotFoundException">The file specified by <paramref name="fileName"/> cannot be found.</exception>
         public PluginModule(string fileName, string entryPoint)
-        {            
+        {
             this.disposed = false;
             this.handle = UnsafeNativeMethods.LoadLibraryW(fileName);
             if (!handle.IsInvalid)

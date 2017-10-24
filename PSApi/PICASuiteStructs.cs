@@ -5,13 +5,13 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
 
 /* Adapted from ASZStringSuite.h, PIBufferSuite.h, PIColorSpaceSuite.h, PIHandleSuite.h, PIUIHooskSuite.h, SPPlugs.h
-*  Copyright 1986 - 2000 Adobe Systems Incorporated              
+*  Copyright 1986 - 2000 Adobe Systems Incorporated
 *  All Rights Reserved
 */
 
@@ -138,7 +138,7 @@ namespace PSFilterLoad.PSApi
 		public IntPtr GetNamedPlugin;
 
 		public IntPtr SetPluginPropertyList;
-	} 
+	}
 #endif
 
 	internal struct ASZStringSuite1

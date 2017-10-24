@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@
 namespace PSFilterLoad.PSApi
 {
 // Disable CS0649, Field 'field' is never assigned to, and will always have its default value 'value'
-#pragma warning disable 0649 
+#pragma warning disable 0649
 
 	internal struct PIProperty
 	{
@@ -27,7 +27,7 @@ namespace PSFilterLoad.PSApi
 		public uint propertyKey;		/* Identification key for this property type. */
 		public int propertyID;		/* Index within this property type. Must be unique for properties of a given type in a PiPL. */
 		public int propertyLength;	/* Length of following data array. Will be rounded to a multiple of 4. */
-		
+
 		public const int SizeOf = 16;
 	}
 
@@ -56,7 +56,7 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		public const uint PIWin32X86CodeProperty = 0x77783836U;
 		/// <summary>
-		/// Win64 Intel code descriptor, Entrypoint 
+		/// Win64 Intel code descriptor, Entrypoint
 		/// </summary>
 		/// <remarks>Taken from the PiPL resources of a 64-bit Photoshop Plugin.</remarks>
 		public const uint PIWin64X86CodeProperty = 0x38363634U;
@@ -85,9 +85,9 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		public const uint PIFilterCaseInfoProperty = 0x66696369U;
 		/// <summary>
-		/// Creator code of required host, such as '8BIM' for Adobe Photoshop. - 'host' 
+		/// Creator code of required host, such as '8BIM' for Adobe Photoshop. - 'host'
 		/// </summary>
 		public const uint PIRequiredHostProperty = 0x686f7374U;
 	}
-	
+
 }

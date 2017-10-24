@@ -121,7 +121,7 @@ namespace PaintDotNet
         {
             return lhs.Bgra != rhs.Bgra;
         }
-       
+
         /// <summary>
         /// Compares two ColorBgra instance to determine if they are equal.
         /// </summary>

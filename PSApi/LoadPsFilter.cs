@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ namespace PSFilterLoad.PSApi
 		// ImageServicesProc
 #if USEIMAGESERVICES
 		private PIResampleProc resample1DProc;
-		private PIResampleProc resample2DProc; 
+		private PIResampleProc resample2DProc;
 #endif
 		// PropertyProcs
 		private GetPropertyProc getPropertyProc;
@@ -362,7 +362,7 @@ namespace PSFilterLoad.PSApi
 			debugFlags |= DebugFlags.DisplayPixels;
 			debugFlags |= DebugFlags.Error;
 			debugFlags |= DebugFlags.HandleSuite;
-			debugFlags |= DebugFlags.MiscCallbacks; // progress callback 
+			debugFlags |= DebugFlags.MiscCallbacks; // progress callback
 			debugFlags |= DebugFlags.PropertySuite;
 			debugFlags |= DebugFlags.ResourceSuite;
 			debugFlags |= DebugFlags.SPBasicSuite;
@@ -419,7 +419,7 @@ namespace PSFilterLoad.PSApi
 						case FilterCase.EditableTransparencyWithSelection:
 							filterCase = FilterCase.FlatImageWithSelection;
 							break;
-					} 
+					}
 				}
 
 				return true;
@@ -1064,13 +1064,13 @@ namespace PSFilterLoad.PSApi
 			if (ignoreAlpha)
 			{
 				filterRecord->inLayerPlanes = 0;
-				filterRecord->inTransparencyMask = 0; // Paint.NET is always PixelFormat.Format32bppArgb			
+				filterRecord->inTransparencyMask = 0; // Paint.NET is always PixelFormat.Format32bppArgb
 				filterRecord->inNonLayerPlanes = 3;
 			}
 			else
 			{
 				filterRecord->inLayerPlanes = 3;
-				filterRecord->inTransparencyMask = 1; // Paint.NET is always PixelFormat.Format32bppArgb			
+				filterRecord->inTransparencyMask = 1; // Paint.NET is always PixelFormat.Format32bppArgb
 				filterRecord->inNonLayerPlanes = 0;
 			}
 			filterRecord->inLayerMasks = 0;
@@ -1228,7 +1228,7 @@ namespace PSFilterLoad.PSApi
 				return PluginAbout(pdata);
 			}
 
-			useChannelPorts = EnableChannelPorts(pdata); 
+			useChannelPorts = EnableChannelPorts(pdata);
 			this.picaSuites.SetPluginName(pdata.Title.TrimEnd('.'));
 
 			ignoreAlpha = IgnoreAlphaChannel(pdata);
@@ -1380,7 +1380,7 @@ namespace PSFilterLoad.PSApi
 						default:
 							message = Resources.FilterBadParameters;
 							break;
-					} 
+					}
 				}
 			}
 
@@ -1955,7 +1955,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe short FillInputBuffer(FilterRecord* filterRecord)
 		{
 #if DEBUG
-			DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("inRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}, inputRate: {4}", new object[] { filterRecord->inRowBytes, filterRecord->inRect, 
+			DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("inRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}, inputRate: {4}", new object[] { filterRecord->inRowBytes, filterRecord->inRect,
 			filterRecord->inLoPlane, filterRecord->inHiPlane, FixedToInt32(filterRecord->inputRate) }));
 #endif
 			Rect16 rect = filterRecord->inRect;
@@ -2078,7 +2078,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe short FillOutputBuffer(FilterRecord* filterRecord)
 		{
 #if DEBUG
-			DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("outRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}", new object[] { filterRecord->outRowBytes, filterRecord->outRect, filterRecord->outLoPlane, 
+			DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("outRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}", new object[] { filterRecord->outRowBytes, filterRecord->outRect, filterRecord->outLoPlane,
 				filterRecord->outHiPlane }));
 
 			using (Bitmap dst = dest.CreateAliasedBitmap())
@@ -3236,7 +3236,7 @@ namespace PSFilterLoad.PSApi
 			for (int y = 0; y < height; y++)
 			{
 				ColorBgra* src = source.GetRowAddressUnchecked(y);
-				byte* dst = mask.GetRowAddressUnchecked(y); 
+				byte* dst = mask.GetRowAddressUnchecked(y);
 
 				for (int x = 0; x < width; x++)
 				{
@@ -3267,7 +3267,7 @@ namespace PSFilterLoad.PSApi
 		private short image_services_interpolate_2d_proc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
 		{
 			return PSError.memFullErr;
-		} 
+		}
 #endif
 
 		private void ProcessEventProc(IntPtr @event)
@@ -3882,7 +3882,7 @@ namespace PSFilterLoad.PSApi
 			// ImageServicesProc
 #if USEIMAGESERVICES
 			resample1DProc = new PIResampleProc(image_services_interpolate_1d_proc);
-			resample2DProc = new PIResampleProc(image_services_interpolate_2d_proc); 
+			resample2DProc = new PIResampleProc(image_services_interpolate_2d_proc);
 #endif
 
 			// PropertyProc
@@ -4081,7 +4081,7 @@ namespace PSFilterLoad.PSApi
 
 			filterRecord->descriptorParameters = descriptorParametersPtr;
 			errorStringPtr = Memory.Allocate(256, true);
-			filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead. 
+			filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead.
 			filterRecord->channelPortProcs = channelPortsPtr;
 			filterRecord->documentInfo = readDocumentPtr;
 
@@ -4226,7 +4226,7 @@ namespace PSFilterLoad.PSApi
 				{
 					Memory.Free(imageServicesProcsPtr);
 					imageServicesProcsPtr = IntPtr.Zero;
-				} 
+				}
 #endif
 				if (propertyProcsPtr != IntPtr.Zero)
 				{

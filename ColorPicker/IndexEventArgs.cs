@@ -15,7 +15,7 @@ namespace PSFilterLoad.ColorPicker
     /// Declares an EventArgs type for an event that needs a single integer, interpreted
     /// as an index, as event information.
     /// </summary>
-    internal sealed class IndexEventArgs 
+    internal sealed class IndexEventArgs
         : EventArgs
     {
         int index;

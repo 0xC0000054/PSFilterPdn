@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -250,7 +250,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             for (int i = 0; i < count; i++)
             {
-                // 0RGB, CMYK, 0HSB , 0HSL, 0LAB, 0XYZ, 000Gray 
+                // 0RGB, CMYK, 0HSB , 0HSL, 0LAB, 0XYZ, 000Gray
                 // all modes except CMYK and GrayScale begin at the second byte
                 switch (inputCSpace)
                 {
@@ -358,7 +358,7 @@ namespace PSFilterLoad.PSApi.PICA
                     else
                     {
                         error = PSError.kSPUserCanceledError;
-                    } 
+                    }
                 }
             }
             else

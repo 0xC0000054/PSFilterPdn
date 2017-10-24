@@ -17,7 +17,7 @@ using PaintDotNet.SystemLayer;
 
 namespace PaintDotNet.SystemLayer
 {
-   
+
 
     /// <summary>
     /// Contains static methods related to the user interface.
@@ -51,7 +51,7 @@ namespace PaintDotNet.SystemLayer
                 InitScaleFactors(c);
             }
         }
-      
+
         private static VisualStyleClass DetermineVisualStyleClassImpl()
         {
             VisualStyleClass vsClass;

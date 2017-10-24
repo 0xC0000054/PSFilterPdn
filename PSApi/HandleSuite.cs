@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -337,7 +337,7 @@ namespace PSFilterLoad.PSApi
 
 						SafeNativeMethods.GlobalFree(handle);
 					}
-				} 
+				}
 			}
 		}
 

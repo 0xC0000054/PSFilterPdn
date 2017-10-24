@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -25,11 +25,11 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public short version;
         /// <summary>
-        /// The sub-version number.	
+        /// The sub-version number.
         /// </summary>
         public short subVersion;
         /// <summary>
-        /// The plug-in's priority. 
+        /// The plug-in's priority.
         /// </summary>
         public short priority;
         /// <summary>

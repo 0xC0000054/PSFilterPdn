@@ -16,7 +16,7 @@ using System.Windows.Forms.VisualStyles;
 
 namespace PSFilterLoad.ColorPicker
 {
-   
+
 
     /// <summary>
     /// Contains static methods related to the user interface.

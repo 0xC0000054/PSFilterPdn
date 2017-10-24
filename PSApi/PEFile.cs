@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ namespace PSFilterLoad.PSApi
             {
                 throw new EndOfStreamException();
             }
-            
+
             int byte2 = stream.ReadByte();
             if (byte2 == -1)
             {
@@ -71,9 +71,9 @@ namespace PSFilterLoad.PSApi
         private const int NTSignatureOffsetLocation = 0x3C;
 
         internal enum ProcessorArchitecture
-        { 
+        {
             Unknown = 0,
-            X86, 
+            X86,
             X64
         }
 
@@ -105,7 +105,7 @@ namespace PSFilterLoad.PSApi
                             ushort machine = ReadUInt16(stream);
 
                             switch (machine)
-                            { 
+                            {
                                 case IMAGE_FILE_MACHINE_I386:
                                     architecture = ProcessorArchitecture.X86;
                                     break;
@@ -127,7 +127,7 @@ namespace PSFilterLoad.PSApi
             {
             }
             catch (SecurityException)
-            { 
+            {
             }
             catch (UnauthorizedAccessException)
             {

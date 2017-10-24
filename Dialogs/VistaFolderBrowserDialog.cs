@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ namespace PSFilterPdn
         /// <remarks>
         /// The string is placed in the title bar of the dialog box, this can be used to provide instructions to the user.
         /// If the title is an empty string, the system uses a default title.
-        /// </remarks> 
+        /// </remarks>
         /// <value>
         /// The folder browser dialog box title. The default value is an empty string ("").
         /// </value>

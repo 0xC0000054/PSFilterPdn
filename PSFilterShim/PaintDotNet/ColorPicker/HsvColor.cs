@@ -13,7 +13,7 @@ using System.Drawing;
 namespace PaintDotNet
 {
     /// <summary>
-    /// Adapted from: 
+    /// Adapted from:
     /// "A Primer on Building a Color Picker User Control with GDI+ in Visual Basic .NET or C#"
     /// http://www.msdnaa.net/Resources/display.aspx?ResID=2460
     /// </summary>
@@ -52,7 +52,7 @@ namespace PaintDotNet
             return (Hue + (Saturation << 8) + (Value << 16)).GetHashCode();;
         }
 
-        public HsvColor(int hue, int saturation, int value) 
+        public HsvColor(int hue, int saturation, int value)
         {
             if (hue < 0 || hue > 360)
             {
@@ -86,7 +86,7 @@ namespace PaintDotNet
             return Color.FromArgb(rgb.Red, rgb.Green, rgb.Blue);
         }
 
-        public RgbColor ToRgb() 
+        public RgbColor ToRgb()
         {
             // HsvColor contains values scaled as in the color wheel:
 
@@ -111,8 +111,8 @@ namespace PaintDotNet
                 r = v;
                 g = v;
                 b = v;
-            } 
-            else 
+            }
+            else
             {
                 double p;
                 double q;
@@ -133,14 +133,14 @@ namespace PaintDotNet
                 fractionalSector = sectorPos - sectorNumber;
 
                 // Calculate values for the three axes
-                // of the color. 
+                // of the color.
                 p = v * (1 - s);
                 q = v * (1 - (s * fractionalSector));
                 t = v * (1 - (s * (1 - fractionalSector)));
 
                 // Assign the fractional colors to r, g, and b
                 // based on the sector the angle is in.
-                switch (sectorNumber) 
+                switch (sectorNumber)
                 {
                     case 0:
                         r = v;
@@ -184,7 +184,7 @@ namespace PaintDotNet
             return new RgbColor((int)(r * 255), (int)(g * 255), (int)(b * 255));
         }
 
-        public override string ToString() 
+        public override string ToString()
         {
             return String.Format("({0}, {1}, {2})", Hue, Saturation, Value);
         }

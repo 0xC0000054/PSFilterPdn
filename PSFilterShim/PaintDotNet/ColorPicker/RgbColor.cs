@@ -13,10 +13,10 @@ using System.Drawing;
 namespace PaintDotNet
 {
     /// <summary>
-    /// Adapted from: 
+    /// Adapted from:
     /// "A Primer on Building a Color Picker User Control with GDI+ in Visual Basic .NET or C#"
     /// http://www.msdnaa.net/Resources/display.aspx?ResID=2460
-    /// 
+    ///
     /// This class is only used by the ColorsForm and ColorWheel. Nothing else in this program
     /// should be using it!
     /// </summary>
@@ -28,18 +28,18 @@ namespace PaintDotNet
         public int Green;
         public int Blue;
 
-        public RgbColor(int R, int G, int B) 
+        public RgbColor(int R, int G, int B)
         {
 #if DEBUG
-            if (R < 0 || R > 255) 
+            if (R < 0 || R > 255)
             {
                 throw new ArgumentOutOfRangeException("R", R, "R must corrospond to a byte value");
             }
-            if (G < 0 || G > 255) 
+            if (G < 0 || G > 255)
             {
                 throw new ArgumentOutOfRangeException("G", G, "G must corrospond to a byte value");
             }
-            if (B < 0 || B > 255) 
+            if (B < 0 || B > 255)
             {
                 throw new ArgumentOutOfRangeException("B", B, "B must corrospond to a byte value");
             }
@@ -61,9 +61,9 @@ namespace PaintDotNet
 
         public HsvColor ToHsv()
         {
-            // In this function, R, G, and B values must be scaled 
+            // In this function, R, G, and B values must be scaled
             // to be between 0 and 1.
-            // HsvColor.Hue will be a value between 0 and 360, and 
+            // HsvColor.Hue will be a value between 0 and 360, and
             // HsvColor.Saturation and value are between 0 and 1.
 
             double min;
@@ -83,35 +83,35 @@ namespace PaintDotNet
             v = max;
             delta = max - min;
 
-            if (max == 0 || delta == 0) 
+            if (max == 0 || delta == 0)
             {
                 // R, G, and B must be 0, or all the same.
                 // In this case, S is 0, and H is undefined.
                 // Using H = 0 is as good as any...
                 s = 0;
                 h = 0;
-            } 
-            else 
+            }
+            else
             {
                 s = delta / max;
-                if (r == max) 
+                if (r == max)
                 {
                     // Between Yellow and Magenta
                     h = (g - b) / delta;
-                } 
-                else if (g == max) 
+                }
+                else if (g == max)
                 {
                     // Between Cyan and Yellow
                     h = 2 + (b - r) / delta;
-                } 
-                else 
+                }
+                else
                 {
                     // Between Magenta and Cyan
                     h = 4 + (r - g) / delta;
                 }
 
             }
-            // Scale h to be between 0 and 360. 
+            // Scale h to be between 0 and 360.
             // This may require adding 360, if the value
             // is negative.
             h *= 60;
@@ -121,15 +121,15 @@ namespace PaintDotNet
                 h += 360;
             }
 
-            // Scale to the requirements of this 
+            // Scale to the requirements of this
             // application. All values are between 0 and 255.
             return new HsvColor((int)h, (int)(s * 100), (int)(v * 100));
         }
 
-        public override string  ToString() 
+        public override string  ToString()
         {
             return String.Format("({0}, {1}, {2})", Red, Green, Blue);
         }
-    } 
+    }
 
 }

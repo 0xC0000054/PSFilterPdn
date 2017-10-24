@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +140,7 @@ namespace PSFilterPdn
                 };
 
                 PSFilterShimService service = new PSFilterShimService(
-                    AbortCallback, 
+                    AbortCallback,
                     token.FilterData,
                     shimData,
                     delegate (string data) { proxyResult = false; proxyErrorMessage = data; },

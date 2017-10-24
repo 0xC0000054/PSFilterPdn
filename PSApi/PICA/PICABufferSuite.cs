@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -132,7 +132,7 @@ namespace PSFilterLoad.PSApi.PICA
 		{
 			if (buffer != IntPtr.Zero)
 			{
-				return (uint)Memory.Size(buffer); 
+				return (uint)Memory.Size(buffer);
 			}
 
 			return 0;
@@ -160,7 +160,7 @@ namespace PSFilterLoad.PSApi.PICA
 
 			return suite;
 		}
-	   
+
 		public void Dispose()
 		{
 			Dispose(true);

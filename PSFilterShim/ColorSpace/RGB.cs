@@ -30,8 +30,8 @@ namespace Devcorp.Controls.Design
 		public static bool operator ==(RGB item1, RGB item2)
 		{
 			return (
-				item1.Red == item2.Red 
-				&& item1.Green == item2.Green 
+				item1.Red == item2.Red
+				&& item1.Green == item2.Green
 				&& item1.Blue == item2.Blue
 				);
 		}
@@ -39,8 +39,8 @@ namespace Devcorp.Controls.Design
 		public static bool operator !=(RGB item1, RGB item2)
 		{
 			return (
-				item1.Red != item2.Red 
-				|| item1.Green != item2.Green 
+				item1.Red != item2.Red
+				|| item1.Green != item2.Green
 				|| item1.Blue != item2.Blue
 				);
 		}
@@ -76,7 +76,7 @@ namespace Devcorp.Controls.Design
 		}
 		#endregion
 
-		public RGB(int R, int G, int B) 
+		public RGB(int R, int G, int B)
 		{
 			red = (R>255)? 255 : ((R<0)?0 : R);
 			green = (G>255)? 255 : ((G<0)?0 : G);
@@ -84,18 +84,18 @@ namespace Devcorp.Controls.Design
 		}
 
 		#region Methods
-		public override bool Equals(Object obj) 
+		public override bool Equals(Object obj)
 		{
 			if(obj==null || GetType()!=obj.GetType()) return false;
 
 			return (this == (RGB)obj);
 		}
 
-		public override int GetHashCode() 
+		public override int GetHashCode()
 		{
 			return Red.GetHashCode() ^ Green.GetHashCode() ^ Blue.GetHashCode();
 		}
 
 		#endregion
-	} 
+	}
 }

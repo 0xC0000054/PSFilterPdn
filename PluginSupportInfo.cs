@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -20,9 +20,9 @@ namespace PSFilterPdn
     {
         public string Author
         {
-            get 
+            get
             {
-                return "null54"; 
+                return "null54";
             }
         }
 
@@ -30,7 +30,7 @@ namespace PSFilterPdn
         {
             get
             {
-                return ((AssemblyCopyrightAttribute)typeof(PSFilterPdnEffect).Assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright; 
+                return ((AssemblyCopyrightAttribute)typeof(PSFilterPdnEffect).Assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright;
             }
         }
 
@@ -44,7 +44,7 @@ namespace PSFilterPdn
 
         public Version Version
         {
-            get 
+            get
             {
                 return typeof(PSFilterPdnEffect).Assembly.GetName().Version;
             }
@@ -52,7 +52,7 @@ namespace PSFilterPdn
 
         public Uri WebsiteUri
         {
-            get 
+            get
             {
                 return new Uri("http://www.getpaint.net/redirect/plugins.html");
             }

@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -19,14 +19,14 @@ namespace PSFilterLoad.PSApi
     /// The class that holds the saved filter parameter and scripting data.
     /// </summary>
     [Serializable]
-    public sealed class ParameterData 
+    public sealed class ParameterData
     {
         private GlobalParameters globalParameters;
         private Dictionary<uint, AETEValue> aeteDictonary;
 
         public GlobalParameters GlobalParameters
         {
-            get 
+            get
             {
                 return globalParameters;
             }
@@ -53,6 +53,6 @@ namespace PSFilterLoad.PSApi
                 this.aeteDictonary = null;
             }
         }
-       
+
     }
 }

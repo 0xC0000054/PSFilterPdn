@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ namespace PSFilterLoad.PSApi
     {
         private sealed class ActionListItemCollection : Collection<ActionListItem>
         {
-            public ActionListItemCollection() : base() 
+            public ActionListItemCollection() : base()
             {
             }
 
@@ -153,7 +153,7 @@ namespace PSFilterLoad.PSApi
         bool IActionListSuite.TryGetListValues(IntPtr list, out ReadOnlyCollection<ActionListItem> values)
         {
             values = null;
-            
+
             ActionListItemCollection items;
             if (this.actionLists.TryGetValue(list, out items))
             {
@@ -878,7 +878,7 @@ namespace PSFilterLoad.PSApi
                     for (int i = 0; i < valueCount; i++)
                     {
                         ActionListItem item = items[i];
-                                                
+
                         // The first through valueCount items in the list are required to be integers.
                         if (item.Type != DescriptorTypes.typeInteger)
                         {
@@ -951,7 +951,7 @@ namespace PSFilterLoad.PSApi
             }
 
             return PSError.kSPBadParameterError;
-        } 
+        }
         #endregion
     }
 }

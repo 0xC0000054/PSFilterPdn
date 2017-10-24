@@ -66,9 +66,9 @@ namespace PSFilterLoad.ColorPicker
 
         // value from [0,255] that specifies the hsv "value" component
         // where we should draw little triangles that show the value
-        public int Value 
+        public int Value
         {
-            get 
+            get
             {
                 return GetValue(0);
             }
@@ -130,28 +130,28 @@ namespace PSFilterLoad.ColorPicker
 
         public int Count
         {
-            get 
+            get
             {
                 return vals.Length;
             }
 
-            set 
+            set
             {
-                if (value < 0 || value > 16) 
+                if (value < 0 || value > 16)
                 {
                     throw new ArgumentOutOfRangeException("value", value, "Count must be between 0 and 16");
                 }
 
                 vals = new int[value];
 
-                if (value > 1) 
+                if (value > 1)
                 {
-                    for (int i = 0; i < value; i++) 
+                    for (int i = 0; i < value; i++)
                     {
                         vals[i] = i * 255 / (value - 1);
                     }
-                } 
-                else if (value == 1) 
+                }
+                else if (value == 1)
                 {
                     vals[0] = 128;
                 }
@@ -161,9 +161,9 @@ namespace PSFilterLoad.ColorPicker
             }
         }
 
-        public int GetValue(int index) 
+        public int GetValue(int index)
         {
-            if (index < 0 || index >= vals.Length) 
+            if (index < 0 || index >= vals.Length)
             {
                 throw new ArgumentOutOfRangeException("index", index, "Index must be within the bounds of the array");
             }
@@ -177,22 +177,22 @@ namespace PSFilterLoad.ColorPicker
             int min = -1;
             int max = 256;
 
-            if (index < 0 || index >= vals.Length) 
+            if (index < 0 || index >= vals.Length)
             {
                 throw new ArgumentOutOfRangeException("index", index, "Index must be within the bounds of the array");
             }
 
-            if (index - 1 >= 0) 
+            if (index - 1 >= 0)
             {
                 min = vals[index - 1];
             }
 
-            if (index + 1 < vals.Length) 
+            if (index + 1 < vals.Length)
             {
                 max = vals[index + 1];
             }
 
-            if (vals[index] != val) 
+            if (vals[index] != val)
             {
                 int newVal = Utility.Clamp(val, min + 1, max - 1);
                 vals[index] = newVal;
@@ -238,7 +238,7 @@ namespace PSFilterLoad.ColorPicker
             {
                 return minColor;
             }
-            
+
             set
             {
                 if (minColor != value)
@@ -379,7 +379,7 @@ namespace PSFilterLoad.ColorPicker
                 }
 
                 gradientSurface.Dispose();
-              
+
             }
             else
             {
@@ -409,12 +409,12 @@ namespace PSFilterLoad.ColorPicker
                 Brush brush;
                 Pen pen;
 
-                if (i == highlight) 
+                if (i == highlight)
                 {
                     brush = Brushes.Blue;
                     pen = (Pen)Pens.White.Clone();
-                } 
-                else 
+                }
+                else
                 {
                     brush = Brushes.Black;
                     pen = (Pen)Pens.Gray.Clone();
@@ -494,7 +494,7 @@ namespace PSFilterLoad.ColorPicker
             DrawGradient(pevent.Graphics);
         }
 
-        /// <summary> 
+        /// <summary>
         /// Clean up any resources being used.
         /// </summary>
         protected override void Dispose(bool disposing)
@@ -515,7 +515,7 @@ namespace PSFilterLoad.ColorPicker
                 case Orientation.Horizontal:
                     max = Width;
                     break;
-                    
+
                 case Orientation.Vertical:
                     max = Height;
                     break;
@@ -561,17 +561,17 @@ namespace PSFilterLoad.ColorPicker
             return pos;
         }
 
-        private int WhichTriangle(int val) 
+        private int WhichTriangle(int val)
         {
             int bestIndex = -1;
             int bestDistance = int.MaxValue;
             int v = PositionToValue(val);
 
-            for (int i = 0; i < this.vals.Length; i++) 
+            for (int i = 0; i < this.vals.Length; i++)
             {
                 int distance = Math.Abs(this.vals[i] - v);
 
-                if (distance < bestDistance) 
+                if (distance < bestDistance)
                 {
                     bestDistance = distance;
                     bestIndex = i;
@@ -667,9 +667,9 @@ namespace PSFilterLoad.ColorPicker
             this.InvalidateTriangle(oldhighlight);
         }
 
-        private void InvalidateTriangle(int index) 
+        private void InvalidateTriangle(int index)
         {
-            if (index < 0 || index >= this.vals.Length) 
+            if (index < 0 || index >= this.vals.Length)
             {
                 return;
             }
@@ -695,8 +695,8 @@ namespace PSFilterLoad.ColorPicker
         }
 
         #region Component Designer generated code
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
+        /// <summary>
+        /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()

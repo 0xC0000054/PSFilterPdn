@@ -12,7 +12,7 @@ using System.Windows.Forms;
 
 namespace PaintDotNet
 {
-    internal class ColorRectangleControl 
+    internal class ColorRectangleControl
         : UserControl
     {
         private Color rectangleColor;

@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ namespace PSFilterLoad.PSApi
 
 		[DllImport("kernel32.dll", ExactSpelling = true)]
 		internal static extern IntPtr LockResource(IntPtr hGlobal);
-	   
+
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[DllImport("kernel32.dll", ExactSpelling = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]

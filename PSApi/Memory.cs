@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -101,15 +101,15 @@ namespace PSFilterLoad.PSApi
 					throw new OutOfMemoryException();
 				}
 			}
-			
+
 			if (size > 0L)
 			{
 				GC.AddMemoryPressure((long)size);
 			}
-			
+
 			return block;
 		}
-		
+
 		/// <summary>
 		/// Allocates a block of memory with the PAGE_EXECUTE permission.
 		/// </summary>
@@ -154,7 +154,7 @@ namespace PSFilterLoad.PSApi
 
 			return block;
 		}
-		
+
 		/// <summary>
 		/// Frees the block of memory allocated by Allocate().
 		/// </summary>

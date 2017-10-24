@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -322,7 +322,7 @@ namespace PaintDotNet
 		/// </summary>
 		/// <param name="source">The Surface to read pixels from.</param>
 		/// <remarks>
-		/// This method was implemented with correctness, not performance, in mind. 
+		/// This method was implemented with correctness, not performance, in mind.
 		/// Based on: "Bicubic Interpolation for Image Scaling" by Paul Bourke,
 		///           http://astronomy.swin.edu.au/%7Epbourke/colour/bicubic/
 		/// </remarks>

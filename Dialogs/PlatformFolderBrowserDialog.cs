@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -144,7 +144,7 @@ namespace PSFilterPdn
                 if (rootFolder != value)
                 {
                     rootFolder = value;
-                    vistaFolderBrowserDefaultFolder = GetSpecialFolderPath(rootFolder); 
+                    vistaFolderBrowserDefaultFolder = GetSpecialFolderPath(rootFolder);
                 }
             }
         }
@@ -190,7 +190,7 @@ namespace PSFilterPdn
         public DialogResult ShowDialog(IWin32Window owner)
         {
             DialogResult result = DialogResult.Cancel;
-             
+
             if (VistaDialogSupported())
             {
                 if (vistaFolderBrowserDialog == null)

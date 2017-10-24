@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ namespace PSFilterLoad.PSApi
         internal AETEData(PluginAETE enumAETE)
         {
             this.flagList = new Dictionary<uint, short>();
-            
+
             foreach (AETEParameter parm in enumAETE.scriptEvent.parameters)
             {
                 if (!flagList.ContainsKey(parm.key))
@@ -38,9 +38,9 @@ namespace PSFilterLoad.PSApi
                     flagList.Add(parm.key, parm.flags);
                 }
             }
-            
+
         }
-    } 
-    
+    }
+
 
 }

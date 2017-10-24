@@ -11,7 +11,7 @@ namespace Devcorp.Controls.Design
 	/// <summary>
 	/// Structure to define CMYK.
 	/// </summary>
-	internal struct CMYK 
+	internal struct CMYK
 	{
 		/// <summary>
 		/// Gets an empty CMYK structure;
@@ -19,9 +19,9 @@ namespace Devcorp.Controls.Design
 		public readonly static CMYK Empty = new CMYK();
 
 		#region Fields
-		private double c; 
-		private double m; 
-		private double y; 
+		private double c;
+		private double m;
+		private double y;
 		private double k;
 		#endregion
 
@@ -29,8 +29,8 @@ namespace Devcorp.Controls.Design
 		public static bool operator ==(CMYK item1, CMYK item2)
 		{
 			return (
-				item1.Cyan == item2.Cyan 
-				&& item1.Magenta == item2.Magenta 
+				item1.Cyan == item2.Cyan
+				&& item1.Magenta == item2.Magenta
 				&& item1.Yellow == item2.Yellow
 				&& item1.Black == item2.Black
 				);
@@ -39,8 +39,8 @@ namespace Devcorp.Controls.Design
 		public static bool operator !=(CMYK item1, CMYK item2)
 		{
 			return (
-				item1.Cyan != item2.Cyan 
-				|| item1.Magenta != item2.Magenta 
+				item1.Cyan != item2.Cyan
+				|| item1.Magenta != item2.Magenta
 				|| item1.Yellow != item2.Yellow
 				|| item1.Black != item2.Black
 				);
@@ -51,42 +51,42 @@ namespace Devcorp.Controls.Design
 
 		#region Accessors
 		public double Cyan
-		{ 
+		{
 			get
 			{
 				return c;
-			} 
-		} 
+			}
+		}
 
 		public double Magenta
-		{ 
+		{
 			get
 			{
 				return m;
-			} 
-		} 
+			}
+		}
 
 		public double Yellow
-		{ 
+		{
 			get
 			{
 				return y;
-			} 
-		} 
+			}
+		}
 
-		public double Black 
-		{ 
+		public double Black
+		{
 			get
 			{
 				return k;
-			} 
-		} 
+			}
+		}
 		#endregion
 
 		/// <summary>
 		/// Creates an instance of a CMYK structure.
 		/// </summary>
-		public CMYK(double c, double m, double y, double k) 
+		public CMYK(double c, double m, double y, double k)
 		{
 			this.c = c;
 			this.m = m;
@@ -95,18 +95,18 @@ namespace Devcorp.Controls.Design
 		}
 
 		#region Methods
-		public override bool Equals(Object obj) 
+		public override bool Equals(Object obj)
 		{
 			if(obj==null || GetType()!=obj.GetType()) return false;
 
 			return (this == (CMYK)obj);
 		}
 
-		public override int GetHashCode() 
+		public override int GetHashCode()
 		{
 			return Cyan.GetHashCode() ^ Magenta.GetHashCode() ^ Yellow.GetHashCode() ^ Black.GetHashCode();
 		}
 
 		#endregion
-	} 
+	}
 }

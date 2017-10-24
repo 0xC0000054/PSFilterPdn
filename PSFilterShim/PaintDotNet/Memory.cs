@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ using System.Runtime.InteropServices;
 namespace PaintDotNet.SystemLayer
 {
     /// <summary>
-    /// Contains methods for allocating, freeing, and performing operations on memory 
+    /// Contains methods for allocating, freeing, and performing operations on memory
     /// that is fixed (pinned) in memory.
     /// </summary>
     internal unsafe static class Memory
@@ -57,7 +57,7 @@ namespace PaintDotNet.SystemLayer
             catch (EntryPointNotFoundException)
             {
                 // If that method isn't available, like on Win2K, don't worry about it.
-            }          
+            }
         }
 
         /// <summary>
@@ -72,13 +72,13 @@ namespace PaintDotNet.SystemLayer
             {
                 CreateHeap();
             }
-            
+
             IntPtr block = SafeNativeMethods.HeapAlloc(hHeap, 0, new UIntPtr(bytes));
             if (block == IntPtr.Zero)
             {
                 throw new OutOfMemoryException("HeapAlloc returned a null pointer");
             }
-            
+
             if (bytes > 0)
             {
                 GC.AddMemoryPressure((long)bytes);
@@ -99,7 +99,7 @@ namespace PaintDotNet.SystemLayer
         /// </remarks>
         public static IntPtr AllocateLarge(ulong bytes)
         {
-            IntPtr block = SafeNativeMethods.VirtualAlloc(IntPtr.Zero, new UIntPtr(bytes), 
+            IntPtr block = SafeNativeMethods.VirtualAlloc(IntPtr.Zero, new UIntPtr(bytes),
                 NativeConstants.MEM_COMMIT, NativeConstants.PAGE_READWRITE);
 
             if (block == IntPtr.Zero)

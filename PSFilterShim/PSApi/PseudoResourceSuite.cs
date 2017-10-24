@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ namespace PSFilterLoad.PSApi
 				resourceProcs->addProc = Marshal.GetFunctionPointerForDelegate(addResourceProc);
 				resourceProcs->countProc = Marshal.GetFunctionPointerForDelegate(countResourceProc);
 				resourceProcs->deleteProc = Marshal.GetFunctionPointerForDelegate(deleteResourceProc);
-				resourceProcs->getProc = Marshal.GetFunctionPointerForDelegate(getResourceProc); 
+				resourceProcs->getProc = Marshal.GetFunctionPointerForDelegate(getResourceProc);
 			}
 
 			return resourceProcsPtr;

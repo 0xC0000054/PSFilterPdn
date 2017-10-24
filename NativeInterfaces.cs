@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -251,8 +251,8 @@ namespace PSFilterPdn
         internal interface IFileDialogEvents
         {
 
-            // NOTE: some of these callbacks are cancelable - returning S_FALSE means that 
-            // the dialog should not proceed (e.g. with closing, changing folder); to 
+            // NOTE: some of these callbacks are cancelable - returning S_FALSE means that
+            // the dialog should not proceed (e.g. with closing, changing folder); to
             // support this, we need to use the PreserveSig attribute to enable us to return
             // the proper HRESULT
             [PreserveSig]
@@ -390,8 +390,8 @@ namespace PSFilterPdn
         }
 
         // ---------------------------------------------------------
-        // Coclass interfaces - designed to "look like" the object 
-        // in the API, so that the 'new' operator can be used in a 
+        // Coclass interfaces - designed to "look like" the object
+        // in the API, so that the 'new' operator can be used in a
         // straightforward way. Behind the scenes, the C# compiler
         // morphs all 'new CoClass()' calls to 'new CoClassWrapper()'
 

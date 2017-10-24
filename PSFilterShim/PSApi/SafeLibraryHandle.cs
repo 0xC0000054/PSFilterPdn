@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -13,15 +13,15 @@
 using System.Security.Permissions;
 using Microsoft.Win32.SafeHandles;
 
-/* The following code is quoted from Mike Stall's blog 
+/* The following code is quoted from Mike Stall's blog
  * Type-safe Managed wrappers for kernel32!GetProcAddress
  * http://blogs.msdn.com/b/jmstall/archive/2007/01/06/typesafe-getprocaddress.aspx
  */
 
 namespace PSFilterLoad.PSApi
-{  
+{
 	/// <summary>
-	/// See http://msdn.microsoft.com/msdnmag/issues/05/10/Reliability/ 
+	/// See http://msdn.microsoft.com/msdnmag/issues/05/10/Reliability/
 	/// for more about safe handles.
 	/// </summary>
 	[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
@@ -40,7 +40,7 @@ namespace PSFilterLoad.PSApi
 			return UnsafeNativeMethods.FreeLibrary(handle);
 		}
 	}
-	
+
 }
 
-	
+

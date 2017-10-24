@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -25,12 +25,12 @@ namespace PSFilterPdn
         private Action<string> errorCallback;
         private Action<int,int> progressCallback;
 
-        public PSFilterShimService(PluginData plugin, PSFilterShimData shimData, Action<string> error, Action<int, int> progress) 
+        public PSFilterShimService(PluginData plugin, PSFilterShimData shimData, Action<string> error, Action<int, int> progress)
             : this(new Func<byte>(delegate() { return 0; }), plugin, shimData, error, progress)
         {
         }
 
-        public PSFilterShimService(Func<byte> abort, PluginData plugin, PSFilterShimData shimData, 
+        public PSFilterShimService(Func<byte> abort, PluginData plugin, PSFilterShimData shimData,
             Action<string> error, Action<int, int> progress)
         {
             if (abort == null)
@@ -49,7 +49,7 @@ namespace PSFilterPdn
         {
             return abortFunc();
         }
-        
+
         public PluginData GetPluginData()
         {
             return pluginData;
@@ -64,7 +64,7 @@ namespace PSFilterPdn
         {
             if (errorCallback != null)
             {
-                errorCallback.Invoke(errorMessage); 
+                errorCallback.Invoke(errorMessage);
             }
         }
 
@@ -72,7 +72,7 @@ namespace PSFilterPdn
         {
             if (progressCallback != null)
             {
-                progressCallback.Invoke(done, total); 
+                progressCallback.Invoke(done, total);
             }
         }
     }

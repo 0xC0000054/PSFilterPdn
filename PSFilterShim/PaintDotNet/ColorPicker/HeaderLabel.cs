@@ -22,8 +22,8 @@ namespace PaintDotNet
             TextFormatFlags.Default |
             TextFormatFlags.EndEllipsis |
             TextFormatFlags.HidePrefix |
-            TextFormatFlags.NoPadding | 
-            TextFormatFlags.NoPrefix | 
+            TextFormatFlags.NoPadding |
+            TextFormatFlags.NoPrefix |
             TextFormatFlags.SingleLine;
 
         private int leftMargin = 2;

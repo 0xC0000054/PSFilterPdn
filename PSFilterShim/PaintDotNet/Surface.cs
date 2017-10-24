@@ -4,7 +4,7 @@ using System.Drawing.Imaging;
 using PaintDotNet.SystemLayer;
 
 namespace PaintDotNet
-{   
+{
     /////////////////////////////////////////////////////////////////////////////////
     // Paint.NET                                                                   //
     // Copyright (C) dotPDN LLC, Rick Brewster, Tom Jackson, and contributors.     //
@@ -54,7 +54,7 @@ namespace PaintDotNet
                 return stride;
             }
         }
-        
+
         public MemoryBlock Scan0
         {
             get
@@ -66,7 +66,7 @@ namespace PaintDotNet
         public Rectangle Bounds
         {
             get
-            { 
+            {
                 return new Rectangle(0, 0, this.width, this.height);
             }
         }
@@ -208,7 +208,7 @@ namespace PaintDotNet
         /// <param name="source">The Surface to read pixels from.</param>
         /// <param name="dstRoi">The rectangle to clip rendering to.</param>
         /// <remarks>
-        /// This method was implemented with correctness, not performance, in mind. 
+        /// This method was implemented with correctness, not performance, in mind.
         /// Based on: "Bicubic Interpolation for Image Scaling" by Paul Bourke,
         ///           http://astronomy.swin.edu.au/%7Epbourke/colour/bicubic/
         /// </remarks>
@@ -667,7 +667,7 @@ namespace PaintDotNet
                 ColorBgra* p = GetRowAddressUnchecked(y);
                 for (int x = 0; x < width; x++)
                 {
-                    p->Bgra |= 0xff000000; // 0xaarrggbb format 
+                    p->Bgra |= 0xff000000; // 0xaarrggbb format
                     p++;
                 }
             }

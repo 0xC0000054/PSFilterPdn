@@ -77,7 +77,7 @@ namespace PaintDotNet
         /// Retrieves a Graphics instance that can be used to draw on to the Surface.
         /// </summary>
         /// <remarks>
-        /// Use of this object is not thread-safe. You must wrap retrieval and consumption of this 
+        /// Use of this object is not thread-safe. You must wrap retrieval and consumption of this
         /// property with a critical section.
         /// </remarks>
         public Graphics Graphics
@@ -159,7 +159,7 @@ namespace PaintDotNet
         /// Creates an instance of the RenderArgs class.
         /// </summary>
         /// <param name="surface">
-        /// The Surface to associate with this instance. This instance of RenderArgs does not 
+        /// The Surface to associate with this instance. This instance of RenderArgs does not
         /// take ownership of this Surface.
         /// </param>
         public RenderArgs(Surface surface)

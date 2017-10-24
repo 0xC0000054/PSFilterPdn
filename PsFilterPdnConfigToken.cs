@@ -6,7 +6,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ namespace PSFilterPdn
         private ReadOnlyCollection<PSResource> pseudoResources;
         private DescriptorRegistryValues descriptorRegistry;
         private ConfigDialogState dialogState;
-        
+
         public Surface Dest
         {
             get
@@ -111,7 +111,7 @@ namespace PSFilterPdn
             }
         }
 
-        public PSFilterPdnConfigToken(Surface dest, PluginData filterData, bool useShim, ParameterData paramData, 
+        public PSFilterPdnConfigToken(Surface dest, PluginData filterData, bool useShim, ParameterData paramData,
             ReadOnlyCollection<PSResource> resources, DescriptorRegistryValues registryValues, ConfigDialogState configDialog)
             : base()
         {

@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -395,10 +395,10 @@ namespace PSFilterLoad.PSApi
                             Marshal.Copy(bytes, 0, cstrValue, length);
                             Marshal.WriteByte(cstrValue, length, 0);
                         }
-                        
+
                         return PSError.kSPNoError;
                     }
-                } 
+                }
             }
 
             return PSError.kSPBadParameterError;

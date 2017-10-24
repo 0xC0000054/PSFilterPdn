@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ namespace PSFilterLoad.PSApi.PICA
                 set
                 {
                     this.refCount = value;
-                } 
+                }
             }
 
             public string Data
@@ -235,7 +235,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 newZString = GenerateDictionaryKey();
                 ZString zstring = new ZString(descriptor.Value);
-                this.strings.Add(newZString, zstring); 
+                this.strings.Add(newZString, zstring);
             }
 
             return newZString;
@@ -322,7 +322,7 @@ namespace PSFilterLoad.PSApi.PICA
                     catch (OutOfMemoryException)
                     {
                         return PSError.kASOutOfMemory;
-                    } 
+                    }
                 }
 
                 return PSError.kASNoErr;
@@ -419,7 +419,7 @@ namespace PSFilterLoad.PSApi.PICA
                     {
                         item.Data = value.Substring(0, value.Length - 3);
                         this.strings[zstr] = item;
-                    } 
+                    }
                 }
                 else
                 {
@@ -443,7 +443,7 @@ namespace PSFilterLoad.PSApi.PICA
                     {
                         item.Data = value.Trim(' ');
                         this.strings[zstr] = item;
-                    } 
+                    }
                 }
                 else
                 {
@@ -503,7 +503,7 @@ namespace PSFilterLoad.PSApi.PICA
                         {
                             return PSError.kASOutOfMemory;
                         }
-                    } 
+                    }
                 }
                 else
                 {
@@ -522,7 +522,7 @@ namespace PSFilterLoad.PSApi.PICA
                 if (this.strings.TryGetValue(zstr, out item))
                 {
                     item.RefCount += 1;
-                    this.strings[zstr] = item; 
+                    this.strings[zstr] = item;
                 }
                 else
                 {
@@ -553,7 +553,7 @@ namespace PSFilterLoad.PSApi.PICA
                     else
                     {
                         this.strings[zstr] = item;
-                    } 
+                    }
                 }
                 else
                 {
@@ -582,7 +582,7 @@ namespace PSFilterLoad.PSApi.PICA
                                 return false;
                             }
                         }
-                    } 
+                    }
                 }
             }
 
@@ -618,7 +618,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                         // Add the null terminator to the total length.
                         return (uint)(charLength + 1);
-                    } 
+                    }
                 }
             }
 
@@ -778,7 +778,7 @@ namespace PSFilterLoad.PSApi.PICA
                 Marshal.WriteByte(str, (byte)bytes.Length);
                 if (bytes.Length > 0)
                 {
-                    Marshal.Copy(bytes, 0, new IntPtr(str.ToInt64() + 1L), bytes.Length); 
+                    Marshal.Copy(bytes, 0, new IntPtr(str.ToInt64() + 1L), bytes.Length);
                 }
 
                 return PSError.kASNoErr;

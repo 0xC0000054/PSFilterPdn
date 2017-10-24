@@ -23,17 +23,17 @@ namespace Devcorp.Controls.Design
 		/// Converts HSB to RGB.
 		/// </summary>
 		/// <param name="hsb">The HSB structure to convert.</param>
-		public static RGB HSBtoRGB(HSB hsb) 
+		public static RGB HSBtoRGB(HSB hsb)
 		{
 			double r = 0;
 			double g = 0;
 			double b = 0;
 
-			if(hsb.Saturation == 0) 
+			if(hsb.Saturation == 0)
 			{
 				r = g = b = hsb.Brightness;
-			} 
-			else 
+			}
+			else
 			{
 				// the color wheel consists of 6 sectors. Figure out which sector you're in.
 				double sectorPos = hsb.Hue / 60.0;
@@ -41,13 +41,13 @@ namespace Devcorp.Controls.Design
 				// get the fractional part of the sector
 				double fractionalSector = sectorPos - sectorNumber;
 
-				// calculate values for the three axes of the color. 
+				// calculate values for the three axes of the color.
 				double p = hsb.Brightness * (1.0 - hsb.Saturation);
 				double q = hsb.Brightness * (1.0 - (hsb.Saturation * fractionalSector));
 				double t = hsb.Brightness * (1.0 - (hsb.Saturation * (1 - fractionalSector)));
 
 				// assign the fractional colors to r, g, and b based on the sector the angle is in.
-				switch (sectorNumber) 
+				switch (sectorNumber)
 				{
 					case 0:
 						r = hsb.Brightness;
@@ -91,12 +91,12 @@ namespace Devcorp.Controls.Design
 		/// <param name="h">Hue value.</param>
 		/// <param name="s">Saturation value.</param>
 		/// <param name="b">Brigthness value.</param>
-		public static RGB HSBtoRGB(double h, double s, double b) 
+		public static RGB HSBtoRGB(double h, double s, double b)
 		{
 			return HSBtoRGB(new HSB(h, s, b));
 		}
 
-		
+
 		/// <summary>
 		/// Converts HSB to HSL.
 		/// </summary>
@@ -133,7 +133,7 @@ namespace Devcorp.Controls.Design
 		/// <param name="h">Hue, must be in [0, 360].</param>
 		/// <param name="s">Saturation, must be in [0, 1].</param>
 		/// <param name="l">Luminance, must be in [0, 1].</param>
-		public static RGB HSLtoRGB(double h, double s, double l) 
+		public static RGB HSLtoRGB(double h, double s, double l)
 		{
 			if(s == 0)
 			{
@@ -175,8 +175,8 @@ namespace Devcorp.Controls.Design
                 return new RGB(ConvertDouble(T[0] * 255.0), ConvertDouble(T[1] * 255.0), ConvertDouble(T[2] * 255.0));
 			}
 		}
-	
-		
+
+
 		/// <summary>
 		/// Converts HSL to HSB.
 		/// </summary>
@@ -200,13 +200,13 @@ namespace Devcorp.Controls.Design
 		#endregion
 
 		#region RGB convert
-		/// <summary> 
+		/// <summary>
 		/// Converts RGB to HSL.
 		/// </summary>
 		/// <param name="red">Red value, must be in [0,255].</param>
 		/// <param name="green">Green value, must be in [0,255].</param>
 		/// <param name="blue">Blue value, must be in [0,255].</param>
-		public static HSL RGBtoHSL(int red, int green, int blue) 
+		public static HSL RGBtoHSL(int red, int green, int blue)
 		{
 			double h=0, s=0, l=0;
 
@@ -258,10 +258,10 @@ namespace Devcorp.Controls.Design
 			}
 
             // return the raw values instead of truncating
-			return new HSL(h, s, l); 
-		} 
+			return new HSL(h, s, l);
+		}
 
-		/// <summary> 
+		/// <summary>
 		/// Converts RGB to HSL.
 		/// </summary>
 		public static HSL RGBtoHSL(RGB rgb)
@@ -269,12 +269,12 @@ namespace Devcorp.Controls.Design
 			return RGBtoHSL(rgb.Red, rgb.Green, rgb.Blue);
 		}
 
-		
-		/// <summary> 
+
+		/// <summary>
 		/// Converts RGB to HSB.
-		/// </summary> 
-		public static HSB RGBtoHSB(int red, int green, int blue) 
-		{ 
+		/// </summary>
+		public static HSB RGBtoHSB(int red, int green, int blue)
+		{
 			double r = ((double)red/255.0);
 			double g = ((double)green/255.0);
 			double b = ((double)blue/255.0);
@@ -304,17 +304,17 @@ namespace Devcorp.Controls.Design
 			double s = (max == 0)? 0.0 : (1.0-((double)min/(double)max));
 
 			return new HSB(h, s, (double)max);
-		} 
+		}
 
-		/// <summary> 
+		/// <summary>
 		/// Converts RGB to HSB.
-		/// </summary> 
-		public static HSB RGBtoHSB(RGB rgb) 
-		{ 
+		/// </summary>
+		public static HSB RGBtoHSB(RGB rgb)
+		{
 			return RGBtoHSB(rgb.Red, rgb.Green, rgb.Blue);
-		} 
-		
-		
+		}
+
+
 		/// <summary>
 		/// Converts RGB to CMYK
 		/// </summary>
@@ -346,7 +346,7 @@ namespace Devcorp.Controls.Design
 			return RGBtoCMYK(rgb.Red, rgb.Green, rgb.Blue);
 		}
 
-		
+
 		/// <summary>
 		/// Converts RGB to CIE XYZ (CIE 1931 color space)
 		/// </summary>
@@ -354,7 +354,7 @@ namespace Devcorp.Controls.Design
 		/// <param name="green">Green must be in [0, 255].</param>
 		/// <param name="blue">Blue must be in [0, 255].</param>
 		public static CIEXYZ RGBtoXYZ(int red, int green, int blue)
-		{		
+		{
 			// normalize red, green, blue values
 			double rLinear = (double)red/255.0;
 			double gLinear = (double)green/255.0;
@@ -379,7 +379,7 @@ namespace Devcorp.Controls.Design
 		{
 			return RGBtoXYZ(rgb.Red, rgb.Green, rgb.Blue);
 		}
-		
+
 		/// <summary>
 		/// Converts RGB to CIELab.
 		/// </summary>
@@ -388,11 +388,11 @@ namespace Devcorp.Controls.Design
 			return XYZtoLab( RGBtoXYZ(red, green, blue) );
 		}
 
-		
+
 		#endregion
 
 		#region CMYK convert
-				
+
 		/// <summary>
 		/// Converts CMYK to RGB.
 		/// </summary>
@@ -418,7 +418,7 @@ namespace Devcorp.Controls.Design
 
 			return RGBtoHSL(rgb.Red, rgb.Green, rgb.Blue);
 		}
-		
+
 		/// <summary>
 		/// Converts CMYK to HSB.
 		/// </summary>
@@ -512,7 +512,7 @@ namespace Devcorp.Controls.Design
 				(fz > theta)? CIEXYZ.D65.Z * (fz*fz*fz) : (fz - 16.0/116.0)*3*(theta*theta)*CIEXYZ.D65.Z
 				);
 		}
-		
+
 		/// <summary>
 		/// Converts CIELab to RGB.
 		/// </summary>
@@ -520,8 +520,8 @@ namespace Devcorp.Controls.Design
 		{
 			return XYZtoRGB( LabtoXYZ(l, a, b) );
 		}
-		
-		
+
+
 		#endregion
 
 	}

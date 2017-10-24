@@ -173,8 +173,8 @@ namespace PSFilterLoad.ColorPicker
         {
             int colorIndex = MouseXYToColorIndex(e.X, e.Y);
 
-            if (colorIndex == this.mouseDownIndex && 
-                colorIndex >= 0 && 
+            if (colorIndex == this.mouseDownIndex &&
+                colorIndex >= 0 &&
                 colorIndex < this.colors.Count)
             {
                 OnColorClicked(colorIndex);
@@ -209,9 +209,9 @@ namespace PSFilterLoad.ColorPicker
                 int swatchY = i / swatchColumns;
 
                 Rectangle swatchRect = new Rectangle(
-                    swatchX * scaledSwatchSize, 
-                    swatchY * scaledSwatchSize, 
-                    scaledSwatchSize, 
+                    swatchX * scaledSwatchSize,
+                    swatchY * scaledSwatchSize,
+                    scaledSwatchSize,
                     scaledSwatchSize);
 
                 PushButtonState state;
@@ -265,7 +265,7 @@ namespace PSFilterLoad.ColorPicker
             {
                 int period = (Math.Abs(Environment.TickCount) / blinkInterval) % 2;
                 Color color;
-                
+
                 switch (period)
                 {
                     case 0:

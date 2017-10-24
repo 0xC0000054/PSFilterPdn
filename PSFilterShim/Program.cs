@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +163,7 @@ namespace PSFilterShim
 
 					if (filterParameters != null)
 					{
-						// ignore the filters that only use the data handle, e.g. Filter Factory  
+						// ignore the filters that only use the data handle, e.g. Filter Factory
 						byte[] parameterData = filterParameters.GlobalParameters.GetParameterDataBytes();
 
 						if (parameterData != null || filterParameters.AETEDictionary.Count > 0)
@@ -248,7 +248,7 @@ namespace PSFilterShim
 			{
 #if DEBUG
 				serviceProxy.SetProxyErrorMessage(ex.Message + Environment.NewLine + ex.StackTrace);
-#else				
+#else
 				serviceProxy.SetProxyErrorMessage(ex.Message);
 #endif
 			}

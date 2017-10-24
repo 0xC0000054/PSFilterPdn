@@ -5,7 +5,7 @@
 //
 // This software is provided under the Microsoft Public License:
 //   Copyright (C) 2010-2017 Nicholas Hayes
-// 
+//
 // See LICENSE.txt for complete licensing and attribution information.
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ namespace PSFilterLoad.PSApi
         public const short errUnsupportedBitOffset = -30913;
         public const short errUnsupportedDepth = -30914;
         public const short errUnsupportedDepthConversion = -30915;
-        
+
         // PICA suite error codes
         public const int kSPNoError = 0;
         public const int kSPBadParameterError = 0x5061726d;
