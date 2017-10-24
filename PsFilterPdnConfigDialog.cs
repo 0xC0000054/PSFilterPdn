@@ -1052,18 +1052,18 @@ namespace PSFilterPdn
         /// <summary>
         /// Checks if the plugin is already contained in the list, and replaces it if the new plugin is 64-bit and the old one is not on a 64-bit OS.
         /// </summary>
-        /// <param name="parent">The parent TreeNode to check</param>
+        /// <param name="nodes">The collection of existing TreeNodes.</param>
         /// <param name="data">The PluginData to check.</param>
         /// <returns>True if the item is not a duplicate; otherwise false.</returns>
-        private static bool IsNotDuplicateNode(ref List<TreeNode> parent, PluginData data)
+        private static bool IsNotDuplicateNode(ref List<TreeNode> nodes, PluginData data)
         {
             if (IntPtr.Size == 8)
             {
-                int index = parent.FindIndex(t => t.Text == data.Title);
+                int index = nodes.FindIndex(t => t.Text == data.Title);
 
                 if (index >= 0)
                 {
-                    TreeNode node = parent[index];
+                    TreeNode node = nodes[index];
                     PluginData menuData = (PluginData)node.Tag;
 
                     if (Is64BitFilterIncompatible(data))
@@ -1071,7 +1071,7 @@ namespace PSFilterPdn
                         // If the 64-bit filter in the menu is incompatible remove it and use the 32-bit version.
                         if (!menuData.RunWith32BitShim && data.RunWith32BitShim)
                         {
-                            parent.RemoveAt(index);
+                            nodes.RemoveAt(index);
                         }
 
                         return data.RunWith32BitShim;
@@ -1080,7 +1080,7 @@ namespace PSFilterPdn
                     if (menuData.RunWith32BitShim && !data.RunWith32BitShim)
                     {
                         // If the new plugin is 64-bit and the old one is not remove the old one and use the 64-bit one.
-                        parent.RemoveAt(index);
+                        nodes.RemoveAt(index);
 
                         return true;
                     }
