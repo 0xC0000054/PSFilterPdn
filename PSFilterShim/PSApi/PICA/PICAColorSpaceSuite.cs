@@ -241,6 +241,11 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int Convert8(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
         {
+            if (!IsValidColorSpace(inputCSpace) || !IsValidColorSpace(outputCSpace) || colorArray == IntPtr.Zero)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             int error = PSError.kSPNoError;
             byte c0 = 0;
             byte c1 = 0;
