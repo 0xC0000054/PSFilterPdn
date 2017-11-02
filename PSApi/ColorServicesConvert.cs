@@ -51,6 +51,11 @@ namespace PSFilterLoad.PSApi
         /// <returns>The status of the conversion</returns>
         public static short Convert(ColorSpace sourceSpace, ColorSpace resultSpace, ref short[] colorComponents)
         {
+            if (sourceSpace < ColorSpace.RGBSpace || resultSpace > ColorSpace.XYZSpace)
+            {
+                return PSError.paramErr;
+            }
+
             // TODO: CMYK, LAB and XYZ conversions are different than Photoshop
             if (sourceSpace != resultSpace)
             {
@@ -145,6 +150,11 @@ namespace PSFilterLoad.PSApi
         /// <returns>The status of the conversion</returns>
         public static int Convert(ColorSpace sourceSpace, ColorSpace resultSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3)
         {
+            if (sourceSpace < ColorSpace.RGBSpace || resultSpace > ColorSpace.XYZSpace)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             if (sourceSpace != resultSpace)
             {
                 if (resultSpace == ColorSpace.ChosenSpace)
