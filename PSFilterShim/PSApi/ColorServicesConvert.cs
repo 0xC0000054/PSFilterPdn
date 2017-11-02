@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using Devcorp.Controls.Design;
+using System;
 using System.ComponentModel;
 
 namespace PSFilterLoad.PSApi
@@ -108,9 +109,10 @@ namespace PSFilterLoad.PSApi
                         colorComponents[2] = (short)(result.component2 * 255.0);
                         break;
                     case ColorSpace.LabSpace:
-                        colorComponents[0] = (short)((result.component0 / 116) * 255.0);
-                        colorComponents[1] = (short)((result.component1 / 500) * 255.0);
-                        colorComponents[2] = (short)((result.component2 / 200) * 255.0);
+                        // The Lab values have already been scaled to the appropriate range.
+                        colorComponents[0] = (short)Math.Round(result.component0);
+                        colorComponents[1] = (short)Math.Round(result.component1);
+                        colorComponents[2] = (short)Math.Round(result.component2);
                         break;
                     case ColorSpace.XYZSpace:
                         colorComponents[0] = (short)((result.component0 / CIEXYZ.D65.X) * 255.0);
@@ -233,9 +235,10 @@ namespace PSFilterLoad.PSApi
                         c2 = (byte)result.component2;
                         break;
                     case ColorSpace.LabSpace:
-                        c0 = (byte)((result.component0 / 116) * 255.0);
-                        c1 = (byte)((result.component1 / 500) * 255.0);
-                        c2 = (byte)((result.component2 / 200) * 255.0);
+                        // The Lab values have already been scaled to the appropriate range.
+                        c0 = (byte)Math.Round(result.component0);
+                        c1 = (byte)Math.Round(result.component1);
+                        c2 = (byte)Math.Round(result.component2);
                         break;
                     case ColorSpace.XYZSpace:
                         c0 = (byte)((result.component0 / CIEXYZ.D65.X) * 255.0);
@@ -278,7 +281,7 @@ namespace PSFilterLoad.PSApi
                     break;
                 case ColorSpace.LabSpace:
                     CIELab lab = ColorSpaceHelper.RGBtoLab(red, green, blue);
-                    color = new ColorResult(lab.L, lab.A, lab.B);
+                    color = ScaleCIELabOutputRange(lab);
                     break;
                 case ColorSpace.XYZSpace:
                     CIEXYZ xyz = ColorSpaceHelper.RGBtoXYZ(red, green, blue);
@@ -316,7 +319,7 @@ namespace PSFilterLoad.PSApi
                     break;
                 case ColorSpace.LabSpace:
                     CIELab lab = CMYKtoLab(c, m, y, k);
-                    color = new ColorResult(lab.L, lab.A, lab.B);
+                    color = ScaleCIELabOutputRange(lab);
                     break;
                 case ColorSpace.XYZSpace:
                     CIEXYZ xyz = CMYKtoXYZ(c, m, y, k);
@@ -358,7 +361,7 @@ namespace PSFilterLoad.PSApi
                     break;
                 case ColorSpace.LabSpace:
                     CIELab lab = HSBToLab(h, s, b);
-                    color = new ColorResult(lab.L, lab.A, lab.B);
+                    color = ScaleCIELabOutputRange(lab);
                     break;
                 case ColorSpace.XYZSpace:
                     CIEXYZ xyz = HSBtoXYZ(h, s, b);
@@ -399,7 +402,7 @@ namespace PSFilterLoad.PSApi
                     break;
                 case ColorSpace.LabSpace:
                     CIELab lab = HSLToLab(h, s, l);
-                    color = new ColorResult(lab.L, lab.A, lab.B);
+                    color = ScaleCIELabOutputRange(lab);
                     break;
                 case ColorSpace.XYZSpace:
                     CIEXYZ xyz = HSLtoXYZ(h, s, l);
@@ -420,9 +423,9 @@ namespace PSFilterLoad.PSApi
         {
             ColorResult color;
 
-            double l = lComponent / 255.0;
-            double a = aComponent / 255.0;
-            double b = bComponent / 255.0;
+            double l = (lComponent / 255.0) * 100.0;
+            double a = aComponent - 128.0;
+            double b = bComponent - 128.0;
 
             switch (resultSpace)
             {
@@ -487,7 +490,7 @@ namespace PSFilterLoad.PSApi
                     break;
                 case ColorSpace.LabSpace:
                     CIELab lab = ColorSpaceHelper.XYZtoLab(x, y, z);
-                    color = new ColorResult(lab.L, lab.A, lab.B);
+                    color = ScaleCIELabOutputRange(lab);
                     break;
                 case ColorSpace.GraySpace:
                     rgb = ColorSpaceHelper.XYZtoRGB(x, y, z);
@@ -523,7 +526,7 @@ namespace PSFilterLoad.PSApi
                     break;
                 case ColorSpace.LabSpace:
                     CIELab lab = ColorSpaceHelper.RGBtoLab(gray, gray, gray);
-                    color = new ColorResult(lab.L, lab.A, lab.B);
+                    color = ScaleCIELabOutputRange(lab);
                     break;
                 case ColorSpace.XYZSpace:
                     CIEXYZ xyz = ColorSpaceHelper.RGBtoXYZ(gray, gray, gray);
@@ -607,7 +610,39 @@ namespace PSFilterLoad.PSApi
             RGB rgb = ColorSpaceHelper.XYZtoRGB(l, a, b);
             return ColorSpaceHelper.RGBtoHSL(rgb);
         }
+
+        /// <summary>
+        /// Scales the output CIE Lab color to the appropriate range for the Photoshop API.
+        /// </summary>
+        /// <param name="color">The CIELab color.</param>
+        /// <returns>A <see cref="ColorResult"/> containing the Lab color scaled to the output range.</returns>
+        private static ColorResult ScaleCIELabOutputRange(CIELab color)
+        {
+            double l = color.L;
+            double a = color.A;
+            double b = color.B;
+
+            if (l < 0)
+            {
+                l = 0;
+            }
+            else if (l > 100)
+            {
+                l = 100;
+            }
+
+            // Scale the luminance component from [0, 100] to [0, 255].
+            l /= 100.0;
+
+            l *= 255;
+
+            // Add the midpoint to scale the a and b components from [-128, 127] to [0, 255].
+            double midpoint = 128.0;
+
+            a += midpoint;
+            b += midpoint;
+
+            return new ColorResult(l, a, b);
+        }
     }
-
-
 }
