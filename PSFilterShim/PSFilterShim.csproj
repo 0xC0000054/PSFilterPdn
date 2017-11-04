@@ -104,13 +104,6 @@
     <Compile Include="PaintDotNet\ColorPicker\UI.cs" />
     <Compile Include="PaintDotNet\ColorPicker\Utility.cs" />
     <Compile Include="PaintDotNet\ColorPicker\VisualStyleClass.cs" />
-    <Compile Include="ColorSpace\CIELab.cs" />
-    <Compile Include="ColorSpace\CIEXYZ.cs" />
-    <Compile Include="ColorSpace\CMYK.cs" />
-    <Compile Include="ColorSpace\ColorSpaceHelper.cs" />
-    <Compile Include="ColorSpace\HSB.cs" />
-    <Compile Include="ColorSpace\HSL.cs" />
-    <Compile Include="ColorSpace\RGB.cs" />
     <Compile Include="IPSFilterShim.cs" />
     <Compile Include="PaintDotNet\ColorBgra.cs">
       <SubType>Code</SubType>
@@ -143,6 +136,13 @@
     <Compile Include="PSApi\BufferProcs.cs" />
     <Compile Include="PSApi\BufferSuite.cs" />
     <Compile Include="PSApi\ChannelPortsProcs.cs" />
+    <Compile Include="PSApi\ColorConversion\CMYK.cs" />
+    <Compile Include="PSApi\ColorConversion\ColorConverter.cs" />
+    <Compile Include="PSApi\ColorConversion\HSB.cs" />
+    <Compile Include="PSApi\ColorConversion\HSL.cs" />
+    <Compile Include="PSApi\ColorConversion\Lab.cs" />
+    <Compile Include="PSApi\ColorConversion\RGB.cs" />
+    <Compile Include="PSApi\ColorConversion\XYZ.cs" />
     <Compile Include="PSApi\ColorServicesConvert.cs" />
     <Compile Include="PSApi\ColorServicesProc.cs" />
     <Compile Include="PSApi\DebugFlags.cs" />

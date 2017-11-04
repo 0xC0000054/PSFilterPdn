@@ -123,13 +123,6 @@
     <Compile Include="ColorPicker\VisualStyleClass.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ColorSpace\CIELab.cs" />
-    <Compile Include="ColorSpace\CIEXYZ.cs" />
-    <Compile Include="ColorSpace\CMYK.cs" />
-    <Compile Include="ColorSpace\ColorSpaceHelper.cs" />
-    <Compile Include="ColorSpace\HSB.cs" />
-    <Compile Include="ColorSpace\HSL.cs" />
-    <Compile Include="ColorSpace\RGB.cs" />
     <Compile Include="ConfigDialogState.cs" />
     <Compile Include="Dialogs\PlatformFolderBrowserDialog.cs">
       <SubType>Component</SubType>
@@ -167,6 +160,13 @@
     <Compile Include="PSApi\AETEValue.cs" />
     <Compile Include="PSApi\BufferSuite.cs" />
     <Compile Include="PSApi\ChannelPortsProcs.cs" />
+    <Compile Include="PSApi\ColorConversion\CMYK.cs" />
+    <Compile Include="PSApi\ColorConversion\ColorConverter.cs" />
+    <Compile Include="PSApi\ColorConversion\HSB.cs" />
+    <Compile Include="PSApi\ColorConversion\HSL.cs" />
+    <Compile Include="PSApi\ColorConversion\Lab.cs" />
+    <Compile Include="PSApi\ColorConversion\RGB.cs" />
+    <Compile Include="PSApi\ColorConversion\XYZ.cs" />
     <Compile Include="PSApi\DebugUtils.cs" />
     <Compile Include="PSApi\DescriptorRegistryItem.cs" />
     <Compile Include="PSApi\DescriptorRegistrySuite.cs" />
