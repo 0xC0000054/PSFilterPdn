@@ -151,6 +151,7 @@
     <Compile Include="PSApi\DescriptorSuite.cs" />
     <Compile Include="PSApi\DescriptorTypes.cs" />
     <Compile Include="PSApi\DisplayPixelsProc.cs" />
+    <Compile Include="PSApi\DoubleExtensions.cs" />
     <Compile Include="PSApi\ErrorSuite.cs" />
     <Compile Include="PSApi\FilterCase.cs" />
     <Compile Include="PSApi\FilterRecord.cs" />
