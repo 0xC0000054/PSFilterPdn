@@ -27,15 +27,6 @@ A "contributor" is any person that distributes its contribution under this licen
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Portions of this software has been adapted from Manipulating colors in .NET - Part 1
-http://www.codeproject.com/KB/recipes/colorspace1.aspx
-
-These portions are provided under the Code Project Open License:
-
-https://www.codeproject.com/info/cpol10.aspx
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 Portions of this software has been adapted from Paint.NET 3.36
 http://www.getpaint.net
 
