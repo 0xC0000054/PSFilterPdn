@@ -10,7 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-namespace PSFilterLoad.PSApi
+namespace PSFilterLoad.PSApi.ColorConversion
 {
     internal static class DoubleExtensions
     {
