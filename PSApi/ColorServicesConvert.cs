@@ -90,7 +90,7 @@ namespace PSFilterLoad.PSApi
 		/// <returns>The status of the conversion</returns>
 		public static short Convert(ColorSpace sourceSpace, ColorSpace resultSpace, ref short[] colorComponents)
 		{
-			if (sourceSpace < ColorSpace.RGBSpace || resultSpace > ColorSpace.XYZSpace)
+			if (sourceSpace < ColorSpace.RGBSpace || sourceSpace > ColorSpace.XYZSpace)
 			{
 				return PSError.paramErr;
 			}
@@ -228,7 +228,7 @@ namespace PSFilterLoad.PSApi
 		/// <returns>The status of the conversion</returns>
 		public static int Convert(ColorSpace sourceSpace, ColorSpace resultSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3)
 		{
-			if (sourceSpace < ColorSpace.RGBSpace || resultSpace > ColorSpace.XYZSpace)
+			if (sourceSpace < ColorSpace.RGBSpace || sourceSpace > ColorSpace.XYZSpace)
 			{
 				return PSError.kSPBadParameterError;
 			}
