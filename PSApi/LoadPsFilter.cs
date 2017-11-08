@@ -277,7 +277,7 @@ namespace PSFilterLoad.PSApi
 
 			this.dataPtr = IntPtr.Zero;
 			this.phase = PluginPhase.None;
-			this.errorMessage = String.Empty;
+			this.errorMessage = string.Empty;
 			this.disposed = false;
 			this.sizesSetup = false;
 			this.frValuesSetup = false;

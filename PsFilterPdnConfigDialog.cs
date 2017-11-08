@@ -1168,8 +1168,8 @@ namespace PSFilterPdn
         private void updateFilterListBw_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             this.folderLoadProgress.PerformStep();
-            this.folderCountLbl.Text = String.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderCount_Format, (e.ProgressPercentage + 1), searchDirectories.Count);
-            this.folderNameLbl.Text = String.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderName_Format, e.UserState);
+            this.folderCountLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderCount_Format, (e.ProgressPercentage + 1), searchDirectories.Count);
+            this.folderNameLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderName_Format, e.UserState);
         }
 
         private void updateFilterListBw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
