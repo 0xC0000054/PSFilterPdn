@@ -71,21 +71,5 @@ namespace PSFilterPdn
 
             base.OnPaint(e);
         }
-
-        private static class NativeConstants
-        {
-            public const int WM_PRINTCLIENT = 0x0318;
-            public const int PRF_CLIENT = 0x00000004;
-            public const int TV_FIRST = 0x1100;
-            public const int TVM_SETEXTENDEDSTYLE = TV_FIRST + 44;
-            public const int TVS_EX_DOUBLEBUFFER = 0x0004;
-        }
-
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        private static class SafeNativeMethods
-        {
-            [DllImport("user32.dll")]
-            public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
-        }
     }
 }

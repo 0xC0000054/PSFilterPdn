@@ -36,5 +36,8 @@ namespace PSFilterPdn
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = false, ExactSpelling = true)]
         internal static extern IntPtr GetCurrentProcess();
+
+        [DllImport("user32.dll")]
+        internal static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
     }
 }

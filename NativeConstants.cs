@@ -21,6 +21,14 @@ namespace PSFilterPdn
 
         internal const int STGM_READ = 0;
 
+        internal const int WM_PRINTCLIENT = 0x0318;
+
+        internal const int PRF_CLIENT = 0x00000004;
+
+        internal const int TV_FIRST = 0x1100;
+        internal const int TVM_SETEXTENDEDSTYLE = TV_FIRST + 44;
+        internal const int TVS_EX_DOUBLEBUFFER = 0x0004;
+
         internal const string CLSID_FileOpenDialog = "DC1C5A9C-E88A-4dde-A5A1-60F82A20AEF7";
         internal const string CLSID_ShellLink = "00021401-0000-0000-C000-000000000046";
 
