@@ -76,7 +76,7 @@ namespace PSFilterPdn
         private bool filterRunning;
         private bool formClosePending;
         private List<string> expandedNodes;
-        private FilterTreeNodes filterTreeNodes;
+        private FilterTreeNodeCollection filterTreeNodes;
         private List<string> searchDirectories;
         private ListViewItem[] searchDirListViewCache;
         private int cacheStartIndex;
@@ -1184,7 +1184,7 @@ namespace PSFilterPdn
                 {
                     UpdateFilterListParam parm = (UpdateFilterListParam)e.Result;
 
-                    this.filterTreeNodes = new FilterTreeNodes(parm.items);
+                    this.filterTreeNodes = new FilterTreeNodeCollection(parm.items);
 
                     PopulateFilterTreeCategories(true);
 

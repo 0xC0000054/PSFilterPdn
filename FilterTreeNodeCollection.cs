@@ -19,16 +19,16 @@ using System.Windows.Forms;
 namespace PSFilterPdn
 {
     [Serializable]
-    public sealed class FilterTreeNodes : IEnumerable<KeyValuePair<string, ReadOnlyCollection<TreeNode>>>
+    public sealed class FilterTreeNodeCollection : IEnumerable<KeyValuePair<string, ReadOnlyCollection<TreeNode>>>
     {
         private readonly Dictionary<string, ReadOnlyCollection<TreeNode>> nodes;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FilterTreeNodes"/> class.
+        /// Initializes a new instance of the <see cref="FilterTreeNodeCollection"/> class.
         /// </summary>
         /// <param name="items">The items.</param>
         /// <exception cref="ArgumentNullException"><paramref name="items"/> is null.</exception>
-        internal FilterTreeNodes(IDictionary<string, List<TreeNode>> items)
+        internal FilterTreeNodeCollection(IDictionary<string, List<TreeNode>> items)
         {
             if (items == null)
             {
