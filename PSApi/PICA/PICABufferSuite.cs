@@ -18,11 +18,62 @@ namespace PSFilterLoad.PSApi.PICA
 {
 	internal sealed class PICABufferSuite : IDisposable
 	{
+		private sealed class BufferEntry : IDisposable
+		{
+			private IntPtr pointer;
+			private readonly uint size;
+			private bool disposed;
+
+			public BufferEntry(IntPtr pointer, uint size)
+			{
+				this.pointer = pointer;
+				this.size = size;
+				this.disposed = false;
+			}
+
+			public uint Size
+			{
+				get
+				{
+					return this.size;
+				}
+			}
+
+			public void Dispose()
+			{
+				Dispose(true);
+				GC.SuppressFinalize(this);
+			}
+
+			private void Dispose(bool disposing)
+			{
+				if (!disposed)
+				{
+					if (disposing)
+					{
+					}
+
+					if (this.pointer != IntPtr.Zero)
+					{
+						Memory.Free(this.pointer);
+						this.pointer = IntPtr.Zero;
+					}
+
+					disposed = true;
+				}
+			}
+
+			~BufferEntry()
+			{
+				Dispose(false);
+			}
+		}
+
 		private readonly PSBufferSuiteNew bufferSuiteNew;
 		private readonly PSBufferSuiteDispose bufferSuiteDispose;
 		private readonly PSBufferSuiteGetSize bufferSuiteGetSize;
 		private readonly PSBufferSuiteGetSpace bufferSuiteGetSpace;
-		private List<IntPtr> buffers;
+		private Dictionary<IntPtr, BufferEntry> buffers;
 		private bool disposed;
 
 		public PICABufferSuite()
@@ -31,7 +82,7 @@ namespace PSFilterLoad.PSApi.PICA
 			this.bufferSuiteDispose = new PSBufferSuiteDispose(PSBufferDispose);
 			this.bufferSuiteGetSize = new PSBufferSuiteGetSize(PSBufferGetSize);
 			this.bufferSuiteGetSpace = new PSBufferSuiteGetSpace(PSBufferGetSpace);
-			this.buffers = new List<IntPtr>();
+			this.buffers = new Dictionary<IntPtr, BufferEntry>();
 			this.disposed = false;
 		}
 
@@ -61,7 +112,7 @@ namespace PSFilterLoad.PSApi.PICA
 						ptr = Memory.Allocate(size, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
 						if (ptr != IntPtr.Zero)
 						{
-							this.buffers.Add(ptr);
+							this.buffers.Add(ptr, new BufferEntry(ptr, size));
 							allocatedSize = size;
 							break;
 						}
@@ -77,7 +128,7 @@ namespace PSFilterLoad.PSApi.PICA
 						ptr = Memory.Allocate(minimumSize, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
 						if (ptr != IntPtr.Zero)
 						{
-							this.buffers.Add(ptr);
+							this.buffers.Add(ptr, new BufferEntry(ptr, minimumSize));
 							allocatedSize = minimumSize;
 						}
 					}
@@ -90,7 +141,7 @@ namespace PSFilterLoad.PSApi.PICA
 					ptr = Memory.Allocate(minimumSize, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
 					if (ptr != IntPtr.Zero)
 					{
-						this.buffers.Add(ptr);
+						this.buffers.Add(ptr, new BufferEntry(ptr, minimumSize));
 					}
 				}
 			}
@@ -119,9 +170,10 @@ namespace PSFilterLoad.PSApi.PICA
 			{
 			}
 
-			if (buffer != IntPtr.Zero)
+			BufferEntry entry;
+			if (buffer != IntPtr.Zero && this.buffers.TryGetValue(buffer, out entry))
 			{
-				Memory.Free(buffer);
+				entry.Dispose();
 				this.buffers.Remove(buffer);
 				// This method is documented to set the pointer to null after it has been freed.
 				bufferPtr = IntPtr.Zero;
@@ -130,9 +182,10 @@ namespace PSFilterLoad.PSApi.PICA
 
 		private uint PSBufferGetSize(IntPtr buffer)
 		{
-			if (buffer != IntPtr.Zero)
+			BufferEntry entry;
+			if (buffer != IntPtr.Zero && this.buffers.TryGetValue(buffer, out entry))
 			{
-				return (uint)Memory.Size(buffer);
+				return entry.Size;
 			}
 
 			return 0;
@@ -178,13 +231,11 @@ namespace PSFilterLoad.PSApi.PICA
 			{
 				if (disposing)
 				{
+					foreach (var item in this.buffers)
+					{
+						item.Value.Dispose();
+					}
 				}
-
-				for (int i = 0; i < this.buffers.Count; i++)
-				{
-					Memory.Free(this.buffers[i]);
-				}
-				this.buffers = null;
 
 				disposed = true;
 			}
