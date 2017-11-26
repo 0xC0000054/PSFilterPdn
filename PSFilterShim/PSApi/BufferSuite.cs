@@ -18,12 +18,81 @@ namespace PSFilterLoad.PSApi
 {
 	internal sealed class BufferSuite
 	{
+		// This class is used in place of List<T> because IntPtr does not implement IEquatable<T>
+		// which causes boxing in List<T> methods that use the default EqualityComparer.
+		private sealed class BufferIDCollection
+		{
+			private List<IntPtr> items;
+
+			public BufferIDCollection()
+			{
+				this.items = new List<IntPtr>();
+			}
+
+			public int Count
+			{
+				get
+				{
+					return items.Count;
+				}
+			}
+
+			public IntPtr this[int index]
+			{
+				get
+				{
+					return this.items[index];
+				}
+			}
+
+			public void Add(IntPtr value)
+			{
+				this.items.Add(value);
+			}
+
+			public void Clear()
+			{
+				this.items.Clear();
+			}
+
+			public bool Contains(IntPtr value)
+			{
+				return IndexOf(value) >= 0;
+			}
+
+			public int IndexOf(IntPtr value)
+			{
+				for (int i = 0; i < this.items.Count; i++)
+				{
+					if (this.items[i] == value)
+					{
+						return i;
+					}
+				}
+
+				return -1;
+			}
+
+			public bool Remove(IntPtr value)
+			{
+				int index = IndexOf(value);
+
+				if (index >= 0)
+				{
+					this.items.RemoveAt(index);
+					return true;
+				}
+
+				return false;
+			}
+		}
+
 		private readonly AllocateBufferProc allocProc;
 		private readonly FreeBufferProc freeProc;
 		private readonly LockBufferProc lockProc;
 		private readonly UnlockBufferProc unlockProc;
 		private readonly BufferSpaceProc spaceProc;
-		private readonly List<IntPtr> bufferIDs;
+		private readonly BufferIDCollection bufferIDs;
 
 		private static readonly BufferSuite instance = new BufferSuite();
 
@@ -34,7 +103,7 @@ namespace PSFilterLoad.PSApi
 			this.lockProc = new LockBufferProc(BufferLockProc);
 			this.unlockProc = new UnlockBufferProc(BufferUnlockProc);
 			this.spaceProc = new BufferSpaceProc(BufferSpaceProc);
-			this.bufferIDs = new List<IntPtr>();
+			this.bufferIDs = new BufferIDCollection();
 		}
 
 		public static BufferSuite Instance
