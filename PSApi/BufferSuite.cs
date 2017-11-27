@@ -221,7 +221,22 @@ namespace PSFilterLoad.PSApi
 
 		private int BufferSpaceProc()
 		{
-			return 1000000000;
+			// Assume that we have 1 GB of available space.
+			int space = 1024 * 1024 * 1024;
+
+			NativeStructs.MEMORYSTATUSEX buffer = new NativeStructs.MEMORYSTATUSEX()
+			{
+				dwLength = (uint)Marshal.SizeOf(typeof(NativeStructs.MEMORYSTATUSEX))
+			};
+			if (SafeNativeMethods.GlobalMemoryStatusEx(ref buffer))
+			{
+				if (buffer.ullAvailVirtual < int.MaxValue)
+				{
+					space = (int)buffer.ullAvailVirtual;
+				}
+			}
+
+			return space;
 		}
 	}
 }
