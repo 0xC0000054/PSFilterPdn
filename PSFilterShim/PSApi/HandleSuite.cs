@@ -413,7 +413,23 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
 #endif
-			if (!AllocatedBySuite(h))
+			if (AllocatedBySuite(h))
+			{
+				try
+				{
+					PSHandle* handle = (PSHandle*)h.ToPointer();
+					IntPtr ptr = Memory.ReAlloc(handle->pointer, newSize);
+
+					handle->pointer = ptr;
+
+					this.handles.AddOrUpdate(h, new HandleEntry(h, ptr, newSize));
+				}
+				catch (OutOfMemoryException)
+				{
+					return PSError.memFullErr;
+				}
+			}
+			else
 			{
 				if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
 				{
@@ -435,24 +451,11 @@ namespace PSFilterLoad.PSApi
 							return PSError.memFullErr;
 						}
 					}
-
-					return PSError.noErr;
 				}
-				return PSError.nilHandleErr;
-			}
-
-			try
-			{
-				PSHandle* handle = (PSHandle*)h.ToPointer();
-				IntPtr ptr = Memory.ReAlloc(handle->pointer, newSize);
-
-				handle->pointer = ptr;
-
-				this.handles.AddOrUpdate(h, new HandleEntry(h, ptr, newSize));
-			}
-			catch (OutOfMemoryException)
-			{
-				return PSError.memFullErr;
+				else
+				{
+					return PSError.nilHandleErr;
+				}
 			}
 
 			return PSError.noErr;
