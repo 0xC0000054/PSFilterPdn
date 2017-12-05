@@ -3327,7 +3327,7 @@ namespace PSFilterLoad.PSApi
 			{
 				case PSProperties.BigNudgeH:
 				case PSProperties.BigNudgeV:
-					simpleProperty = new IntPtr(Int32ToFixed(PSConstants.Properties.BigNudgeDistance));
+					simpleProperty = new IntPtr(new Fixed16(PSConstants.Properties.BigNudgeDistance).Value);
 					break;
 				case PSProperties.Caption:
 					if (complexProperty != IntPtr.Zero)
@@ -3382,7 +3382,7 @@ namespace PSFilterLoad.PSApi
 					}
 					break;
 				case PSProperties.GridMajor:
-					simpleProperty = new IntPtr(Int32ToFixed(PSConstants.Properties.GridMajor));
+					simpleProperty = new IntPtr(new Fixed16(PSConstants.Properties.GridMajor).Value);
 					break;
 				case PSProperties.GridMinor:
 					simpleProperty = new IntPtr(PSConstants.Properties.GridMinor);
@@ -3409,7 +3409,7 @@ namespace PSFilterLoad.PSApi
 					break;
 				case PSProperties.RulerOriginH:
 				case PSProperties.RulerOriginV:
-					simpleProperty = new IntPtr(Int32ToFixed(0));
+					simpleProperty = new IntPtr(new Fixed16(0).Value);
 					break;
 				case PSProperties.SerialString:
 					bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
@@ -3828,26 +3828,6 @@ namespace PSFilterLoad.PSApi
 #endif
 
 			return PSError.kSPNoError;
-		}
-
-		/// <summary>
-		/// Converts an Int32 to a 16.16 fixed point value.
-		/// </summary>
-		/// <param name="value">The value to convert.</param>
-		/// <returns>The value converted to a 16.16 fixed point number.</returns>
-		private static int Int32ToFixed(int value)
-		{
-			return (value << 16);
-		}
-
-		/// <summary>
-		/// Converts a 16.16 fixed point value to an Int32.
-		/// </summary>
-		/// <param name="value">The value to convert.</param>
-		/// <returns>The value converted from a 16.16 fixed point number.</returns>
-		private static int FixedToInt32(int value)
-		{
-			return (value >> 16);
 		}
 
 		private unsafe void SetupSizes()
