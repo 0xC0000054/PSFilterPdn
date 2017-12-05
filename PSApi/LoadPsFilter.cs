@@ -1891,7 +1891,7 @@ namespace PSFilterLoad.PSApi
 		/// Scales the temp surface.
 		/// </summary>
 		/// <param name="lockRect">The rectangle to clamp the size to.</param>
-		private unsafe void ScaleTempSurface(int inputRate, Rectangle lockRect)
+		private unsafe void ScaleTempSurface(Fixed16 inputRate, Rectangle lockRect)
 		{
 			// If the scale rectangle bounds are not valid return a copy of the original surface.
 			if (lockRect.X >= source.Width || lockRect.Y >= source.Height)
@@ -1909,7 +1909,7 @@ namespace PSFilterLoad.PSApi
 				return;
 			}
 
-			int scaleFactor = FixedToInt32(inputRate);
+			int scaleFactor = inputRate.ToInt32();
 			if (scaleFactor == 0) // Photoshop 2.5 filters don't use the host scaling.
 			{
 				scaleFactor = 1;
@@ -1956,7 +1956,7 @@ namespace PSFilterLoad.PSApi
 		{
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("inRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}, inputRate: {4}", new object[] { filterRecord->inRowBytes, filterRecord->inRect,
-			filterRecord->inLoPlane, filterRecord->inHiPlane, FixedToInt32(filterRecord->inputRate) }));
+			filterRecord->inLoPlane, filterRecord->inHiPlane, filterRecord->inputRate.ToInt32() }));
 #endif
 			Rect16 rect = filterRecord->inRect;
 
@@ -2190,7 +2190,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.noErr;
 		}
 
-		private unsafe void ScaleTempMask(int maskRate, Rectangle lockRect)
+		private unsafe void ScaleTempMask(Fixed16 maskRate, Rectangle lockRect)
 		{
 			// If the scale rectangle bounds are not valid return a copy of the original surface.
 			if (lockRect.X >= mask.Width || lockRect.Y >= mask.Height)
@@ -2208,7 +2208,7 @@ namespace PSFilterLoad.PSApi
 				return;
 			}
 
-			int scaleFactor = FixedToInt32(maskRate);
+			int scaleFactor = maskRate.ToInt32();
 
 			if (scaleFactor == 0)
 			{
@@ -2255,7 +2255,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe short FillMaskBuffer(FilterRecord* filterRecord)
 		{
 #if DEBUG
-			DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes: {0}, Rect: {1}, maskRate: {2}", new object[] { filterRecord->maskRowBytes, filterRecord->maskRect, FixedToInt32(filterRecord->maskRate) }));
+			DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes: {0}, Rect: {1}, maskRate: {2}", new object[] { filterRecord->maskRowBytes, filterRecord->maskRect, filterRecord->maskRate.ToInt32() }));
 #endif
 			Rect16 rect = filterRecord->maskRect;
 			int width = rect.right - rect.left;
@@ -2884,8 +2884,8 @@ namespace PSFilterLoad.PSApi
 			doc->bounds.left = 0;
 			doc->bounds.right = source.Width;
 			doc->bounds.bottom = source.Height;
-			doc->hResolution = Int32ToFixed((int)(dpiX + 0.5));
-			doc->vResolution = Int32ToFixed((int)(dpiY + 0.5));
+			doc->hResolution = new Fixed16((int)(dpiX + 0.5));
+			doc->vResolution = new Fixed16((int)(dpiY + 0.5));
 
 			string[] names = new string[3] { Resources.RedChannelName, Resources.GreenChannelName, Resources.BlueChannelName };
 			IntPtr channel = CreateReadChannelDesc(PSConstants.ChannelPorts.Red, names[0], doc->depth, doc->bounds);
@@ -3861,8 +3861,8 @@ namespace PSFilterLoad.PSApi
 			filterRecord->filterRect.right = width;
 			filterRecord->filterRect.bottom = height;
 
-			filterRecord->imageHRes = Int32ToFixed((int)(dpiX + 0.5));
-			filterRecord->imageVRes = Int32ToFixed((int)(dpiY + 0.5));
+			filterRecord->imageHRes = new Fixed16((int)(dpiX + 0.5));
+			filterRecord->imageVRes = new Fixed16((int)(dpiY + 0.5));
 
 			filterRecord->wholeSize.h = width;
 			filterRecord->wholeSize.v = height;
@@ -4052,8 +4052,8 @@ namespace PSFilterLoad.PSApi
 			filterRecord->maskPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
 			filterRecord->samplingSupport = PSConstants.SamplingSupport.hostSupportsIntegralSampling;
 			filterRecord->reservedByte = 0;
-			filterRecord->inputRate = Int32ToFixed(1);
-			filterRecord->maskRate = Int32ToFixed(1);
+			filterRecord->inputRate = new Fixed16(1);
+			filterRecord->maskRate = new Fixed16(1);
 			filterRecord->colorServices = Marshal.GetFunctionPointerForDelegate(colorProc);
 
 #if USEIMAGESERVICES

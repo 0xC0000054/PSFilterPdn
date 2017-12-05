@@ -27,8 +27,8 @@ namespace PSFilterLoad.PSApi
         public int imageMode;
         public int depth;
         public VRect bounds;
-        public int hResolution;
-        public int vResolution;
+        public Fixed16 hResolution;
+        public Fixed16 vResolution;
         public fixed byte redLUT[256];
         public fixed byte greenLUT[256];
         public fixed byte blueLUT[256];

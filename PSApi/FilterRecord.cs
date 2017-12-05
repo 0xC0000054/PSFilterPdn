@@ -64,8 +64,8 @@ namespace PSFilterLoad.PSApi
         public IntPtr hostProcs;
 
         public short imageMode;
-        public int imageHRes;
-        public int imageVRes;
+        public Fixed16 imageHRes;
+        public Fixed16 imageVRes;
         public Point16 floatCoord;
         public Point16 wholeSize;
         public PlugInMonitor monitor;
@@ -100,8 +100,8 @@ namespace PSFilterLoad.PSApi
         public byte samplingSupport;
         public byte reservedByte;
 
-        public int inputRate;
-        public int maskRate;
+        public Fixed16 inputRate;
+        public Fixed16 maskRate;
 
         public IntPtr colorServices;
 
