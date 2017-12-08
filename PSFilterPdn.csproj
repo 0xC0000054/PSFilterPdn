@@ -179,6 +179,7 @@
     <Compile Include="PSApi\DictionaryExtensions.cs" />
     <Compile Include="PSApi\ColorConversion\DoubleExtensions.cs" />
     <Compile Include="PSApi\ErrorSuite.cs" />
+    <Compile Include="PSApi\Fixed16.cs" />
     <Compile Include="PSApi\GlobalParameters.cs" />
     <Compile Include="PSApi\HandleSuite.cs" />
     <Compile Include="PSApi\IActionDescriptorSuite.cs" />
