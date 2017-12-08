@@ -191,6 +191,7 @@
     <Compile Include="PSApi\ProcessEventProc.cs" />
     <Compile Include="PSApi\ProgressProc.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
+    <Compile Include="PSApi\PropertySuite.cs" />
     <Compile Include="PSApi\PSActionDescriptor.cs" />
     <Compile Include="PSApi\PSActionList.cs" />
     <Compile Include="PSApi\PSActionReference.cs" />

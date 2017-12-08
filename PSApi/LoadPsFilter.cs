@@ -63,9 +63,6 @@ namespace PSFilterLoad.PSApi
 		private PIResampleProc resample1DProc;
 		private PIResampleProc resample2DProc;
 #endif
-		// PropertyProcs
-		private GetPropertyProc getPropertyProc;
-		private SetPropertyProc setPropertyProc;
 
 		// ChannelPorts
 		private ReadPixelsProc readPixelsProc;
@@ -165,6 +162,7 @@ namespace PSFilterLoad.PSApi
 		private PICASuites picaSuites;
 
 		private DescriptorSuite descriptorSuite;
+		private PropertySuite propertySuite;
 		private PseudoResourceSuite pseudoResourceSuite;
 		private ActionSuiteProvider actionSuites;
 		private DescriptorRegistrySuite descriptorRegistrySuite;
@@ -336,6 +334,8 @@ namespace PSFilterLoad.PSApi
 			this.source = eep.SourceSurface.Clone();
 
 			this.dest = new Surface(source.Width, source.Height);
+
+			propertySuite = new PropertySuite(source.Width, source.Height);
 
 			this.backgroundColor = new byte[4] { eep.SecondaryColor.R, eep.SecondaryColor.G, eep.SecondaryColor.B, 0 };
 			this.foregroundColor = new byte[4] { eep.PrimaryColor.R, eep.PrimaryColor.G, eep.PrimaryColor.B, 0 };
@@ -3289,200 +3289,6 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-		private unsafe short PropertyGetProc(uint signature, uint key, int index, ref IntPtr simpleProperty, ref IntPtr complexProperty)
-		{
-#if DEBUG
-			DebugUtils.Ping(DebugFlags.PropertySuite, string.Format("Sig: {0}, Key: {1}, Index: {2}", DebugUtils.PropToString(signature), DebugUtils.PropToString(key), index.ToString()));
-#endif
-			if (signature != PSConstants.kPhotoshopSignature)
-			{
-				return PSError.errPlugInPropertyUndefined;
-			}
-
-			byte[] bytes = null;
-
-			FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-			switch (key)
-			{
-				case PSProperties.BigNudgeH:
-				case PSProperties.BigNudgeV:
-					simpleProperty = new IntPtr(new Fixed16(PSConstants.Properties.BigNudgeDistance).Value);
-					break;
-				case PSProperties.Caption:
-					if (complexProperty != IntPtr.Zero)
-					{
-						complexProperty = HandleSuite.Instance.NewHandle(0);
-					}
-					break;
-				case PSProperties.ChannelName:
-					if (index < 0 || index > (filterRecord->planes - 1))
-					{
-						return PSError.errPlugInPropertyUndefined;
-					}
-					string name = string.Empty;
-					switch (index)
-					{
-						case 0:
-							name = Resources.RedChannelName;
-							break;
-						case 1:
-							name = Resources.GreenChannelName;
-							break;
-						case 2:
-							name = Resources.BlueChannelName;
-							break;
-						case 3:
-							name = Resources.AlphaChannelName;
-							break;
-					}
-
-					bytes = Encoding.ASCII.GetBytes(name);
-
-					complexProperty = HandleSuite.Instance.NewHandle(bytes.Length);
-
-					if (complexProperty == IntPtr.Zero)
-					{
-						return PSError.memFullErr;
-					}
-
-					Marshal.Copy(bytes, 0, HandleSuite.Instance.LockHandle(complexProperty, 0), bytes.Length);
-					HandleSuite.Instance.UnlockHandle(complexProperty);
-					break;
-				case PSProperties.Copyright:
-				case PSProperties.Copyright2:
-					simpleProperty = new IntPtr(0);
-					break;
-				case PSProperties.EXIFData:
-				case PSProperties.XMPData:
-					if (complexProperty != IntPtr.Zero)
-					{
-						// If the complexProperty is not IntPtr.Zero we return a valid zero byte handle, otherwise some filters will crash with an access violation.
-						complexProperty = HandleSuite.Instance.NewHandle(0);
-					}
-					break;
-				case PSProperties.GridMajor:
-					simpleProperty = new IntPtr(new Fixed16(PSConstants.Properties.GridMajor).Value);
-					break;
-				case PSProperties.GridMinor:
-					simpleProperty = new IntPtr(PSConstants.Properties.GridMinor);
-					break;
-				case PSProperties.ImageMode:
-					simpleProperty = new IntPtr(filterRecord->imageMode);
-					break;
-				case PSProperties.InterpolationMethod:
-					simpleProperty = new IntPtr(PSConstants.Properties.InterpolationMethod.NearestNeghbor);
-					break;
-				case PSProperties.NumberOfChannels:
-					simpleProperty = new IntPtr(filterRecord->planes);
-					break;
-				case PSProperties.NumberOfPaths:
-					simpleProperty = new IntPtr(0);
-					break;
-				case PSProperties.WorkPathIndex:
-				case PSProperties.ClippingPathIndex:
-				case PSProperties.TargetPathIndex:
-					simpleProperty = new IntPtr(PSConstants.Properties.NoPathIndex);
-					break;
-				case PSProperties.RulerUnits:
-					simpleProperty = new IntPtr(PSConstants.Properties.RulerUnits.Pixels);
-					break;
-				case PSProperties.RulerOriginH:
-				case PSProperties.RulerOriginV:
-					simpleProperty = new IntPtr(new Fixed16(0).Value);
-					break;
-				case PSProperties.SerialString:
-					bytes = Encoding.ASCII.GetBytes(filterRecord->serial.ToString(CultureInfo.InvariantCulture));
-					complexProperty = HandleSuite.Instance.NewHandle(bytes.Length);
-
-					if (complexProperty == IntPtr.Zero)
-					{
-						return PSError.memFullErr;
-					}
-
-					Marshal.Copy(bytes, 0, HandleSuite.Instance.LockHandle(complexProperty, 0), bytes.Length);
-					HandleSuite.Instance.UnlockHandle(complexProperty);
-					break;
-				case PSProperties.URL:
-					if (complexProperty != IntPtr.Zero)
-					{
-						complexProperty = HandleSuite.Instance.NewHandle(0);
-					}
-					break;
-				case PSProperties.Title:
-				case PSProperties.UnicodeTitle:
-					string title = "temp.pdn"; // some filters just want a non empty string
-					if (key == PSProperties.UnicodeTitle)
-					{
-						bytes = Encoding.Unicode.GetBytes(title);
-					}
-					else
-					{
-						bytes = Encoding.ASCII.GetBytes(title);
-					}
-					complexProperty = HandleSuite.Instance.NewHandle(bytes.Length);
-
-					if (complexProperty == IntPtr.Zero)
-					{
-						return PSError.memFullErr;
-					}
-
-					Marshal.Copy(bytes, 0, HandleSuite.Instance.LockHandle(complexProperty, 0), bytes.Length);
-					HandleSuite.Instance.UnlockHandle(complexProperty);
-					break;
-				case PSProperties.WatchSuspension:
-					simpleProperty = new IntPtr(0);
-					break;
-				case PSProperties.DocumentWidth:
-					simpleProperty = new IntPtr(source.Width);
-					break;
-				case PSProperties.DocumentHeight:
-					simpleProperty = new IntPtr(source.Height);
-					break;
-				case PSProperties.ToolTips:
-					simpleProperty = new IntPtr(1);
-					break;
-				default:
-					return PSError.errPlugInPropertyUndefined;
-			}
-
-
-			return PSError.noErr;
-		}
-
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-		private short PropertySetProc(uint signature, uint key, int index, IntPtr simpleProperty, IntPtr complexProperty)
-		{
-#if DEBUG
-			DebugUtils.Ping(DebugFlags.PropertySuite, string.Format("Sig: {0}, Key: {1}, Index: {2}", DebugUtils.PropToString(signature), DebugUtils.PropToString(key), index.ToString()));
-#endif
-			if (signature != PSConstants.kPhotoshopSignature)
-			{
-				return PSError.errPlugInPropertyUndefined;
-			}
-
-			switch (key)
-			{
-				case PSProperties.BigNudgeH:
-				case PSProperties.BigNudgeV:
-				case PSProperties.Caption:
-				case PSProperties.Copyright:
-				case PSProperties.EXIFData:
-				case PSProperties.XMPData:
-				case PSProperties.GridMajor:
-				case PSProperties.GridMinor:
-				case PSProperties.RulerOriginH:
-				case PSProperties.RulerOriginV:
-				case PSProperties.URL:
-				case PSProperties.WatchSuspension:
-					break;
-				default:
-					return PSError.errPlugInPropertyUndefined;
-			}
-
-			return PSError.noErr;
-		}
-
 		private int SPBasicAcquireSuite(IntPtr name, int version, ref IntPtr suite)
 		{
 
@@ -3833,6 +3639,7 @@ namespace PSFilterLoad.PSApi
 			{
 				filterRecord->planes = 4;
 			}
+			propertySuite.NumberOfChannels = filterRecord->planes;
 
 			filterRecord->floatCoord.h = 0;
 			filterRecord->floatCoord.v = 0;
@@ -3865,9 +3672,6 @@ namespace PSFilterLoad.PSApi
 			resample2DProc = new PIResampleProc(image_services_interpolate_2d_proc);
 #endif
 
-			// PropertyProc
-			getPropertyProc = new GetPropertyProc(PropertyGetProc);
-			setPropertyProc = new SetPropertyProc(PropertySetProc);
 			// ChannelPortsProcs
 			readPixelsProc = new ReadPixelsProc(ReadPixelsProc);
 			writeBasePixelsProc = new WriteBasePixelsProc(WriteBasePixels);
@@ -3900,12 +3704,7 @@ namespace PSFilterLoad.PSApi
 #endif
 
 
-			propertyProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(PropertyProcs)), true);
-			PropertyProcs* propertyProcs = (PropertyProcs*)propertyProcsPtr.ToPointer();
-			propertyProcs->propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion;
-			propertyProcs->numPropertyProcs = PSConstants.kCurrentPropertyProcsCount;
-			propertyProcs->getPropertyProc = Marshal.GetFunctionPointerForDelegate(getPropertyProc);
-			propertyProcs->setPropertyProc = Marshal.GetFunctionPointerForDelegate(setPropertyProc);
+			propertyProcsPtr = propertySuite.CreatePropertySuite();
 
 			resourceProcsPtr = pseudoResourceSuite.CreateResourceProcs();
 
@@ -4024,7 +3823,7 @@ namespace PSFilterLoad.PSApi
 
 			filterRecord->supportsAbsolute = 1;
 			filterRecord->wantsAbsolute = 0;
-			filterRecord->getPropertyObsolete = Marshal.GetFunctionPointerForDelegate(getPropertyProc);
+			filterRecord->getPropertyObsolete = propertySuite.GetPropertyCallback;
 			filterRecord->cannotUndo = 0;
 			filterRecord->supportsPadding = 1;
 			filterRecord->inputPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
