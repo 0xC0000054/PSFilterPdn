@@ -16,9 +16,11 @@
 */
 
 
+using System;
+using System.Runtime.InteropServices;
+
 namespace PSFilterLoad.PSApi
 {
-#if USEIMAGESERVICES
     [StructLayout(LayoutKind.Sequential)]
     internal struct PSImagePlane
     {
@@ -27,5 +29,4 @@ namespace PSFilterLoad.PSApi
         public int rowBytes;
         public int colBytes;
     }
-#endif
 }
