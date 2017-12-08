@@ -3281,12 +3281,12 @@ namespace PSFilterLoad.PSApi
 		}
 
 #if USEIMAGESERVICES
-		private short image_services_interpolate_1d_proc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
+		private short ImageServicesInterpolate1DProc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
 		{
 			return PSError.memFullErr;
 		}
 
-		private short image_services_interpolate_2d_proc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
+		private short ImageServicesInterpolate2DProc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
 		{
 			return PSError.memFullErr;
 		}
@@ -3688,8 +3688,8 @@ namespace PSFilterLoad.PSApi
 			abortProc = new TestAbortProc(AbortProc);
 			// ImageServicesProc
 #if USEIMAGESERVICES
-			resample1DProc = new PIResampleProc(image_services_interpolate_1d_proc);
-			resample2DProc = new PIResampleProc(image_services_interpolate_2d_proc);
+			resample1DProc = new PIResampleProc(ImageServicesInterpolate1DProc);
+			resample2DProc = new PIResampleProc(ImageServicesInterpolate2DProc);
 #endif
 
 			// ChannelPortsProcs
