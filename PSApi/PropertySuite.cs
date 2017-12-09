@@ -74,7 +74,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public unsafe IntPtr CreatePropertySuite()
+        public unsafe IntPtr CreatePropertySuitePointer()
         {
             IntPtr propertyProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(PropertyProcs)), true);
 

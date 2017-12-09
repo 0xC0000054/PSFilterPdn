@@ -127,7 +127,7 @@ namespace PSFilterLoad.PSApi
 			return this.bufferIDs.Contains(buffer);
 		}
 
-		public IntPtr CreateBufferProcs()
+		public IntPtr CreateBufferProcsPointer()
 		{
 			IntPtr bufferProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(BufferProcs)), true);
 

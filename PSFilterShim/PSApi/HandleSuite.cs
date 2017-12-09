@@ -146,7 +146,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		public IntPtr CreateHandleProcs()
+		public IntPtr CreateHandleProcsPointer()
 		{
 			IntPtr handleProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(HandleProcs)), true);
 

@@ -3700,9 +3700,9 @@ namespace PSFilterLoad.PSApi
 
 		private unsafe void SetupSuites()
 		{
-			bufferProcsPtr = BufferSuite.Instance.CreateBufferProcs();
+			bufferProcsPtr = BufferSuite.Instance.CreateBufferProcsPointer();
 
-			handleProcsPtr = HandleSuite.Instance.CreateHandleProcs();
+			handleProcsPtr = HandleSuite.Instance.CreateHandleProcsPointer();
 
 			imageServicesProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ImageServicesProcs)), true);
 
@@ -3713,13 +3713,13 @@ namespace PSFilterLoad.PSApi
 			imageServicesProcs->interpolate2DProc = Marshal.GetFunctionPointerForDelegate(resample2DProc);
 
 
-			propertyProcsPtr = propertySuite.CreatePropertySuite();
+			propertyProcsPtr = propertySuite.CreatePropertySuitePointer();
 
-			resourceProcsPtr = pseudoResourceSuite.CreateResourceProcs();
+			resourceProcsPtr = pseudoResourceSuite.CreateResourceProcsPointer();
 
-			readDescriptorPtr = descriptorSuite.CreateReadDescriptor();
+			readDescriptorPtr = descriptorSuite.CreateReadDescriptorPointer();
 
-			writeDescriptorPtr = descriptorSuite.CreateWriteDescriptor();
+			writeDescriptorPtr = descriptorSuite.CreateWriteDescriptorPointer();
 
 			descriptorParametersPtr = Memory.Allocate(Marshal.SizeOf(typeof(PIDescriptorParameters)), true);
 			PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
