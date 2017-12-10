@@ -200,7 +200,6 @@
     <Compile Include="PSApi\PSDescriptorRegistry.cs" />
     <Compile Include="PSApi\PSError.cs" />
     <Compile Include="PSApi\PSErrorSuite.cs" />
-    <Compile Include="PSApi\PSImagePlane.cs" />
     <Compile Include="PSApi\PSPixelMap.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
     <Compile Include="PSApi\ReadImageDocumentDesc.cs" />
