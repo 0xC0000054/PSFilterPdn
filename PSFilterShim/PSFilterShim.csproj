@@ -165,6 +165,7 @@
     <Compile Include="PSApi\IActionReferenceSuite.cs" />
     <Compile Include="PSApi\ImageModes.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
+    <Compile Include="PSApi\ImageServicesSuite.cs" />
     <Compile Include="PSApi\Int32Extensions.cs" />
     <Compile Include="PSApi\IntPtrEqualityComparer.cs" />
     <Compile Include="PSApi\IntPtrExtensions.cs" />

@@ -56,9 +56,6 @@ namespace PSFilterLoad.PSApi
 		private ProcessEventProc processEventProc;
 		private ProgressProc progressProc;
 		private TestAbortProc abortProc;
-		// ImageServicesProc
-		private PIResampleProc resample1DProc;
-		private PIResampleProc resample2DProc;
 		// ChannelPorts
 		private ReadPixelsProc readPixelsProc;
 		private WriteBasePixelsProc writeBasePixelsProc;
@@ -155,6 +152,7 @@ namespace PSFilterLoad.PSApi
 		private PICASuites picaSuites;
 
 		private DescriptorSuite descriptorSuite;
+		private ImageServicesSuite imageServicesSuite;
 		private PropertySuite propertySuite;
 		private PseudoResourceSuite pseudoResourceSuite;
 		private ActionSuiteProvider actionSuites;
@@ -314,6 +312,7 @@ namespace PSFilterLoad.PSApi
 			}
 			this.dest = new Surface(source.Width, source.Height);
 
+			this.imageServicesSuite = new ImageServicesSuite();
 			this.propertySuite = new PropertySuite(source.Width, source.Height);
 
 			this.inputHandling = FilterDataHandling.None;
@@ -3276,16 +3275,6 @@ namespace PSFilterLoad.PSApi
 #endif
 		}
 
-		private short ImageServicesInterpolate1DProc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
-		{
-			return PSError.memFullErr;
-		}
-
-		private short ImageServicesInterpolate2DProc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
-		{
-			return PSError.memFullErr;
-		}
-
 		private void ProcessEventProc(IntPtr @event)
 		{
 		}
@@ -3680,9 +3669,6 @@ namespace PSFilterLoad.PSApi
 			processEventProc = new ProcessEventProc(ProcessEventProc);
 			progressProc = new ProgressProc(ProgressProc);
 			abortProc = new TestAbortProc(AbortProc);
-			// ImageServicesProc
-			resample1DProc = new PIResampleProc(ImageServicesInterpolate1DProc);
-			resample2DProc = new PIResampleProc(ImageServicesInterpolate2DProc);
 
 			// ChannelPortsProcs
 			readPixelsProc = new ReadPixelsProc(ReadPixelsProc);
@@ -3704,14 +3690,7 @@ namespace PSFilterLoad.PSApi
 
 			handleProcsPtr = HandleSuite.Instance.CreateHandleProcsPointer();
 
-			imageServicesProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ImageServicesProcs)), true);
-
-			ImageServicesProcs* imageServicesProcs = (ImageServicesProcs*)imageServicesProcsPtr.ToPointer();
-			imageServicesProcs->imageServicesProcsVersion = PSConstants.kCurrentImageServicesProcsVersion;
-			imageServicesProcs->numImageServicesProcs = PSConstants.kCurrentImageServicesProcsCount;
-			imageServicesProcs->interpolate1DProc = Marshal.GetFunctionPointerForDelegate(resample1DProc);
-			imageServicesProcs->interpolate2DProc = Marshal.GetFunctionPointerForDelegate(resample2DProc);
-
+			imageServicesProcsPtr = imageServicesSuite.CreateImageServicesSuitePointer();
 
 			propertyProcsPtr = propertySuite.CreatePropertySuitePointer();
 
