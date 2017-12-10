@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-	internal sealed class PseudoResourceSuite
+	internal sealed class ResourceSuite
 	{
 		private CountPIResourcesProc countResourceProc;
 		private GetPIResourceProc getResourceProc;
@@ -24,7 +24,7 @@ namespace PSFilterLoad.PSApi
 		private AddPIResourceProc addResourceProc;
 		private List<PSResource> pseudoResources;
 
-		public PseudoResourceSuite()
+		public ResourceSuite()
 		{
 			this.countResourceProc = new CountPIResourcesProc(CountResource);
 			this.addResourceProc = new AddPIResourceProc(AddResource);

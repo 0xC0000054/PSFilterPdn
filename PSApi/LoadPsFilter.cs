@@ -156,7 +156,7 @@ namespace PSFilterLoad.PSApi
 		private DescriptorSuite descriptorSuite;
 		private ImageServicesSuite imageServicesSuite;
 		private PropertySuite propertySuite;
-		private PseudoResourceSuite pseudoResourceSuite;
+		private ResourceSuite resourceSuite;
 		private ActionSuiteProvider actionSuites;
 		private DescriptorRegistrySuite descriptorRegistrySuite;
 		private ErrorSuite errorSuite;
@@ -242,11 +242,11 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return pseudoResourceSuite.PseudoResources;
+				return resourceSuite.PseudoResources;
 			}
 			set
 			{
-				pseudoResourceSuite.PseudoResources = value;
+				resourceSuite.PseudoResources = value;
 			}
 		}
 
@@ -282,7 +282,7 @@ namespace PSFilterLoad.PSApi
 			this.activePICASuites = new ActivePICASuites();
 			this.picaSuites = new PICASuites();
 			this.descriptorSuite = new DescriptorSuite();
-			this.pseudoResourceSuite = new PseudoResourceSuite();
+			this.resourceSuite = new ResourceSuite();
 			this.actionSuites = new ActionSuiteProvider();
 
 			if (eep.SourceSurface.Width > 32000 || eep.SourceSurface.Height > 32000)
@@ -3673,7 +3673,7 @@ namespace PSFilterLoad.PSApi
 
 			propertyProcsPtr = propertySuite.CreatePropertySuitePointer();
 
-			resourceProcsPtr = pseudoResourceSuite.CreateResourceProcsPointer();
+			resourceProcsPtr = resourceSuite.CreateResourceProcsPointer();
 
 			readDescriptorPtr = descriptorSuite.CreateReadDescriptorPointer();
 			writeDescriptorPtr = descriptorSuite.CreateWriteDescriptorPointer();

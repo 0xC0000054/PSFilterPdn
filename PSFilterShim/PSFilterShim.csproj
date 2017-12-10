@@ -200,13 +200,13 @@
     <Compile Include="PSApi\PSDescriptorRegistry.cs" />
     <Compile Include="PSApi\PSError.cs" />
     <Compile Include="PSApi\PSErrorSuite.cs" />
-    <Compile Include="PSApi\PseudoResourceSuite.cs" />
     <Compile Include="PSApi\PSImagePlane.cs" />
     <Compile Include="PSApi\PSPixelMap.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
     <Compile Include="PSApi\ReadImageDocumentDesc.cs" />
     <Compile Include="PSApi\Rect.cs" />
     <Compile Include="PSApi\ResourceProc.cs" />
+    <Compile Include="PSApi\ResourceSuite.cs" />
     <Compile Include="PSApi\RGBColor.cs" />
     <Compile Include="PSApi\SafeLibraryHandle.cs">
       <SubType>Code</SubType>
