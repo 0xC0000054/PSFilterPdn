@@ -1032,23 +1032,23 @@ namespace PSFilterLoad.PSApi
 			if (filterCase == FilterCase.FloatingSelection)
 			{
 				DrawFloatingSelectionMask();
-				filterRecord->isFloating = 1;
-				filterRecord->haveMask = 1;
-				filterRecord->autoMask = 0;
+				filterRecord->isFloating = true;
+				filterRecord->haveMask = true;
+				filterRecord->autoMask = false;
 			}
 			else if (selectedRegion != null)
 			{
 				DrawMask();
-				filterRecord->isFloating = 0;
-				filterRecord->haveMask = 1;
-				filterRecord->autoMask = 1;
+				filterRecord->isFloating = false;
+				filterRecord->haveMask = true;
+				filterRecord->autoMask = true;
 				filterRecord->maskRect = filterRecord->filterRect;
 			}
 			else
 			{
-				filterRecord->isFloating = 0;
-				filterRecord->haveMask = 0;
-				filterRecord->autoMask = 0;
+				filterRecord->isFloating = false;
+				filterRecord->haveMask = false;
+				filterRecord->autoMask = false;
 			}
 			filterRecord->maskRect = Rect16.Empty;
 			filterRecord->maskData = IntPtr.Zero;
@@ -1443,7 +1443,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("Inrect = {0}, Outrect = {1}, maskRect = {2}", filterRecord->inRect.ToString(), filterRecord->outRect.ToString(), filterRecord->maskRect.ToString()));
 #endif
-			if (filterRecord->haveMask == 1 && RectNonEmpty(filterRecord->maskRect))
+			if (filterRecord->haveMask && RectNonEmpty(filterRecord->maskRect))
 			{
 				if (!lastMaskRect.Equals(filterRecord->maskRect))
 				{
@@ -2936,8 +2936,8 @@ namespace PSFilterLoad.PSApi
 			desc->maxVersion = PSConstants.kCurrentMaxVersReadChannelDesc;
 			desc->depth = depth;
 			desc->bounds = bounds;
-			desc->target = (channel < PSConstants.ChannelPorts.Alpha) ? (byte)1 : (byte)0;
-			desc->shown = (channel < PSConstants.ChannelPorts.SelectionMask) ? (byte)1 : (byte)0;
+			desc->target = (channel < PSConstants.ChannelPorts.Alpha);
+			desc->shown = (channel < PSConstants.ChannelPorts.SelectionMask);
 			desc->tileSize.h = bounds.right - bounds.left;
 			desc->tileSize.v = bounds.bottom - bounds.top;
 			desc->port = new IntPtr(channel);
@@ -3780,19 +3780,19 @@ namespace PSFilterLoad.PSApi
 
 			filterRecord->handleProcs = handleProcsPtr;
 
-			filterRecord->supportsDummyChannels = 0;
-			filterRecord->supportsAlternateLayouts = 0;
+			filterRecord->supportsDummyChannels = false;
+			filterRecord->supportsAlternateLayouts = false;
 			filterRecord->wantLayout = PSConstants.Layout.Traditional;
 			filterRecord->filterCase = filterCase;
 			filterRecord->dummyPlaneValue = -1;
 			filterRecord->premiereHook = IntPtr.Zero;
 			filterRecord->advanceState = Marshal.GetFunctionPointerForDelegate(advanceProc);
 
-			filterRecord->supportsAbsolute = 1;
-			filterRecord->wantsAbsolute = 0;
+			filterRecord->supportsAbsolute = true;
+			filterRecord->wantsAbsolute = false;
 			filterRecord->getPropertyObsolete = propertySuite.GetPropertyCallback;
-			filterRecord->cannotUndo = 0;
-			filterRecord->supportsPadding = 1;
+			filterRecord->cannotUndo = false;
+			filterRecord->supportsPadding = true;
 			filterRecord->inputPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
 			filterRecord->outputPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
 			filterRecord->maskPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;

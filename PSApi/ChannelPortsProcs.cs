@@ -67,8 +67,8 @@ namespace PSFilterLoad.PSApi
 		public int depth;
 		public VPoint tileSize;
 		public VPoint tileOrigin;
-		public byte target;
-		public byte shown;
+		public PSBoolean target;
+		public PSBoolean shown;
 		public ChannelTypes channelType;
 		public IntPtr contextInfo;
 		public IntPtr name;

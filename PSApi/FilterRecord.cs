@@ -51,9 +51,9 @@ namespace PSFilterLoad.PSApi
         public IntPtr outData;
         public int outRowBytes;
 
-        public byte isFloating;
-        public byte haveMask;
-        public byte autoMask;
+        public PSBoolean isFloating;
+        public PSBoolean haveMask;
+        public PSBoolean autoMask;
         public Rect16 maskRect;
         public IntPtr maskData;
         public int maskRowBytes;
@@ -78,8 +78,8 @@ namespace PSFilterLoad.PSApi
         public IntPtr handleProcs;
 
         /* New in 3.0 */
-        public byte supportsDummyChannels;
-        public byte supportsAlternateLayouts;
+        public PSBoolean supportsDummyChannels;
+        public PSBoolean supportsAlternateLayouts;
         public short wantLayout;
 
         public short filterCase;
@@ -87,12 +87,12 @@ namespace PSFilterLoad.PSApi
         public IntPtr premiereHook;
         public IntPtr advanceState;
 
-        public byte supportsAbsolute;
-        public byte wantsAbsolute;
+        public PSBoolean supportsAbsolute;
+        public PSBoolean wantsAbsolute;
         public IntPtr getPropertyObsolete;
-        public byte cannotUndo;
+        public PSBoolean cannotUndo;
 
-        public byte supportsPadding;
+        public PSBoolean supportsPadding;
         public short inputPadding;
         public short outputPadding;
         public short maskPadding;

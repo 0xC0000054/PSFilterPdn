@@ -66,8 +66,8 @@ namespace PSFilterLoad.PSApi
         public ColorServicesSelector selector;
         public ColorSpace sourceSpace;
         public ColorSpace resultSpace;
-        public byte resultGamutInfoValid;
-        public byte resultInGamut;
+        public PSBoolean resultGamutInfoValid;
+        public PSBoolean resultInGamut;
         public System.IntPtr reservedSourceSpaceInfo;
         public System.IntPtr reservedResultSpaceInfo;
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.I2, SizeConst = 4)]

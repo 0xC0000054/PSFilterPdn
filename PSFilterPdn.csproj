@@ -213,6 +213,7 @@
     <Compile Include="PSApi\PSActionDescriptor.cs" />
     <Compile Include="PSApi\PSActionList.cs" />
     <Compile Include="PSApi\PSActionReference.cs" />
+    <Compile Include="PSApi\PSBoolean.cs" />
     <Compile Include="PSApi\PSDescriptorRegistry.cs" />
     <Compile Include="PSApi\PSErrorSuite.cs" />
     <Compile Include="PSApi\PSProperties.cs" />

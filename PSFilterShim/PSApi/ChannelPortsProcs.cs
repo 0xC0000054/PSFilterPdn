@@ -67,8 +67,8 @@ namespace PSFilterLoad.PSApi
 		public int depth;
 		public VPoint tileSize;
 		public VPoint tileOrigin;
-		public byte target;
-		public byte shown;
+		public PSBoolean target;
+		public PSBoolean shown;
 		public ChannelTypes channelType;
 		public IntPtr contextInfo;
 		public IntPtr name;
@@ -97,9 +97,7 @@ namespace PSFilterLoad.PSApi
 		public IntPtr contextInfo;		/* A pointer to additional info dependent on context. */
 
 		public IntPtr name;		/* The name of the channel. */
-
 	}
-
 
 	internal enum ChannelTypes : short
 	{
