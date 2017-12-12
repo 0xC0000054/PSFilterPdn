@@ -218,6 +218,7 @@
     <Compile Include="PSApi\PSErrorSuite.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
     <Compile Include="PSApi\PSResource.cs" />
+    <Compile Include="PSApi\ReadImageDocument.cs" />
     <Compile Include="PSApi\ReadImageDocumentDesc.cs" />
     <Compile Include="PSApi\ReadOnlyDictionary.cs" />
     <Compile Include="PSApi\ResourceSuite.cs" />

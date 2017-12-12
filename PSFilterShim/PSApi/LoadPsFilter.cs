@@ -35,18 +35,6 @@ namespace PSFilterLoad.PSApi
 		private static readonly long OTOFHandleSize = IntPtr.Size + 4L;
 		private const int OTOFSignature = 0x464f544f;
 
-		private sealed class ChannelDescPtrs
-		{
-			public readonly IntPtr address;
-			public readonly IntPtr name;
-
-			public ChannelDescPtrs(IntPtr address, IntPtr name)
-			{
-				this.address = address;
-				this.name = name;
-			}
-		}
-
 		#region CallbackDelegates
 		private AdvanceStateProc advanceProc;
 		// MiscCallbacks
@@ -69,8 +57,6 @@ namespace PSFilterLoad.PSApi
 		private SPBasicSuite_ReleaseSuite spReleaseSuite;
 		private SPBasicSuite_Undefined spUndefined;
 		#endregion
-
-		private List<ChannelDescPtrs> channelReadDescPtrs;
 
 		private IntPtr filterRecordPtr;
 
@@ -154,6 +140,7 @@ namespace PSFilterLoad.PSApi
 		private DescriptorSuite descriptorSuite;
 		private ImageServicesSuite imageServicesSuite;
 		private PropertySuite propertySuite;
+		private ReadImageDocument readImageDocument;
 		private ResourceSuite resourceSuite;
 		private ActionSuiteProvider actionSuites;
 		private DescriptorRegistrySuite descriptorRegistrySuite;
@@ -273,7 +260,6 @@ namespace PSFilterLoad.PSApi
 			this.globalParameters = new GlobalParameters();
 			this.scriptingData = null;
 			this.useChannelPorts = false;
-			this.channelReadDescPtrs = new List<ChannelDescPtrs>();
 			this.activePICASuites = new ActivePICASuites();
 			this.picaSuites = new PICASuites();
 			this.descriptorSuite = new DescriptorSuite();
@@ -314,6 +300,7 @@ namespace PSFilterLoad.PSApi
 
 			this.imageServicesSuite = new ImageServicesSuite();
 			this.propertySuite = new PropertySuite(source.Width, source.Height);
+			this.readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
 
 			this.inputHandling = FilterDataHandling.None;
 			this.outputHandling = FilterDataHandling.None;
@@ -2558,105 +2545,6 @@ namespace PSFilterLoad.PSApi
 			return PSError.memFullErr;
 		}
 
-		private unsafe void CreateReadImageDocument()
-		{
-			readDocumentPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadImageDocumentDesc)), true);
-			ReadImageDocumentDesc* doc = (ReadImageDocumentDesc*)readDocumentPtr.ToPointer();
-			doc->minVersion = PSConstants.kCurrentMinVersReadImageDocDesc;
-			doc->maxVersion = PSConstants.kCurrentMaxVersReadImageDocDesc;
-			doc->imageMode = PSConstants.plugInModeRGBColor;
-			doc->depth = 8;
-			doc->bounds.top = 0;
-			doc->bounds.left = 0;
-			doc->bounds.right = source.Width;
-			doc->bounds.bottom = source.Height;
-			doc->hResolution = new Fixed16((int)(dpiX + 0.5));
-			doc->vResolution = new Fixed16((int)(dpiY + 0.5));
-
-			string[] names = new string[3] { Resources.RedChannelName, Resources.GreenChannelName, Resources.BlueChannelName };
-			IntPtr channel = CreateReadChannelDesc(PSConstants.ChannelPorts.Red, names[0], doc->depth, doc->bounds);
-
-			ReadChannelDesc* ch = (ReadChannelDesc*)channel.ToPointer();
-
-			for (int i = PSConstants.ChannelPorts.Green; i <= PSConstants.ChannelPorts.Blue; i++)
-			{
-				IntPtr ptr = CreateReadChannelDesc(i, names[i], doc->depth, doc->bounds);
-
-				ch->next = ptr;
-
-				ch = (ReadChannelDesc*)ptr.ToPointer();
-			}
-
-			doc->targetCompositeChannels = doc->mergedCompositeChannels = channel;
-
-			if (!ignoreAlpha)
-			{
-				IntPtr alphaPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.Alpha, Resources.AlphaChannelName, doc->depth, doc->bounds);
-				doc->targetTransparency = doc->mergedTransparency = alphaPtr;
-			}
-
-			if (selectedRegion != null)
-			{
-				IntPtr selectionPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.SelectionMask, Resources.MaskChannelName, doc->depth, doc->bounds);
-				doc->selection = selectionPtr;
-			}
-		}
-
-		private unsafe IntPtr CreateReadChannelDesc(int channel, string name, int depth, VRect bounds)
-		{
-			IntPtr addressPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadChannelDesc)), true);
-			IntPtr namePtr = IntPtr.Zero;
-			try
-			{
-				namePtr = Marshal.StringToHGlobalAnsi(name);
-
-				this.channelReadDescPtrs.Add(new ChannelDescPtrs(addressPtr, namePtr));
-			}
-			catch (Exception)
-			{
-				Memory.Free(addressPtr);
-				if (namePtr != IntPtr.Zero)
-				{
-					Marshal.FreeHGlobal(namePtr);
-					namePtr = IntPtr.Zero;
-				}
-				throw;
-			}
-
-			ReadChannelDesc* desc = (ReadChannelDesc*)addressPtr.ToPointer();
-			desc->minVersion = PSConstants.kCurrentMinVersReadChannelDesc;
-			desc->maxVersion = PSConstants.kCurrentMaxVersReadChannelDesc;
-			desc->depth = depth;
-			desc->bounds = bounds;
-			desc->target = (channel < PSConstants.ChannelPorts.Alpha);
-			desc->shown = (channel < PSConstants.ChannelPorts.SelectionMask);
-			desc->tileSize.h = bounds.right - bounds.left;
-			desc->tileSize.v = bounds.bottom - bounds.top;
-			desc->port = new IntPtr(channel);
-			switch (channel)
-			{
-				case PSConstants.ChannelPorts.Red:
-					desc->channelType = ChannelTypes.Red;
-					break;
-				case PSConstants.ChannelPorts.Green:
-					desc->channelType = ChannelTypes.Green;
-					break;
-				case PSConstants.ChannelPorts.Blue:
-					desc->channelType = ChannelTypes.Blue;
-					break;
-				case PSConstants.ChannelPorts.Alpha:
-					desc->channelType = ChannelTypes.Transparency;
-					break;
-				case PSConstants.ChannelPorts.SelectionMask:
-					desc->channelType = ChannelTypes.SelectionMask;
-					break;
-			}
-
-			desc->name = namePtr;
-
-			return addressPtr;
-		}
-
 		/// <summary>
 		/// Sets the mask padding.
 		/// </summary>
@@ -3748,7 +3636,7 @@ namespace PSFilterLoad.PSApi
 				channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
 				channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);
 
-				CreateReadImageDocument();
+				readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(ignoreAlpha, selectedRegion != null);
 			}
 			else
 			{
@@ -3945,6 +3833,12 @@ namespace PSFilterLoad.PSApi
 						scaledSelectionMask = null;
 					}
 
+					if (readImageDocument != null)
+					{
+						readImageDocument.Dispose();
+						readImageDocument = null;
+					}
+
 					if (activePICASuites != null)
 					{
 						activePICASuites.Dispose();
@@ -4045,16 +3939,6 @@ namespace PSFilterLoad.PSApi
 				{
 					Memory.Free(readDocumentPtr);
 					readDocumentPtr = IntPtr.Zero;
-				}
-
-				if (channelReadDescPtrs != null)
-				{
-					foreach (var item in channelReadDescPtrs)
-					{
-						Marshal.FreeHGlobal(item.name);
-						Memory.Free(item.address);
-					}
-					channelReadDescPtrs = null;
 				}
 
 				if (basicSuitePtr != IntPtr.Zero)
