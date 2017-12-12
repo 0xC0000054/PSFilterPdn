@@ -79,7 +79,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public override bool Equals(object obj)
         {
-            if (obj != null && obj is Fixed16)
+            if (obj is Fixed16)
             {
                 return Equals((Fixed16)obj);
             }
