@@ -61,6 +61,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string DebuggerDisplay
         {
             get
