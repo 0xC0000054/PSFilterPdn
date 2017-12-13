@@ -257,6 +257,11 @@ namespace PSFilterLoad.PSApi
 
 		internal unsafe IntPtr NewHandle(int size)
 		{
+			if (size < 0)
+			{
+				return IntPtr.Zero;
+			}
+
 			IntPtr handle = IntPtr.Zero;
 			try
 			{
@@ -413,6 +418,11 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
 #endif
+			if (newSize < 0)
+			{
+				return PSError.paramErr;
+			}
+
 			if (AllocatedBySuite(h))
 			{
 				try

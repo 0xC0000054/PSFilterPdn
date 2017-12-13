@@ -171,6 +171,11 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.BufferSuite, string.Format("Size: {0}", size));
 #endif
+			if (size < 0)
+			{
+				return PSError.paramErr;
+			}
+
 			bufferID = IntPtr.Zero;
 			try
 			{
