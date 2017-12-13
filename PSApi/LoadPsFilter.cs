@@ -26,7 +26,7 @@ using PSFilterPdn.Properties;
 namespace PSFilterLoad.PSApi
 {
 
-	internal sealed class LoadPsFilter : IDisposable
+	internal sealed class LoadPsFilter : IDisposable, IFilterImageProvider
 	{
 		static bool RectNonEmpty(Rect16 rect)
 		{
@@ -46,10 +46,6 @@ namespace PSFilterLoad.PSApi
 		private ProgressProc progressProc;
 		private TestAbortProc abortProc;
 
-		// ChannelPorts
-		private ReadPixelsProc readPixelsProc;
-		private WriteBasePixelsProc writeBasePixelsProc;
-		private ReadPortForWritePortProc readPortForWritePortProc;
 		// SPBasic Suite
 		private SPBasicSuite_AcquireSuite spAcquireSuite;
 		private SPBasicSuite_AllocateBlock spAllocateBlock;
@@ -97,8 +93,6 @@ namespace PSFilterLoad.PSApi
 		private Surface tempSurface;
 		private MaskSurface tempMask;
 		private Surface displaySurface;
-		private Surface scaledChannelSurface;
-		private MaskSurface scaledSelectionMask;
 		private Bitmap checkerBoardBitmap;
 
 		private bool disposed;
@@ -139,6 +133,7 @@ namespace PSFilterLoad.PSApi
 		private ActivePICASuites activePICASuites;
 		private PICASuites picaSuites;
 
+		private ChannelPortsSuite channelPortsSuite;
 		private DescriptorSuite descriptorSuite;
 		private ImageServicesSuite imageServicesSuite;
 		private PropertySuite propertySuite;
@@ -314,6 +309,7 @@ namespace PSFilterLoad.PSApi
 
 			this.dest = new Surface(source.Width, source.Height);
 
+			this.channelPortsSuite = new ChannelPortsSuite(this);
 			this.imageServicesSuite = new ImageServicesSuite();
 			propertySuite = new PropertySuite(source.Width, source.Height);
 
@@ -350,6 +346,30 @@ namespace PSFilterLoad.PSApi
 			debugFlags |= DebugFlags.SPBasicSuite;
 			DebugUtils.GlobalDebugFlags = debugFlags;
 #endif
+		}
+
+		Surface IFilterImageProvider.Source
+		{
+			get
+			{
+				return this.source;
+			}
+		}
+
+		Surface IFilterImageProvider.Destination
+		{
+			get
+			{
+				return this.dest;
+			}
+		}
+
+		MaskSurface IFilterImageProvider.Mask
+		{
+			get
+			{
+				return this.mask;
+			}
 		}
 
 		/// <summary>
@@ -2600,202 +2620,6 @@ namespace PSFilterLoad.PSApi
 			return err;
 		}
 
-		private static unsafe void FillChannelData(int channel, PixelMemoryDesc destiniation, Surface source, VRect srcRect)
-		{
-			byte* dstPtr = (byte*)destiniation.data.ToPointer();
-			int stride = destiniation.rowBits / 8;
-			int bpp = destiniation.colBits / 8;
-			int offset = destiniation.bitOffset / 8;
-
-
-			for (int y = srcRect.top; y < srcRect.bottom; y++)
-			{
-				ColorBgra* src = source.GetPointAddressUnchecked(srcRect.left, y);
-				byte* dst = dstPtr + (y * stride) + offset;
-				for (int x = srcRect.left; x < srcRect.right; x++)
-				{
-					switch (channel)
-					{
-						case PSConstants.ChannelPorts.Red:
-							*dst = src->R;
-							break;
-						case PSConstants.ChannelPorts.Green:
-							*dst = src->G;
-							break;
-						case PSConstants.ChannelPorts.Blue:
-							*dst = src->B;
-							break;
-						case PSConstants.ChannelPorts.Alpha:
-							*dst = src->A;
-							break;
-					}
-					src++;
-					dst += bpp;
-				}
-			}
-		}
-
-		private static unsafe void FillSelectionMask(PixelMemoryDesc destiniation, MaskSurface source, VRect srcRect)
-		{
-			byte* dstPtr = (byte*)destiniation.data.ToPointer();
-			int stride = destiniation.rowBits / 8;
-			int bpp = destiniation.colBits / 8;
-			int offset = destiniation.bitOffset / 8;
-
-			for (int y = srcRect.top; y < srcRect.bottom; y++)
-			{
-				byte* src = source.GetPointAddressUnchecked(srcRect.left, y);
-				byte* dst = dstPtr + (y * stride) + offset;
-				for (int x = srcRect.left; x < srcRect.right; x++)
-				{
-					*dst = *src;
-
-					src++;
-					dst += bpp;
-				}
-			}
-		}
-
-		private unsafe short ReadPixelsProc(IntPtr port, ref PSScaling scaling, ref VRect writeRect, ref PixelMemoryDesc destination, ref VRect wroteRect)
-		{
-#if DEBUG
-			DebugUtils.Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), writeRect.ToString()));
-#endif
-			if (destination.depth != 8)
-			{
-				return PSError.errUnsupportedDepth;
-			}
-
-			if ((destination.bitOffset % 8) != 0)
-			{
-				return PSError.errUnsupportedBitOffset;
-			}
-
-			if ((destination.colBits % 8) != 0)
-			{
-				return PSError.errUnsupportedColBits;
-			}
-
-			if ((destination.rowBits % 8) != 0)
-			{
-				return PSError.errUnsupportedRowBits;
-			}
-
-			int channel = port.ToInt32();
-
-			if (channel < PSConstants.ChannelPorts.Red || channel > PSConstants.ChannelPorts.SelectionMask)
-			{
-				return PSError.errUnknownPort;
-			}
-
-			VRect srcRect = scaling.sourceRect;
-			VRect dstRect = scaling.destinationRect;
-
-			int srcWidth = srcRect.right - srcRect.left;
-			int srcHeight = srcRect.bottom - srcRect.top;
-			int dstWidth = dstRect.right - dstRect.left;
-			int dstHeight = dstRect.bottom - dstRect.top;
-
-			if (channel == PSConstants.ChannelPorts.SelectionMask)
-			{
-				if (srcWidth == dstWidth && srcHeight == dstHeight)
-				{
-					FillSelectionMask(destination, mask, srcRect);
-				}
-				else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
-				{
-					if ((scaledSelectionMask == null) || scaledSelectionMask.Width != dstWidth || scaledSelectionMask.Height != dstHeight)
-					{
-						if (scaledSelectionMask != null)
-						{
-							scaledSelectionMask.Dispose();
-							scaledSelectionMask = null;
-						}
-
-						scaledSelectionMask = new MaskSurface(dstWidth, dstHeight);
-						scaledSelectionMask.SuperSampleFitSurface(mask);
-					}
-
-					FillSelectionMask(destination, scaledSelectionMask, dstRect);
-				}
-				else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
-				{
-					if ((scaledSelectionMask == null) || scaledSelectionMask.Width != dstWidth || scaledSelectionMask.Height != dstHeight)
-					{
-						if (scaledSelectionMask != null)
-						{
-							scaledSelectionMask.Dispose();
-							scaledSelectionMask = null;
-						}
-
-						scaledSelectionMask = new MaskSurface(dstWidth, dstHeight);
-						scaledSelectionMask.BicubicFitSurface(mask);
-					}
-
-					FillSelectionMask(destination, scaledSelectionMask, dstRect);
-				}
-			}
-			else
-			{
-				if (srcWidth == dstWidth && srcHeight == dstHeight)
-				{
-					FillChannelData(channel, destination, source, srcRect);
-				}
-				else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
-				{
-					if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
-					{
-						if (scaledChannelSurface != null)
-						{
-							scaledChannelSurface.Dispose();
-							scaledChannelSurface = null;
-						}
-
-						scaledChannelSurface = new Surface(dstWidth, dstHeight);
-						scaledChannelSurface.FitSurface(ResamplingAlgorithm.SuperSampling, source);
-					}
-
-					FillChannelData(channel, destination, scaledChannelSurface, dstRect);
-				}
-				else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
-				{
-					if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
-					{
-						if (scaledChannelSurface != null)
-						{
-							scaledChannelSurface.Dispose();
-							scaledChannelSurface = null;
-						}
-
-						scaledChannelSurface = new Surface(dstWidth, dstHeight);
-						scaledChannelSurface.FitSurface(ResamplingAlgorithm.Bicubic, source);
-					}
-
-					FillChannelData(channel, destination, scaledChannelSurface, dstRect);
-				}
-			}
-
-			wroteRect = dstRect;
-
-			return PSError.noErr;
-		}
-
-		private short WriteBasePixels(IntPtr port, ref VRect writeRect, PixelMemoryDesc srcDesc)
-		{
-#if DEBUG
-			DebugUtils.Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), writeRect.ToString()));
-#endif
-			return PSError.memFullErr;
-		}
-
-		private short ReadPortForWritePort(ref IntPtr readPort, IntPtr writePort)
-		{
-#if DEBUG
-			DebugUtils.Ping(DebugFlags.ChannelPorts, string.Format("readPort: {0}, writePort: {1}", readPort.ToString(), writePort.ToString()));
-#endif
-			return PSError.memFullErr;
-		}
-
 		private void SetupDisplaySurface(int width, int height, bool haveMask)
 		{
 			if ((displaySurface == null) || width != displaySurface.Width || height != displaySurface.Height)
@@ -3480,10 +3304,6 @@ namespace PSFilterLoad.PSApi
 			progressProc = new ProgressProc(ProgressProc);
 			abortProc = new TestAbortProc(AbortProc);
 
-			// ChannelPortsProcs
-			readPixelsProc = new ReadPixelsProc(ReadPixelsProc);
-			writeBasePixelsProc = new WriteBasePixelsProc(WriteBasePixels);
-			readPortForWritePortProc = new ReadPortForWritePortProc(ReadPortForWritePort);
 			// SPBasicSuite
 			spAcquireSuite = new SPBasicSuite_AcquireSuite(SPBasicAcquireSuite);
 			spReleaseSuite = new SPBasicSuite_ReleaseSuite(SPBasicReleaseSuite);
@@ -3548,14 +3368,7 @@ namespace PSFilterLoad.PSApi
 
 			if (useChannelPorts)
 			{
-				channelPortsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ChannelPortProcs)), true);
-				ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
-				channelPorts->channelPortProcsVersion = PSConstants.kCurrentChannelPortProcsVersion;
-				channelPorts->numChannelPortProcs = PSConstants.kCurrentChannelPortProcsCount;
-				channelPorts->readPixelsProc = Marshal.GetFunctionPointerForDelegate(readPixelsProc);
-				channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
-				channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);
-
+				channelPortsPtr = channelPortsSuite.CreateChannelPortsPointer();
 				readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(ignoreAlpha, selectedRegion != null);
 			}
 			else
@@ -3740,16 +3553,10 @@ namespace PSFilterLoad.PSApi
 						displaySurface = null;
 					}
 
-					if (scaledChannelSurface != null)
+					if (channelPortsSuite != null)
 					{
-						scaledChannelSurface.Dispose();
-						scaledChannelSurface = null;
-					}
-
-					if (scaledSelectionMask != null)
-					{
-						scaledSelectionMask.Dispose();
-						scaledSelectionMask = null;
+						channelPortsSuite.Dispose();
+						channelPortsSuite = null;
 					}
 
 					if (readImageDocument != null)

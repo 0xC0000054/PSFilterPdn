@@ -136,6 +136,7 @@
     <Compile Include="PSApi\BufferProcs.cs" />
     <Compile Include="PSApi\BufferSuite.cs" />
     <Compile Include="PSApi\ChannelPortsProcs.cs" />
+    <Compile Include="PSApi\ChannelPortsSuite.cs" />
     <Compile Include="PSApi\ColorConversion\CMYK.cs" />
     <Compile Include="PSApi\ColorConversion\ColorConverter.cs" />
     <Compile Include="PSApi\ColorConversion\HSB.cs" />
@@ -163,6 +164,7 @@
     <Compile Include="PSApi\IActionDescriptorSuite.cs" />
     <Compile Include="PSApi\IActionListSuite.cs" />
     <Compile Include="PSApi\IActionReferenceSuite.cs" />
+    <Compile Include="PSApi\IFilterImageProvider.cs" />
     <Compile Include="PSApi\ImageModes.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />
     <Compile Include="PSApi\ImageServicesSuite.cs" />
