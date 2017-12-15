@@ -729,6 +729,7 @@ namespace PSFilterLoad.PSApi
 			byte[] parameterDataBytes = globalParameters.GetParameterDataBytes();
 			if (parameterDataBytes != null)
 			{
+				parameterDataRestored = true;
 				FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
 				switch (globalParameters.ParameterDataStorageMethod)
@@ -771,12 +772,11 @@ namespace PSFilterLoad.PSApi
 					default:
 						throw new InvalidEnumArgumentException("ParameterDataStorageMethod", (int)globalParameters.ParameterDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
 				}
-				parameterDataRestored = true;
 			}
 			byte[] pluginDataBytes = globalParameters.GetPluginDataBytes();
 			if (pluginDataBytes != null)
 			{
-
+				parameterDataRestored = true;
 				switch (globalParameters.PluginDataStorageMethod)
 				{
 					case GlobalParameters.DataStorageMethod.HandleSuite:
@@ -816,7 +816,6 @@ namespace PSFilterLoad.PSApi
 					default:
 						throw new InvalidEnumArgumentException("PluginDataStorageMethod", (int)globalParameters.PluginDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
 				}
-				pluginDataRestored = true;
 			}
 
 		}
