@@ -35,14 +35,14 @@ namespace PSFilterLoad.PSApi
 		private const int OTOFSignature = 0x464f544f;
 
 		#region CallbackDelegates
-		private AdvanceStateProc advanceProc;
 		// MiscCallbacks
-		private ColorServicesProc colorProc;
-		private DisplayPixelsProc displayPixelsProc;
-		private HostProcs hostProc;
-		private ProcessEventProc processEventProc;
-		private ProgressProc progressProc;
-		private TestAbortProc abortProc;
+		private readonly AdvanceStateProc advanceProc;
+		private readonly ColorServicesProc colorProc;
+		private readonly DisplayPixelsProc displayPixelsProc;
+		private readonly HostProcs hostProc;
+		private readonly ProcessEventProc processEventProc;
+		private readonly ProgressProc progressProc;
+		private readonly TestAbortProc abortProc;
 		#endregion
 		private readonly IntPtr parentWindowHandle;
 
@@ -281,6 +281,14 @@ namespace PSFilterLoad.PSApi
 				this.dpiY = bmp.VerticalResolution;
 			}
 			this.dest = new Surface(source.Width, source.Height);
+
+			this.advanceProc = new AdvanceStateProc(AdvanceStateProc);
+			this.colorProc = new ColorServicesProc(ColorServicesProc);
+			this.displayPixelsProc = new DisplayPixelsProc(DisplayPixelsProc);
+			this.hostProc = new HostProcs(HostProc);
+			this.processEventProc = new ProcessEventProc(ProcessEventProc);
+			this.progressProc = new ProgressProc(ProgressProc);
+			this.abortProc = new TestAbortProc(AbortProc);
 
 			this.channelPortsSuite = new ChannelPortsSuite(this);
 			this.imageServicesSuite = new ImageServicesSuite();
@@ -1300,7 +1308,6 @@ namespace PSFilterLoad.PSApi
 				basicSuiteProvider.Aete = pdata.Aete;
 			}
 
-			SetupDelegates();
 			SetupSuites();
 			SetupFilterRecord();
 
@@ -3002,21 +3009,6 @@ namespace PSFilterLoad.PSApi
 
 			filterRecord->wholeSize.h = (short)source.Width;
 			filterRecord->wholeSize.v = (short)source.Height;
-		}
-
-		/// <summary>
-		/// Setup the delegates for this instance.
-		/// </summary>
-		private void SetupDelegates()
-		{
-			advanceProc = new AdvanceStateProc(AdvanceStateProc);
-			// Misc Callbacks
-			colorProc = new ColorServicesProc(ColorServicesProc);
-			displayPixelsProc = new DisplayPixelsProc(DisplayPixelsProc);
-			hostProc = new HostProcs(HostProc);
-			processEventProc = new ProcessEventProc(ProcessEventProc);
-			progressProc = new ProgressProc(ProgressProc);
-			abortProc = new TestAbortProc(AbortProc);
 		}
 
 		private unsafe void SetupSuites()
