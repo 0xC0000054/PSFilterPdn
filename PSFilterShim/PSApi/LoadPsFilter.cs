@@ -853,21 +853,20 @@ namespace PSFilterLoad.PSApi
 
 		private bool PluginAbout(PluginData pdata)
 		{
-
-			AboutRecord about = new AboutRecord()
-			{
-				platformData = platFormDataPtr
-			};
-
 			result = PSError.noErr;
 
-			GCHandle gch = GCHandle.Alloc(about, GCHandleType.Pinned);
-
+			IntPtr aboutRecordPtr = Memory.Allocate(Marshal.SizeOf(typeof(AboutRecord)), true);
 			try
 			{
+				unsafe
+				{
+					AboutRecord* aboutRecord = (AboutRecord*)aboutRecordPtr.ToPointer();
+					aboutRecord->platformData = platFormDataPtr;
+				}
+
 				if (pdata.ModuleEntryPoints == null)
 				{
-					module.entryPoint(FilterSelector.About, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
+					module.entryPoint(FilterSelector.About, aboutRecordPtr, ref dataPtr, ref result);
 				}
 				else
 				{
@@ -876,7 +875,7 @@ namespace PSFilterLoad.PSApi
 					{
 						PluginEntryPoint ep = module.GetEntryPoint(entryPoint);
 
-						ep(FilterSelector.About, gch.AddrOfPinnedObject(), ref dataPtr, ref result);
+						ep(FilterSelector.About, aboutRecordPtr, ref dataPtr, ref result);
 
 						if (result != PSError.noErr)
 						{
@@ -889,7 +888,11 @@ namespace PSFilterLoad.PSApi
 			}
 			finally
 			{
-				gch.Free();
+				if (aboutRecordPtr != IntPtr.Zero)
+				{
+					Memory.Free(aboutRecordPtr);
+					aboutRecordPtr = IntPtr.Zero;
+				}
 			}
 
 
