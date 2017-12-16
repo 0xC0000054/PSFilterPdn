@@ -17,7 +17,7 @@ using System.Text;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class PropertySuite
+    internal sealed class PropertySuite : IPropertySuite
     {
         private readonly GetPropertyProc getPropertyProc;
         private readonly SetPropertyProc setPropertyProc;
@@ -34,6 +34,19 @@ namespace PSFilterLoad.PSApi
             this.documentWidth = documentWidth;
             this.documentHeight = documentHeight;
             this.numberOfChannels = 0;
+        }
+
+        PropertyProcs IPropertySuite.CreatePropertySuite()
+        {
+            PropertyProcs suite = new PropertyProcs
+            {
+                propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion,
+                numPropertyProcs = PSConstants.kCurrentPropertyProcsCount,
+                getPropertyProc = Marshal.GetFunctionPointerForDelegate(this.getPropertyProc),
+                setPropertyProc = Marshal.GetFunctionPointerForDelegate(this.setPropertyProc)
+            };
+
+            return suite;
         }
 
         /// <summary>

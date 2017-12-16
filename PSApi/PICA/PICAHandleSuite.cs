@@ -15,11 +15,18 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal static class PICAHandleSuite
+    internal sealed class PICAHandleSuite
     {
-        private static SetPIHandleLockDelegate setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
+        private readonly HandleProcs handleProcs;
+        private readonly SetPIHandleLockDelegate setHandleLock;
 
-        private static void SetHandleLock(IntPtr handle, byte lockHandle, ref IntPtr address, ref byte oldLock)
+        public PICAHandleSuite()
+        {
+            this.handleProcs = HandleSuite.Instance.CreateHandleProcs();
+            this.setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
+        }
+
+        private void SetHandleLock(IntPtr handle, byte lockHandle, ref IntPtr address, ref byte oldLock)
         {
             try
             {
@@ -41,32 +48,32 @@ namespace PSFilterLoad.PSApi.PICA
             }
         }
 
-        public static unsafe PSHandleSuite1 CreateHandleSuite1(HandleProcs* procs)
+        public PSHandleSuite1 CreateHandleSuite1()
         {
             PSHandleSuite1 suite = new PSHandleSuite1
             {
-                New = procs->newProc,
-                Dispose = procs->disposeProc,
+                New = handleProcs.newProc,
+                Dispose = handleProcs.disposeProc,
                 SetLock = Marshal.GetFunctionPointerForDelegate(setHandleLock),
-                GetSize = procs->getSizeProc,
-                SetSize = procs->setSizeProc,
-                RecoverSpace = procs->recoverSpaceProc
+                GetSize = handleProcs.getSizeProc,
+                SetSize = handleProcs.setSizeProc,
+                RecoverSpace = handleProcs.recoverSpaceProc
             };
 
             return suite;
         }
 
-        public static unsafe PSHandleSuite2 CreateHandleSuite2(HandleProcs* procs)
+        public PSHandleSuite2 CreateHandleSuite2()
         {
             PSHandleSuite2 suite = new PSHandleSuite2
             {
-                New = procs->newProc,
-                Dispose = procs->disposeProc,
-                DisposeRegularHandle = procs->disposeRegularHandleProc,
+                New = handleProcs.newProc,
+                Dispose = handleProcs.disposeProc,
+                DisposeRegularHandle = handleProcs.disposeRegularHandleProc,
                 SetLock = Marshal.GetFunctionPointerForDelegate(setHandleLock),
-                GetSize = procs->getSizeProc,
-                SetSize = procs->setSizeProc,
-                RecoverSpace = procs->recoverSpaceProc
+                GetSize = handleProcs.getSizeProc,
+                SetSize = handleProcs.setSizeProc,
+                RecoverSpace = handleProcs.recoverSpaceProc
             };
 
             return suite;

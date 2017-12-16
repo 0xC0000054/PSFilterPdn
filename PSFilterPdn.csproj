@@ -191,11 +191,12 @@
     <Compile Include="PSApi\ImageServicesSuite.cs" />
     <Compile Include="PSApi\IntPtrEqualityComparer.cs" />
     <Compile Include="PSApi\IntPtrExtensions.cs" />
+    <Compile Include="PSApi\IPICASuiteDataProvider.cs" />
+    <Compile Include="PSApi\IPropertySuite.cs" />
     <Compile Include="PSApi\LoadPsFilter.cs" />
     <Compile Include="PSApi\Memory.cs" />
     <Compile Include="PSApi\ParameterData.cs" />
     <Compile Include="PSApi\PEFile.cs" />
-    <Compile Include="PSApi\PICASuites.cs" />
     <Compile Include="PSApi\PICASuiteStructs.cs" />
     <Compile Include="PSApi\PICA\ASZStringSuite.cs" />
     <Compile Include="PSApi\PICA\IASZStringSuite.cs" />
@@ -227,6 +228,7 @@
     <Compile Include="PSApi\SafeLibraryHandle.cs" />
     <Compile Include="PSApi\SafeNativeMethods.cs" />
     <Compile Include="PSApi\SPBasicSuite.cs" />
+    <Compile Include="PSApi\SPBasicSuiteProvider.cs" />
     <Compile Include="PSApi\StringUtil.cs" />
     <Compile Include="PSApi\TestAbortProc.cs" />
     <Compile Include="PSApi\UnsafeNativeMethods.cs" />

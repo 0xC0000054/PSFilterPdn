@@ -25,14 +25,14 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly UISuiteGetPluginName uiPluginName;
         private readonly IASZStringSuite zstringSuite;
 
-        public unsafe PICAUIHooksSuite(FilterRecord* filterRecord, string name, IASZStringSuite zstringSuite)
+        public PICAUIHooksSuite(IntPtr parentWindowHandle, string name, IASZStringSuite zstringSuite)
         {
             if (zstringSuite == null)
             {
                 throw new ArgumentNullException("zstringSuite");
             }
 
-            this.hwnd = ((PlatformData*)filterRecord->platformData.ToPointer())->hwnd;
+            this.hwnd = parentWindowHandle;
             if (name != null)
             {
                 this.pluginName = name;
@@ -71,14 +71,14 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        public unsafe PSUIHooksSuite1 CreateUIHooksSuite1(FilterRecord* filterRecord)
+        public PSUIHooksSuite1 CreateUIHooksSuite1(IPICASuiteDataProvider suiteDataProvider)
         {
             PSUIHooksSuite1 suite = new PSUIHooksSuite1
             {
-                processEvent = filterRecord->processEvent,
-                displayPixels = filterRecord->displayPixels,
-                progressBar = filterRecord->progressProc,
-                testAbort = filterRecord->abortProc,
+                processEvent = Marshal.GetFunctionPointerForDelegate(suiteDataProvider.ProcessEvent),
+                displayPixels = Marshal.GetFunctionPointerForDelegate(suiteDataProvider.DisplayPixels),
+                progressBar = Marshal.GetFunctionPointerForDelegate(suiteDataProvider.Progress),
+                testAbort = Marshal.GetFunctionPointerForDelegate(suiteDataProvider.TestAbort),
                 MainAppWindow = Marshal.GetFunctionPointerForDelegate(this.uiWindowHandle),
                 SetCursor = Marshal.GetFunctionPointerForDelegate(this.uiSetCursor),
                 TickCount = Marshal.GetFunctionPointerForDelegate(this.uiTickCount),
