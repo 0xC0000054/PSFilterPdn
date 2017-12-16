@@ -855,6 +855,8 @@ namespace PSFilterLoad.PSApi
 		{
 			result = PSError.noErr;
 
+			basicSuitePtr = basicSuiteProvider.CreateSPBasicSuitePointer();
+
 			IntPtr aboutRecordPtr = Memory.Allocate(Marshal.SizeOf(typeof(AboutRecord)), true);
 			try
 			{
@@ -862,6 +864,8 @@ namespace PSFilterLoad.PSApi
 				{
 					AboutRecord* aboutRecord = (AboutRecord*)aboutRecordPtr.ToPointer();
 					aboutRecord->platformData = platFormDataPtr;
+					aboutRecord->sSPBasic = basicSuitePtr;
+					aboutRecord->plugInRef = IntPtr.Zero;
 				}
 
 				if (pdata.ModuleEntryPoints == null)
