@@ -45,13 +45,13 @@ namespace PSFilterLoad.PSApi
 		private ProgressProc progressProc;
 		private TestAbortProc abortProc;
 		// SPBasic Suite
-		private SPBasicSuite_AcquireSuite spAcquireSuite;
-		private SPBasicSuite_AllocateBlock spAllocateBlock;
-		private SPBasicSuite_FreeBlock spFreeBlock;
-		private SPBasicSuite_IsEqual spIsEqual;
-		private SPBasicSuite_ReallocateBlock spReallocateBlock;
-		private SPBasicSuite_ReleaseSuite spReleaseSuite;
-		private SPBasicSuite_Undefined spUndefined;
+		private SPBasicAcquireSuite spAcquireSuite;
+		private SPBasicAllocateBlock spAllocateBlock;
+		private SPBasicFreeBlock spFreeBlock;
+		private SPBasicIsEqual spIsEqual;
+		private SPBasicReallocateBlock spReallocateBlock;
+		private SPBasicReleaseSuite spReleaseSuite;
+		private SPBasicUndefined spUndefined;
 		#endregion
 
 		private IntPtr filterRecordPtr;
@@ -3325,13 +3325,13 @@ namespace PSFilterLoad.PSApi
 			abortProc = new TestAbortProc(AbortProc);
 
 			// SPBasicSuite
-			spAcquireSuite = new SPBasicSuite_AcquireSuite(SPBasicAcquireSuite);
-			spReleaseSuite = new SPBasicSuite_ReleaseSuite(SPBasicReleaseSuite);
-			spIsEqual = new SPBasicSuite_IsEqual(SPBasicIsEqual);
-			spAllocateBlock = new SPBasicSuite_AllocateBlock(SPBasicAllocateBlock);
-			spFreeBlock = new SPBasicSuite_FreeBlock(SPBasicFreeBlock);
-			spReallocateBlock = new SPBasicSuite_ReallocateBlock(SPBasicReallocateBlock);
-			spUndefined = new SPBasicSuite_Undefined(SPBasicUndefined);
+			spAcquireSuite = new SPBasicAcquireSuite(SPBasicAcquireSuite);
+			spReleaseSuite = new SPBasicReleaseSuite(SPBasicReleaseSuite);
+			spIsEqual = new SPBasicIsEqual(SPBasicIsEqual);
+			spAllocateBlock = new SPBasicAllocateBlock(SPBasicAllocateBlock);
+			spFreeBlock = new SPBasicFreeBlock(SPBasicFreeBlock);
+			spReallocateBlock = new SPBasicReallocateBlock(SPBasicReallocateBlock);
+			spUndefined = new SPBasicUndefined(SPBasicUndefined);
 		}
 
 		private unsafe void SetupSuites()
