@@ -331,11 +331,6 @@ namespace PSFilterLoad.PSApi
 				}
 				else if (suiteName.Equals(PSConstants.PICA.PropertySuite, StringComparison.Ordinal))
 				{
-					// The property suite can be null when the filter is showing its about box.
-					if (propertySuite == null)
-					{
-						return PSError.kSPSuiteNotFoundError;
-					}
 					if (version != PSConstants.kCurrentPropertyProcsVersion)
 					{
 						return PSError.kSPSuiteNotFoundError;
