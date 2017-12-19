@@ -53,6 +53,8 @@ namespace PSFilterLoad.PSApi
 		/// <param name="propertySuite">The property suite.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <paramref name="picaSuiteData"/> is null.
+		/// or
+		/// <paramref name="propertySuite"/> is null.
 		/// </exception>
 		public SPBasicSuiteProvider(IPICASuiteDataProvider picaSuiteData, IPropertySuite propertySuite)
 		{
