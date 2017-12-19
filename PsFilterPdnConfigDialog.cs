@@ -447,7 +447,7 @@ namespace PSFilterPdn
             //
             // remDirBtn
             //
-            this.remDirBtn.Location = new System.Drawing.Point(353, 266);
+            this.remDirBtn.Location = new System.Drawing.Point(371, 251);
             this.remDirBtn.Name = "remDirBtn";
             this.remDirBtn.Size = new System.Drawing.Size(75, 23);
             this.remDirBtn.TabIndex = 2;
@@ -457,7 +457,7 @@ namespace PSFilterPdn
             //
             // addDirBtn
             //
-            this.addDirBtn.Location = new System.Drawing.Point(272, 266);
+            this.addDirBtn.Location = new System.Drawing.Point(290, 251);
             this.addDirBtn.Name = "addDirBtn";
             this.addDirBtn.Size = new System.Drawing.Size(75, 23);
             this.addDirBtn.TabIndex = 1;
