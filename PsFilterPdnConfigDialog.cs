@@ -472,7 +472,7 @@ namespace PSFilterPdn
             this.searchDirListView.Location = new System.Drawing.Point(6, 6);
             this.searchDirListView.MultiSelect = false;
             this.searchDirListView.Name = "searchDirListView";
-            this.searchDirListView.Size = new System.Drawing.Size(422, 243);
+            this.searchDirListView.Size = new System.Drawing.Size(440, 243);
             this.searchDirListView.TabIndex = 0;
             this.searchDirListView.UseCompatibleStateImageBehavior = false;
             this.searchDirListView.View = System.Windows.Forms.View.Details;
