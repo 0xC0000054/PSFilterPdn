@@ -13,7 +13,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace PSFilterPdn
+namespace PSFilterPdn.Controls
 {
     // Adapted from https://www.codeproject.com/Articles/37253/Double-buffered-Tree-and-Listviews
 

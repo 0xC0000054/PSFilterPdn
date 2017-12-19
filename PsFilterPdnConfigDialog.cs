@@ -13,6 +13,7 @@
 using PaintDotNet;
 using PaintDotNet.Effects;
 using PSFilterLoad.PSApi;
+using PSFilterPdn.Controls;
 using PSFilterPdn.Properties;
 using System;
 using System.Collections.Generic;

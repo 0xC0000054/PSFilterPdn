@@ -12,7 +12,7 @@
 
 using System.Windows.Forms;
 
-namespace PSFilterPdn
+namespace PSFilterPdn.Controls
 {
     internal sealed class DoubleBufferedListView : ListView
     {
