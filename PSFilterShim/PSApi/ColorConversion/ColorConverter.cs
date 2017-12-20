@@ -457,11 +457,25 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <returns>The converted color.</returns>
         public static CMYK RGBtoCMYK(double red, double green, double blue)
         {
+            double c = 0;
+            double m = 0;
+            double y = 0;
             double k = Math.Min(1.0 - red, Math.Min(1.0 - green, 1.0 - blue));
 
-            double c = (1.0 - red - k) / (1 - k);
-            double m = (1.0 - green - k) / (1 - k);
-            double y = (1.0 - blue - k) / (1 - k);
+            if (k < 1.0)
+            {
+                double divisor = 1.0 - k;
+
+                c = (1.0 - red - k) / divisor;
+                m = (1.0 - green - k) / divisor;
+                y = (1.0 - blue - k) / divisor;
+            }
+            else
+            {
+                c = 1.0 - red;
+                m = 1.0 - green;
+                y = 1.0 - blue;
+            }
 
             return new CMYK(c, m, y, k);
         }
