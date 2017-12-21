@@ -17,9 +17,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
 using PaintDotNet;
-using PSFilterLoad.ColorPicker;
 using PSFilterPdn.Properties;
 
 namespace PSFilterLoad.PSApi
@@ -2568,29 +2566,30 @@ namespace PSFilterLoad.PSApi
 
 					if (err == PSError.noErr)
 					{
-						using (ColorPickerForm picker = new ColorPickerForm(name))
+						short red = info.colorComponents[0];
+						short green = info.colorComponents[1];
+						short blue = info.colorComponents[2];
+
+						ColorBgra? chosenColor = ColorPickerService.ShowColorPickerDialog(name, red, green, blue);
+
+						if (chosenColor.HasValue)
 						{
-							picker.SetDefaultColor(info.colorComponents[0], info.colorComponents[1], info.colorComponents[2]);
+							ColorBgra color = chosenColor.Value;
+							info.colorComponents[0] = color.R;
+							info.colorComponents[1] = color.G;
+							info.colorComponents[2] = color.B;
 
-							if (picker.ShowDialog() == DialogResult.OK)
+							if (info.resultSpace == ColorSpace.ChosenSpace)
 							{
-								ColorBgra color = picker.UserPrimaryColor;
-								info.colorComponents[0] = color.R;
-								info.colorComponents[1] = color.G;
-								info.colorComponents[2] = color.B;
-
-								if (info.resultSpace == ColorSpace.ChosenSpace)
-								{
-									info.resultSpace = ColorSpace.RGBSpace;
-								}
-
-								err = ColorServicesConvert.Convert(ColorSpace.RGBSpace, info.resultSpace, ref info.colorComponents);
-
+								info.resultSpace = ColorSpace.RGBSpace;
 							}
-							else
-							{
-								err = PSError.userCanceledErr;
-							}
+
+							err = ColorServicesConvert.Convert(ColorSpace.RGBSpace, info.resultSpace, ref info.colorComponents);
+
+						}
+						else
+						{
+							err = PSError.userCanceledErr;
 						}
 					}
 

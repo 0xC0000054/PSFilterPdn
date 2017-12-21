@@ -171,6 +171,7 @@
     <Compile Include="PSApi\ColorConversion\Lab.cs" />
     <Compile Include="PSApi\ColorConversion\RGB.cs" />
     <Compile Include="PSApi\ColorConversion\XYZ.cs" />
+    <Compile Include="PSApi\ColorPickerService.cs" />
     <Compile Include="PSApi\DebugUtils.cs" />
     <Compile Include="PSApi\DescriptorRegistryItem.cs" />
     <Compile Include="PSApi\DescriptorRegistrySuite.cs" />

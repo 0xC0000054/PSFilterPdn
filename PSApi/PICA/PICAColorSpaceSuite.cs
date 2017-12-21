@@ -349,21 +349,20 @@ namespace PSFilterLoad.PSApi.PICA
             string prompt;
             if (zstringSuite.ConvertToString(promptZString, out prompt))
             {
-                using (ColorPickerForm dialog = new ColorPickerForm(prompt))
+                PaintDotNet.ColorBgra? chosenColor = ColorPickerService.ShowColorPickerDialog(prompt);
+
+                if (chosenColor.HasValue)
                 {
-                    if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    error = Make(ref colorID);
+                    if (error == PSError.kSPNoError)
                     {
-                        error = Make(ref colorID);
-                        if (error == PSError.kSPNoError)
-                        {
-                            PaintDotNet.ColorBgra color = dialog.UserPrimaryColor;
-                            this.colors[colorID] = new Color(ColorSpace.RGBSpace, color.R, color.G, color.B, 0);
-                        }
+                        PaintDotNet.ColorBgra color = chosenColor.Value;
+                        this.colors[colorID] = new Color(ColorSpace.RGBSpace, color.R, color.G, color.B, 0);
                     }
-                    else
-                    {
-                        error = PSError.kSPUserCanceledError;
-                    }
+                }
+                else
+                {
+                    error = PSError.kSPUserCanceledError;
                 }
             }
             else
