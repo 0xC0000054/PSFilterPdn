@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PSFilterLoad.ColorPicker;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
