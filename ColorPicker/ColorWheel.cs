@@ -281,6 +281,11 @@ namespace PSFilterLoad.ColorPicker
                     components.Dispose();
                     components = null;
                 }
+                if (renderBitmap != null)
+                {
+                    renderBitmap.Dispose();
+                    renderBitmap = null;
+                }
             }
 
             base.Dispose(disposing);
