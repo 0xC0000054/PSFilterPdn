@@ -351,6 +351,62 @@ namespace PaintDotNet
             base.Dispose(disposing);
         }
 
+        protected override void OnBackColorChanged(EventArgs e)
+        {
+            base.OnBackColorChanged(e);
+
+            UpdateControlBackColor(this, BackColor);
+        }
+
+        protected override void OnForeColorChanged(EventArgs e)
+        {
+            base.OnForeColorChanged(e);
+
+            UpdateControlForeColor(this, ForeColor);
+        }
+
+        private static void UpdateControlBackColor(Control parent, Color backColor)
+        {
+            foreach (Control item in parent.Controls)
+            {
+                if (item is Button button)
+                {
+                    // Reset the BackColor of all Button controls.
+                    button.UseVisualStyleBackColor = true;
+                }
+                else
+                {
+                    item.BackColor = backColor;
+
+                    if (item.HasChildren)
+                    {
+                        UpdateControlBackColor(item, backColor);
+                    }
+                }
+            }
+        }
+
+        private static void UpdateControlForeColor(Control parent, Color foreColor)
+        {
+            foreach (Control item in parent.Controls)
+            {
+                if (item is Button button)
+                {
+                    // Reset the ForeColor of all Button controls.
+                    button.ForeColor = SystemColors.ControlText;
+                }
+                else
+                {
+                    item.ForeColor = foreColor;
+
+                    if (item.HasChildren)
+                    {
+                        UpdateControlForeColor(item, foreColor);
+                    }
+                }
+            }
+        }
+
         #region Windows Form Designer generated code
         /// <summary>
         /// Required method for Designer support - do not modify

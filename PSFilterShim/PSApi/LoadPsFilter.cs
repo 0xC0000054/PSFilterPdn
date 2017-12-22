@@ -289,6 +289,8 @@ namespace PSFilterLoad.PSApi
 			this.progressProc = new ProgressProc(ProgressProc);
 			this.abortProc = new TestAbortProc(AbortProc);
 
+			ColorPickerService.SetDialogColors(settings.PluginUISettings);
+
 			this.channelPortsSuite = new ChannelPortsSuite(this);
 			this.imageServicesSuite = new ImageServicesSuite();
 			this.propertySuite = new PropertySuite(source.Width, source.Height, settings.PluginUISettings);

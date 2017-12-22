@@ -32,5 +32,23 @@ namespace PSFilterPdn
             [MarshalAs(UnmanagedType.LPWStr)]
             public string pszSpec;
         }
+
+        internal struct POINT
+        {
+            public int x;
+            public int y;
+
+            public POINT(int x, int y)
+            {
+                this.x = x;
+                this.y = y;
+            }
+        }
+
+        internal struct TCHITTESTINFO
+        {
+            public POINT pt;
+            public NativeEnums.TCHITTESTFLAGS flags;
+        }
     }
 }

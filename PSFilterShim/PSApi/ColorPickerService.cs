@@ -11,11 +11,29 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace PSFilterLoad.PSApi
 {
     internal static class ColorPickerService
     {
+        private static Color formBackColor = Control.DefaultBackColor;
+        private static Color formForeColor = Control.DefaultForeColor;
+
+        /// <summary>
+        /// Sets the background and foreground colors of the dialog.
+        /// </summary>
+        /// <param name="pluginUISettings">The plug-in UI settings.</param>
+        public static void SetDialogColors(PluginUISettings pluginUISettings)
+        {
+            if (pluginUISettings != null)
+            {
+                formBackColor = pluginUISettings.ColorPickerBackColor;
+                formForeColor = pluginUISettings.ColorPickerForeColor;
+            }
+        }
+
         /// <summary>
         /// Shows the color picker dialog.
         /// </summary>
@@ -40,6 +58,8 @@ namespace PSFilterLoad.PSApi
 
             using (ColorPickerForm form = new ColorPickerForm(prompt))
             {
+                form.BackColor = formBackColor;
+                form.ForeColor = formForeColor;
                 form.SetDefaultColor(red, green, blue);
 
                 if (form.ShowDialog() == System.Windows.Forms.DialogResult.OK)

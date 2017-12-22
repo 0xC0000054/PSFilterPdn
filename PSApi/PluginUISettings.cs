@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using System.Drawing;
 using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
@@ -24,9 +25,39 @@ namespace PSFilterLoad.PSApi
         /// Initializes a new instance of the <see cref="PluginUISettings"/> class.
         /// </summary>
         /// <param name="highDpi"><c>true</c> if the host is running in high DPI mode; otherwise, <c>false</c>.</param>
-        internal PluginUISettings(bool highDpi)
+        /// <param name="colorPickerBackColor">The color picker background color.</param>
+        /// <param name="colorPickerForeColor">The color picker foreground color.</param>
+        internal PluginUISettings(bool highDpi, Color colorPickerBackColor, Color colorPickerForeColor)
         {
+            this.ColorPickerBackColor = colorPickerBackColor;
+            this.ColorPickerForeColor = colorPickerForeColor;
             this.HighDpi = highDpi;
+        }
+
+        /// <summary>
+        /// Gets the color picker background color.
+        /// </summary>
+        /// <value>
+        /// The color picker background color.
+        /// </value>
+        [DataMember]
+        public Color ColorPickerBackColor
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the color picker foreground color.
+        /// </summary>
+        /// <value>
+        /// The color picker foreground color.
+        /// </value>
+        [DataMember]
+        public Color ColorPickerForeColor
+        {
+            get;
+            private set;
         }
 
         /// <summary>

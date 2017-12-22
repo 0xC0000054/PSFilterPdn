@@ -135,6 +135,15 @@ namespace PSFilterPdn
             PROCESS_DEP_ENABLE = 1,
             PROCESS_DEP_DISABLE_ATL_THUNK_EMULATION = 2
         }
+
+        [Flags]
+        internal enum TCHITTESTFLAGS
+        {
+            TCHT_NOWHERE = 1,
+            TCHT_ONITEMICON = 2,
+            TCHT_ONITEMLABEL = 4,
+            TCHT_ONITEM = TCHT_ONITEMICON | TCHT_ONITEMLABEL
+        }
     }
 }
 

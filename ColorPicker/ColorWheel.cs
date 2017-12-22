@@ -63,6 +63,18 @@ namespace PSFilterLoad.ColorPicker
             hsvColor = new HsvColor(0, 0, 0);
         }
 
+        protected override void OnBackColorChanged(EventArgs e)
+        {
+            base.OnBackColorChanged(e);
+
+            if (this.renderBitmap != null)
+            {
+                this.renderBitmap.Dispose();
+                this.renderBitmap = null;
+            }
+            Invalidate();
+        }
+
         private static PointF SphericalToCartesian(float r, float theta)
         {
             float x;

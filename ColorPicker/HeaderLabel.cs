@@ -125,7 +125,8 @@ namespace PSFilterLoad.ColorPicker
             }
 
             Size textSize = GetTextSize();
-            TextRenderer.DrawText(e.Graphics, this.Text, this.Font, new Point(this.leftMargin, 0), SystemColors.WindowText, textFormatFlags);
+            Color textColor = BackColor != DefaultBackColor ? ForeColor : SystemColors.WindowText;
+            TextRenderer.DrawText(e.Graphics, this.Text, this.Font, new Point(this.leftMargin, 0), textColor, textFormatFlags);
 
             base.OnPaint(e);
         }

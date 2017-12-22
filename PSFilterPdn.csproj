@@ -130,6 +130,9 @@
     <Compile Include="Controls\DoubleBufferedTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\TabControlEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Dialogs\PlatformFolderBrowserDialog.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -150,6 +153,7 @@
     <Compile Include="NativeInterfaces.cs" />
     <Compile Include="NativeStructs.cs" />
     <Compile Include="OS.cs" />
+    <Compile Include="PluginThemingUtil.cs" />
     <Compile Include="PluginSupportInfo.cs" />
     <Compile Include="PSApi\ActionDescriptorSuite.cs" />
     <Compile Include="PSApi\ActionListDescriptor.cs" />

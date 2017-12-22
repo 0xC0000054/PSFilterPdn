@@ -31,7 +31,7 @@ namespace PSFilterPdn
     internal sealed class PsFilterPdnConfigDialog : EffectConfigDialog
     {
         private Button buttonOK;
-        private TabControl tabControl1;
+        private TabControlEx tabControl1;
         private TabPage filterTab;
         private DoubleBufferedTreeView filterTree;
         private TabPage dirTab;
@@ -233,7 +233,7 @@ namespace PSFilterPdn
         {
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonOK = new System.Windows.Forms.Button();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabControl1 = new PSFilterPdn.Controls.TabControlEx();
             this.filterTab = new System.Windows.Forms.TabPage();
             this.filterProgressBar = new System.Windows.Forms.ProgressBar();
             this.fileNameLbl = new System.Windows.Forms.Label();
@@ -666,7 +666,7 @@ namespace PSFilterPdn
                 ParameterDataPath = parameterDataFileName,
                 PseudoResourcePath = resourceDataFileName,
                 DescriptorRegistryPath = descriptorRegistryFileName,
-                PluginUISettings = new PluginUISettings(this.highDpiMode)
+                PluginUISettings = new PluginUISettings(this.highDpiMode, BackColor, ForeColor)
             };
 
             PSFilterShimService service = new PSFilterShimService(data, settings, SetProxyErrorResult, UpdateProgress);
@@ -857,7 +857,7 @@ namespace PSFilterPdn
 
                         try
                         {
-                            PluginUISettings pluginUISettings = new PluginUISettings(this.highDpiMode);
+                            PluginUISettings pluginUISettings = new PluginUISettings(this.highDpiMode, BackColor, ForeColor);
                             using (LoadPsFilter lps = new LoadPsFilter(this.Effect.EnvironmentParameters, this.Handle, pluginUISettings))
                             {
                                 lps.SetProgressCallback(new Action<int, int>(UpdateProgress));
@@ -1335,6 +1335,21 @@ namespace PSFilterPdn
                     // This method is only present on Vista SP1 or XP SP3 and later.
                 }
             }
+            PluginThemingUtil.EnableEffectDialogTheme(this);
+        }
+
+        protected override void OnBackColorChanged(EventArgs e)
+        {
+            base.OnBackColorChanged(e);
+
+            PluginThemingUtil.UpdateControlBackColor(this);
+        }
+
+        protected override void OnForeColorChanged(EventArgs e)
+        {
+            base.OnForeColorChanged(e);
+
+            PluginThemingUtil.UpdateControlForeColor(this);
         }
 
         protected override void OnShown(EventArgs e)
