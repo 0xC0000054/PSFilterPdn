@@ -92,6 +92,8 @@ namespace PSFilterPdn
         private bool useDEPProxy;
         private bool searchBoxIgnoreTextChanged;
 
+        private readonly bool highDpiMode;
+
         private const string DummyTreeNodeName = "dummyTreeNode";
 
         private static readonly string EffectsFolderPath = Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location);
@@ -108,6 +110,8 @@ namespace PSFilterPdn
             this.folderNameLbl.Text = string.Empty;
             this.proxyTempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             this.searchDirectories = new List<string>();
+            PSFilterLoad.ColorPicker.UI.InitScaling(this);
+            this.highDpiMode = PSFilterLoad.ColorPicker.UI.GetXScaleFactor() > 1.0f;
         }
 
         protected override void Dispose(bool disposing)
@@ -661,7 +665,8 @@ namespace PSFilterPdn
                 RegionDataPath = regionFileName,
                 ParameterDataPath = parameterDataFileName,
                 PseudoResourcePath = resourceDataFileName,
-                DescriptorRegistryPath = descriptorRegistryFileName
+                DescriptorRegistryPath = descriptorRegistryFileName,
+                PluginUISettings = new PluginUISettings(this.highDpiMode)
             };
 
             PSFilterShimService service = new PSFilterShimService(data, settings, SetProxyErrorResult, UpdateProgress);
@@ -852,7 +857,8 @@ namespace PSFilterPdn
 
                         try
                         {
-                            using (LoadPsFilter lps = new LoadPsFilter(this.Effect.EnvironmentParameters, this.Handle))
+                            PluginUISettings pluginUISettings = new PluginUISettings(this.highDpiMode);
+                            using (LoadPsFilter lps = new LoadPsFilter(this.Effect.EnvironmentParameters, this.Handle, pluginUISettings))
                             {
                                 lps.SetProgressCallback(new Action<int, int>(UpdateProgress));
 

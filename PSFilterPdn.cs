@@ -136,7 +136,8 @@ namespace PSFilterPdn
                     RegionDataPath = regionFileName,
                     ParameterDataPath = parameterDataFileName,
                     PseudoResourcePath = resourceDataFileName,
-                    DescriptorRegistryPath = descriptorRegistryFileName
+                    DescriptorRegistryPath = descriptorRegistryFileName,
+                    PluginUISettings = null
                 };
 
                 PSFilterShimService service = new PSFilterShimService(
@@ -248,7 +249,7 @@ namespace PSFilterPdn
         {
             try
             {
-                using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, window.Handle))
+                using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, window.Handle, null))
                 {
                     lps.SetAbortCallback(new Func<byte>(AbortCallback));
                     if (token.DescriptorRegistry != null)

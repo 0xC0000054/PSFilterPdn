@@ -23,16 +23,18 @@ namespace PSFilterLoad.PSApi
         private readonly SetPropertyProc setPropertyProc;
         private readonly int documentWidth;
         private readonly int documentHeight;
+        private readonly bool highDpi;
         private int numberOfChannels;
 
         private const string HostSerial = "0";
 
-        public PropertySuite(int documentWidth, int documentHeight)
+        public PropertySuite(int documentWidth, int documentHeight, PluginUISettings pluginUISettings)
         {
             this.getPropertyProc = new GetPropertyProc(PropertyGetProc);
             this.setPropertyProc = new SetPropertyProc(PropertySetProc);
             this.documentWidth = documentWidth;
             this.documentHeight = documentHeight;
+            this.highDpi = pluginUISettings?.HighDpi ?? false;
             this.numberOfChannels = 0;
         }
 
@@ -251,6 +253,9 @@ namespace PSFilterLoad.PSApi
                     break;
                 case PSProperties.ToolTips:
                     simpleProperty = new IntPtr(1);
+                    break;
+                case PSProperties.HighDpi:
+                    simpleProperty = new IntPtr(highDpi ? 1 : 0);
                     break;
                 default:
                     return PSError.errPlugInPropertyUndefined;

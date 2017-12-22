@@ -135,5 +135,9 @@ namespace PSFilterLoad.PSApi
         /// The title of the current document in UTF-16 - 'unnm'
         /// </summary>
         public const uint UnicodeTitle = 0x756e6e6dU;
+        /// <summary>
+        /// Indicates whether the host is running in high DPI mode - 'HDPI'
+        /// </summary>
+        public const uint HighDpi = 0x48445049U;
     }
 }

@@ -281,6 +281,7 @@
     <Compile Include="PSFilterShimServer.cs" />
     <Compile Include="PSFilterShimService.cs" />
     <Compile Include="PSFilterShimSettings.cs" />
+    <Compile Include="PSApi\PluginUISettings.cs" />
     <Compile Include="RegionDataWrapper.cs" />
     <Compile Include="SafeNativeMethods.cs" />
     <Compile Include="ShellLink.cs" />

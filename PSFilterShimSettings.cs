@@ -96,6 +96,13 @@ namespace PSFilterPdn
             internal set;
         }
 
+        [DataMember]
+        public PSFilterLoad.PSApi.PluginUISettings PluginUISettings
+        {
+            get;
+            internal set;
+        }
+
         internal PSFilterShimSettings()
         {
         }

@@ -291,7 +291,7 @@ namespace PSFilterLoad.PSApi
 
 			this.channelPortsSuite = new ChannelPortsSuite(this);
 			this.imageServicesSuite = new ImageServicesSuite();
-			this.propertySuite = new PropertySuite(source.Width, source.Height);
+			this.propertySuite = new PropertySuite(source.Width, source.Height, settings.PluginUISettings);
 			this.readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
 			this.basicSuiteProvider = new SPBasicSuiteProvider(this, propertySuite);
 

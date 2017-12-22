@@ -225,9 +225,10 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		/// <param name="eep">The EffectEnvironmentParameters of the plugin</param>
 		/// <param name="owner">The handle of the parent window</param>
+		/// <param name="pluginUISettings">The user interface settings for plug-in created dialogs.</param>
 		/// <exception cref="System.ArgumentNullException">The EffectEnvironmentParameters are null.</exception>
 		/// <exception cref="PSFilterLoad.PSApi.ImageSizeTooLargeException">The source image is larger than 32000 pixels in width and/or height.</exception>
-		internal LoadPsFilter(PaintDotNet.Effects.EffectEnvironmentParameters eep, IntPtr owner)
+		internal LoadPsFilter(PaintDotNet.Effects.EffectEnvironmentParameters eep, IntPtr owner, PluginUISettings pluginUISettings)
 		{
 			if (eep == null)
 				throw new ArgumentNullException("eep", "eep is null.");
@@ -305,7 +306,7 @@ namespace PSFilterLoad.PSApi
 
 			this.channelPortsSuite = new ChannelPortsSuite(this);
 			this.imageServicesSuite = new ImageServicesSuite();
-			propertySuite = new PropertySuite(source.Width, source.Height);
+			propertySuite = new PropertySuite(source.Width, source.Height, pluginUISettings);
 			this.basicSuiteProvider = new SPBasicSuiteProvider(this, propertySuite);
 
 			this.backgroundColor = new byte[4] { eep.SecondaryColor.R, eep.SecondaryColor.G, eep.SecondaryColor.B, 0 };
