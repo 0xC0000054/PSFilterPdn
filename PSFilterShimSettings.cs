@@ -17,7 +17,7 @@ using System.Runtime.Serialization;
 namespace PSFilterPdn
 {
     [DataContract]
-    public sealed class PSFilterShimData
+    public sealed class PSFilterShimSettings
     {
         [DataMember]
         public bool RepeatEffect
@@ -96,7 +96,7 @@ namespace PSFilterPdn
             internal set;
         }
 
-        internal PSFilterShimData()
+        internal PSFilterShimSettings()
         {
         }
     }

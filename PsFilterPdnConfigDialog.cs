@@ -649,7 +649,7 @@ namespace PSFilterPdn
                 }
             }
 
-            PSFilterShimData shimData = new PSFilterShimData
+            PSFilterShimSettings settings = new PSFilterShimSettings
             {
                 RepeatEffect = false,
                 ShowAboutDialog = showAboutBoxCb.Checked,
@@ -664,7 +664,7 @@ namespace PSFilterPdn
                 DescriptorRegistryPath = descriptorRegistryFileName
             };
 
-            PSFilterShimService service = new PSFilterShimService(data, shimData, SetProxyErrorResult, UpdateProgress);
+            PSFilterShimService service = new PSFilterShimService(data, settings, SetProxyErrorResult, UpdateProgress);
 
             PSFilterShimServer.Start(service);
             this.proxyData = data;

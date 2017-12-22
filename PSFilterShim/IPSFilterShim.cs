@@ -22,7 +22,7 @@ internal interface IPSFilterShim
     PSFilterLoad.PSApi.PluginData GetPluginData();
 
     [OperationContract]
-    PSFilterPdn.PSFilterShimData GetShimData();
+    PSFilterPdn.PSFilterShimSettings GetShimSettings();
 
     [OperationContract(IsOneWay = true)]
     void SetProxyErrorMessage(string errorMessage);

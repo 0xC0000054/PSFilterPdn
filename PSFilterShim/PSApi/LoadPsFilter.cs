@@ -223,13 +223,13 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Loads and runs Photoshop Filters
 		/// </summary>
-		/// <param name="shimData">The execution parameters for the filter.</param>
+		/// <param name="settings">The execution parameters for the filter.</param>
 		/// <param name="selection">The <see cref="Region"/> describing the selected area within the image.</param>
-		/// <exception cref="System.ArgumentNullException"><paramref name="shimData"/> is null.</exception>
-		public LoadPsFilter(PSFilterPdn.PSFilterShimData shimData, Region selection)
+		/// <exception cref="System.ArgumentNullException"><paramref name="settings"/> is null.</exception>
+		public LoadPsFilter(PSFilterPdn.PSFilterShimSettings settings, Region selection)
 		{
-			if (shimData == null)
-				throw new ArgumentNullException("shimData");
+			if (settings == null)
+				throw new ArgumentNullException("settings");
 
 			this.dataPtr = IntPtr.Zero;
 
@@ -247,9 +247,9 @@ namespace PSFilterLoad.PSApi
 			this.useChannelPorts = false;
 			this.descriptorSuite = new DescriptorSuite();
 			this.resourceSuite = new ResourceSuite();
-			this.parentWindowHandle = shimData.ParentWindowHandle;
+			this.parentWindowHandle = settings.ParentWindowHandle;
 
-			using (Bitmap bmp = new Bitmap(shimData.SourceImagePath))
+			using (Bitmap bmp = new Bitmap(settings.SourceImagePath))
 			{
 				if (bmp.Width > 32000 || bmp.Height > 32000)
 				{
@@ -305,7 +305,7 @@ namespace PSFilterLoad.PSApi
 			unsafe
 			{
 				platFormDataPtr = Memory.Allocate(Marshal.SizeOf(typeof(PlatformData)), true);
-				((PlatformData*)platFormDataPtr)->hwnd = shimData.ParentWindowHandle;
+				((PlatformData*)platFormDataPtr)->hwnd = settings.ParentWindowHandle;
 			}
 
 			this.lastOutRect = Rect16.Empty;
@@ -319,8 +319,8 @@ namespace PSFilterLoad.PSApi
 			this.lastOutLoPlane = -1;
 			this.lastInLoPlane = -1;
 
-			Color primary = shimData.PrimaryColor;
-			Color secondary = shimData.SecondaryColor;
+			Color primary = settings.PrimaryColor;
+			Color secondary = settings.SecondaryColor;
 
 			this.backgroundColor = new byte[4] { secondary.R, secondary.G, secondary.B, 0 };
 			this.foregroundColor = new byte[4] { primary.R, primary.G, primary.B, 0 };

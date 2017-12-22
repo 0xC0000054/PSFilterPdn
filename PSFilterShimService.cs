@@ -21,16 +21,16 @@ namespace PSFilterPdn
     {
         private Func<byte> abortFunc;
         private PluginData pluginData;
-        private PSFilterShimData shimData;
+        private PSFilterShimSettings settings;
         private Action<string> errorCallback;
         private Action<int,int> progressCallback;
 
-        public PSFilterShimService(PluginData plugin, PSFilterShimData shimData, Action<string> error, Action<int, int> progress)
-            : this(new Func<byte>(delegate() { return 0; }), plugin, shimData, error, progress)
+        public PSFilterShimService(PluginData plugin, PSFilterShimSettings settings, Action<string> error, Action<int, int> progress)
+            : this(new Func<byte>(delegate() { return 0; }), plugin, settings, error, progress)
         {
         }
 
-        public PSFilterShimService(Func<byte> abort, PluginData plugin, PSFilterShimData shimData,
+        public PSFilterShimService(Func<byte> abort, PluginData plugin, PSFilterShimSettings settings,
             Action<string> error, Action<int, int> progress)
         {
             if (abort == null)
@@ -40,7 +40,7 @@ namespace PSFilterPdn
 
             this.abortFunc = abort;
             this.pluginData = plugin;
-            this.shimData = shimData;
+            this.settings = settings;
             this.errorCallback = error;
             this.progressCallback = progress;
         }
@@ -55,9 +55,9 @@ namespace PSFilterPdn
             return pluginData;
         }
 
-        public PSFilterShimData GetShimData()
+        public PSFilterShimSettings GetShimSettings()
         {
-            return shimData;
+            return settings;
         }
 
         public void SetProxyErrorMessage(string errorMessage)

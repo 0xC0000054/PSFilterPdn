@@ -84,13 +84,13 @@ namespace PSFilterShim
 		static void RunFilter()
 		{
 			PluginData pdata = serviceProxy.GetPluginData();
-			PSFilterShimData shimData = serviceProxy.GetShimData();
+			PSFilterShimSettings settings = serviceProxy.GetShimSettings();
 
 			Region selectionRegion = null;
 
-			if (!string.IsNullOrEmpty(shimData.RegionDataPath))
+			if (!string.IsNullOrEmpty(settings.RegionDataPath))
 			{
-				using (FileStream fs = new FileStream(shimData.RegionDataPath, FileMode.Open, FileAccess.Read, FileShare.None))
+				using (FileStream fs = new FileStream(settings.RegionDataPath, FileMode.Open, FileAccess.Read, FileShare.None))
 				{
 					BinaryFormatter bf = new BinaryFormatter();
 					RegionDataWrapper wrapper = (RegionDataWrapper)bf.Deserialize(fs);
@@ -109,7 +109,7 @@ namespace PSFilterShim
 				ParameterData filterParameters = null;
 				try
 				{
-					using (FileStream fs = new FileStream(shimData.ParameterDataPath, FileMode.Open, FileAccess.Read, FileShare.None))
+					using (FileStream fs = new FileStream(settings.ParameterDataPath, FileMode.Open, FileAccess.Read, FileShare.None))
 					{
 						BinaryFormatter bf = new BinaryFormatter();
 						filterParameters = (ParameterData)bf.Deserialize(fs);
@@ -122,7 +122,7 @@ namespace PSFilterShim
 				List<PSResource> pseudoResources = null;
 				try
 				{
-					using (FileStream fs = new FileStream(shimData.PseudoResourcePath, FileMode.Open, FileAccess.Read, FileShare.None))
+					using (FileStream fs = new FileStream(settings.PseudoResourcePath, FileMode.Open, FileAccess.Read, FileShare.None))
 					{
 						BinaryFormatter bf = new BinaryFormatter();
 						pseudoResources = (List<PSResource>)bf.Deserialize(fs);
@@ -135,7 +135,7 @@ namespace PSFilterShim
 				DescriptorRegistryValues registryValues = null;
 				try
 				{
-					using (FileStream fs = new FileStream(shimData.DescriptorRegistryPath, FileMode.Open, FileAccess.Read, FileShare.None))
+					using (FileStream fs = new FileStream(settings.DescriptorRegistryPath, FileMode.Open, FileAccess.Read, FileShare.None))
 					{
 						BinaryFormatter bf = new BinaryFormatter();
 						registryValues = (DescriptorRegistryValues)bf.Deserialize(fs);
@@ -149,9 +149,9 @@ namespace PSFilterShim
 				{
 				}
 
-				using (LoadPsFilter lps = new LoadPsFilter(shimData, selectionRegion))
+				using (LoadPsFilter lps = new LoadPsFilter(settings, selectionRegion))
 				{
-					if (shimData.RepeatEffect)
+					if (settings.RepeatEffect)
 					{
 						lps.SetAbortCallback(new Func<byte>(serviceProxy.AbortFilter));
 					}
@@ -169,7 +169,7 @@ namespace PSFilterShim
 						if (parameterData != null || filterParameters.AETEDictionary.Count > 0)
 						{
 							lps.FilterParameters = filterParameters;
-							lps.IsRepeatEffect = shimData.RepeatEffect;
+							lps.IsRepeatEffect = settings.RepeatEffect;
 						}
 					}
 
@@ -183,26 +183,26 @@ namespace PSFilterShim
 						lps.SetRegistryValues(registryValues);
 					}
 
-					bool result = lps.RunPlugin(pdata, shimData.ShowAboutDialog);
+					bool result = lps.RunPlugin(pdata, settings.ShowAboutDialog);
 
 					if (result)
 					{
-						if (!shimData.ShowAboutDialog)
+						if (!settings.ShowAboutDialog)
 						{
 							using (Bitmap dst = lps.Dest.CreateAliasedBitmap())
 							{
-								dst.Save(shimData.DestinationImagePath, ImageFormat.Png);
+								dst.Save(settings.DestinationImagePath, ImageFormat.Png);
 							}
 
 							if (!lps.IsRepeatEffect)
 							{
-								using (FileStream fs = new FileStream(shimData.ParameterDataPath, FileMode.Create, FileAccess.Write, FileShare.None))
+								using (FileStream fs = new FileStream(settings.ParameterDataPath, FileMode.Create, FileAccess.Write, FileShare.None))
 								{
 									BinaryFormatter bf = new BinaryFormatter();
 									bf.Serialize(fs, lps.FilterParameters);
 								}
 
-								using (FileStream fs = new FileStream(shimData.PseudoResourcePath, FileMode.Create, FileAccess.Write, FileShare.None))
+								using (FileStream fs = new FileStream(settings.PseudoResourcePath, FileMode.Create, FileAccess.Write, FileShare.None))
 								{
 									BinaryFormatter bf = new BinaryFormatter();
 									bf.Serialize(fs, lps.PseudoResources);
@@ -211,7 +211,7 @@ namespace PSFilterShim
 								registryValues = lps.GetRegistryValues();
 								if (registryValues != null && registryValues.Changed)
 								{
-									using (FileStream fs = new FileStream(shimData.DescriptorRegistryPath, FileMode.Create, FileAccess.Write, FileShare.None))
+									using (FileStream fs = new FileStream(settings.DescriptorRegistryPath, FileMode.Create, FileAccess.Write, FileShare.None))
 									{
 										BinaryFormatter bf = new BinaryFormatter();
 										bf.Serialize(fs, registryValues);

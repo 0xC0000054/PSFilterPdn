@@ -124,7 +124,7 @@ namespace PSFilterPdn
                 bool proxyResult = true;
                 string proxyErrorMessage = string.Empty;
 
-                PSFilterShimData shimData = new PSFilterShimData
+                PSFilterShimSettings settings = new PSFilterShimSettings
                 {
                     RepeatEffect = true,
                     ShowAboutDialog = false,
@@ -142,7 +142,7 @@ namespace PSFilterPdn
                 PSFilterShimService service = new PSFilterShimService(
                     AbortCallback,
                     token.FilterData,
-                    shimData,
+                    settings,
                     delegate (string data) { proxyResult = false; proxyErrorMessage = data; },
                     null);
 
