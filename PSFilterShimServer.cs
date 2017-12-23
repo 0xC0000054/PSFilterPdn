@@ -18,10 +18,10 @@ namespace PSFilterPdn
     // Adapted from: http://www.jmedved.com/2010/03/named-pipes-in-wcf/
     internal static class PSFilterShimServer
     {
-        private static readonly Uri ServiceUri = new Uri("net.pipe://localhost/PSFilterShim");
+        private static readonly Uri ServiceUri = new Uri("net.pipe://localhost/PSFilterPdn");
         private const string PipeName = "ShimData";
 
-        internal const string EndpointName = "net.pipe://localhost/PSFilterShim/ShimData";
+        internal const string EndpointName = "net.pipe://localhost/PSFilterPdn/ShimData";
 
         private static ServiceHost _host = null;
 
