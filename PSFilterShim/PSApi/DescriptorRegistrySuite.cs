@@ -24,6 +24,7 @@ namespace PSFilterLoad.PSApi
 
         private IActionDescriptorSuite actionDescriptorSuite;
         private Dictionary<string, DescriptorRegistryItem> registry;
+        private bool persistentValuesChanged;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DescriptorRegistrySuite"/> class.
@@ -42,6 +43,7 @@ namespace PSFilterLoad.PSApi
             this.erase = new DescriptorRegistryErase(Erase);
             this.get = new DescriptorRegistryGet(Get);
             this.registry = new Dictionary<string, DescriptorRegistryItem>(StringComparer.Ordinal);
+            this.persistentValuesChanged = false;
         }
 
         /// <summary>
@@ -71,7 +73,7 @@ namespace PSFilterLoad.PSApi
         {
             if (this.registry.Count > 0)
             {
-                return new DescriptorRegistryValues(this.registry);
+                return new DescriptorRegistryValues(this.registry, this.persistentValuesChanged);
             }
 
             return null;
@@ -124,6 +126,10 @@ namespace PSFilterLoad.PSApi
                 if (this.actionDescriptorSuite.TryGetDescriptorValues(descriptor, out values))
                 {
                     this.registry.AddOrUpdate(registryKey, new DescriptorRegistryItem(values, isPersistent));
+                    if (isPersistent)
+                    {
+                        this.persistentValuesChanged = true;
+                    }
                 }
                 else
                 {

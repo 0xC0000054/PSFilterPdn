@@ -26,8 +26,9 @@ namespace PSFilterLoad.PSApi
         /// Initializes a new instance of the <see cref="DescriptorRegistryValues"/> class.
         /// </summary>
         /// <param name="values">The registry values.</param>
+        /// <param name="persistentValuesChanged"><c>true</c> if the persistent values have been changed; otherwise, <c>false</c>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="values"/> is null.</exception>
-        public DescriptorRegistryValues(IDictionary<string, DescriptorRegistryItem> values)
+        public DescriptorRegistryValues(IDictionary<string, DescriptorRegistryItem> values, bool persistentValuesChanged)
         {
             if (values == null)
             {
@@ -51,7 +52,7 @@ namespace PSFilterLoad.PSApi
 
             this.persistedValues = new ReadOnlyDictionary<string, DescriptorRegistryItem>(persistentItems);
             this.sessionValues = new ReadOnlyDictionary<string, DescriptorRegistryItem>(sessionItems);
-            this.changed = true;
+            this.changed = persistentValuesChanged;
         }
 
         /// <summary>
