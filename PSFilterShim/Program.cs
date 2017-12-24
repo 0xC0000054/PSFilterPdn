@@ -139,10 +139,6 @@ namespace PSFilterShim
 					{
 						BinaryFormatter bf = new BinaryFormatter();
 						registryValues = (DescriptorRegistryValues)bf.Deserialize(fs);
-						if (registryValues != null)
-						{
-							registryValues.Changed = false;
-						}
 					}
 				}
 				catch (FileNotFoundException)
@@ -209,7 +205,7 @@ namespace PSFilterShim
 								}
 
 								registryValues = lps.GetRegistryValues();
-								if (registryValues != null && registryValues.Changed)
+								if (registryValues != null)
 								{
 									using (FileStream fs = new FileStream(settings.DescriptorRegistryPath, FileMode.Create, FileAccess.Write, FileShare.None))
 									{
