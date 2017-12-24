@@ -81,7 +81,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 if (ptr == IntPtr.Zero)
                 {
-                    throw new ArgumentNullException("ptr");
+                    throw new ArgumentNullException(nameof(ptr));
                 }
 
                 this.refCount = 1;
@@ -269,7 +269,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             IntPtr newZString = IntPtr.Zero;

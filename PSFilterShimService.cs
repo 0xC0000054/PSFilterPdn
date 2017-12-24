@@ -35,7 +35,7 @@ namespace PSFilterPdn
         {
             if (abort == null)
             {
-                throw new ArgumentNullException("abort");
+                throw new ArgumentNullException(nameof(abort));
             }
 
             this.abortFunc = abort;

@@ -36,7 +36,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (name == null)
                 {
-                    throw new ArgumentNullException("name");
+                    throw new ArgumentNullException(nameof(name));
                 }
 
                 this.name = name;

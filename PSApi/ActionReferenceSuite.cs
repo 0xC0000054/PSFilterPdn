@@ -142,7 +142,7 @@ namespace PSFilterLoad.PSApi
         {
             if (values == null)
             {
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             }
 
             IntPtr reference = GenerateDictionaryKey();

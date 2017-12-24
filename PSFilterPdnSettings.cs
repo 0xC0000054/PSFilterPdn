@@ -37,7 +37,7 @@ namespace PSFilterPdn
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             this.path = path;

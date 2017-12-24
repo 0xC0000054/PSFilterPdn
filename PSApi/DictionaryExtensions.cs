@@ -21,7 +21,7 @@ namespace PSFilterLoad.PSApi
         {
             if (dictionary == null)
             {
-                throw new ArgumentNullException("dictionary");
+                throw new ArgumentNullException(nameof(dictionary));
             }
 
             if (!dictionary.ContainsKey(key))

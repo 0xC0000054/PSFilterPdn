@@ -137,7 +137,7 @@ namespace PSFilterPdn
             {
                 if (path == null)
                 {
-                    throw new ArgumentNullException("path");
+                    throw new ArgumentNullException(nameof(path));
                 }
 
                 this.path = path;
@@ -158,11 +158,11 @@ namespace PSFilterPdn
             {
                 if (parent == null)
                 {
-                    throw new ArgumentNullException("parent");
+                    throw new ArgumentNullException(nameof(parent));
                 }
                 if (subDirectoryName == null)
                 {
-                    throw new ArgumentNullException("subDirectoryName");
+                    throw new ArgumentNullException(nameof(subDirectoryName));
                 }
 
                 this.path = Path.Combine(parent.path, subDirectoryName);
@@ -264,12 +264,12 @@ namespace PSFilterPdn
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             if (fileExtension == null)
             {
-                throw new ArgumentNullException("fileExtension");
+                throw new ArgumentNullException(nameof(fileExtension));
             }
 
             string fullPath = Path.GetFullPath(path);

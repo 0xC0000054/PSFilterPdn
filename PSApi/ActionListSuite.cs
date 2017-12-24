@@ -97,11 +97,11 @@ namespace PSFilterLoad.PSApi
         {
             if (actionReferenceSuite == null)
             {
-                throw new ArgumentNullException("actionReferenceSuite");
+                throw new ArgumentNullException(nameof(actionReferenceSuite));
             }
             if (zstringSuite == null)
             {
-                throw new ArgumentNullException("zstringSuite");
+                throw new ArgumentNullException(nameof(zstringSuite));
             }
 
             this.make = new ActionListMake(Make);
@@ -169,7 +169,7 @@ namespace PSFilterLoad.PSApi
         {
             if (values == null)
             {
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             }
 
             IntPtr list = GenerateDictionaryKey();

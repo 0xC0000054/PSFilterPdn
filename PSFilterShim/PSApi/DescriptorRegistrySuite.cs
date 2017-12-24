@@ -35,7 +35,7 @@ namespace PSFilterLoad.PSApi
         {
             if (actionDescriptorSuite == null)
             {
-                throw new ArgumentNullException("actionDescriptorSuite");
+                throw new ArgumentNullException(nameof(actionDescriptorSuite));
             }
 
             this.actionDescriptorSuite = actionDescriptorSuite;
@@ -88,7 +88,7 @@ namespace PSFilterLoad.PSApi
         {
             if (values == null)
             {
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             }
 
             ReadOnlyDictionary<string, DescriptorRegistryItem> persistedValues = values.PersistedValues;

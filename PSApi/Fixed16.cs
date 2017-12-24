@@ -34,7 +34,7 @@ namespace PSFilterLoad.PSApi
         {
             if (value < 0 || value > 65535)
             {
-                throw new ArgumentOutOfRangeException("value", value, "The value must be between 0 and 65535.");
+                throw new ArgumentOutOfRangeException(nameof(value), value, "The value must be between 0 and 65535.");
             }
 
             this.fixedValue = (value << 16);

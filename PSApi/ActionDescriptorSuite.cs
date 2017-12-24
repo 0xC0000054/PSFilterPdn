@@ -179,15 +179,15 @@ namespace PSFilterLoad.PSApi
         {
             if (actionListSuite == null)
             {
-                throw new ArgumentNullException("actionListSuite");
+                throw new ArgumentNullException(nameof(actionListSuite));
             }
             if (actionReferenceSuite == null)
             {
-                throw new ArgumentNullException("actionReferenceSuite");
+                throw new ArgumentNullException(nameof(actionReferenceSuite));
             }
             if (zstringSuite == null)
             {
-                throw new ArgumentNullException("zstringSuite");
+                throw new ArgumentNullException(nameof(zstringSuite));
             }
 
             this.make = new ActionDescriptorMake(Make);

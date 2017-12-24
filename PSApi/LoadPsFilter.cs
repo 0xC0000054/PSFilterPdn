@@ -141,7 +141,7 @@ namespace PSFilterLoad.PSApi
 		internal void SetProgressCallback(Action<int, int> callback)
 		{
 			if (callback == null)
-				throw new ArgumentNullException("callback");
+				throw new ArgumentNullException(nameof(callback));
 
 			progressFunc = callback;
 		}
@@ -149,7 +149,7 @@ namespace PSFilterLoad.PSApi
 		internal void SetAbortCallback(Func<byte> callback)
 		{
 			if (callback == null)
-				throw new ArgumentNullException("callback");
+				throw new ArgumentNullException(nameof(callback));
 
 			abortFunc = callback;
 		}
@@ -231,7 +231,7 @@ namespace PSFilterLoad.PSApi
 		internal LoadPsFilter(PaintDotNet.Effects.EffectEnvironmentParameters eep, IntPtr owner, PluginUISettings pluginUISettings)
 		{
 			if (eep == null)
-				throw new ArgumentNullException("eep");
+				throw new ArgumentNullException(nameof(eep));
 
 			this.inputHandling = FilterDataHandling.None;
 			this.outputHandling = FilterDataHandling.None;

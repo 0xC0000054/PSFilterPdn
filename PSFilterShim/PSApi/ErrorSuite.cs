@@ -49,7 +49,7 @@ namespace PSFilterLoad.PSApi
         {
             if (zstringSuite == null)
             {
-                throw new ArgumentNullException("zstringSuite");
+                throw new ArgumentNullException(nameof(zstringSuite));
             }
 
             this.setErrorFromPString = new ErrorSuiteSetErrorFromPString(SetErrorFromPString);

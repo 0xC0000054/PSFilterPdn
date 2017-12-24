@@ -34,7 +34,7 @@ namespace PSFilterPdn
         {
             if (service == null)
             {
-                throw new ArgumentNullException("service");
+                throw new ArgumentNullException(nameof(service));
             }
 
             if (_host == null)

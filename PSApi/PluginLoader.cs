@@ -564,7 +564,7 @@ namespace PSFilterLoad.PSApi
         {
             if (fileName == null)
             {
-                throw new ArgumentNullException("fileName");
+                throw new ArgumentNullException(nameof(fileName));
             }
 
             PEFile.ProcessorArchitecture platform = PEFile.GetProcessorArchitecture(fileName);

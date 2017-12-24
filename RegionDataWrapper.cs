@@ -42,7 +42,7 @@ namespace PSFilterPdn
         {
             if (info == null)
             {
-                throw new ArgumentNullException("info");
+                throw new ArgumentNullException(nameof(info));
             }
 
             info.AddValue("rgnData", this.rgnData, typeof(byte[]));

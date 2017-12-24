@@ -138,7 +138,7 @@ namespace PSFilterLoad.PSApi
 		public void SetProgressCallback(Action<int, int> callback)
 		{
 			if (callback == null)
-				throw new ArgumentNullException("callback");
+				throw new ArgumentNullException(nameof(callback));
 
 			progressFunc = callback;
 		}
@@ -146,7 +146,7 @@ namespace PSFilterLoad.PSApi
 		public void SetAbortCallback(Func<byte> abortCallback)
 		{
 			if (abortCallback == null)
-				throw new ArgumentNullException("abortCallback");
+				throw new ArgumentNullException(nameof(abortCallback));
 
 			abortFunc = abortCallback;
 		}
@@ -229,7 +229,7 @@ namespace PSFilterLoad.PSApi
 		public LoadPsFilter(PSFilterPdn.PSFilterShimSettings settings, Region selection)
 		{
 			if (settings == null)
-				throw new ArgumentNullException("settings");
+				throw new ArgumentNullException(nameof(settings));
 
 			this.dataPtr = IntPtr.Zero;
 
