@@ -20,7 +20,7 @@ namespace PSFilterLoad.PSApi
     {
         private readonly ReadOnlyDictionary<string, DescriptorRegistryItem> persistedValues;
         private readonly ReadOnlyDictionary<string, DescriptorRegistryItem> sessionValues;
-        private bool changed;
+        private bool dirty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DescriptorRegistryValues"/> class.
@@ -61,7 +61,7 @@ namespace PSFilterLoad.PSApi
 
             this.persistedValues = new ReadOnlyDictionary<string, DescriptorRegistryItem>(persistentItems);
             this.sessionValues = new ReadOnlyDictionary<string, DescriptorRegistryItem>(sessionItems);
-            this.changed = persistentValuesChanged;
+            this.dirty = persistentValuesChanged;
         }
 
         /// <summary>
@@ -93,20 +93,20 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance has changed.
+        /// Gets or sets a value indicating whether the persisted settings have been marked as changed.
         /// </summary>
         /// <value>
-        ///   <c>true</c> if this instance changed; otherwise, <c>false</c>.
+        ///   <c>true</c> if the persisted settings have changed; otherwise, <c>false</c>.
         /// </value>
-        public bool Changed
+        public bool Dirty
         {
             get
             {
-                return this.changed;
+                return this.dirty;
             }
             set
             {
-                this.changed = value;
+                this.dirty = value;
             }
         }
     }

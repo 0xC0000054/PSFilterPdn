@@ -1719,7 +1719,7 @@ namespace PSFilterPdn
                         {
                             this.descriptorRegistry = new DescriptorRegistryValues(values)
                             {
-                                Changed = false
+                                Dirty = false
                             };
                         }
                     }
@@ -1733,7 +1733,7 @@ namespace PSFilterPdn
 
         private void SaveDescriptorRegistry()
         {
-            if (descriptorRegistry != null && descriptorRegistry.Changed)
+            if (descriptorRegistry != null && descriptorRegistry.Dirty)
             {
                 string userDataPath = Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
                 string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
@@ -1746,7 +1746,7 @@ namespace PSFilterPdn
                         BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
                         bf.Serialize(fs, descriptorRegistry.PersistedValues);
                     }
-                    descriptorRegistry.Changed = false;
+                    descriptorRegistry.Dirty = false;
                 }
                 catch (IOException ex)
                 {
