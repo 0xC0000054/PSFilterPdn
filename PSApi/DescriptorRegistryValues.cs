@@ -109,19 +109,5 @@ namespace PSFilterLoad.PSApi
                 this.changed = value;
             }
         }
-
-        /// <summary>
-        /// Gets a value indicating whether this instance has persisted data.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if this instance has persisted data; otherwise, <c>false</c>.
-        /// </value>
-        internal bool HasPersistedData
-        {
-            get
-            {
-                return (this.persistedValues.Count > 0);
-            }
-        }
     }
 }

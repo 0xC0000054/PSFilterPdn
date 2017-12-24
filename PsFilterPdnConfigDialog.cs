@@ -1735,30 +1735,27 @@ namespace PSFilterPdn
         {
             if (descriptorRegistry != null && descriptorRegistry.Changed)
             {
-                if (descriptorRegistry.HasPersistedData)
-                {
-                    string userDataPath = Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
-                    string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
+                string userDataPath = Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
+                string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
 
-                    try
+                try
+                {
+                    using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
-                        using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
-                        {
-                            SelfBinder binder = new SelfBinder();
-                            BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
-                            bf.Serialize(fs, descriptorRegistry.PersistedValues);
-                        }
+                        SelfBinder binder = new SelfBinder();
+                        BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
+                        bf.Serialize(fs, descriptorRegistry.PersistedValues);
                     }
-                    catch (IOException ex)
-                    {
-                        ShowErrorMessage(ex.Message);
-                    }
-                    catch (UnauthorizedAccessException ex)
-                    {
-                        ShowErrorMessage(ex.Message);
-                    }
+                    descriptorRegistry.Changed = false;
                 }
-                descriptorRegistry.Changed = false;
+                catch (IOException ex)
+                {
+                    ShowErrorMessage(ex.Message);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    ShowErrorMessage(ex.Message);
+                }
             }
         }
     }
