@@ -26,6 +26,15 @@ namespace PSFilterLoad.PSApi
         /// Initializes a new instance of the <see cref="DescriptorRegistryValues"/> class.
         /// </summary>
         /// <param name="values">The registry values.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="values"/> is null.</exception>
+        internal DescriptorRegistryValues(ReadOnlyDictionary<string, DescriptorRegistryItem> values) : this(values, false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DescriptorRegistryValues"/> class.
+        /// </summary>
+        /// <param name="values">The registry values.</param>
         /// <param name="persistentValuesChanged"><c>true</c> if the persistent values have been changed; otherwise, <c>false</c>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="values"/> is null.</exception>
         public DescriptorRegistryValues(IDictionary<string, DescriptorRegistryItem> values, bool persistentValuesChanged)
