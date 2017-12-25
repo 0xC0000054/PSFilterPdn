@@ -17,7 +17,6 @@
 
 using System.Runtime.InteropServices;
 
-
 namespace PSFilterLoad.PSApi
 {
     [StructLayout(LayoutKind.Sequential)]
