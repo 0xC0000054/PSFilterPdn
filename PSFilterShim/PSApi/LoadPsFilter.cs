@@ -127,6 +127,15 @@ namespace PSFilterLoad.PSApi
 		private ResourceSuite resourceSuite;
 		private SPBasicSuiteProvider basicSuiteProvider;
 
+		/// <summary>
+		/// The host signature (.PDN in little-endian byte order) - 'NDP.'
+		/// </summary>
+		/// <remarks>
+		/// The signature is specified in little-endian byte order for compatibility with previous versions
+		/// that used BitConverter.ToUInt32 after converting ".PDN" to a byte array with Encoding.ASCII.GetBytes.
+		/// </remarks>
+		private const uint HostSignature = 0x4e44502e;
+
 		public Surface Dest
 		{
 			get
@@ -3116,7 +3125,7 @@ namespace PSFilterLoad.PSApi
 
 			filterRecord->bufferSpace = BufferSuite.Instance.AvailableSpace;
 			filterRecord->maxSpace = filterRecord->bufferSpace;
-			filterRecord->hostSig = BitConverter.ToUInt32(Encoding.ASCII.GetBytes(".PDN"), 0);
+			filterRecord->hostSig = HostSignature;
 			filterRecord->hostProcs = Marshal.GetFunctionPointerForDelegate(hostProc);
 			filterRecord->platformData = platFormDataPtr;
 			filterRecord->bufferProcs = bufferProcsPtr;
