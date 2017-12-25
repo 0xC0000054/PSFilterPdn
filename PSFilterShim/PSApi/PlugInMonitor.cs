@@ -22,15 +22,15 @@ namespace PSFilterLoad.PSApi
     [StructLayout(LayoutKind.Sequential)]
     internal struct PlugInMonitor
     {
-        public int gamma;
-        public int redX;
-        public int redY;
-        public int greenX;
-        public int greenY;
-        public int blueX;
-        public int blueY;
-        public int whiteX;
-        public int whiteY;
-        public int ambient;
+        public Fixed16 gamma;
+        public Fixed16 redX;
+        public Fixed16 redY;
+        public Fixed16 greenX;
+        public Fixed16 greenY;
+        public Fixed16 blueX;
+        public Fixed16 blueY;
+        public Fixed16 whiteX;
+        public Fixed16 whiteY;
+        public Fixed16 ambient;
     }
 }
