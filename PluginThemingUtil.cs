@@ -55,6 +55,8 @@ namespace PSFilterPdn
             }
             catch
             {
+                // Ignore any exceptions that are thrown when trying to enable the dialog theming.
+                // The dialog should be shown to the user even if theming could not be enabled.
             }
         }
 
