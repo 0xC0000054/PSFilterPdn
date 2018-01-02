@@ -1514,12 +1514,12 @@ namespace PSFilterPdn
                                 if (nodes.ContainsKey(category))
                                 {
                                     TreeNode node = nodes[category];
-                                    node.Nodes.Add(child.CloneT<TreeNode>());
+                                    node.Nodes.Add(child.CloneT());
                                 }
                                 else
                                 {
                                     TreeNode node = new TreeNode(category);
-                                    node.Nodes.Add(child.CloneT<TreeNode>());
+                                    node.Nodes.Add(child.CloneT());
 
                                     nodes.Add(category, node);
                                 }
