@@ -1006,10 +1006,7 @@ namespace PSFilterPdn
                     UpdateFilterListParam uflp = new UpdateFilterListParam();
                     int count = this.searchDirectories.Count;
                     uflp.directories = new string[count];
-                    for (int i = 0; i < count; i++)
-                    {
-                        uflp.directories[i] = this.searchDirectories[i];
-                    }
+                    this.searchDirectories.CopyTo(uflp.directories);
                     uflp.searchSubdirectories = this.subDirSearchCb.Checked;
 
                     this.filterTree.Nodes.Clear();
