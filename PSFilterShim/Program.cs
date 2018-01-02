@@ -221,8 +221,6 @@ namespace PSFilterShim
 						serviceProxy.SetProxyErrorMessage(lps.ErrorMessage);
 					}
 				}
-
-
 			}
 			catch (BadImageFormatException ex)
 			{
@@ -261,10 +259,5 @@ namespace PSFilterShim
 				}
 			}
 		}
-
 	}
-
-
-
-
 }
