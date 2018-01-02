@@ -135,15 +135,6 @@ namespace PSFilterPdn
                     XmlDocument xmlDocument = new XmlDocument();
                     xmlDocument.Load(xmlReader);
 
-                    XmlNode searchSubDirNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchSubdirectoriesPath);
-                    if (searchSubDirNode != null)
-                    {
-                        bool result;
-                        if (bool.TryParse(searchSubDirNode.InnerText.Trim(), out result))
-                        {
-                            this.searchSubdirectories = result;
-                        }
-                    }
                     XmlNode searchDirsNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchDirectoriesPath);
                     if (searchDirsNode != null)
                     {
@@ -186,6 +177,15 @@ namespace PSFilterPdn
                             {
                                 this.searchDirectories = new HashSet<string>(directories, StringComparer.OrdinalIgnoreCase);
                             }
+                        }
+                    }
+                    XmlNode searchSubDirNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchSubdirectoriesPath);
+                    if (searchSubDirNode != null)
+                    {
+                        bool result;
+                        if (bool.TryParse(searchSubDirNode.InnerText.Trim(), out result))
+                        {
+                            this.searchSubdirectories = result;
                         }
                     }
 
