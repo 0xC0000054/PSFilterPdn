@@ -159,7 +159,7 @@ namespace PSFilterShim
 
 					if (filterParameters != null)
 					{
-						// ignore the filters that only use the data handle, e.g. Filter Factory
+						// Ignore the filters that only use the data handle, e.g. Filter Factory.
 						byte[] parameterData = filterParameters.GlobalParameters.GetParameterDataBytes();
 
 						if (parameterData != null || filterParameters.AETEDictionary.Count > 0)
