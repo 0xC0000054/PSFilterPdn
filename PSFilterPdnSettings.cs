@@ -23,7 +23,7 @@ namespace PSFilterPdn
     {
         private readonly string path;
         private bool changed;
-        [DataMember(Name = "DirectoryList")]
+        [DataMember(Name = "SearchDirectories")]
         private HashSet<string> searchDirectories;
         [DataMember(Name = "SearchSubdirectories")]
         private bool searchSubdirectories;
