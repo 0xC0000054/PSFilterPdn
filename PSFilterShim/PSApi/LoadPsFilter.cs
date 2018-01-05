@@ -455,9 +455,9 @@ namespace PSFilterLoad.PSApi
 			return false;
 		}
 
-		private bool IgnoreAlphaChannel(PluginData data)
+		private bool IgnoreTransparency(PluginData data)
 		{
-			// Some filters do not handle the alpha channel correctly despite what their filterInfo says.
+			// Some filters do not handle transparency correctly despite what their filterInfo says.
 			if (data.FilterInfo == null ||
 				data.Category.Equals("Axion", StringComparison.Ordinal) ||
 				data.Category.Equals("Vizros 4", StringComparison.Ordinal) && data.Title.StartsWith("Lake", StringComparison.Ordinal) ||
@@ -1284,7 +1284,7 @@ namespace PSFilterLoad.PSApi
 			useChannelPorts = EnableChannelPorts(pdata);
 			this.basicSuiteProvider.SetPluginName(pdata.Title.TrimEnd('.'));
 
-			ignoreTransparency = IgnoreAlphaChannel(pdata);
+			ignoreTransparency = IgnoreTransparency(pdata);
 
 			if (pdata.FilterInfo != null)
 			{

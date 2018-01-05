@@ -445,11 +445,11 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		///Checks if the host should ignore the alpha channel for the plugin.
+		///Checks if the host should ignore transparency for the plugin.
 		/// </summary>
 		/// <param name="data">The plugin to check.</param>
-		/// <returns><c>true</c> if the alpha channel should be ignored; otherwise <c>false</c>.</returns>
-		private bool IgnoreAlphaChannel(PluginData data)
+		/// <returns><c>true</c> if transparency should be ignored; otherwise <c>false</c>.</returns>
+		private bool IgnoreTransparency(PluginData data)
 		{
 			if (data.FilterInfo == null ||
 				data.Category.Equals("Nik Collection", StringComparison.Ordinal) && data.Title.StartsWith("Dfine 2", StringComparison.Ordinal))
@@ -1274,7 +1274,7 @@ namespace PSFilterLoad.PSApi
 			useChannelPorts = EnableChannelPorts(pdata);
 			this.basicSuiteProvider.SetPluginName(pdata.Title.TrimEnd('.'));
 
-			ignoreTransparency = IgnoreAlphaChannel(pdata);
+			ignoreTransparency = IgnoreTransparency(pdata);
 
 			if (pdata.FilterInfo != null)
 			{
