@@ -1205,10 +1205,8 @@ namespace PSFilterLoad.PSApi
 
 					for (int x = 0; x < dest.Width; x++)
 					{
-						if (src->A > 0)
-						{
-							dst->A = src->A;
-						}
+						dst->A = src->A;
+
 						src++;
 						dst++;
 					}
