@@ -99,7 +99,7 @@ namespace PSFilterLoad.PSApi
 		private byte[] backgroundColor;
 		private byte[] foregroundColor;
 
-		private bool ignoreAlpha;
+		private bool ignoreTransparency;
 		private FilterDataHandling inputHandling;
 		private FilterDataHandling outputHandling;
 
@@ -1106,7 +1106,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->maskRowBytes = 0;
 
 			filterRecord->imageMode = PSConstants.plugInModeRGBColor;
-			if (ignoreAlpha)
+			if (ignoreTransparency)
 			{
 				filterRecord->inLayerPlanes = 0;
 				filterRecord->inTransparencyMask = 0; // Paint.NET is always PixelFormat.Format32bppArgb
@@ -1121,7 +1121,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->inLayerMasks = 0;
 			filterRecord->inInvertedLayerMasks = 0;
 
-			filterRecord->inColumnBytes = ignoreAlpha ? 3 : 4;
+			filterRecord->inColumnBytes = ignoreTransparency ? 3 : 4;
 
 			if (filterCase == FilterCase.ProtectedTransparencyNoSelection ||
 				filterCase == FilterCase.ProtectedTransparencyWithSelection)
@@ -1274,7 +1274,7 @@ namespace PSFilterLoad.PSApi
 			useChannelPorts = EnableChannelPorts(pdata);
 			this.basicSuiteProvider.SetPluginName(pdata.Title.TrimEnd('.'));
 
-			ignoreAlpha = IgnoreAlphaChannel(pdata);
+			ignoreTransparency = IgnoreAlphaChannel(pdata);
 
 			if (pdata.FilterInfo != null)
 			{
@@ -1303,7 +1303,7 @@ namespace PSFilterLoad.PSApi
 				dest.CopySurface(source); // copy the source image to the dest image if the filter does not write to all the pixels.
 			}
 
-			if (ignoreAlpha)
+			if (ignoreTransparency)
 			{
 				ClearDestAlpha();
 			}
@@ -2674,7 +2674,7 @@ namespace PSFilterLoad.PSApi
 
 				displaySurface = new Surface(width, height);
 
-				if (ignoreAlpha || !haveMask)
+				if (ignoreTransparency || !haveMask)
 				{
 					new UnaryPixelOps.SetAlphaChannelTo255().Apply(displaySurface, displaySurface.Bounds);
 				}
@@ -2983,7 +2983,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->imageSize.h = width;
 			filterRecord->imageSize.v = height;
 
-			if (ignoreAlpha)
+			if (ignoreTransparency)
 			{
 				filterRecord->planes = 3;
 			}
@@ -3063,7 +3063,7 @@ namespace PSFilterLoad.PSApi
 			if (useChannelPorts)
 			{
 				channelPortsPtr = channelPortsSuite.CreateChannelPortsPointer();
-				readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(ignoreAlpha, selectedRegion != null);
+				readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(ignoreTransparency, selectedRegion != null);
 			}
 			else
 			{

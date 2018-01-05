@@ -99,7 +99,7 @@ namespace PSFilterLoad.PSApi
 		private byte[] backgroundColor;
 		private byte[] foregroundColor;
 
-		private bool ignoreAlpha;
+		private bool ignoreTransparency;
 		private FilterDataHandling inputHandling;
 		private FilterDataHandling outputHandling;
 
@@ -1110,7 +1110,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->maskRowBytes = 0;
 
 			filterRecord->imageMode = PSConstants.plugInModeRGBColor;
-			if (ignoreAlpha)
+			if (ignoreTransparency)
 			{
 				filterRecord->inLayerPlanes = 0;
 				filterRecord->inTransparencyMask = 0; // Paint.NET is always PixelFormat.Format32bppArgb
@@ -1125,7 +1125,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->inLayerMasks = 0;
 			filterRecord->inInvertedLayerMasks = 0;
 
-			filterRecord->inColumnBytes = ignoreAlpha ? 3 : 4;
+			filterRecord->inColumnBytes = ignoreTransparency ? 3 : 4;
 
 			if (filterCase == FilterCase.ProtectedTransparencyNoSelection ||
 				filterCase == FilterCase.ProtectedTransparencyWithSelection)
@@ -1284,7 +1284,7 @@ namespace PSFilterLoad.PSApi
 			useChannelPorts = EnableChannelPorts(pdata);
 			this.basicSuiteProvider.SetPluginName(pdata.Title.TrimEnd('.'));
 
-			ignoreAlpha = IgnoreAlphaChannel(pdata);
+			ignoreTransparency = IgnoreAlphaChannel(pdata);
 
 			if (pdata.FilterInfo != null)
 			{
@@ -1314,7 +1314,7 @@ namespace PSFilterLoad.PSApi
 				dest.CopySurface(source);
 			}
 
-			if (ignoreAlpha)
+			if (ignoreTransparency)
 			{
 				ClearDestAlpha();
 			}
@@ -2699,7 +2699,7 @@ namespace PSFilterLoad.PSApi
 
 				displaySurface = new Surface(width, height);
 
-				if (ignoreAlpha || !haveMask)
+				if (ignoreTransparency || !haveMask)
 				{
 					displaySurface.SetAlphaTo255();
 				}
@@ -3006,7 +3006,7 @@ namespace PSFilterLoad.PSApi
 			filterRecord->imageSize.h = (short)source.Width;
 			filterRecord->imageSize.v = (short)source.Height;
 
-			if (ignoreAlpha)
+			if (ignoreTransparency)
 			{
 				filterRecord->planes = (short)3;
 			}
@@ -3088,7 +3088,7 @@ namespace PSFilterLoad.PSApi
 			if (useChannelPorts)
 			{
 				channelPortsPtr = channelPortsSuite.CreateChannelPortsPointer();
-				readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(ignoreAlpha, selectedRegion != null);
+				readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(ignoreTransparency, selectedRegion != null);
 			}
 			else
 			{
