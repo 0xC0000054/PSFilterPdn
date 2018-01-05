@@ -1132,7 +1132,7 @@ namespace PSFilterLoad.PSApi
 				filterRecord->outNonLayerPlanes = 3;
 				filterRecord->outColumnBytes = 3;
 
-				ClearDestAlpha();
+				CopySourceTransparency();
 			}
 			else
 			{
@@ -1194,7 +1194,7 @@ namespace PSFilterLoad.PSApi
 			return true;
 		}
 
-		private unsafe void ClearDestAlpha()
+		private unsafe void CopySourceTransparency()
 		{
 			if (!copyToDest)
 			{
@@ -1305,7 +1305,7 @@ namespace PSFilterLoad.PSApi
 
 			if (ignoreTransparency)
 			{
-				ClearDestAlpha();
+				CopySourceTransparency();
 			}
 
 			if (pdata.Aete != null)

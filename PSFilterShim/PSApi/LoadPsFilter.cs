@@ -1136,7 +1136,7 @@ namespace PSFilterLoad.PSApi
 				filterRecord->outNonLayerPlanes = 3;
 				filterRecord->outColumnBytes = 3;
 
-				ClearDestAlpha();
+				CopySourceTransparency();
 			}
 			else
 			{
@@ -1202,9 +1202,9 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		/// Clears the dest alpha to match the source alpha.
+		/// Copies the source transparency to the destination.
 		/// </summary>
-		private unsafe void ClearDestAlpha()
+		private unsafe void CopySourceTransparency()
 		{
 			if (!copyToDest)
 			{
@@ -1316,7 +1316,7 @@ namespace PSFilterLoad.PSApi
 
 			if (ignoreTransparency)
 			{
-				ClearDestAlpha();
+				CopySourceTransparency();
 			}
 
 			if (pdata.Aete != null)
