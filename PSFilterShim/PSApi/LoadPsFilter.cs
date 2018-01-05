@@ -85,7 +85,7 @@ namespace PSFilterLoad.PSApi
 
 		private bool disposed;
 		private PluginModule module;
-		private PluginPhase phase;
+		private PluginPhase previousPhase;
 		private Action<int, int> progressFunc;
 		private IntPtr dataPtr;
 		private short result;
@@ -242,7 +242,7 @@ namespace PSFilterLoad.PSApi
 
 			this.dataPtr = IntPtr.Zero;
 
-			this.phase = PluginPhase.None;
+			this.previousPhase = PluginPhase.None;
 			this.errorMessage = string.Empty;
 			this.disposed = false;
 			this.copyToDest = true;
@@ -771,7 +771,7 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		private unsafe void RestoreParameterHandles()
 		{
-			if (phase == PluginPhase.Parameters)
+			if (previousPhase == PluginPhase.Parameters)
 				return;
 
 			byte[] parameterDataBytes = globalParameters.GetParameterDataBytes();
@@ -925,7 +925,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe bool PluginApply()
 		{
 #if DEBUG
-			System.Diagnostics.Debug.Assert(phase == PluginPhase.Prepare);
+			System.Diagnostics.Debug.Assert(previousPhase == PluginPhase.Prepare);
 #endif
 			result = PSError.noErr;
 
@@ -1062,7 +1062,7 @@ namespace PSFilterLoad.PSApi
 				return false;
 			}
 
-			phase = PluginPhase.Parameters;
+			previousPhase = PluginPhase.Parameters;
 
 			return true;
 		}
@@ -1195,7 +1195,7 @@ namespace PSFilterLoad.PSApi
 			}
 
 #if DEBUG
-			phase = PluginPhase.Prepare;
+			previousPhase = PluginPhase.Prepare;
 #endif
 
 			return true;
