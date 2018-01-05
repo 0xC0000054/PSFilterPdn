@@ -436,7 +436,7 @@ namespace PSFilterLoad.PSApi
 		/// <returns>
 		///   <c>true</c> if the source image has transparent pixels; otherwise, <c>false</c>.
 		/// </returns>
-		private unsafe bool HasTransparentAlpha()
+		private unsafe bool HasTransparentPixels()
 		{
 			for (int y = 0; y < source.Height; y++)
 			{
@@ -463,7 +463,7 @@ namespace PSFilterLoad.PSApi
 				data.Category.Equals("Vizros 4", StringComparison.Ordinal) && data.Title.StartsWith("Lake", StringComparison.Ordinal) ||
 				data.Category.Equals("Nik Collection", StringComparison.Ordinal) && data.Title.StartsWith("Dfine 2", StringComparison.Ordinal))
 			{
-				if (HasTransparentAlpha())
+				if (HasTransparentPixels())
 				{
 					filterCase = FilterCase.FloatingSelection;
 				}
@@ -488,7 +488,7 @@ namespace PSFilterLoad.PSApi
 
 			if (filterInfo[filterCaseIndex].InputHandling == FilterDataHandling.CantFilter)
 			{
-				bool hasTransparency = HasTransparentAlpha();
+				bool hasTransparency = HasTransparentPixels();
 				if (!hasTransparency)
 				{
 					switch (filterCase)
