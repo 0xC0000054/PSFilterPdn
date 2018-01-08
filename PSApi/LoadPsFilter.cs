@@ -1302,8 +1302,7 @@ namespace PSFilterLoad.PSApi
 			{
 				dest.CopySurface(source); // copy the source image to the dest image if the filter does not write to all the pixels.
 			}
-
-			if (ignoreTransparency)
+			else if (ignoreTransparency)
 			{
 				CopySourceTransparency();
 			}
