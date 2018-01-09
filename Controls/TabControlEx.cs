@@ -315,10 +315,10 @@ namespace PSFilterPdn.Controls
 
                 try
                 {
-                    background = new SolidBrush(backColor);
+                    background = new SolidBrush(BackColor);
                     border = new Pen(borderColor);
                     hotTrack = new SolidBrush(hotTrackColor);
-                    text = new SolidBrush(foreColor);
+                    text = new SolidBrush(ForeColor);
                     format = new StringFormat()
                     {
                         Alignment = StringAlignment.Center,
