@@ -3236,6 +3236,12 @@ namespace PSFilterLoad.PSApi
 						displaySurface = null;
 					}
 
+					if (descriptorSuite != null)
+					{
+						descriptorSuite.Dispose();
+						descriptorSuite = null;
+					}
+
 					if (channelPortsSuite != null)
 					{
 						channelPortsSuite.Dispose();
