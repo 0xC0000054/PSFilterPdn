@@ -17,7 +17,7 @@ namespace PSFilterPdn
     internal static class ListExtensions
     {
         /// <summary>
-        /// Determines whether the specified lists contain the same elements, ignoring duplicates.
+        /// Determines whether the specified lists contain the same elements, ignoring order and duplicates.
         /// </summary>
         /// <typeparam name="T">The type of the elements in the collection.</typeparam>
         /// <param name="first">The first list.</param>
