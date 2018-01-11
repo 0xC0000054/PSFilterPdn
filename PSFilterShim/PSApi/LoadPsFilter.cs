@@ -2695,7 +2695,7 @@ namespace PSFilterLoad.PSApi
 
 				displaySurface = new Surface(width, height);
 
-				if (ignoreTransparency || !haveMask)
+				if (!haveMask)
 				{
 					displaySurface.SetAlphaTo255();
 				}
