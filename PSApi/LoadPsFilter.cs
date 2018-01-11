@@ -2532,8 +2532,8 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		private unsafe void PostProcessOutputData()
 		{
-			if ((filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection) &&
-				outputHandling == FilterDataHandling.FillMask)
+			if (outputHandling == FilterDataHandling.FillMask &&
+				(filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection))
 			{
 				int width = dest.Width;
 				int height = dest.Height;
