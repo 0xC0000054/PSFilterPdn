@@ -488,8 +488,7 @@ namespace PSFilterLoad.PSApi
 
 			if (filterInfo[filterCaseIndex].InputHandling == FilterDataHandling.CantFilter)
 			{
-				bool hasTransparency = HasTransparentPixels();
-				if (!hasTransparency)
+				if (!HasTransparentPixels())
 				{
 					switch (filterCase)
 					{
@@ -506,7 +505,7 @@ namespace PSFilterLoad.PSApi
 				else if (filterInfo[filterCaseIndex + 2].InputHandling == FilterDataHandling.CantFilter)
 				{
 					// If the protected transparency modes are not supported use the next most appropriate mode.
-					if (hasTransparency && filterInfo[FilterCase.FloatingSelection - 1].InputHandling != FilterDataHandling.CantFilter)
+					if (filterInfo[FilterCase.FloatingSelection - 1].InputHandling != FilterDataHandling.CantFilter)
 					{
 						filterCase = FilterCase.FloatingSelection;
 					}
