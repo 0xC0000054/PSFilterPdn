@@ -455,7 +455,7 @@ namespace PSFilterLoad.PSApi
 			return false;
 		}
 
-		private bool SetFilterTransparencyMode(PluginData data)
+		private void SetFilterTransparencyMode(PluginData data)
 		{
 			// Some filters do not handle transparency correctly despite what their filterInfo says.
 			if (data.FilterInfo == null ||
@@ -479,37 +479,15 @@ namespace PSFilterLoad.PSApi
 							break;
 					}
 				}
-
-				return true;
 			}
-
-			int filterCaseIndex = filterCase - 1;
-			System.Collections.ObjectModel.ReadOnlyCollection<FilterCaseInfo> filterInfo = data.FilterInfo;
-
-			if (filterInfo[filterCaseIndex].InputHandling == FilterDataHandling.CantFilter)
+			else
 			{
-				if (!HasTransparentPixels())
-				{
-					switch (filterCase)
-					{
-						case FilterCase.EditableTransparencyNoSelection:
-							filterCase = FilterCase.FlatImageNoSelection;
-							break;
-						case FilterCase.EditableTransparencyWithSelection:
-							filterCase = FilterCase.FlatImageWithSelection;
-							break;
-					}
+				int filterCaseIndex = filterCase - 1;
+				System.Collections.ObjectModel.ReadOnlyCollection<FilterCaseInfo> filterInfo = data.FilterInfo;
 
-					return true;
-				}
-				else if (filterInfo[filterCaseIndex + 2].InputHandling == FilterDataHandling.CantFilter)
+				if (filterInfo[filterCaseIndex].InputHandling == FilterDataHandling.CantFilter)
 				{
-					// If the protected transparency modes are not supported use the next most appropriate mode.
-					if (filterInfo[FilterCase.FloatingSelection - 1].InputHandling != FilterDataHandling.CantFilter)
-					{
-						filterCase = FilterCase.FloatingSelection;
-					}
-					else
+					if (!HasTransparentPixels())
 					{
 						switch (filterCase)
 						{
@@ -521,27 +499,42 @@ namespace PSFilterLoad.PSApi
 								break;
 						}
 					}
-
-					return true;
-				}
-				else
-				{
-					switch (filterCase)
+					else if (filterInfo[filterCaseIndex + 2].InputHandling == FilterDataHandling.CantFilter)
 					{
-						case FilterCase.EditableTransparencyNoSelection:
-							filterCase = FilterCase.ProtectedTransparencyNoSelection;
-							break;
-						case FilterCase.EditableTransparencyWithSelection:
-							filterCase = FilterCase.ProtectedTransparencyWithSelection;
-							break;
+						// If the protected transparency modes are not supported use the next most appropriate mode.
+						if (filterInfo[FilterCase.FloatingSelection - 1].InputHandling != FilterDataHandling.CantFilter)
+						{
+							filterCase = FilterCase.FloatingSelection;
+						}
+						else
+						{
+							switch (filterCase)
+							{
+								case FilterCase.EditableTransparencyNoSelection:
+									filterCase = FilterCase.FlatImageNoSelection;
+									break;
+								case FilterCase.EditableTransparencyWithSelection:
+									filterCase = FilterCase.FlatImageWithSelection;
+									break;
+							}
+						}
 					}
+					else
+					{
+						switch (filterCase)
+						{
+							case FilterCase.EditableTransparencyNoSelection:
+								filterCase = FilterCase.ProtectedTransparencyNoSelection;
+								break;
+							case FilterCase.EditableTransparencyWithSelection:
+								filterCase = FilterCase.ProtectedTransparencyWithSelection;
+								break;
+						}
 
 
+					}
 				}
-
 			}
-
-			return false;
 		}
 
 		/// <summary>
