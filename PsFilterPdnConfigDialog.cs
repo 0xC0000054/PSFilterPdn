@@ -1247,7 +1247,7 @@ namespace PSFilterPdn
                 e.Cancel = true;
             }
 
-            if (proxyRunning)
+            if (proxyRunning || filterRunning)
             {
                 e.Cancel = true;
             }
