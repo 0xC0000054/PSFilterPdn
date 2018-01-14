@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 using PaintDotNet;
@@ -99,7 +100,6 @@ namespace PSFilterLoad.PSApi
 		private byte[] backgroundColor;
 		private byte[] foregroundColor;
 
-		private bool ignoreTransparency;
 		private FilterDataHandling inputHandling;
 		private FilterDataHandling outputHandling;
 
@@ -1105,22 +1105,30 @@ namespace PSFilterLoad.PSApi
 			filterRecord->maskRowBytes = 0;
 
 			filterRecord->imageMode = PSConstants.plugInModeRGBColor;
-			if (ignoreTransparency)
+			switch (filterCase)
 			{
-				filterRecord->inLayerPlanes = 0;
-				filterRecord->inTransparencyMask = 0; // Paint.NET is always PixelFormat.Format32bppArgb
-				filterRecord->inNonLayerPlanes = 3;
-			}
-			else
-			{
-				filterRecord->inLayerPlanes = 3;
-				filterRecord->inTransparencyMask = 1; // Paint.NET is always PixelFormat.Format32bppArgb
-				filterRecord->inNonLayerPlanes = 0;
+				case FilterCase.FlatImageNoSelection:
+				case FilterCase.FlatImageWithSelection:
+				case FilterCase.FloatingSelection:
+					filterRecord->inLayerPlanes = 0;
+					filterRecord->inTransparencyMask = 0;
+					filterRecord->inNonLayerPlanes = 3;
+					filterRecord->inColumnBytes = 3;
+					break;
+				case FilterCase.EditableTransparencyNoSelection:
+				case FilterCase.EditableTransparencyWithSelection:
+				case FilterCase.ProtectedTransparencyNoSelection:
+				case FilterCase.ProtectedTransparencyWithSelection:
+					filterRecord->inLayerPlanes = 3;
+					filterRecord->inTransparencyMask = 1; // Paint.NET is always PixelFormat.Format32bppArgb
+					filterRecord->inNonLayerPlanes = 0;
+					filterRecord->inColumnBytes = 4;
+					break;
+				default:
+					throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Unsupported filter case: {0}", filterCase));
 			}
 			filterRecord->inLayerMasks = 0;
 			filterRecord->inInvertedLayerMasks = 0;
-
-			filterRecord->inColumnBytes = ignoreTransparency ? 3 : 4;
 
 			if (filterCase == FilterCase.ProtectedTransparencyNoSelection ||
 				filterCase == FilterCase.ProtectedTransparencyWithSelection)
@@ -1271,7 +1279,7 @@ namespace PSFilterLoad.PSApi
 			useChannelPorts = EnableChannelPorts(pdata);
 			this.basicSuiteProvider.SetPluginName(pdata.Title.TrimEnd('.'));
 
-			ignoreTransparency = IgnoreTransparency(pdata);
+			IgnoreTransparency(pdata);
 
 			if (pdata.FilterInfo != null)
 			{
@@ -2980,13 +2988,21 @@ namespace PSFilterLoad.PSApi
 			filterRecord->imageSize.h = width;
 			filterRecord->imageSize.v = height;
 
-			if (ignoreTransparency)
+			switch (filterCase)
 			{
-				filterRecord->planes = 3;
-			}
-			else
-			{
-				filterRecord->planes = 4;
+				case FilterCase.FlatImageNoSelection:
+				case FilterCase.FlatImageWithSelection:
+				case FilterCase.FloatingSelection:
+				case FilterCase.ProtectedTransparencyNoSelection:
+				case FilterCase.ProtectedTransparencyWithSelection:
+					filterRecord->planes = 3;
+					break;
+				case FilterCase.EditableTransparencyNoSelection:
+				case FilterCase.EditableTransparencyWithSelection:
+					filterRecord->planes = 4;
+					break;
+				default:
+					throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Unsupported filter case: {0}", filterCase));
 			}
 			propertySuite.NumberOfChannels = filterRecord->planes;
 
@@ -3060,6 +3076,7 @@ namespace PSFilterLoad.PSApi
 			if (useChannelPorts)
 			{
 				channelPortsPtr = channelPortsSuite.CreateChannelPortsPointer();
+				bool ignoreTransparency = filterCase != FilterCase.EditableTransparencyNoSelection && filterCase != FilterCase.EditableTransparencyWithSelection;
 				readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(ignoreTransparency, selectedRegion != null);
 			}
 			else
