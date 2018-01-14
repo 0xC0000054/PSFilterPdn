@@ -455,7 +455,7 @@ namespace PSFilterLoad.PSApi
 			return false;
 		}
 
-		private bool IgnoreTransparency(PluginData data)
+		private bool SetFilterTransparencyMode(PluginData data)
 		{
 			// Some filters do not handle transparency correctly despite what their filterInfo says.
 			if (data.FilterInfo == null ||
@@ -1289,7 +1289,7 @@ namespace PSFilterLoad.PSApi
 			useChannelPorts = EnableChannelPorts(pdata);
 			this.basicSuiteProvider.SetPluginName(pdata.Title.TrimEnd('.'));
 
-			IgnoreTransparency(pdata);
+			SetFilterTransparencyMode(pdata);
 
 			if (pdata.FilterInfo != null)
 			{

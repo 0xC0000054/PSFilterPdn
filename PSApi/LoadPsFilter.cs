@@ -445,11 +445,11 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		///Checks if the host should ignore transparency for the plugin.
+		/// Determines how images with transparent pixels are displayed to the filter.
 		/// </summary>
 		/// <param name="data">The plugin to check.</param>
 		/// <returns><c>true</c> if transparency should be ignored; otherwise <c>false</c>.</returns>
-		private bool IgnoreTransparency(PluginData data)
+		private bool SetFilterTransparencyMode(PluginData data)
 		{
 			if (data.FilterInfo == null ||
 				data.Category.Equals("Nik Collection", StringComparison.Ordinal) && data.Title.StartsWith("Dfine 2", StringComparison.Ordinal))
@@ -1278,7 +1278,7 @@ namespace PSFilterLoad.PSApi
 			useChannelPorts = EnableChannelPorts(pdata);
 			this.basicSuiteProvider.SetPluginName(pdata.Title.TrimEnd('.'));
 
-			IgnoreTransparency(pdata);
+			SetFilterTransparencyMode(pdata);
 
 			if (pdata.FilterInfo != null)
 			{
