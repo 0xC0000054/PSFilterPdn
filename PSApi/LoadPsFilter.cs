@@ -329,12 +329,10 @@ namespace PSFilterLoad.PSApi
 
 			if (eep.GetSelection(eep.SourceSurface.Bounds).GetBoundsInt() != eep.SourceSurface.Bounds)
 			{
-				this.filterCase = FilterCase.EditableTransparencyWithSelection;
 				this.selectedRegion = eep.GetSelection(eep.SourceSurface.Bounds).Clone();
 			}
 			else
 			{
-				this.filterCase = FilterCase.EditableTransparencyNoSelection;
 				this.selectedRegion = null;
 			}
 
@@ -459,19 +457,13 @@ namespace PSFilterLoad.PSApi
 				}
 				else
 				{
-					switch (filterCase)
-					{
-						case FilterCase.EditableTransparencyNoSelection:
-							filterCase = FilterCase.FlatImageNoSelection;
-							break;
-						case FilterCase.EditableTransparencyWithSelection:
-							filterCase = FilterCase.FlatImageWithSelection;
-							break;
-					}
+					this.filterCase = selectedRegion != null ? FilterCase.FlatImageWithSelection : FilterCase.FlatImageNoSelection;
 				}
 			}
 			else
 			{
+				this.filterCase = selectedRegion != null ? FilterCase.EditableTransparencyWithSelection : FilterCase.EditableTransparencyNoSelection;
+
 				int filterCaseIndex = filterCase - 1;
 				System.Collections.ObjectModel.ReadOnlyCollection<FilterCaseInfo> filterInfo = data.FilterInfo;
 
