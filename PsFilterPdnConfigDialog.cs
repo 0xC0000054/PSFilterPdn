@@ -559,6 +559,16 @@ namespace PSFilterPdn
             }
         }
 
+        private byte AbortCallback()
+        {
+            if (formClosePending)
+            {
+                return 1;
+            }
+
+            return 0;
+        }
+
         private void UpdateProgress(int done, int total)
         {
             double progress = ((double)done / (double)total) * 100.0;
@@ -578,11 +588,26 @@ namespace PSFilterPdn
         {
             if (proxyRunning)
             {
-                SetProxyResultData();
+                if (!formClosePending)
+                {
+                    SetProxyResultData();
+                }
 
                 PSFilterShimServer.Stop();
 
                 proxyRunning = false;
+
+                if (formClosePending)
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new MethodInvoker(delegate() { Close(); }));
+                    }
+                    else
+                    {
+                        Close();
+                    }
+                }
             }
         }
 
@@ -669,7 +694,7 @@ namespace PSFilterPdn
                 PluginUISettings = new PluginUISettings(this.highDpiMode, BackColor, ForeColor)
             };
 
-            PSFilterShimService service = new PSFilterShimService(data, settings, SetProxyErrorResult, UpdateProgress);
+            PSFilterShimService service = new PSFilterShimService(AbortCallback, data, settings, SetProxyErrorResult, UpdateProgress);
 
             PSFilterShimServer.Start(service);
             this.proxyData = data;
@@ -860,6 +885,7 @@ namespace PSFilterPdn
                             PluginUISettings pluginUISettings = new PluginUISettings(this.highDpiMode, BackColor, ForeColor);
                             using (LoadPsFilter lps = new LoadPsFilter(this.Effect.EnvironmentParameters, this.Handle, pluginUISettings))
                             {
+                                lps.SetAbortCallback(new Func<byte>(AbortCallback));
                                 lps.SetProgressCallback(new Action<int, int>(UpdateProgress));
 
                                 if (descriptorRegistry != null)
@@ -934,8 +960,16 @@ namespace PSFilterPdn
                         }
                         finally
                         {
-                            FinishTokenUpdate();
+                            if (!formClosePending)
+                            {
+                                FinishTokenUpdate();
+                            }
                             filterRunning = false;
+                        }
+
+                        if (formClosePending)
+                        {
+                            Close();
                         }
                     }
 
@@ -1249,6 +1283,10 @@ namespace PSFilterPdn
 
             if (proxyRunning || filterRunning)
             {
+                if (DialogResult == DialogResult.Cancel)
+                {
+                    this.formClosePending = true;
+                }
                 e.Cancel = true;
             }
 

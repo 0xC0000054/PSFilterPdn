@@ -147,11 +147,9 @@ namespace PSFilterShim
 
 				using (LoadPsFilter lps = new LoadPsFilter(settings, selectionRegion))
 				{
-					if (settings.RepeatEffect)
-					{
-						lps.SetAbortCallback(new Func<byte>(serviceProxy.AbortFilter));
-					}
-					else
+					lps.SetAbortCallback(new Func<byte>(serviceProxy.AbortFilter));
+
+					if (!settings.RepeatEffect)
 					{
 						// As Paint.NET does not currently allow custom progress reporting only set this callback for the effect dialog.
 						lps.SetProgressCallback(new Action<int, int>(serviceProxy.UpdateFilterProgress));
