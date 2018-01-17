@@ -25,11 +25,6 @@ namespace PSFilterPdn
         private Action<string> errorCallback;
         private Action<int,int> progressCallback;
 
-        public PSFilterShimService(PluginData plugin, PSFilterShimSettings settings, Action<string> error, Action<int, int> progress)
-            : this(new Func<byte>(delegate() { return 0; }), plugin, settings, error, progress)
-        {
-        }
-
         public PSFilterShimService(Func<byte> abort, PluginData plugin, PSFilterShimSettings settings,
             Action<string> error, Action<int, int> progress)
         {
