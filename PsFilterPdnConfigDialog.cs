@@ -885,8 +885,8 @@ namespace PSFilterPdn
                             PluginUISettings pluginUISettings = new PluginUISettings(this.highDpiMode, BackColor, ForeColor);
                             using (LoadPsFilter lps = new LoadPsFilter(this.Effect.EnvironmentParameters, this.Handle, pluginUISettings))
                             {
-                                lps.SetAbortCallback(new Func<byte>(AbortCallback));
-                                lps.SetProgressCallback(new Action<int, int>(UpdateProgress));
+                                lps.SetAbortCallback(AbortCallback);
+                                lps.SetProgressCallback(UpdateProgress);
 
                                 if (descriptorRegistry != null)
                                 {

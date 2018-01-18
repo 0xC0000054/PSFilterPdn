@@ -251,7 +251,7 @@ namespace PSFilterPdn
             {
                 using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, window.Handle, null))
                 {
-                    lps.SetAbortCallback(new Func<byte>(AbortCallback));
+                    lps.SetAbortCallback(AbortCallback);
                     if (token.DescriptorRegistry != null)
                     {
                         lps.SetRegistryValues(token.DescriptorRegistry);
