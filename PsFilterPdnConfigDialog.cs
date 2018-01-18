@@ -147,9 +147,9 @@ namespace PSFilterPdn
 
         private DialogResult ShowErrorMessage(string message)
         {
-            if (base.InvokeRequired)
+            if (InvokeRequired)
             {
-                return (DialogResult)base.Invoke(new Func<string, DialogResult>(delegate(string error)
+                return (DialogResult)Invoke(new Func<string, DialogResult>(delegate(string error)
                     {
                         return MessageBox.Show(this, error, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
                     }), message);
@@ -771,9 +771,9 @@ namespace PSFilterPdn
         {
             bool showAbout = false;
 
-            if (base.InvokeRequired)
+            if (InvokeRequired)
             {
-                showAbout = (bool)base.Invoke(new Func<bool>(delegate()
+                showAbout = (bool)Invoke(new Func<bool>(delegate()
                 {
                     return this.showAboutBoxCb.Checked;
                 }));
@@ -846,9 +846,9 @@ namespace PSFilterPdn
                 }
             }
 
-            if (base.InvokeRequired)
+            if (InvokeRequired)
             {
-                base.Invoke(new MethodInvoker(delegate()
+                Invoke(new MethodInvoker(delegate()
                 {
                     this.filterProgressBar.Value = 0;
                 }));
