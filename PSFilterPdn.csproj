@@ -148,10 +148,10 @@
     <Compile Include="MaskSurface\MemoryBlock.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="NativeConstants.cs" />
-    <Compile Include="NativeEnums.cs" />
-    <Compile Include="NativeInterfaces.cs" />
-    <Compile Include="NativeStructs.cs" />
+    <Compile Include="Interop\NativeConstants.cs" />
+    <Compile Include="Interop\NativeEnums.cs" />
+    <Compile Include="Interop\NativeInterfaces.cs" />
+    <Compile Include="Interop\NativeStructs.cs" />
     <Compile Include="OS.cs" />
     <Compile Include="PluginThemingUtil.cs" />
     <Compile Include="PluginSupportInfo.cs" />
@@ -287,7 +287,7 @@
     <Compile Include="PSFilterShimSettings.cs" />
     <Compile Include="PSApi\PluginUISettings.cs" />
     <Compile Include="RegionDataWrapper.cs" />
-    <Compile Include="SafeNativeMethods.cs" />
+    <Compile Include="Interop\SafeNativeMethods.cs" />
     <Compile Include="ShellLink.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="StringLogicalComparer.cs" />
