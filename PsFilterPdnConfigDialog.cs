@@ -258,7 +258,7 @@ namespace PSFilterPdn
             this.filterTab.SuspendLayout();
             this.folderLoadPanel.SuspendLayout();
             this.dirTab.SuspendLayout();
-            this.SuspendLayout();
+            SuspendLayout();
             //
             // buttonCancel
             //
@@ -268,7 +268,7 @@ namespace PSFilterPdn
             this.buttonCancel.TabIndex = 1;
             this.buttonCancel.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_buttonCancel_Text;
             this.buttonCancel.UseVisualStyleBackColor = true;
-            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
+            this.buttonCancel.Click += new System.EventHandler(buttonCancel_Click);
             //
             // buttonOK
             //
@@ -278,7 +278,7 @@ namespace PSFilterPdn
             this.buttonOK.TabIndex = 2;
             this.buttonOK.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_buttonOK_Text;
             this.buttonOK.UseVisualStyleBackColor = true;
-            this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
+            this.buttonOK.Click += new System.EventHandler(buttonOK_Click);
             //
             // tabControl1
             //
@@ -335,9 +335,9 @@ namespace PSFilterPdn
             this.filterSearchBox.Size = new System.Drawing.Size(230, 20);
             this.filterSearchBox.TabIndex = 15;
             this.filterSearchBox.Text = "Search Filters";
-            this.filterSearchBox.TextChanged += new System.EventHandler(this.filterSearchBox_TextChanged);
-            this.filterSearchBox.Enter += new System.EventHandler(this.filterSearchBox_Enter);
-            this.filterSearchBox.Leave += new System.EventHandler(this.filterSearchBox_Leave);
+            this.filterSearchBox.TextChanged += new System.EventHandler(filterSearchBox_TextChanged);
+            this.filterSearchBox.Enter += new System.EventHandler(filterSearchBox_Enter);
+            this.filterSearchBox.Leave += new System.EventHandler(filterSearchBox_Leave);
             //
             // showAboutBoxCb
             //
@@ -404,7 +404,7 @@ namespace PSFilterPdn
             this.runFilterBtn.TabIndex = 1;
             this.runFilterBtn.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_runFilterBtn_Text;
             this.runFilterBtn.UseVisualStyleBackColor = true;
-            this.runFilterBtn.Click += new System.EventHandler(this.runFilterBtn_Click);
+            this.runFilterBtn.Click += new System.EventHandler(runFilterBtn_Click);
             //
             // filterTree
             //
@@ -414,12 +414,12 @@ namespace PSFilterPdn
             this.filterTree.ShowLines = false;
             this.filterTree.Size = new System.Drawing.Size(230, 260);
             this.filterTree.TabIndex = 0;
-            this.filterTree.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(this.filterTree_AfterCollapse);
-            this.filterTree.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.filterTree_BeforeExpand);
-            this.filterTree.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.filterTree_AfterExpand);
-            this.filterTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.filterTree_AfterSelect);
-            this.filterTree.DoubleClick += new System.EventHandler(this.filterTree_DoubleClick);
-            this.filterTree.KeyDown += new System.Windows.Forms.KeyEventHandler(this.filterTree_KeyDown);
+            this.filterTree.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(filterTree_AfterCollapse);
+            this.filterTree.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(filterTree_BeforeExpand);
+            this.filterTree.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(filterTree_AfterExpand);
+            this.filterTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(filterTree_AfterSelect);
+            this.filterTree.DoubleClick += new System.EventHandler(filterTree_DoubleClick);
+            this.filterTree.KeyDown += new System.Windows.Forms.KeyEventHandler(filterTree_KeyDown);
             //
             // dirTab
             //
@@ -447,7 +447,7 @@ namespace PSFilterPdn
             this.subDirSearchCb.TabIndex = 3;
             this.subDirSearchCb.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_subDirSearchCb_Text;
             this.subDirSearchCb.UseVisualStyleBackColor = true;
-            this.subDirSearchCb.CheckedChanged += new System.EventHandler(this.subDirSearchCb_CheckedChanged);
+            this.subDirSearchCb.CheckedChanged += new System.EventHandler(subDirSearchCb_CheckedChanged);
             //
             // remDirBtn
             //
@@ -457,7 +457,7 @@ namespace PSFilterPdn
             this.remDirBtn.TabIndex = 2;
             this.remDirBtn.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_remDirBtn_Text;
             this.remDirBtn.UseVisualStyleBackColor = true;
-            this.remDirBtn.Click += new System.EventHandler(this.remDirBtn_Click);
+            this.remDirBtn.Click += new System.EventHandler(remDirBtn_Click);
             //
             // addDirBtn
             //
@@ -467,7 +467,7 @@ namespace PSFilterPdn
             this.addDirBtn.TabIndex = 1;
             this.addDirBtn.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_addDirBtn_Text;
             this.addDirBtn.UseVisualStyleBackColor = true;
-            this.addDirBtn.Click += new System.EventHandler(this.addDirBtn_Click);
+            this.addDirBtn.Click += new System.EventHandler(addDirBtn_Click);
             //
             // searchDirListView
             //
@@ -481,9 +481,9 @@ namespace PSFilterPdn
             this.searchDirListView.UseCompatibleStateImageBehavior = false;
             this.searchDirListView.View = System.Windows.Forms.View.Details;
             this.searchDirListView.VirtualMode = true;
-            this.searchDirListView.CacheVirtualItems += new System.Windows.Forms.CacheVirtualItemsEventHandler(this.searchDirListView_CacheVirtualItems);
-            this.searchDirListView.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.searchDirListView_RetrieveVirtualItem);
-            this.searchDirListView.SelectedIndexChanged += new System.EventHandler(this.searchDirListView_SelectedIndexChanged);
+            this.searchDirListView.CacheVirtualItems += new System.Windows.Forms.CacheVirtualItemsEventHandler(searchDirListView_CacheVirtualItems);
+            this.searchDirListView.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(searchDirListView_RetrieveVirtualItem);
+            this.searchDirListView.SelectedIndexChanged += new System.EventHandler(searchDirListView_SelectedIndexChanged);
             //
             // dirHeader
             //
@@ -494,9 +494,9 @@ namespace PSFilterPdn
             //
             this.updateFilterListBw.WorkerReportsProgress = true;
             this.updateFilterListBw.WorkerSupportsCancellation = true;
-            this.updateFilterListBw.DoWork += new System.ComponentModel.DoWorkEventHandler(this.updateFilterListBw_DoWork);
-            this.updateFilterListBw.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.updateFilterListBw_ProgressChanged);
-            this.updateFilterListBw.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.updateFilterListBw_RunWorkerCompleted);
+            this.updateFilterListBw.DoWork += new System.ComponentModel.DoWorkEventHandler(updateFilterListBw_DoWork);
+            this.updateFilterListBw.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(updateFilterListBw_ProgressChanged);
+            this.updateFilterListBw.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(updateFilterListBw_RunWorkerCompleted);
             //
             // donateLink
             //
@@ -508,7 +508,7 @@ namespace PSFilterPdn
             this.donateLink.TabIndex = 4;
             this.donateLink.TabStop = true;
             this.donateLink.Text = "Donate!";
-            this.donateLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.donateLink_LinkClicked);
+            this.donateLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(donateLink_LinkClicked);
             //
             // PsFilterPdnConfigDialog
             //
@@ -532,20 +532,20 @@ namespace PSFilterPdn
             this.folderLoadPanel.PerformLayout();
             this.dirTab.ResumeLayout(false);
             this.dirTab.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         private void buttonOK_Click(object sender, EventArgs e)
         {
             FinishTokenUpdate();
             DialogResult = DialogResult.OK;
-            this.Close();
+            Close();
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         /// <summary>
@@ -872,7 +872,7 @@ namespace PSFilterPdn
                     if (data.RunWith32BitShim || useDEPProxy)
                     {
                         this.runWith32BitShim = true;
-                        this.Run32BitFilterProxy(this.Effect.EnvironmentParameters, data);
+                        Run32BitFilterProxy(this.Effect.EnvironmentParameters, data);
                     }
                     else
                     {
@@ -1234,7 +1234,7 @@ namespace PSFilterPdn
             this.Cursor = Cursors.Default;
             if (formClosePending)
             {
-                this.Close();
+                Close();
             }
         }
 
@@ -1343,7 +1343,7 @@ namespace PSFilterPdn
 
                 if (ShowErrorMessage(message) == System.Windows.Forms.DialogResult.OK)
                 {
-                    this.Close();
+                    Close();
                 }
             }
         }
@@ -1611,7 +1611,7 @@ namespace PSFilterPdn
         {
             if ((filterTree.SelectedNode != null) && filterTree.SelectedNode.Tag != null)
             {
-                this.runFilterBtn_Click(this, EventArgs.Empty);
+                runFilterBtn_Click(this, EventArgs.Empty);
             }
         }
 
@@ -1643,7 +1643,7 @@ namespace PSFilterPdn
             if ((filterTree.SelectedNode != null) && filterTree.SelectedNode.Tag != null && e.KeyCode == Keys.Enter)
             {
                 e.Handled = true;
-                this.runFilterBtn_Click(this, EventArgs.Empty);
+                runFilterBtn_Click(this, EventArgs.Empty);
             }
             else
             {
