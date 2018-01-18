@@ -60,15 +60,10 @@ namespace PSFilterPdn
         /// <summary>
         /// The function that the Photoshop filters can poll to check if to abort.
         /// </summary>
-        /// <returns>The effect's IsCancelRequested property as a byte.</returns>
-        private byte AbortCallback()
+        /// <returns>The effect's IsCancelRequested property.</returns>
+        private bool AbortCallback()
         {
-            if (base.IsCancelRequested)
-            {
-                return 1;
-            }
-
-            return 0;
+            return IsCancelRequested;
         }
 
         public override EffectConfigDialog CreateConfigDialog()

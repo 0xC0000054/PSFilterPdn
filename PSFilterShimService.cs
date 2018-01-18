@@ -19,13 +19,13 @@ namespace PSFilterPdn
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     internal sealed class PSFilterShimService : IPSFilterShim
     {
-        private Func<byte> abortFunc;
+        private Func<bool> abortFunc;
         private PluginData pluginData;
         private PSFilterShimSettings settings;
         private Action<string> errorCallback;
         private Action<int,int> progressCallback;
 
-        public PSFilterShimService(Func<byte> abort, PluginData plugin, PSFilterShimSettings settings,
+        public PSFilterShimService(Func<bool> abort, PluginData plugin, PSFilterShimSettings settings,
             Action<string> error, Action<int, int> progress)
         {
             if (abort == null)
@@ -40,7 +40,7 @@ namespace PSFilterPdn
             this.progressCallback = progress;
         }
 
-        public byte AbortFilter()
+        public bool AbortFilter()
         {
             return abortFunc();
         }

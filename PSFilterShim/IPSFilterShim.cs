@@ -16,7 +16,7 @@ using System.ServiceModel;
 internal interface IPSFilterShim
 {
     [OperationContract]
-    byte AbortFilter();
+    bool AbortFilter();
 
     [OperationContract]
     PSFilterLoad.PSApi.PluginData GetPluginData();

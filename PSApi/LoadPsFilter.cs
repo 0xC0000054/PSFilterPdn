@@ -90,7 +90,7 @@ namespace PSFilterLoad.PSApi
 		private IntPtr dataPtr;
 		private short result;
 
-		private Func<byte> abortFunc;
+		private Func<bool> abortFunc;
 		private string errorMessage;
 		private short filterCase;
 		private float dpiX;
@@ -154,7 +154,7 @@ namespace PSFilterLoad.PSApi
 			progressFunc = callback;
 		}
 
-		internal void SetAbortCallback(Func<byte> callback)
+		internal void SetAbortCallback(Func<bool> callback)
 		{
 			if (callback == null)
 				throw new ArgumentNullException(nameof(callback));
@@ -973,7 +973,7 @@ namespace PSFilterLoad.PSApi
 					return false;
 				}
 
-				if (AbortProc() != 0)
+				if (AbortProc())
 				{
 					module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
 
@@ -1418,7 +1418,7 @@ namespace PSFilterLoad.PSApi
 			return message;
 		}
 
-		private byte AbortProc()
+		private bool AbortProc()
 		{
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.MiscCallbacks, string.Empty);
@@ -1428,7 +1428,7 @@ namespace PSFilterLoad.PSApi
 				return abortFunc();
 			}
 
-			return 0;
+			return false;
 		}
 
 		/// <summary>

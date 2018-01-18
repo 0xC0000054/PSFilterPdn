@@ -559,14 +559,9 @@ namespace PSFilterPdn
             }
         }
 
-        private byte AbortCallback()
+        private bool AbortCallback()
         {
-            if (formClosePending)
-            {
-                return 1;
-            }
-
-            return 0;
+            return formClosePending;
         }
 
         private void UpdateProgress(int done, int total)
