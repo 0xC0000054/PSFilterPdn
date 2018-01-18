@@ -144,6 +144,27 @@ namespace PSFilterPdn
             TCHT_ONITEMLABEL = 4,
             TCHT_ONITEM = TCHT_ONITEMICON | TCHT_ONITEMLABEL
         }
+
+        internal enum FindExInfoLevel : int
+        {
+            Standard = 0,
+            Basic
+        }
+
+        internal enum FindExSearchOp : int
+        {
+            NameMatch = 0,
+            LimitToDirectories,
+            LimitToDevices
+        }
+
+        [Flags]
+        internal enum FindExAdditionalFlags : uint
+        {
+            None = 0,
+            CaseSensitive = 1,
+            LargeFetch = 2
+        }
     }
 }
 

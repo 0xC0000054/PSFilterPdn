@@ -10,14 +10,10 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
-using System.Security;
 using System.Security.Permissions;
 
 namespace PSFilterPdn
@@ -27,101 +23,6 @@ namespace PSFilterPdn
     /// </summary>
     internal sealed class FileEnumerator : IEnumerator<string>
     {
-        private sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
-        {
-            private SafeFindHandle() : base(true) { }
-
-            protected override bool ReleaseHandle()
-            {
-                return UnsafeNativeMethods.FindClose(handle);
-            }
-        }
-
-        private enum FindExInfoLevel : int
-        {
-            Standard = 0,
-            Basic
-        }
-
-        private enum FindExSearchOp : int
-        {
-            NameMatch = 0,
-            LimitToDirectories,
-            LimitToDevices
-        }
-
-        [Flags]
-        private enum FindExAdditionalFlags : uint
-        {
-            None = 0,
-            CaseSensitive = 1,
-            LargeFetch = 2
-        }
-
-        [SuppressUnmanagedCodeSecurity]
-        private static class UnsafeNativeMethods
-        {
-            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-            internal static extern SafeFindHandle FindFirstFileExW(
-                string fileName,
-                FindExInfoLevel fInfoLevelId,
-                [Out()] WIN32_FIND_DATAW data,
-                FindExSearchOp fSearchOp,
-                IntPtr lpSearchFilter,
-                FindExAdditionalFlags dwAdditionalFlags);
-
-            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool FindNextFileW(SafeFindHandle hndFindFile, [Out()] WIN32_FIND_DATAW lpFindFileData);
-
-            [DllImport("kernel32.dll", ExactSpelling = true), ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool FindClose(IntPtr handle);
-
-            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-            internal static extern uint GetFileAttributesW(string lpFileName);
-
-            [DllImport("kernel32.dll", ExactSpelling = true)]
-            internal static extern uint SetErrorMode(uint uMode);
-
-            [DllImport("kernel32.dll", ExactSpelling = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool SetThreadErrorMode(uint dwNewMode, out uint lpOldMode);
-        }
-
-        private static class NativeConstants
-        {
-            internal const uint FILE_ATTRIBUTE_DIRECTORY = 16U;
-            internal const uint FILE_ATTRIBUTE_REPARSE_POINT = 1024U;
-            internal const uint INVALID_FILE_ATTRIBUTES = 0xFFFFFFFF;
-            internal const uint SEM_FAILCRITICALERRORS = 1U;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        [BestFitMapping(false)]
-        private sealed class WIN32_FIND_DATAW
-        {
-            public uint dwFileAttributes;
-            public FILETIME ftCreationTime;
-            public FILETIME ftLastAccessTime;
-            public FILETIME ftLastWriteTime;
-            public uint nFileSizeHigh;
-            public uint nFileSizeLow;
-            public uint dwReserved0;
-            public uint dwReserved1;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-            public string cFileName;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 14)]
-            public string cAlternateFileName;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct FILETIME
-        {
-            public uint dwLowDateTime;
-            public uint dwHighDateTime;
-        }
-
         private sealed class SearchData
         {
             public readonly string path;
@@ -239,8 +140,8 @@ namespace PSFilterPdn
         private bool needPathDiscoveryDemand;
         private string shellLinkTarget;
 
-        private readonly FindExInfoLevel infoLevel;
-        private readonly FindExAdditionalFlags additionalFlags;
+        private readonly NativeEnums.FindExInfoLevel infoLevel;
+        private readonly NativeEnums.FindExAdditionalFlags additionalFlags;
         private readonly string fileExtension;
         private readonly bool searchSubDirectories;
         private readonly bool dereferenceLinks;
@@ -296,13 +197,13 @@ namespace PSFilterPdn
             if (OS.IsWindows7OrLater)
             {
                 // Suppress the querying of short filenames and use a larger buffer on Windows 7 and later.
-                this.infoLevel = FindExInfoLevel.Basic;
-                this.additionalFlags = FindExAdditionalFlags.LargeFetch;
+                this.infoLevel = NativeEnums.FindExInfoLevel.Basic;
+                this.additionalFlags = NativeEnums.FindExAdditionalFlags.LargeFetch;
             }
             else
             {
-                this.infoLevel = FindExInfoLevel.Standard;
-                this.additionalFlags = FindExAdditionalFlags.None;
+                this.infoLevel = NativeEnums.FindExInfoLevel.Standard;
+                this.additionalFlags = NativeEnums.FindExAdditionalFlags.None;
             }
             this.oldErrorMode = SetErrorModeWrapper(NativeConstants.SEM_FAILCRITICALERRORS);
             this.state = -1;
@@ -319,7 +220,7 @@ namespace PSFilterPdn
                 searchPath,
                 this.infoLevel,
                 findData,
-                FindExSearchOp.NameMatch,
+                NativeEnums.FindExSearchOp.NameMatch,
                 IntPtr.Zero,
                 this.additionalFlags);
 
@@ -525,7 +426,7 @@ namespace PSFilterPdn
                                 searchPath,
                                 this.infoLevel,
                                 findData,
-                                FindExSearchOp.NameMatch,
+                                NativeEnums.FindExSearchOp.NameMatch,
                                 IntPtr.Zero,
                                 this.additionalFlags);
 

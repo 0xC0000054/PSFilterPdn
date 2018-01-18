@@ -19,6 +19,13 @@ namespace PSFilterPdn
         internal const int S_OK = 0;
         internal const int S_FALSE = 1;
 
+        internal const uint FILE_ATTRIBUTE_DIRECTORY = 16U;
+        internal const uint FILE_ATTRIBUTE_REPARSE_POINT = 1024U;
+
+        internal const uint INVALID_FILE_ATTRIBUTES = 0xFFFFFFFF;
+
+        internal const uint SEM_FAILCRITICALERRORS = 1U;
+
         internal const int STGM_READ = 0;
 
         internal const int WM_PRINTCLIENT = 0x0318;

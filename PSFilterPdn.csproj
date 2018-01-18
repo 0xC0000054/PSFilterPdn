@@ -140,6 +140,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="FilterTreeNodeCollection.cs" />
+    <Compile Include="Interop\SafeFindHandle.cs" />
+    <Compile Include="Interop\UnsafeNativeMethods.cs" />
+    <Compile Include="Interop\Win32FindData.cs" />
     <Compile Include="ListExtensions.cs" />
     <Compile Include="FileEnumerator.cs" />
     <Compile Include="GlobalSuppressions.cs" />

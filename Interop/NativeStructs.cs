@@ -50,5 +50,12 @@ namespace PSFilterPdn
             public POINT pt;
             public NativeEnums.TCHITTESTFLAGS flags;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct FILETIME
+        {
+            public uint dwLowDateTime;
+            public uint dwHighDateTime;
+        }
     }
 }
