@@ -74,7 +74,17 @@ namespace PSFilterShim
 			string endpointName = args[0];
 
 			EndpointAddress address = new EndpointAddress(endpointName);
-			serviceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(new NetNamedPipeBinding(NetNamedPipeSecurityMode.None), address);
+			NetNamedPipeBinding netNamedPipe = new NetNamedPipeBinding
+			{
+				MaxBufferPoolSize = int.MaxValue,
+				MaxBufferSize = int.MaxValue,
+				MaxReceivedMessageSize = int.MaxValue,
+			};
+			netNamedPipe.ReaderQuotas.MaxArrayLength = int.MaxValue;
+			netNamedPipe.ReaderQuotas.MaxStringContentLength = int.MaxValue;
+			netNamedPipe.Security.Mode = NetNamedPipeSecurityMode.None;
+
+			serviceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(netNamedPipe, address);
 
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 

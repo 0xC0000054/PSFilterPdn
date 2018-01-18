@@ -40,7 +40,17 @@ namespace PSFilterPdn
             if (_host == null)
             {
                 _host = new ServiceHost(service, ServiceUri);
-                _host.AddServiceEndpoint(typeof(IPSFilterShim), new NetNamedPipeBinding(NetNamedPipeSecurityMode.None), PipeName);
+                NetNamedPipeBinding netNamedPipe = new NetNamedPipeBinding
+                {
+                    MaxBufferPoolSize = int.MaxValue,
+                    MaxBufferSize = int.MaxValue,
+                    MaxReceivedMessageSize = int.MaxValue,
+                };
+                netNamedPipe.ReaderQuotas.MaxArrayLength = int.MaxValue;
+                netNamedPipe.ReaderQuotas.MaxStringContentLength = int.MaxValue;
+                netNamedPipe.Security.Mode = NetNamedPipeSecurityMode.None;
+
+                _host.AddServiceEndpoint(typeof(IPSFilterShim), netNamedPipe, PipeName);
                 _host.Open();
             }
         }
