@@ -34,7 +34,7 @@ namespace PSFilterPdn
 
         public int Compare(object x, object y)
         {
-            if (Object.ReferenceEquals(x, y))
+            if (ReferenceEquals(x, y))
             {
                 return 0;
             }
