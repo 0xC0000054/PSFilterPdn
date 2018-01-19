@@ -1500,7 +1500,7 @@ namespace PSFilterPdn
                 this.searchBoxIgnoreTextChanged = true;
                 this.filterSearchBox.Text = string.Empty;
                 this.filterSearchBox.Font = new Font(filterSearchBox.Font, FontStyle.Regular);
-                this.filterSearchBox.ForeColor = SystemColors.WindowText;
+                this.filterSearchBox.ForeColor = ForeColor != DefaultForeColor ? ForeColor : SystemColors.WindowText;
             }
         }
 
