@@ -1380,6 +1380,7 @@ namespace PSFilterPdn
             base.OnForeColorChanged(e);
 
             PluginThemingUtil.UpdateControlForeColor(this);
+            this.filterSearchBox.ForeColor = SystemColors.GrayText;
         }
 
         protected override void OnShown(EventArgs e)
