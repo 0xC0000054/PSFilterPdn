@@ -301,6 +301,7 @@ namespace PSFilterLoad.PSApi
             {
                 PIProperty* pipp = (PIProperty*)propPtr;
                 uint propKey = pipp->propertyKey;
+                int propertyLength = pipp->propertyLength;
 
                 byte* dataPtr = propPtr + PIProperty.SizeOf;
                 if (propKey == PIPropertyID.PIKindProperty)
@@ -315,7 +316,7 @@ namespace PSFilterLoad.PSApi
                 }
                 else if (propKey == query.platformEntryPoint)
                 {
-                    enumData.EntryPoint = Marshal.PtrToStringAnsi((IntPtr)dataPtr, pipp->propertyLength).TrimEnd('\0');
+                    enumData.EntryPoint = Marshal.PtrToStringAnsi((IntPtr)dataPtr, propertyLength).TrimEnd('\0');
                     // If it is a 32-bit plug-in on a 64-bit OS run it with the 32-bit shim.
                     enumData.RunWith32BitShim = (IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty);
                 }
@@ -415,7 +416,7 @@ namespace PSFilterLoad.PSApi
                 }
 #endif
 
-                int propertyDataPaddedLength = (pipp->propertyLength + 3) & ~3;
+                int propertyDataPaddedLength = (propertyLength + 3) & ~3;
                 propPtr += (PIProperty.SizeOf + propertyDataPaddedLength);
             }
 
