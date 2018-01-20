@@ -54,21 +54,18 @@ namespace PSFilterLoad.PSApi
     [DataContract()]
     public sealed class FilterCaseInfo
     {
-        [DataMember]
         public FilterDataHandling InputHandling
         {
             get;
             private set;
         }
 
-        [DataMember]
         public FilterDataHandling OutputHandling
         {
             get;
             private set;
         }
 
-        [DataMember]
         public FilterCaseInfoFlags Flags1
         {
             get;
@@ -80,6 +77,57 @@ namespace PSFilterLoad.PSApi
         {
             get;
             private set;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Performance",
+            "CA1811:AvoidUncalledPrivateCode",
+            Justification = "Required to allow WCF to serialize unknown enum values.")]
+        [DataMember(Name = "InputHandling")]
+        private byte InputHandlingValue
+        {
+            get
+            {
+                return (byte)InputHandling;
+            }
+            set
+            {
+                InputHandling = (FilterDataHandling)value;
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+                    "Microsoft.Performance",
+                    "CA1811:AvoidUncalledPrivateCode",
+                    Justification = "Required to allow WCF to serialize unknown enum values.")]
+        [DataMember(Name = "OutputHandling")]
+        private byte OutputHandlingValue
+        {
+            get
+            {
+                return (byte)OutputHandling;
+            }
+            set
+            {
+                OutputHandling = (FilterDataHandling)value;
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+                    "Microsoft.Performance",
+                    "CA1811:AvoidUncalledPrivateCode",
+                    Justification = "Required to allow WCF to serialize unknown enum values.")]
+        [DataMember(Name = "Flags1")]
+        private byte Flags1Value
+        {
+            get
+            {
+                return (byte)Flags1;
+            }
+            set
+            {
+                Flags1 = (FilterCaseInfoFlags)value;
+            }
         }
 
         internal const int SizeOf = 4;
