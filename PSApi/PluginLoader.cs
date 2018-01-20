@@ -63,6 +63,166 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        private sealed class FilterCaseInfoResult
+        {
+            public readonly ReadOnlyCollection<FilterCaseInfo> filterCaseInfo;
+            public readonly int propertyLength;
+
+            public FilterCaseInfoResult(ReadOnlyCollection<FilterCaseInfo> filterCaseInfo, int actualArrayLength)
+            {
+                this.filterCaseInfo = filterCaseInfo;
+                this.propertyLength = actualArrayLength;
+            }
+        }
+
+        private static class FilterCaseInfoParser
+        {
+            public static unsafe FilterCaseInfoResult Parse(byte* ptr, int length)
+            {
+                const int MinLength = 7 * FilterCaseInfo.SizeOf;
+
+                if (length < MinLength)
+                {
+                    return null;
+                }
+
+                FilterCaseInfo[] info = new FilterCaseInfo[7];
+                int offset = 0;
+                int bytesRead = 0;
+                bool filterInfoValid = true;
+
+                for (int i = 0; i < info.Length; i++)
+                {
+                    byte? inputHandling = ParseField(ptr, offset, out bytesRead);
+                    offset += bytesRead;
+
+                    byte? outputHandling = ParseField(ptr, offset, out bytesRead);
+                    offset += bytesRead;
+
+                    byte? flags1 = ParseField(ptr, offset, out bytesRead);
+                    offset += bytesRead;
+
+                    byte? flags2 = ParseField(ptr, offset, out bytesRead);
+                    offset += bytesRead;
+
+                    if (IsFilterDataHandlingValid(inputHandling) &&
+                        IsFilterDataHandlingValid(outputHandling) &&
+                        IsFilterCaseInfoFlagsValid(flags1) &&
+                        flags2.HasValue)
+                    {
+                        info[i] = new FilterCaseInfo((FilterDataHandling)inputHandling.Value,
+                                                     (FilterDataHandling)outputHandling.Value,
+                                                     (FilterCaseInfoFlags)flags1.Value,
+                                                     flags2.Value);
+                    }
+                    else
+                    {
+                        filterInfoValid = false;
+                    }
+                }
+
+                return new FilterCaseInfoResult(filterInfoValid ? Array.AsReadOnly(info) : null, offset);
+            }
+
+            private static bool IsFilterDataHandlingValid(byte? handling)
+            {
+                if (handling.HasValue)
+                {
+                    byte value = handling.Value;
+
+                    return (value >= (byte)FilterDataHandling.CantFilter && value <= (byte)FilterDataHandling.ForegroundZap);
+                }
+
+                return false;
+            }
+
+            private static bool IsFilterCaseInfoFlagsValid(byte? filterCaseInfoFlags)
+            {
+                if (filterCaseInfoFlags.HasValue)
+                {
+                    const byte ValidFlags = (byte)FilterCaseInfoFlags.DontCopyToDestination |
+                                            (byte)FilterCaseInfoFlags.WorksWithBlankData |
+                                            (byte)FilterCaseInfoFlags.FiltersLayerMask |
+                                            (byte)FilterCaseInfoFlags.WritesOutsideSelection;
+
+                    return ((filterCaseInfoFlags.Value & ~ValidFlags) == 0);
+                }
+
+                return false;
+            }
+
+            private static bool IsHexadecimalChar(char value)
+            {
+                return (value >= '0' && value <= '9' ||
+                        value >= 'A' && value <= 'F' ||
+                        value >= 'a' && value <= 'f');
+            }
+
+            private static unsafe byte? ParseField(byte* data, int startOffset, out int fieldLength)
+            {
+                byte value = data[startOffset];
+
+                char c = (char)value;
+                // The FilterCaseInfo resource in Alf's Power Toys contains incorrectly escaped hexadecimal numbers.
+                // The numbers are formatted /x00 instead of \x00.
+                if (c == '/')
+                {
+                    char next = (char)data[startOffset + 1];
+                    if (next == 'x')
+                    {
+                        int offset = startOffset + 2;
+                        // Convert the hexadecimal characters to a decimal number.
+                        char hexChar = (char)data[offset];
+
+                        if (IsHexadecimalChar(hexChar))
+                        {
+                            int fieldValue = 0;
+
+                            do
+                            {
+                                int digit;
+
+                                if (hexChar < 'A')
+                                {
+                                    digit = hexChar - '0';
+                                }
+                                else
+                                {
+                                    if (hexChar >= 'a')
+                                    {
+                                        // Convert the letter to upper case.
+                                        hexChar = (char)(hexChar - 0x20);
+                                    }
+
+                                    digit = 10 + (hexChar - 'A');
+                                }
+
+
+                                fieldValue = (fieldValue * 16) + digit;
+
+                                offset++;
+                                hexChar = (char)data[offset];
+
+                            } while (IsHexadecimalChar(hexChar));
+
+                            if (fieldValue >= byte.MinValue && fieldValue <= byte.MaxValue)
+                            {
+                                fieldLength = offset - startOffset;
+
+                                return (byte)fieldValue;
+                            }
+                        }
+
+                        fieldLength = 2;
+                        return null;
+                    }
+                }
+
+                fieldLength = 1;
+                return value;
+            }
+        }
+
         private static unsafe bool EnumAETE(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
         {
             GCHandle handle = GCHandle.FromIntPtr(lParam);
@@ -356,13 +516,18 @@ namespace PSFilterLoad.PSApi
                 }
                 else if (propKey == PIPropertyID.PIFilterCaseInfoProperty)
                 {
-                    FilterCaseInfo[] filterInfo = new FilterCaseInfo[7];
-                    for (int j = 0; j < filterInfo.Length; j++)
+                    FilterCaseInfoResult result = FilterCaseInfoParser.Parse(dataPtr, propertyLength);
+
+                    if (result != null)
                     {
-                        filterInfo[j] = new FilterCaseInfo(dataPtr);
-                        dataPtr += FilterCaseInfo.SizeOf;
+                        enumData.FilterInfo = result.filterCaseInfo;
+                        // The actual property length may be longer than the header specifies
+                        // if the FilterCaseInfo fields are incorrectly escaped.
+                        if (propertyLength != result.propertyLength)
+                        {
+                            propertyLength = result.propertyLength;
+                        }
                     }
-                    enumData.FilterInfo = new ReadOnlyCollection<FilterCaseInfo>(filterInfo);
                 }
                 else if (propKey == PIPropertyID.PIHasTerminologyProperty)
                 {

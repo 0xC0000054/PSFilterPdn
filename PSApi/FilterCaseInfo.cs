@@ -84,12 +84,12 @@ namespace PSFilterLoad.PSApi
 
         internal const int SizeOf = 4;
 
-        internal unsafe FilterCaseInfo(byte* ptr)
+        internal FilterCaseInfo(FilterDataHandling inputHandling, FilterDataHandling outputHandling, FilterCaseInfoFlags flags1, byte flags2)
         {
-            this.InputHandling = (FilterDataHandling)ptr[0];
-            this.OutputHandling = (FilterDataHandling)ptr[1];
-            this.Flags1 = (FilterCaseInfoFlags)ptr[2];
-            this.Flags2 = ptr[3];
+            this.InputHandling = inputHandling;
+            this.OutputHandling = outputHandling;
+            this.Flags1 = flags1;
+            this.Flags2 = flags2;
         }
     }
 
