@@ -170,7 +170,7 @@ namespace PSFilterShim
 						// Ignore the filters that only use the data handle, e.g. Filter Factory.
 						byte[] parameterData = filterParameters.GlobalParameters.GetParameterDataBytes();
 
-						if (parameterData != null || filterParameters.AETEDictionary.Count > 0)
+						if (parameterData != null || filterParameters.AETEDictionary != null)
 						{
 							lps.FilterParameters = filterParameters;
 							lps.IsRepeatEffect = settings.RepeatEffect;
