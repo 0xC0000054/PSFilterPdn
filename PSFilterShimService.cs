@@ -32,6 +32,14 @@ namespace PSFilterPdn
             {
                 throw new ArgumentNullException(nameof(abort));
             }
+            if (plugin == null)
+            {
+                throw new ArgumentNullException(nameof(plugin));
+            }
+            if (settings == null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
 
             this.abortFunc = abort;
             this.pluginData = plugin;
