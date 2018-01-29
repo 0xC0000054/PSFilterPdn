@@ -25,6 +25,21 @@ namespace PSFilterPdn
         private Action<string> errorCallback;
         private Action<int,int> progressCallback;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PSFilterShimService"/> class.
+        /// </summary>
+        /// <param name="abort">The abort callback.</param>
+        /// <param name="plugin">The plug-in data.</param>
+        /// <param name="settings">The settings for the shim application.</param>
+        /// <param name="error">The error callback.</param>
+        /// <param name="progress">The progress callback.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="abort"/> is null.
+        /// or
+        /// <paramref name="plugin"/> is null.
+        /// or
+        /// <paramref name="settings"/> is null.
+        /// </exception>
         public PSFilterShimService(Func<bool> abort, PluginData plugin, PSFilterShimSettings settings,
             Action<string> error, Action<int, int> progress)
         {
