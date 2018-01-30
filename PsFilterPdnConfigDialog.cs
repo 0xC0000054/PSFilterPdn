@@ -1722,6 +1722,10 @@ namespace PSFilterPdn
                 if (changedIndex >= cacheStartIndex && changedIndex <= endIndex)
                 {
                     this.searchDirListViewCache = null;
+                    if (endIndex > searchDirListView.VirtualListSize)
+                    {
+                        endIndex = searchDirListView.VirtualListSize;
+                    }
                     // The indexes in the CacheVirtualItems event are inclusive,
                     // so we need to subtract 1 from the end index.
                     searchDirListView_CacheVirtualItems(this, new CacheVirtualItemsEventArgs(cacheStartIndex, endIndex - 1));
