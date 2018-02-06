@@ -93,7 +93,8 @@ namespace PSFilterLoad.PSApi
     internal delegate short CloseReadDescriptorProc([In()] IntPtr descriptor);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
-    internal delegate byte GetKeyProc([In()] IntPtr descriptor, ref uint key, ref uint type, ref int flags);
+    [return: MarshalAs(UnmanagedType.U1)]
+    internal delegate bool GetKeyProc([In()] IntPtr descriptor, ref uint key, ref uint type, ref int flags);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
     internal delegate short GetIntegerProc([In()] IntPtr descriptor, ref int data);
