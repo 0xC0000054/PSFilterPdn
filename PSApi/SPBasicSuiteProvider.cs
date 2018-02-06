@@ -503,7 +503,7 @@ namespace PSFilterLoad.PSApi
 			return PSError.kSPNoError;
 		}
 
-		private unsafe int SPBasicIsEqual(IntPtr token1, IntPtr token2)
+		private unsafe bool SPBasicIsEqual(IntPtr token1, IntPtr token2)
 		{
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("token1: {0}, token2: {1}", Marshal.PtrToStringAnsi(token1), Marshal.PtrToStringAnsi(token2)));
@@ -512,14 +512,14 @@ namespace PSFilterLoad.PSApi
 			{
 				if (token2 == IntPtr.Zero)
 				{
-					return 1;
+					return true;
 				}
 
-				return 0;
+				return false;
 			}
 			else if (token2 == IntPtr.Zero)
 			{
-				return 0;
+				return false;
 			}
 
 			// Compare two null-terminated ASCII strings for equality.
@@ -530,13 +530,13 @@ namespace PSFilterLoad.PSApi
 			{
 				if ((*src - *dst) != 0)
 				{
-					return 0;
+					return false;
 				}
 				src++;
 				dst++;
 			}
 
-			return 1;
+			return true;
 		}
 
 		private int SPBasicAllocateBlock(int size, ref IntPtr block)
