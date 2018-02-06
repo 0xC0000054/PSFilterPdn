@@ -22,22 +22,22 @@ namespace PSFilterLoad.PSApi
 {
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
-    internal delegate int SPBasicAcquireSuite(System.IntPtr name, int version, ref System.IntPtr suite);
+    internal delegate int SPBasicAcquireSuite(IntPtr name, int version, ref IntPtr suite);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
-    internal delegate int SPBasicReleaseSuite(System.IntPtr name, int version);
+    internal delegate int SPBasicReleaseSuite(IntPtr name, int version);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
-    internal delegate int SPBasicIsEqual(System.IntPtr token1, System.IntPtr token2);
+    internal delegate int SPBasicIsEqual(IntPtr token1, IntPtr token2);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
-    internal delegate int SPBasicAllocateBlock(int size, ref System.IntPtr block);
+    internal delegate int SPBasicAllocateBlock(int size, ref IntPtr block);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
-    internal delegate int SPBasicFreeBlock(System.IntPtr block);
+    internal delegate int SPBasicFreeBlock(IntPtr block);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
-    internal delegate int SPBasicReallocateBlock(System.IntPtr block, int newSize, ref System.IntPtr newblock);
+    internal delegate int SPBasicReallocateBlock(IntPtr block, int newSize, ref IntPtr newblock);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
     internal delegate int SPBasicUndefined();
