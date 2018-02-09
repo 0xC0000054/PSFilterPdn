@@ -789,7 +789,7 @@ namespace PSFilterPdn
 
                 try
                 {
-                    using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Open, FileAccess.Read, FileShare.None))
+                    using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Open, FileAccess.Read, FileShare.None, 4096, FileOptions.DeleteOnClose))
                     {
                         SelfBinder binder = new SelfBinder();
                         BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
