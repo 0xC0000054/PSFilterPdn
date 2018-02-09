@@ -338,6 +338,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugFlags debugFlags = DebugFlags.None;
 			debugFlags |= DebugFlags.AdvanceState;
+			debugFlags |= DebugFlags.BufferSuite;
 			debugFlags |= DebugFlags.Call;
 			debugFlags |= DebugFlags.ColorServices;
 			debugFlags |= DebugFlags.DescriptorParameters;
