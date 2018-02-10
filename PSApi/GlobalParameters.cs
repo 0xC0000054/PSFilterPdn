@@ -145,6 +145,34 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
+        /// Gets a value indicating whether this instance has data.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance has data; otherwise, <c>false</c>.
+        /// </value>
+        public bool HasData
+        {
+            get
+            {
+                // Only the filters that use the FilterRecord 'parameters' handle are supported.
+                // A plug-in that only uses the 'data' handle and does not use scripting will
+                // reshow its dialog when Paint.NET executes the 'Repeat Effect' command.
+                //
+                // This is due to the fact that Filter Factory-based filters will crash with an
+                // access violation when the 32-bit proxy process restores the 'data' handle.
+                // It is possible that Filter Factory stores a pointer in its data handle and the
+                // crash is caused by the pointer becoming invalid due to the address space layout
+                // changing when the proxy process is launched a second time.
+                //
+                // Unfortunately the Paint.NET Effects API does not have a mechanism to allow the
+                // proxy process to stay resident in the background for Paint.NET's lifetime,
+                // which would fix this issue.
+
+                return (parameterDataBytes != null);
+            }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="GlobalParameters"/> class.
         /// </summary>
         public GlobalParameters()
