@@ -224,7 +224,7 @@ namespace PSFilterLoad.PSApi
 			}
 		}
 
-		public List<PSResource> PseudoResources
+		public PseudoResourceCollection PseudoResources
 		{
 			get
 			{

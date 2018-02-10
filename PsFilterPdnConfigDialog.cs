@@ -57,7 +57,7 @@ namespace PSFilterPdn
         private Surface destSurface;
         private PluginData filterData;
         private Dictionary<PluginData, ParameterData> filterParameters;
-        private List<PSResource> pseudoResources;
+        private PseudoResourceCollection pseudoResources;
         private bool runWith32BitShim;
         private DescriptorRegistryValues descriptorRegistry;
 
@@ -105,7 +105,7 @@ namespace PSFilterPdn
             this.destSurface = null;
             this.expandedNodes = new List<string>();
             this.filterParameters = new Dictionary<PluginData, ParameterData>();
-            this.pseudoResources = new List<PSResource>();
+            this.pseudoResources = new PseudoResourceCollection();
             this.fileNameLbl.Text = string.Empty;
             this.folderNameLbl.Text = string.Empty;
             this.proxyTempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -173,7 +173,7 @@ namespace PSFilterPdn
             token.FilterData = this.filterData;
             token.RunWith32BitShim = this.runWith32BitShim;
             token.FilterParameters = this.filterParameters;
-            token.PseudoResources = this.pseudoResources.AsReadOnly();
+            token.PseudoResources = this.pseudoResources;
             token.DescriptorRegistry = this.descriptorRegistry;
             token.DialogState = new ConfigDialogState(this.expandedNodes.AsReadOnly(), this.filterTreeNodes, this.searchDirectories.AsReadOnly());
         }
@@ -194,7 +194,7 @@ namespace PSFilterPdn
 
             if ((token.PseudoResources != null) && token.PseudoResources.Count > 0)
             {
-                this.pseudoResources = new List<PSResource>(token.PseudoResources);
+                this.pseudoResources = token.PseudoResources;
             }
 
             if (token.DescriptorRegistry != null)
@@ -808,8 +808,7 @@ namespace PSFilterPdn
                     {
                         SelfBinder binder = new SelfBinder();
                         BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
-                        List<PSResource> items = (List<PSResource>)bf.Deserialize(fs);
-                        this.pseudoResources.AddRange(items);
+                        this.pseudoResources = (PseudoResourceCollection)bf.Deserialize(fs);
                     }
                 }
                 catch (FileNotFoundException)
@@ -896,10 +895,7 @@ namespace PSFilterPdn
                                     lps.FilterParameters = parameterData;
                                 }
 
-                                if (pseudoResources.Count > 0)
-                                {
-                                    lps.PseudoResources = this.pseudoResources;
-                                }
+                                lps.PseudoResources = this.pseudoResources;
 
                                 bool showAboutDialog = showAboutBoxCb.Checked;
                                 bool result = lps.RunPlugin(data, showAboutDialog);
@@ -913,10 +909,7 @@ namespace PSFilterPdn
                                     {
                                         this.filterParameters.AddOrUpdate(data, parameters);
                                     }
-                                    if (lps.PseudoResources.Count > 0)
-                                    {
-                                        this.pseudoResources.AddRange(lps.PseudoResources);
-                                    }
+                                    this.pseudoResources = lps.PseudoResources;
                                     this.descriptorRegistry = lps.GetRegistryValues();
                                 }
                                 else if (!string.IsNullOrEmpty(lps.ErrorMessage))

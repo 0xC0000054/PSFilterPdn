@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
@@ -22,7 +21,7 @@ namespace PSFilterLoad.PSApi
 		private GetPIResourceProc getResourceProc;
 		private DeletePIResourceProc deleteResourceProc;
 		private AddPIResourceProc addResourceProc;
-		private List<PSResource> pseudoResources;
+		private PseudoResourceCollection pseudoResources;
 
 		public ResourceSuite()
 		{
@@ -30,10 +29,10 @@ namespace PSFilterLoad.PSApi
 			this.addResourceProc = new AddPIResourceProc(AddResource);
 			this.deleteResourceProc = new DeletePIResourceProc(DeleteResource);
 			this.getResourceProc = new GetPIResourceProc(GetResource);
-			this.pseudoResources = new List<PSResource>();
+			this.pseudoResources = new PseudoResourceCollection();
 		}
 
-		public List<PSResource> PseudoResources
+		public PseudoResourceCollection PseudoResources
 		{
 			get
 			{
@@ -118,10 +117,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", DebugUtils.PropToString(ofType), index));
 #endif
-			int resourceIndex = this.pseudoResources.FindIndex(delegate (PSResource r)
-			{
-				return r.Equals(ofType, index);
-			});
+			int resourceIndex = this.pseudoResources.FindIndex(ofType, index);
 
 			if (resourceIndex >= 0)
 			{
@@ -132,10 +128,7 @@ namespace PSFilterLoad.PSApi
 				while (true)
 				{
 					// Renumber the index of subsequent items.
-					int next = this.pseudoResources.FindIndex(delegate (PSResource r)
-					{
-						return r.Equals(ofType, i);
-					});
+					int next = this.pseudoResources.FindIndex(ofType, i);
 
 					if (next < 0) break;
 
@@ -151,10 +144,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", DebugUtils.PropToString(ofType), index));
 #endif
-			PSResource res = this.pseudoResources.Find(delegate (PSResource r)
-			{
-				return r.Equals(ofType, index);
-			});
+			PSResource res = this.pseudoResources.Find(ofType, index);
 
 			if (res != null)
 			{

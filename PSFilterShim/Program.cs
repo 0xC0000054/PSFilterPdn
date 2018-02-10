@@ -129,13 +129,13 @@ namespace PSFilterShim
 				{
 				}
 
-				List<PSResource> pseudoResources = null;
+				PseudoResourceCollection pseudoResources = null;
 				try
 				{
 					using (FileStream fs = new FileStream(settings.PseudoResourcePath, FileMode.Open, FileAccess.Read, FileShare.None))
 					{
 						BinaryFormatter bf = new BinaryFormatter();
-						pseudoResources = (List<PSResource>)bf.Deserialize(fs);
+						pseudoResources = (PseudoResourceCollection)bf.Deserialize(fs);
 					}
 				}
 				catch (FileNotFoundException)

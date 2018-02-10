@@ -19,7 +19,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Windows.Forms;
@@ -168,7 +167,7 @@ namespace PSFilterPdn
                     using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
                         BinaryFormatter bf = new BinaryFormatter();
-                        bf.Serialize(fs, token.PseudoResources.ToList());
+                        bf.Serialize(fs, token.PseudoResources);
                     }
                 }
 
@@ -261,7 +260,7 @@ namespace PSFilterPdn
                     {
                         lps.FilterParameters = parameterData;
                     }
-                    lps.PseudoResources = token.PseudoResources.ToList();
+                    lps.PseudoResources = token.PseudoResources;
                     lps.IsRepeatEffect = true;
 
                     bool result = lps.RunPlugin(token.FilterData, false);
