@@ -15,7 +15,7 @@ using System;
 namespace PSFilterLoad.PSApi
 {
     [Serializable]
-    public sealed class PSResource
+    public sealed class PseudoResource
     {
         private uint key;
         private int index;
@@ -56,7 +56,7 @@ namespace PSFilterLoad.PSApi
             return data;
         }
 
-        public PSResource(uint key, int index, byte[] data)
+        public PseudoResource(uint key, int index, byte[] data)
         {
             this.key = key;
             this.index = index;

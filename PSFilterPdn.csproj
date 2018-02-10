@@ -227,9 +227,9 @@
     <Compile Include="PSApi\PSBoolean.cs" />
     <Compile Include="PSApi\PSDescriptorRegistry.cs" />
     <Compile Include="PSApi\PSErrorSuite.cs" />
+    <Compile Include="PSApi\PseudoResource.cs" />
     <Compile Include="PSApi\PseudoResourceCollection.cs" />
     <Compile Include="PSApi\PSProperties.cs" />
-    <Compile Include="PSApi\PSResource.cs" />
     <Compile Include="PSApi\ReadImageDocument.cs" />
     <Compile Include="PSApi\ReadImageDocumentDesc.cs" />
     <Compile Include="PSApi\ReadOnlyDictionary.cs" />

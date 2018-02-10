@@ -21,7 +21,7 @@ namespace PSFilterLoad.PSApi
     /// </summary>
     /// <seealso cref="System.Collections.ObjectModel.Collection{PSResource}" />
     [Serializable]
-    public sealed class PseudoResourceCollection : Collection<PSResource>
+    public sealed class PseudoResourceCollection : Collection<PseudoResource>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PseudoResourceCollection"/> class.
@@ -36,13 +36,13 @@ namespace PSFilterLoad.PSApi
         /// <param name="type">The type.</param>
         /// <param name="index">The index.</param>
         /// <returns>The pseudo-resource with the specified type and index, if found; otherwise, null.</returns>
-        public PSResource Find(uint type, int index)
+        public PseudoResource Find(uint type, int index)
         {
-            IList<PSResource> items = Items;
+            IList<PseudoResource> items = Items;
 
             for (int i = 0; i < items.Count; i++)
             {
-                PSResource item = items[i];
+                PseudoResource item = items[i];
                 if (item.Equals(type, index))
                 {
                     return item;
@@ -60,7 +60,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>The zero-based index of pseudo-resource with the specified type and index, if found; otherwise, -1.</returns>
         public int FindIndex(uint type, int index)
         {
-            IList<PSResource> items = Items;
+            IList<PseudoResource> items = Items;
 
             for (int i = 0; i < items.Count; i++)
             {

@@ -84,7 +84,7 @@ namespace PSFilterLoad.PSApi
 				}
 
 				int index = CountResource(ofType) + 1;
-				this.pseudoResources.Add(new PSResource(ofType, index, bytes));
+				this.pseudoResources.Add(new PseudoResource(ofType, index, bytes));
 			}
 			catch (OutOfMemoryException)
 			{
@@ -144,7 +144,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", DebugUtils.PropToString(ofType), index));
 #endif
-			PSResource res = this.pseudoResources.Find(ofType, index);
+			PseudoResource res = this.pseudoResources.Find(ofType, index);
 
 			if (res != null)
 			{
