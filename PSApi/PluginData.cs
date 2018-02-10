@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using System;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 
@@ -19,7 +20,7 @@ namespace PSFilterLoad.PSApi
     /// The class that encapsulates an Adobe® Photoshop® filter plugin
     /// </summary>
     [DataContract()]
-    public sealed class PluginData
+    public sealed class PluginData : IEquatable<PluginData>
     {
         private string fileName;
         private string entryPoint;
@@ -158,6 +159,69 @@ namespace PSFilterLoad.PSApi
             this.runWith32BitShim = true;
             this.aete = null;
             this.moduleEntryPoints = null;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            return Equals(obj as PluginData);
+        }
+
+        public bool Equals(PluginData other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return (string.Equals(this.fileName, other.fileName, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(this.entryPoint, other.entryPoint, StringComparison.Ordinal) &&
+                    string.Equals(this.category, other.category, StringComparison.Ordinal) &&
+                    string.Equals(this.title, other.title, StringComparison.Ordinal));
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 23;
+
+            unchecked
+            {
+                hash = (hash * 127) + (this.fileName != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(this.fileName) : 0);
+                hash = (hash * 127) + (this.entryPoint != null ? this.entryPoint.GetHashCode() : 0);
+                hash = (hash * 127) + (this.category != null ? this.category.GetHashCode() : 0);
+                hash = (hash * 127) + (this.title != null ? this.title.GetHashCode() : 0);
+            }
+
+            return hash;
+        }
+
+        public static bool operator ==(PluginData p1, PluginData p2)
+        {
+            if (ReferenceEquals(p1, p2))
+            {
+                return true;
+            }
+
+            if (((object)p1) == null || ((object)p2) == null)
+            {
+                return false;
+            }
+
+            return p1.Equals(p2);
+        }
+
+        public static bool operator !=(PluginData p1, PluginData p2)
+        {
+            return !(p1 == p2);
         }
 
         internal bool IsValid()
