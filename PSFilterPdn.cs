@@ -152,10 +152,14 @@ namespace PSFilterPdn
                     }
                 }
 
-                using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                ParameterData parameterData;
+                if (token.FilterParameters.TryGetValue(token.FilterData, out parameterData))
                 {
-                    BinaryFormatter bf = new BinaryFormatter();
-                    bf.Serialize(fs, token.FilterParameters);
+                    using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        BinaryFormatter bf = new BinaryFormatter();
+                        bf.Serialize(fs, parameterData);
+                    }
                 }
 
 
@@ -252,7 +256,11 @@ namespace PSFilterPdn
                         lps.SetRegistryValues(token.DescriptorRegistry);
                     }
 
-                    lps.FilterParameters = token.FilterParameters;
+                    ParameterData parameterData;
+                    if (token.FilterParameters.TryGetValue(token.FilterData, out parameterData))
+                    {
+                        lps.FilterParameters = parameterData;
+                    }
                     lps.PseudoResources = token.PseudoResources.ToList();
                     lps.IsRepeatEffect = true;
 

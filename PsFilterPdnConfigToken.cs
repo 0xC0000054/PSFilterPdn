@@ -11,6 +11,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using PaintDotNet;
 using PSFilterLoad.PSApi;
@@ -22,7 +23,7 @@ namespace PSFilterPdn
         private Surface dest;
         private PluginData filterData;
         private bool runWith32BitShim;
-        private ParameterData filterParameters;
+        private Dictionary<PluginData, ParameterData> filterParameters;
         private ReadOnlyCollection<PSResource> pseudoResources;
         private DescriptorRegistryValues descriptorRegistry;
         private ConfigDialogState dialogState;
@@ -63,7 +64,7 @@ namespace PSFilterPdn
             }
         }
 
-        public ParameterData FilterParameters
+        public Dictionary<PluginData, ParameterData> FilterParameters
         {
             get
             {
@@ -111,7 +112,7 @@ namespace PSFilterPdn
             }
         }
 
-        public PSFilterPdnConfigToken(Surface dest, PluginData filterData, bool useShim, ParameterData paramData,
+        public PSFilterPdnConfigToken(Surface dest, PluginData filterData, bool useShim, Dictionary<PluginData, ParameterData> paramData,
             ReadOnlyCollection<PSResource> resources, DescriptorRegistryValues registryValues, ConfigDialogState configDialog)
             : base()
         {

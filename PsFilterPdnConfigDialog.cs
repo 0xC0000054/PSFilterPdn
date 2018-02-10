@@ -56,7 +56,7 @@ namespace PSFilterPdn
 
         private Surface destSurface;
         private PluginData filterData;
-        private ParameterData filterParameters;
+        private Dictionary<PluginData, ParameterData> filterParameters;
         private List<PSResource> pseudoResources;
         private bool runWith32BitShim;
         private DescriptorRegistryValues descriptorRegistry;
@@ -84,7 +84,6 @@ namespace PSFilterPdn
 
         private PSFilterPdnSettings settings;
         private string lastSelectedFilterTitle;
-        private string filterParametersPluginFileName;
         private bool foundEffectsDir;
         /// <summary>
         /// If DEP is enabled on a 32-bit OS use the shim process.
@@ -105,6 +104,7 @@ namespace PSFilterPdn
             this.proxyProcess = null;
             this.destSurface = null;
             this.expandedNodes = new List<string>();
+            this.filterParameters = new Dictionary<PluginData, ParameterData>();
             this.pseudoResources = new List<PSResource>();
             this.fileNameLbl.Text = string.Empty;
             this.folderNameLbl.Text = string.Empty;
@@ -187,9 +187,8 @@ namespace PSFilterPdn
                 this.lastSelectedFilterTitle = token.FilterData.Title;
             }
 
-            if (token.FilterData != null && token.FilterParameters != null)
+            if (token.FilterParameters != null)
             {
-                this.filterParametersPluginFileName = token.FilterData.FileName;
                 this.filterParameters = token.FilterParameters;
             }
 
@@ -704,12 +703,13 @@ namespace PSFilterPdn
                     }
                 }
 
-                if ((filterParameters != null) && data.FileName.Equals(filterParametersPluginFileName, StringComparison.OrdinalIgnoreCase))
+                ParameterData parameterData;
+                if ((filterParameters != null) && filterParameters.TryGetValue(data, out parameterData))
                 {
                     using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
                         BinaryFormatter bf = new BinaryFormatter();
-                        bf.Serialize(fs, this.filterParameters);
+                        bf.Serialize(fs, parameterData);
                     }
                 }
 
@@ -793,7 +793,9 @@ namespace PSFilterPdn
                     {
                         SelfBinder binder = new SelfBinder();
                         BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
-                        this.filterParameters = (ParameterData)bf.Deserialize(fs);
+                        ParameterData parameterData = (ParameterData)bf.Deserialize(fs);
+
+                        this.filterParameters.AddOrUpdate(proxyData, parameterData);
                     }
                 }
                 catch (FileNotFoundException)
@@ -888,9 +890,10 @@ namespace PSFilterPdn
                                     lps.SetRegistryValues(descriptorRegistry);
                                 }
 
-                                if ((filterParameters != null) && data.FileName.Equals(filterParametersPluginFileName, StringComparison.OrdinalIgnoreCase))
+                                ParameterData parameterData;
+                                if ((filterParameters != null) && filterParameters.TryGetValue(data, out parameterData))
                                 {
-                                    lps.FilterParameters = this.filterParameters;
+                                    lps.FilterParameters = parameterData;
                                 }
 
                                 if (pseudoResources.Count > 0)
@@ -905,7 +908,7 @@ namespace PSFilterPdn
                                 {
                                     this.destSurface = lps.Dest.Clone();
                                     this.filterData = data;
-                                    this.filterParameters = lps.FilterParameters;
+                                    this.filterParameters.AddOrUpdate(data, lps.FilterParameters);
                                     if (lps.PseudoResources.Count > 0)
                                     {
                                         this.pseudoResources.AddRange(lps.PseudoResources);
