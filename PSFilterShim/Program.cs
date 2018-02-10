@@ -200,10 +200,14 @@ namespace PSFilterShim
 
 							if (!lps.IsRepeatEffect)
 							{
-								using (FileStream fs = new FileStream(settings.ParameterDataPath, FileMode.Create, FileAccess.Write, FileShare.None))
+								ParameterData parameters = lps.FilterParameters;
+								if (parameters != null)
 								{
-									BinaryFormatter bf = new BinaryFormatter();
-									bf.Serialize(fs, lps.FilterParameters);
+									using (FileStream fs = new FileStream(settings.ParameterDataPath, FileMode.Create, FileAccess.Write, FileShare.None))
+									{
+										BinaryFormatter bf = new BinaryFormatter();
+										bf.Serialize(fs, parameters);
+									}
 								}
 
 								using (FileStream fs = new FileStream(settings.PseudoResourcePath, FileMode.Create, FileAccess.Write, FileShare.None))

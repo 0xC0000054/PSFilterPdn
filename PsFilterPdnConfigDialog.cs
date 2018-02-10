@@ -908,7 +908,11 @@ namespace PSFilterPdn
                                 {
                                     this.destSurface = lps.Dest.Clone();
                                     this.filterData = data;
-                                    this.filterParameters.AddOrUpdate(data, lps.FilterParameters);
+                                    ParameterData parameters = lps.FilterParameters;
+                                    if (parameters != null)
+                                    {
+                                        this.filterParameters.AddOrUpdate(data, parameters);
+                                    }
                                     if (lps.PseudoResources.Count > 0)
                                     {
                                         this.pseudoResources.AddRange(lps.PseudoResources);

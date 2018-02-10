@@ -196,12 +196,20 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return new ParameterData(globalParameters, scriptingData);
+				if (globalParameters.HasData || scriptingData != null)
+				{
+					return new ParameterData(globalParameters, scriptingData);
+				}
+
+				return null;
 			}
 			set
 			{
-				globalParameters = value.GlobalParameters;
-				scriptingData = value.AETEDictionary;
+				if (value != null)
+				{
+					globalParameters = value.GlobalParameters;
+					scriptingData = value.AETEDictionary;
+				}
 			}
 		}
 
