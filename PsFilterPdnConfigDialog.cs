@@ -1146,7 +1146,7 @@ namespace PSFilterPdn
                 bool searchSubDirectories = args.searchSubdirectories;
                 if (i == 0 && foundEffectsDir)
                 {
-                    // The sub directories of the Effects are always searched.
+                    // The sub directories of the Effects folder are always searched.
                     searchSubDirectories = true;
                 }
 
