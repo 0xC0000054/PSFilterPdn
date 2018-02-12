@@ -22,16 +22,22 @@ namespace PSFilterLoad.PSApi
     [DataContract()]
     public sealed class PluginData : IEquatable<PluginData>
     {
+        [DataMember(Name = nameof(FileName))]
         private string fileName;
+        [DataMember(Name = nameof(EntryPoint))]
         private string entryPoint;
+        [DataMember(Name = nameof(Category))]
         private string category;
+        [DataMember(Name = nameof(Title))]
         private string title;
+        [DataMember(Name = nameof(FilterInfo))]
         private ReadOnlyCollection<FilterCaseInfo> filterInfo;
         private bool runWith32BitShim;
+        [DataMember(Name = nameof(Aete))]
         private AETEData aete;
+        [DataMember(Name = nameof(ModuleEntryPoints))]
         private ReadOnlyCollection<string> moduleEntryPoints;
 
-        [DataMember]
         public string FileName
         {
             get
@@ -44,7 +50,6 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        [DataMember]
         public string EntryPoint
         {
             get
@@ -57,7 +62,6 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        [DataMember]
         public string Category
         {
             get
@@ -70,7 +74,6 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        [DataMember]
         public string Title
         {
             get
@@ -83,7 +86,6 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        [DataMember]
         public ReadOnlyCollection<FilterCaseInfo> FilterInfo
         {
             get
@@ -111,7 +113,6 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        [DataMember]
         public AETEData Aete
         {
             get
@@ -124,7 +125,6 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        [DataMember]
         public ReadOnlyCollection<string> ModuleEntryPoints
         {
             get
