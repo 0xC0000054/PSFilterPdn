@@ -44,10 +44,6 @@ namespace PSFilterLoad.PSApi
             {
                 return this.fileName;
             }
-            private set // Required for DataContract serialization.
-            {
-                this.fileName = value;
-            }
         }
 
         public string EntryPoint
