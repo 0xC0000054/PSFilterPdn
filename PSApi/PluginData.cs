@@ -38,6 +38,12 @@ namespace PSFilterLoad.PSApi
         [DataMember(Name = nameof(ModuleEntryPoints))]
         private ReadOnlyCollection<string> moduleEntryPoints;
 
+        /// <summary>
+        /// Gets the file path of the filter.
+        /// </summary>
+        /// <value>
+        /// The file path of the filter.
+        /// </value>
         public string FileName
         {
             get
@@ -46,6 +52,12 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        /// <summary>
+        /// Gets the filter entry point.
+        /// </summary>
+        /// <value>
+        /// The entry point.
+        /// </value>
         public string EntryPoint
         {
             get
@@ -54,6 +66,12 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        /// <summary>
+        /// Gets the filter category.
+        /// </summary>
+        /// <value>
+        /// The filter category.
+        /// </value>
         public string Category
         {
             get
@@ -62,6 +80,12 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        /// <summary>
+        /// Gets the filter title.
+        /// </summary>
+        /// <value>
+        /// The filter title.
+        /// </value>
         public string Title
         {
             get
@@ -70,6 +94,12 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        /// <summary>
+        /// Gets the filter information used to determine how transparency is processed.
+        /// </summary>
+        /// <value>
+        /// The filter information used to determine how transparency is processed.
+        /// </value>
         public ReadOnlyCollection<FilterCaseInfo> FilterInfo
         {
             get
@@ -89,6 +119,12 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        /// <summary>
+        /// Gets the AETE scripting information.
+        /// </summary>
+        /// <value>
+        /// The AETE scripting information.
+        /// </value>
         public AETEData Aete
         {
             get
@@ -97,6 +133,12 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        /// <summary>
+        /// Gets a collection containing all of the entry points in the filter module.
+        /// </summary>
+        /// <value>
+        /// The collection containing all of the entry points in the module.
+        /// </value>
         public ReadOnlyCollection<string> ModuleEntryPoints
         {
             get
@@ -109,10 +151,27 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PluginData"/> class.
+        /// </summary>
+        /// <param name="fileName">The file path of the filter.</param>
+        /// <param name="entryPoint">The filter entry point.</param>
+        /// <param name="category">The filter category.</param>
+        /// <param name="title">The filter title.</param>
         internal PluginData(string fileName, string entryPoint, string category, string title) : this(fileName, entryPoint, category, title, null, true, null)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PluginData" /> class.
+        /// </summary>
+        /// <param name="fileName">The file path of the filter.</param>
+        /// <param name="entryPoint">The filter entry point.</param>
+        /// <param name="category">The filter category.</param>
+        /// <param name="title">The filter title.</param>
+        /// <param name="filterInfo">The filter information used to determine how transparency is processed..</param>
+        /// <param name="runWith32BitShim"><c>true</c> if the filter should be run with the 32-bit surrogate process; otherwise, <c>false</c>.</param>
+        /// <param name="aete">The AETE scripting information.</param>
         internal PluginData(string fileName, string entryPoint, string category, string title, ReadOnlyCollection<FilterCaseInfo> filterInfo,
             bool runWith32BitShim, AETEData aete)
         {
