@@ -424,7 +424,12 @@ namespace PSFilterLoad.PSApi
 #endif
                 return true;
             }
-            PluginData enumData = new PluginData(query.fileName);
+            string entryPoint = null;
+            string category = null;
+            string title = null;
+            ReadOnlyCollection<FilterCaseInfo> filterInfo = null;
+            bool runWith32BitShim = false;
+            AETEData aete = null;
 
             int count = Marshal.ReadInt32(lockRes, 6);
 
@@ -449,9 +454,9 @@ namespace PSFilterLoad.PSApi
                 }
                 else if (propKey == query.platformEntryPoint)
                 {
-                    enumData.EntryPoint = Marshal.PtrToStringAnsi((IntPtr)dataPtr, propertyLength).TrimEnd('\0');
+                    entryPoint = Marshal.PtrToStringAnsi((IntPtr)dataPtr, propertyLength).TrimEnd('\0');
                     // If it is a 32-bit plug-in on a 64-bit OS run it with the 32-bit shim.
-                    enumData.RunWith32BitShim = (IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty);
+                    runWith32BitShim = (IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty);
                 }
                 else if (propKey == PIPropertyID.PIVersionProperty)
                 {
@@ -481,11 +486,11 @@ namespace PSFilterLoad.PSApi
                 }
                 else if (propKey == PIPropertyID.PICategoryProperty)
                 {
-                    enumData.Category = StringUtil.FromPascalString(dataPtr);
+                    category = StringUtil.FromPascalString(dataPtr);
                 }
                 else if (propKey == PIPropertyID.PINameProperty)
                 {
-                    enumData.Title = StringUtil.FromPascalString(dataPtr);
+                    title = StringUtil.FromPascalString(dataPtr);
                 }
                 else if (propKey == PIPropertyID.PIFilterCaseInfoProperty)
                 {
@@ -493,7 +498,7 @@ namespace PSFilterLoad.PSApi
 
                     if (result != null)
                     {
-                        enumData.FilterInfo = result.filterCaseInfo;
+                        filterInfo = result.filterCaseInfo;
                         // The actual property length may be longer than the header specifies
                         // if the FilterCaseInfo fields are incorrectly escaped.
                         if (propertyLength != result.propertyLength)
@@ -532,7 +537,7 @@ namespace PSFilterLoad.PSApi
 
                         if (queryAETE.enumAETE != null)
                         {
-                            enumData.Aete = new AETEData(queryAETE.enumAETE);
+                            aete = new AETEData(queryAETE.enumAETE);
                         }
                     }
                 }
@@ -557,6 +562,8 @@ namespace PSFilterLoad.PSApi
                 int propertyDataPaddedLength = (propertyLength + 3) & ~3;
                 propPtr += (PIProperty.SizeOf + propertyDataPaddedLength);
             }
+
+            PluginData enumData = new PluginData(query.fileName, entryPoint, category, title, filterInfo, runWith32BitShim, aete);
 
             if (enumData.IsValid())
             {

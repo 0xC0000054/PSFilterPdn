@@ -52,10 +52,6 @@ namespace PSFilterLoad.PSApi
             {
                 return this.entryPoint;
             }
-            internal set
-            {
-                this.entryPoint = value;
-            }
         }
 
         public string Category
@@ -63,10 +59,6 @@ namespace PSFilterLoad.PSApi
             get
             {
                 return this.category;
-            }
-            internal set
-            {
-                this.category = value;
             }
         }
 
@@ -76,10 +68,6 @@ namespace PSFilterLoad.PSApi
             {
                 return this.title;
             }
-            internal set
-            {
-                this.title = value;
-            }
         }
 
         public ReadOnlyCollection<FilterCaseInfo> FilterInfo
@@ -87,10 +75,6 @@ namespace PSFilterLoad.PSApi
             get
             {
                 return this.filterInfo;
-            }
-            internal set
-            {
-                this.filterInfo = value;
             }
         }
 
@@ -103,10 +87,6 @@ namespace PSFilterLoad.PSApi
             {
                 return this.runWith32BitShim;
             }
-            set
-            {
-                this.runWith32BitShim = value;
-            }
         }
 
         public AETEData Aete
@@ -114,10 +94,6 @@ namespace PSFilterLoad.PSApi
             get
             {
                 return this.aete;
-            }
-            internal set
-            {
-                this.aete = value;
             }
         }
 
@@ -133,27 +109,20 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        internal PluginData(string fileName)
+        internal PluginData(string fileName, string entryPoint, string category, string title) : this(fileName, entryPoint, category, title, null, true, null)
         {
-            this.fileName = fileName;
-            this.entryPoint = string.Empty;
-            this.category = string.Empty;
-            this.title = string.Empty;
-            this.filterInfo = null;
-            this.runWith32BitShim = false;
-            this.aete = null;
-            this.moduleEntryPoints = null;
         }
 
-        internal PluginData(string fileName, string entryPoint, string category, string title)
+        internal PluginData(string fileName, string entryPoint, string category, string title, ReadOnlyCollection<FilterCaseInfo> filterInfo,
+            bool runWith32BitShim, AETEData aete)
         {
             this.fileName = fileName;
             this.entryPoint = entryPoint;
             this.category = category;
             this.title = title;
-            this.filterInfo = null;
-            this.runWith32BitShim = true;
-            this.aete = null;
+            this.filterInfo = filterInfo;
+            this.runWith32BitShim = runWith32BitShim;
+            this.aete = aete;
             this.moduleEntryPoints = null;
         }
 
