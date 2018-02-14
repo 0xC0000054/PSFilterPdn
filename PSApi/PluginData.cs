@@ -109,8 +109,11 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
-        /// Used to run 32-bit plugins in 64-bit Paint.NET
+        /// Gets a value indicating whether the filter should be run with the 32-bit surrogate process.
         /// </summary>
+        /// <value>
+        ///   <c>true</c> if the filter should be run with the 32-bit surrogate process; otherwise, <c>false</c>.
+        /// </value>
         internal bool RunWith32BitShim
         {
             get
