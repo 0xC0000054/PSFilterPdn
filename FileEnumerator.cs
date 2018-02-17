@@ -143,7 +143,7 @@ namespace PSFilterPdn
         private readonly NativeEnums.FindExInfoLevel infoLevel;
         private readonly NativeEnums.FindExAdditionalFlags additionalFlags;
         private readonly string fileExtension;
-        private readonly bool searchSubDirectories;
+        private readonly SearchOption searchOption;
         private readonly bool dereferenceLinks;
         private readonly uint oldErrorMode;
 
@@ -152,16 +152,20 @@ namespace PSFilterPdn
         /// </summary>
         /// <param name="path">The directory to search.</param>
         /// <param name="fileExtension">The file extension to search for.</param>
-        /// <param name="searchSubDirectories">if set to <c>true</c> search the sub directories of <paramref name="path"/>.</param>
+        /// <param name="searchOption">
+        /// One of the <see cref="SearchOption"/> values that specifies whether the search operation should include
+        /// only the current directory or should include all subdirectories.
+        /// </param>
         /// <param name="dereferenceLinks">if set to <c>true</c> search the target of shortcuts.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="path"/> in null.
         /// -or-
         /// <paramref name="fileExtension"/> is null.
         /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="searchOption"/> is not a valid <see cref="SearchOption"/> value.</exception>
         /// <exception cref="PathTooLongException">The specified path, file name, or combined exceed the system-defined maximum length.</exception>
         /// <exception cref="SecurityException">The caller does not have the required permission.</exception>
-        public FileEnumerator(string path, string fileExtension, bool searchSubDirectories, bool dereferenceLinks)
+        public FileEnumerator(string path, string fileExtension, SearchOption searchOption, bool dereferenceLinks)
         {
             if (path == null)
             {
@@ -172,6 +176,10 @@ namespace PSFilterPdn
             {
                 throw new ArgumentNullException(nameof(fileExtension));
             }
+            if (searchOption != SearchOption.AllDirectories && searchOption != SearchOption.TopDirectoryOnly)
+            {
+                throw new ArgumentOutOfRangeException(nameof(searchOption));
+            }
 
             string fullPath = Path.GetFullPath(path);
             string demandPath = GetPermissionPath(fullPath, false);
@@ -180,7 +188,7 @@ namespace PSFilterPdn
 
             this.searchData = new SearchData(fullPath, false);
             this.fileExtension = fileExtension;
-            this.searchSubDirectories = searchSubDirectories;
+            this.searchOption = searchOption;
             this.searchDirectories = new Queue<SearchData>();
             if (dereferenceLinks)
             {
@@ -273,7 +281,7 @@ namespace PSFilterPdn
         {
             if ((findData.dwFileAttributes & NativeConstants.FILE_ATTRIBUTE_DIRECTORY) == NativeConstants.FILE_ATTRIBUTE_DIRECTORY)
             {
-                if (this.searchSubDirectories && !findData.cFileName.Equals(".") && !findData.cFileName.Equals(".."))
+                if (this.searchOption == SearchOption.AllDirectories && !findData.cFileName.Equals(".") && !findData.cFileName.Equals(".."))
                 {
                     this.searchDirectories.Enqueue(new SearchData(this.searchData, findData.cFileName));
                 }
@@ -464,7 +472,7 @@ namespace PSFilterPdn
                                     return true;
                                 }
                             }
-                            else if (this.searchSubDirectories && !findData.cFileName.Equals(".") && !findData.cFileName.Equals(".."))
+                            else if (this.searchOption == SearchOption.AllDirectories && !findData.cFileName.Equals(".") && !findData.cFileName.Equals(".."))
                             {
                                 this.searchDirectories.Enqueue(new SearchData(this.searchData, findData.cFileName));
                             }
