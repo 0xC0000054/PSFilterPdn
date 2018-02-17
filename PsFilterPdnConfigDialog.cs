@@ -1015,11 +1015,12 @@ namespace PSFilterPdn
             public string[] directories;
             public bool searchSubdirectories;
 
-            public UpdateFilterListParam()
+            public UpdateFilterListParam(ICollection<string> searchDirectories, bool searchSubDirectories)
             {
                 this.items = null;
-                this.directories = null;
-                this.searchSubdirectories = false;
+                this.directories = new string[searchDirectories.Count];
+                searchDirectories.CopyTo(this.directories, 0);
+                this.searchSubdirectories = searchSubDirectories;
             }
         }
 
@@ -1032,11 +1033,8 @@ namespace PSFilterPdn
             {
                 if (!updateFilterListBw.IsBusy)
                 {
-                    UpdateFilterListParam uflp = new UpdateFilterListParam();
+                    UpdateFilterListParam uflp = new UpdateFilterListParam(this.searchDirectories, this.subDirSearchCb.Checked);
                     int count = this.searchDirectories.Count;
-                    uflp.directories = new string[count];
-                    this.searchDirectories.CopyTo(uflp.directories);
-                    uflp.searchSubdirectories = this.subDirSearchCb.Checked;
 
                     this.filterTree.Nodes.Clear();
 
