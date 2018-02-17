@@ -22,7 +22,7 @@ namespace PSFilterLoad.PSApi
         private readonly DescriptorRegistryErase erase;
         private readonly DescriptorRegistryGet get;
 
-        private IActionDescriptorSuite actionDescriptorSuite;
+        private readonly IActionDescriptorSuite actionDescriptorSuite;
         private Dictionary<string, DescriptorRegistryItem> registry;
         private bool persistentValuesChanged;
 
