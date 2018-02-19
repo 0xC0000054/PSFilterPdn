@@ -33,6 +33,7 @@ namespace PSFilterPdn
             public string pszSpec;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
         internal struct POINT
         {
             public int x;
@@ -45,6 +46,7 @@ namespace PSFilterPdn
             }
         }
 
+        [StructLayout(LayoutKind.Sequential)]
         internal struct TCHITTESTINFO
         {
             public POINT pt;
