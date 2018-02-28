@@ -2817,21 +2817,24 @@ namespace PSFilterLoad.PSApi
 					bool allOpaque = true;
 					PSPixelMask* mask = (PSPixelMask*)srcPixelMap.masks.ToPointer();
 
-					byte* maskPtr = (byte*)mask->maskData.ToPointer();
-					for (int y = top; y < bottom; y++)
+					if (mask->maskData != IntPtr.Zero && mask->colBytes != 0 && mask->rowBytes != 0)
 					{
-						byte* src = maskPtr + (y * mask->rowBytes) + left;
-						ColorBgra* dst = displaySurface.GetRowAddressUnchecked(y - top);
-						for (int x = 0; x < width; x++)
+						byte* maskPtr = (byte*)mask->maskData.ToPointer();
+						for (int y = top; y < bottom; y++)
 						{
-							dst->A = *src;
-							if (*src < 255)
+							byte* src = maskPtr + (y * mask->rowBytes) + left;
+							ColorBgra* dst = displaySurface.GetRowAddressUnchecked(y - top);
+							for (int x = 0; x < width; x++)
 							{
-								allOpaque = false;
-							}
+								dst->A = *src;
+								if (*src < 255)
+								{
+									allOpaque = false;
+								}
 
-							src += mask->colBytes;
-							dst++;
+								src += mask->colBytes;
+								dst++;
+							}
 						}
 					}
 
