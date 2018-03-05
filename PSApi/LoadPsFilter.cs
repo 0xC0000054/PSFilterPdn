@@ -1706,7 +1706,7 @@ namespace PSFilterLoad.PSApi
 						}
 
 						long dataLength = mask.Width * mask.Height;
-						SafeNativeMethods.memset(maskData, maskPadding, new UIntPtr((ulong)dataLength));
+						Memory.FillMemory(maskData, (byte)maskPadding, (ulong)dataLength);
 						break;
 				}
 			}
@@ -1911,7 +1911,7 @@ namespace PSFilterLoad.PSApi
 							return PSError.paramErr;
 						}
 
-						SafeNativeMethods.memset(inData, inputPadding, new UIntPtr((ulong)Memory.Size(inData)));
+						Memory.FillMemory(inData, (byte)inputPadding, (ulong)Memory.Size(inData));
 						break;
 				}
 
@@ -2886,7 +2886,7 @@ namespace PSFilterLoad.PSApi
 		{
 			mask = new MaskSurface(source.Width, source.Height);
 
-			SafeNativeMethods.memset(mask.Scan0.Pointer, 0, new UIntPtr((ulong)mask.Scan0.Length));
+			Memory.SetToZero(mask.Scan0.Pointer, (ulong)mask.Scan0.Length);
 
 			Rectangle[] scans = selectedRegion.GetRegionScansReadOnlyInt();
 
@@ -2914,7 +2914,7 @@ namespace PSFilterLoad.PSApi
 			int height = source.Height;
 			mask = new MaskSurface(width, height);
 
-			SafeNativeMethods.memset(mask.Scan0.Pointer, 0, new UIntPtr((ulong)mask.Scan0.Length));
+			Memory.SetToZero(mask.Scan0.Pointer, (ulong)mask.Scan0.Length);
 
 			for (int y = 0; y < height; y++)
 			{
