@@ -234,5 +234,25 @@ namespace PSFilterLoad.PSApi
 			return 0L;
 		}
 
+		/// <summary>
+		/// Fills the memory block with the specified value.
+		/// </summary>
+		/// <param name="ptr">The starting address of the memory block to fill.</param>
+		/// <param name="value">The value to place in the memory block.</param>
+		/// <param name="length">The length of the memory block.</param>
+		public static void FillMemory(IntPtr ptr, byte value, ulong length)
+		{
+			SafeNativeMethods.memset(ptr, value, new UIntPtr(length));
+		}
+
+		/// <summary>
+		/// Fills the memory block with the zeros.
+		/// </summary>
+		/// <param name="ptr">The starting address of the memory block to fill.</param>
+		/// <param name="length">The length of the memory block.</param>
+		public static void SetToZero(IntPtr ptr, ulong length)
+		{
+			SafeNativeMethods.memset(ptr, 0, new UIntPtr(length));
+		}
 	}
 }
