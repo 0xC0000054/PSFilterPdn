@@ -231,24 +231,24 @@ namespace PSFilterLoad.PSApi
             return hash;
         }
 
-        public static bool operator ==(PluginData p1, PluginData p2)
+        public static bool operator ==(PluginData pluginData1, PluginData pluginData2)
         {
-            if (ReferenceEquals(p1, p2))
+            if (ReferenceEquals(pluginData1, pluginData2))
             {
                 return true;
             }
 
-            if (((object)p1) == null || ((object)p2) == null)
+            if (((object)pluginData1) == null || ((object)pluginData2) == null)
             {
                 return false;
             }
 
-            return p1.Equals(p2);
+            return pluginData1.Equals(pluginData2);
         }
 
-        public static bool operator !=(PluginData p1, PluginData p2)
+        public static bool operator !=(PluginData pluginData1, PluginData pluginData2)
         {
-            return !(p1 == p2);
+            return !(pluginData1 == pluginData2);
         }
 
         internal bool IsValid()
