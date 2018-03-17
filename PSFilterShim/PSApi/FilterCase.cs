@@ -20,7 +20,6 @@ namespace PSFilterLoad.PSApi
 {
     internal static class FilterCase
     {
-        public const short Unsupported = -1;
         public const short FlatImageNoSelection = 1;
         public const short FlatImageWithSelection = 2;
         public const short FloatingSelection = 3;
