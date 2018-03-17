@@ -139,6 +139,11 @@ namespace PSFilterLoad.PSApi
             this.Flags1 = flags1;
             this.Flags2 = flags2;
         }
+
+        public bool IsSupported()
+        {
+            return (InputHandling != FilterDataHandling.CantFilter && OutputHandling != FilterDataHandling.CantFilter);
+        }
     }
 
 }
