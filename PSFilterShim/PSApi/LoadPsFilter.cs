@@ -477,7 +477,7 @@ namespace PSFilterLoad.PSApi
 				int filterCaseIndex = filterCase - 1;
 				System.Collections.ObjectModel.ReadOnlyCollection<FilterCaseInfo> filterInfo = data.FilterInfo;
 
-				if (filterInfo[filterCaseIndex].InputHandling == FilterDataHandling.CantFilter)
+				if (!filterInfo[filterCaseIndex].IsSupported())
 				{
 					if (!HasTransparentPixels())
 					{
@@ -491,10 +491,10 @@ namespace PSFilterLoad.PSApi
 								break;
 						}
 					}
-					else if (filterInfo[filterCaseIndex + 2].InputHandling == FilterDataHandling.CantFilter)
+					else if (!filterInfo[filterCaseIndex + 2].IsSupported())
 					{
 						// If the protected transparency modes are not supported use the next most appropriate mode.
-						if (filterInfo[FilterCase.FloatingSelection - 1].InputHandling != FilterDataHandling.CantFilter)
+						if (filterInfo[FilterCase.FloatingSelection - 1].IsSupported())
 						{
 							filterCase = FilterCase.FloatingSelection;
 						}
