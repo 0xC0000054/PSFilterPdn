@@ -18,14 +18,14 @@
 
 namespace PSFilterLoad.PSApi
 {
-    internal static class FilterCase
+    internal enum FilterCase : short
     {
-        public const short FlatImageNoSelection = 1;
-        public const short FlatImageWithSelection = 2;
-        public const short FloatingSelection = 3;
-        public const short EditableTransparencyNoSelection = 4;
-        public const short EditableTransparencyWithSelection = 5;
-        public const short ProtectedTransparencyNoSelection = 6;
-        public const short ProtectedTransparencyWithSelection = 7;
+        FlatImageNoSelection = 1,
+        FlatImageWithSelection = 2,
+        FloatingSelection = 3,
+        EditableTransparencyNoSelection = 4,
+        EditableTransparencyWithSelection = 5,
+        ProtectedTransparencyNoSelection = 6,
+        ProtectedTransparencyWithSelection = 7
     }
 }

@@ -82,7 +82,7 @@ namespace PSFilterLoad.PSApi
         public PSBoolean supportsAlternateLayouts;
         public short wantLayout;
 
-        public short filterCase;
+        public FilterCase filterCase;
         public short dummyPlaneValue;
         public IntPtr premiereHook;
         public IntPtr advanceState;

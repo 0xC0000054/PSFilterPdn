@@ -92,7 +92,7 @@ namespace PSFilterLoad.PSApi
 
 		private Func<bool> abortFunc;
 		private string errorMessage;
-		private short filterCase;
+		private FilterCase filterCase;
 		private float dpiX;
 		private float dpiY;
 		private PdnRegion selectedRegion;
@@ -464,7 +464,7 @@ namespace PSFilterLoad.PSApi
 			{
 				this.filterCase = selectedRegion != null ? FilterCase.EditableTransparencyWithSelection : FilterCase.EditableTransparencyNoSelection;
 
-				int filterCaseIndex = filterCase - 1;
+				int filterCaseIndex = (int)filterCase - 1;
 				System.Collections.ObjectModel.ReadOnlyCollection<FilterCaseInfo> filterInfo = data.FilterInfo;
 
 				if (!filterInfo[filterCaseIndex].IsSupported())
@@ -484,7 +484,7 @@ namespace PSFilterLoad.PSApi
 					else if (!filterInfo[filterCaseIndex + 2].IsSupported())
 					{
 						// If the protected transparency modes are not supported use the next most appropriate mode.
-						if (filterInfo[FilterCase.FloatingSelection - 1].IsSupported())
+						if (filterInfo[(int)FilterCase.FloatingSelection - 1].IsSupported())
 						{
 							filterCase = FilterCase.FloatingSelection;
 						}
@@ -1267,7 +1267,7 @@ namespace PSFilterLoad.PSApi
 
 			if (pdata.FilterInfo != null)
 			{
-				FilterCaseInfo info = pdata.FilterInfo[filterCase - 1];
+				FilterCaseInfo info = pdata.FilterInfo[(int)filterCase - 1];
 				inputHandling = info.InputHandling;
 				outputHandling = info.OutputHandling;
 				FilterCaseInfoFlags filterCaseFlags = info.Flags1;
