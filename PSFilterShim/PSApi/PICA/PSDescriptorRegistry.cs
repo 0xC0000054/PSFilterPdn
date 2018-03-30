@@ -27,6 +27,7 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int DescriptorRegistryGet(IntPtr key, ref IntPtr descriptor);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable")]
     internal struct PSDescriptorRegistryProcs
     {
         public IntPtr Register;
