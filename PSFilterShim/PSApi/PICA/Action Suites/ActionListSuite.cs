@@ -13,6 +13,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
@@ -92,6 +93,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// or
         /// <paramref name="zstringSuite"/> is null.
         /// </exception>
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public ActionListSuite(IActionReferenceSuite actionReferenceSuite, IASZStringSuite zstringSuite)
         {
             if (actionReferenceSuite == null)
@@ -198,6 +200,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// Creates the action list suite version 1 structure.
         /// </summary>
         /// <returns>A <see cref="PSActionListProcs"/> containing the action list suite callbacks.</returns>
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public PSActionListProcs CreateActionListSuite1()
         {
             PSActionListProcs suite = new PSActionListProcs()

@@ -13,6 +13,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
@@ -173,6 +174,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// or
         /// <paramref name="zstringSuite"/> is null.
         /// </exception>
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public ActionDescriptorSuite(AETEData aete, IActionListSuite actionListSuite, IActionReferenceSuite actionReferenceSuite,
             IASZStringSuite zstringSuite)
         {
@@ -273,6 +275,7 @@ namespace PSFilterLoad.PSApi.PICA
             return descriptor;
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public PSActionDescriptorProc CreateActionDescriptorSuite2()
         {
             PSActionDescriptorProc suite = new PSActionDescriptorProc
