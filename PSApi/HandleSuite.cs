@@ -43,7 +43,7 @@ namespace PSFilterLoad.PSApi
 			public static readonly int SizeOf = Marshal.SizeOf(typeof(PSHandle));
 		}
 
-		private sealed class HandleEntry : IDisposable
+		private sealed class HandleEntry
 		{
 			private IntPtr handle;
 			private IntPtr pointer;
