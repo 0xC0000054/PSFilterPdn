@@ -66,7 +66,7 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
-        /// Gets or sets the number of channels.
+        /// Sets the number of channels.
         /// </summary>
         /// <value>
         /// The number of channels.
@@ -74,10 +74,6 @@ namespace PSFilterLoad.PSApi
         /// <exception cref="ArgumentOutOfRangeException">The number of channels is less than one.</exception>
         public int NumberOfChannels
         {
-            get
-            {
-                return this.numberOfChannels;
-            }
             set
             {
                 if (value < 1)
