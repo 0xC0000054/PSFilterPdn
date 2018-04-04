@@ -1079,7 +1079,7 @@ namespace PSFilterLoad.PSApi
 				case FilterCase.FlatImageWithSelection:
 				case FilterCase.EditableTransparencyWithSelection:
 				case FilterCase.ProtectedTransparencyWithSelection:
-					DrawMask();
+					DrawSelectionMask();
 					filterRecord->isFloating = false;
 					filterRecord->haveMask = true;
 					filterRecord->autoMask = true;
@@ -2915,7 +2915,7 @@ namespace PSFilterLoad.PSApi
 
 		}
 
-		private unsafe void DrawMask()
+		private unsafe void DrawSelectionMask()
 		{
 			mask = new MaskSurface(source.Width, source.Height);
 
