@@ -1064,25 +1064,31 @@ namespace PSFilterLoad.PSApi
 			filterRecord->outData = IntPtr.Zero;
 			filterRecord->outRowBytes = 0;
 
-			if (filterCase == FilterCase.FloatingSelection)
+			switch (filterCase)
 			{
-				DrawFloatingSelectionMask();
-				filterRecord->isFloating = true;
-				filterRecord->haveMask = true;
-				filterRecord->autoMask = false;
-			}
-			else if (selectedRegion != null)
-			{
-				DrawMask();
-				filterRecord->isFloating = false;
-				filterRecord->haveMask = true;
-				filterRecord->autoMask = true;
-			}
-			else
-			{
-				filterRecord->isFloating = false;
-				filterRecord->haveMask = false;
-				filterRecord->autoMask = false;
+				case FilterCase.FloatingSelection:
+					DrawFloatingSelectionMask();
+					filterRecord->isFloating = true;
+					filterRecord->haveMask = true;
+					filterRecord->autoMask = false;
+					break;
+				case FilterCase.FlatImageWithSelection:
+				case FilterCase.EditableTransparencyWithSelection:
+				case FilterCase.ProtectedTransparencyWithSelection:
+					DrawMask();
+					filterRecord->isFloating = false;
+					filterRecord->haveMask = true;
+					filterRecord->autoMask = true;
+					break;
+				case FilterCase.FlatImageNoSelection:
+				case FilterCase.EditableTransparencyNoSelection:
+				case FilterCase.ProtectedTransparencyNoSelection:
+					filterRecord->isFloating = false;
+					filterRecord->haveMask = false;
+					filterRecord->autoMask = false;
+					break;
+				default:
+					throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Unsupported filter case: {0}", filterCase));
 			}
 			filterRecord->maskRect = Rect16.Empty;
 			filterRecord->maskData = IntPtr.Zero;
