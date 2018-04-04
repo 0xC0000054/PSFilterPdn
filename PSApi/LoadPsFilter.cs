@@ -1077,7 +1077,6 @@ namespace PSFilterLoad.PSApi
 				filterRecord->isFloating = false;
 				filterRecord->haveMask = true;
 				filterRecord->autoMask = true;
-				filterRecord->maskRect = filterRecord->filterRect;
 			}
 			else
 			{
