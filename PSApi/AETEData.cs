@@ -19,14 +19,6 @@ namespace PSFilterLoad.PSApi
     {
         private Dictionary<uint, short> flagList;
 
-        public IEnumerable<KeyValuePair<uint, short>> FlagList
-        {
-            get
-            {
-                return flagList;
-            }
-        }
-
         internal AETEData(PluginAETE enumAETE)
         {
             this.flagList = new Dictionary<uint, short>();
@@ -39,6 +31,11 @@ namespace PSFilterLoad.PSApi
                 }
             }
 
+        }
+
+        public bool TryGetParameterFlags(uint key, out short flags)
+        {
+            return flagList.TryGetValue(key, out flags);
         }
     }
 

@@ -743,14 +743,11 @@ namespace PSFilterLoad.PSApi
 		{
 			if (aete != null)
 			{
-				foreach (var item in aete.FlagList)
+				short flags;
+				if (aete.TryGetParameterFlags(key, out flags))
 				{
-					if (item.Key == key)
-					{
-						return item.Value;
-					}
+					return flags;
 				}
-
 			}
 
 			return 0;

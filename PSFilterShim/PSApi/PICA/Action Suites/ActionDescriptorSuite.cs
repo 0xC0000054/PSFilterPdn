@@ -586,14 +586,11 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (aete != null)
             {
-                foreach (var item in aete.FlagList)
+                short value;
+                if (aete.TryGetParameterFlags(key, out value))
                 {
-                    if (item.Key == key)
-                    {
-                        return item.Value;
-                    }
+                    return value;
                 }
-
             }
 
             return 0;
