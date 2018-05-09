@@ -149,7 +149,9 @@ namespace PSFilterLoad.PSApi
 		internal void SetProgressCallback(Action<int, int> callback)
 		{
 			if (callback == null)
+			{
 				throw new ArgumentNullException(nameof(callback));
+			}
 
 			progressFunc = callback;
 		}
@@ -157,7 +159,9 @@ namespace PSFilterLoad.PSApi
 		internal void SetAbortCallback(Func<bool> callback)
 		{
 			if (callback == null)
+			{
 				throw new ArgumentNullException(nameof(callback));
+			}
 
 			abortFunc = callback;
 		}
@@ -239,7 +243,9 @@ namespace PSFilterLoad.PSApi
 		internal LoadPsFilter(PaintDotNet.Effects.EffectEnvironmentParameters eep, IntPtr owner, PluginUISettings pluginUISettings)
 		{
 			if (eep == null)
+			{
 				throw new ArgumentNullException(nameof(eep));
+			}
 
 			this.inputHandling = FilterDataHandling.None;
 			this.outputHandling = FilterDataHandling.None;
@@ -746,7 +752,9 @@ namespace PSFilterLoad.PSApi
 		private unsafe void RestoreParameterHandles()
 		{
 			if (previousPhase == PluginPhase.Parameters)
+			{
 				return;
+			}
 
 			byte[] parameterDataBytes = globalParameters.GetParameterDataBytes();
 			if (parameterDataBytes != null)
@@ -1050,7 +1058,9 @@ namespace PSFilterLoad.PSApi
 		private unsafe void SetFilterRecordValues()
 		{
 			if (frValuesSetup)
+			{
 				return;
+			}
 
 			frValuesSetup = true;
 
@@ -2968,7 +2978,9 @@ namespace PSFilterLoad.PSApi
 		private unsafe void SetupSizes()
 		{
 			if (sizesSetup)
+			{
 				return;
+			}
 
 			sizesSetup = true;
 

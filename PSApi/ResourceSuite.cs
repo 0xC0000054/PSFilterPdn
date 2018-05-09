@@ -130,7 +130,10 @@ namespace PSFilterLoad.PSApi
 					// Renumber the index of subsequent items.
 					int next = this.pseudoResources.FindIndex(ofType, i);
 
-					if (next < 0) break;
+					if (next < 0)
+                    {
+                        break;
+                    }
 
 					this.pseudoResources[next].Index = i - 1;
 

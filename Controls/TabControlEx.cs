@@ -305,7 +305,10 @@ namespace PSFilterPdn.Controls
             {
                 e.Graphics.Clear(backColor);
 
-                if (TabCount <= 0) return;
+                if (TabCount <= 0)
+                {
+                    return;
+                }
 
                 SolidBrush background = null;
                 Pen border = null;
