@@ -31,6 +31,12 @@ csharp_style_expression_bodied_accessors = false:none
 # Code block settings
 csharp_prefer_braces = true:warning
 
+# "This." qualifier settings
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
 [*.xml]
 indent_style = space
 indent_size = 2
