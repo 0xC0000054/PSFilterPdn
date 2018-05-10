@@ -131,9 +131,9 @@ namespace PSFilterLoad.PSApi
 					int next = this.pseudoResources.FindIndex(ofType, i);
 
 					if (next < 0)
-                    {
-                        break;
-                    }
+					{
+						break;
+					}
 
 					this.pseudoResources[next].Index = i - 1;
 
