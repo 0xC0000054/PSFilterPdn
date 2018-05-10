@@ -149,7 +149,7 @@ namespace PSFilterLoad.ColorPicker
         {
             get
             {
-                return this.ignoreChangedEvents != 0;
+                return ignoreChangedEvents != 0;
             }
         }
 
@@ -186,18 +186,18 @@ namespace PSFilterLoad.ColorPicker
                     }
 
                     SyncHsvFromRgb(value);
-                    this.colorDisplayWidget.RectangleColor = this.userPrimaryColor.ToColor();
+                    colorDisplayWidget.RectangleColor = userPrimaryColor.ToColor();
 
-                    this.colorDisplayWidget.Invalidate();
+                    colorDisplayWidget.Invalidate();
                 }
             }
         }
 
         internal void SetDefaultColor(short r, short g, short b)
         {
-            this.redUpDown.Value = r;
-            this.greenUpDown.Value = g;
-            this.blueUpDown.Value = b;
+            redUpDown.Value = r;
+            greenUpDown.Value = g;
+            blueUpDown.Value = b;
         }
 
         private static string GetHexNumericUpDownValue(int red, int green, int blue)
@@ -316,23 +316,23 @@ namespace PSFilterLoad.ColorPicker
 
             if (!string.IsNullOrEmpty(title))
             {
-                this.Text = title;
+                Text = title;
             }
 
-            this.redLabel.Text = "R:";
-            this.greenLabel.Text = "G:";
-            this.blueLabel.Text = "B:";
+            redLabel.Text = "R:";
+            greenLabel.Text = "G:";
+            blueLabel.Text = "B:";
 
-            this.hueLabel.Text = "H:";
-            this.saturationLabel.Text = "S:";
-            this.valueLabel.Text = "V:";
+            hueLabel.Text = "H:";
+            saturationLabel.Text = "S:";
+            valueLabel.Text = "V:";
 
-            this.rgbHeader.Text = "RGB";
-            this.hexLabel.Text = "Hex:";
-            this.hsvHeader.Text = "HSV";
+            rgbHeader.Text = "RGB";
+            hexLabel.Text = "Hex:";
+            hsvHeader.Text = "HSV";
 
-            this.swatchControl.Colors = paletteColors;
-            this.hexBox.Text = "000000";
+            swatchControl.Colors = paletteColors;
+            hexBox.Text = "000000";
         }
 
         /// <summary>
@@ -415,445 +415,445 @@ namespace PSFilterLoad.ColorPicker
         /// </summary>
         private void InitializeComponent()
         {
-            this.redUpDown = new System.Windows.Forms.NumericUpDown();
-            this.greenUpDown = new System.Windows.Forms.NumericUpDown();
-            this.blueUpDown = new System.Windows.Forms.NumericUpDown();
-            this.redLabel = new System.Windows.Forms.Label();
-            this.blueLabel = new System.Windows.Forms.Label();
-            this.greenLabel = new System.Windows.Forms.Label();
-            this.saturationLabel = new System.Windows.Forms.Label();
-            this.valueLabel = new System.Windows.Forms.Label();
-            this.hueLabel = new System.Windows.Forms.Label();
-            this.valueUpDown = new System.Windows.Forms.NumericUpDown();
-            this.saturationUpDown = new System.Windows.Forms.NumericUpDown();
-            this.hueUpDown = new System.Windows.Forms.NumericUpDown();
-            this.hexBox = new System.Windows.Forms.TextBox();
-            this.hexLabel = new System.Windows.Forms.Label();
-            this.okBtn = new System.Windows.Forms.Button();
-            this.cancelBtn = new System.Windows.Forms.Button();
-            this.blueGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
-            this.greenGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
-            this.redGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
-            this.saturationGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
-            this.hueGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
-            this.colorWheel = new PSFilterLoad.ColorPicker.ColorWheel();
-            this.hsvHeader = new PSFilterLoad.ColorPicker.HeaderLabel();
-            this.rgbHeader = new PSFilterLoad.ColorPicker.HeaderLabel();
-            this.valueGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
-            this.colorDisplayWidget = new PSFilterLoad.ColorPicker.ColorRectangleControl();
-            this.swatchHeader = new PSFilterLoad.ColorPicker.HeaderLabel();
-            this.swatchControl = new PSFilterLoad.ColorPicker.SwatchControl();
-            ((System.ComponentModel.ISupportInitialize)(this.redUpDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.greenUpDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.blueUpDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.valueUpDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.saturationUpDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.hueUpDown)).BeginInit();
-            this.SuspendLayout();
+            redUpDown = new System.Windows.Forms.NumericUpDown();
+            greenUpDown = new System.Windows.Forms.NumericUpDown();
+            blueUpDown = new System.Windows.Forms.NumericUpDown();
+            redLabel = new System.Windows.Forms.Label();
+            blueLabel = new System.Windows.Forms.Label();
+            greenLabel = new System.Windows.Forms.Label();
+            saturationLabel = new System.Windows.Forms.Label();
+            valueLabel = new System.Windows.Forms.Label();
+            hueLabel = new System.Windows.Forms.Label();
+            valueUpDown = new System.Windows.Forms.NumericUpDown();
+            saturationUpDown = new System.Windows.Forms.NumericUpDown();
+            hueUpDown = new System.Windows.Forms.NumericUpDown();
+            hexBox = new System.Windows.Forms.TextBox();
+            hexLabel = new System.Windows.Forms.Label();
+            okBtn = new System.Windows.Forms.Button();
+            cancelBtn = new System.Windows.Forms.Button();
+            blueGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
+            greenGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
+            redGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
+            saturationGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
+            hueGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
+            colorWheel = new PSFilterLoad.ColorPicker.ColorWheel();
+            hsvHeader = new PSFilterLoad.ColorPicker.HeaderLabel();
+            rgbHeader = new PSFilterLoad.ColorPicker.HeaderLabel();
+            valueGradientControl = new PSFilterLoad.ColorPicker.ColorGradientControl();
+            colorDisplayWidget = new PSFilterLoad.ColorPicker.ColorRectangleControl();
+            swatchHeader = new PSFilterLoad.ColorPicker.HeaderLabel();
+            swatchControl = new PSFilterLoad.ColorPicker.SwatchControl();
+            ((System.ComponentModel.ISupportInitialize)(redUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(greenUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(blueUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(valueUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(saturationUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(hueUpDown)).BeginInit();
+            SuspendLayout();
             //
             // redUpDown
             //
-            this.redUpDown.Location = new System.Drawing.Point(318, 17);
-            this.redUpDown.Maximum = new decimal(new int[] {
+            redUpDown.Location = new System.Drawing.Point(318, 17);
+            redUpDown.Maximum = new decimal(new int[] {
             255,
             0,
             0,
             0});
-            this.redUpDown.Name = "redUpDown";
-            this.redUpDown.Size = new System.Drawing.Size(56, 20);
-            this.redUpDown.TabIndex = 2;
-            this.redUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.redUpDown.ValueChanged += new System.EventHandler(this.UpDown_ValueChanged);
-            this.redUpDown.Enter += new System.EventHandler(this.UpDown_Enter);
-            this.redUpDown.KeyUp += new System.Windows.Forms.KeyEventHandler(this.UpDown_KeyUp);
-            this.redUpDown.Leave += new System.EventHandler(this.UpDown_Leave);
+            redUpDown.Name = "redUpDown";
+            redUpDown.Size = new System.Drawing.Size(56, 20);
+            redUpDown.TabIndex = 2;
+            redUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            redUpDown.ValueChanged += new System.EventHandler(UpDown_ValueChanged);
+            redUpDown.Enter += new System.EventHandler(UpDown_Enter);
+            redUpDown.KeyUp += new System.Windows.Forms.KeyEventHandler(UpDown_KeyUp);
+            redUpDown.Leave += new System.EventHandler(UpDown_Leave);
             //
             // greenUpDown
             //
-            this.greenUpDown.Location = new System.Drawing.Point(318, 41);
-            this.greenUpDown.Maximum = new decimal(new int[] {
+            greenUpDown.Location = new System.Drawing.Point(318, 41);
+            greenUpDown.Maximum = new decimal(new int[] {
             255,
             0,
             0,
             0});
-            this.greenUpDown.Name = "greenUpDown";
-            this.greenUpDown.Size = new System.Drawing.Size(56, 20);
-            this.greenUpDown.TabIndex = 3;
-            this.greenUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.greenUpDown.ValueChanged += new System.EventHandler(this.UpDown_ValueChanged);
-            this.greenUpDown.Enter += new System.EventHandler(this.UpDown_Enter);
-            this.greenUpDown.KeyUp += new System.Windows.Forms.KeyEventHandler(this.UpDown_KeyUp);
-            this.greenUpDown.Leave += new System.EventHandler(this.UpDown_Leave);
+            greenUpDown.Name = "greenUpDown";
+            greenUpDown.Size = new System.Drawing.Size(56, 20);
+            greenUpDown.TabIndex = 3;
+            greenUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            greenUpDown.ValueChanged += new System.EventHandler(UpDown_ValueChanged);
+            greenUpDown.Enter += new System.EventHandler(UpDown_Enter);
+            greenUpDown.KeyUp += new System.Windows.Forms.KeyEventHandler(UpDown_KeyUp);
+            greenUpDown.Leave += new System.EventHandler(UpDown_Leave);
             //
             // blueUpDown
             //
-            this.blueUpDown.Location = new System.Drawing.Point(318, 65);
-            this.blueUpDown.Maximum = new decimal(new int[] {
+            blueUpDown.Location = new System.Drawing.Point(318, 65);
+            blueUpDown.Maximum = new decimal(new int[] {
             255,
             0,
             0,
             0});
-            this.blueUpDown.Name = "blueUpDown";
-            this.blueUpDown.Size = new System.Drawing.Size(56, 20);
-            this.blueUpDown.TabIndex = 4;
-            this.blueUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.blueUpDown.ValueChanged += new System.EventHandler(this.UpDown_ValueChanged);
-            this.blueUpDown.Enter += new System.EventHandler(this.UpDown_Enter);
-            this.blueUpDown.KeyUp += new System.Windows.Forms.KeyEventHandler(this.UpDown_KeyUp);
-            this.blueUpDown.Leave += new System.EventHandler(this.UpDown_Leave);
+            blueUpDown.Name = "blueUpDown";
+            blueUpDown.Size = new System.Drawing.Size(56, 20);
+            blueUpDown.TabIndex = 4;
+            blueUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            blueUpDown.ValueChanged += new System.EventHandler(UpDown_ValueChanged);
+            blueUpDown.Enter += new System.EventHandler(UpDown_Enter);
+            blueUpDown.KeyUp += new System.Windows.Forms.KeyEventHandler(UpDown_KeyUp);
+            blueUpDown.Leave += new System.EventHandler(UpDown_Leave);
             //
             // redLabel
             //
-            this.redLabel.AutoSize = true;
-            this.redLabel.Location = new System.Drawing.Point(220, 21);
-            this.redLabel.Name = "redLabel";
-            this.redLabel.Size = new System.Drawing.Size(15, 13);
-            this.redLabel.TabIndex = 7;
-            this.redLabel.Text = "R";
-            this.redLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            redLabel.AutoSize = true;
+            redLabel.Location = new System.Drawing.Point(220, 21);
+            redLabel.Name = "redLabel";
+            redLabel.Size = new System.Drawing.Size(15, 13);
+            redLabel.TabIndex = 7;
+            redLabel.Text = "R";
+            redLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             //
             // blueLabel
             //
-            this.blueLabel.AutoSize = true;
-            this.blueLabel.Location = new System.Drawing.Point(220, 69);
-            this.blueLabel.Name = "blueLabel";
-            this.blueLabel.Size = new System.Drawing.Size(14, 13);
-            this.blueLabel.TabIndex = 8;
-            this.blueLabel.Text = "B";
-            this.blueLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            blueLabel.AutoSize = true;
+            blueLabel.Location = new System.Drawing.Point(220, 69);
+            blueLabel.Name = "blueLabel";
+            blueLabel.Size = new System.Drawing.Size(14, 13);
+            blueLabel.TabIndex = 8;
+            blueLabel.Text = "B";
+            blueLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // greenLabel
             //
-            this.greenLabel.AutoSize = true;
-            this.greenLabel.Location = new System.Drawing.Point(220, 45);
-            this.greenLabel.Name = "greenLabel";
-            this.greenLabel.Size = new System.Drawing.Size(15, 13);
-            this.greenLabel.TabIndex = 9;
-            this.greenLabel.Text = "G";
-            this.greenLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            greenLabel.AutoSize = true;
+            greenLabel.Location = new System.Drawing.Point(220, 45);
+            greenLabel.Name = "greenLabel";
+            greenLabel.Size = new System.Drawing.Size(15, 13);
+            greenLabel.TabIndex = 9;
+            greenLabel.Text = "G";
+            greenLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             //
             // saturationLabel
             //
-            this.saturationLabel.AutoSize = true;
-            this.saturationLabel.Location = new System.Drawing.Point(220, 157);
-            this.saturationLabel.Name = "saturationLabel";
-            this.saturationLabel.Size = new System.Drawing.Size(17, 13);
-            this.saturationLabel.TabIndex = 16;
-            this.saturationLabel.Text = "S:";
-            this.saturationLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            saturationLabel.AutoSize = true;
+            saturationLabel.Location = new System.Drawing.Point(220, 157);
+            saturationLabel.Name = "saturationLabel";
+            saturationLabel.Size = new System.Drawing.Size(17, 13);
+            saturationLabel.TabIndex = 16;
+            saturationLabel.Text = "S:";
+            saturationLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // valueLabel
             //
-            this.valueLabel.AutoSize = true;
-            this.valueLabel.Location = new System.Drawing.Point(220, 181);
-            this.valueLabel.Name = "valueLabel";
-            this.valueLabel.Size = new System.Drawing.Size(17, 13);
-            this.valueLabel.TabIndex = 15;
-            this.valueLabel.Text = "V:";
-            this.valueLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            valueLabel.AutoSize = true;
+            valueLabel.Location = new System.Drawing.Point(220, 181);
+            valueLabel.Name = "valueLabel";
+            valueLabel.Size = new System.Drawing.Size(17, 13);
+            valueLabel.TabIndex = 15;
+            valueLabel.Text = "V:";
+            valueLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // hueLabel
             //
-            this.hueLabel.AutoSize = true;
-            this.hueLabel.Location = new System.Drawing.Point(220, 133);
-            this.hueLabel.Name = "hueLabel";
-            this.hueLabel.Size = new System.Drawing.Size(18, 13);
-            this.hueLabel.TabIndex = 14;
-            this.hueLabel.Text = "H:";
-            this.hueLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            hueLabel.AutoSize = true;
+            hueLabel.Location = new System.Drawing.Point(220, 133);
+            hueLabel.Name = "hueLabel";
+            hueLabel.Size = new System.Drawing.Size(18, 13);
+            hueLabel.TabIndex = 14;
+            hueLabel.Text = "H:";
+            hueLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // valueUpDown
             //
-            this.valueUpDown.Location = new System.Drawing.Point(318, 177);
-            this.valueUpDown.Name = "valueUpDown";
-            this.valueUpDown.Size = new System.Drawing.Size(56, 20);
-            this.valueUpDown.TabIndex = 8;
-            this.valueUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.valueUpDown.ValueChanged += new System.EventHandler(this.UpDown_ValueChanged);
-            this.valueUpDown.Enter += new System.EventHandler(this.UpDown_Enter);
-            this.valueUpDown.KeyUp += new System.Windows.Forms.KeyEventHandler(this.UpDown_KeyUp);
-            this.valueUpDown.Leave += new System.EventHandler(this.UpDown_Leave);
+            valueUpDown.Location = new System.Drawing.Point(318, 177);
+            valueUpDown.Name = "valueUpDown";
+            valueUpDown.Size = new System.Drawing.Size(56, 20);
+            valueUpDown.TabIndex = 8;
+            valueUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            valueUpDown.ValueChanged += new System.EventHandler(UpDown_ValueChanged);
+            valueUpDown.Enter += new System.EventHandler(UpDown_Enter);
+            valueUpDown.KeyUp += new System.Windows.Forms.KeyEventHandler(UpDown_KeyUp);
+            valueUpDown.Leave += new System.EventHandler(UpDown_Leave);
             //
             // saturationUpDown
             //
-            this.saturationUpDown.Location = new System.Drawing.Point(318, 153);
-            this.saturationUpDown.Name = "saturationUpDown";
-            this.saturationUpDown.Size = new System.Drawing.Size(56, 20);
-            this.saturationUpDown.TabIndex = 7;
-            this.saturationUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.saturationUpDown.ValueChanged += new System.EventHandler(this.UpDown_ValueChanged);
-            this.saturationUpDown.Enter += new System.EventHandler(this.UpDown_Enter);
-            this.saturationUpDown.KeyUp += new System.Windows.Forms.KeyEventHandler(this.UpDown_KeyUp);
-            this.saturationUpDown.Leave += new System.EventHandler(this.UpDown_Leave);
+            saturationUpDown.Location = new System.Drawing.Point(318, 153);
+            saturationUpDown.Name = "saturationUpDown";
+            saturationUpDown.Size = new System.Drawing.Size(56, 20);
+            saturationUpDown.TabIndex = 7;
+            saturationUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            saturationUpDown.ValueChanged += new System.EventHandler(UpDown_ValueChanged);
+            saturationUpDown.Enter += new System.EventHandler(UpDown_Enter);
+            saturationUpDown.KeyUp += new System.Windows.Forms.KeyEventHandler(UpDown_KeyUp);
+            saturationUpDown.Leave += new System.EventHandler(UpDown_Leave);
             //
             // hueUpDown
             //
-            this.hueUpDown.Location = new System.Drawing.Point(318, 129);
-            this.hueUpDown.Maximum = new decimal(new int[] {
+            hueUpDown.Location = new System.Drawing.Point(318, 129);
+            hueUpDown.Maximum = new decimal(new int[] {
             360,
             0,
             0,
             0});
-            this.hueUpDown.Name = "hueUpDown";
-            this.hueUpDown.Size = new System.Drawing.Size(56, 20);
-            this.hueUpDown.TabIndex = 6;
-            this.hueUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.hueUpDown.ValueChanged += new System.EventHandler(this.UpDown_ValueChanged);
-            this.hueUpDown.Enter += new System.EventHandler(this.UpDown_Enter);
-            this.hueUpDown.KeyUp += new System.Windows.Forms.KeyEventHandler(this.UpDown_KeyUp);
-            this.hueUpDown.Leave += new System.EventHandler(this.UpDown_Leave);
+            hueUpDown.Name = "hueUpDown";
+            hueUpDown.Size = new System.Drawing.Size(56, 20);
+            hueUpDown.TabIndex = 6;
+            hueUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            hueUpDown.ValueChanged += new System.EventHandler(UpDown_ValueChanged);
+            hueUpDown.Enter += new System.EventHandler(UpDown_Enter);
+            hueUpDown.KeyUp += new System.Windows.Forms.KeyEventHandler(UpDown_KeyUp);
+            hueUpDown.Leave += new System.EventHandler(UpDown_Leave);
             //
             // hexBox
             //
-            this.hexBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
-            this.hexBox.Location = new System.Drawing.Point(318, 89);
-            this.hexBox.Name = "hexBox";
-            this.hexBox.Size = new System.Drawing.Size(56, 20);
-            this.hexBox.TabIndex = 5;
-            this.hexBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.hexBox.TextChanged += new System.EventHandler(this.UpDown_ValueChanged);
-            this.hexBox.Enter += new System.EventHandler(this.HexUpDown_Enter);
-            this.hexBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.hexBox_KeyDown);
-            this.hexBox.Leave += new System.EventHandler(this.HexUpDown_Leave);
+            hexBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+            hexBox.Location = new System.Drawing.Point(318, 89);
+            hexBox.Name = "hexBox";
+            hexBox.Size = new System.Drawing.Size(56, 20);
+            hexBox.TabIndex = 5;
+            hexBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            hexBox.TextChanged += new System.EventHandler(UpDown_ValueChanged);
+            hexBox.Enter += new System.EventHandler(HexUpDown_Enter);
+            hexBox.KeyDown += new System.Windows.Forms.KeyEventHandler(hexBox_KeyDown);
+            hexBox.Leave += new System.EventHandler(HexUpDown_Leave);
             //
             // hexLabel
             //
-            this.hexLabel.AutoSize = true;
-            this.hexLabel.Location = new System.Drawing.Point(220, 92);
-            this.hexLabel.Name = "hexLabel";
-            this.hexLabel.Size = new System.Drawing.Size(26, 13);
-            this.hexLabel.TabIndex = 13;
-            this.hexLabel.Text = "Hex";
-            this.hexLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            hexLabel.AutoSize = true;
+            hexLabel.Location = new System.Drawing.Point(220, 92);
+            hexLabel.Name = "hexLabel";
+            hexLabel.Size = new System.Drawing.Size(26, 13);
+            hexLabel.TabIndex = 13;
+            hexLabel.Text = "Hex";
+            hexLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             //
             // okBtn
             //
-            this.okBtn.Location = new System.Drawing.Point(218, 235);
-            this.okBtn.Name = "okBtn";
-            this.okBtn.Size = new System.Drawing.Size(75, 23);
-            this.okBtn.TabIndex = 40;
-            this.okBtn.Text = "Ok";
-            this.okBtn.UseVisualStyleBackColor = true;
-            this.okBtn.Click += new System.EventHandler(this.okBtn_Click);
+            okBtn.Location = new System.Drawing.Point(218, 235);
+            okBtn.Name = "okBtn";
+            okBtn.Size = new System.Drawing.Size(75, 23);
+            okBtn.TabIndex = 40;
+            okBtn.Text = "Ok";
+            okBtn.UseVisualStyleBackColor = true;
+            okBtn.Click += new System.EventHandler(okBtn_Click);
             //
             // cancelBtn
             //
-            this.cancelBtn.Location = new System.Drawing.Point(299, 235);
-            this.cancelBtn.Name = "cancelBtn";
-            this.cancelBtn.Size = new System.Drawing.Size(75, 23);
-            this.cancelBtn.TabIndex = 41;
-            this.cancelBtn.Text = "Cancel";
-            this.cancelBtn.UseVisualStyleBackColor = true;
-            this.cancelBtn.Click += new System.EventHandler(this.cancelBtn_Click);
+            cancelBtn.Location = new System.Drawing.Point(299, 235);
+            cancelBtn.Name = "cancelBtn";
+            cancelBtn.Size = new System.Drawing.Size(75, 23);
+            cancelBtn.TabIndex = 41;
+            cancelBtn.Text = "Cancel";
+            cancelBtn.UseVisualStyleBackColor = true;
+            cancelBtn.Click += new System.EventHandler(cancelBtn_Click);
             //
             // blueGradientControl
             //
-            this.blueGradientControl.Count = 1;
-            this.blueGradientControl.CustomGradient = null;
-            this.blueGradientControl.DrawFarNub = true;
-            this.blueGradientControl.DrawNearNub = false;
-            this.blueGradientControl.Location = new System.Drawing.Point(241, 66);
-            this.blueGradientControl.MaxColor = System.Drawing.Color.White;
-            this.blueGradientControl.MinColor = System.Drawing.Color.Black;
-            this.blueGradientControl.Name = "blueGradientControl";
-            this.blueGradientControl.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            this.blueGradientControl.Size = new System.Drawing.Size(73, 19);
-            this.blueGradientControl.TabIndex = 39;
-            this.blueGradientControl.TabStop = false;
-            this.blueGradientControl.Value = 0;
-            this.blueGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.RgbGradientControl_ValueChanged);
+            blueGradientControl.Count = 1;
+            blueGradientControl.CustomGradient = null;
+            blueGradientControl.DrawFarNub = true;
+            blueGradientControl.DrawNearNub = false;
+            blueGradientControl.Location = new System.Drawing.Point(241, 66);
+            blueGradientControl.MaxColor = System.Drawing.Color.White;
+            blueGradientControl.MinColor = System.Drawing.Color.Black;
+            blueGradientControl.Name = "blueGradientControl";
+            blueGradientControl.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            blueGradientControl.Size = new System.Drawing.Size(73, 19);
+            blueGradientControl.TabIndex = 39;
+            blueGradientControl.TabStop = false;
+            blueGradientControl.Value = 0;
+            blueGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(RgbGradientControl_ValueChanged);
             //
             // greenGradientControl
             //
-            this.greenGradientControl.Count = 1;
-            this.greenGradientControl.CustomGradient = null;
-            this.greenGradientControl.DrawFarNub = true;
-            this.greenGradientControl.DrawNearNub = false;
-            this.greenGradientControl.Location = new System.Drawing.Point(241, 42);
-            this.greenGradientControl.MaxColor = System.Drawing.Color.White;
-            this.greenGradientControl.MinColor = System.Drawing.Color.Black;
-            this.greenGradientControl.Name = "greenGradientControl";
-            this.greenGradientControl.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            this.greenGradientControl.Size = new System.Drawing.Size(73, 19);
-            this.greenGradientControl.TabIndex = 38;
-            this.greenGradientControl.TabStop = false;
-            this.greenGradientControl.Value = 0;
-            this.greenGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.RgbGradientControl_ValueChanged);
+            greenGradientControl.Count = 1;
+            greenGradientControl.CustomGradient = null;
+            greenGradientControl.DrawFarNub = true;
+            greenGradientControl.DrawNearNub = false;
+            greenGradientControl.Location = new System.Drawing.Point(241, 42);
+            greenGradientControl.MaxColor = System.Drawing.Color.White;
+            greenGradientControl.MinColor = System.Drawing.Color.Black;
+            greenGradientControl.Name = "greenGradientControl";
+            greenGradientControl.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            greenGradientControl.Size = new System.Drawing.Size(73, 19);
+            greenGradientControl.TabIndex = 38;
+            greenGradientControl.TabStop = false;
+            greenGradientControl.Value = 0;
+            greenGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(RgbGradientControl_ValueChanged);
             //
             // redGradientControl
             //
-            this.redGradientControl.Count = 1;
-            this.redGradientControl.CustomGradient = null;
-            this.redGradientControl.DrawFarNub = true;
-            this.redGradientControl.DrawNearNub = false;
-            this.redGradientControl.Location = new System.Drawing.Point(241, 18);
-            this.redGradientControl.MaxColor = System.Drawing.Color.White;
-            this.redGradientControl.MinColor = System.Drawing.Color.Black;
-            this.redGradientControl.Name = "redGradientControl";
-            this.redGradientControl.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            this.redGradientControl.Size = new System.Drawing.Size(73, 19);
-            this.redGradientControl.TabIndex = 37;
-            this.redGradientControl.TabStop = false;
-            this.redGradientControl.Value = 0;
-            this.redGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.RgbGradientControl_ValueChanged);
+            redGradientControl.Count = 1;
+            redGradientControl.CustomGradient = null;
+            redGradientControl.DrawFarNub = true;
+            redGradientControl.DrawNearNub = false;
+            redGradientControl.Location = new System.Drawing.Point(241, 18);
+            redGradientControl.MaxColor = System.Drawing.Color.White;
+            redGradientControl.MinColor = System.Drawing.Color.Black;
+            redGradientControl.Name = "redGradientControl";
+            redGradientControl.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            redGradientControl.Size = new System.Drawing.Size(73, 19);
+            redGradientControl.TabIndex = 37;
+            redGradientControl.TabStop = false;
+            redGradientControl.Value = 0;
+            redGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(RgbGradientControl_ValueChanged);
             //
             // saturationGradientControl
             //
-            this.saturationGradientControl.Count = 1;
-            this.saturationGradientControl.CustomGradient = null;
-            this.saturationGradientControl.DrawFarNub = true;
-            this.saturationGradientControl.DrawNearNub = false;
-            this.saturationGradientControl.Location = new System.Drawing.Point(241, 154);
-            this.saturationGradientControl.MaxColor = System.Drawing.Color.White;
-            this.saturationGradientControl.MinColor = System.Drawing.Color.Black;
-            this.saturationGradientControl.Name = "saturationGradientControl";
-            this.saturationGradientControl.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            this.saturationGradientControl.Size = new System.Drawing.Size(73, 19);
-            this.saturationGradientControl.TabIndex = 35;
-            this.saturationGradientControl.TabStop = false;
-            this.saturationGradientControl.Value = 0;
-            this.saturationGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.HsvGradientControl_ValueChanged);
+            saturationGradientControl.Count = 1;
+            saturationGradientControl.CustomGradient = null;
+            saturationGradientControl.DrawFarNub = true;
+            saturationGradientControl.DrawNearNub = false;
+            saturationGradientControl.Location = new System.Drawing.Point(241, 154);
+            saturationGradientControl.MaxColor = System.Drawing.Color.White;
+            saturationGradientControl.MinColor = System.Drawing.Color.Black;
+            saturationGradientControl.Name = "saturationGradientControl";
+            saturationGradientControl.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            saturationGradientControl.Size = new System.Drawing.Size(73, 19);
+            saturationGradientControl.TabIndex = 35;
+            saturationGradientControl.TabStop = false;
+            saturationGradientControl.Value = 0;
+            saturationGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(HsvGradientControl_ValueChanged);
             //
             // hueGradientControl
             //
-            this.hueGradientControl.Count = 1;
-            this.hueGradientControl.CustomGradient = null;
-            this.hueGradientControl.DrawFarNub = true;
-            this.hueGradientControl.DrawNearNub = false;
-            this.hueGradientControl.Location = new System.Drawing.Point(241, 130);
-            this.hueGradientControl.MaxColor = System.Drawing.Color.White;
-            this.hueGradientControl.MinColor = System.Drawing.Color.Black;
-            this.hueGradientControl.Name = "hueGradientControl";
-            this.hueGradientControl.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            this.hueGradientControl.Size = new System.Drawing.Size(73, 19);
-            this.hueGradientControl.TabIndex = 34;
-            this.hueGradientControl.TabStop = false;
-            this.hueGradientControl.Value = 0;
-            this.hueGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.HsvGradientControl_ValueChanged);
+            hueGradientControl.Count = 1;
+            hueGradientControl.CustomGradient = null;
+            hueGradientControl.DrawFarNub = true;
+            hueGradientControl.DrawNearNub = false;
+            hueGradientControl.Location = new System.Drawing.Point(241, 130);
+            hueGradientControl.MaxColor = System.Drawing.Color.White;
+            hueGradientControl.MinColor = System.Drawing.Color.Black;
+            hueGradientControl.Name = "hueGradientControl";
+            hueGradientControl.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            hueGradientControl.Size = new System.Drawing.Size(73, 19);
+            hueGradientControl.TabIndex = 34;
+            hueGradientControl.TabStop = false;
+            hueGradientControl.Value = 0;
+            hueGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(HsvGradientControl_ValueChanged);
             //
             // colorWheel
             //
-            this.colorWheel.Location = new System.Drawing.Point(54, 24);
-            this.colorWheel.Name = "colorWheel";
-            this.colorWheel.Size = new System.Drawing.Size(146, 147);
-            this.colorWheel.TabIndex = 3;
-            this.colorWheel.TabStop = false;
-            this.colorWheel.ColorChanged += new System.EventHandler(this.ColorWheel_ColorChanged);
+            colorWheel.Location = new System.Drawing.Point(54, 24);
+            colorWheel.Name = "colorWheel";
+            colorWheel.Size = new System.Drawing.Size(146, 147);
+            colorWheel.TabIndex = 3;
+            colorWheel.TabStop = false;
+            colorWheel.ColorChanged += new System.EventHandler(ColorWheel_ColorChanged);
             //
             // hsvHeader
             //
-            this.hsvHeader.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.hsvHeader.Location = new System.Drawing.Point(220, 113);
-            this.hsvHeader.Name = "hsvHeader";
-            this.hsvHeader.RightMargin = 0;
-            this.hsvHeader.Size = new System.Drawing.Size(154, 14);
-            this.hsvHeader.TabIndex = 28;
-            this.hsvHeader.TabStop = false;
+            hsvHeader.ForeColor = System.Drawing.SystemColors.Highlight;
+            hsvHeader.Location = new System.Drawing.Point(220, 113);
+            hsvHeader.Name = "hsvHeader";
+            hsvHeader.RightMargin = 0;
+            hsvHeader.Size = new System.Drawing.Size(154, 14);
+            hsvHeader.TabIndex = 28;
+            hsvHeader.TabStop = false;
             //
             // rgbHeader
             //
-            this.rgbHeader.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.rgbHeader.Location = new System.Drawing.Point(220, 1);
-            this.rgbHeader.Name = "rgbHeader";
-            this.rgbHeader.RightMargin = 0;
-            this.rgbHeader.Size = new System.Drawing.Size(154, 14);
-            this.rgbHeader.TabIndex = 27;
-            this.rgbHeader.TabStop = false;
+            rgbHeader.ForeColor = System.Drawing.SystemColors.Highlight;
+            rgbHeader.Location = new System.Drawing.Point(220, 1);
+            rgbHeader.Name = "rgbHeader";
+            rgbHeader.RightMargin = 0;
+            rgbHeader.Size = new System.Drawing.Size(154, 14);
+            rgbHeader.TabIndex = 27;
+            rgbHeader.TabStop = false;
             //
             // valueGradientControl
             //
-            this.valueGradientControl.Count = 1;
-            this.valueGradientControl.CustomGradient = null;
-            this.valueGradientControl.DrawFarNub = true;
-            this.valueGradientControl.DrawNearNub = false;
-            this.valueGradientControl.Location = new System.Drawing.Point(241, 178);
-            this.valueGradientControl.MaxColor = System.Drawing.Color.White;
-            this.valueGradientControl.MinColor = System.Drawing.Color.Black;
-            this.valueGradientControl.Name = "valueGradientControl";
-            this.valueGradientControl.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            this.valueGradientControl.Size = new System.Drawing.Size(73, 19);
-            this.valueGradientControl.TabIndex = 2;
-            this.valueGradientControl.TabStop = false;
-            this.valueGradientControl.Value = 0;
-            this.valueGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.HsvGradientControl_ValueChanged);
+            valueGradientControl.Count = 1;
+            valueGradientControl.CustomGradient = null;
+            valueGradientControl.DrawFarNub = true;
+            valueGradientControl.DrawNearNub = false;
+            valueGradientControl.Location = new System.Drawing.Point(241, 178);
+            valueGradientControl.MaxColor = System.Drawing.Color.White;
+            valueGradientControl.MinColor = System.Drawing.Color.Black;
+            valueGradientControl.Name = "valueGradientControl";
+            valueGradientControl.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            valueGradientControl.Size = new System.Drawing.Size(73, 19);
+            valueGradientControl.TabIndex = 2;
+            valueGradientControl.TabStop = false;
+            valueGradientControl.Value = 0;
+            valueGradientControl.ValueChanged += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(HsvGradientControl_ValueChanged);
             //
             // colorDisplayWidget
             //
-            this.colorDisplayWidget.Location = new System.Drawing.Point(7, 16);
-            this.colorDisplayWidget.Name = "colorDisplayWidget";
-            this.colorDisplayWidget.RectangleColor = System.Drawing.Color.Empty;
-            this.colorDisplayWidget.Size = new System.Drawing.Size(42, 42);
-            this.colorDisplayWidget.TabIndex = 32;
+            colorDisplayWidget.Location = new System.Drawing.Point(7, 16);
+            colorDisplayWidget.Name = "colorDisplayWidget";
+            colorDisplayWidget.RectangleColor = System.Drawing.Color.Empty;
+            colorDisplayWidget.Size = new System.Drawing.Size(42, 42);
+            colorDisplayWidget.TabIndex = 32;
             //
             // swatchHeader
             //
-            this.swatchHeader.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.swatchHeader.Location = new System.Drawing.Point(8, 177);
-            this.swatchHeader.Name = "swatchHeader";
-            this.swatchHeader.RightMargin = 0;
-            this.swatchHeader.Size = new System.Drawing.Size(193, 14);
-            this.swatchHeader.TabIndex = 30;
-            this.swatchHeader.TabStop = false;
+            swatchHeader.ForeColor = System.Drawing.SystemColors.Highlight;
+            swatchHeader.Location = new System.Drawing.Point(8, 177);
+            swatchHeader.Name = "swatchHeader";
+            swatchHeader.RightMargin = 0;
+            swatchHeader.Size = new System.Drawing.Size(193, 14);
+            swatchHeader.TabIndex = 30;
+            swatchHeader.TabStop = false;
             //
             // swatchControl
             //
-            this.swatchControl.BlinkHighlight = false;
-            this.swatchControl.Colors = new PaintDotNet.ColorBgra[0];
-            this.swatchControl.Location = new System.Drawing.Point(8, 189);
-            this.swatchControl.Name = "swatchControl";
-            this.swatchControl.Size = new System.Drawing.Size(192, 74);
-            this.swatchControl.TabIndex = 31;
-            this.swatchControl.Text = "swatchControl1";
-            this.swatchControl.ColorClicked += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(this.swatchControl_ColorClicked);
+            swatchControl.BlinkHighlight = false;
+            swatchControl.Colors = new PaintDotNet.ColorBgra[0];
+            swatchControl.Location = new System.Drawing.Point(8, 189);
+            swatchControl.Name = "swatchControl";
+            swatchControl.Size = new System.Drawing.Size(192, 74);
+            swatchControl.TabIndex = 31;
+            swatchControl.Text = "swatchControl1";
+            swatchControl.ColorClicked += new System.EventHandler<PSFilterLoad.ColorPicker.IndexEventArgs>(swatchControl_ColorClicked);
             //
             // ColorPickerForm
             //
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(386, 270);
-            this.Controls.Add(this.cancelBtn);
-            this.Controls.Add(this.okBtn);
-            this.Controls.Add(this.valueLabel);
-            this.Controls.Add(this.saturationLabel);
-            this.Controls.Add(this.hueLabel);
-            this.Controls.Add(this.greenLabel);
-            this.Controls.Add(this.blueLabel);
-            this.Controls.Add(this.redLabel);
-            this.Controls.Add(this.hexLabel);
-            this.Controls.Add(this.blueGradientControl);
-            this.Controls.Add(this.greenGradientControl);
-            this.Controls.Add(this.redGradientControl);
-            this.Controls.Add(this.saturationGradientControl);
-            this.Controls.Add(this.hueGradientControl);
-            this.Controls.Add(this.colorWheel);
-            this.Controls.Add(this.hsvHeader);
-            this.Controls.Add(this.rgbHeader);
-            this.Controls.Add(this.valueGradientControl);
-            this.Controls.Add(this.blueUpDown);
-            this.Controls.Add(this.greenUpDown);
-            this.Controls.Add(this.redUpDown);
-            this.Controls.Add(this.hexBox);
-            this.Controls.Add(this.hueUpDown);
-            this.Controls.Add(this.saturationUpDown);
-            this.Controls.Add(this.valueUpDown);
-            this.Controls.Add(this.colorDisplayWidget);
-            this.Controls.Add(this.swatchHeader);
-            this.Controls.Add(this.swatchControl);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "ColorPickerForm";
-            this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Color Picker";
-            ((System.ComponentModel.ISupportInitialize)(this.redUpDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.greenUpDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.blueUpDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.valueUpDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.saturationUpDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.hueUpDown)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            ClientSize = new System.Drawing.Size(386, 270);
+            Controls.Add(cancelBtn);
+            Controls.Add(okBtn);
+            Controls.Add(valueLabel);
+            Controls.Add(saturationLabel);
+            Controls.Add(hueLabel);
+            Controls.Add(greenLabel);
+            Controls.Add(blueLabel);
+            Controls.Add(redLabel);
+            Controls.Add(hexLabel);
+            Controls.Add(blueGradientControl);
+            Controls.Add(greenGradientControl);
+            Controls.Add(redGradientControl);
+            Controls.Add(saturationGradientControl);
+            Controls.Add(hueGradientControl);
+            Controls.Add(colorWheel);
+            Controls.Add(hsvHeader);
+            Controls.Add(rgbHeader);
+            Controls.Add(valueGradientControl);
+            Controls.Add(blueUpDown);
+            Controls.Add(greenUpDown);
+            Controls.Add(redUpDown);
+            Controls.Add(hexBox);
+            Controls.Add(hueUpDown);
+            Controls.Add(saturationUpDown);
+            Controls.Add(valueUpDown);
+            Controls.Add(colorDisplayWidget);
+            Controls.Add(swatchHeader);
+            Controls.Add(swatchControl);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "ColorPickerForm";
+            ShowInTaskbar = false;
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            Text = "Color Picker";
+            ((System.ComponentModel.ISupportInitialize)(redUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(greenUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(blueUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(valueUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(saturationUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(hueUpDown)).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
 
         }
         #endregion
@@ -888,7 +888,7 @@ namespace PSFilterLoad.ColorPicker
             SetColorGradientValuesRgb(color.R, color.G, color.B);
             SetColorGradientMinMaxColorsRgb(color.R, color.G, color.B);
 
-            this.UserPrimaryColor = color;
+            UserPrimaryColor = color;
 
             PopIgnoreChangedEvents();
 
@@ -906,7 +906,7 @@ namespace PSFilterLoad.ColorPicker
                 hueColors[newH] = hsv.ToColor();
             }
 
-            this.hueGradientControl.CustomGradient = hueColors;
+            hueGradientControl.CustomGradient = hueColors;
 
             Color[] satColors = new Color[101];
 
@@ -916,20 +916,20 @@ namespace PSFilterLoad.ColorPicker
                 satColors[newS] = hsv.ToColor();
             }
 
-            this.saturationGradientControl.CustomGradient = satColors;
+            saturationGradientControl.CustomGradient = satColors;
 
-            this.valueGradientControl.MaxColor = new HsvColor(h, s, 100).ToColor();
-            this.valueGradientControl.MinColor = new HsvColor(h, s, 0).ToColor();
+            valueGradientControl.MaxColor = new HsvColor(h, s, 100).ToColor();
+            valueGradientControl.MinColor = new HsvColor(h, s, 0).ToColor();
         }
 
         private void SetColorGradientMinMaxColorsRgb(int r, int g, int b)
         {
-            this.redGradientControl.MaxColor = Color.FromArgb(255, g, b);
-            this.redGradientControl.MinColor = Color.FromArgb(0, g, b);
-            this.greenGradientControl.MaxColor = Color.FromArgb(r, 255, b);
-            this.greenGradientControl.MinColor = Color.FromArgb(r, 0, b);
-            this.blueGradientControl.MaxColor = Color.FromArgb(r, g, 255);
-            this.blueGradientControl.MinColor = Color.FromArgb(r, g, 0);
+            redGradientControl.MaxColor = Color.FromArgb(255, g, b);
+            redGradientControl.MinColor = Color.FromArgb(0, g, b);
+            greenGradientControl.MaxColor = Color.FromArgb(r, 255, b);
+            greenGradientControl.MinColor = Color.FromArgb(r, 0, b);
+            blueGradientControl.MaxColor = Color.FromArgb(r, g, 255);
+            blueGradientControl.MinColor = Color.FromArgb(r, g, 0);
         }
 
         private void RgbGradientControl_ValueChanged(object sender, IndexEventArgs ce)
@@ -1126,7 +1126,7 @@ namespace PSFilterLoad.ColorPicker
 
                     SyncHsvFromRgb(rgbColor);
 
-                    this.UserPrimaryColor = rgbColor;
+                    UserPrimaryColor = rgbColor;
                 }
                 else if (sender == hexBox)
                 {
@@ -1172,7 +1172,7 @@ namespace PSFilterLoad.ColorPicker
 
                     ColorBgra rgbColor = ColorBgra.FromBgra((byte)newBlue, (byte)newGreen, (byte)newRed, 255);
                     SyncHsvFromRgb(rgbColor);
-                    this.UserPrimaryColor = rgbColor;
+                    UserPrimaryColor = rgbColor;
                 }
                 else if (sender == hueUpDown || sender == saturationUpDown || sender == valueUpDown)
                 {
@@ -1188,7 +1188,7 @@ namespace PSFilterLoad.ColorPicker
 
                         SyncRgbFromHsv(newHsvColor);
                         RgbColor rgbColor = newHsvColor.ToRgb();
-                        this.UserPrimaryColor = ColorBgra.FromBgra((byte)rgbColor.Blue, (byte)rgbColor.Green, (byte)rgbColor.Red, 255);
+                        UserPrimaryColor = ColorBgra.FromBgra((byte)rgbColor.Blue, (byte)rgbColor.Green, (byte)rgbColor.Red, 255);
                     }
                 }
                 PopIgnoreChangedEvents();
@@ -1198,29 +1198,29 @@ namespace PSFilterLoad.ColorPicker
 
         private void PushIgnoreChangedEvents()
         {
-            ++this.ignoreChangedEvents;
+            ++ignoreChangedEvents;
         }
 
         private void PopIgnoreChangedEvents()
         {
-            --this.ignoreChangedEvents;
+            --ignoreChangedEvents;
         }
 
         private void swatchControl_ColorClicked(object sender, IndexEventArgs e)
         {
-            this.UserPrimaryColor = paletteColors[e.Index];
+            UserPrimaryColor = paletteColors[e.Index];
         }
 
         private void okBtn_Click(object sender, EventArgs e)
         {
             DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.Close();
+            Close();
         }
 
         private void cancelBtn_Click(object sender, EventArgs e)
         {
             DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.Close();
+            Close();
         }
 
 

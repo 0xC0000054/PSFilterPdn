@@ -40,12 +40,12 @@ namespace PSFilterLoad.PSApi
             }
 
             this.filterImageProvider = filterImageProvider;
-            this.readPixelsProc = new ReadPixelsProc(ReadPixelsProc);
-            this.writeBasePixelsProc = new WriteBasePixelsProc(WriteBasePixels);
-            this.readPortForWritePortProc = new ReadPortForWritePortProc(ReadPortForWritePort);
-            this.scaledChannelSurface = null;
-            this.scaledSelectionMask = null;
-            this.disposed = false;
+            readPixelsProc = new ReadPixelsProc(ReadPixelsProc);
+            writeBasePixelsProc = new WriteBasePixelsProc(WriteBasePixels);
+            readPortForWritePortProc = new ReadPortForWritePortProc(ReadPortForWritePort);
+            scaledChannelSurface = null;
+            scaledSelectionMask = null;
+            disposed = false;
         }
 
         public unsafe IntPtr CreateChannelPortsPointer()

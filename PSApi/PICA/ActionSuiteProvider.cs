@@ -31,10 +31,10 @@ namespace PSFilterLoad.PSApi.PICA
         /// </summary>
         public ActionSuiteProvider()
         {
-            this.actionDescriptorSuite = null;
-            this.actionListSuite = null;
-            this.actionReferenceSuite = null;
-            this.disposed = false;
+            actionDescriptorSuite = null;
+            actionListSuite = null;
+            actionReferenceSuite = null;
+            disposed = false;
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             get
             {
-                return this.actionDescriptorSuite != null;
+                return actionDescriptorSuite != null;
             }
         }
 
@@ -61,7 +61,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             get
             {
-                return this.actionListSuite != null;
+                return actionListSuite != null;
             }
         }
 
@@ -75,7 +75,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             get
             {
-                return this.actionReferenceSuite != null;
+                return actionReferenceSuite != null;
             }
         }
 
@@ -92,16 +92,16 @@ namespace PSFilterLoad.PSApi.PICA
         {
             get
             {
-                if (this.disposed)
+                if (disposed)
                 {
                     throw new ObjectDisposedException("ActionSuiteProvider");
                 }
-                if (this.actionDescriptorSuite == null)
+                if (actionDescriptorSuite == null)
                 {
                     throw new InvalidOperationException("CreateDescriptorSuite() must be called before accessing this property.");
                 }
 
-                return this.actionDescriptorSuite;
+                return actionDescriptorSuite;
             }
         }
 
@@ -118,16 +118,16 @@ namespace PSFilterLoad.PSApi.PICA
         {
             get
             {
-                if (this.disposed)
+                if (disposed)
                 {
                     throw new ObjectDisposedException("ActionSuiteProvider");
                 }
-                if (this.actionListSuite == null)
+                if (actionListSuite == null)
                 {
                     throw new InvalidOperationException("CreateListSuite() must be called before accessing this property.");
                 }
 
-                return this.actionListSuite;
+                return actionListSuite;
             }
         }
 
@@ -144,16 +144,16 @@ namespace PSFilterLoad.PSApi.PICA
         {
             get
             {
-                if (this.disposed)
+                if (disposed)
                 {
                     throw new ObjectDisposedException("ActionSuiteProvider");
                 }
-                if (this.actionReferenceSuite == null)
+                if (actionReferenceSuite == null)
                 {
                     throw new InvalidOperationException("CreateReferenceSuite() must be called before accessing this property.");
                 }
 
-                return this.actionReferenceSuite;
+                return actionReferenceSuite;
             }
         }
 
@@ -172,7 +172,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 throw new ArgumentNullException(nameof(zstringSuite));
             }
-            if (this.disposed)
+            if (disposed)
             {
                 throw new ObjectDisposedException("ActionSuiteProvider");
             }
@@ -187,11 +187,11 @@ namespace PSFilterLoad.PSApi.PICA
                 {
                     CreateListSuite(zstringSuite);
                 }
-                this.actionDescriptorSuite = new ActionDescriptorSuite(aete, this.actionListSuite, this.actionReferenceSuite, zstringSuite);
-                this.actionListSuite.ActionDescriptorSuite = this.actionDescriptorSuite;
+                actionDescriptorSuite = new ActionDescriptorSuite(aete, actionListSuite, actionReferenceSuite, zstringSuite);
+                actionListSuite.ActionDescriptorSuite = actionDescriptorSuite;
                 if (scriptingData != null)
                 {
-                    this.actionDescriptorSuite.SetScriptingData(descriptorHandle, scriptingData);
+                    actionDescriptorSuite.SetScriptingData(descriptorHandle, scriptingData);
                 }
             }
         }
@@ -208,7 +208,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 throw new ArgumentNullException(nameof(zstringSuite));
             }
-            if (this.disposed)
+            if (disposed)
             {
                 throw new ObjectDisposedException("ActionSuiteProvider");
             }
@@ -220,7 +220,7 @@ namespace PSFilterLoad.PSApi.PICA
                     CreateReferenceSuite();
                 }
 
-                this.actionListSuite = new ActionListSuite(this.actionReferenceSuite, zstringSuite);
+                actionListSuite = new ActionListSuite(actionReferenceSuite, zstringSuite);
             }
         }
 
@@ -230,14 +230,14 @@ namespace PSFilterLoad.PSApi.PICA
         /// <exception cref="ObjectDisposedException">The class has been disposed.</exception>
         public void CreateReferenceSuite()
         {
-            if (this.disposed)
+            if (disposed)
             {
                 throw new ObjectDisposedException("ActionSuiteProvider");
             }
 
             if (!ReferenceSuiteCreated)
             {
-                this.actionReferenceSuite = new ActionReferenceSuite();
+                actionReferenceSuite = new ActionReferenceSuite();
             }
         }
 
@@ -246,17 +246,17 @@ namespace PSFilterLoad.PSApi.PICA
         /// </summary>
         public void Dispose()
         {
-            if (!this.disposed)
+            if (!disposed)
             {
-                this.disposed = true;
+                disposed = true;
 
-                if (this.actionDescriptorSuite != null)
+                if (actionDescriptorSuite != null)
                 {
-                    this.actionDescriptorSuite.Dispose();
-                    this.actionDescriptorSuite = null;
+                    actionDescriptorSuite.Dispose();
+                    actionDescriptorSuite = null;
                 }
-                this.actionListSuite = null;
-                this.actionReferenceSuite = null;
+                actionListSuite = null;
+                actionReferenceSuite = null;
             }
         }
     }

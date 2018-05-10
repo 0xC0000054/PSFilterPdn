@@ -22,9 +22,9 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="brightness">The brightness component in the range of [0, 1].</param>
         public HSB(double hue, double saturation, double brightness)
         {
-            this.Hue = hue;
-            this.Saturation = saturation;
-            this.Brightness = brightness;
+            Hue = hue;
+            Saturation = saturation;
+            Brightness = brightness;
         }
 
         /// <summary>

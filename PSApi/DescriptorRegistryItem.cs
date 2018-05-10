@@ -47,7 +47,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.values;
+                return values;
             }
         }
 
@@ -61,7 +61,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.isPersistent;
+                return isPersistent;
             }
         }
     }

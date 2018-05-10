@@ -24,7 +24,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             get
             {
-                return this.type;
+                return type;
             }
         }
 
@@ -32,7 +32,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             get
             {
-                return this.descriptorValues;
+                return descriptorValues;
             }
         }
 

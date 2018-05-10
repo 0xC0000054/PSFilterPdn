@@ -27,9 +27,9 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="z">The z component in the range of [0, 1].</param>
         public XYZ(double x, double y, double z)
         {
-            this.X = x;
-            this.Y = y;
-            this.Z = z;
+            X = x;
+            Y = y;
+            Z = z;
         }
 
         /// <summary>

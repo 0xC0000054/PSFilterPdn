@@ -59,9 +59,9 @@ namespace PSFilterLoad.PSApi
                 }
             }
 
-            this.persistedValues = new ReadOnlyDictionary<string, DescriptorRegistryItem>(persistentItems);
-            this.sessionValues = new ReadOnlyDictionary<string, DescriptorRegistryItem>(sessionItems);
-            this.dirty = persistentValuesChanged;
+            persistedValues = new ReadOnlyDictionary<string, DescriptorRegistryItem>(persistentItems);
+            sessionValues = new ReadOnlyDictionary<string, DescriptorRegistryItem>(sessionItems);
+            dirty = persistentValuesChanged;
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.persistedValues;
+                return persistedValues;
             }
         }
 
@@ -88,7 +88,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.sessionValues;
+                return sessionValues;
             }
         }
 
@@ -102,11 +102,11 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.dirty;
+                return dirty;
             }
             set
             {
-                this.dirty = value;
+                dirty = value;
             }
         }
     }

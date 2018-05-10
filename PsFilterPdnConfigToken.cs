@@ -117,23 +117,23 @@ namespace PSFilterPdn
         {
             this.dest = dest;
             this.filterData = filterData;
-            this.runWith32BitShim = useShim;
-            this.filterParameters = paramData;
-            this.pseudoResources = resources;
-            this.descriptorRegistry = registryValues;
-            this.dialogState = configDialog;
+            runWith32BitShim = useShim;
+            filterParameters = paramData;
+            pseudoResources = resources;
+            descriptorRegistry = registryValues;
+            dialogState = configDialog;
         }
 
         private PSFilterPdnConfigToken(PSFilterPdnConfigToken copyMe)
             : base(copyMe)
         {
-            this.dest = copyMe.dest;
-            this.filterData = copyMe.filterData;
-            this.runWith32BitShim = copyMe.runWith32BitShim;
-            this.filterParameters = copyMe.filterParameters;
-            this.pseudoResources = copyMe.pseudoResources;
-            this.descriptorRegistry = copyMe.descriptorRegistry;
-            this.dialogState = copyMe.dialogState;
+            dest = copyMe.dest;
+            filterData = copyMe.filterData;
+            runWith32BitShim = copyMe.runWith32BitShim;
+            filterParameters = copyMe.filterParameters;
+            pseudoResources = copyMe.pseudoResources;
+            descriptorRegistry = copyMe.descriptorRegistry;
+            dialogState = copyMe.dialogState;
         }
 
         public override object Clone()

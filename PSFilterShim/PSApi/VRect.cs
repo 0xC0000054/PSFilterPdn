@@ -27,7 +27,7 @@ namespace PSFilterLoad.PSApi
 
         public bool Equals(VRect rect)
         {
-            return (this.left == rect.left && this.top == rect.top && this.right == rect.right && this.bottom == rect.bottom);
+            return (left == rect.left && top == rect.top && right == rect.right && bottom == rect.bottom);
         }
 
         public override bool Equals(object obj)
@@ -46,10 +46,10 @@ namespace PSFilterLoad.PSApi
             {
                 int hash = 23;
 
-                hash = (hash * 127) + this.top.GetHashCode();
-                hash = (hash * 127) + this.left.GetHashCode();
-                hash = (hash * 127) + this.bottom.GetHashCode();
-                hash = (hash * 127) + this.right.GetHashCode();
+                hash = (hash * 127) + top.GetHashCode();
+                hash = (hash * 127) + left.GetHashCode();
+                hash = (hash * 127) + bottom.GetHashCode();
+                hash = (hash * 127) + right.GetHashCode();
 
                 return hash;
             }
@@ -68,7 +68,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
         public override string ToString()
         {
-            return ("Top=" + this.top.ToString() + ",Bottom=" + this.bottom.ToString() + ",Left=" + this.left.ToString() + ",Right=" + this.right.ToString());
+            return ("Top=" + top.ToString() + ",Bottom=" + bottom.ToString() + ",Left=" + left.ToString() + ",Right=" + right.ToString());
         }
 #endif
     }

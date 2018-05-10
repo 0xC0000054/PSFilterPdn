@@ -22,8 +22,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         public PICAHandleSuite()
         {
-            this.handleProcs = HandleSuite.Instance.CreateHandleProcs();
-            this.setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
+            handleProcs = HandleSuite.Instance.CreateHandleProcs();
+            setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
         }
 
         private void SetHandleLock(IntPtr handle, byte lockHandle, ref IntPtr address, ref byte oldLock)

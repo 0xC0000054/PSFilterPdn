@@ -22,8 +22,8 @@ namespace PSFilterLoad.PSApi
 
         public ImageServicesSuite()
         {
-            this.interpolate1DProc = new PIResampleProc(Interpolate1DProc);
-            this.interpolate2DProc = new PIResampleProc(Interpolate2DProc);
+            interpolate1DProc = new PIResampleProc(Interpolate1DProc);
+            interpolate2DProc = new PIResampleProc(Interpolate2DProc);
         }
 
         public unsafe IntPtr CreateImageServicesSuitePointer()

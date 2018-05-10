@@ -46,8 +46,8 @@ namespace PSFilterLoad.PSApi
             }
 
             this.dictionary = dictionary;
-            this.keys = null;
-            this.values = null;
+            keys = null;
+            values = null;
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.dictionary.Count;
+                return dictionary.Count;
             }
         }
 
@@ -68,12 +68,12 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                if (this.keys == null)
+                if (keys == null)
                 {
-                    this.keys = new KeyCollection(this.dictionary.Keys);
+                    keys = new KeyCollection(dictionary.Keys);
                 }
 
-                return this.keys;
+                return keys;
             }
         }
 
@@ -84,12 +84,12 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                if (this.values == null)
+                if (values == null)
                 {
-                    this.values = new ValueCollection(this.dictionary.Values);
+                    values = new ValueCollection(dictionary.Values);
                 }
 
-                return this.values;
+                return values;
             }
         }
 
@@ -105,7 +105,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.dictionary[key];
+                return dictionary[key];
             }
         }
 
@@ -118,7 +118,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public bool ContainsKey(TKey key)
         {
-            return this.dictionary.ContainsKey(key);
+            return dictionary.ContainsKey(key);
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            return this.dictionary.GetEnumerator();
+            return dictionary.GetEnumerator();
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public bool TryGetValue(TKey key, out TValue value)
         {
-            return this.dictionary.TryGetValue(key, out value);
+            return dictionary.TryGetValue(key, out value);
         }
 
         private static void ThrowNotSupportedException()
@@ -175,12 +175,12 @@ namespace PSFilterLoad.PSApi
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
         {
-            return this.dictionary.Contains(item);
+            return dictionary.Contains(item);
         }
 
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
-            this.dictionary.CopyTo(array, arrayIndex);
+            dictionary.CopyTo(array, arrayIndex);
         }
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
@@ -195,7 +195,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return new KeyCollection(this.dictionary.Keys);
+                return new KeyCollection(dictionary.Keys);
             }
         }
 
@@ -203,7 +203,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return new ValueCollection(this.dictionary.Values);
+                return new ValueCollection(dictionary.Values);
             }
         }
 
@@ -211,7 +211,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.dictionary.Count;
+                return dictionary.Count;
             }
         }
 
@@ -219,7 +219,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.dictionary[key];
+                return dictionary[key];
             }
             set
             {
@@ -234,7 +234,7 @@ namespace PSFilterLoad.PSApi
 
         bool IDictionary<TKey, TValue>.ContainsKey(TKey key)
         {
-            return this.dictionary.ContainsKey(key);
+            return dictionary.ContainsKey(key);
         }
 
         bool IDictionary<TKey, TValue>.Remove(TKey key)
@@ -245,14 +245,14 @@ namespace PSFilterLoad.PSApi
 
         bool IDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value)
         {
-            return this.dictionary.TryGetValue(key, out value);
+            return dictionary.TryGetValue(key, out value);
         }
         #endregion
 
         #region IEnumerator Methods
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.dictionary.GetEnumerator();
+            return dictionary.GetEnumerator();
         }
         #endregion
 
@@ -278,7 +278,7 @@ namespace PSFilterLoad.PSApi
             {
                 get
                 {
-                    return this.items.Count;
+                    return items.Count;
                 }
             }
 
@@ -291,7 +291,7 @@ namespace PSFilterLoad.PSApi
             /// </returns>
             public bool Contains(TKey item)
             {
-                return this.items.Contains(item);
+                return items.Contains(item);
             }
 
             /// <summary>
@@ -304,7 +304,7 @@ namespace PSFilterLoad.PSApi
             /// <param name="arrayIndex">The zero-based index in <paramref name="array"/> at which copying begins.</param>
             public void CopyTo(TKey[] array, int arrayIndex)
             {
-                this.items.CopyTo(array, arrayIndex);
+                items.CopyTo(array, arrayIndex);
             }
 
             /// <summary>
@@ -315,7 +315,7 @@ namespace PSFilterLoad.PSApi
             /// </returns>
             public IEnumerator<TKey> GetEnumerator()
             {
-                return this.items.GetEnumerator();
+                return items.GetEnumerator();
             }
 
             bool ICollection<TKey>.IsReadOnly
@@ -338,7 +338,7 @@ namespace PSFilterLoad.PSApi
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return this.items.GetEnumerator();
+                return items.GetEnumerator();
             }
 
             bool ICollection<TKey>.Remove(TKey item)
@@ -370,7 +370,7 @@ namespace PSFilterLoad.PSApi
             {
                 get
                 {
-                    return this.items.Count;
+                    return items.Count;
                 }
             }
 
@@ -383,7 +383,7 @@ namespace PSFilterLoad.PSApi
             /// </returns>
             public bool Contains(TValue item)
             {
-                return this.items.Contains(item);
+                return items.Contains(item);
             }
 
             /// <summary>
@@ -396,7 +396,7 @@ namespace PSFilterLoad.PSApi
             /// <param name="arrayIndex">The zero-based index in <paramref name="array"/> at which copying begins.</param>
             public void CopyTo(TValue[] array, int arrayIndex)
             {
-                this.items.CopyTo(array, arrayIndex);
+                items.CopyTo(array, arrayIndex);
             }
 
             /// <summary>
@@ -407,7 +407,7 @@ namespace PSFilterLoad.PSApi
             /// </returns>
             public IEnumerator<TValue> GetEnumerator()
             {
-                return this.items.GetEnumerator();
+                return items.GetEnumerator();
             }
 
             bool ICollection<TValue>.IsReadOnly
@@ -430,7 +430,7 @@ namespace PSFilterLoad.PSApi
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return this.items.GetEnumerator();
+                return items.GetEnumerator();
             }
 
             bool ICollection<TValue>.Remove(TValue item)

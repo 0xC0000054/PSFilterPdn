@@ -51,8 +51,8 @@ namespace PSFilterPdn
         public PSFilterPdnEffect()
             : base(StaticName, StaticIcon, EffectFlags.Configurable)
         {
-            this.repeatEffect = true;
-            this.filterThread = null;
+            repeatEffect = true;
+            filterThread = null;
             filterDone = null;
         }
 
@@ -67,7 +67,7 @@ namespace PSFilterPdn
 
         public override EffectConfigDialog CreateConfigDialog()
         {
-            this.repeatEffect = false;
+            repeatEffect = false;
             return new PsFilterPdnConfigDialog();
         }
 
@@ -324,21 +324,21 @@ namespace PSFilterPdn
                 {
                     filterDone = new ManualResetEvent(false);
 
-                    this.filterThread = new Thread(() => RunRepeatFilter(ref token, win32Window))
+                    filterThread = new Thread(() => RunRepeatFilter(ref token, win32Window))
                     {
                         IsBackground = true,
                         Priority = ThreadPriority.AboveNormal
                     };
                     // Some filters may use OLE which requires Single Threaded Apartment mode.
-                    this.filterThread.SetApartmentState(ApartmentState.STA);
-                    this.filterThread.Start();
+                    filterThread.SetApartmentState(ApartmentState.STA);
+                    filterThread.Start();
 
                     filterDone.WaitOne();
                     filterDone.Close();
                     filterDone = null;
 
-                    this.filterThread.Join();
-                    this.filterThread = null;
+                    filterThread.Join();
+                    filterThread = null;
                 }
 
             }
@@ -370,7 +370,7 @@ namespace PSFilterPdn
 
             internal Win32Window(IntPtr hWnd)
             {
-                this.handle = hWnd;
+                handle = hWnd;
             }
         }
     }

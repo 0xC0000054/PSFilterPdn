@@ -82,22 +82,22 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return new Rectangle(0, 0, this.width, this.height);
+				return new Rectangle(0, 0, width, height);
 			}
 		}
 
 		public MaskSurface(int width, int height)
 		{
-			this.disposed = false;
+			disposed = false;
 			this.width = width;
 			this.height = height;
-			this.stride = width;
-			this.scan0 = new MemoryBlock(width * height);
+			stride = width;
+			scan0 = new MemoryBlock(width * height);
 		}
 
 		public MaskSurface Clone()
 		{
-			MaskSurface surface = new MaskSurface(this.width, this.height);
+			MaskSurface surface = new MaskSurface(width, height);
 			surface.CopySurface(this);
 			return surface;
 		}
@@ -118,13 +118,13 @@ namespace PSFilterLoad.PSApi
 				throw new ObjectDisposedException("Surface");
 			}
 
-			if (this.stride == source.stride &&
-				this.width == source.width &&
-				this.height == source.height)
+			if (stride == source.stride &&
+				width == source.width &&
+				height == source.height)
 			{
 				unsafe
 				{
-					Memory.Copy(this.scan0.VoidStar,
+					Memory.Copy(scan0.VoidStar,
 								source.scan0.VoidStar,
 								((ulong)(height - 1) * (ulong)stride) + (ulong)width);
 				}
@@ -146,7 +146,7 @@ namespace PSFilterLoad.PSApi
 
 		public byte GetPoint(int x, int y)
 		{
-			if (x < 0 || y < 0 || x >= this.width || y >= this.height)
+			if (x < 0 || y < 0 || x >= width || y >= height)
 			{
 				throw new ArgumentOutOfRangeException("(x,y)", new Point(x, y), "Coordinates out of range, max=" + new Size(width - 1, height - 1).ToString());
 			}
@@ -174,7 +174,7 @@ namespace PSFilterLoad.PSApi
 
 		public unsafe void SuperSampleFitSurface(MaskSurface source)
 		{
-			Rectangle dstRoi2 = Rectangle.Intersect(source.Bounds, this.Bounds);
+			Rectangle dstRoi2 = Rectangle.Intersect(source.Bounds, Bounds);
 			int srcHeight = source.Height;
 			int srcWidth = source.Width;
 			long srcStride = source.Stride;
@@ -191,7 +191,7 @@ namespace PSFilterLoad.PSApi
 				double srcBottomWeight = srcBottom - srcBottomFloor;
 				int srcBottomInt = (int)srcBottomFloor;
 
-				byte* dstPtr = this.GetPointAddressUnchecked(dstRoi2.Left, dstY);
+				byte* dstPtr = GetPointAddressUnchecked(dstRoi2.Left, dstY);
 
 				for (int dstX = dstRoi2.Left; dstX < dstRoi2.Right; ++dstX)
 				{
@@ -344,7 +344,7 @@ namespace PSFilterLoad.PSApi
 												   new Rectangle(right, top, width - right, height - top),
 												   new Rectangle(left, bottom, right - left, height - bottom)
 											   };
-			Rectangle dstRoi = this.Bounds;
+			Rectangle dstRoi = Bounds;
 			for (int i = 0; i < rois.Length; ++i)
 			{
 				rois[i].Intersect(dstRoi);
@@ -368,7 +368,7 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		private unsafe void BicubicFitSurfaceChecked(MaskSurface source, Rectangle dstRoi)
 		{
-			Rectangle roi = Rectangle.Intersect(dstRoi, this.Bounds);
+			Rectangle roi = Rectangle.Intersect(dstRoi, Bounds);
 			Rectangle roiIn = Rectangle.Intersect(dstRoi, new Rectangle(1, 1, width - 1, height - 1));
 
 			IntPtr rColCacheIP = Memory.Allocate(4 * (long)roi.Width * (long)sizeof(double), false);
@@ -399,7 +399,7 @@ namespace PSFilterLoad.PSApi
 				double srcRowFloor = (double)Math.Floor(srcRow);
 				double srcRowFrac = srcRow - srcRowFloor;
 				int srcRowInt = (int)srcRow;
-				byte* dstPtr = this.GetPointAddressUnchecked(roi.Left, dstY);
+				byte* dstPtr = GetPointAddressUnchecked(roi.Left, dstY);
 
 				// Compute the R() values for this row
 				for (int n = -1; n <= 2; ++n)
@@ -488,7 +488,7 @@ namespace PSFilterLoad.PSApi
 		private unsafe void BicubicFitSurfaceUnchecked(MaskSurface source, Rectangle dstRoi)
 		{
 
-			Rectangle roi = Rectangle.Intersect(dstRoi, this.Bounds);
+			Rectangle roi = Rectangle.Intersect(dstRoi, Bounds);
 			Rectangle roiIn = Rectangle.Intersect(dstRoi, new Rectangle(1, 1, width - 1, height - 1));
 
 			IntPtr rColCacheIP = Memory.Allocate(4 * (long)roi.Width * (long)sizeof(double), false);
@@ -519,7 +519,7 @@ namespace PSFilterLoad.PSApi
 				double srcRowFloor = Math.Floor(srcRow);
 				double srcRowFrac = srcRow - srcRowFloor;
 				int srcRowInt = (int)srcRow;
-				byte* dstPtr = this.GetPointAddressUnchecked(roi.Left, dstY);
+				byte* dstPtr = GetPointAddressUnchecked(roi.Left, dstY);
 
 				// Compute the R() values for this row
 				for (int n = -1; n <= 2; ++n)
@@ -603,11 +603,11 @@ namespace PSFilterLoad.PSApi
 		{
 			if (!disposed && disposing)
 			{
-				this.disposed = true;
+				disposed = true;
 				if (scan0 != null)
 				{
-					this.scan0.Dispose();
-					this.scan0 = null;
+					scan0.Dispose();
+					scan0 = null;
 				}
 			}
 		}

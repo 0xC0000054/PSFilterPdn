@@ -27,46 +27,46 @@ namespace PSFilterLoad.PSApi.PICA
 
             public ScriptingParameters()
             {
-                this.parameters = new Dictionary<uint, AETEValue>();
-                this.keys = new List<uint>();
+                parameters = new Dictionary<uint, AETEValue>();
+                keys = new List<uint>();
             }
             public ScriptingParameters(IDictionary<uint, AETEValue> dict)
             {
-                this.parameters = new Dictionary<uint, AETEValue>(dict);
-                this.keys = new List<uint>(dict.Keys);
+                parameters = new Dictionary<uint, AETEValue>(dict);
+                keys = new List<uint>(dict.Keys);
             }
 
             private ScriptingParameters(ScriptingParameters cloneMe)
             {
-                this.parameters = new Dictionary<uint, AETEValue>(cloneMe.parameters);
-                this.keys = new List<uint>(cloneMe.keys);
+                parameters = new Dictionary<uint, AETEValue>(cloneMe.parameters);
+                keys = new List<uint>(cloneMe.keys);
             }
 
             public int Count
             {
                 get
                 {
-                    return this.parameters.Count;
+                    return parameters.Count;
                 }
             }
 
             public void Add(uint key, AETEValue value)
             {
-                if (this.parameters.ContainsKey(key))
+                if (parameters.ContainsKey(key))
                 {
-                    this.parameters[key] = value;
+                    parameters[key] = value;
                 }
                 else
                 {
-                    this.parameters.Add(key, value);
-                    this.keys.Add(key);
+                    parameters.Add(key, value);
+                    keys.Add(key);
                 }
             }
 
             public void Clear()
             {
-                this.parameters.Clear();
-                this.keys.Clear();
+                parameters.Clear();
+                keys.Clear();
             }
 
             public ScriptingParameters Clone()
@@ -76,28 +76,28 @@ namespace PSFilterLoad.PSApi.PICA
 
             public bool ContainsKey(uint key)
             {
-                return this.parameters.ContainsKey(key);
+                return parameters.ContainsKey(key);
             }
 
             public uint GetKeyAtIndex(int index)
             {
-                return this.keys[index];
+                return keys[index];
             }
 
             public void Remove(uint key)
             {
-                this.parameters.Remove(key);
-                this.keys.Remove(key);
+                parameters.Remove(key);
+                keys.Remove(key);
             }
 
             public bool TryGetValue(uint key, out AETEValue value)
             {
-                return this.parameters.TryGetValue(key, out value);
+                return parameters.TryGetValue(key, out value);
             }
 
             public Dictionary<uint, AETEValue> ToDictionary()
             {
-                return new Dictionary<uint, AETEValue>(this.parameters);
+                return new Dictionary<uint, AETEValue>(parameters);
             }
         }
 
@@ -191,69 +191,69 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new ArgumentNullException(nameof(zstringSuite));
             }
 
-            this.make = new ActionDescriptorMake(Make);
-            this.free = new ActionDescriptorFree(Free);
-            this.handleToDescriptor = new ActionDescriptorHandleToDescriptor(HandleToDescriptor);
-            this.asHandle = new ActionDescriptorAsHandle(AsHandle);
-            this.getType = new ActionDescriptorGetType(GetType);
-            this.getKey = new ActionDescriptorGetKey(GetKey);
-            this.hasKey = new ActionDescriptorHasKey(HasKey);
-            this.getCount = new ActionDescriptorGetCount(GetCount);
-            this.isEqual = new ActionDescriptorIsEqual(IsEqual);
-            this.erase = new ActionDescriptorErase(Erase);
-            this.clear = new ActionDescriptorClear(Clear);
-            this.hasKeys = new ActionDescriptorHasKeys(HasKeys);
-            this.putInteger = new ActionDescriptorPutInteger(PutInteger);
-            this.putFloat = new ActionDescriptorPutFloat(PutFloat);
-            this.putUnitFloat = new ActionDescriptorPutUnitFloat(PutUnitFloat);
-            this.putString = new ActionDescriptorPutString(PutString);
-            this.putBoolean = new ActionDescriptorPutBoolean(PutBoolean);
-            this.putList = new ActionDescriptorPutList(PutList);
-            this.putObject = new ActionDescriptorPutObject(PutObject);
-            this.putGlobalObject = new ActionDescriptorPutGlobalObject(PutGlobalObject);
-            this.putEnumerated = new ActionDescriptorPutEnumerated(PutEnumerated);
-            this.putReference = new ActionDescriptorPutReference(PutReference);
-            this.putClass = new ActionDescriptorPutClass(PutClass);
-            this.putGlobalClass = new ActionDescriptorPutGlobalClass(PutGlobalClass);
-            this.putAlias = new ActionDescriptorPutAlias(PutAlias);
-            this.putIntegers = new ActionDescriptorPutIntegers(PutIntegers);
-            this.putZString = new ActionDescriptorPutZString(PutZString);
-            this.putData = new ActionDescriptorPutData(PutData);
-            this.getInteger = new ActionDescriptorGetInteger(GetInteger);
-            this.getFloat = new ActionDescriptorGetFloat(GetFloat);
-            this.getUnitFloat = new ActionDescriptorGetUnitFloat(GetUnitFloat);
-            this.getStringLength = new ActionDescriptorGetStringLength(GetStringLength);
-            this.getString = new ActionDescriptorGetString(GetString);
-            this.getBoolean = new ActionDescriptorGetBoolean(GetBoolean);
-            this.getList = new ActionDescriptorGetList(GetList);
-            this.getObject = new ActionDescriptorGetObject(GetObject);
-            this.getGlobalObject = new ActionDescriptorGetGlobalObject(GetGlobalObject);
-            this.getEnumerated = new ActionDescriptorGetEnumerated(GetEnumerated);
-            this.getReference = new ActionDescriptorGetReference(GetReference);
-            this.getClass = new ActionDescriptorGetClass(GetClass);
-            this.getGlobalClass = new ActionDescriptorGetGlobalClass(GetGlobalClass);
-            this.getAlias = new ActionDescriptorGetAlias(GetAlias);
-            this.getIntegers = new ActionDescriptorGetIntegers(GetIntegers);
-            this.getZString = new ActionDescriptorGetZString(GetZString);
-            this.getDataLength = new ActionDescriptorGetDataLength(GetDataLength);
-            this.getData = new ActionDescriptorGetData(GetData);
+            make = new ActionDescriptorMake(Make);
+            free = new ActionDescriptorFree(Free);
+            handleToDescriptor = new ActionDescriptorHandleToDescriptor(HandleToDescriptor);
+            asHandle = new ActionDescriptorAsHandle(AsHandle);
+            getType = new ActionDescriptorGetType(GetType);
+            getKey = new ActionDescriptorGetKey(GetKey);
+            hasKey = new ActionDescriptorHasKey(HasKey);
+            getCount = new ActionDescriptorGetCount(GetCount);
+            isEqual = new ActionDescriptorIsEqual(IsEqual);
+            erase = new ActionDescriptorErase(Erase);
+            clear = new ActionDescriptorClear(Clear);
+            hasKeys = new ActionDescriptorHasKeys(HasKeys);
+            putInteger = new ActionDescriptorPutInteger(PutInteger);
+            putFloat = new ActionDescriptorPutFloat(PutFloat);
+            putUnitFloat = new ActionDescriptorPutUnitFloat(PutUnitFloat);
+            putString = new ActionDescriptorPutString(PutString);
+            putBoolean = new ActionDescriptorPutBoolean(PutBoolean);
+            putList = new ActionDescriptorPutList(PutList);
+            putObject = new ActionDescriptorPutObject(PutObject);
+            putGlobalObject = new ActionDescriptorPutGlobalObject(PutGlobalObject);
+            putEnumerated = new ActionDescriptorPutEnumerated(PutEnumerated);
+            putReference = new ActionDescriptorPutReference(PutReference);
+            putClass = new ActionDescriptorPutClass(PutClass);
+            putGlobalClass = new ActionDescriptorPutGlobalClass(PutGlobalClass);
+            putAlias = new ActionDescriptorPutAlias(PutAlias);
+            putIntegers = new ActionDescriptorPutIntegers(PutIntegers);
+            putZString = new ActionDescriptorPutZString(PutZString);
+            putData = new ActionDescriptorPutData(PutData);
+            getInteger = new ActionDescriptorGetInteger(GetInteger);
+            getFloat = new ActionDescriptorGetFloat(GetFloat);
+            getUnitFloat = new ActionDescriptorGetUnitFloat(GetUnitFloat);
+            getStringLength = new ActionDescriptorGetStringLength(GetStringLength);
+            getString = new ActionDescriptorGetString(GetString);
+            getBoolean = new ActionDescriptorGetBoolean(GetBoolean);
+            getList = new ActionDescriptorGetList(GetList);
+            getObject = new ActionDescriptorGetObject(GetObject);
+            getGlobalObject = new ActionDescriptorGetGlobalObject(GetGlobalObject);
+            getEnumerated = new ActionDescriptorGetEnumerated(GetEnumerated);
+            getReference = new ActionDescriptorGetReference(GetReference);
+            getClass = new ActionDescriptorGetClass(GetClass);
+            getGlobalClass = new ActionDescriptorGetGlobalClass(GetGlobalClass);
+            getAlias = new ActionDescriptorGetAlias(GetAlias);
+            getIntegers = new ActionDescriptorGetIntegers(GetIntegers);
+            getZString = new ActionDescriptorGetZString(GetZString);
+            getDataLength = new ActionDescriptorGetDataLength(GetDataLength);
+            getData = new ActionDescriptorGetData(GetData);
 
             this.aete = aete;
             this.actionListSuite = actionListSuite;
             this.actionReferenceSuite = actionReferenceSuite;
             this.zstringSuite = zstringSuite;
-            this.actionDescriptors = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
-            this.descriptorHandles = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
-            this.actionDescriptorsIndex = 0;
+            actionDescriptors = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
+            descriptorHandles = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
+            actionDescriptorsIndex = 0;
             HandleSuite.Instance.SuiteHandleDisposed += SuiteHandleDisposed;
-            this.disposed = false;
+            disposed = false;
         }
 
         bool IActionDescriptorSuite.TryGetDescriptorValues(IntPtr descriptor, out ReadOnlyDictionary<uint, AETEValue> values)
         {
             values = null;
             ScriptingParameters scriptingData;
-            if (this.actionDescriptors.TryGetValue(descriptor, out scriptingData))
+            if (actionDescriptors.TryGetValue(descriptor, out scriptingData))
             {
                 values = new ReadOnlyDictionary<uint, AETEValue>(scriptingData.ToDictionary());
                 return true;
@@ -270,7 +270,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
 
             IntPtr descriptor = GenerateDictionaryKey();
-            this.actionDescriptors.Add(descriptor, new ScriptingParameters(values));
+            actionDescriptors.Add(descriptor, new ScriptingParameters(values));
 
             return descriptor;
         }
@@ -280,52 +280,52 @@ namespace PSFilterLoad.PSApi.PICA
         {
             PSActionDescriptorProc suite = new PSActionDescriptorProc
             {
-                Make = Marshal.GetFunctionPointerForDelegate(this.make),
-                Free = Marshal.GetFunctionPointerForDelegate(this.free),
-                GetType = Marshal.GetFunctionPointerForDelegate(this.getType),
-                GetKey = Marshal.GetFunctionPointerForDelegate(this.getKey),
-                HasKey = Marshal.GetFunctionPointerForDelegate(this.hasKey),
-                GetCount = Marshal.GetFunctionPointerForDelegate(this.getCount),
-                IsEqual = Marshal.GetFunctionPointerForDelegate(this.isEqual),
-                Erase = Marshal.GetFunctionPointerForDelegate(this.erase),
-                Clear = Marshal.GetFunctionPointerForDelegate(this.clear),
-                PutInteger = Marshal.GetFunctionPointerForDelegate(this.putInteger),
-                PutFloat = Marshal.GetFunctionPointerForDelegate(this.putFloat),
-                PutUnitFloat = Marshal.GetFunctionPointerForDelegate(this.putUnitFloat),
-                PutString = Marshal.GetFunctionPointerForDelegate(this.putString),
-                PutBoolean = Marshal.GetFunctionPointerForDelegate(this.putBoolean),
-                PutList = Marshal.GetFunctionPointerForDelegate(this.putList),
-                PutObject = Marshal.GetFunctionPointerForDelegate(this.putObject),
-                PutGlobalObject = Marshal.GetFunctionPointerForDelegate(this.putGlobalObject),
-                PutEnumerated = Marshal.GetFunctionPointerForDelegate(this.putEnumerated),
-                PutReference = Marshal.GetFunctionPointerForDelegate(this.putReference),
-                PutClass = Marshal.GetFunctionPointerForDelegate(this.putClass),
-                PutGlobalClass = Marshal.GetFunctionPointerForDelegate(this.putGlobalClass),
-                PutAlias = Marshal.GetFunctionPointerForDelegate(this.putAlias),
-                GetInteger = Marshal.GetFunctionPointerForDelegate(this.getInteger),
-                GetFloat = Marshal.GetFunctionPointerForDelegate(this.getFloat),
-                GetUnitFloat = Marshal.GetFunctionPointerForDelegate(this.getUnitFloat),
-                GetStringLength = Marshal.GetFunctionPointerForDelegate(this.getStringLength),
-                GetString = Marshal.GetFunctionPointerForDelegate(this.getString),
-                GetBoolean = Marshal.GetFunctionPointerForDelegate(this.getBoolean),
-                GetList = Marshal.GetFunctionPointerForDelegate(this.getList),
-                GetObject = Marshal.GetFunctionPointerForDelegate(this.getObject),
-                GetGlobalObject = Marshal.GetFunctionPointerForDelegate(this.getGlobalObject),
-                GetEnumerated = Marshal.GetFunctionPointerForDelegate(this.getEnumerated),
-                GetReference = Marshal.GetFunctionPointerForDelegate(this.getReference),
-                GetClass = Marshal.GetFunctionPointerForDelegate(this.getClass),
-                GetGlobalClass = Marshal.GetFunctionPointerForDelegate(this.getGlobalClass),
-                GetAlias = Marshal.GetFunctionPointerForDelegate(this.getAlias),
-                HasKeys = Marshal.GetFunctionPointerForDelegate(this.hasKeys),
-                PutIntegers = Marshal.GetFunctionPointerForDelegate(this.putIntegers),
-                GetIntegers = Marshal.GetFunctionPointerForDelegate(this.getIntegers),
-                AsHandle = Marshal.GetFunctionPointerForDelegate(this.asHandle),
-                HandleToDescriptor = Marshal.GetFunctionPointerForDelegate(this.handleToDescriptor),
-                PutZString = Marshal.GetFunctionPointerForDelegate(this.putZString),
-                GetZString = Marshal.GetFunctionPointerForDelegate(this.getZString),
-                PutData = Marshal.GetFunctionPointerForDelegate(this.putData),
-                GetDataLength = Marshal.GetFunctionPointerForDelegate(this.getDataLength),
-                GetData = Marshal.GetFunctionPointerForDelegate(this.getData)
+                Make = Marshal.GetFunctionPointerForDelegate(make),
+                Free = Marshal.GetFunctionPointerForDelegate(free),
+                GetType = Marshal.GetFunctionPointerForDelegate(getType),
+                GetKey = Marshal.GetFunctionPointerForDelegate(getKey),
+                HasKey = Marshal.GetFunctionPointerForDelegate(hasKey),
+                GetCount = Marshal.GetFunctionPointerForDelegate(getCount),
+                IsEqual = Marshal.GetFunctionPointerForDelegate(isEqual),
+                Erase = Marshal.GetFunctionPointerForDelegate(erase),
+                Clear = Marshal.GetFunctionPointerForDelegate(clear),
+                PutInteger = Marshal.GetFunctionPointerForDelegate(putInteger),
+                PutFloat = Marshal.GetFunctionPointerForDelegate(putFloat),
+                PutUnitFloat = Marshal.GetFunctionPointerForDelegate(putUnitFloat),
+                PutString = Marshal.GetFunctionPointerForDelegate(putString),
+                PutBoolean = Marshal.GetFunctionPointerForDelegate(putBoolean),
+                PutList = Marshal.GetFunctionPointerForDelegate(putList),
+                PutObject = Marshal.GetFunctionPointerForDelegate(putObject),
+                PutGlobalObject = Marshal.GetFunctionPointerForDelegate(putGlobalObject),
+                PutEnumerated = Marshal.GetFunctionPointerForDelegate(putEnumerated),
+                PutReference = Marshal.GetFunctionPointerForDelegate(putReference),
+                PutClass = Marshal.GetFunctionPointerForDelegate(putClass),
+                PutGlobalClass = Marshal.GetFunctionPointerForDelegate(putGlobalClass),
+                PutAlias = Marshal.GetFunctionPointerForDelegate(putAlias),
+                GetInteger = Marshal.GetFunctionPointerForDelegate(getInteger),
+                GetFloat = Marshal.GetFunctionPointerForDelegate(getFloat),
+                GetUnitFloat = Marshal.GetFunctionPointerForDelegate(getUnitFloat),
+                GetStringLength = Marshal.GetFunctionPointerForDelegate(getStringLength),
+                GetString = Marshal.GetFunctionPointerForDelegate(getString),
+                GetBoolean = Marshal.GetFunctionPointerForDelegate(getBoolean),
+                GetList = Marshal.GetFunctionPointerForDelegate(getList),
+                GetObject = Marshal.GetFunctionPointerForDelegate(getObject),
+                GetGlobalObject = Marshal.GetFunctionPointerForDelegate(getGlobalObject),
+                GetEnumerated = Marshal.GetFunctionPointerForDelegate(getEnumerated),
+                GetReference = Marshal.GetFunctionPointerForDelegate(getReference),
+                GetClass = Marshal.GetFunctionPointerForDelegate(getClass),
+                GetGlobalClass = Marshal.GetFunctionPointerForDelegate(getGlobalClass),
+                GetAlias = Marshal.GetFunctionPointerForDelegate(getAlias),
+                HasKeys = Marshal.GetFunctionPointerForDelegate(hasKeys),
+                PutIntegers = Marshal.GetFunctionPointerForDelegate(putIntegers),
+                GetIntegers = Marshal.GetFunctionPointerForDelegate(getIntegers),
+                AsHandle = Marshal.GetFunctionPointerForDelegate(asHandle),
+                HandleToDescriptor = Marshal.GetFunctionPointerForDelegate(handleToDescriptor),
+                PutZString = Marshal.GetFunctionPointerForDelegate(putZString),
+                GetZString = Marshal.GetFunctionPointerForDelegate(getZString),
+                PutData = Marshal.GetFunctionPointerForDelegate(putData),
+                GetDataLength = Marshal.GetFunctionPointerForDelegate(getDataLength),
+                GetData = Marshal.GetFunctionPointerForDelegate(getData)
             };
 
             return suite;
@@ -333,9 +333,9 @@ namespace PSFilterLoad.PSApi.PICA
 
         public void Dispose()
         {
-            if (!this.disposed)
+            if (!disposed)
             {
-                this.disposed = true;
+                disposed = true;
 
                 HandleSuite.Instance.SuiteHandleDisposed -= SuiteHandleDisposed;
             }
@@ -346,7 +346,7 @@ namespace PSFilterLoad.PSApi.PICA
             scriptingData = null;
 
             ScriptingParameters parameters;
-            if (this.descriptorHandles.TryGetValue(descriptorHandle, out parameters))
+            if (descriptorHandles.TryGetValue(descriptorHandle, out parameters))
             {
                 scriptingData = parameters.ToDictionary();
 
@@ -360,20 +360,20 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (descriptorHandle != IntPtr.Zero)
             {
-                this.descriptorHandles.Add(descriptorHandle, new ScriptingParameters(scriptingData));
+                descriptorHandles.Add(descriptorHandle, new ScriptingParameters(scriptingData));
             }
         }
 
         private void SuiteHandleDisposed(object sender, HandleDisposedEventArgs e)
         {
-            this.descriptorHandles.Remove(e.Handle);
+            descriptorHandles.Remove(e.Handle);
         }
 
         private IntPtr GenerateDictionaryKey()
         {
-            this.actionDescriptorsIndex++;
+            actionDescriptorsIndex++;
 
-            return new IntPtr(this.actionDescriptorsIndex);
+            return new IntPtr(actionDescriptorsIndex);
         }
 
         private int Make(ref IntPtr descriptor)
@@ -384,7 +384,7 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 descriptor = GenerateDictionaryKey();
-                this.actionDescriptors.Add(descriptor, new ScriptingParameters());
+                actionDescriptors.Add(descriptor, new ScriptingParameters());
             }
             catch (OutOfMemoryException)
             {
@@ -399,10 +399,10 @@ namespace PSFilterLoad.PSApi.PICA
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: 0x{0}", descriptor.ToHexString()));
 #endif
-            this.actionDescriptors.Remove(descriptor);
-            if (this.actionDescriptorsIndex == descriptor.ToInt32())
+            actionDescriptors.Remove(descriptor);
+            if (actionDescriptorsIndex == descriptor.ToInt32())
             {
-                this.actionDescriptorsIndex--;
+                actionDescriptorsIndex--;
             }
 
             return PSError.kSPNoError;
@@ -414,12 +414,12 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("handle: 0x{0}", handle.ToHexString()));
 #endif
             ScriptingParameters parameters;
-            if (this.descriptorHandles.TryGetValue(handle, out parameters))
+            if (descriptorHandles.TryGetValue(handle, out parameters))
             {
                 try
                 {
                     descriptor = GenerateDictionaryKey();
-                    this.actionDescriptors.Add(descriptor, parameters);
+                    actionDescriptors.Add(descriptor, parameters);
                 }
                 catch (OutOfMemoryException)
                 {
@@ -444,7 +444,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             try
             {
-                this.descriptorHandles.Add(handle, this.actionDescriptors[descriptor].Clone());
+                descriptorHandles.Add(handle, actionDescriptors[descriptor].Clone());
             }
             catch (OutOfMemoryException)
             {
@@ -460,7 +460,7 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item = null;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 // If the value is a sub-descriptor it must be retrieved with GetObject.
                 if (item.Value is Dictionary<uint, AETEValue>)
@@ -483,7 +483,7 @@ namespace PSFilterLoad.PSApi.PICA
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("index: {0}", index));
 #endif
-            ScriptingParameters parameters = this.actionDescriptors[descriptor];
+            ScriptingParameters parameters = actionDescriptors[descriptor];
 
             if (index >= 0 && index < parameters.Count)
             {
@@ -499,7 +499,7 @@ namespace PSFilterLoad.PSApi.PICA
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            hasKey = this.actionDescriptors[descriptor].ContainsKey(key) ? (byte)1 : (byte)0;
+            hasKey = actionDescriptors[descriptor].ContainsKey(key) ? (byte)1 : (byte)0;
 
             return PSError.kSPNoError;
         }
@@ -509,7 +509,7 @@ namespace PSFilterLoad.PSApi.PICA
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-            ScriptingParameters parameters = this.actionDescriptors[descriptor];
+            ScriptingParameters parameters = actionDescriptors[descriptor];
 
             count = (uint)parameters.Count;
 
@@ -531,7 +531,7 @@ namespace PSFilterLoad.PSApi.PICA
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            this.actionDescriptors[descriptor].Remove(key);
+            actionDescriptors[descriptor].Remove(key);
 
             return PSError.kSPNoError;
         }
@@ -541,7 +541,7 @@ namespace PSFilterLoad.PSApi.PICA
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-            this.actionDescriptors[descriptor].Clear();
+            actionDescriptors[descriptor].Clear();
 
             return PSError.kSPNoError;
         }
@@ -553,7 +553,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             if (keyArray != IntPtr.Zero)
             {
-                ScriptingParameters parameters = this.actionDescriptors[descriptor];
+                ScriptingParameters parameters = actionDescriptors[descriptor];
                 bool result = true;
 
                 unsafe
@@ -603,7 +603,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             try
             {
-                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), 0, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), 0, data));
             }
             catch (OutOfMemoryException)
             {
@@ -619,7 +619,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             try
             {
-                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Float, GetAETEParamFlags(key), 0, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Float, GetAETEParamFlags(key), 0, data));
             }
             catch (OutOfMemoryException)
             {
@@ -637,7 +637,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 UnitFloat item = new UnitFloat(unit, data);
 
-                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.UintFloat, GetAETEParamFlags(key), 0, item));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.UintFloat, GetAETEParamFlags(key), 0, item));
             }
             catch (OutOfMemoryException)
             {
@@ -663,7 +663,7 @@ namespace PSFilterLoad.PSApi.PICA
                 byte[] data = new byte[length];
                 Marshal.Copy(cstrValue, data, 0, length);
 
-                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), length, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), length, data));
             }
             catch (OutOfMemoryException)
             {
@@ -680,7 +680,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             try
             {
-                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Boolean, GetAETEParamFlags(key), 0, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Boolean, GetAETEParamFlags(key), 0, data));
             }
             catch (OutOfMemoryException)
             {
@@ -697,9 +697,9 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 ReadOnlyCollection<ActionListItem> values;
-                if (this.actionListSuite.TryGetListValues(list, out values))
+                if (actionListSuite.TryGetListValues(list, out values))
                 {
-                    this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.ValueList, GetAETEParamFlags(key), 0, values));
+                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.ValueList, GetAETEParamFlags(key), 0, values));
                 }
                 else
                 {
@@ -721,11 +721,11 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             // Attach the sub key to the parent descriptor.
             ScriptingParameters subKeys;
-            if (this.actionDescriptors.TryGetValue(descriptorHandle, out subKeys))
+            if (actionDescriptors.TryGetValue(descriptorHandle, out subKeys))
             {
                 try
                 {
-                    this.actionDescriptors[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys.ToDictionary()));
+                    actionDescriptors[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys.ToDictionary()));
                 }
                 catch (OutOfMemoryException)
                 {
@@ -753,7 +753,7 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 EnumeratedValue item = new EnumeratedValue(type, data);
-                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Enumerated, GetAETEParamFlags(key), 0, item));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Enumerated, GetAETEParamFlags(key), 0, item));
             }
             catch (OutOfMemoryException)
             {
@@ -770,9 +770,9 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 ReadOnlyCollection<ActionReferenceItem> values;
-                if (this.actionReferenceSuite.TryGetReferenceValues(reference, out values))
+                if (actionReferenceSuite.TryGetReferenceValues(reference, out values))
                 {
-                    this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.ObjectReference, GetAETEParamFlags(key), 0, values));
+                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.ObjectReference, GetAETEParamFlags(key), 0, values));
                 }
                 else
                 {
@@ -794,7 +794,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             try
             {
-                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), 0, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), 0, data));
             }
             catch (OutOfMemoryException)
             {
@@ -811,7 +811,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             try
             {
-                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.GlobalClass, GetAETEParamFlags(key), 0, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.GlobalClass, GetAETEParamFlags(key), 0, data));
             }
             catch (OutOfMemoryException)
             {
@@ -836,7 +836,7 @@ namespace PSFilterLoad.PSApi.PICA
                     byte[] data = new byte[size];
                     Marshal.Copy(hPtr, data, 0, size);
 
-                    this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Alias, GetAETEParamFlags(key), size, data));
+                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Alias, GetAETEParamFlags(key), size, data));
                 }
                 finally
                 {
@@ -875,7 +875,7 @@ namespace PSFilterLoad.PSApi.PICA
                     }
                 }
 
-                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), 0, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), 0, data));
             }
             catch (OutOfMemoryException)
             {
@@ -895,7 +895,7 @@ namespace PSFilterLoad.PSApi.PICA
                 ActionDescriptorZString value;
                 if (zstringSuite.ConvertToActionDescriptor(zstring, out value))
                 {
-                    this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), 0, value));
+                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), 0, value));
 
                     return PSError.kSPNoError;
                 }
@@ -924,7 +924,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 Marshal.Copy(blob, data, 0, length);
 
-                this.actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.RawData, GetAETEParamFlags(key), length, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.RawData, GetAETEParamFlags(key), length, data));
             }
             catch (OutOfMemoryException)
             {
@@ -942,7 +942,7 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 data = (int)item.Value;
 
@@ -958,7 +958,7 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 data = (double)item.Value;
 
@@ -974,7 +974,7 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 UnitFloat unitFloat = (UnitFloat)item.Value;
 
@@ -1000,7 +1000,7 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 byte[] bytes = (byte[])item.Value;
 
@@ -1023,7 +1023,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
 
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 if (maxLength > 0)
                 {
@@ -1047,7 +1047,7 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 data = (byte)item.Value;
 
@@ -1063,13 +1063,13 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 ReadOnlyCollection<ActionListItem> values = (ReadOnlyCollection<ActionListItem>)item.Value;
 
                 try
                 {
-                    list = this.actionListSuite.CreateList(values);
+                    list = actionListSuite.CreateList(values);
                 }
                 catch (OutOfMemoryException)
                 {
@@ -1088,7 +1088,7 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 uint type = item.Type;
 
@@ -1105,7 +1105,7 @@ namespace PSFilterLoad.PSApi.PICA
                 if (parameters != null)
                 {
                     descriptorHandle = GenerateDictionaryKey();
-                    this.actionDescriptors.Add(descriptorHandle, new ScriptingParameters(parameters));
+                    actionDescriptors.Add(descriptorHandle, new ScriptingParameters(parameters));
 
                     return PSError.kSPNoError;
                 }
@@ -1125,7 +1125,7 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 EnumeratedValue enumerated = (EnumeratedValue)item.Value;
                 try
@@ -1150,13 +1150,13 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 ReadOnlyCollection<ActionReferenceItem> values = (ReadOnlyCollection<ActionReferenceItem>)item.Value;
 
                 try
                 {
-                    reference = this.actionReferenceSuite.CreateReference(values);
+                    reference = actionReferenceSuite.CreateReference(values);
                 }
                 catch (OutOfMemoryException)
                 {
@@ -1175,7 +1175,7 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 data = (uint)item.Value;
 
@@ -1196,7 +1196,7 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 int size = item.Size;
                 data = HandleSuite.Instance.NewHandle(size);
@@ -1227,7 +1227,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
 
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 int[] values = (int[])item.Value;
                 if (count > values.Length)
@@ -1250,7 +1250,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
 
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 ActionDescriptorZString value = (ActionDescriptorZString)item.Value;
 
@@ -1276,7 +1276,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
 
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 byte[] bytes = (byte[])item.Value;
 
@@ -1299,7 +1299,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
 
             AETEValue item;
-            if (this.actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 byte[] data = (byte[])item.Value;
 

@@ -21,7 +21,7 @@ namespace PSFilterLoad.PSApi
 
         internal AETEData(PluginAETE enumAETE)
         {
-            this.flagList = new Dictionary<uint, short>();
+            flagList = new Dictionary<uint, short>();
 
             foreach (AETEParameter parm in enumAETE.scriptEvent.parameters)
             {

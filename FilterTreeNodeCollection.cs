@@ -35,11 +35,11 @@ namespace PSFilterPdn
                 throw new ArgumentNullException(nameof(items));
             }
 
-            this.nodes = new Dictionary<string, ReadOnlyCollection<TreeNode>>(items.Count, StringComparer.Ordinal);
+            nodes = new Dictionary<string, ReadOnlyCollection<TreeNode>>(items.Count, StringComparer.Ordinal);
 
             foreach (var item in items)
             {
-                this.nodes.Add(item.Key, new ReadOnlyCollection<TreeNode>(item.Value));
+                nodes.Add(item.Key, new ReadOnlyCollection<TreeNode>(item.Value));
             }
         }
 
@@ -47,7 +47,7 @@ namespace PSFilterPdn
         {
             get
             {
-                return this.nodes.Count;
+                return nodes.Count;
             }
         }
 
@@ -55,18 +55,18 @@ namespace PSFilterPdn
         {
             get
             {
-                return this.nodes[key];
+                return nodes[key];
             }
         }
 
         public IEnumerator<KeyValuePair<string, ReadOnlyCollection<TreeNode>>> GetEnumerator()
         {
-            return this.nodes.GetEnumerator();
+            return nodes.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.nodes.GetEnumerator();
+            return nodes.GetEnumerator();
         }
     }
 }

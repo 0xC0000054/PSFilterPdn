@@ -102,7 +102,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return this.type;
+				return type;
 			}
 		}
 
@@ -110,7 +110,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return this.value;
+				return value;
 			}
 		}
 

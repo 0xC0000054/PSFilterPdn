@@ -29,7 +29,7 @@ namespace PSFilterLoad.PSApi
             {
                 this.readChannelDesc = readChannelDesc;
                 this.channelName = channelName;
-                this.disposed = false;
+                disposed = false;
             }
 
             ~ChannelDescPtrs()
@@ -81,8 +81,8 @@ namespace PSFilterLoad.PSApi
             this.documentHeight = documentHeight;
             this.dpiX = dpiX;
             this.dpiY = dpiY;
-            this.channelReadDescPtrs = new List<ChannelDescPtrs>();
-            this.disposed = false;
+            channelReadDescPtrs = new List<ChannelDescPtrs>();
+            disposed = false;
         }
 
         public unsafe IntPtr CreateReadImageDocumentPointer(bool ignoreAlpha, bool hasSelection)
@@ -163,9 +163,9 @@ namespace PSFilterLoad.PSApi
             {
                 disposed = true;
 
-                for (int i = 0; i < this.channelReadDescPtrs.Count; i++)
+                for (int i = 0; i < channelReadDescPtrs.Count; i++)
                 {
-                    this.channelReadDescPtrs[i].Dispose();
+                    channelReadDescPtrs[i].Dispose();
                 }
             }
         }
@@ -178,7 +178,7 @@ namespace PSFilterLoad.PSApi
             {
                 namePtr = Marshal.StringToHGlobalAnsi(name);
 
-                this.channelReadDescPtrs.Add(new ChannelDescPtrs(addressPtr, namePtr));
+                channelReadDescPtrs.Add(new ChannelDescPtrs(addressPtr, namePtr));
             }
             catch (Exception)
             {

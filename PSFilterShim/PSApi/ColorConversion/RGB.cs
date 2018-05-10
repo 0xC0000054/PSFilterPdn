@@ -22,9 +22,9 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="blue">The blue component in the range of [0, 1].</param>
         public RGB(double red, double green, double blue)
         {
-            this.Red = red;
-            this.Green = green;
-            this.Blue = blue;
+            Red = red;
+            Green = green;
+            Blue = blue;
         }
 
         /// <summary>

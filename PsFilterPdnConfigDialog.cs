@@ -101,17 +101,17 @@ namespace PSFilterPdn
         public PsFilterPdnConfigDialog()
         {
             InitializeComponent();
-            this.proxyProcess = null;
-            this.destSurface = null;
-            this.expandedNodes = new List<string>();
-            this.filterParameters = new Dictionary<PluginData, ParameterData>();
-            this.pseudoResources = new PseudoResourceCollection();
-            this.fileNameLbl.Text = string.Empty;
-            this.folderNameLbl.Text = string.Empty;
-            this.proxyTempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            this.searchDirectories = new List<string>();
+            proxyProcess = null;
+            destSurface = null;
+            expandedNodes = new List<string>();
+            filterParameters = new Dictionary<PluginData, ParameterData>();
+            pseudoResources = new PseudoResourceCollection();
+            fileNameLbl.Text = string.Empty;
+            folderNameLbl.Text = string.Empty;
+            proxyTempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            searchDirectories = new List<string>();
             PSFilterLoad.ColorPicker.UI.InitScaling(this);
-            this.highDpiMode = PSFilterLoad.ColorPicker.UI.GetXScaleFactor() > 1.0f;
+            highDpiMode = PSFilterLoad.ColorPicker.UI.GetXScaleFactor() > 1.0f;
         }
 
         protected override void Dispose(bool disposing)
@@ -151,12 +151,12 @@ namespace PSFilterPdn
             {
                 return (DialogResult)Invoke(new Func<string, DialogResult>(delegate(string error)
                     {
-                        return MessageBox.Show(this, error, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
+                        return MessageBox.Show(this, error, Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
                     }), message);
             }
             else
             {
-                return MessageBox.Show(this, message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
+                return MessageBox.Show(this, message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
             }
         }
 
@@ -169,13 +169,13 @@ namespace PSFilterPdn
         {
             PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)base.theEffectToken;
 
-            token.Dest = this.destSurface;
-            token.FilterData = this.filterData;
-            token.RunWith32BitShim = this.runWith32BitShim;
-            token.FilterParameters = this.filterParameters;
-            token.PseudoResources = this.pseudoResources;
-            token.DescriptorRegistry = this.descriptorRegistry;
-            token.DialogState = new ConfigDialogState(this.expandedNodes.AsReadOnly(), this.filterTreeNodes, this.searchDirectories.AsReadOnly());
+            token.Dest = destSurface;
+            token.FilterData = filterData;
+            token.RunWith32BitShim = runWith32BitShim;
+            token.FilterParameters = filterParameters;
+            token.PseudoResources = pseudoResources;
+            token.DescriptorRegistry = descriptorRegistry;
+            token.DialogState = new ConfigDialogState(expandedNodes.AsReadOnly(), filterTreeNodes, searchDirectories.AsReadOnly());
         }
 
         protected override void InitDialogFromToken(EffectConfigToken effectToken)
@@ -184,22 +184,22 @@ namespace PSFilterPdn
 
             if (token.FilterData != null)
             {
-                this.lastSelectedFilterTitle = token.FilterData.Title;
+                lastSelectedFilterTitle = token.FilterData.Title;
             }
 
             if (token.FilterParameters != null)
             {
-                this.filterParameters = token.FilterParameters;
+                filterParameters = token.FilterParameters;
             }
 
             if ((token.PseudoResources != null) && token.PseudoResources.Count > 0)
             {
-                this.pseudoResources = token.PseudoResources;
+                pseudoResources = token.PseudoResources;
             }
 
             if (token.DescriptorRegistry != null)
             {
-                this.descriptorRegistry = token.DescriptorRegistry;
+                descriptorRegistry = token.DescriptorRegistry;
             }
 
             if (token.DialogState != null)
@@ -210,327 +210,327 @@ namespace PSFilterPdn
                     state.ExpandedNodes != null &&
                     state.ExpandedNodes.Count > 0)
                 {
-                    this.expandedNodes = new List<string>(state.ExpandedNodes);
+                    expandedNodes = new List<string>(state.ExpandedNodes);
                 }
 
                 if (filterTreeNodes == null &&
                     state.FilterTreeNodes != null)
                 {
-                    this.filterTreeNodes = state.FilterTreeNodes;
+                    filterTreeNodes = state.FilterTreeNodes;
                 }
 
                 if (searchDirectories.Count == 0 &&
                     state.SearchDirectories != null &&
                     state.SearchDirectories.Count > 0)
                 {
-                    this.searchDirectories = new List<string>(state.SearchDirectories);
+                    searchDirectories = new List<string>(state.SearchDirectories);
                 }
             }
         }
 
         private void InitializeComponent()
         {
-            this.buttonCancel = new System.Windows.Forms.Button();
-            this.buttonOK = new System.Windows.Forms.Button();
-            this.tabControl1 = new PSFilterPdn.Controls.TabControlEx();
-            this.filterTab = new System.Windows.Forms.TabPage();
-            this.filterProgressBar = new System.Windows.Forms.ProgressBar();
-            this.fileNameLbl = new System.Windows.Forms.Label();
-            this.filterSearchBox = new System.Windows.Forms.TextBox();
-            this.showAboutBoxCb = new System.Windows.Forms.CheckBox();
-            this.folderLoadPanel = new System.Windows.Forms.Panel();
-            this.folderNameLbl = new System.Windows.Forms.Label();
-            this.folderCountLbl = new System.Windows.Forms.Label();
-            this.fldrLoadProgLbl = new System.Windows.Forms.Label();
-            this.folderLoadProgress = new System.Windows.Forms.ProgressBar();
-            this.runFilterBtn = new System.Windows.Forms.Button();
-            this.filterTree = new DoubleBufferedTreeView();
-            this.dirTab = new System.Windows.Forms.TabPage();
-            this.subDirSearchCb = new System.Windows.Forms.CheckBox();
-            this.remDirBtn = new System.Windows.Forms.Button();
-            this.addDirBtn = new System.Windows.Forms.Button();
-            this.searchDirListView = new DoubleBufferedListView();
-            this.dirHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.updateFilterListBw = new System.ComponentModel.BackgroundWorker();
-            this.donateLink = new System.Windows.Forms.LinkLabel();
-            this.tabControl1.SuspendLayout();
-            this.filterTab.SuspendLayout();
-            this.folderLoadPanel.SuspendLayout();
-            this.dirTab.SuspendLayout();
+            buttonCancel = new System.Windows.Forms.Button();
+            buttonOK = new System.Windows.Forms.Button();
+            tabControl1 = new PSFilterPdn.Controls.TabControlEx();
+            filterTab = new System.Windows.Forms.TabPage();
+            filterProgressBar = new System.Windows.Forms.ProgressBar();
+            fileNameLbl = new System.Windows.Forms.Label();
+            filterSearchBox = new System.Windows.Forms.TextBox();
+            showAboutBoxCb = new System.Windows.Forms.CheckBox();
+            folderLoadPanel = new System.Windows.Forms.Panel();
+            folderNameLbl = new System.Windows.Forms.Label();
+            folderCountLbl = new System.Windows.Forms.Label();
+            fldrLoadProgLbl = new System.Windows.Forms.Label();
+            folderLoadProgress = new System.Windows.Forms.ProgressBar();
+            runFilterBtn = new System.Windows.Forms.Button();
+            filterTree = new DoubleBufferedTreeView();
+            dirTab = new System.Windows.Forms.TabPage();
+            subDirSearchCb = new System.Windows.Forms.CheckBox();
+            remDirBtn = new System.Windows.Forms.Button();
+            addDirBtn = new System.Windows.Forms.Button();
+            searchDirListView = new DoubleBufferedListView();
+            dirHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            updateFilterListBw = new System.ComponentModel.BackgroundWorker();
+            donateLink = new System.Windows.Forms.LinkLabel();
+            tabControl1.SuspendLayout();
+            filterTab.SuspendLayout();
+            folderLoadPanel.SuspendLayout();
+            dirTab.SuspendLayout();
             SuspendLayout();
             //
             // buttonCancel
             //
-            this.buttonCancel.Location = new System.Drawing.Point(397, 368);
-            this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(75, 23);
-            this.buttonCancel.TabIndex = 1;
-            this.buttonCancel.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_buttonCancel_Text;
-            this.buttonCancel.UseVisualStyleBackColor = true;
-            this.buttonCancel.Click += new System.EventHandler(buttonCancel_Click);
+            buttonCancel.Location = new System.Drawing.Point(397, 368);
+            buttonCancel.Name = "buttonCancel";
+            buttonCancel.Size = new System.Drawing.Size(75, 23);
+            buttonCancel.TabIndex = 1;
+            buttonCancel.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_buttonCancel_Text;
+            buttonCancel.UseVisualStyleBackColor = true;
+            buttonCancel.Click += new System.EventHandler(buttonCancel_Click);
             //
             // buttonOK
             //
-            this.buttonOK.Location = new System.Drawing.Point(316, 368);
-            this.buttonOK.Name = "buttonOK";
-            this.buttonOK.Size = new System.Drawing.Size(75, 23);
-            this.buttonOK.TabIndex = 2;
-            this.buttonOK.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_buttonOK_Text;
-            this.buttonOK.UseVisualStyleBackColor = true;
-            this.buttonOK.Click += new System.EventHandler(buttonOK_Click);
+            buttonOK.Location = new System.Drawing.Point(316, 368);
+            buttonOK.Name = "buttonOK";
+            buttonOK.Size = new System.Drawing.Size(75, 23);
+            buttonOK.TabIndex = 2;
+            buttonOK.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_buttonOK_Text;
+            buttonOK.UseVisualStyleBackColor = true;
+            buttonOK.Click += new System.EventHandler(buttonOK_Click);
             //
             // tabControl1
             //
-            this.tabControl1.Controls.Add(this.filterTab);
-            this.tabControl1.Controls.Add(this.dirTab);
-            this.tabControl1.Location = new System.Drawing.Point(12, 12);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(460, 350);
-            this.tabControl1.TabIndex = 3;
+            tabControl1.Controls.Add(filterTab);
+            tabControl1.Controls.Add(dirTab);
+            tabControl1.Location = new System.Drawing.Point(12, 12);
+            tabControl1.Name = "tabControl1";
+            tabControl1.SelectedIndex = 0;
+            tabControl1.Size = new System.Drawing.Size(460, 350);
+            tabControl1.TabIndex = 3;
             //
             // filterTab
             //
-            this.filterTab.BackColor = System.Drawing.Color.Transparent;
-            this.filterTab.Controls.Add(this.filterProgressBar);
-            this.filterTab.Controls.Add(this.fileNameLbl);
-            this.filterTab.Controls.Add(this.filterSearchBox);
-            this.filterTab.Controls.Add(this.showAboutBoxCb);
-            this.filterTab.Controls.Add(this.folderLoadPanel);
-            this.filterTab.Controls.Add(this.runFilterBtn);
-            this.filterTab.Controls.Add(this.filterTree);
-            this.filterTab.Location = new System.Drawing.Point(4, 22);
-            this.filterTab.Name = "filterTab";
-            this.filterTab.Padding = new System.Windows.Forms.Padding(3);
-            this.filterTab.Size = new System.Drawing.Size(452, 324);
-            this.filterTab.TabIndex = 0;
-            this.filterTab.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_filterTab_Text;
-            this.filterTab.UseVisualStyleBackColor = true;
+            filterTab.BackColor = System.Drawing.Color.Transparent;
+            filterTab.Controls.Add(filterProgressBar);
+            filterTab.Controls.Add(fileNameLbl);
+            filterTab.Controls.Add(filterSearchBox);
+            filterTab.Controls.Add(showAboutBoxCb);
+            filterTab.Controls.Add(folderLoadPanel);
+            filterTab.Controls.Add(runFilterBtn);
+            filterTab.Controls.Add(filterTree);
+            filterTab.Location = new System.Drawing.Point(4, 22);
+            filterTab.Name = "filterTab";
+            filterTab.Padding = new System.Windows.Forms.Padding(3);
+            filterTab.Size = new System.Drawing.Size(452, 324);
+            filterTab.TabIndex = 0;
+            filterTab.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_filterTab_Text;
+            filterTab.UseVisualStyleBackColor = true;
             //
             // filterProgressBar
             //
-            this.filterProgressBar.Enabled = false;
-            this.filterProgressBar.Location = new System.Drawing.Point(6, 298);
-            this.filterProgressBar.Name = "filterProgressBar";
-            this.filterProgressBar.Size = new System.Drawing.Size(230, 23);
-            this.filterProgressBar.Step = 1;
-            this.filterProgressBar.TabIndex = 17;
+            filterProgressBar.Enabled = false;
+            filterProgressBar.Location = new System.Drawing.Point(6, 298);
+            filterProgressBar.Name = "filterProgressBar";
+            filterProgressBar.Size = new System.Drawing.Size(230, 23);
+            filterProgressBar.Step = 1;
+            filterProgressBar.TabIndex = 17;
             //
             // fileNameLbl
             //
-            this.fileNameLbl.AutoSize = true;
-            this.fileNameLbl.Location = new System.Drawing.Point(249, 51);
-            this.fileNameLbl.Name = "fileNameLbl";
-            this.fileNameLbl.Size = new System.Drawing.Size(67, 13);
-            this.fileNameLbl.TabIndex = 16;
-            this.fileNameLbl.Text = "Filename.8bf";
+            fileNameLbl.AutoSize = true;
+            fileNameLbl.Location = new System.Drawing.Point(249, 51);
+            fileNameLbl.Name = "fileNameLbl";
+            fileNameLbl.Size = new System.Drawing.Size(67, 13);
+            fileNameLbl.TabIndex = 16;
+            fileNameLbl.Text = "Filename.8bf";
             //
             // filterSearchBox
             //
-            this.filterSearchBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic);
-            this.filterSearchBox.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.filterSearchBox.Location = new System.Drawing.Point(6, 6);
-            this.filterSearchBox.Name = "filterSearchBox";
-            this.filterSearchBox.Size = new System.Drawing.Size(230, 20);
-            this.filterSearchBox.TabIndex = 15;
-            this.filterSearchBox.Text = "Search Filters";
-            this.filterSearchBox.TextChanged += new System.EventHandler(filterSearchBox_TextChanged);
-            this.filterSearchBox.Enter += new System.EventHandler(filterSearchBox_Enter);
-            this.filterSearchBox.Leave += new System.EventHandler(filterSearchBox_Leave);
+            filterSearchBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic);
+            filterSearchBox.ForeColor = System.Drawing.SystemColors.GrayText;
+            filterSearchBox.Location = new System.Drawing.Point(6, 6);
+            filterSearchBox.Name = "filterSearchBox";
+            filterSearchBox.Size = new System.Drawing.Size(230, 20);
+            filterSearchBox.TabIndex = 15;
+            filterSearchBox.Text = "Search Filters";
+            filterSearchBox.TextChanged += new System.EventHandler(filterSearchBox_TextChanged);
+            filterSearchBox.Enter += new System.EventHandler(filterSearchBox_Enter);
+            filterSearchBox.Leave += new System.EventHandler(filterSearchBox_Leave);
             //
             // showAboutBoxCb
             //
-            this.showAboutBoxCb.AutoSize = true;
-            this.showAboutBoxCb.Location = new System.Drawing.Point(243, 243);
-            this.showAboutBoxCb.Name = "showAboutBoxCb";
-            this.showAboutBoxCb.Size = new System.Drawing.Size(104, 17);
-            this.showAboutBoxCb.TabIndex = 3;
-            this.showAboutBoxCb.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_showAboutBoxcb_Text;
-            this.showAboutBoxCb.UseVisualStyleBackColor = true;
+            showAboutBoxCb.AutoSize = true;
+            showAboutBoxCb.Location = new System.Drawing.Point(243, 243);
+            showAboutBoxCb.Name = "showAboutBoxCb";
+            showAboutBoxCb.Size = new System.Drawing.Size(104, 17);
+            showAboutBoxCb.TabIndex = 3;
+            showAboutBoxCb.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_showAboutBoxcb_Text;
+            showAboutBoxCb.UseVisualStyleBackColor = true;
             //
             // folderLoadPanel
             //
-            this.folderLoadPanel.Controls.Add(this.folderNameLbl);
-            this.folderLoadPanel.Controls.Add(this.folderCountLbl);
-            this.folderLoadPanel.Controls.Add(this.fldrLoadProgLbl);
-            this.folderLoadPanel.Controls.Add(this.folderLoadProgress);
-            this.folderLoadPanel.Location = new System.Drawing.Point(243, 157);
-            this.folderLoadPanel.Name = "folderLoadPanel";
-            this.folderLoadPanel.Size = new System.Drawing.Size(209, 76);
-            this.folderLoadPanel.TabIndex = 2;
-            this.folderLoadPanel.Visible = false;
+            folderLoadPanel.Controls.Add(folderNameLbl);
+            folderLoadPanel.Controls.Add(folderCountLbl);
+            folderLoadPanel.Controls.Add(fldrLoadProgLbl);
+            folderLoadPanel.Controls.Add(folderLoadProgress);
+            folderLoadPanel.Location = new System.Drawing.Point(243, 157);
+            folderLoadPanel.Name = "folderLoadPanel";
+            folderLoadPanel.Size = new System.Drawing.Size(209, 76);
+            folderLoadPanel.TabIndex = 2;
+            folderLoadPanel.Visible = false;
             //
             // folderNameLbl
             //
-            this.folderNameLbl.AutoSize = true;
-            this.folderNameLbl.Location = new System.Drawing.Point(3, 45);
-            this.folderNameLbl.Name = "folderNameLbl";
-            this.folderNameLbl.Size = new System.Drawing.Size(65, 13);
-            this.folderNameLbl.TabIndex = 3;
-            this.folderNameLbl.Text = "(foldername)";
+            folderNameLbl.AutoSize = true;
+            folderNameLbl.Location = new System.Drawing.Point(3, 45);
+            folderNameLbl.Name = "folderNameLbl";
+            folderNameLbl.Size = new System.Drawing.Size(65, 13);
+            folderNameLbl.TabIndex = 3;
+            folderNameLbl.Text = "(foldername)";
             //
             // folderCountLbl
             //
-            this.folderCountLbl.AutoSize = true;
-            this.folderCountLbl.Location = new System.Drawing.Point(160, 29);
-            this.folderCountLbl.Name = "folderCountLbl";
-            this.folderCountLbl.Size = new System.Drawing.Size(40, 13);
-            this.folderCountLbl.TabIndex = 2;
-            this.folderCountLbl.Text = "(2 of 3)";
+            folderCountLbl.AutoSize = true;
+            folderCountLbl.Location = new System.Drawing.Point(160, 29);
+            folderCountLbl.Name = "folderCountLbl";
+            folderCountLbl.Size = new System.Drawing.Size(40, 13);
+            folderCountLbl.TabIndex = 2;
+            folderCountLbl.Text = "(2 of 3)";
             //
             // fldrLoadProgLbl
             //
-            this.fldrLoadProgLbl.AutoSize = true;
-            this.fldrLoadProgLbl.Location = new System.Drawing.Point(3, 3);
-            this.fldrLoadProgLbl.Name = "fldrLoadProgLbl";
-            this.fldrLoadProgLbl.Size = new System.Drawing.Size(105, 13);
-            this.fldrLoadProgLbl.TabIndex = 1;
-            this.fldrLoadProgLbl.Text = "Folder load progress:";
+            fldrLoadProgLbl.AutoSize = true;
+            fldrLoadProgLbl.Location = new System.Drawing.Point(3, 3);
+            fldrLoadProgLbl.Name = "fldrLoadProgLbl";
+            fldrLoadProgLbl.Size = new System.Drawing.Size(105, 13);
+            fldrLoadProgLbl.TabIndex = 1;
+            fldrLoadProgLbl.Text = "Folder load progress:";
             //
             // folderLoadProgress
             //
-            this.folderLoadProgress.Location = new System.Drawing.Point(3, 19);
-            this.folderLoadProgress.Name = "folderLoadProgress";
-            this.folderLoadProgress.Size = new System.Drawing.Size(151, 23);
-            this.folderLoadProgress.TabIndex = 0;
+            folderLoadProgress.Location = new System.Drawing.Point(3, 19);
+            folderLoadProgress.Name = "folderLoadProgress";
+            folderLoadProgress.Size = new System.Drawing.Size(151, 23);
+            folderLoadProgress.TabIndex = 0;
             //
             // runFilterBtn
             //
-            this.runFilterBtn.Enabled = false;
-            this.runFilterBtn.Location = new System.Drawing.Point(243, 266);
-            this.runFilterBtn.Name = "runFilterBtn";
-            this.runFilterBtn.Size = new System.Drawing.Size(75, 23);
-            this.runFilterBtn.TabIndex = 1;
-            this.runFilterBtn.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_runFilterBtn_Text;
-            this.runFilterBtn.UseVisualStyleBackColor = true;
-            this.runFilterBtn.Click += new System.EventHandler(runFilterBtn_Click);
+            runFilterBtn.Enabled = false;
+            runFilterBtn.Location = new System.Drawing.Point(243, 266);
+            runFilterBtn.Name = "runFilterBtn";
+            runFilterBtn.Size = new System.Drawing.Size(75, 23);
+            runFilterBtn.TabIndex = 1;
+            runFilterBtn.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_runFilterBtn_Text;
+            runFilterBtn.UseVisualStyleBackColor = true;
+            runFilterBtn.Click += new System.EventHandler(runFilterBtn_Click);
             //
             // filterTree
             //
-            this.filterTree.HideSelection = false;
-            this.filterTree.Location = new System.Drawing.Point(6, 32);
-            this.filterTree.Name = "filterTree";
-            this.filterTree.ShowLines = false;
-            this.filterTree.Size = new System.Drawing.Size(230, 260);
-            this.filterTree.TabIndex = 0;
-            this.filterTree.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(filterTree_AfterCollapse);
-            this.filterTree.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(filterTree_BeforeExpand);
-            this.filterTree.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(filterTree_AfterExpand);
-            this.filterTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(filterTree_AfterSelect);
-            this.filterTree.DoubleClick += new System.EventHandler(filterTree_DoubleClick);
-            this.filterTree.KeyDown += new System.Windows.Forms.KeyEventHandler(filterTree_KeyDown);
+            filterTree.HideSelection = false;
+            filterTree.Location = new System.Drawing.Point(6, 32);
+            filterTree.Name = "filterTree";
+            filterTree.ShowLines = false;
+            filterTree.Size = new System.Drawing.Size(230, 260);
+            filterTree.TabIndex = 0;
+            filterTree.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(filterTree_AfterCollapse);
+            filterTree.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(filterTree_BeforeExpand);
+            filterTree.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(filterTree_AfterExpand);
+            filterTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(filterTree_AfterSelect);
+            filterTree.DoubleClick += new System.EventHandler(filterTree_DoubleClick);
+            filterTree.KeyDown += new System.Windows.Forms.KeyEventHandler(filterTree_KeyDown);
             //
             // dirTab
             //
-            this.dirTab.BackColor = System.Drawing.Color.Transparent;
-            this.dirTab.Controls.Add(this.subDirSearchCb);
-            this.dirTab.Controls.Add(this.remDirBtn);
-            this.dirTab.Controls.Add(this.addDirBtn);
-            this.dirTab.Controls.Add(this.searchDirListView);
-            this.dirTab.Location = new System.Drawing.Point(4, 22);
-            this.dirTab.Name = "dirTab";
-            this.dirTab.Padding = new System.Windows.Forms.Padding(3);
-            this.dirTab.Size = new System.Drawing.Size(452, 324);
-            this.dirTab.TabIndex = 1;
-            this.dirTab.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_dirTab_Text;
-            this.dirTab.UseVisualStyleBackColor = true;
+            dirTab.BackColor = System.Drawing.Color.Transparent;
+            dirTab.Controls.Add(subDirSearchCb);
+            dirTab.Controls.Add(remDirBtn);
+            dirTab.Controls.Add(addDirBtn);
+            dirTab.Controls.Add(searchDirListView);
+            dirTab.Location = new System.Drawing.Point(4, 22);
+            dirTab.Name = "dirTab";
+            dirTab.Padding = new System.Windows.Forms.Padding(3);
+            dirTab.Size = new System.Drawing.Size(452, 324);
+            dirTab.TabIndex = 1;
+            dirTab.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_dirTab_Text;
+            dirTab.UseVisualStyleBackColor = true;
             //
             // subDirSearchCb
             //
-            this.subDirSearchCb.AutoSize = true;
-            this.subDirSearchCb.Checked = true;
-            this.subDirSearchCb.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.subDirSearchCb.Location = new System.Drawing.Point(6, 255);
-            this.subDirSearchCb.Name = "subDirSearchCb";
-            this.subDirSearchCb.Size = new System.Drawing.Size(130, 17);
-            this.subDirSearchCb.TabIndex = 3;
-            this.subDirSearchCb.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_subDirSearchCb_Text;
-            this.subDirSearchCb.UseVisualStyleBackColor = true;
-            this.subDirSearchCb.CheckedChanged += new System.EventHandler(subDirSearchCb_CheckedChanged);
+            subDirSearchCb.AutoSize = true;
+            subDirSearchCb.Checked = true;
+            subDirSearchCb.CheckState = System.Windows.Forms.CheckState.Checked;
+            subDirSearchCb.Location = new System.Drawing.Point(6, 255);
+            subDirSearchCb.Name = "subDirSearchCb";
+            subDirSearchCb.Size = new System.Drawing.Size(130, 17);
+            subDirSearchCb.TabIndex = 3;
+            subDirSearchCb.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_subDirSearchCb_Text;
+            subDirSearchCb.UseVisualStyleBackColor = true;
+            subDirSearchCb.CheckedChanged += new System.EventHandler(subDirSearchCb_CheckedChanged);
             //
             // remDirBtn
             //
-            this.remDirBtn.Location = new System.Drawing.Point(371, 251);
-            this.remDirBtn.Name = "remDirBtn";
-            this.remDirBtn.Size = new System.Drawing.Size(75, 23);
-            this.remDirBtn.TabIndex = 2;
-            this.remDirBtn.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_remDirBtn_Text;
-            this.remDirBtn.UseVisualStyleBackColor = true;
-            this.remDirBtn.Click += new System.EventHandler(remDirBtn_Click);
+            remDirBtn.Location = new System.Drawing.Point(371, 251);
+            remDirBtn.Name = "remDirBtn";
+            remDirBtn.Size = new System.Drawing.Size(75, 23);
+            remDirBtn.TabIndex = 2;
+            remDirBtn.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_remDirBtn_Text;
+            remDirBtn.UseVisualStyleBackColor = true;
+            remDirBtn.Click += new System.EventHandler(remDirBtn_Click);
             //
             // addDirBtn
             //
-            this.addDirBtn.Location = new System.Drawing.Point(290, 251);
-            this.addDirBtn.Name = "addDirBtn";
-            this.addDirBtn.Size = new System.Drawing.Size(75, 23);
-            this.addDirBtn.TabIndex = 1;
-            this.addDirBtn.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_addDirBtn_Text;
-            this.addDirBtn.UseVisualStyleBackColor = true;
-            this.addDirBtn.Click += new System.EventHandler(addDirBtn_Click);
+            addDirBtn.Location = new System.Drawing.Point(290, 251);
+            addDirBtn.Name = "addDirBtn";
+            addDirBtn.Size = new System.Drawing.Size(75, 23);
+            addDirBtn.TabIndex = 1;
+            addDirBtn.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_addDirBtn_Text;
+            addDirBtn.UseVisualStyleBackColor = true;
+            addDirBtn.Click += new System.EventHandler(addDirBtn_Click);
             //
             // searchDirListView
             //
-            this.searchDirListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.dirHeader});
-            this.searchDirListView.Location = new System.Drawing.Point(6, 6);
-            this.searchDirListView.MultiSelect = false;
-            this.searchDirListView.Name = "searchDirListView";
-            this.searchDirListView.Size = new System.Drawing.Size(440, 243);
-            this.searchDirListView.TabIndex = 0;
-            this.searchDirListView.UseCompatibleStateImageBehavior = false;
-            this.searchDirListView.View = System.Windows.Forms.View.Details;
-            this.searchDirListView.VirtualMode = true;
-            this.searchDirListView.CacheVirtualItems += new System.Windows.Forms.CacheVirtualItemsEventHandler(searchDirListView_CacheVirtualItems);
-            this.searchDirListView.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(searchDirListView_RetrieveVirtualItem);
-            this.searchDirListView.SelectedIndexChanged += new System.EventHandler(searchDirListView_SelectedIndexChanged);
+            searchDirListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            dirHeader});
+            searchDirListView.Location = new System.Drawing.Point(6, 6);
+            searchDirListView.MultiSelect = false;
+            searchDirListView.Name = "searchDirListView";
+            searchDirListView.Size = new System.Drawing.Size(440, 243);
+            searchDirListView.TabIndex = 0;
+            searchDirListView.UseCompatibleStateImageBehavior = false;
+            searchDirListView.View = System.Windows.Forms.View.Details;
+            searchDirListView.VirtualMode = true;
+            searchDirListView.CacheVirtualItems += new System.Windows.Forms.CacheVirtualItemsEventHandler(searchDirListView_CacheVirtualItems);
+            searchDirListView.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(searchDirListView_RetrieveVirtualItem);
+            searchDirListView.SelectedIndexChanged += new System.EventHandler(searchDirListView_SelectedIndexChanged);
             //
             // dirHeader
             //
-            this.dirHeader.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_dirHeader_Text;
-            this.dirHeader.Width = 417;
+            dirHeader.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_dirHeader_Text;
+            dirHeader.Width = 417;
             //
             // updateFilterListBw
             //
-            this.updateFilterListBw.WorkerReportsProgress = true;
-            this.updateFilterListBw.WorkerSupportsCancellation = true;
-            this.updateFilterListBw.DoWork += new System.ComponentModel.DoWorkEventHandler(updateFilterListBw_DoWork);
-            this.updateFilterListBw.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(updateFilterListBw_ProgressChanged);
-            this.updateFilterListBw.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(updateFilterListBw_RunWorkerCompleted);
+            updateFilterListBw.WorkerReportsProgress = true;
+            updateFilterListBw.WorkerSupportsCancellation = true;
+            updateFilterListBw.DoWork += new System.ComponentModel.DoWorkEventHandler(updateFilterListBw_DoWork);
+            updateFilterListBw.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(updateFilterListBw_ProgressChanged);
+            updateFilterListBw.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(updateFilterListBw_RunWorkerCompleted);
             //
             // donateLink
             //
-            this.donateLink.AutoSize = true;
-            this.donateLink.BackColor = System.Drawing.Color.Transparent;
-            this.donateLink.Location = new System.Drawing.Point(9, 373);
-            this.donateLink.Name = "donateLink";
-            this.donateLink.Size = new System.Drawing.Size(45, 13);
-            this.donateLink.TabIndex = 4;
-            this.donateLink.TabStop = true;
-            this.donateLink.Text = "Donate!";
-            this.donateLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(donateLink_LinkClicked);
+            donateLink.AutoSize = true;
+            donateLink.BackColor = System.Drawing.Color.Transparent;
+            donateLink.Location = new System.Drawing.Point(9, 373);
+            donateLink.Name = "donateLink";
+            donateLink.Size = new System.Drawing.Size(45, 13);
+            donateLink.TabIndex = 4;
+            donateLink.TabStop = true;
+            donateLink.Text = "Donate!";
+            donateLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(donateLink_LinkClicked);
             //
             // PsFilterPdnConfigDialog
             //
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.ClientSize = new System.Drawing.Size(484, 403);
-            this.Controls.Add(this.donateLink);
-            this.Controls.Add(this.tabControl1);
-            this.Controls.Add(this.buttonOK);
-            this.Controls.Add(this.buttonCancel);
-            this.Location = new System.Drawing.Point(0, 0);
-            this.Name = "PsFilterPdnConfigDialog";
-            this.Text = "8bf Filter";
-            this.Controls.SetChildIndex(this.buttonCancel, 0);
-            this.Controls.SetChildIndex(this.buttonOK, 0);
-            this.Controls.SetChildIndex(this.tabControl1, 0);
-            this.Controls.SetChildIndex(this.donateLink, 0);
-            this.tabControl1.ResumeLayout(false);
-            this.filterTab.ResumeLayout(false);
-            this.filterTab.PerformLayout();
-            this.folderLoadPanel.ResumeLayout(false);
-            this.folderLoadPanel.PerformLayout();
-            this.dirTab.ResumeLayout(false);
-            this.dirTab.PerformLayout();
+            AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            ClientSize = new System.Drawing.Size(484, 403);
+            Controls.Add(donateLink);
+            Controls.Add(tabControl1);
+            Controls.Add(buttonOK);
+            Controls.Add(buttonCancel);
+            Location = new System.Drawing.Point(0, 0);
+            Name = "PsFilterPdnConfigDialog";
+            Text = "8bf Filter";
+            Controls.SetChildIndex(buttonCancel, 0);
+            Controls.SetChildIndex(buttonOK, 0);
+            Controls.SetChildIndex(tabControl1, 0);
+            Controls.SetChildIndex(donateLink, 0);
+            tabControl1.ResumeLayout(false);
+            filterTab.ResumeLayout(false);
+            filterTab.PerformLayout();
+            folderLoadPanel.ResumeLayout(false);
+            folderLoadPanel.PerformLayout();
+            dirTab.ResumeLayout(false);
+            dirTab.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -648,12 +648,12 @@ namespace PSFilterPdn
                 return;
             }
 
-            this.srcFileName = Path.Combine(proxyTempDir, "proxysource.png");
-            this.destFileName = Path.Combine(proxyTempDir, "proxyresult.png");
-            this.parameterDataFileName = Path.Combine(proxyTempDir, "parameters.dat");
-            this.resourceDataFileName = Path.Combine(proxyTempDir, "PseudoResources.dat");
-            this.descriptorRegistryFileName = Path.Combine(proxyTempDir, "registry.dat");
-            this.regionFileName = string.Empty;
+            srcFileName = Path.Combine(proxyTempDir, "proxysource.png");
+            destFileName = Path.Combine(proxyTempDir, "proxyresult.png");
+            parameterDataFileName = Path.Combine(proxyTempDir, "parameters.dat");
+            resourceDataFileName = Path.Combine(proxyTempDir, "PseudoResources.dat");
+            descriptorRegistryFileName = Path.Combine(proxyTempDir, "registry.dat");
+            regionFileName = string.Empty;
 
 
             Rectangle sourceBounds = eep.SourceSurface.Bounds;
@@ -662,7 +662,7 @@ namespace PSFilterPdn
 
             if (selection != sourceBounds)
             {
-                this.regionFileName = Path.Combine(proxyTempDir, "selection.dat");
+                regionFileName = Path.Combine(proxyTempDir, "selection.dat");
                 RegionDataWrapper selectedRegion = new RegionDataWrapper(eep.GetSelection(sourceBounds).GetRegionData());
 
                 using (FileStream fs = new FileStream(regionFileName, FileMode.Create, FileAccess.Write))
@@ -678,20 +678,20 @@ namespace PSFilterPdn
                 ShowAboutDialog = showAboutBoxCb.Checked,
                 SourceImagePath = srcFileName,
                 DestinationImagePath = destFileName,
-                ParentWindowHandle = this.Handle,
+                ParentWindowHandle = Handle,
                 PrimaryColor = eep.PrimaryColor.ToColor(),
                 SecondaryColor = eep.SecondaryColor.ToColor(),
                 RegionDataPath = regionFileName,
                 ParameterDataPath = parameterDataFileName,
                 PseudoResourcePath = resourceDataFileName,
                 DescriptorRegistryPath = descriptorRegistryFileName,
-                PluginUISettings = new PluginUISettings(this.highDpiMode, BackColor, ForeColor)
+                PluginUISettings = new PluginUISettings(highDpiMode, BackColor, ForeColor)
             };
 
             PSFilterShimService service = new PSFilterShimService(AbortCallback, data, settings, SetProxyErrorResult, UpdateProgress);
 
             PSFilterShimServer.Start(service);
-            this.proxyData = data;
+            proxyData = data;
             try
             {
 
@@ -718,7 +718,7 @@ namespace PSFilterPdn
                     using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
                         BinaryFormatter bf = new BinaryFormatter();
-                        bf.Serialize(fs, this.pseudoResources);
+                        bf.Serialize(fs, pseudoResources);
                     }
                 }
 
@@ -727,7 +727,7 @@ namespace PSFilterPdn
                     using (FileStream fs = new FileStream(descriptorRegistryFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
                         BinaryFormatter bf = new BinaryFormatter();
-                        bf.Serialize(fs, this.descriptorRegistry);
+                        bf.Serialize(fs, descriptorRegistry);
                     }
                 }
 
@@ -770,21 +770,21 @@ namespace PSFilterPdn
             {
                 showAbout = (bool)Invoke(new Func<bool>(delegate()
                 {
-                    return this.showAboutBoxCb.Checked;
+                    return showAboutBoxCb.Checked;
                 }));
             }
             else
             {
-                showAbout = this.showAboutBoxCb.Checked;
+                showAbout = showAboutBoxCb.Checked;
             }
 
             if (proxyResult && !showAbout && File.Exists(destFileName))
             {
-                this.filterData = proxyData;
+                filterData = proxyData;
 
                 using (Bitmap dst = new Bitmap(destFileName))
                 {
-                    this.destSurface = Surface.CopyFromBitmap(dst);
+                    destSurface = Surface.CopyFromBitmap(dst);
                 }
 
                 try
@@ -795,7 +795,7 @@ namespace PSFilterPdn
                         BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
                         ParameterData parameterData = (ParameterData)bf.Deserialize(fs);
 
-                        this.filterParameters.AddOrUpdate(proxyData, parameterData);
+                        filterParameters.AddOrUpdate(proxyData, parameterData);
                     }
                 }
                 catch (FileNotFoundException)
@@ -808,7 +808,7 @@ namespace PSFilterPdn
                     {
                         SelfBinder binder = new SelfBinder();
                         BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
-                        this.pseudoResources = (PseudoResourceCollection)bf.Deserialize(fs);
+                        pseudoResources = (PseudoResourceCollection)bf.Deserialize(fs);
                     }
                 }
                 catch (FileNotFoundException)
@@ -821,7 +821,7 @@ namespace PSFilterPdn
                     {
                         SelfBinder binder = new SelfBinder();
                         BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
-                        this.descriptorRegistry = (DescriptorRegistryValues)bf.Deserialize(fs);
+                        descriptorRegistry = (DescriptorRegistryValues)bf.Deserialize(fs);
                     }
                 }
                 catch (FileNotFoundException)
@@ -846,12 +846,12 @@ namespace PSFilterPdn
             {
                 Invoke(new MethodInvoker(delegate()
                 {
-                    this.filterProgressBar.Value = 0;
+                    filterProgressBar.Value = 0;
                 }));
             }
             else
             {
-                this.filterProgressBar.Value = 0;
+                filterProgressBar.Value = 0;
             }
 
             FinishTokenUpdate();
@@ -867,19 +867,19 @@ namespace PSFilterPdn
                 {
                     if (data.RunWith32BitShim || useDEPProxy)
                     {
-                        this.runWith32BitShim = true;
-                        Run32BitFilterProxy(this.Effect.EnvironmentParameters, data);
+                        runWith32BitShim = true;
+                        Run32BitFilterProxy(Effect.EnvironmentParameters, data);
                     }
                     else
                     {
-                        this.runWith32BitShim = false;
+                        runWith32BitShim = false;
 
-                        this.filterRunning = true;
+                        filterRunning = true;
 
                         try
                         {
-                            PluginUISettings pluginUISettings = new PluginUISettings(this.highDpiMode, BackColor, ForeColor);
-                            using (LoadPsFilter lps = new LoadPsFilter(this.Effect.EnvironmentParameters, this.Handle, pluginUISettings))
+                            PluginUISettings pluginUISettings = new PluginUISettings(highDpiMode, BackColor, ForeColor);
+                            using (LoadPsFilter lps = new LoadPsFilter(Effect.EnvironmentParameters, Handle, pluginUISettings))
                             {
                                 lps.SetAbortCallback(AbortCallback);
                                 lps.SetProgressCallback(UpdateProgress);
@@ -895,18 +895,18 @@ namespace PSFilterPdn
                                     lps.FilterParameters = parameterData;
                                 }
 
-                                lps.PseudoResources = this.pseudoResources;
+                                lps.PseudoResources = pseudoResources;
 
                                 bool showAboutDialog = showAboutBoxCb.Checked;
                                 bool result = lps.RunPlugin(data, showAboutDialog);
 
                                 if (!showAboutDialog && result)
                                 {
-                                    this.destSurface = lps.Dest.Clone();
-                                    this.filterData = data;
-                                    this.filterParameters.AddOrUpdate(data, lps.FilterParameters);
-                                    this.pseudoResources = lps.PseudoResources;
-                                    this.descriptorRegistry = lps.GetRegistryValues();
+                                    destSurface = lps.Dest.Clone();
+                                    filterData = data;
+                                    filterParameters.AddOrUpdate(data, lps.FilterParameters);
+                                    pseudoResources = lps.PseudoResources;
+                                    descriptorRegistry = lps.GetRegistryValues();
                                 }
                                 else if (!string.IsNullOrEmpty(lps.ErrorMessage))
                                 {
@@ -916,13 +916,13 @@ namespace PSFilterPdn
                                 {
                                     if (!showAboutDialog && destSurface != null)
                                     {
-                                        this.destSurface.Dispose();
-                                        this.destSurface = null;
+                                        destSurface.Dispose();
+                                        destSurface = null;
                                     }
 
                                 }
 
-                                this.filterProgressBar.Value = 0;
+                                filterProgressBar.Value = 0;
 
                             }
                         }
@@ -1013,10 +1013,10 @@ namespace PSFilterPdn
 
             public UpdateFilterListParam(ICollection<string> searchDirectories, bool searchSubDirectories)
             {
-                this.items = null;
-                this.directories = new string[searchDirectories.Count];
-                searchDirectories.CopyTo(this.directories, 0);
-                this.searchOption = searchSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+                items = null;
+                directories = new string[searchDirectories.Count];
+                searchDirectories.CopyTo(directories, 0);
+                searchOption = searchSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
             }
         }
 
@@ -1029,19 +1029,19 @@ namespace PSFilterPdn
             {
                 if (!updateFilterListBw.IsBusy)
                 {
-                    UpdateFilterListParam uflp = new UpdateFilterListParam(this.searchDirectories, this.subDirSearchCb.Checked);
-                    int count = this.searchDirectories.Count;
+                    UpdateFilterListParam uflp = new UpdateFilterListParam(searchDirectories, subDirSearchCb.Checked);
+                    int count = searchDirectories.Count;
 
-                    this.filterTree.Nodes.Clear();
+                    filterTree.Nodes.Clear();
 
-                    this.folderLoadProgress.Maximum = count;
-                    this.folderLoadProgress.Step = 1;
-                    this.folderCountLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderCount_Format, 0, count);
-                    this.folderLoadPanel.Visible = true;
+                    folderLoadProgress.Maximum = count;
+                    folderLoadProgress.Step = 1;
+                    folderCountLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderCount_Format, 0, count);
+                    folderLoadPanel.Visible = true;
 
-                    this.Cursor = Cursors.WaitCursor;
+                    Cursor = Cursors.WaitCursor;
 
-                    this.updateFilterListBw.RunWorkerAsync(uflp);
+                    updateFilterListBw.RunWorkerAsync(uflp);
                 }
             }
         }
@@ -1194,9 +1194,9 @@ namespace PSFilterPdn
 
         private void updateFilterListBw_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            this.folderLoadProgress.PerformStep();
-            this.folderCountLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderCount_Format, (e.ProgressPercentage + 1), searchDirectories.Count);
-            this.folderNameLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderName_Format, e.UserState);
+            folderLoadProgress.PerformStep();
+            folderCountLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderCount_Format, (e.ProgressPercentage + 1), searchDirectories.Count);
+            folderNameLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderName_Format, e.UserState);
         }
 
         private void updateFilterListBw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -1211,16 +1211,16 @@ namespace PSFilterPdn
                 {
                     UpdateFilterListParam parm = (UpdateFilterListParam)e.Result;
 
-                    this.filterTreeNodes = new FilterTreeNodeCollection(parm.items);
+                    filterTreeNodes = new FilterTreeNodeCollection(parm.items);
 
                     PopulateFilterTreeCategories(true);
 
-                    this.folderLoadProgress.Value = 0;
-                    this.folderLoadPanel.Visible = false;
+                    folderLoadProgress.Value = 0;
+                    folderLoadPanel.Visible = false;
                 }
             }
 
-            this.Cursor = Cursors.Default;
+            Cursor = Cursors.Default;
             if (formClosePending)
             {
                 Close();
@@ -1229,19 +1229,19 @@ namespace PSFilterPdn
 
         private void PopulateFilterTreeCategories(bool expandLastUsedCategories)
         {
-            this.filterTree.BeginUpdate();
-            this.filterTree.Nodes.Clear();
-            this.filterTree.TreeViewNodeSorter = null;
+            filterTree.BeginUpdate();
+            filterTree.Nodes.Clear();
+            filterTree.TreeViewNodeSorter = null;
 
             foreach (var item in filterTreeNodes)
             {
                 TreeNode dummy = new TreeNode() { Name = DummyTreeNodeName };
 
-                this.filterTree.Nodes.Add(new TreeNode(item.Key, new TreeNode[] { dummy }) { Name = item.Key });
+                filterTree.Nodes.Add(new TreeNode(item.Key, new TreeNode[] { dummy }) { Name = item.Key });
             }
 
-            this.filterTree.TreeViewNodeSorter = TreeNodeItemComparer.Instance;
-            this.filterTree.EndUpdate();
+            filterTree.TreeViewNodeSorter = TreeNodeItemComparer.Instance;
+            filterTree.EndUpdate();
 
             if (expandLastUsedCategories && expandedNodes.Count > 0)
             {
@@ -1249,7 +1249,7 @@ namespace PSFilterPdn
                 {
                     if (filterTree.Nodes.ContainsKey(item))
                     {
-                        TreeNode node = this.filterTree.Nodes[item];
+                        TreeNode node = filterTree.Nodes[item];
                         node.Expand();
 
                         if (!string.IsNullOrEmpty(lastSelectedFilterTitle) && node.Nodes.ContainsKey(lastSelectedFilterTitle))
@@ -1265,8 +1265,8 @@ namespace PSFilterPdn
         {
             if (updateFilterListBw.IsBusy && searchDirectories.Count > 0)
             {
-                this.updateFilterListBw.CancelAsync();
-                this.formClosePending = true;
+                updateFilterListBw.CancelAsync();
+                formClosePending = true;
                 e.Cancel = true;
             }
 
@@ -1274,7 +1274,7 @@ namespace PSFilterPdn
             {
                 if (DialogResult == DialogResult.Cancel)
                 {
-                    this.formClosePending = true;
+                    formClosePending = true;
                 }
                 e.Cancel = true;
             }
@@ -1342,7 +1342,7 @@ namespace PSFilterPdn
             base.OnLoad(e);
 
             // set the useDEPProxy flag when on a 32-bit OS.
-            this.useDEPProxy = false;
+            useDEPProxy = false;
             if (IntPtr.Size == 4)
             {
                 NativeEnums.ProcessDEPPolicy depFlags;
@@ -1351,7 +1351,7 @@ namespace PSFilterPdn
                 {
                     if (SafeNativeMethods.GetProcessDEPPolicy(SafeNativeMethods.GetCurrentProcess(), out depFlags, out permanent))
                     {
-                        this.useDEPProxy = (depFlags != NativeEnums.ProcessDEPPolicy.PROCESS_DEP_DISABLED);
+                        useDEPProxy = (depFlags != NativeEnums.ProcessDEPPolicy.PROCESS_DEP_DISABLED);
                     }
                 }
                 catch (EntryPointNotFoundException)
@@ -1374,7 +1374,7 @@ namespace PSFilterPdn
             base.OnForeColorChanged(e);
 
             PluginThemingUtil.UpdateControlForeColor(this);
-            this.filterSearchBox.ForeColor = SystemColors.GrayText;
+            filterSearchBox.ForeColor = SystemColors.GrayText;
         }
 
         protected override void OnShown(EventArgs e)
@@ -1394,7 +1394,7 @@ namespace PSFilterPdn
 
                 string path = Path.Combine(userDataPath, @"PSFilterPdn.xml");
 
-                this.settings = new PSFilterPdnSettings(path);
+                settings = new PSFilterPdnSettings(path);
             }
             catch (IOException ex)
             {
@@ -1422,12 +1422,12 @@ namespace PSFilterPdn
             {
                 EffectsFolderPath
             };
-            this.foundEffectsDir = true;
+            foundEffectsDir = true;
 
             if (settings != null)
             {
-                this.subDirSearchCb.Checked = this.settings.SearchSubdirectories;
-                HashSet<string> dirs = this.settings.SearchDirectories;
+                subDirSearchCb.Checked = settings.SearchSubdirectories;
+                HashSet<string> dirs = settings.SearchDirectories;
 
                 if (dirs != null)
                 {
@@ -1436,7 +1436,7 @@ namespace PSFilterPdn
             }
             else
             {
-                this.subDirSearchCb.Checked = true;
+                subDirSearchCb.Checked = true;
             }
 
             // Scan the search directories for filters when there are not any cached filters
@@ -1445,13 +1445,13 @@ namespace PSFilterPdn
             if (filterTreeNodes == null ||
                 !searchDirectories.SetEqual(directories, StringComparer.OrdinalIgnoreCase))
             {
-                this.searchDirectories = directories;
-                this.searchDirListView.VirtualListSize = directories.Count;
+                searchDirectories = directories;
+                searchDirListView.VirtualListSize = directories.Count;
                 UpdateFilterList();
             }
             else
             {
-                this.searchDirListView.VirtualListSize = searchDirectories.Count;
+                searchDirListView.VirtualListSize = searchDirectories.Count;
                 PopulateFilterTreeCategories(true);
             }
         }
@@ -1483,7 +1483,7 @@ namespace PSFilterPdn
         {
             if (settings != null)
             {
-                this.settings.SearchSubdirectories = subDirSearchCb.Checked;
+                settings.SearchSubdirectories = subDirSearchCb.Checked;
             }
             UpdateFilterList();
         }
@@ -1492,10 +1492,10 @@ namespace PSFilterPdn
         {
             if (filterSearchBox.Text == Resources.ConfigDialog_FilterSearchBox_BackText)
             {
-                this.searchBoxIgnoreTextChanged = true;
-                this.filterSearchBox.Text = string.Empty;
-                this.filterSearchBox.Font = new Font(filterSearchBox.Font, FontStyle.Regular);
-                this.filterSearchBox.ForeColor = ForeColor != DefaultForeColor ? ForeColor : SystemColors.WindowText;
+                searchBoxIgnoreTextChanged = true;
+                filterSearchBox.Text = string.Empty;
+                filterSearchBox.Font = new Font(filterSearchBox.Font, FontStyle.Regular);
+                filterSearchBox.ForeColor = ForeColor != DefaultForeColor ? ForeColor : SystemColors.WindowText;
             }
         }
 
@@ -1503,10 +1503,10 @@ namespace PSFilterPdn
         {
             if (string.IsNullOrEmpty(filterSearchBox.Text))
             {
-                this.searchBoxIgnoreTextChanged = true;
-                this.filterSearchBox.Text = Resources.ConfigDialog_FilterSearchBox_BackText;
-                this.filterSearchBox.Font = new Font(filterSearchBox.Font, FontStyle.Italic);
-                this.filterSearchBox.ForeColor = SystemColors.GrayText;
+                searchBoxIgnoreTextChanged = true;
+                filterSearchBox.Text = Resources.ConfigDialog_FilterSearchBox_BackText;
+                filterSearchBox.Font = new Font(filterSearchBox.Font, FontStyle.Italic);
+                filterSearchBox.ForeColor = SystemColors.GrayText;
             }
         }
 
@@ -1518,9 +1518,9 @@ namespace PSFilterPdn
         {
             if (filterTreeNodes.Count > 0)
             {
-                this.filterTree.SelectedNode = null;
-                this.runFilterBtn.Enabled = false;
-                this.fileNameLbl.Text = string.Empty;
+                filterTree.SelectedNode = null;
+                runFilterBtn.Enabled = false;
+                fileNameLbl.Text = string.Empty;
 
                 if (string.IsNullOrEmpty(keyword))
                 {
@@ -1556,16 +1556,16 @@ namespace PSFilterPdn
                         }
                     }
 
-                    this.filterTree.BeginUpdate();
-                    this.filterTree.Nodes.Clear();
-                    this.filterTree.TreeViewNodeSorter = null;
+                    filterTree.BeginUpdate();
+                    filterTree.Nodes.Clear();
+                    filterTree.TreeViewNodeSorter = null;
                     foreach (var item in nodes)
                     {
-                        int index = this.filterTree.Nodes.Add(item.Value);
-                        this.filterTree.Nodes[index].Expand();
+                        int index = filterTree.Nodes.Add(item.Value);
+                        filterTree.Nodes[index].Expand();
                     }
-                    this.filterTree.TreeViewNodeSorter = TreeNodeItemComparer.Instance;
-                    this.filterTree.EndUpdate();
+                    filterTree.TreeViewNodeSorter = TreeNodeItemComparer.Instance;
+                    filterTree.EndUpdate();
                 }
             }
         }
@@ -1588,11 +1588,11 @@ namespace PSFilterPdn
             {
                 if ((searchDirListView.SelectedIndices[0] == 0 && foundEffectsDir) || searchDirectories.Count == 1)
                 {
-                    this.remDirBtn.Enabled = false;
+                    remDirBtn.Enabled = false;
                 }
                 else
                 {
-                    this.remDirBtn.Enabled = true;
+                    remDirBtn.Enabled = true;
                 }
             }
         }
@@ -1611,7 +1611,7 @@ namespace PSFilterPdn
             {
                 if (expandedNodes.Contains(e.Node.Text))
                 {
-                    this.expandedNodes.Remove(e.Node.Text);
+                    expandedNodes.Remove(e.Node.Text);
                 }
             }
         }
@@ -1622,7 +1622,7 @@ namespace PSFilterPdn
             {
                 if (!expandedNodes.Contains(e.Node.Text))
                 {
-                    this.expandedNodes.Add(e.Node.Text);
+                    expandedNodes.Add(e.Node.Text);
                 }
             }
         }
@@ -1654,12 +1654,12 @@ namespace PSFilterPdn
 
                 if (item.Nodes.Count == 1 && item.Nodes[0].Name.Equals(DummyTreeNodeName, StringComparison.Ordinal))
                 {
-                    TreeNode parent = this.filterTree.Nodes[item.Name];
+                    TreeNode parent = filterTree.Nodes[item.Name];
 
                     // Remove the placeholder node and add the real nodes.
                     parent.Nodes.RemoveAt(0);
 
-                    ReadOnlyCollection<TreeNode> values = this.filterTreeNodes[item.Text];
+                    ReadOnlyCollection<TreeNode> values = filterTreeNodes[item.Text];
 
                     TreeNode[] nodes = new TreeNode[values.Count];
                     for (int i = 0; i < values.Count; i++)
@@ -1682,7 +1682,7 @@ namespace PSFilterPdn
             }
             else
             {
-                e.Item = new ListViewItem(this.searchDirectories[e.ItemIndex]);
+                e.Item = new ListViewItem(searchDirectories[e.ItemIndex]);
             }
         }
 
@@ -1704,7 +1704,7 @@ namespace PSFilterPdn
             // Fill the cache with the appropriate ListViewItems.
             for (int i = 0; i < length; i++)
             {
-                searchDirListViewCache[i] = new ListViewItem(this.searchDirectories[i + cacheStartIndex]);
+                searchDirListViewCache[i] = new ListViewItem(searchDirectories[i + cacheStartIndex]);
             }
         }
 
@@ -1715,7 +1715,7 @@ namespace PSFilterPdn
                 int endIndex = cacheStartIndex + searchDirListViewCache.Length;
                 if (changedIndex >= cacheStartIndex && changedIndex <= endIndex)
                 {
-                    this.searchDirListViewCache = null;
+                    searchDirListViewCache = null;
                     if (endIndex > searchDirListView.VirtualListSize)
                     {
                         endIndex = searchDirListView.VirtualListSize;
@@ -1746,7 +1746,7 @@ namespace PSFilterPdn
 
                         if (values != null && values.Count > 0)
                         {
-                            this.descriptorRegistry = new DescriptorRegistryValues(values)
+                            descriptorRegistry = new DescriptorRegistryValues(values)
                             {
                                 Dirty = false
                             };

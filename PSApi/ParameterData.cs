@@ -42,15 +42,15 @@ namespace PSFilterLoad.PSApi
 
         public ParameterData(GlobalParameters globals, Dictionary<uint, AETEValue> aete)
         {
-            this.globalParameters = globals;
+            globalParameters = globals;
 
             if (aete != null)
             {
-                this.aeteDictonary = new Dictionary<uint, AETEValue>(aete);
+                aeteDictonary = new Dictionary<uint, AETEValue>(aete);
             }
             else
             {
-                this.aeteDictonary = null;
+                aeteDictonary = null;
             }
         }
 

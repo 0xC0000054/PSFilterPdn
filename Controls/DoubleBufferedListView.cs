@@ -18,7 +18,7 @@ namespace PSFilterPdn.Controls
     {
         public DoubleBufferedListView() : base()
         {
-            this.DoubleBuffered = true;
+            DoubleBuffered = true;
         }
     }
 }

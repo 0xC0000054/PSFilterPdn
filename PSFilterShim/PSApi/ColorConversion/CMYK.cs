@@ -23,10 +23,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="black">The black component in the range of [0, 1]..</param>
         public CMYK(double cyan, double magenta, double yellow, double black)
         {
-            this.Cyan = cyan;
-            this.Magenta = magenta;
-            this.Yellow = yellow;
-            this.Black = black;
+            Cyan = cyan;
+            Magenta = magenta;
+            Yellow = yellow;
+            Black = black;
         }
 
         /// <summary>

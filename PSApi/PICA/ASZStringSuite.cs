@@ -36,11 +36,11 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 get
                 {
-                    return this.refCount;
+                    return refCount;
                 }
                 set
                 {
-                    this.refCount = value;
+                    refCount = value;
                 }
             }
 
@@ -48,11 +48,11 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 get
                 {
-                    return this.data;
+                    return data;
                 }
                 set
                 {
-                    this.data = value;
+                    data = value;
                 }
             }
 
@@ -84,18 +84,18 @@ namespace PSFilterLoad.PSApi.PICA
                     throw new ArgumentNullException(nameof(ptr));
                 }
 
-                this.refCount = 1;
+                refCount = 1;
 
                 switch (format)
                 {
                     case ZStringFormat.Ascii:
-                        this.data = Marshal.PtrToStringAnsi(ptr, length).TrimEnd('\0');
+                        data = Marshal.PtrToStringAnsi(ptr, length).TrimEnd('\0');
                         break;
                     case ZStringFormat.Unicode:
-                        this.data = Marshal.PtrToStringUni(ptr, length).TrimEnd('\0');
+                        data = Marshal.PtrToStringUni(ptr, length).TrimEnd('\0');
                         break;
                     case ZStringFormat.Pascal:
-                        this.data = PtrToStringPascal(ptr, length);
+                        data = PtrToStringPascal(ptr, length);
                         break;
                     default:
                         throw new InvalidEnumArgumentException("format", (int)format, typeof(ZStringFormat));
@@ -108,7 +108,7 @@ namespace PSFilterLoad.PSApi.PICA
             /// <param name="data">The data.</param>
             public ZString(string data)
             {
-                this.refCount = 1;
+                refCount = 1;
                 this.data = data;
             }
         }
@@ -147,61 +147,61 @@ namespace PSFilterLoad.PSApi.PICA
         /// </summary>
         public ASZStringSuite()
         {
-            this.makeFromUnicode = new ASZStringMakeFromUnicode(MakeFromUnicode);
-            this.makeFromCString = new ASZStringMakeFromCString(MakeFromCString);
-            this.makeFromPascalString = new ASZStringMakeFromPascalString(MakeFromPascalString);
-            this.makeRomanizationOfInteger = new ASZStringMakeRomanizationOfInteger(MakeRomanizationOfInteger);
-            this.makeRomanizationOfFixed = new ASZStringMakeRomanizationOfFixed(MakeRomanizationOfFixed);
-            this.makeRomanizationOfDouble = new ASZStringMakeRomanizationOfDouble(MakeRomanizationOfDouble);
-            this.getEmpty = new ASZStringGetEmpty(GetEmpty);
-            this.copy = new ASZStringCopy(Copy);
-            this.replace = new ASZStringReplace(Replace);
-            this.trimEllpsis = new ASZStringTrimEllipsis(TrimEllipsis);
-            this.trimSpaces = new ASZStringTrimSpaces(TrimSpaces);
-            this.removeAccelerators = new ASZStringRemoveAccelerators(RemoveAccelerators);
-            this.addRef = new ASZStringAddRef(AddRef);
-            this.release = new ASZStringRelease(Release);
-            this.isAllWhitespace = new ASZStringIsAllWhiteSpace(IsAllWhiteSpace);
-            this.isEmpty = new ASZStringIsEmpty(IsEmpty);
-            this.willReplace = new ASZStringWillReplace(WillReplace);
-            this.lengthAsUnicodeCString = new ASZStringLengthAsUnicodeCString(LengthAsUnicodeCString);
-            this.asUnicodeCString = new ASZStringAsUnicodeCString(AsUnicodeCString);
-            this.lengthAsCString = new ASZStringLengthAsCString(LengthAsCString);
-            this.asCString = new ASZStringAsCString(AsCString);
-            this.lengthAsPascalString = new ASZStringLengthAsPascalString(LengthAsPascalString);
-            this.asPascalString = new ASZStringAsPascalString(AsPascalString);
+            makeFromUnicode = new ASZStringMakeFromUnicode(MakeFromUnicode);
+            makeFromCString = new ASZStringMakeFromCString(MakeFromCString);
+            makeFromPascalString = new ASZStringMakeFromPascalString(MakeFromPascalString);
+            makeRomanizationOfInteger = new ASZStringMakeRomanizationOfInteger(MakeRomanizationOfInteger);
+            makeRomanizationOfFixed = new ASZStringMakeRomanizationOfFixed(MakeRomanizationOfFixed);
+            makeRomanizationOfDouble = new ASZStringMakeRomanizationOfDouble(MakeRomanizationOfDouble);
+            getEmpty = new ASZStringGetEmpty(GetEmpty);
+            copy = new ASZStringCopy(Copy);
+            replace = new ASZStringReplace(Replace);
+            trimEllpsis = new ASZStringTrimEllipsis(TrimEllipsis);
+            trimSpaces = new ASZStringTrimSpaces(TrimSpaces);
+            removeAccelerators = new ASZStringRemoveAccelerators(RemoveAccelerators);
+            addRef = new ASZStringAddRef(AddRef);
+            release = new ASZStringRelease(Release);
+            isAllWhitespace = new ASZStringIsAllWhiteSpace(IsAllWhiteSpace);
+            isEmpty = new ASZStringIsEmpty(IsEmpty);
+            willReplace = new ASZStringWillReplace(WillReplace);
+            lengthAsUnicodeCString = new ASZStringLengthAsUnicodeCString(LengthAsUnicodeCString);
+            asUnicodeCString = new ASZStringAsUnicodeCString(AsUnicodeCString);
+            lengthAsCString = new ASZStringLengthAsCString(LengthAsCString);
+            asCString = new ASZStringAsCString(AsCString);
+            lengthAsPascalString = new ASZStringLengthAsPascalString(LengthAsPascalString);
+            asPascalString = new ASZStringAsPascalString(AsPascalString);
 
-            this.strings = new Dictionary<IntPtr, ZString>(IntPtrEqualityComparer.Instance);
-            this.stringsIndex = 0;
+            strings = new Dictionary<IntPtr, ZString>(IntPtrEqualityComparer.Instance);
+            stringsIndex = 0;
         }
 
         public ASZStringSuite1 CreateASZStringSuite1()
         {
             ASZStringSuite1 suite = new ASZStringSuite1
             {
-                MakeFromUnicode = Marshal.GetFunctionPointerForDelegate(this.makeFromUnicode),
-                MakeFromCString = Marshal.GetFunctionPointerForDelegate(this.makeFromCString),
-                MakeFromPascalString = Marshal.GetFunctionPointerForDelegate(this.makeFromPascalString),
-                MakeRomanizationOfInteger = Marshal.GetFunctionPointerForDelegate(this.makeRomanizationOfInteger),
-                MakeRomanizationOfFixed = Marshal.GetFunctionPointerForDelegate(this.makeRomanizationOfFixed),
-                MakeRomanizationOfDouble = Marshal.GetFunctionPointerForDelegate(this.makeRomanizationOfDouble),
-                GetEmpty = Marshal.GetFunctionPointerForDelegate(this.getEmpty),
-                Copy = Marshal.GetFunctionPointerForDelegate(this.copy),
-                Replace = Marshal.GetFunctionPointerForDelegate(this.replace),
-                TrimEllipsis = Marshal.GetFunctionPointerForDelegate(this.trimEllpsis),
-                TrimSpaces = Marshal.GetFunctionPointerForDelegate(this.trimSpaces),
-                RemoveAccelerators = Marshal.GetFunctionPointerForDelegate(this.removeAccelerators),
-                AddRef = Marshal.GetFunctionPointerForDelegate(this.addRef),
-                Release = Marshal.GetFunctionPointerForDelegate(this.release),
-                IsAllWhiteSpace = Marshal.GetFunctionPointerForDelegate(this.isAllWhitespace),
-                IsEmpty = Marshal.GetFunctionPointerForDelegate(this.isEmpty),
-                WillReplace = Marshal.GetFunctionPointerForDelegate(this.willReplace),
-                LengthAsUnicodeCString = Marshal.GetFunctionPointerForDelegate(this.lengthAsUnicodeCString),
-                AsUnicodeCString = Marshal.GetFunctionPointerForDelegate(this.asUnicodeCString),
-                LengthAsCString = Marshal.GetFunctionPointerForDelegate(this.lengthAsCString),
-                AsCString = Marshal.GetFunctionPointerForDelegate(this.asCString),
-                LengthAsPascalString = Marshal.GetFunctionPointerForDelegate(this.lengthAsPascalString),
-                AsPascalString = Marshal.GetFunctionPointerForDelegate(this.asPascalString)
+                MakeFromUnicode = Marshal.GetFunctionPointerForDelegate(makeFromUnicode),
+                MakeFromCString = Marshal.GetFunctionPointerForDelegate(makeFromCString),
+                MakeFromPascalString = Marshal.GetFunctionPointerForDelegate(makeFromPascalString),
+                MakeRomanizationOfInteger = Marshal.GetFunctionPointerForDelegate(makeRomanizationOfInteger),
+                MakeRomanizationOfFixed = Marshal.GetFunctionPointerForDelegate(makeRomanizationOfFixed),
+                MakeRomanizationOfDouble = Marshal.GetFunctionPointerForDelegate(makeRomanizationOfDouble),
+                GetEmpty = Marshal.GetFunctionPointerForDelegate(getEmpty),
+                Copy = Marshal.GetFunctionPointerForDelegate(copy),
+                Replace = Marshal.GetFunctionPointerForDelegate(replace),
+                TrimEllipsis = Marshal.GetFunctionPointerForDelegate(trimEllpsis),
+                TrimSpaces = Marshal.GetFunctionPointerForDelegate(trimSpaces),
+                RemoveAccelerators = Marshal.GetFunctionPointerForDelegate(removeAccelerators),
+                AddRef = Marshal.GetFunctionPointerForDelegate(addRef),
+                Release = Marshal.GetFunctionPointerForDelegate(release),
+                IsAllWhiteSpace = Marshal.GetFunctionPointerForDelegate(isAllWhitespace),
+                IsEmpty = Marshal.GetFunctionPointerForDelegate(isEmpty),
+                WillReplace = Marshal.GetFunctionPointerForDelegate(willReplace),
+                LengthAsUnicodeCString = Marshal.GetFunctionPointerForDelegate(lengthAsUnicodeCString),
+                AsUnicodeCString = Marshal.GetFunctionPointerForDelegate(asUnicodeCString),
+                LengthAsCString = Marshal.GetFunctionPointerForDelegate(lengthAsCString),
+                AsCString = Marshal.GetFunctionPointerForDelegate(asCString),
+                LengthAsPascalString = Marshal.GetFunctionPointerForDelegate(lengthAsPascalString),
+                AsPascalString = Marshal.GetFunctionPointerForDelegate(asPascalString)
             };
 
             return suite;
@@ -214,7 +214,7 @@ namespace PSFilterLoad.PSApi.PICA
             if (zstring != Empty)
             {
                 ZString value;
-                if (this.strings.TryGetValue(zstring, out value))
+                if (strings.TryGetValue(zstring, out value))
                 {
                     descriptor = new ActionDescriptorZString(value.Data);
                 }
@@ -235,7 +235,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 newZString = GenerateDictionaryKey();
                 ZString zstring = new ZString(descriptor.Value);
-                this.strings.Add(newZString, zstring);
+                strings.Add(newZString, zstring);
             }
 
             return newZString;
@@ -252,7 +252,7 @@ namespace PSFilterLoad.PSApi.PICA
             else
             {
                 ZString item;
-                if (this.strings.TryGetValue(zstring, out item))
+                if (strings.TryGetValue(zstring, out item))
                 {
                     value = item.Data;
                 }
@@ -282,7 +282,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 ZString zstring = new ZString(value);
                 newZString = GenerateDictionaryKey();
-                this.strings.Add(newZString, zstring);
+                strings.Add(newZString, zstring);
             }
 
             return newZString;
@@ -290,9 +290,9 @@ namespace PSFilterLoad.PSApi.PICA
 
         private IntPtr GenerateDictionaryKey()
         {
-            this.stringsIndex++;
+            stringsIndex++;
 
-            return new IntPtr(this.stringsIndex);
+            return new IntPtr(stringsIndex);
         }
 
         private int MakeString(IntPtr src, UIntPtr byteCount, ref IntPtr newZString, ZStringFormat format)
@@ -317,7 +317,7 @@ namespace PSFilterLoad.PSApi.PICA
                     {
                         ZString zstring = new ZString(src, (int)stringLength, format);
                         newZString = GenerateDictionaryKey();
-                        this.strings.Add(newZString, zstring);
+                        strings.Add(newZString, zstring);
                     }
                     catch (OutOfMemoryException)
                     {
@@ -350,7 +350,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             ZString zstring = new ZString(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
             newZString = GenerateDictionaryKey();
-            this.strings.Add(newZString, zstring);
+            strings.Add(newZString, zstring);
 
             return PSError.kASNoErr;
         }
@@ -379,13 +379,13 @@ namespace PSFilterLoad.PSApi.PICA
             else
             {
                 ZString existing;
-                if (this.strings.TryGetValue(source, out existing))
+                if (strings.TryGetValue(source, out existing))
                 {
                     try
                     {
                         ZString zstring = new ZString(string.Copy(existing.Data));
                         copy = GenerateDictionaryKey();
-                        this.strings.Add(copy, zstring);
+                        strings.Add(copy, zstring);
                     }
                     catch (OutOfMemoryException)
                     {
@@ -411,14 +411,14 @@ namespace PSFilterLoad.PSApi.PICA
             if (zstr != Empty)
             {
                 ZString item;
-                if (this.strings.TryGetValue(zstr, out item))
+                if (strings.TryGetValue(zstr, out item))
                 {
                     string value = item.Data;
 
                     if (value != null && value.EndsWith("...", StringComparison.Ordinal))
                     {
                         item.Data = value.Substring(0, value.Length - 3);
-                        this.strings[zstr] = item;
+                        strings[zstr] = item;
                     }
                 }
                 else
@@ -435,14 +435,14 @@ namespace PSFilterLoad.PSApi.PICA
             if (zstr != Empty)
             {
                 ZString item;
-                if (this.strings.TryGetValue(zstr, out item))
+                if (strings.TryGetValue(zstr, out item))
                 {
                     string value = item.Data;
 
                     if (value != null)
                     {
                         item.Data = value.Trim(' ');
-                        this.strings[zstr] = item;
+                        strings[zstr] = item;
                     }
                 }
                 else
@@ -459,7 +459,7 @@ namespace PSFilterLoad.PSApi.PICA
             if (zstr != Empty)
             {
                 ZString item;
-                if (this.strings.TryGetValue(zstr, out item))
+                if (strings.TryGetValue(zstr, out item))
                 {
                     string value = item.Data;
 
@@ -497,7 +497,7 @@ namespace PSFilterLoad.PSApi.PICA
                             }
 
                             item.Data = sb.ToString();
-                            this.strings[zstr] = item;
+                            strings[zstr] = item;
                         }
                         catch (OutOfMemoryException)
                         {
@@ -519,10 +519,10 @@ namespace PSFilterLoad.PSApi.PICA
             if (zstr != Empty)
             {
                 ZString item;
-                if (this.strings.TryGetValue(zstr, out item))
+                if (strings.TryGetValue(zstr, out item))
                 {
                     item.RefCount += 1;
-                    this.strings[zstr] = item;
+                    strings[zstr] = item;
                 }
                 else
                 {
@@ -538,21 +538,21 @@ namespace PSFilterLoad.PSApi.PICA
             if (zstr != Empty)
             {
                 ZString item;
-                if (this.strings.TryGetValue(zstr, out item))
+                if (strings.TryGetValue(zstr, out item))
                 {
                     item.RefCount -= 1;
 
                     if (item.RefCount == 0)
                     {
-                        this.strings.Remove(zstr);
-                        if (this.stringsIndex == zstr.ToInt32())
+                        strings.Remove(zstr);
+                        if (stringsIndex == zstr.ToInt32())
                         {
-                            this.stringsIndex--;
+                            stringsIndex--;
                         }
                     }
                     else
                     {
-                        this.strings[zstr] = item;
+                        strings[zstr] = item;
                     }
                 }
                 else
@@ -569,7 +569,7 @@ namespace PSFilterLoad.PSApi.PICA
             if (zstr != Empty)
             {
                 ZString item;
-                if (this.strings.TryGetValue(zstr, out item))
+                if (strings.TryGetValue(zstr, out item))
                 {
                     string value = item.Data;
 
@@ -609,7 +609,7 @@ namespace PSFilterLoad.PSApi.PICA
             else
             {
                 ZString item;
-                if (this.strings.TryGetValue(zstr, out item))
+                if (strings.TryGetValue(zstr, out item))
                 {
                     if (item.Data != null)
                     {
@@ -633,7 +633,7 @@ namespace PSFilterLoad.PSApi.PICA
                 if (zstr != Empty)
                 {
                     ZString item;
-                    if (this.strings.TryGetValue(zstr, out item))
+                    if (strings.TryGetValue(zstr, out item))
                     {
                         value = item.Data;
                     }
@@ -672,7 +672,7 @@ namespace PSFilterLoad.PSApi.PICA
             else
             {
                 ZString item;
-                if (this.strings.TryGetValue(zstr, out item))
+                if (strings.TryGetValue(zstr, out item))
                 {
                     if (item.Data != null)
                     {
@@ -695,7 +695,7 @@ namespace PSFilterLoad.PSApi.PICA
                 if (zstr != Empty)
                 {
                     ZString item;
-                    if (this.strings.TryGetValue(zstr, out item))
+                    if (strings.TryGetValue(zstr, out item))
                     {
                         value = item.Data;
                     }
@@ -733,7 +733,7 @@ namespace PSFilterLoad.PSApi.PICA
             else
             {
                 ZString item;
-                if (this.strings.TryGetValue(zstr, out item))
+                if (strings.TryGetValue(zstr, out item))
                 {
                     if (item.Data != null)
                     {
@@ -756,7 +756,7 @@ namespace PSFilterLoad.PSApi.PICA
                 if (zstr != Empty)
                 {
                     ZString item;
-                    if (this.strings.TryGetValue(zstr, out item))
+                    if (strings.TryGetValue(zstr, out item))
                     {
                         value = item.Data;
                     }

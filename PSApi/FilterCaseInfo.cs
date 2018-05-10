@@ -134,10 +134,10 @@ namespace PSFilterLoad.PSApi
 
         internal FilterCaseInfo(FilterDataHandling inputHandling, FilterDataHandling outputHandling, FilterCaseInfoFlags flags1, byte flags2)
         {
-            this.InputHandling = inputHandling;
-            this.OutputHandling = outputHandling;
-            this.Flags1 = flags1;
-            this.Flags2 = flags2;
+            InputHandling = inputHandling;
+            OutputHandling = outputHandling;
+            Flags1 = flags1;
+            Flags2 = flags2;
         }
 
         public bool IsSupported()

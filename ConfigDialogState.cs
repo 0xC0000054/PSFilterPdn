@@ -32,8 +32,8 @@ namespace PSFilterPdn
         public ConfigDialogState(ReadOnlyCollection<string> expandedNodes, FilterTreeNodeCollection nodes, ReadOnlyCollection<string> directories)
         {
             this.expandedNodes = expandedNodes;
-            this.filterTreeNodes = nodes;
-            this.searchDirectories = directories;
+            filterTreeNodes = nodes;
+            searchDirectories = directories;
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace PSFilterPdn
         {
             get
             {
-                return this.expandedNodes;
+                return expandedNodes;
             }
         }
 
@@ -60,7 +60,7 @@ namespace PSFilterPdn
         {
             get
             {
-                return this.filterTreeNodes;
+                return filterTreeNodes;
             }
         }
 
@@ -74,7 +74,7 @@ namespace PSFilterPdn
         {
             get
             {
-                return this.searchDirectories;
+                return searchDirectories;
             }
         }
     }

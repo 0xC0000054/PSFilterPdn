@@ -22,9 +22,9 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="luminance">The luminance component in the range of [0, 1].</param>
         public HSL(double hue, double saturation, double luminance)
         {
-            this.Hue = hue;
-            this.Saturation = saturation;
-            this.Luminance = luminance;
+            Hue = hue;
+            Saturation = saturation;
+            Luminance = luminance;
         }
 
         /// <summary>

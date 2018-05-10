@@ -56,11 +56,11 @@ namespace PSFilterLoad.PSApi.PICA
 
             public Color(ColorSpace colorSpace, byte component0, byte component1, byte component2, byte component3)
             {
-                this.ColorSpace = colorSpace;
-                this.Component0 = component0;
-                this.Component1 = component1;
-                this.Component2 = component2;
-                this.Component3 = component3;
+                ColorSpace = colorSpace;
+                Component0 = component0;
+                Component1 = component1;
+                Component2 = component2;
+                Component3 = component3;
             }
         }
 
@@ -97,26 +97,26 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new ArgumentNullException(nameof(zstringSuite));
             }
 
-            this.csMake = new CSMake(Make);
-            this.csDelete = new CSDelete(Delete);
-            this.csStuffComponent = new CSStuffComponents(StuffComponents);
-            this.csExtractComponent = new CSExtractComponents(ExtractComponents);
-            this.csStuffXYZ = new CSStuffXYZ(StuffXYZ);
-            this.csExtractXYZ = new CSExtractXYZ(ExtractXYZ);
-            this.csConvert8 = new CSConvert8(Convert8);
-            this.csConvert16 = new CSConvert16(Convert16);
-            this.csGetNativeSpace = new CSGetNativeSpace(GetNativeSpace);
-            this.csIsBookColor = new CSIsBookColor(IsBookColor);
-            this.csExtractColorName = new CSExtractColorName(ExtractColorName);
-            this.csPickColor = new CSPickColor(PickColor);
-            this.csConvert8to16 = new CSConvert(Convert8to16);
-            this.csConvert16to8 = new CSConvert(Convert16to8);
-            this.csConvertToMonitorRGB = new CSConvertToMonitorRGB(ConvertToMonitorRGB);
+            csMake = new CSMake(Make);
+            csDelete = new CSDelete(Delete);
+            csStuffComponent = new CSStuffComponents(StuffComponents);
+            csExtractComponent = new CSExtractComponents(ExtractComponents);
+            csStuffXYZ = new CSStuffXYZ(StuffXYZ);
+            csExtractXYZ = new CSExtractXYZ(ExtractXYZ);
+            csConvert8 = new CSConvert8(Convert8);
+            csConvert16 = new CSConvert16(Convert16);
+            csGetNativeSpace = new CSGetNativeSpace(GetNativeSpace);
+            csIsBookColor = new CSIsBookColor(IsBookColor);
+            csExtractColorName = new CSExtractColorName(ExtractColorName);
+            csPickColor = new CSPickColor(PickColor);
+            csConvert8to16 = new CSConvert(Convert8to16);
+            csConvert16to8 = new CSConvert(Convert16to8);
+            csConvertToMonitorRGB = new CSConvertToMonitorRGB(ConvertToMonitorRGB);
             this.zstringSuite = zstringSuite;
-            this.colors = new Dictionary<IntPtr, Color>(IntPtrEqualityComparer.Instance);
-            this.colorsIndex = 0;
-            this.lookup16To8 = null;
-            this.lookup8To16 = null;
+            colors = new Dictionary<IntPtr, Color>(IntPtrEqualityComparer.Instance);
+            colorsIndex = 0;
+            lookup16To8 = null;
+            lookup8To16 = null;
         }
 
         private static bool IsValidColorSpace(ColorSpace colorSpace)
@@ -128,9 +128,9 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                this.colorsIndex++;
-                colorID = new IntPtr(this.colorsIndex);
-                this.colors.Add(colorID, new Color());
+                colorsIndex++;
+                colorID = new IntPtr(colorsIndex);
+                colors.Add(colorID, new Color());
             }
             catch (OutOfMemoryException)
             {
@@ -142,10 +142,10 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Delete(ref IntPtr colorID)
         {
-            this.colors.Remove(colorID);
-            if (this.colorsIndex == colorID.ToInt32())
+            colors.Remove(colorID);
+            if (colorsIndex == colorID.ToInt32())
             {
-                this.colorsIndex--;
+                colorsIndex--;
             }
 
             return PSError.kSPNoError;
@@ -158,7 +158,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            this.colors[colorID] = new Color(colorSpace, c0, c1, c2, c3);
+            colors[colorID] = new Color(colorSpace, c0, c1, c2, c3);
 
             return PSError.kSPNoError;
         }
@@ -170,7 +170,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            Color item = this.colors[colorID];
+            Color item = colors[colorID];
 
             c0 = item.Component0;
             c1 = item.Component1;
@@ -208,14 +208,14 @@ namespace PSFilterLoad.PSApi.PICA
                 z = 255;
             }
 
-            this.colors[colorID] = new Color(ColorSpace.XYZSpace, (byte)x, (byte)y, (byte)z, 0);
+            colors[colorID] = new Color(ColorSpace.XYZSpace, (byte)x, (byte)y, (byte)z, 0);
 
             return PSError.kSPNoError;
         }
 
         private int ExtractXYZ(IntPtr colorID, ref CS_XYZ xyz)
         {
-            Color item = this.colors[colorID];
+            Color item = colors[colorID];
 
             byte c0 = item.Component0;
             byte c1 = item.Component1;
@@ -322,7 +322,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetNativeSpace(IntPtr colorID, ref ColorSpace nativeSpace)
         {
-            nativeSpace = this.colors[colorID].ColorSpace;
+            nativeSpace = colors[colorID].ColorSpace;
 
             return PSError.kSPNoError;
         }
@@ -356,7 +356,7 @@ namespace PSFilterLoad.PSApi.PICA
                     if (error == PSError.kSPNoError)
                     {
                         PaintDotNet.ColorBgra color = chosenColor.Value;
-                        this.colors[colorID] = new Color(ColorSpace.RGBSpace, color.R, color.G, color.B, 0);
+                        colors[colorID] = new Color(ColorSpace.RGBSpace, color.R, color.G, color.B, 0);
                     }
                 }
                 else
@@ -381,14 +381,14 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (count > 0)
             {
-                if (this.lookup8To16 == null)
+                if (lookup8To16 == null)
                 {
                     // This function is documented to use the Photoshop internal 16-bit range [0, 32768].
-                    this.lookup8To16 = new ushort[256];
+                    lookup8To16 = new ushort[256];
 
-                    for (int i = 0; i < this.lookup8To16.Length; i++)
+                    for (int i = 0; i < lookup8To16.Length; i++)
                     {
-                        this.lookup8To16[i] = (ushort)(((i * 32768) + 127) / 255);
+                        lookup8To16[i] = (ushort)(((i * 32768) + 127) / 255);
                     }
                 }
 
@@ -398,7 +398,7 @@ namespace PSFilterLoad.PSApi.PICA
                 for (int i = 0; i < count; i++)
                 {
                     int index = input[i];
-                    output[i] = this.lookup8To16[index];
+                    output[i] = lookup8To16[index];
                 }
             }
 
@@ -414,14 +414,14 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (count > 0)
             {
-                if (this.lookup16To8 == null)
+                if (lookup16To8 == null)
                 {
                     // This function is documented to use the Photoshop internal 16-bit range [0, 32768].
-                    this.lookup16To8 = new byte[32769];
+                    lookup16To8 = new byte[32769];
 
-                    for (int i = 0; i < this.lookup16To8.Length; i++)
+                    for (int i = 0; i < lookup16To8.Length; i++)
                     {
-                        this.lookup16To8[i] = (byte)(((i * 255) + 16384) / 32768);
+                        lookup16To8[i] = (byte)(((i * 255) + 16384) / 32768);
                     }
                 }
 
@@ -431,7 +431,7 @@ namespace PSFilterLoad.PSApi.PICA
                 for (int i = 0; i < count; i++)
                 {
                     int index = input[i];
-                    output[i] = this.lookup16To8[index];
+                    output[i] = lookup16To8[index];
                 }
             }
 
@@ -447,21 +447,21 @@ namespace PSFilterLoad.PSApi.PICA
         {
             PSColorSpaceSuite1 suite = new PSColorSpaceSuite1
             {
-                Make = Marshal.GetFunctionPointerForDelegate(this.csMake),
-                Delete = Marshal.GetFunctionPointerForDelegate(this.csDelete),
-                StuffComponents = Marshal.GetFunctionPointerForDelegate(this.csStuffComponent),
-                ExtractComponents = Marshal.GetFunctionPointerForDelegate(this.csExtractComponent),
-                StuffXYZ = Marshal.GetFunctionPointerForDelegate(this.csStuffXYZ),
-                ExtractXYZ = Marshal.GetFunctionPointerForDelegate(this.csExtractXYZ),
-                Convert8 = Marshal.GetFunctionPointerForDelegate(this.csConvert8),
-                Convert16 = Marshal.GetFunctionPointerForDelegate(this.csConvert16),
-                GetNativeSpace = Marshal.GetFunctionPointerForDelegate(this.csGetNativeSpace),
-                IsBookColor = Marshal.GetFunctionPointerForDelegate(this.csIsBookColor),
-                ExtractColorName = Marshal.GetFunctionPointerForDelegate(this.csExtractColorName),
-                PickColor = Marshal.GetFunctionPointerForDelegate(this.csPickColor),
-                Convert8to16 = Marshal.GetFunctionPointerForDelegate(this.csConvert8to16),
-                Convert16to8 = Marshal.GetFunctionPointerForDelegate(this.csConvert16to8),
-                ConvertToMonitorRGB = Marshal.GetFunctionPointerForDelegate(this.csConvertToMonitorRGB)
+                Make = Marshal.GetFunctionPointerForDelegate(csMake),
+                Delete = Marshal.GetFunctionPointerForDelegate(csDelete),
+                StuffComponents = Marshal.GetFunctionPointerForDelegate(csStuffComponent),
+                ExtractComponents = Marshal.GetFunctionPointerForDelegate(csExtractComponent),
+                StuffXYZ = Marshal.GetFunctionPointerForDelegate(csStuffXYZ),
+                ExtractXYZ = Marshal.GetFunctionPointerForDelegate(csExtractXYZ),
+                Convert8 = Marshal.GetFunctionPointerForDelegate(csConvert8),
+                Convert16 = Marshal.GetFunctionPointerForDelegate(csConvert16),
+                GetNativeSpace = Marshal.GetFunctionPointerForDelegate(csGetNativeSpace),
+                IsBookColor = Marshal.GetFunctionPointerForDelegate(csIsBookColor),
+                ExtractColorName = Marshal.GetFunctionPointerForDelegate(csExtractColorName),
+                PickColor = Marshal.GetFunctionPointerForDelegate(csPickColor),
+                Convert8to16 = Marshal.GetFunctionPointerForDelegate(csConvert8to16),
+                Convert16to8 = Marshal.GetFunctionPointerForDelegate(csConvert16to8),
+                ConvertToMonitorRGB = Marshal.GetFunctionPointerForDelegate(csConvertToMonitorRGB)
             };
 
             return suite;

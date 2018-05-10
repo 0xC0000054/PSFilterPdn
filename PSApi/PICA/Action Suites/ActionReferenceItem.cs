@@ -37,7 +37,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             get
             {
-                return this.form;
+                return form;
             }
         }
 
@@ -45,7 +45,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             get
             {
-                return this.desiredClass;
+                return desiredClass;
             }
         }
 
@@ -53,7 +53,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             get
             {
-                return this.value;
+                return value;
             }
         }
 

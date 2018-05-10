@@ -24,12 +24,12 @@ namespace PSFilterPdn
 
         internal RegionDataWrapper(RegionData rgn)
         {
-            this.rgnData = rgn.Data;
+            rgnData = rgn.Data;
         }
 
         private RegionDataWrapper(SerializationInfo info, StreamingContext context)
         {
-            this.rgnData = (byte[])info.GetValue("rgnData", typeof(byte[]));
+            rgnData = (byte[])info.GetValue("rgnData", typeof(byte[]));
         }
 
         public byte[] GetData()
@@ -45,7 +45,7 @@ namespace PSFilterPdn
                 throw new ArgumentNullException(nameof(info));
             }
 
-            info.AddValue("rgnData", this.rgnData, typeof(byte[]));
+            info.AddValue("rgnData", rgnData, typeof(byte[]));
         }
     }
 }

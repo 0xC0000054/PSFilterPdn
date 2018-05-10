@@ -53,7 +53,7 @@ namespace PSFilterLoad.PSApi
             {
                 get
                 {
-                    return this.name;
+                    return name;
                 }
             }
 
@@ -67,7 +67,7 @@ namespace PSFilterLoad.PSApi
             {
                 get
                 {
-                    return this.version;
+                    return version;
                 }
             }
 
@@ -75,7 +75,7 @@ namespace PSFilterLoad.PSApi
             {
                 get
                 {
-                    return string.Format(CultureInfo.CurrentCulture, "{0}, version {1}", this.name, this.version);
+                    return string.Format(CultureInfo.CurrentCulture, "{0}, version {1}", name, version);
                 }
             }
 
@@ -106,8 +106,8 @@ namespace PSFilterLoad.PSApi
 
                 unchecked
                 {
-                    hash = (hash * 127) + this.name.GetHashCode();
-                    hash = (hash * 127) + this.version.GetHashCode();
+                    hash = (hash * 127) + name.GetHashCode();
+                    hash = (hash * 127) + version.GetHashCode();
                 }
 
                 return hash;
@@ -120,7 +120,7 @@ namespace PSFilterLoad.PSApi
                     return false;
                 }
 
-                return (this.name.Equals(other.name, StringComparison.Ordinal) && this.version == other.version);
+                return (name.Equals(other.name, StringComparison.Ordinal) && version == other.version);
             }
 
             public static bool operator ==(PICASuiteKey p1, PICASuiteKey p2)
@@ -154,7 +154,7 @@ namespace PSFilterLoad.PSApi
             {
                 get
                 {
-                    return this.suitePointer;
+                    return suitePointer;
                 }
             }
 
@@ -162,18 +162,18 @@ namespace PSFilterLoad.PSApi
             {
                 get
                 {
-                    return this.refCount;
+                    return refCount;
                 }
                 set
                 {
-                    this.refCount = value;
+                    refCount = value;
                 }
             }
 
             public PICASuite(IntPtr suite)
             {
-                this.suitePointer = suite;
-                this.refCount = 1;
+                suitePointer = suite;
+                refCount = 1;
             }
 
             public void Dispose()
@@ -197,8 +197,8 @@ namespace PSFilterLoad.PSApi
 
                     if (suitePointer != IntPtr.Zero)
                     {
-                        Memory.Free(this.suitePointer);
-                        this.suitePointer = IntPtr.Zero;
+                        Memory.Free(suitePointer);
+                        suitePointer = IntPtr.Zero;
                     }
 
                     disposed = true;
@@ -214,8 +214,8 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public ActivePICASuites()
         {
-            this.activeSuites = new Dictionary<PICASuiteKey, PICASuite>();
-            this.disposed = false;
+            activeSuites = new Dictionary<PICASuiteKey, PICASuite>();
+            disposed = false;
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace PSFilterLoad.PSApi
             {
                 Marshal.StructureToPtr(suite, suitePointer, false);
 
-                this.activeSuites.Add(key, new PICASuite(suitePointer));
+                activeSuites.Add(key, new PICASuite(suitePointer));
             }
             catch (Exception)
             {
@@ -270,9 +270,9 @@ namespace PSFilterLoad.PSApi
         /// <returns>The pointer to the suite instance.</returns>
         public IntPtr AddRef(PICASuiteKey key)
         {
-            PICASuite suite = this.activeSuites[key];
+            PICASuite suite = activeSuites[key];
             suite.RefCount += 1;
-            this.activeSuites[key] = suite;
+            activeSuites[key] = suite;
 
             return suite.SuitePointer;
         }
@@ -295,11 +295,11 @@ namespace PSFilterLoad.PSApi
                 if (suite.RefCount == 0)
                 {
                     suite.Dispose();
-                    this.activeSuites.Remove(key);
+                    activeSuites.Remove(key);
                 }
                 else
                 {
-                    this.activeSuites[key] = suite;
+                    activeSuites[key] = suite;
                 }
             }
         }
@@ -314,7 +314,7 @@ namespace PSFilterLoad.PSApi
                 {
                     item.Dispose();
                 }
-                this.activeSuites = null;
+                activeSuites = null;
             }
         }
     }

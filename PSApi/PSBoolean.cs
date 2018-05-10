@@ -40,7 +40,7 @@ namespace PSFilterLoad.PSApi
             get
             {
                 // Return lowercase words to match the built-in Boolean values displayed in the debugger.
-                if (this.value != 0)
+                if (value != 0)
                 {
                     return "true";
                 }
@@ -78,7 +78,7 @@ namespace PSFilterLoad.PSApi
         public bool Equals(PSBoolean other)
         {
             // Use a comparison where any non zero value is true.
-            if (this.value != 0)
+            if (value != 0)
             {
                 return (other.value != 0);
             }
@@ -96,7 +96,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public override int GetHashCode()
         {
-            return (this.value != 0 ? True : False);
+            return (value != 0 ? True : False);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public override string ToString()
         {
-            return (this.value != 0 ? bool.TrueString : bool.FalseString);
+            return (value != 0 ? bool.TrueString : bool.FalseString);
         }
 
         public static bool operator ==(PSBoolean left, PSBoolean right)

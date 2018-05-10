@@ -30,12 +30,12 @@ namespace PSFilterLoad.PSApi
 
         public PropertySuite(int documentWidth, int documentHeight, PluginUISettings pluginUISettings)
         {
-            this.getPropertyProc = new GetPropertyProc(PropertyGetProc);
-            this.setPropertyProc = new SetPropertyProc(PropertySetProc);
+            getPropertyProc = new GetPropertyProc(PropertyGetProc);
+            setPropertyProc = new SetPropertyProc(PropertySetProc);
             this.documentWidth = documentWidth;
             this.documentHeight = documentHeight;
-            this.highDpi = pluginUISettings?.HighDpi ?? false;
-            this.numberOfChannels = 0;
+            highDpi = pluginUISettings?.HighDpi ?? false;
+            numberOfChannels = 0;
         }
 
         PropertyProcs IPropertySuite.CreatePropertySuite()
@@ -44,8 +44,8 @@ namespace PSFilterLoad.PSApi
             {
                 propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion,
                 numPropertyProcs = PSConstants.kCurrentPropertyProcsCount,
-                getPropertyProc = Marshal.GetFunctionPointerForDelegate(this.getPropertyProc),
-                setPropertyProc = Marshal.GetFunctionPointerForDelegate(this.setPropertyProc)
+                getPropertyProc = Marshal.GetFunctionPointerForDelegate(getPropertyProc),
+                setPropertyProc = Marshal.GetFunctionPointerForDelegate(setPropertyProc)
             };
 
             return suite;
@@ -61,7 +61,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return Marshal.GetFunctionPointerForDelegate(this.getPropertyProc);
+                return Marshal.GetFunctionPointerForDelegate(getPropertyProc);
             }
         }
 
@@ -81,7 +81,7 @@ namespace PSFilterLoad.PSApi
                     throw new ArgumentOutOfRangeException("value", value, "The value must be at least one.");
                 }
 
-                this.numberOfChannels = value;
+                numberOfChannels = value;
             }
         }
 

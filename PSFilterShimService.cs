@@ -56,11 +56,11 @@ namespace PSFilterPdn
                 throw new ArgumentNullException(nameof(settings));
             }
 
-            this.abortFunc = abort;
-            this.pluginData = plugin;
+            abortFunc = abort;
+            pluginData = plugin;
             this.settings = settings;
-            this.errorCallback = error;
-            this.progressCallback = progress;
+            errorCallback = error;
+            progressCallback = progress;
         }
 
         public bool AbortFilter()

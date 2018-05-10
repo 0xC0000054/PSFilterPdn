@@ -52,14 +52,14 @@ namespace PSFilterLoad.PSApi
 
 			public ReadDescriptorState(Dictionary<uint, AETEValue> dictionary, IntPtr keyArray)
 			{
-				this.currentKey = 0;
-				this.lastReadError = PSError.noErr;
-				this.keyIndex = 0;
-				this.keyCount = dictionary.Count;
-				this.keys = new ReadOnlyCollection<uint>(new List<uint>(dictionary.Keys));
-				this.items = new ReadOnlyDictionary<uint, AETEValue>(dictionary);
-				this.expectedKeys = keyArray;
-				this.expectedKeyOffsets = GetKeyArrayOffsets(keyArray);
+				currentKey = 0;
+				lastReadError = PSError.noErr;
+				keyIndex = 0;
+				keyCount = dictionary.Count;
+				keys = new ReadOnlyCollection<uint>(new List<uint>(dictionary.Keys));
+				items = new ReadOnlyDictionary<uint, AETEValue>(dictionary);
+				expectedKeys = keyArray;
+				expectedKeyOffsets = GetKeyArrayOffsets(keyArray);
 			}
 		}
 
@@ -110,54 +110,54 @@ namespace PSFilterLoad.PSApi
 		{
 			set
 			{
-				this.aete = value;
+				aete = value;
 			}
 		}
 
 		public DescriptorSuite()
 		{
-			this.openReadDescriptorProc = new OpenReadDescriptorProc(OpenReadDescriptorProc);
-			this.closeReadDescriptorProc = new CloseReadDescriptorProc(CloseReadDescriptorProc);
-			this.getKeyProc = new GetKeyProc(GetKeyProc);
-			this.getAliasProc = new GetAliasProc(GetAliasProc);
-			this.getBooleanProc = new GetBooleanProc(GetBooleanProc);
-			this.getClassProc = new GetClassProc(GetClassProc);
-			this.getCountProc = new GetCountProc(GetCountProc);
-			this.getEnumeratedProc = new GetEnumeratedProc(GetEnumeratedProc);
-			this.getFloatProc = new GetFloatProc(GetFloatProc);
-			this.getIntegerProc = new GetIntegerProc(GetIntegerProc);
-			this.getObjectProc = new GetObjectProc(GetObjectProc);
-			this.getPinnedFloatProc = new GetPinnedFloatProc(GetPinnedFloatProc);
-			this.getPinnedIntegerProc = new GetPinnedIntegerProc(GetPinnedIntegerProc);
-			this.getPinnedUnitFloatProc = new GetPinnedUnitFloatProc(GetPinnedUnitFloatProc);
-			this.getSimpleReferenceProc = new GetSimpleReferenceProc(GetSimpleReferenceProc);
-			this.getStringProc = new GetStringProc(GetStringProc);
-			this.getTextProc = new GetTextProc(GetTextProc);
-			this.getUnitFloatProc = new GetUnitFloatProc(GetUnitFloatProc);
-			this.openWriteDescriptorProc = new OpenWriteDescriptorProc(OpenWriteDescriptorProc);
-			this.closeWriteDescriptorProc = new CloseWriteDescriptorProc(CloseWriteDescriptorProc);
-			this.putAliasProc = new PutAliasProc(PutAliasProc);
-			this.putBooleanProc = new PutBooleanProc(PutBooleanProc);
-			this.putClassProc = new PutClassProc(PutClassProc);
-			this.putCountProc = new PutCountProc(PutCountProc);
-			this.putEnumeratedProc = new PutEnumeratedProc(PutEnumeratedProc);
-			this.putFloatProc = new PutFloatProc(PutFloatProc);
-			this.putIntegerProc = new PutIntegerProc(PutIntegerProc);
-			this.putObjectProc = new PutObjectProc(PutObjectProc);
-			this.putScopedClassProc = new PutScopedClassProc(PutScopedClassProc);
-			this.putScopedObjectProc = new PutScopedObjectProc(PutScopedObjectProc);
-			this.putSimpleReferenceProc = new PutSimpleReferenceProc(PutSimpleReferenceProc);
-			this.putStringProc = new PutStringProc(PutStringProc);
-			this.putTextProc = new PutTextProc(PutTextProc);
-			this.putUnitFloatProc = new PutUnitFloatProc(PutUnitFloatProc);
+			openReadDescriptorProc = new OpenReadDescriptorProc(OpenReadDescriptorProc);
+			closeReadDescriptorProc = new CloseReadDescriptorProc(CloseReadDescriptorProc);
+			getKeyProc = new GetKeyProc(GetKeyProc);
+			getAliasProc = new GetAliasProc(GetAliasProc);
+			getBooleanProc = new GetBooleanProc(GetBooleanProc);
+			getClassProc = new GetClassProc(GetClassProc);
+			getCountProc = new GetCountProc(GetCountProc);
+			getEnumeratedProc = new GetEnumeratedProc(GetEnumeratedProc);
+			getFloatProc = new GetFloatProc(GetFloatProc);
+			getIntegerProc = new GetIntegerProc(GetIntegerProc);
+			getObjectProc = new GetObjectProc(GetObjectProc);
+			getPinnedFloatProc = new GetPinnedFloatProc(GetPinnedFloatProc);
+			getPinnedIntegerProc = new GetPinnedIntegerProc(GetPinnedIntegerProc);
+			getPinnedUnitFloatProc = new GetPinnedUnitFloatProc(GetPinnedUnitFloatProc);
+			getSimpleReferenceProc = new GetSimpleReferenceProc(GetSimpleReferenceProc);
+			getStringProc = new GetStringProc(GetStringProc);
+			getTextProc = new GetTextProc(GetTextProc);
+			getUnitFloatProc = new GetUnitFloatProc(GetUnitFloatProc);
+			openWriteDescriptorProc = new OpenWriteDescriptorProc(OpenWriteDescriptorProc);
+			closeWriteDescriptorProc = new CloseWriteDescriptorProc(CloseWriteDescriptorProc);
+			putAliasProc = new PutAliasProc(PutAliasProc);
+			putBooleanProc = new PutBooleanProc(PutBooleanProc);
+			putClassProc = new PutClassProc(PutClassProc);
+			putCountProc = new PutCountProc(PutCountProc);
+			putEnumeratedProc = new PutEnumeratedProc(PutEnumeratedProc);
+			putFloatProc = new PutFloatProc(PutFloatProc);
+			putIntegerProc = new PutIntegerProc(PutIntegerProc);
+			putObjectProc = new PutObjectProc(PutObjectProc);
+			putScopedClassProc = new PutScopedClassProc(PutScopedClassProc);
+			putScopedObjectProc = new PutScopedObjectProc(PutScopedObjectProc);
+			putSimpleReferenceProc = new PutSimpleReferenceProc(PutSimpleReferenceProc);
+			putStringProc = new PutStringProc(PutStringProc);
+			putTextProc = new PutTextProc(PutTextProc);
+			putUnitFloatProc = new PutUnitFloatProc(PutUnitFloatProc);
 
-			this.readDescriptors = new Dictionary<IntPtr, ReadDescriptorState>(IntPtrEqualityComparer.Instance);
-			this.descriptorHandles = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
-			this.writeDescriptors = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
-			this.readDescriptorsIndex = 0;
-			this.writeDescriptorsIndex = 0;
+			readDescriptors = new Dictionary<IntPtr, ReadDescriptorState>(IntPtrEqualityComparer.Instance);
+			descriptorHandles = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
+			writeDescriptors = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
+			readDescriptorsIndex = 0;
+			writeDescriptorsIndex = 0;
 			HandleSuite.Instance.SuiteHandleDisposed += SuiteHandleDisposed;
-			this.disposed = false;
+			disposed = false;
 		}
 
 		public IntPtr CreateReadDescriptorPointer()
@@ -169,24 +169,24 @@ namespace PSFilterLoad.PSApi
 				ReadDescriptorProcs* readDescriptor = (ReadDescriptorProcs*)readDescriptorPtr.ToPointer();
 				readDescriptor->readDescriptorProcsVersion = PSConstants.kCurrentReadDescriptorProcsVersion;
 				readDescriptor->numReadDescriptorProcs = PSConstants.kCurrentReadDescriptorProcsCount;
-				readDescriptor->openReadDescriptorProc = Marshal.GetFunctionPointerForDelegate(this.openReadDescriptorProc);
-				readDescriptor->closeReadDescriptorProc = Marshal.GetFunctionPointerForDelegate(this.closeReadDescriptorProc);
-				readDescriptor->getAliasProc = Marshal.GetFunctionPointerForDelegate(this.getAliasProc);
-				readDescriptor->getBooleanProc = Marshal.GetFunctionPointerForDelegate(this.getBooleanProc);
-				readDescriptor->getClassProc = Marshal.GetFunctionPointerForDelegate(this.getClassProc);
-				readDescriptor->getCountProc = Marshal.GetFunctionPointerForDelegate(this.getCountProc);
-				readDescriptor->getEnumeratedProc = Marshal.GetFunctionPointerForDelegate(this.getEnumeratedProc);
-				readDescriptor->getFloatProc = Marshal.GetFunctionPointerForDelegate(this.getFloatProc);
-				readDescriptor->getIntegerProc = Marshal.GetFunctionPointerForDelegate(this.getIntegerProc);
-				readDescriptor->getKeyProc = Marshal.GetFunctionPointerForDelegate(this.getKeyProc);
-				readDescriptor->getObjectProc = Marshal.GetFunctionPointerForDelegate(this.getObjectProc);
-				readDescriptor->getPinnedFloatProc = Marshal.GetFunctionPointerForDelegate(this.getPinnedFloatProc);
-				readDescriptor->getPinnedIntegerProc = Marshal.GetFunctionPointerForDelegate(this.getPinnedIntegerProc);
-				readDescriptor->getPinnedUnitFloatProc = Marshal.GetFunctionPointerForDelegate(this.getPinnedUnitFloatProc);
-				readDescriptor->getSimpleReferenceProc = Marshal.GetFunctionPointerForDelegate(this.getSimpleReferenceProc);
-				readDescriptor->getStringProc = Marshal.GetFunctionPointerForDelegate(this.getStringProc);
-				readDescriptor->getTextProc = Marshal.GetFunctionPointerForDelegate(this.getTextProc);
-				readDescriptor->getUnitFloatProc = Marshal.GetFunctionPointerForDelegate(this.getUnitFloatProc);
+				readDescriptor->openReadDescriptorProc = Marshal.GetFunctionPointerForDelegate(openReadDescriptorProc);
+				readDescriptor->closeReadDescriptorProc = Marshal.GetFunctionPointerForDelegate(closeReadDescriptorProc);
+				readDescriptor->getAliasProc = Marshal.GetFunctionPointerForDelegate(getAliasProc);
+				readDescriptor->getBooleanProc = Marshal.GetFunctionPointerForDelegate(getBooleanProc);
+				readDescriptor->getClassProc = Marshal.GetFunctionPointerForDelegate(getClassProc);
+				readDescriptor->getCountProc = Marshal.GetFunctionPointerForDelegate(getCountProc);
+				readDescriptor->getEnumeratedProc = Marshal.GetFunctionPointerForDelegate(getEnumeratedProc);
+				readDescriptor->getFloatProc = Marshal.GetFunctionPointerForDelegate(getFloatProc);
+				readDescriptor->getIntegerProc = Marshal.GetFunctionPointerForDelegate(getIntegerProc);
+				readDescriptor->getKeyProc = Marshal.GetFunctionPointerForDelegate(getKeyProc);
+				readDescriptor->getObjectProc = Marshal.GetFunctionPointerForDelegate(getObjectProc);
+				readDescriptor->getPinnedFloatProc = Marshal.GetFunctionPointerForDelegate(getPinnedFloatProc);
+				readDescriptor->getPinnedIntegerProc = Marshal.GetFunctionPointerForDelegate(getPinnedIntegerProc);
+				readDescriptor->getPinnedUnitFloatProc = Marshal.GetFunctionPointerForDelegate(getPinnedUnitFloatProc);
+				readDescriptor->getSimpleReferenceProc = Marshal.GetFunctionPointerForDelegate(getSimpleReferenceProc);
+				readDescriptor->getStringProc = Marshal.GetFunctionPointerForDelegate(getStringProc);
+				readDescriptor->getTextProc = Marshal.GetFunctionPointerForDelegate(getTextProc);
+				readDescriptor->getUnitFloatProc = Marshal.GetFunctionPointerForDelegate(getUnitFloatProc);
 			}
 
 			return readDescriptorPtr;
@@ -201,22 +201,22 @@ namespace PSFilterLoad.PSApi
 				WriteDescriptorProcs* writeDescriptor = (WriteDescriptorProcs*)writeDescriptorPtr.ToPointer();
 				writeDescriptor->writeDescriptorProcsVersion = PSConstants.kCurrentWriteDescriptorProcsVersion;
 				writeDescriptor->numWriteDescriptorProcs = PSConstants.kCurrentWriteDescriptorProcsCount;
-				writeDescriptor->openWriteDescriptorProc = Marshal.GetFunctionPointerForDelegate(this.openWriteDescriptorProc);
-				writeDescriptor->closeWriteDescriptorProc = Marshal.GetFunctionPointerForDelegate(this.closeWriteDescriptorProc);
-				writeDescriptor->putAliasProc = Marshal.GetFunctionPointerForDelegate(this.putAliasProc);
-				writeDescriptor->putBooleanProc = Marshal.GetFunctionPointerForDelegate(this.putBooleanProc);
-				writeDescriptor->putClassProc = Marshal.GetFunctionPointerForDelegate(this.putClassProc);
-				writeDescriptor->putCountProc = Marshal.GetFunctionPointerForDelegate(this.putCountProc);
-				writeDescriptor->putEnumeratedProc = Marshal.GetFunctionPointerForDelegate(this.putEnumeratedProc);
-				writeDescriptor->putFloatProc = Marshal.GetFunctionPointerForDelegate(this.putFloatProc);
-				writeDescriptor->putIntegerProc = Marshal.GetFunctionPointerForDelegate(this.putIntegerProc);
-				writeDescriptor->putObjectProc = Marshal.GetFunctionPointerForDelegate(this.putObjectProc);
-				writeDescriptor->putScopedClassProc = Marshal.GetFunctionPointerForDelegate(this.putScopedClassProc);
-				writeDescriptor->putScopedObjectProc = Marshal.GetFunctionPointerForDelegate(this.putScopedObjectProc);
-				writeDescriptor->putSimpleReferenceProc = Marshal.GetFunctionPointerForDelegate(this.putSimpleReferenceProc);
-				writeDescriptor->putStringProc = Marshal.GetFunctionPointerForDelegate(this.putStringProc);
-				writeDescriptor->putTextProc = Marshal.GetFunctionPointerForDelegate(this.putTextProc);
-				writeDescriptor->putUnitFloatProc = Marshal.GetFunctionPointerForDelegate(this.putUnitFloatProc);
+				writeDescriptor->openWriteDescriptorProc = Marshal.GetFunctionPointerForDelegate(openWriteDescriptorProc);
+				writeDescriptor->closeWriteDescriptorProc = Marshal.GetFunctionPointerForDelegate(closeWriteDescriptorProc);
+				writeDescriptor->putAliasProc = Marshal.GetFunctionPointerForDelegate(putAliasProc);
+				writeDescriptor->putBooleanProc = Marshal.GetFunctionPointerForDelegate(putBooleanProc);
+				writeDescriptor->putClassProc = Marshal.GetFunctionPointerForDelegate(putClassProc);
+				writeDescriptor->putCountProc = Marshal.GetFunctionPointerForDelegate(putCountProc);
+				writeDescriptor->putEnumeratedProc = Marshal.GetFunctionPointerForDelegate(putEnumeratedProc);
+				writeDescriptor->putFloatProc = Marshal.GetFunctionPointerForDelegate(putFloatProc);
+				writeDescriptor->putIntegerProc = Marshal.GetFunctionPointerForDelegate(putIntegerProc);
+				writeDescriptor->putObjectProc = Marshal.GetFunctionPointerForDelegate(putObjectProc);
+				writeDescriptor->putScopedClassProc = Marshal.GetFunctionPointerForDelegate(putScopedClassProc);
+				writeDescriptor->putScopedObjectProc = Marshal.GetFunctionPointerForDelegate(putScopedObjectProc);
+				writeDescriptor->putSimpleReferenceProc = Marshal.GetFunctionPointerForDelegate(putSimpleReferenceProc);
+				writeDescriptor->putStringProc = Marshal.GetFunctionPointerForDelegate(putStringProc);
+				writeDescriptor->putTextProc = Marshal.GetFunctionPointerForDelegate(putTextProc);
+				writeDescriptor->putUnitFloatProc = Marshal.GetFunctionPointerForDelegate(putUnitFloatProc);
 			}
 
 			return writeDescriptorPtr;
@@ -224,9 +224,9 @@ namespace PSFilterLoad.PSApi
 
 		public void Dispose()
 		{
-			if (!this.disposed)
+			if (!disposed)
 			{
-				this.disposed = true;
+				disposed = true;
 
 				HandleSuite.Instance.SuiteHandleDisposed -= SuiteHandleDisposed;
 			}
@@ -237,7 +237,7 @@ namespace PSFilterLoad.PSApi
 			scriptingData = null;
 
 			Dictionary<uint, AETEValue> data;
-			if (this.descriptorHandles.TryGetValue(descriptorHandle, out data))
+			if (descriptorHandles.TryGetValue(descriptorHandle, out data))
 			{
 				scriptingData = data;
 
@@ -249,12 +249,12 @@ namespace PSFilterLoad.PSApi
 
 		public void SetScriptingData(IntPtr descriptorHandle, Dictionary<uint, AETEValue> scriptingData)
 		{
-			this.descriptorHandles.Add(descriptorHandle, scriptingData);
+			descriptorHandles.Add(descriptorHandle, scriptingData);
 		}
 
 		private void SuiteHandleDisposed(object sender, HandleDisposedEventArgs e)
 		{
-			this.descriptorHandles.Remove(e.Handle);
+			descriptorHandles.Remove(e.Handle);
 		}
 
 		#region ReadDescriptorProcs
@@ -265,13 +265,13 @@ namespace PSFilterLoad.PSApi
 #endif
 			if (descriptorHandle != IntPtr.Zero)
 			{
-				Dictionary<uint, AETEValue> dictionary = this.descriptorHandles[descriptorHandle];
+				Dictionary<uint, AETEValue> dictionary = descriptorHandles[descriptorHandle];
 
-				this.readDescriptorsIndex++;
-				IntPtr handle = new IntPtr(this.readDescriptorsIndex);
+				readDescriptorsIndex++;
+				IntPtr handle = new IntPtr(readDescriptorsIndex);
 				try
 				{
-					this.readDescriptors.Add(handle, new ReadDescriptorState(dictionary, keyArray));
+					readDescriptors.Add(handle, new ReadDescriptorState(dictionary, keyArray));
 				}
 				catch (OutOfMemoryException)
 				{
@@ -293,11 +293,11 @@ namespace PSFilterLoad.PSApi
 
 			if (descriptor != IntPtr.Zero)
 			{
-				error = this.readDescriptors[descriptor].lastReadError;
-				this.readDescriptors.Remove(descriptor);
-				if (this.readDescriptorsIndex == descriptor.ToInt32())
+				error = readDescriptors[descriptor].lastReadError;
+				readDescriptors.Remove(descriptor);
+				if (readDescriptorsIndex == descriptor.ToInt32())
 				{
-					this.readDescriptorsIndex--;
+					readDescriptorsIndex--;
 				}
 			}
 
@@ -312,7 +312,7 @@ namespace PSFilterLoad.PSApi
 
 			if (descriptor != IntPtr.Zero)
 			{
-				ReadDescriptorState state = this.readDescriptors[descriptor];
+				ReadDescriptorState state = readDescriptors[descriptor];
 
 				if (state.keyIndex >= state.keyCount)
 				{
@@ -367,7 +367,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetIntegerProc(IntPtr descriptor, ref int data)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -381,7 +381,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetFloatProc(IntPtr descriptor, ref double data)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -395,7 +395,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetUnitFloatProc(IntPtr descriptor, ref uint unit, ref double data)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -419,7 +419,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetBooleanProc(IntPtr descriptor, ref byte data)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -433,7 +433,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetTextProc(IntPtr descriptor, ref IntPtr data)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -457,7 +457,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetAliasProc(IntPtr descriptor, ref IntPtr data)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -481,7 +481,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetEnumeratedProc(IntPtr descriptor, ref uint type)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -495,7 +495,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetClassProc(IntPtr descriptor, ref uint type)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -509,7 +509,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetSimpleReferenceProc(IntPtr descriptor, ref PIDescriptorSimpleReference data)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -523,7 +523,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetObjectProc(IntPtr descriptor, ref uint retType, ref IntPtr descriptorHandle)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -551,7 +551,7 @@ namespace PSFilterLoad.PSApi
 					state.lastReadError = PSError.memFullErr;
 					return PSError.memFullErr;
 				}
-				this.descriptorHandles.Add(descriptorHandle, value);
+				descriptorHandles.Add(descriptorHandle, value);
 			}
 			else
 			{
@@ -564,7 +564,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetCountProc(IntPtr descriptor, ref uint count)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -577,7 +577,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetStringProc(IntPtr descriptor, IntPtr data)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -594,7 +594,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetPinnedIntegerProc(IntPtr descriptor, int min, int max, ref int intNumber)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -624,7 +624,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetPinnedFloatProc(IntPtr descriptor, ref double min, ref double max, ref double floatNumber)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -653,7 +653,7 @@ namespace PSFilterLoad.PSApi
 
 		private short GetPinnedUnitFloatProc(IntPtr descriptor, ref double min, ref double max, ref uint units, ref double floatNumber)
 		{
-			ReadDescriptorState state = this.readDescriptors[descriptor];
+			ReadDescriptorState state = readDescriptors[descriptor];
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
@@ -695,11 +695,11 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-			this.writeDescriptorsIndex++;
-			IntPtr handle = new IntPtr(this.writeDescriptorsIndex);
+			writeDescriptorsIndex++;
+			IntPtr handle = new IntPtr(writeDescriptorsIndex);
 			try
 			{
-				this.writeDescriptors.Add(handle, new Dictionary<uint, AETEValue>());
+				writeDescriptors.Add(handle, new Dictionary<uint, AETEValue>());
 			}
 			catch (OutOfMemoryException)
 			{
@@ -723,12 +723,12 @@ namespace PSFilterLoad.PSApi
 			{
 				// Add the items to the descriptor handle dictionary.
 				// If the descriptor is a sub key the plug-in will attach it to a parent descriptor by calling PutObjectProc.
-				this.descriptorHandles.Add(descriptorHandle, this.writeDescriptors[descriptor]);
+				descriptorHandles.Add(descriptorHandle, writeDescriptors[descriptor]);
 
-				this.writeDescriptors.Remove(descriptor);
-				if (this.writeDescriptorsIndex == descriptor.ToInt32())
+				writeDescriptors.Remove(descriptor);
+				if (writeDescriptorsIndex == descriptor.ToInt32())
 				{
-					this.writeDescriptorsIndex--;
+					writeDescriptorsIndex--;
 				}
 			}
 			catch (OutOfMemoryException)
@@ -760,7 +760,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			try
 			{
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), 0, data));
+				writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), 0, data));
 			}
 			catch (OutOfMemoryException)
 			{
@@ -777,7 +777,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			try
 			{
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Float, GetAETEParamFlags(key), 0, data));
+				writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Float, GetAETEParamFlags(key), 0, data));
 			}
 			catch (OutOfMemoryException)
 			{
@@ -796,7 +796,7 @@ namespace PSFilterLoad.PSApi
 			{
 				UnitFloat item = new UnitFloat(unit, data);
 
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.UintFloat, GetAETEParamFlags(key), 0, item));
+				writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.UintFloat, GetAETEParamFlags(key), 0, item));
 			}
 			catch (OutOfMemoryException)
 			{
@@ -813,7 +813,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			try
 			{
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Boolean, GetAETEParamFlags(key), 0, data));
+				writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Boolean, GetAETEParamFlags(key), 0, data));
 			}
 			catch (OutOfMemoryException)
 			{
@@ -841,7 +841,7 @@ namespace PSFilterLoad.PSApi
 						byte[] data = new byte[size];
 						Marshal.Copy(hPtr, data, 0, size);
 
-						this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), size, data));
+						writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), size, data));
 					}
 					finally
 					{
@@ -872,7 +872,7 @@ namespace PSFilterLoad.PSApi
 					byte[] data = new byte[size];
 					Marshal.Copy(hPtr, data, 0, size);
 
-					this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Alias, GetAETEParamFlags(key), size, data));
+					writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Alias, GetAETEParamFlags(key), size, data));
 				}
 				finally
 				{
@@ -894,7 +894,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			try
 			{
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
+				writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
 			}
 			catch (OutOfMemoryException)
 			{
@@ -911,7 +911,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			try
 			{
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), 0, data));
+				writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), 0, data));
 			}
 			catch (OutOfMemoryException)
 			{
@@ -928,7 +928,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			try
 			{
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.ObjectReference, GetAETEParamFlags(key), 0, data));
+				writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.ObjectReference, GetAETEParamFlags(key), 0, data));
 			}
 			catch (OutOfMemoryException)
 			{
@@ -947,10 +947,10 @@ namespace PSFilterLoad.PSApi
 			{
 				// If the handle is a sub key add it to the parent descriptor.
 				Dictionary<uint, AETEValue> subKeys;
-				if (this.descriptorHandles.TryGetValue(descriptorHandle, out subKeys))
+				if (descriptorHandles.TryGetValue(descriptorHandle, out subKeys))
 				{
-					this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
-					this.descriptorHandles.Remove(descriptorHandle);
+					writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
+					descriptorHandles.Remove(descriptorHandle);
 				}
 				else
 				{
@@ -985,7 +985,7 @@ namespace PSFilterLoad.PSApi
 				byte[] data = new byte[size];
 				Marshal.Copy(new IntPtr(stringHandle.ToInt64() + 1L), data, 0, size);
 
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), size, data));
+				writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), size, data));
 			}
 			catch (OutOfMemoryException)
 			{
@@ -1002,7 +1002,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			try
 			{
-				this.writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), 0, data));
+				writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), 0, data));
 			}
 			catch (OutOfMemoryException)
 			{

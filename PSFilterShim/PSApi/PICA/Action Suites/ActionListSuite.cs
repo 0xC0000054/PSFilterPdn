@@ -105,50 +105,50 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new ArgumentNullException(nameof(zstringSuite));
             }
 
-            this.make = new ActionListMake(Make);
-            this.free = new ActionListFree(Free);
-            this.getType = new ActionListGetType(GetType);
-            this.getCount = new ActionListGetCount(GetCount);
-            this.putInteger = new ActionListPutInteger(PutInteger);
-            this.putFloat = new ActionListPutFloat(PutFloat);
-            this.putUnitFloat = new ActionListPutUnitFloat(PutUnitFloat);
-            this.putString = new ActionListPutString(PutString);
-            this.putBoolean = new ActionListPutBoolean(PutBoolean);
-            this.putList = new ActionListPutList(PutList);
-            this.putObject = new ActionListPutObject(PutObject);
-            this.putGlobalObject = new ActionListPutGlobalObject(PutGlobalObject);
-            this.putEnumerated = new ActionListPutEnumerated(PutEnumerated);
-            this.putReference = new ActionListPutReference(PutReference);
-            this.putClass = new ActionListPutClass(PutClass);
-            this.putGlobalClass = new ActionListPutGlobalClass(PutGlobalClass);
-            this.putAlias = new ActionListPutAlias(PutAlias);
-            this.putIntegers = new ActionListPutIntegers(PutIntegers);
-            this.putData = new ActionListPutData(PutData);
-            this.putZString = new ActionListPutZString(PutZString);
-            this.getInteger = new ActionListGetInteger(GetInteger);
-            this.getFloat = new ActionListGetFloat(GetFloat);
-            this.getUnitFloat = new ActionListGetUnitFloat(GetUnitFloat);
-            this.getStringLength = new ActionListGetStringLength(GetStringLength);
-            this.getString = new ActionListGetString(GetString);
-            this.getBoolean = new ActionListGetBoolean(GetBoolean);
-            this.getList = new ActionListGetList(GetList);
-            this.getObject = new ActionListGetObject(GetObject);
-            this.getGlobalObject = new ActionListGetGlobalObject(GetGlobalObject);
-            this.getEnumerated = new ActionListGetEnumerated(GetEnumerated);
-            this.getReference = new ActionListGetReference(GetReference);
-            this.getClass = new ActionListGetClass(GetClass);
-            this.getGlobalClass = new ActionListGetGlobalClass(GetGlobalClass);
-            this.getAlias = new ActionListGetAlias(GetAlias);
-            this.getIntegers = new ActionListGetIntegers(GetIntegers);
-            this.getDataLength = new ActionListGetDataLength(GetDataLength);
-            this.getData = new ActionListGetData(GetData);
-            this.getZString = new ActionListGetZString(GetZString);
+            make = new ActionListMake(Make);
+            free = new ActionListFree(Free);
+            getType = new ActionListGetType(GetType);
+            getCount = new ActionListGetCount(GetCount);
+            putInteger = new ActionListPutInteger(PutInteger);
+            putFloat = new ActionListPutFloat(PutFloat);
+            putUnitFloat = new ActionListPutUnitFloat(PutUnitFloat);
+            putString = new ActionListPutString(PutString);
+            putBoolean = new ActionListPutBoolean(PutBoolean);
+            putList = new ActionListPutList(PutList);
+            putObject = new ActionListPutObject(PutObject);
+            putGlobalObject = new ActionListPutGlobalObject(PutGlobalObject);
+            putEnumerated = new ActionListPutEnumerated(PutEnumerated);
+            putReference = new ActionListPutReference(PutReference);
+            putClass = new ActionListPutClass(PutClass);
+            putGlobalClass = new ActionListPutGlobalClass(PutGlobalClass);
+            putAlias = new ActionListPutAlias(PutAlias);
+            putIntegers = new ActionListPutIntegers(PutIntegers);
+            putData = new ActionListPutData(PutData);
+            putZString = new ActionListPutZString(PutZString);
+            getInteger = new ActionListGetInteger(GetInteger);
+            getFloat = new ActionListGetFloat(GetFloat);
+            getUnitFloat = new ActionListGetUnitFloat(GetUnitFloat);
+            getStringLength = new ActionListGetStringLength(GetStringLength);
+            getString = new ActionListGetString(GetString);
+            getBoolean = new ActionListGetBoolean(GetBoolean);
+            getList = new ActionListGetList(GetList);
+            getObject = new ActionListGetObject(GetObject);
+            getGlobalObject = new ActionListGetGlobalObject(GetGlobalObject);
+            getEnumerated = new ActionListGetEnumerated(GetEnumerated);
+            getReference = new ActionListGetReference(GetReference);
+            getClass = new ActionListGetClass(GetClass);
+            getGlobalClass = new ActionListGetGlobalClass(GetGlobalClass);
+            getAlias = new ActionListGetAlias(GetAlias);
+            getIntegers = new ActionListGetIntegers(GetIntegers);
+            getDataLength = new ActionListGetDataLength(GetDataLength);
+            getData = new ActionListGetData(GetData);
+            getZString = new ActionListGetZString(GetZString);
 
-            this.actionDescriptorSuite = null;
+            actionDescriptorSuite = null;
             this.actionReferenceSuite = actionReferenceSuite;
             this.zstringSuite = zstringSuite;
-            this.actionLists = new Dictionary<IntPtr, ActionListItemCollection>(IntPtrEqualityComparer.Instance);
-            this.actionListsIndex = 0;
+            actionLists = new Dictionary<IntPtr, ActionListItemCollection>(IntPtrEqualityComparer.Instance);
+            actionListsIndex = 0;
         }
 
         bool IActionListSuite.TryGetListValues(IntPtr list, out ReadOnlyCollection<ActionListItem> values)
@@ -156,7 +156,7 @@ namespace PSFilterLoad.PSApi.PICA
             values = null;
 
             ActionListItemCollection items;
-            if (this.actionLists.TryGetValue(list, out items))
+            if (actionLists.TryGetValue(list, out items))
             {
                 values = items.GetListAsReadOnly();
 
@@ -174,7 +174,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
 
             IntPtr list = GenerateDictionaryKey();
-            this.actionLists.Add(list, new ActionListItemCollection(values));
+            actionLists.Add(list, new ActionListItemCollection(values));
 
             return list;
         }
@@ -192,7 +192,7 @@ namespace PSFilterLoad.PSApi.PICA
                     throw new ArgumentNullException("value");
                 }
 
-                this.actionDescriptorSuite = value;
+                actionDescriptorSuite = value;
             }
         }
 
@@ -205,44 +205,44 @@ namespace PSFilterLoad.PSApi.PICA
         {
             PSActionListProcs suite = new PSActionListProcs()
             {
-                Make = Marshal.GetFunctionPointerForDelegate(this.make),
-                Free = Marshal.GetFunctionPointerForDelegate(this.free),
-                GetType = Marshal.GetFunctionPointerForDelegate(this.getType),
-                GetCount = Marshal.GetFunctionPointerForDelegate(this.getCount),
-                PutInteger = Marshal.GetFunctionPointerForDelegate(this.putInteger),
-                PutFloat = Marshal.GetFunctionPointerForDelegate(this.putFloat),
-                PutUnitFloat = Marshal.GetFunctionPointerForDelegate(this.putUnitFloat),
-                PutString = Marshal.GetFunctionPointerForDelegate(this.putString),
-                PutBoolean = Marshal.GetFunctionPointerForDelegate(this.putBoolean),
-                PutList = Marshal.GetFunctionPointerForDelegate(this.putList),
-                PutObject = Marshal.GetFunctionPointerForDelegate(this.putObject),
-                PutGlobalObject = Marshal.GetFunctionPointerForDelegate(this.putGlobalObject),
-                PutEnumerated = Marshal.GetFunctionPointerForDelegate(this.putEnumerated),
-                PutReference = Marshal.GetFunctionPointerForDelegate(this.putReference),
-                PutClass = Marshal.GetFunctionPointerForDelegate(this.putClass),
-                PutGlobalClass = Marshal.GetFunctionPointerForDelegate(this.putGlobalClass),
-                PutAlias = Marshal.GetFunctionPointerForDelegate(this.putAlias),
-                GetInteger = Marshal.GetFunctionPointerForDelegate(this.getInteger),
-                GetFloat = Marshal.GetFunctionPointerForDelegate(this.getFloat),
-                GetUnitFloat = Marshal.GetFunctionPointerForDelegate(this.getUnitFloat),
-                GetStringLength = Marshal.GetFunctionPointerForDelegate(this.getStringLength),
-                GetString = Marshal.GetFunctionPointerForDelegate(this.getString),
-                GetBoolean = Marshal.GetFunctionPointerForDelegate(this.getBoolean),
-                GetList = Marshal.GetFunctionPointerForDelegate(this.getList),
-                GetObject = Marshal.GetFunctionPointerForDelegate(this.getObject),
-                GetGlobalObject = Marshal.GetFunctionPointerForDelegate(this.getGlobalObject),
-                GetEnumerated = Marshal.GetFunctionPointerForDelegate(this.getEnumerated),
-                GetReference = Marshal.GetFunctionPointerForDelegate(this.getReference),
-                GetClass = Marshal.GetFunctionPointerForDelegate(this.getClass),
-                GetGlobalClass = Marshal.GetFunctionPointerForDelegate(this.getGlobalClass),
-                GetAlias = Marshal.GetFunctionPointerForDelegate(this.getAlias),
-                PutIntegers = Marshal.GetFunctionPointerForDelegate(this.putIntegers),
-                GetIntegers = Marshal.GetFunctionPointerForDelegate(this.getIntegers),
-                PutData = Marshal.GetFunctionPointerForDelegate(this.putData),
-                GetDataLength = Marshal.GetFunctionPointerForDelegate(this.getDataLength),
-                GetData = Marshal.GetFunctionPointerForDelegate(this.getData),
-                PutZString = Marshal.GetFunctionPointerForDelegate(this.putZString),
-                GetZString = Marshal.GetFunctionPointerForDelegate(this.getZString)
+                Make = Marshal.GetFunctionPointerForDelegate(make),
+                Free = Marshal.GetFunctionPointerForDelegate(free),
+                GetType = Marshal.GetFunctionPointerForDelegate(getType),
+                GetCount = Marshal.GetFunctionPointerForDelegate(getCount),
+                PutInteger = Marshal.GetFunctionPointerForDelegate(putInteger),
+                PutFloat = Marshal.GetFunctionPointerForDelegate(putFloat),
+                PutUnitFloat = Marshal.GetFunctionPointerForDelegate(putUnitFloat),
+                PutString = Marshal.GetFunctionPointerForDelegate(putString),
+                PutBoolean = Marshal.GetFunctionPointerForDelegate(putBoolean),
+                PutList = Marshal.GetFunctionPointerForDelegate(putList),
+                PutObject = Marshal.GetFunctionPointerForDelegate(putObject),
+                PutGlobalObject = Marshal.GetFunctionPointerForDelegate(putGlobalObject),
+                PutEnumerated = Marshal.GetFunctionPointerForDelegate(putEnumerated),
+                PutReference = Marshal.GetFunctionPointerForDelegate(putReference),
+                PutClass = Marshal.GetFunctionPointerForDelegate(putClass),
+                PutGlobalClass = Marshal.GetFunctionPointerForDelegate(putGlobalClass),
+                PutAlias = Marshal.GetFunctionPointerForDelegate(putAlias),
+                GetInteger = Marshal.GetFunctionPointerForDelegate(getInteger),
+                GetFloat = Marshal.GetFunctionPointerForDelegate(getFloat),
+                GetUnitFloat = Marshal.GetFunctionPointerForDelegate(getUnitFloat),
+                GetStringLength = Marshal.GetFunctionPointerForDelegate(getStringLength),
+                GetString = Marshal.GetFunctionPointerForDelegate(getString),
+                GetBoolean = Marshal.GetFunctionPointerForDelegate(getBoolean),
+                GetList = Marshal.GetFunctionPointerForDelegate(getList),
+                GetObject = Marshal.GetFunctionPointerForDelegate(getObject),
+                GetGlobalObject = Marshal.GetFunctionPointerForDelegate(getGlobalObject),
+                GetEnumerated = Marshal.GetFunctionPointerForDelegate(getEnumerated),
+                GetReference = Marshal.GetFunctionPointerForDelegate(getReference),
+                GetClass = Marshal.GetFunctionPointerForDelegate(getClass),
+                GetGlobalClass = Marshal.GetFunctionPointerForDelegate(getGlobalClass),
+                GetAlias = Marshal.GetFunctionPointerForDelegate(getAlias),
+                PutIntegers = Marshal.GetFunctionPointerForDelegate(putIntegers),
+                GetIntegers = Marshal.GetFunctionPointerForDelegate(getIntegers),
+                PutData = Marshal.GetFunctionPointerForDelegate(putData),
+                GetDataLength = Marshal.GetFunctionPointerForDelegate(getDataLength),
+                GetData = Marshal.GetFunctionPointerForDelegate(getData),
+                PutZString = Marshal.GetFunctionPointerForDelegate(putZString),
+                GetZString = Marshal.GetFunctionPointerForDelegate(getZString)
             };
 
             return suite;
@@ -250,9 +250,9 @@ namespace PSFilterLoad.PSApi.PICA
 
         private IntPtr GenerateDictionaryKey()
         {
-            this.actionListsIndex++;
+            actionListsIndex++;
 
-            return new IntPtr(this.actionListsIndex);
+            return new IntPtr(actionListsIndex);
         }
 
         private int Make(ref IntPtr list)
@@ -260,7 +260,7 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 list = GenerateDictionaryKey();
-                this.actionLists.Add(list, new ActionListItemCollection());
+                actionLists.Add(list, new ActionListItemCollection());
             }
             catch (OutOfMemoryException)
             {
@@ -272,10 +272,10 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Free(IntPtr list)
         {
-            this.actionLists.Remove(list);
-            if (this.actionListsIndex == list.ToInt32())
+            actionLists.Remove(list);
+            if (actionListsIndex == list.ToInt32())
             {
-                this.actionListsIndex--;
+                actionListsIndex--;
             }
 
             return PSError.kSPNoError;
@@ -283,7 +283,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetType(IntPtr list, uint index, ref uint type)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 type = items[(int)index].Type;
@@ -296,7 +296,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetCount(IntPtr list, ref uint count)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
 
             count = (uint)items.Count;
 
@@ -308,7 +308,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                this.actionLists[list].Add(new ActionListItem(DescriptorTypes.Integer, data));
+                actionLists[list].Add(new ActionListItem(DescriptorTypes.Integer, data));
             }
             catch (OutOfMemoryException)
             {
@@ -322,7 +322,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                this.actionLists[list].Add(new ActionListItem(DescriptorTypes.Float, data));
+                actionLists[list].Add(new ActionListItem(DescriptorTypes.Float, data));
             }
             catch (OutOfMemoryException)
             {
@@ -338,7 +338,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 UnitFloat item = new UnitFloat(unit, data);
 
-                this.actionLists[list].Add(new ActionListItem(DescriptorTypes.UintFloat, item));
+                actionLists[list].Add(new ActionListItem(DescriptorTypes.UintFloat, item));
             }
             catch (OutOfMemoryException)
             {
@@ -361,7 +361,7 @@ namespace PSFilterLoad.PSApi.PICA
                 byte[] data = new byte[length];
                 Marshal.Copy(cstrValue, data, 0, length);
 
-                this.actionLists[list].Add(new ActionListItem(DescriptorTypes.Char, data));
+                actionLists[list].Add(new ActionListItem(DescriptorTypes.Char, data));
             }
             catch (OutOfMemoryException)
             {
@@ -375,7 +375,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                this.actionLists[list].Add(new ActionListItem(DescriptorTypes.Boolean, data));
+                actionLists[list].Add(new ActionListItem(DescriptorTypes.Boolean, data));
             }
             catch (OutOfMemoryException)
             {
@@ -390,9 +390,9 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 ActionListItemCollection items;
-                if (this.actionLists.TryGetValue(data, out items))
+                if (actionLists.TryGetValue(data, out items))
                 {
-                    this.actionLists[list].Add(new ActionListItem(DescriptorTypes.ValueList, items.GetListAsReadOnly()));
+                    actionLists[list].Add(new ActionListItem(DescriptorTypes.ValueList, items.GetListAsReadOnly()));
                 }
                 else
                 {
@@ -409,7 +409,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutObject(IntPtr list, uint type, IntPtr descriptor)
         {
-            if (this.actionDescriptorSuite == null)
+            if (actionDescriptorSuite == null)
             {
                 // The plug-in called this method before acquiring the Action Descriptor suite.
                 return PSError.kSPLogicError;
@@ -418,10 +418,10 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 ReadOnlyDictionary<uint, AETEValue> descriptorValues;
-                if (this.actionDescriptorSuite.TryGetDescriptorValues(descriptor, out descriptorValues))
+                if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out descriptorValues))
                 {
                     ActionListDescriptor item = new ActionListDescriptor(type, descriptorValues);
-                    this.actionLists[list].Add(new ActionListItem(DescriptorTypes.Object, item));
+                    actionLists[list].Add(new ActionListItem(DescriptorTypes.Object, item));
                 }
                 else
                 {
@@ -446,7 +446,7 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 EnumeratedValue item = new EnumeratedValue(type, data);
-                this.actionLists[list].Add(new ActionListItem(DescriptorTypes.Enumerated, item));
+                actionLists[list].Add(new ActionListItem(DescriptorTypes.Enumerated, item));
             }
             catch (OutOfMemoryException)
             {
@@ -461,9 +461,9 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 ReadOnlyCollection<ActionReferenceItem> value;
-                if (this.actionReferenceSuite.TryGetReferenceValues(reference, out value))
+                if (actionReferenceSuite.TryGetReferenceValues(reference, out value))
                 {
-                    this.actionLists[list].Add(new ActionListItem(DescriptorTypes.ObjectReference, value));
+                    actionLists[list].Add(new ActionListItem(DescriptorTypes.ObjectReference, value));
                 }
                 else
                 {
@@ -482,7 +482,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                this.actionLists[list].Add(new ActionListItem(DescriptorTypes.Class, data));
+                actionLists[list].Add(new ActionListItem(DescriptorTypes.Class, data));
             }
             catch (OutOfMemoryException)
             {
@@ -496,7 +496,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                this.actionLists[list].Add(new ActionListItem(DescriptorTypes.GlobalClass, data));
+                actionLists[list].Add(new ActionListItem(DescriptorTypes.GlobalClass, data));
             }
             catch (OutOfMemoryException)
             {
@@ -518,7 +518,7 @@ namespace PSFilterLoad.PSApi.PICA
                     byte[] data = new byte[size];
                     Marshal.Copy(hPtr, data, 0, size);
 
-                    this.actionLists[list].Add(new ActionListItem(DescriptorTypes.Alias, data));
+                    actionLists[list].Add(new ActionListItem(DescriptorTypes.Alias, data));
                 }
                 finally
                 {
@@ -544,7 +544,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 unsafe
                 {
-                    ActionListItemCollection items = this.actionLists[list];
+                    ActionListItemCollection items = actionLists[list];
                     int* ptr = (int*)arrayPointer;
 
                     for (uint i = 0; i < count; i++)
@@ -575,7 +575,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 Marshal.Copy(blob, data, 0, length);
 
-                this.actionLists[list].Add(new ActionListItem(DescriptorTypes.RawData, data));
+                actionLists[list].Add(new ActionListItem(DescriptorTypes.RawData, data));
             }
             catch (OutOfMemoryException)
             {
@@ -592,7 +592,7 @@ namespace PSFilterLoad.PSApi.PICA
                 ActionDescriptorZString value;
                 if (zstringSuite.ConvertToActionDescriptor(zstring, out value))
                 {
-                    this.actionLists[list].Add(new ActionListItem(DescriptorTypes.Char, value));
+                    actionLists[list].Add(new ActionListItem(DescriptorTypes.Char, value));
                 }
                 else
                 {
@@ -611,7 +611,7 @@ namespace PSFilterLoad.PSApi.PICA
         #region List read methods
         private int GetInteger(IntPtr list, uint index, ref int data)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 data = (int)items[(int)index].Value;
@@ -624,7 +624,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetFloat(IntPtr list, uint index, ref double data)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 data = (double)items[(int)index].Value;
@@ -637,7 +637,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetUnitFloat(IntPtr list, uint index, ref uint unit, ref double data)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 UnitFloat unitFloat = (UnitFloat)items[(int)index].Value;
@@ -660,7 +660,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetStringLength(IntPtr list, uint index, ref uint length)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 byte[] bytes = (byte[])items[(int)index].Value;
@@ -680,7 +680,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 if (maxLength > 0)
@@ -702,7 +702,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetBoolean(IntPtr list, uint index, ref byte data)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 data = (byte)items[(int)index].Value;
@@ -715,7 +715,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetList(IntPtr list, uint index, ref IntPtr data)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 ReadOnlyCollection<ActionListItem> value = (ReadOnlyCollection<ActionListItem>)items[(int)index].Value;
@@ -723,7 +723,7 @@ namespace PSFilterLoad.PSApi.PICA
                 try
                 {
                     data = GenerateDictionaryKey();
-                    this.actionLists.Add(list, new ActionListItemCollection(value));
+                    actionLists.Add(list, new ActionListItemCollection(value));
                 }
                 catch (OutOfMemoryException)
                 {
@@ -738,13 +738,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetObject(IntPtr list, uint index, ref uint retType, ref IntPtr descriptor)
         {
-            if (this.actionDescriptorSuite == null)
+            if (actionDescriptorSuite == null)
             {
                 // The plug-in called this method before acquiring the Action Descriptor suite.
                 return PSError.kSPLogicError;
             }
 
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 ActionListDescriptor item = (ActionListDescriptor)items[(int)index].Value;
@@ -760,7 +760,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 try
                 {
-                    descriptor = this.actionDescriptorSuite.CreateDescriptor(item.DescriptorValues);
+                    descriptor = actionDescriptorSuite.CreateDescriptor(item.DescriptorValues);
                 }
                 catch (OutOfMemoryException)
                 {
@@ -780,7 +780,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetEnumerated(IntPtr list, uint index, ref uint type, ref uint data)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 EnumeratedValue enumerated = (EnumeratedValue)items[(int)index].Value;
@@ -802,14 +802,14 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetReference(IntPtr list, uint index, ref IntPtr reference)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 ReadOnlyCollection<ActionReferenceItem> value = (ReadOnlyCollection<ActionReferenceItem>)items[(int)index].Value;
 
                 try
                 {
-                    reference = this.actionReferenceSuite.CreateReference(value);
+                    reference = actionReferenceSuite.CreateReference(value);
                 }
                 catch (OutOfMemoryException)
                 {
@@ -824,7 +824,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetClass(IntPtr list, uint index, ref uint data)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 data = (uint)items[(int)index].Value;
@@ -842,7 +842,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetAlias(IntPtr list, uint index, ref IntPtr data)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 byte[] bytes = (byte[])items[(int)index].Value;
@@ -869,7 +869,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (count <= items.Count)
             {
                 int valueCount = (int)count;
@@ -900,7 +900,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetDataLength(IntPtr list, uint index, ref int length)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 byte[] bytes = (byte[])items[(int)index].Value;
@@ -920,7 +920,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 byte[] data = (byte[])items[(int)index].Value;
@@ -935,7 +935,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetZString(IntPtr list, uint index, ref IntPtr zstring)
         {
-            ActionListItemCollection items = this.actionLists[list];
+            ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
                 ActionDescriptorZString value = (ActionDescriptorZString)items[(int)index].Value;

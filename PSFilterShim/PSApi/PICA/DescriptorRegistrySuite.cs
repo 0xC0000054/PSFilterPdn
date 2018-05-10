@@ -39,11 +39,11 @@ namespace PSFilterLoad.PSApi.PICA
             }
 
             this.actionDescriptorSuite = actionDescriptorSuite;
-            this.register = new DescriptorRegistryRegister(Register);
-            this.erase = new DescriptorRegistryErase(Erase);
-            this.get = new DescriptorRegistryGet(Get);
-            this.registry = new Dictionary<string, DescriptorRegistryItem>(StringComparer.Ordinal);
-            this.persistentValuesChanged = false;
+            register = new DescriptorRegistryRegister(Register);
+            erase = new DescriptorRegistryErase(Erase);
+            get = new DescriptorRegistryGet(Get);
+            registry = new Dictionary<string, DescriptorRegistryItem>(StringComparer.Ordinal);
+            persistentValuesChanged = false;
         }
 
         /// <summary>
@@ -54,9 +54,9 @@ namespace PSFilterLoad.PSApi.PICA
         {
             PSDescriptorRegistryProcs suite = new PSDescriptorRegistryProcs
             {
-                Register = Marshal.GetFunctionPointerForDelegate(this.register),
-                Erase = Marshal.GetFunctionPointerForDelegate(this.erase),
-                Get = Marshal.GetFunctionPointerForDelegate(this.get)
+                Register = Marshal.GetFunctionPointerForDelegate(register),
+                Erase = Marshal.GetFunctionPointerForDelegate(erase),
+                Get = Marshal.GetFunctionPointerForDelegate(get)
             };
 
             return suite;
@@ -71,9 +71,9 @@ namespace PSFilterLoad.PSApi.PICA
         /// </returns>
         public DescriptorRegistryValues GetRegistryValues()
         {
-            if (this.registry.Count > 0)
+            if (registry.Count > 0)
             {
-                return new DescriptorRegistryValues(this.registry, this.persistentValuesChanged);
+                return new DescriptorRegistryValues(registry, persistentValuesChanged);
             }
 
             return null;
@@ -98,7 +98,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 foreach (var item in persistedValues)
                 {
-                    this.registry.Add(item.Key, item.Value);
+                    registry.Add(item.Key, item.Value);
                 }
             }
 
@@ -106,7 +106,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 foreach (var item in sessionValues)
                 {
-                    this.registry.Add(item.Key, item.Value);
+                    registry.Add(item.Key, item.Value);
                 }
             }
         }
@@ -123,12 +123,12 @@ namespace PSFilterLoad.PSApi.PICA
 
                 ReadOnlyDictionary<uint, AETEValue> values;
 
-                if (this.actionDescriptorSuite.TryGetDescriptorValues(descriptor, out values))
+                if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out values))
                 {
-                    this.registry.AddOrUpdate(registryKey, new DescriptorRegistryItem(values, isPersistent));
+                    registry.AddOrUpdate(registryKey, new DescriptorRegistryItem(values, isPersistent));
                     if (isPersistent)
                     {
-                        this.persistentValuesChanged = true;
+                        persistentValuesChanged = true;
                     }
                 }
                 else
@@ -154,7 +154,7 @@ namespace PSFilterLoad.PSApi.PICA
                     return PSError.kSPBadParameterError;
                 }
 
-                this.registry.Remove(registryKey);
+                registry.Remove(registryKey);
             }
             catch (OutOfMemoryException)
             {
@@ -176,9 +176,9 @@ namespace PSFilterLoad.PSApi.PICA
 
                 DescriptorRegistryItem item;
 
-                if (this.registry.TryGetValue(registryKey, out item))
+                if (registry.TryGetValue(registryKey, out item))
                 {
-                    descriptor = this.actionDescriptorSuite.CreateDescriptor(item.Values);
+                    descriptor = actionDescriptorSuite.CreateDescriptor(item.Values);
                 }
                 else
                 {

@@ -29,9 +29,9 @@ namespace PSFilterLoad.PSApi
         /// <param name="colorPickerForeColor">The color picker foreground color.</param>
         internal PluginUISettings(bool highDpi, Color colorPickerBackColor, Color colorPickerForeColor)
         {
-            this.ColorPickerBackColor = colorPickerBackColor;
-            this.ColorPickerForeColor = colorPickerForeColor;
-            this.HighDpi = highDpi;
+            ColorPickerBackColor = colorPickerBackColor;
+            ColorPickerForeColor = colorPickerForeColor;
+            HighDpi = highDpi;
         }
 
         /// <summary>

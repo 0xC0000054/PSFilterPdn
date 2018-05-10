@@ -247,25 +247,25 @@ namespace PSFilterLoad.PSApi
 				throw new ArgumentNullException(nameof(eep));
 			}
 
-			this.inputHandling = FilterDataHandling.None;
-			this.outputHandling = FilterDataHandling.None;
-			this.copyToDest = true;
+			inputHandling = FilterDataHandling.None;
+			outputHandling = FilterDataHandling.None;
+			copyToDest = true;
 
-			this.dataPtr = IntPtr.Zero;
-			this.previousPhase = PluginPhase.None;
-			this.errorMessage = string.Empty;
-			this.disposed = false;
-			this.sizesSetup = false;
-			this.frValuesSetup = false;
-			this.isRepeatEffect = false;
-			this.parameterDataRestored = false;
-			this.pluginDataRestored = false;
-			this.globalParameters = new GlobalParameters();
-			this.scriptingData = null;
-			this.useChannelPorts = false;
-			this.descriptorSuite = new DescriptorSuite();
-			this.resourceSuite = new ResourceSuite();
-			this.parentWindowHandle = owner;
+			dataPtr = IntPtr.Zero;
+			previousPhase = PluginPhase.None;
+			errorMessage = string.Empty;
+			disposed = false;
+			sizesSetup = false;
+			frValuesSetup = false;
+			isRepeatEffect = false;
+			parameterDataRestored = false;
+			pluginDataRestored = false;
+			globalParameters = new GlobalParameters();
+			scriptingData = null;
+			useChannelPorts = false;
+			descriptorSuite = new DescriptorSuite();
+			resourceSuite = new ResourceSuite();
+			parentWindowHandle = owner;
 
 			if (eep.SourceSurface.Width > 32000 || eep.SourceSurface.Height > 32000)
 			{
@@ -295,50 +295,50 @@ namespace PSFilterLoad.PSApi
 				((PlatformData*)platFormDataPtr.ToPointer())->hwnd = owner;
 			}
 
-			this.lastOutRect = Rect16.Empty;
-			this.lastInRect = Rect16.Empty;
-			this.lastMaskRect = Rect16.Empty;
+			lastOutRect = Rect16.Empty;
+			lastInRect = Rect16.Empty;
+			lastMaskRect = Rect16.Empty;
 
-			this.maskDataPtr = inDataPtr = outDataPtr = IntPtr.Zero;
+			maskDataPtr = inDataPtr = outDataPtr = IntPtr.Zero;
 
-			this.lastOutRowBytes = 0;
-			this.lastOutHiPlane = 0;
-			this.lastOutLoPlane = -1;
-			this.lastInLoPlane = -1;
+			lastOutRowBytes = 0;
+			lastOutHiPlane = 0;
+			lastOutLoPlane = -1;
+			lastInLoPlane = -1;
 
-			this.source = eep.SourceSurface.Clone();
+			source = eep.SourceSurface.Clone();
 
-			this.dest = new Surface(source.Width, source.Height);
+			dest = new Surface(source.Width, source.Height);
 
-			this.advanceProc = new AdvanceStateProc(AdvanceStateProc);
-			this.colorProc = new ColorServicesProc(ColorServicesProc);
-			this.displayPixelsProc = new DisplayPixelsProc(DisplayPixelsProc);
-			this.hostProc = new HostProcs(HostProc);
-			this.processEventProc = new ProcessEventProc(ProcessEventProc);
-			this.progressProc = new ProgressProc(ProgressProc);
-			this.abortProc = new TestAbortProc(AbortProc);
+			advanceProc = new AdvanceStateProc(AdvanceStateProc);
+			colorProc = new ColorServicesProc(ColorServicesProc);
+			displayPixelsProc = new DisplayPixelsProc(DisplayPixelsProc);
+			hostProc = new HostProcs(HostProc);
+			processEventProc = new ProcessEventProc(ProcessEventProc);
+			progressProc = new ProgressProc(ProgressProc);
+			abortProc = new TestAbortProc(AbortProc);
 
 			ColorPickerService.SetDialogColors(pluginUISettings);
 
-			this.channelPortsSuite = new ChannelPortsSuite(this);
-			this.imageServicesSuite = new ImageServicesSuite();
+			channelPortsSuite = new ChannelPortsSuite(this);
+			imageServicesSuite = new ImageServicesSuite();
 			propertySuite = new PropertySuite(source.Width, source.Height, pluginUISettings);
-			this.basicSuiteProvider = new SPBasicSuiteProvider(this, propertySuite);
+			basicSuiteProvider = new SPBasicSuiteProvider(this, propertySuite);
 
-			this.backgroundColor = new byte[4] { eep.SecondaryColor.R, eep.SecondaryColor.G, eep.SecondaryColor.B, 0 };
-			this.foregroundColor = new byte[4] { eep.PrimaryColor.R, eep.PrimaryColor.G, eep.PrimaryColor.B, 0 };
+			backgroundColor = new byte[4] { eep.SecondaryColor.R, eep.SecondaryColor.G, eep.SecondaryColor.B, 0 };
+			foregroundColor = new byte[4] { eep.PrimaryColor.R, eep.PrimaryColor.G, eep.PrimaryColor.B, 0 };
 
-			this.dpiX = this.dpiY = 96f; // Paint.NET does not expose the DPI info to Effects, assume standard monitor resolution of 96.
+			dpiX = dpiY = 96f; // Paint.NET does not expose the DPI info to Effects, assume standard monitor resolution of 96.
 
-			this.readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
+			readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
 
 			if (eep.GetSelection(eep.SourceSurface.Bounds).GetBoundsInt() != eep.SourceSurface.Bounds)
 			{
-				this.selectedRegion = eep.GetSelection(eep.SourceSurface.Bounds).Clone();
+				selectedRegion = eep.GetSelection(eep.SourceSurface.Bounds).Clone();
 			}
 			else
 			{
-				this.selectedRegion = null;
+				selectedRegion = null;
 			}
 
 #if DEBUG
@@ -363,7 +363,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return this.source;
+				return source;
 			}
 		}
 
@@ -371,7 +371,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return this.dest;
+				return dest;
 			}
 		}
 
@@ -379,7 +379,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return this.mask;
+				return mask;
 			}
 		}
 
@@ -387,7 +387,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return this.parentWindowHandle;
+				return parentWindowHandle;
 			}
 		}
 
@@ -395,7 +395,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return this.displayPixelsProc;
+				return displayPixelsProc;
 			}
 		}
 
@@ -403,7 +403,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return this.processEventProc;
+				return processEventProc;
 			}
 		}
 
@@ -411,7 +411,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return this.progressProc;
+				return progressProc;
 			}
 		}
 
@@ -419,7 +419,7 @@ namespace PSFilterLoad.PSApi
 		{
 			get
 			{
-				return this.abortProc;
+				return abortProc;
 			}
 		}
 
@@ -463,12 +463,12 @@ namespace PSFilterLoad.PSApi
 				}
 				else
 				{
-					this.filterCase = selectedRegion != null ? FilterCase.FlatImageWithSelection : FilterCase.FlatImageNoSelection;
+					filterCase = selectedRegion != null ? FilterCase.FlatImageWithSelection : FilterCase.FlatImageNoSelection;
 				}
 			}
 			else
 			{
-				this.filterCase = selectedRegion != null ? FilterCase.EditableTransparencyWithSelection : FilterCase.EditableTransparencyNoSelection;
+				filterCase = selectedRegion != null ? FilterCase.EditableTransparencyWithSelection : FilterCase.EditableTransparencyNoSelection;
 
 				int filterCaseIndex = (int)filterCase - 1;
 				System.Collections.ObjectModel.ReadOnlyCollection<FilterCaseInfo> filterInfo = data.FilterInfo;
@@ -598,11 +598,11 @@ namespace PSFilterLoad.PSApi
 				Dictionary<uint, AETEValue> data;
 				if (basicSuiteProvider.TryGetScriptingData(descriptorParameters->descriptor, out data))
 				{
-					this.scriptingData = data;
+					scriptingData = data;
 				}
 				else if (descriptorSuite.TryGetScriptingData(descriptorParameters->descriptor, out data))
 				{
-					this.scriptingData = data;
+					scriptingData = data;
 				}
 				HandleSuite.Instance.UnlockHandle(descriptorParameters->descriptor);
 				HandleSuite.Instance.DisposeHandle(descriptorParameters->descriptor);
@@ -1276,7 +1276,7 @@ namespace PSFilterLoad.PSApi
 			}
 
 			useChannelPorts = EnableChannelPorts(pdata);
-			this.basicSuiteProvider.SetPluginName(pdata.Title.TrimEnd('.'));
+			basicSuiteProvider.SetPluginName(pdata.Title.TrimEnd('.'));
 
 			SetFilterTransparencyMode(pdata);
 
@@ -1364,11 +1364,11 @@ namespace PSFilterLoad.PSApi
 				{
 					if (basicSuiteProvider.ErrorSuiteMessage != null)
 					{
-						message = this.basicSuiteProvider.ErrorSuiteMessage;
+						message = basicSuiteProvider.ErrorSuiteMessage;
 					}
 					else
 					{
-						message = StringUtil.FromPascalString(this.errorStringPtr, string.Empty);
+						message = StringUtil.FromPascalString(errorStringPtr, string.Empty);
 					}
 				}
 				else

@@ -48,7 +48,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.fileName;
+                return fileName;
             }
         }
 
@@ -62,7 +62,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.entryPoint;
+                return entryPoint;
             }
         }
 
@@ -76,7 +76,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.category;
+                return category;
             }
         }
 
@@ -90,7 +90,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.title;
+                return title;
             }
         }
 
@@ -104,7 +104,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.filterInfo;
+                return filterInfo;
             }
         }
 
@@ -118,7 +118,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.runWith32BitShim;
+                return runWith32BitShim;
             }
         }
 
@@ -132,7 +132,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.aete;
+                return aete;
             }
         }
 
@@ -146,11 +146,11 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.moduleEntryPoints;
+                return moduleEntryPoints;
             }
             internal set
             {
-                this.moduleEntryPoints = value;
+                moduleEntryPoints = value;
             }
         }
 
@@ -185,7 +185,7 @@ namespace PSFilterLoad.PSApi
             this.filterInfo = filterInfo;
             this.runWith32BitShim = runWith32BitShim;
             this.aete = aete;
-            this.moduleEntryPoints = null;
+            moduleEntryPoints = null;
         }
 
         public override bool Equals(object obj)
@@ -210,10 +210,10 @@ namespace PSFilterLoad.PSApi
                 return false;
             }
 
-            return (string.Equals(this.fileName, other.fileName, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(this.entryPoint, other.entryPoint, StringComparison.Ordinal) &&
-                    string.Equals(this.category, other.category, StringComparison.Ordinal) &&
-                    string.Equals(this.title, other.title, StringComparison.Ordinal));
+            return (string.Equals(fileName, other.fileName, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(entryPoint, other.entryPoint, StringComparison.Ordinal) &&
+                    string.Equals(category, other.category, StringComparison.Ordinal) &&
+                    string.Equals(title, other.title, StringComparison.Ordinal));
         }
 
         public override int GetHashCode()
@@ -222,10 +222,10 @@ namespace PSFilterLoad.PSApi
 
             unchecked
             {
-                hash = (hash * 127) + (this.fileName != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(this.fileName) : 0);
-                hash = (hash * 127) + (this.entryPoint != null ? this.entryPoint.GetHashCode() : 0);
-                hash = (hash * 127) + (this.category != null ? this.category.GetHashCode() : 0);
-                hash = (hash * 127) + (this.title != null ? this.title.GetHashCode() : 0);
+                hash = (hash * 127) + (fileName != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(fileName) : 0);
+                hash = (hash * 127) + (entryPoint != null ? entryPoint.GetHashCode() : 0);
+                hash = (hash * 127) + (category != null ? category.GetHashCode() : 0);
+                hash = (hash * 127) + (title != null ? title.GetHashCode() : 0);
             }
 
             return hash;
@@ -253,7 +253,7 @@ namespace PSFilterLoad.PSApi
 
         internal bool IsValid()
         {
-            return (!string.IsNullOrEmpty(this.category) && !string.IsNullOrEmpty(this.title) && !string.IsNullOrEmpty(this.entryPoint));
+            return (!string.IsNullOrEmpty(category) && !string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(entryPoint));
         }
     }
 }

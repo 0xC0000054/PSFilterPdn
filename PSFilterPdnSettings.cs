@@ -41,9 +41,9 @@ namespace PSFilterPdn
             }
 
             this.path = path;
-            this.changed = false;
-            this.searchSubdirectories = true;
-            this.searchDirectories = null;
+            changed = false;
+            searchSubdirectories = true;
+            searchDirectories = null;
 
             try
             {
@@ -69,7 +69,7 @@ namespace PSFilterPdn
         {
             get
             {
-                return this.searchDirectories;
+                return searchDirectories;
             }
             set
             {
@@ -78,8 +78,8 @@ namespace PSFilterPdn
                     throw new ArgumentNullException("value");
                 }
 
-                this.searchDirectories = value;
-                this.changed = true;
+                searchDirectories = value;
+                changed = true;
             }
         }
 
@@ -93,14 +93,14 @@ namespace PSFilterPdn
         {
             get
             {
-                return this.searchSubdirectories;
+                return searchSubdirectories;
             }
             set
             {
-                if (this.searchSubdirectories != value)
+                if (searchSubdirectories != value)
                 {
-                    this.searchSubdirectories = value;
-                    this.changed = true;
+                    searchSubdirectories = value;
+                    changed = true;
                 }
             }
         }
@@ -110,10 +110,10 @@ namespace PSFilterPdn
         /// </summary>
         public void Flush()
         {
-            if (this.changed)
+            if (changed)
             {
                 Save();
-                this.changed = false;
+                changed = false;
             }
         }
 
@@ -175,7 +175,7 @@ namespace PSFilterPdn
 
                             if (directories.Count > 0)
                             {
-                                this.searchDirectories = new HashSet<string>(directories, StringComparer.OrdinalIgnoreCase);
+                                searchDirectories = new HashSet<string>(directories, StringComparer.OrdinalIgnoreCase);
                             }
                         }
                     }
@@ -185,19 +185,19 @@ namespace PSFilterPdn
                         bool result;
                         if (bool.TryParse(searchSubDirNode.InnerText.Trim(), out result))
                         {
-                            this.searchSubdirectories = result;
+                            searchSubdirectories = result;
                         }
                     }
 
-                    this.changed = true;
+                    changed = true;
                 }
                 else
                 {
                     DataContractSerializer serializer = new DataContractSerializer(typeof(PSFilterPdnSettings));
                     PSFilterPdnSettings settings = (PSFilterPdnSettings)serializer.ReadObject(xmlReader);
 
-                    this.searchDirectories = settings.searchDirectories;
-                    this.searchSubdirectories = settings.searchSubdirectories;
+                    searchDirectories = settings.searchDirectories;
+                    searchSubdirectories = settings.searchSubdirectories;
                 }
             }
         }
@@ -209,7 +209,7 @@ namespace PSFilterPdn
                 Indent = true
             };
 
-            using (XmlWriter writer = XmlWriter.Create(this.path, writerSettings))
+            using (XmlWriter writer = XmlWriter.Create(path, writerSettings))
             {
                 DataContractSerializer serializer = new DataContractSerializer(typeof(PSFilterPdnSettings));
                 serializer.WriteObject(writer, this);

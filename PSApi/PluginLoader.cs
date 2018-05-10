@@ -27,8 +27,8 @@ namespace PSFilterLoad.PSApi
 
             public QueryAETE(int terminologyID)
             {
-                this.resourceID = new IntPtr(terminologyID);
-                this.enumAETE = null;
+                resourceID = new IntPtr(terminologyID);
+                enumAETE = null;
             }
         }
 
@@ -50,16 +50,16 @@ namespace PSFilterLoad.PSApi
                 switch (platform)
                 {
                     case PEFile.ProcessorArchitecture.X86:
-                        this.platformEntryPoint = PIPropertyID.PIWin32X86CodeProperty;
+                        platformEntryPoint = PIPropertyID.PIWin32X86CodeProperty;
                         break;
                     case PEFile.ProcessorArchitecture.X64:
-                        this.platformEntryPoint = PIPropertyID.PIWin64X86CodeProperty;
+                        platformEntryPoint = PIPropertyID.PIWin64X86CodeProperty;
                         break;
                     case PEFile.ProcessorArchitecture.Unknown:
                     default:
                         throw new PlatformNotSupportedException();
                 }
-                this.plugins = new List<PluginData>();
+                plugins = new List<PluginData>();
             }
         }
 
@@ -71,7 +71,7 @@ namespace PSFilterLoad.PSApi
             public FilterCaseInfoResult(ReadOnlyCollection<FilterCaseInfo> filterCaseInfo, int actualArrayLength)
             {
                 this.filterCaseInfo = filterCaseInfo;
-                this.propertyLength = actualArrayLength;
+                propertyLength = actualArrayLength;
             }
         }
 

@@ -22,9 +22,9 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="b">The b component in the range of [0, 1].</param>
         public Lab(double luminance, double a, double b)
         {
-            this.L = luminance;
-            this.A = a;
-            this.B = b;
+            L = luminance;
+            A = a;
+            B = b;
         }
 
         /// <summary>

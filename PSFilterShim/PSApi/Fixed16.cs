@@ -37,7 +37,7 @@ namespace PSFilterLoad.PSApi
                 throw new ArgumentOutOfRangeException(nameof(value), value, "The value must be between 0 and 65535.");
             }
 
-            this.fixedValue = (value << 16);
+            fixedValue = (value << 16);
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="value">The value.</param>
         public Fixed16(double value)
         {
-            this.fixedValue = (int)(value * 65536.0);
+            fixedValue = (int)(value * 65536.0);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return this.fixedValue;
+                return fixedValue;
             }
         }
 
@@ -66,7 +66,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                return string.Format("Fixed = {0}", this.fixedValue);
+                return string.Format("Fixed = {0}", fixedValue);
             }
         }
 
@@ -96,7 +96,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public bool Equals(Fixed16 other)
         {
-            return (this.fixedValue == other.fixedValue);
+            return (fixedValue == other.fixedValue);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public override int GetHashCode()
         {
-            return this.fixedValue.GetHashCode();
+            return fixedValue.GetHashCode();
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>The 16.16 fixed point value converted to an Int32.</returns>
         public int ToInt32()
         {
-            return (this.fixedValue >> 16);
+            return (fixedValue >> 16);
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>The 16.16 fixed point value converted to a Double.</returns>
         public double ToDouble()
         {
-            return (this.fixedValue / 65536.0);
+            return (fixedValue / 65536.0);
         }
 
         public static bool operator ==(Fixed16 left, Fixed16 right)

@@ -25,18 +25,18 @@ namespace PSFilterLoad.PSApi
 
 		public ResourceSuite()
 		{
-			this.countResourceProc = new CountPIResourcesProc(CountResource);
-			this.addResourceProc = new AddPIResourceProc(AddResource);
-			this.deleteResourceProc = new DeletePIResourceProc(DeleteResource);
-			this.getResourceProc = new GetPIResourceProc(GetResource);
-			this.pseudoResources = new PseudoResourceCollection();
+			countResourceProc = new CountPIResourcesProc(CountResource);
+			addResourceProc = new AddPIResourceProc(AddResource);
+			deleteResourceProc = new DeletePIResourceProc(DeleteResource);
+			getResourceProc = new GetPIResourceProc(GetResource);
+			pseudoResources = new PseudoResourceCollection();
 		}
 
 		public PseudoResourceCollection PseudoResources
 		{
 			get
 			{
-				return this.pseudoResources;
+				return pseudoResources;
 			}
 			set
 			{
@@ -45,7 +45,7 @@ namespace PSFilterLoad.PSApi
 					throw new ArgumentNullException("value");
 				}
 
-				this.pseudoResources = value;
+				pseudoResources = value;
 			}
 		}
 
@@ -84,7 +84,7 @@ namespace PSFilterLoad.PSApi
 				}
 
 				int index = CountResource(ofType) + 1;
-				this.pseudoResources.Add(new PseudoResource(ofType, index, bytes));
+				pseudoResources.Add(new PseudoResource(ofType, index, bytes));
 			}
 			catch (OutOfMemoryException)
 			{
@@ -101,7 +101,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			short count = 0;
 
-			foreach (var item in this.pseudoResources)
+			foreach (var item in pseudoResources)
 			{
 				if (item.Equals(ofType))
 				{
@@ -117,25 +117,25 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", DebugUtils.PropToString(ofType), index));
 #endif
-			int resourceIndex = this.pseudoResources.FindIndex(ofType, index);
+			int resourceIndex = pseudoResources.FindIndex(ofType, index);
 
 			if (resourceIndex >= 0)
 			{
-				this.pseudoResources.RemoveAt(resourceIndex);
+				pseudoResources.RemoveAt(resourceIndex);
 
 				int i = index + 1;
 
 				while (true)
 				{
 					// Renumber the index of subsequent items.
-					int next = this.pseudoResources.FindIndex(ofType, i);
+					int next = pseudoResources.FindIndex(ofType, i);
 
 					if (next < 0)
 					{
 						break;
 					}
 
-					this.pseudoResources[next].Index = i - 1;
+					pseudoResources[next].Index = i - 1;
 
 					i++;
 				}
@@ -147,7 +147,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", DebugUtils.PropToString(ofType), index));
 #endif
-			PseudoResource res = this.pseudoResources.Find(ofType, index);
+			PseudoResource res = pseudoResources.Find(ofType, index);
 
 			if (res != null)
 			{
