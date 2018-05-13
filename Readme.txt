@@ -13,7 +13,11 @@ Installation
 -------------
 
 1. Exit Paint.NET.
-2. Place PSFilterPdn.dll and PSFilterShim.exe in the Paint.NET Effects folder (usually C:\Program Files\Paint.NET\Effects).
+2. Place PSFilterPdn.dll and PSFilterShim.exe in the Paint.NET Effects folder which is usually located in one the following locations depending on the Paint.NET version you have installed.
+
+  Classic: C:\Program Files\Paint.NET\Effects.
+  Microsoft Store: My Documents\paint.net App Files\Effects
+
 3. Restart Paint.NET.
 
 A copy of Paint.NET can be obtained from the official website.
