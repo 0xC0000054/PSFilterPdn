@@ -28,5 +28,4 @@ namespace PSFilterLoad.PSApi
 
         public fixed byte reserved[244];
     }
-
 }

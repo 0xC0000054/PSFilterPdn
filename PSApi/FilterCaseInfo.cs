@@ -16,7 +16,6 @@
  * All rights reserved.
 */
 
-
 using System;
 using System.Runtime.Serialization;
 
@@ -145,5 +144,4 @@ namespace PSFilterLoad.PSApi
             return (InputHandling != FilterDataHandling.CantFilter && OutputHandling != FilterDataHandling.CantFilter);
         }
     }
-
 }

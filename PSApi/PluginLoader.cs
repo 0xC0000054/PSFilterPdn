@@ -170,7 +170,6 @@ namespace PSFilterLoad.PSApi
                                     digit = 10 + (hexChar - 'A');
                                 }
 
-
                                 fieldValue = (fieldValue * 16) + digit;
 
                                 offset++;

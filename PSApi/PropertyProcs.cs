@@ -26,7 +26,6 @@ namespace PSFilterLoad.PSApi
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short SetPropertyProc(uint signature, uint key, int index, IntPtr simpleProperty, IntPtr complexProperty);
 
-
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayout(LayoutKind.Sequential)]
     internal struct PropertyProcs
     {

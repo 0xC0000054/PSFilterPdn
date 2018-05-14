@@ -40,7 +40,6 @@ namespace PSFilterLoad.PSApi
 			return UnsafeNativeMethods.FreeLibrary(handle);
 		}
 	}
-
 }
 
 

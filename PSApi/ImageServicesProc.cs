@@ -15,7 +15,6 @@
  * All rights reserved.
 */
 
-
 using System;
 using System.Runtime.InteropServices;
 
@@ -42,5 +41,4 @@ namespace PSFilterLoad.PSApi
         public IntPtr interpolate1DProc;
         public IntPtr interpolate2DProc;
     }
-
 }

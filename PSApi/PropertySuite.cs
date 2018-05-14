@@ -257,7 +257,6 @@ namespace PSFilterLoad.PSApi
                     return PSError.errPlugInPropertyUndefined;
             }
 
-
             return PSError.noErr;
         }
 

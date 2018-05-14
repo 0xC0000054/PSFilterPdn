@@ -109,7 +109,6 @@ namespace PaintDotNet
                     // Between Magenta and Cyan
                     h = 4 + (r - g) / delta;
                 }
-
             }
             // Scale h to be between 0 and 360.
             // This may require adding 360, if the value
@@ -131,5 +130,4 @@ namespace PaintDotNet
             return String.Format("({0}, {1}, {2})", Red, Green, Blue);
         }
     }
-
 }

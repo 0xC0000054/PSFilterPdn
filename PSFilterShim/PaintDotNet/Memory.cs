@@ -115,7 +115,6 @@ namespace PaintDotNet.SystemLayer
             return block;
         }
 
-
         /// <summary>
         /// Frees a block of memory previously allocated with Allocate().
         /// </summary>

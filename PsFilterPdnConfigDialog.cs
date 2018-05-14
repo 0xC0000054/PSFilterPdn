@@ -655,7 +655,6 @@ namespace PSFilterPdn
             descriptorRegistryFileName = Path.Combine(proxyTempDir, "registry.dat");
             regionFileName = string.Empty;
 
-
             Rectangle sourceBounds = eep.SourceSurface.Bounds;
 
             Rectangle selection = eep.GetSelection(sourceBounds).GetBoundsInt();
@@ -694,7 +693,6 @@ namespace PSFilterPdn
             proxyData = data;
             try
             {
-
                 using (FileStream fs = new FileStream(srcFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     using (Bitmap bmp = base.EffectSourceSurface.CreateAliasedBitmap())
@@ -919,11 +917,9 @@ namespace PSFilterPdn
                                         destSurface.Dispose();
                                         destSurface = null;
                                     }
-
                                 }
 
                                 filterProgressBar.Value = 0;
-
                             }
                         }
                         catch (BadImageFormatException bifex)
@@ -963,7 +959,6 @@ namespace PSFilterPdn
                             Close();
                         }
                     }
-
                 }
             }
         }
@@ -986,7 +981,6 @@ namespace PSFilterPdn
                     }
                 }
             }
-
         }
 
         private void remDirBtn_Click(object sender, EventArgs e)
@@ -1121,7 +1115,6 @@ namespace PSFilterPdn
 
                     return false;
                 }
-
             }
 
             return true;
@@ -1551,7 +1544,6 @@ namespace PSFilterPdn
 
                                     nodes.Add(category, node);
                                 }
-
                             }
                         }
                     }

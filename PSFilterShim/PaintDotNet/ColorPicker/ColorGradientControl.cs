@@ -227,7 +227,6 @@ namespace PaintDotNet
             }
         }
 
-
         private Color minColor;
         public Color MinColor
         {
@@ -296,7 +295,6 @@ namespace PaintDotNet
 
             if (this.customGradient != null && gradientRect.Width > 1 && gradientRect.Height > 1)
             {
-
                 Surface gradientSurface = new Surface(gradientRect.Width, gradientRect.Height);
 
                 using (RenderArgs ra = new RenderArgs(gradientSurface))
@@ -376,7 +374,6 @@ namespace PaintDotNet
                 }
 
                 gradientSurface.Dispose();
-
             }
             else
             {
@@ -654,7 +651,6 @@ namespace PaintDotNet
                     this.InvalidateTriangle(highlight);
                 }
             }
-
         }
 
         protected override void OnMouseLeave(EventArgs e)

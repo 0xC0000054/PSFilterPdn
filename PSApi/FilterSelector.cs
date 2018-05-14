@@ -16,7 +16,6 @@
  * All rights reserved.
 */
 
-
 namespace PSFilterLoad.PSApi
 {
     internal enum FilterSelector : short

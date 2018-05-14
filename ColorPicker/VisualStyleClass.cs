@@ -7,7 +7,6 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
-
 namespace PSFilterLoad.ColorPicker
 {
     internal enum VisualStyleClass

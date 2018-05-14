@@ -74,5 +74,4 @@ namespace PSFilterLoad.PSApi
         // Scripting error codes
         public const int errMissingParameter = -1715;
     }
-
 }

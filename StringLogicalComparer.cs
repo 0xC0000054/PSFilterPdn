@@ -140,7 +140,6 @@ namespace PSFilterPdn
                             return -1;
                         }
                     }
-
                 }
                 else if (sp1 && sp2)
                 {

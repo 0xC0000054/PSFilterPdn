@@ -7,7 +7,6 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
-
 namespace PaintDotNet.SystemLayer
 {
     internal enum VisualStyleClass

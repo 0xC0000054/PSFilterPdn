@@ -279,7 +279,6 @@ namespace PSFilterLoad.PSApi.PICA
                         break;
                 }
 
-
                 error = ColorServicesConvert.Convert(inputCSpace, outputCSpace, ref c0, ref c1, ref c2, ref c3);
                 if (error != PSError.kSPNoError)
                 {

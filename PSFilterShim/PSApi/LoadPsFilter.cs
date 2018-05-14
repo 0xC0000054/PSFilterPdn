@@ -22,7 +22,6 @@ using PSFilterShim.Properties;
 
 namespace PSFilterLoad.PSApi
 {
-
 	internal sealed class LoadPsFilter : IDisposable, IFilterImageProvider, IPICASuiteDataProvider
 	{
 		private static bool RectNonEmpty(Rect16 rect)
@@ -55,7 +54,6 @@ namespace PSFilterLoad.PSApi
 		private IntPtr imageServicesProcsPtr;
 		private IntPtr propertyProcsPtr;
 		private IntPtr resourceProcsPtr;
-
 
 		private IntPtr descriptorParametersPtr;
 		private IntPtr readDescriptorPtr;
@@ -289,7 +287,6 @@ namespace PSFilterLoad.PSApi
 
 				source = Surface.CopyFromBitmap(bmp);
 
-
 				dpiX = bmp.HorizontalResolution;
 				dpiY = bmp.VerticalResolution;
 			}
@@ -313,7 +310,6 @@ namespace PSFilterLoad.PSApi
 
 			inputHandling = FilterDataHandling.None;
 			outputHandling = FilterDataHandling.None;
-
 
 			abortFunc = null;
 			progressFunc = null;
@@ -528,8 +524,6 @@ namespace PSFilterLoad.PSApi
 								filterCase = FilterCase.ProtectedTransparencyWithSelection;
 								break;
 						}
-
-
 					}
 				}
 			}
@@ -633,7 +627,6 @@ namespace PSFilterLoad.PSApi
 				{
 					int handleSize = HandleSuite.Instance.GetHandleSize(filterRecord->parameters);
 
-
 					byte[] buf = new byte[handleSize];
 					Marshal.Copy(HandleSuite.Instance.LockHandle(filterRecord->parameters, 0), buf, 0, buf.Length);
 					HandleSuite.Instance.UnlockHandle(filterRecord->parameters);
@@ -664,7 +657,6 @@ namespace PSFilterLoad.PSApi
 									// Some plug-ins may have executable code in the parameter block.
 									globalParameters.ParameterDataExecutable = IsMemoryExecutable(hPtr);
 								}
-
 							}
 							else
 							{
@@ -685,7 +677,6 @@ namespace PSFilterLoad.PSApi
 									globalParameters.SetParameterDataBytes(buf);
 									globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.RawBytes;
 								}
-
 							}
 						}
 						finally
@@ -694,7 +685,6 @@ namespace PSFilterLoad.PSApi
 						}
 					}
 				}
-
 			}
 			if (filterRecord->parameters != IntPtr.Zero && dataPtr != IntPtr.Zero)
 			{
@@ -738,7 +728,6 @@ namespace PSFilterLoad.PSApi
 							globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.OTOFHandle;
 							globalParameters.PluginDataExecutable = IsMemoryExecutable(hPtr);
 						}
-
 					}
 					else if (pluginDataSize > 0L)
 					{
@@ -752,7 +741,6 @@ namespace PSFilterLoad.PSApi
 				{
 					SafeNativeMethods.GlobalUnlock(ptr);
 				}
-
 			}
 		}
 
@@ -850,7 +838,6 @@ namespace PSFilterLoad.PSApi
 						throw new InvalidEnumArgumentException("PluginDataStorageMethod", (int)globalParameters.PluginDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
 				}
 			}
-
 		}
 
 		private bool PluginAbout(PluginData pdata)
@@ -900,7 +887,6 @@ namespace PSFilterLoad.PSApi
 					aboutRecordPtr = IntPtr.Zero;
 				}
 			}
-
 
 			if (result != PSError.noErr)
 			{
@@ -998,7 +984,6 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 			AdvanceStateProc();
-
 
 			result = PSError.noErr;
 
@@ -1167,7 +1152,6 @@ namespace PSFilterLoad.PSApi
 
 			filterRecord->inPlaneBytes = 1;
 			filterRecord->outPlaneBytes = 1;
-
 		}
 
 		private bool PluginPrepare()
@@ -1176,9 +1160,7 @@ namespace PSFilterLoad.PSApi
 			RestoreParameterHandles();
 			SetFilterRecordValues();
 
-
 			result = PSError.noErr;
-
 
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.Call, "Before filterSelectorPrepare");
@@ -1345,7 +1327,6 @@ namespace PSFilterLoad.PSApi
 					return false;
 				}
 			}
-
 
 			if (!PluginPrepare())
 			{
@@ -1598,7 +1579,6 @@ namespace PSFilterLoad.PSApi
 					lastOutLoPlane = filterRecord->outLoPlane;
 					lastOutHiPlane = filterRecord->outHiPlane;
 				}
-
 			}
 			else
 			{
@@ -1730,7 +1710,6 @@ namespace PSFilterLoad.PSApi
 				}
 			}
 
-
 			try
 			{
 				ScaleTempSurface(filterRecord->inputRate, lockRect);
@@ -1739,7 +1718,6 @@ namespace PSFilterLoad.PSApi
 			{
 				return PSError.memFullErr;
 			}
-
 
 			short channelOffset = filterRecord->inLoPlane;
 
@@ -1793,7 +1771,6 @@ namespace PSFilterLoad.PSApi
 							dst[2] = src[0];
 							dst[3] = src[3];
 							break;
-
 					}
 
 					src += ColorBgra.SizeOf;
@@ -1912,7 +1889,6 @@ namespace PSFilterLoad.PSApi
 							dst[2] = src[0];
 							dst[3] = src[3];
 							break;
-
 					}
 
 					src += ColorBgra.SizeOf;
@@ -1978,7 +1954,6 @@ namespace PSFilterLoad.PSApi
 				{
 					tempMask = mask.Clone();
 				}
-
 			}
 		}
 
@@ -2135,7 +2110,6 @@ namespace PSFilterLoad.PSApi
 
 					for (int x = left; x < right; x++)
 					{
-
 						switch (nplanes)
 						{
 							case 1:
@@ -2156,14 +2130,12 @@ namespace PSFilterLoad.PSApi
 								dst[2] = src[0];
 								dst[3] = src[3];
 								break;
-
 						}
 
 						src += nplanes;
 						dst += ColorBgra.SizeOf;
 					}
 				}
-
 
 #if DEBUG
 				using (Bitmap bmp = dest.CreateAliasedBitmap())
@@ -2252,7 +2224,6 @@ namespace PSFilterLoad.PSApi
 					}
 				}
 			}
-
 		}
 
 		private unsafe short ColorServicesProc(ref ColorServicesInfo info)
@@ -2293,7 +2264,6 @@ namespace PSFilterLoad.PSApi
 							}
 
 							err = ColorServicesConvert.Convert(ColorSpace.RGBSpace, info.resultSpace, ref info.colorComponents);
-
 						}
 						else
 						{
@@ -2358,7 +2328,6 @@ namespace PSFilterLoad.PSApi
 					}
 
 					break;
-
 			}
 			return err;
 		}
@@ -2441,7 +2410,6 @@ namespace PSFilterLoad.PSApi
 									src++;
 									dst++;
 								}
-
 							}
 						}
 
@@ -2456,7 +2424,6 @@ namespace PSFilterLoad.PSApi
 
 								for (int x = 0; x < right; x++)
 								{
-
 									*dst = src;
 
 									dst++;
@@ -2517,7 +2484,6 @@ namespace PSFilterLoad.PSApi
 
 						byte* inDataPtr = (byte*)inData.ToPointer();
 
-
 						if (top > 0)
 						{
 							for (int y = 0; y < top; y++)
@@ -2555,7 +2521,6 @@ namespace PSFilterLoad.PSApi
 							}
 						}
 
-
 						if (left > 0)
 						{
 							for (int y = 0; y < height; y++)
@@ -2591,7 +2556,6 @@ namespace PSFilterLoad.PSApi
 								}
 							}
 						}
-
 
 						if (bottom > 0)
 						{
@@ -2629,7 +2593,6 @@ namespace PSFilterLoad.PSApi
 									p++;
 									q += nplanes;
 								}
-
 							}
 						}
 
@@ -2686,7 +2649,6 @@ namespace PSFilterLoad.PSApi
 						Memory.FillMemory(inData, (byte)inputPadding, (ulong)Memory.Size(inData));
 						break;
 				}
-
 			}
 
 			return PSError.noErr;
@@ -2922,7 +2884,6 @@ namespace PSFilterLoad.PSApi
 			{
 				checkerBoardBitmap.UnlockBits(bd);
 			}
-
 		}
 
 		private unsafe void DrawSelectionMask()
@@ -3077,7 +3038,6 @@ namespace PSFilterLoad.PSApi
 			{
 				descriptorParameters->recordInfo = RecordInfo.plugInDialogNone;
 			}
-
 
 			if (scriptingData != null)
 			{
@@ -3353,7 +3313,6 @@ namespace PSFilterLoad.PSApi
 						HandleSuite.Instance.UnlockHandle(descParam->descriptor);
 						HandleSuite.Instance.DisposeHandle(descParam->descriptor);
 					}
-
 
 					Memory.Free(descriptorParametersPtr);
 					descriptorParametersPtr = IntPtr.Zero;

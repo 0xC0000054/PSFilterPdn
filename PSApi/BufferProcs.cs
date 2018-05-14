@@ -46,5 +46,4 @@ namespace PSFilterLoad.PSApi
         public IntPtr freeProc;
         public IntPtr spaceProc;
     }
-
 }

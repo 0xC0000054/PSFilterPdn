@@ -15,8 +15,6 @@
  * All rights reserved.
 */
 
-
-
 namespace PSFilterLoad.PSApi
 {
     internal static class PSConstants
@@ -35,7 +33,6 @@ namespace PSFilterLoad.PSApi
         /// The filter type code - '8BFM'
         /// </summary>
         public const uint filterKind = 0x3842464dU;
-
 
         public const int kCurrentBufferProcsVersion = 2;
         public const int kCurrentBufferProcsCount = 5;
@@ -56,7 +53,6 @@ namespace PSFilterLoad.PSApi
 
         public const int kCurrentWriteDescriptorProcsVersion = 0;
         public const short kCurrentWriteDescriptorProcsCount = 16;
-
 
         public const int kCurrentMinVersReadChannelDesc = 0;
         public const int kCurrentMaxVersReadChannelDesc = 0;

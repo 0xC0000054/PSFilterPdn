@@ -10,6 +10,5 @@
         public const uint MEM_RELEASE = 0x8000;
 
         public const int HeapCompatibilityInformation = 0;
-
     }
 }

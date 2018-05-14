@@ -7,7 +7,6 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
-
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -15,8 +14,6 @@ using System.Windows.Forms.VisualStyles;
 
 namespace PaintDotNet.SystemLayer
 {
-
-
     /// <summary>
     /// Contains static methods related to the user interface.
     /// </summary>
@@ -118,6 +115,5 @@ namespace PaintDotNet.SystemLayer
         {
             return (int)Math.Round((float)width * GetXScaleFactor());
         }
-
     }
 }

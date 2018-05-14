@@ -646,7 +646,6 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-
         private int PutString(IntPtr descriptor, uint key, IntPtr cstrValue)
         {
 #if DEBUG
@@ -1214,7 +1213,6 @@ namespace PSFilterLoad.PSApi.PICA
 
             return PSError.errMissingParameter;
         }
-
 
         private int GetIntegers(IntPtr descriptor, uint key, uint count, IntPtr data)
         {

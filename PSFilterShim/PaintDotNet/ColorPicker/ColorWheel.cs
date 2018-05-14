@@ -327,7 +327,6 @@ namespace PaintDotNet
             this.Controls.Add(this.wheelPictureBox);
             this.Name = "ColorWheel";
             this.ResumeLayout(false);
-
         }
         #endregion
 

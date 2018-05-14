@@ -161,7 +161,6 @@ namespace PSFilterPdn
                     }
                 }
 
-
                 if (token.PseudoResources.Count > 0)
                 {
                     using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -240,7 +239,6 @@ namespace PSFilterPdn
 
                 PSFilterShimServer.Stop();
             }
-
         }
 
         private void RunRepeatFilter(ref PSFilterPdnConfigToken token, IWin32Window window)
@@ -300,7 +298,6 @@ namespace PSFilterPdn
             {
                 filterDone.Set();
             }
-
         }
 
         protected override void OnSetRenderInfo(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs)
@@ -340,7 +337,6 @@ namespace PSFilterPdn
                     filterThread.Join();
                     filterThread = null;
                 }
-
             }
 
             base.OnSetRenderInfo(parameters, dstArgs, srcArgs);

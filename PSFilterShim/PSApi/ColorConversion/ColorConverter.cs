@@ -358,7 +358,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
             return RGBtoCMYK(rgb.Red, rgb.Green, rgb.Blue);
         }
 
-
         /// <summary>
         /// Converts a Lab color to XYZ.
         /// </summary>
@@ -446,7 +445,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
 
             return new XYZ(x, y, z);
         }
-
 
         /// <summary>
         /// Converts a RGB color to CMYK.

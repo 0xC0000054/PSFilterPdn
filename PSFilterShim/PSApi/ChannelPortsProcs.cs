@@ -122,5 +122,4 @@ namespace PSFilterLoad.PSApi
 		InvertedLayerMask = 18,
 		SelectionMask = 19
 	}
-
 }

@@ -30,7 +30,6 @@ namespace PSFilterLoad.PSApi
                     flagList.Add(parm.key, parm.flags);
                 }
             }
-
         }
 
         public bool TryGetParameterFlags(uint key, out short flags)
@@ -38,6 +37,4 @@ namespace PSFilterLoad.PSApi
             return flagList.TryGetValue(key, out flags);
         }
     }
-
-
 }

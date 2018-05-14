@@ -143,7 +143,6 @@ namespace PaintDotNet
                 };
         }
 
-
         private bool IgnoreChangedEvents
         {
             get
@@ -853,7 +852,6 @@ namespace PaintDotNet
             ((System.ComponentModel.ISupportInitialize)(hueUpDown)).EndInit();
             ResumeLayout(false);
             PerformLayout();
-
         }
         #endregion
 
@@ -890,7 +888,6 @@ namespace PaintDotNet
             UserPrimaryColor = color;
 
             PopIgnoreChangedEvents();
-
 
             Update();
         }
@@ -968,7 +965,6 @@ namespace PaintDotNet
                 blue = (int)blueUpDown.Value;
             }
 
-
             Color rgbColor = Color.FromArgb(255, red, green, blue);
             HsvColor hsvColor = HsvColor.FromColor(rgbColor);
 
@@ -1045,9 +1041,7 @@ namespace PaintDotNet
             string hexText = GetHexNumericUpDownValue(rgbColor.Red, rgbColor.Green, rgbColor.Blue);
             hexBox.Text = hexText;
 
-
             UserPrimaryColor = color;
-
 
             Update();
         }
@@ -1143,7 +1137,6 @@ namespace PaintDotNet
                             hexInt = 0;
                             hexBox.Text = "";
                         }
-
                         catch (OverflowException)
                         {
                             hexInt = 16777215;
@@ -1190,7 +1183,6 @@ namespace PaintDotNet
                     }
                 }
                 PopIgnoreChangedEvents();
-
             }
         }
 
@@ -1220,8 +1212,6 @@ namespace PaintDotNet
             DialogResult = System.Windows.Forms.DialogResult.Cancel;
             Close();
         }
-
-
 
     }
 }

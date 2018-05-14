@@ -144,7 +144,6 @@ namespace PSFilterLoad.ColorPicker
                 };
         }
 
-
         private bool IgnoreChangedEvents
         {
             get
@@ -854,7 +853,6 @@ namespace PSFilterLoad.ColorPicker
             ((System.ComponentModel.ISupportInitialize)(hueUpDown)).EndInit();
             ResumeLayout(false);
             PerformLayout();
-
         }
         #endregion
 
@@ -891,7 +889,6 @@ namespace PSFilterLoad.ColorPicker
             UserPrimaryColor = color;
 
             PopIgnoreChangedEvents();
-
 
             Update();
         }
@@ -969,7 +966,6 @@ namespace PSFilterLoad.ColorPicker
                 blue = (int)blueUpDown.Value;
             }
 
-
             Color rgbColor = Color.FromArgb(255, red, green, blue);
             HsvColor hsvColor = HsvColor.FromColor(rgbColor);
 
@@ -1046,9 +1042,7 @@ namespace PSFilterLoad.ColorPicker
             string hexText = GetHexNumericUpDownValue(rgbColor.Red, rgbColor.Green, rgbColor.Blue);
             hexBox.Text = hexText;
 
-
             UserPrimaryColor = color;
-
 
             Update();
         }
@@ -1145,7 +1139,6 @@ namespace PSFilterLoad.ColorPicker
                             hexInt = 0;
                             hexBox.Text = "";
                         }
-
                         catch (OverflowException)
                         {
                             hexInt = 16777215;
@@ -1192,7 +1185,6 @@ namespace PSFilterLoad.ColorPicker
                     }
                 }
                 PopIgnoreChangedEvents();
-
             }
         }
 
@@ -1222,8 +1214,5 @@ namespace PSFilterLoad.ColorPicker
             DialogResult = System.Windows.Forms.DialogResult.Cancel;
             Close();
         }
-
-
-
     }
 }

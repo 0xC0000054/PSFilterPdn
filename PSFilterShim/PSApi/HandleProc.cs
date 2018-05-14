@@ -58,5 +58,4 @@ namespace PSFilterLoad.PSApi
         public IntPtr recoverSpaceProc;
         public IntPtr disposeRegularHandleProc;
     }
-
 }

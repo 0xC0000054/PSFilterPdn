@@ -37,7 +37,6 @@ namespace PaintDotNet
 		private MemoryBlock scan0;
 		private bool disposed;
 
-
 		/// <summary>
 		/// Gets the width of the Surface.
 		/// </summary>
@@ -102,7 +101,6 @@ namespace PaintDotNet
 			surface.CopySurface(this);
 			return surface;
 		}
-
 
 		/// <summary>
 		/// Copies the contents of the given surface to the upper left corner of this surface.
@@ -488,7 +486,6 @@ namespace PaintDotNet
 		/// </summary>
 		private unsafe void BicubicFitSurfaceUnchecked(MaskSurface source, Rectangle dstRoi)
 		{
-
 			Rectangle roi = Rectangle.Intersect(dstRoi, Bounds);
 			Rectangle roiIn = Rectangle.Intersect(dstRoi, new Rectangle(1, 1, width - 1, height - 1));
 

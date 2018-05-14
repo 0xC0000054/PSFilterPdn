@@ -166,7 +166,6 @@ namespace PSFilterPdn
 
                                         directories[index] = lastPath + "," + dir;
                                     }
-
                                 }
                                 catch (ArgumentException)
                                 {

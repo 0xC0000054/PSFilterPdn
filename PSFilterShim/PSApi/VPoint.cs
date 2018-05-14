@@ -24,5 +24,4 @@ namespace PSFilterLoad.PSApi
         public int v;
         public int h;
     }
-
 }

@@ -18,7 +18,6 @@
 using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
-
     internal enum SpecialColorID : int
     {
         ForegroundColor = 0,

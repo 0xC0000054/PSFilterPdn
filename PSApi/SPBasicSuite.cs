@@ -20,7 +20,6 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
     internal delegate int SPBasicAcquireSuite(IntPtr name, int version, ref IntPtr suite);
 
@@ -54,5 +53,4 @@ namespace PSFilterLoad.PSApi
         public IntPtr reallocateBlock;
         public IntPtr undefined;
     }
-
 }

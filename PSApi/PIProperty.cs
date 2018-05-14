@@ -15,7 +15,6 @@
  * All rights reserved.
 */
 
-
 namespace PSFilterLoad.PSApi
 {
 // Disable CS0649, Field 'field' is never assigned to, and will always have its default value 'value'
@@ -89,5 +88,4 @@ namespace PSFilterLoad.PSApi
 		/// </summary>
 		public const uint PIRequiredHostProperty = 0x686f7374U;
 	}
-
 }

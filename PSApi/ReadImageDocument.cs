@@ -104,7 +104,6 @@ namespace PSFilterLoad.PSApi
                 doc->hResolution = new Fixed16((int)(dpiX + 0.5));
                 doc->vResolution = new Fixed16((int)(dpiY + 0.5));
 
-
                 IntPtr channel = CreateReadChannelDesc(PSConstants.ChannelPorts.Red, Resources.RedChannelName, doc->depth, doc->bounds);
 
                 ReadChannelDesc* ch = (ReadChannelDesc*)channel.ToPointer();

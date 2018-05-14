@@ -37,7 +37,5 @@ namespace PSFilterLoad.PSApi
         private ImageSizeTooLargeException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
-
-
     }
 }

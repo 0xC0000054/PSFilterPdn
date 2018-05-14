@@ -63,7 +63,6 @@ namespace PSFilterLoad.PSApi
             this.data = data;
         }
 
-
         public bool Equals(uint otherKey, int otherIndex)
         {
             return (key == otherKey && index == otherIndex);

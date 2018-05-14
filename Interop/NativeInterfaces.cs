@@ -85,7 +85,6 @@ namespace PSFilterPdn
             int GetClassID(out Guid pClassID);
         }
 
-
         [ComImport(), Guid(NativeConstants.IID_IPersistFile), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
         internal interface IPersistFile : IPersist
         {
@@ -250,7 +249,6 @@ namespace PSFilterPdn
         [ComImport(), Guid(NativeConstants.IID_IFileDialogEvents), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
         internal interface IFileDialogEvents
         {
-
             // NOTE: some of these callbacks are cancelable - returning S_FALSE means that
             // the dialog should not proceed (e.g. with closing, changing folder); to
             // support this, we need to use the PreserveSig attribute to enable us to return

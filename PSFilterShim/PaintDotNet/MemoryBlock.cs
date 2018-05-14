@@ -12,7 +12,6 @@ namespace PaintDotNet
     // .                                                                           //
     /////////////////////////////////////////////////////////////////////////////////
 
-
     internal unsafe sealed class MemoryBlock : IDisposable
     {
         // blocks this size or larger are allocated with AllocateLarge (VirtualAlloc) instead of Allocate (HeapAlloc)
@@ -202,7 +201,6 @@ namespace PaintDotNet
                 this.valid = false;
             }
         }
-
 
         private static IntPtr Allocate(long bytes)
         {

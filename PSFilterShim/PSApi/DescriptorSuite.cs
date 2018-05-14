@@ -530,7 +530,6 @@ namespace PSFilterLoad.PSApi
 #endif
 			AETEValue item = state.items[state.currentKey];
 
-
 			uint type = item.Type;
 
 			try

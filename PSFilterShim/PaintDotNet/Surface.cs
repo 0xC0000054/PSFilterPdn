@@ -153,7 +153,6 @@ namespace PaintDotNet
             }
         }
 
-
         public ColorBgra GetPoint(int x, int y)
         {
             if (x < 0 || y < 0 || x >= this.width || y >= this.height)
@@ -734,7 +733,6 @@ namespace PaintDotNet
             }
         }
 
-
         private void Dispose(bool disposing)
         {
             if (!disposed && disposing)
@@ -752,7 +750,5 @@ namespace PaintDotNet
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
-
     }
 }

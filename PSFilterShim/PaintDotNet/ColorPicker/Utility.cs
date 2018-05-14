@@ -7,7 +7,6 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
-
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -61,7 +60,6 @@ namespace PaintDotNet
                 backgroundBrush.Dispose();
                 colorBrush.Dispose();
             }
-
         }
 
         public static void SetNumericUpDownValue(NumericUpDown upDown, decimal newValue)

@@ -39,7 +39,6 @@ namespace PSFilterLoad.PSApi
             {
                 return false;
             }
-
         }
         public bool Equals(Rect16 rect)
         {
@@ -53,7 +52,6 @@ namespace PSFilterLoad.PSApi
         }
 #endif
         public static readonly Rect16 Empty = new Rect16();
-
     }
 #pragma warning restore 0659
 }

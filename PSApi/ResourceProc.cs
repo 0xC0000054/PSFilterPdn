@@ -19,7 +19,6 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short CountPIResourcesProc(uint type);
 

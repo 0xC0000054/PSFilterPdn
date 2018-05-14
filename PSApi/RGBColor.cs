@@ -25,5 +25,4 @@ namespace PSFilterLoad.PSApi
         public ushort green;
         public ushort blue;
     }
-
 }

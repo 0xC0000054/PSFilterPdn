@@ -328,7 +328,6 @@ namespace PSFilterLoad.ColorPicker
             this.Controls.Add(this.wheelPictureBox);
             this.Name = "ColorWheel";
             this.ResumeLayout(false);
-
         }
         #endregion
 

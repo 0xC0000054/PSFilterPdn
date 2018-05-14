@@ -13,7 +13,6 @@ namespace PaintDotNet
     // .                                                                           //
     /////////////////////////////////////////////////////////////////////////////////
 
-
     [StructLayout(LayoutKind.Explicit)]
     internal struct ColorBgra
     {
@@ -127,7 +126,6 @@ namespace PaintDotNet
         /// </summary>
         public override bool Equals(object obj)
         {
-
             if (obj != null && obj is ColorBgra && ((ColorBgra)obj).Bgra == this.Bgra)
             {
                 return true;
