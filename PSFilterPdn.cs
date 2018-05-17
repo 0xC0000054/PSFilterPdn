@@ -99,14 +99,14 @@ namespace PSFilterPdn
                 string descriptorRegistryFileName = Path.Combine(proxyTempDir, "registry.dat");
                 string regionFileName = string.Empty;
 
-                Rectangle sourceBounds = base.EnvironmentParameters.SourceSurface.Bounds;
+                Rectangle sourceBounds = EnvironmentParameters.SourceSurface.Bounds;
 
-                Rectangle selection = base.EnvironmentParameters.GetSelection(sourceBounds).GetBoundsInt();
+                Rectangle selection = EnvironmentParameters.GetSelection(sourceBounds).GetBoundsInt();
 
                 if (selection != sourceBounds)
                 {
                     regionFileName = Path.Combine(proxyTempDir, "selection.dat");
-                    RegionDataWrapper selectedRegion = new RegionDataWrapper(base.EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
+                    RegionDataWrapper selectedRegion = new RegionDataWrapper(EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
 
                     using (FileStream fs = new FileStream(regionFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
@@ -145,7 +145,7 @@ namespace PSFilterPdn
 
                 using (FileStream fs = new FileStream(srcFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    using (Bitmap bmp = base.EnvironmentParameters.SourceSurface.CreateAliasedBitmap())
+                    using (Bitmap bmp = EnvironmentParameters.SourceSurface.CreateAliasedBitmap())
                     {
                         bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
                     }
@@ -245,7 +245,7 @@ namespace PSFilterPdn
         {
             try
             {
-                using (LoadPsFilter lps = new LoadPsFilter(base.EnvironmentParameters, window.Handle, null))
+                using (LoadPsFilter lps = new LoadPsFilter(EnvironmentParameters, window.Handle, null))
                 {
                     lps.SetAbortCallback(AbortCallback);
                     if (token.DescriptorRegistry != null)

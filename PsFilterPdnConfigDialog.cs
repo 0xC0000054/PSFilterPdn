@@ -162,12 +162,12 @@ namespace PSFilterPdn
 
         protected override void InitialInitToken()
         {
-            base.theEffectToken = new PSFilterPdnConfigToken(null, null, false, null, null, null, null);
+            theEffectToken = new PSFilterPdnConfigToken(null, null, false, null, null, null, null);
         }
 
         protected override void InitTokenFromDialog()
         {
-            PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)base.theEffectToken;
+            PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)theEffectToken;
 
             token.Dest = destSurface;
             token.FilterData = filterData;
@@ -695,7 +695,7 @@ namespace PSFilterPdn
             {
                 using (FileStream fs = new FileStream(srcFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    using (Bitmap bmp = base.EffectSourceSurface.CreateAliasedBitmap())
+                    using (Bitmap bmp = EffectSourceSurface.CreateAliasedBitmap())
                     {
                         bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
                     }
@@ -1300,8 +1300,8 @@ namespace PSFilterPdn
 
         private void CheckSourceSurfaceSize()
         {
-            int width = base.EffectSourceSurface.Width;
-            int height = base.EffectSourceSurface.Height;
+            int width = EffectSourceSurface.Width;
+            int height = EffectSourceSurface.Height;
 
             if (width > 32000 || height > 32000)
             {
@@ -1378,7 +1378,7 @@ namespace PSFilterPdn
 
             try
             {
-                string userDataPath = base.Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
+                string userDataPath = Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
 
                 if (!Directory.Exists(userDataPath))
                 {
@@ -1635,7 +1635,7 @@ namespace PSFilterPdn
 
         private void donateLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            base.Services.GetService<PaintDotNet.AppModel.IShellService>().LaunchUrl(this, @"http://forums.getpaint.net/index.php?showtopic=20622");
+            Services.GetService<PaintDotNet.AppModel.IShellService>().LaunchUrl(this, @"http://forums.getpaint.net/index.php?showtopic=20622");
         }
 
         private void filterTree_BeforeExpand(object sender, TreeViewCancelEventArgs e)
