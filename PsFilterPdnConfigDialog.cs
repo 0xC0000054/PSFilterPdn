@@ -178,9 +178,9 @@ namespace PSFilterPdn
             token.DialogState = new ConfigDialogState(expandedNodes.AsReadOnly(), filterTreeNodes, searchDirectories.AsReadOnly());
         }
 
-        protected override void InitDialogFromToken(EffectConfigToken effectToken)
+        protected override void InitDialogFromToken(EffectConfigToken effectTokenCopy)
         {
-            PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)effectToken;
+            PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)effectTokenCopy;
 
             if (token.FilterData != null)
             {
