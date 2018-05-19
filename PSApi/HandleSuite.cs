@@ -34,6 +34,8 @@ namespace PSFilterLoad.PSApi
 		}
 	}
 
+	// This class is a singleton because plug-ins can use it to allocate memory for pointers embedded
+	// in the API structures that will be freed when the LoadPsFilter class is finalized.
 	internal sealed class HandleSuite
 	{
 		private struct PSHandle
