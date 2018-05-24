@@ -144,11 +144,9 @@ namespace PSFilterPdn
                 PSFilterShimServer.Start(service);
 
                 using (FileStream fs = new FileStream(srcFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (Bitmap bmp = EnvironmentParameters.SourceSurface.CreateAliasedBitmap())
                 {
-                    using (Bitmap bmp = EnvironmentParameters.SourceSurface.CreateAliasedBitmap())
-                    {
-                        bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
-                    }
+                    bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
                 }
 
                 ParameterData parameterData;

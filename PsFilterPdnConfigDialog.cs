@@ -694,11 +694,9 @@ namespace PSFilterPdn
             try
             {
                 using (FileStream fs = new FileStream(srcFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (Bitmap bmp = EffectSourceSurface.CreateAliasedBitmap())
                 {
-                    using (Bitmap bmp = EffectSourceSurface.CreateAliasedBitmap())
-                    {
-                        bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
-                    }
+                    bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
                 }
 
                 ParameterData parameterData;
