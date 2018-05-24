@@ -92,8 +92,8 @@ namespace PSFilterPdn
             {
                 Directory.CreateDirectory(proxyTempDir);
 
-                string srcFileName = Path.Combine(proxyTempDir, "proxysource.png");
-                string destFileName = Path.Combine(proxyTempDir, "proxyresult.png");
+                string srcFileName = Path.Combine(proxyTempDir, "source.png");
+                string destFileName = Path.Combine(proxyTempDir, "result.png");
                 string parameterDataFileName = Path.Combine(proxyTempDir, "parameters.dat");
                 string resourceDataFileName = Path.Combine(proxyTempDir, "PseudoResources.dat");
                 string descriptorRegistryFileName = Path.Combine(proxyTempDir, "registry.dat");

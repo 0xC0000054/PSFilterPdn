@@ -648,8 +648,8 @@ namespace PSFilterPdn
                 return;
             }
 
-            srcFileName = Path.Combine(proxyTempDir, "proxysource.png");
-            destFileName = Path.Combine(proxyTempDir, "proxyresult.png");
+            srcFileName = Path.Combine(proxyTempDir, "source.png");
+            destFileName = Path.Combine(proxyTempDir, "result.png");
             parameterDataFileName = Path.Combine(proxyTempDir, "parameters.dat");
             resourceDataFileName = Path.Combine(proxyTempDir, "PseudoResources.dat");
             descriptorRegistryFileName = Path.Combine(proxyTempDir, "registry.dat");
