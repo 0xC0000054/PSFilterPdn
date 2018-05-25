@@ -2938,10 +2938,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
 			DebugUtils.Ping(DebugFlags.MiscCallbacks, string.Format("Done: {0}, Total: {1}, Progress: {2}%", done, total, (((double)done / (double)total) * 100.0)));
 #endif
-			if (progressFunc != null)
-			{
-				progressFunc.Invoke(done, total);
-			}
+			progressFunc?.Invoke(done, total);
 		}
 
 		private unsafe void SetupSizes()

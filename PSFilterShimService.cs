@@ -80,18 +80,12 @@ namespace PSFilterPdn
 
         public void SetProxyErrorMessage(string errorMessage)
         {
-            if (errorCallback != null)
-            {
-                errorCallback.Invoke(errorMessage);
-            }
+            errorCallback?.Invoke(errorMessage);
         }
 
         public void UpdateFilterProgress(int done, int total)
         {
-            if (progressCallback != null)
-            {
-                progressCallback.Invoke(done, total);
-            }
+            progressCallback?.Invoke(done, total);
         }
     }
 }

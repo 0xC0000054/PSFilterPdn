@@ -855,7 +855,7 @@ namespace PSFilterPdn
 
         private void runFilterBtn_Click(object sender, EventArgs e)
         {
-            if (filterTree.SelectedNode != null && filterTree.SelectedNode.Tag != null)
+            if (filterTree.SelectedNode?.Tag != null)
             {
                 PluginData data = (PluginData)filterTree.SelectedNode.Tag;
 
@@ -1272,10 +1272,7 @@ namespace PSFilterPdn
 
             if (!e.Cancel)
             {
-                if (settings != null)
-                {
-                    settings.Flush();
-                }
+                settings?.Flush();
                 SaveDescriptorRegistry();
             }
 
@@ -1589,7 +1586,7 @@ namespace PSFilterPdn
 
         private void filterTree_DoubleClick(object sender, EventArgs e)
         {
-            if ((filterTree.SelectedNode != null) && filterTree.SelectedNode.Tag != null)
+            if (filterTree.SelectedNode?.Tag != null)
             {
                 runFilterBtn_Click(this, EventArgs.Empty);
             }
@@ -1620,7 +1617,7 @@ namespace PSFilterPdn
         private void filterTree_KeyDown(object sender, KeyEventArgs e)
         {
             // if the selectedNode is a filter run it when the Enter key is pressed
-            if ((filterTree.SelectedNode != null) && filterTree.SelectedNode.Tag != null && e.KeyCode == Keys.Enter)
+            if ((filterTree.SelectedNode?.Tag != null) && e.KeyCode == Keys.Enter)
             {
                 e.Handled = true;
                 runFilterBtn_Click(this, EventArgs.Empty);
