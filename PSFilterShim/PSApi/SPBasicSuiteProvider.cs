@@ -215,7 +215,7 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Sets the plug-in settings for the current session.
 		/// </summary>
-		/// <param name="settings">The plug-in settings.</param>
+		/// <param name="values">The plug-in settings.</param>
 		public void SetRegistryValues(DescriptorRegistryValues values)
 		{
 			registryValues = values;
