@@ -36,7 +36,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double Hue
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -48,7 +47,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double Saturation
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -60,7 +58,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double Luminance
         {
             get;
-            private set;
         }
     }
 }

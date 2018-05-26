@@ -38,7 +38,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double Cyan
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -50,7 +49,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double Magenta
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -62,7 +60,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double Yellow
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -74,7 +71,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double Black
         {
             get;
-            private set;
         }
     }
 }

@@ -24,31 +24,26 @@ namespace PSFilterLoad.PSApi.PICA
             public ColorSpace ColorSpace
             {
                 get;
-                private set;
             }
 
             public byte Component0
             {
                 get;
-                private set;
             }
 
             public byte Component1
             {
                 get;
-                private set;
             }
 
             public byte Component2
             {
                 get;
-                private set;
             }
 
             public byte Component3
             {
                 get;
-                private set;
             }
 
             public Color() : this(ColorSpace.RGBSpace, 0, 0, 0, 0)

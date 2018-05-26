@@ -41,7 +41,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double X
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -53,7 +52,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double Y
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -65,7 +63,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double Z
         {
             get;
-            private set;
         }
     }
 }

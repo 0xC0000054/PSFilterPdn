@@ -36,7 +36,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double Red
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -48,7 +47,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double Green
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -60,7 +58,6 @@ namespace PSFilterLoad.PSApi.ColorConversion
         public double Blue
         {
             get;
-            private set;
         }
 
         /// <summary>
