@@ -48,7 +48,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 get
                 {
-                    return data;
+                    return data ?? string.Empty;
                 }
                 set
                 {
