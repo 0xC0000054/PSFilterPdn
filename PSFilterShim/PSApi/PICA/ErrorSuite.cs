@@ -31,14 +31,6 @@ namespace PSFilterLoad.PSApi.PICA
             }
         }
 
-        public bool HasErrorMessage
-        {
-            get
-            {
-                return errorMessage != null;
-            }
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorSuite"/> class.
         /// </summary>
