@@ -116,7 +116,7 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 string registryKey = Marshal.PtrToStringAnsi(key);
-                if (key == null)
+                if (registryKey == null)
                 {
                     return PSError.kSPBadParameterError;
                 }
@@ -149,7 +149,7 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 string registryKey = Marshal.PtrToStringAnsi(key);
-                if (key == null)
+                if (registryKey == null)
                 {
                     return PSError.kSPBadParameterError;
                 }
@@ -169,7 +169,7 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 string registryKey = Marshal.PtrToStringAnsi(key);
-                if (key == null)
+                if (registryKey == null)
                 {
                     return PSError.kSPBadParameterError;
                 }
