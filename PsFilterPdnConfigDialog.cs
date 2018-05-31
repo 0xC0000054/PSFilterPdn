@@ -1617,7 +1617,7 @@ namespace PSFilterPdn
         private void filterTree_KeyDown(object sender, KeyEventArgs e)
         {
             // if the selectedNode is a filter run it when the Enter key is pressed
-            if ((filterTree.SelectedNode?.Tag != null) && e.KeyCode == Keys.Enter)
+            if (e.KeyCode == Keys.Enter && filterTree.SelectedNode?.Tag != null)
             {
                 e.Handled = true;
                 runFilterBtn_Click(this, EventArgs.Empty);
