@@ -33,14 +33,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
 
             hwnd = parentWindowHandle;
-            if (name != null)
-            {
-                pluginName = name;
-            }
-            else
-            {
-                pluginName = string.Empty;
-            }
+            pluginName = name ?? string.Empty;
 
             uiWindowHandle = new UISuiteMainWindowHandle(MainWindowHandle);
             uiSetCursor = new UISuiteHostSetCursor(HostSetCursor);
