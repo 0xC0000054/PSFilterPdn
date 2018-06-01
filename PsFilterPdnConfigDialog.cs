@@ -1380,7 +1380,7 @@ namespace PSFilterPdn
                     Directory.CreateDirectory(userDataPath);
                 }
 
-                string path = Path.Combine(userDataPath, @"PSFilterPdn.xml");
+                string path = Path.Combine(userDataPath, "PSFilterPdn.xml");
 
                 settings = new PSFilterPdnSettings(path);
             }
@@ -1630,7 +1630,7 @@ namespace PSFilterPdn
 
         private void donateLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Services.GetService<PaintDotNet.AppModel.IShellService>().LaunchUrl(this, @"http://forums.getpaint.net/index.php?showtopic=20622");
+            Services.GetService<PaintDotNet.AppModel.IShellService>().LaunchUrl(this, "http://forums.getpaint.net/index.php?showtopic=20622");
         }
 
         private void filterTree_BeforeExpand(object sender, TreeViewCancelEventArgs e)
