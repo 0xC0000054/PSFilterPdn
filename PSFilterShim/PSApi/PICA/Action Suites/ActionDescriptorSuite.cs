@@ -485,7 +485,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             ScriptingParameters parameters = actionDescriptors[descriptor];
 
-            if (index >= 0 && index < parameters.Count)
+            if (index < parameters.Count)
             {
                 key = parameters.GetKeyAtIndex((int)index);
                 return PSError.kSPNoError;
