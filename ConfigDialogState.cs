@@ -29,6 +29,8 @@ namespace PSFilterPdn
         /// Initializes a new instance of the <see cref="ConfigDialogState"/> class.
         /// </summary>
         /// <param name="expandedNodes">The expanded nodes.</param>
+        /// <param name="nodes">The filter tree nodes.</param>
+        /// <param name="directories">The search directories.</param>
         public ConfigDialogState(ReadOnlyCollection<string> expandedNodes, FilterTreeNodeCollection nodes, ReadOnlyCollection<string> directories)
         {
             this.expandedNodes = expandedNodes;
