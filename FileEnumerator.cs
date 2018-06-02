@@ -14,7 +14,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Permissions;
 
 namespace PSFilterPdn
 {
@@ -71,45 +70,6 @@ namespace PSFilterPdn
             }
         }
 
-        /// <summary>
-        /// Gets the demand path for the FileIOPermission.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <param name="includeSubDirectories">if set to <c>true</c> include the sub directories of <paramref name="path"/>.</param>
-        /// <returns></returns>
-        private static string GetPermissionPath(string path, bool includeSubDirectories)
-        {
-            char end = path[path.Length - 1];
-
-            if (!includeSubDirectories)
-            {
-                if (end == Path.DirectorySeparatorChar || end == Path.AltDirectorySeparatorChar)
-                {
-                    return path + ".";
-                }
-
-                return path + Path.DirectorySeparatorChar + "."; // Demand permission for the current directory only
-            }
-
-            if (end == Path.DirectorySeparatorChar || end == Path.AltDirectorySeparatorChar)
-            {
-                return path;
-            }
-
-            return path + Path.DirectorySeparatorChar; // Demand permission for the current directory and all subdirectories.
-        }
-
-        /// <summary>
-        /// Performs a FileIOPermission demand for PathDiscovery on the specified directory.
-        /// </summary>
-        /// <param name="directory">The path.</param>
-        /// <exception cref="SecurityException">The caller does not have the required permission.</exception>
-        private static void DoDemand(string directory)
-        {
-            string demandPath = GetPermissionPath(directory, false);
-            new FileIOPermission(FileIOPermissionAccess.PathDiscovery, demandPath).Demand();
-        }
-
         private static uint SetErrorModeWrapper(uint newMode)
         {
             uint oldMode;
@@ -137,7 +97,6 @@ namespace PSFilterPdn
         private string current;
         private int state;
         private bool disposed;
-        private bool needPathDiscoveryDemand;
         private string shellLinkTarget;
 
         private readonly NativeEnums.FindExInfoLevel infoLevel;
@@ -182,9 +141,6 @@ namespace PSFilterPdn
             }
 
             string fullPath = Path.GetFullPath(path);
-            string demandPath = GetPermissionPath(fullPath, false);
-            new FileIOPermission(FileIOPermissionAccess.PathDiscovery, demandPath).Demand();
-            needPathDiscoveryDemand = false;
 
             searchData = new SearchData(fullPath, false);
             this.fileExtension = fileExtension;
@@ -321,11 +277,6 @@ namespace PSFilterPdn
             }
             else if (FileMatchesFilter(findData.cFileName))
             {
-                if (needPathDiscoveryDemand)
-                {
-                    DoDemand(searchData.path);
-                    needPathDiscoveryDemand = false;
-                }
                 shellLinkTarget = null;
 
                 return true;
@@ -447,7 +398,6 @@ namespace PSFilterPdn
                                 }
                             }
 
-                            needPathDiscoveryDemand = true;
                             if (FirstFileIncluded(findData))
                             {
                                 current = CreateFilePath(findData);
