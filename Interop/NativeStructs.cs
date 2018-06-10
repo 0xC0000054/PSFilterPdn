@@ -59,5 +59,20 @@ namespace PSFilterPdn
             public uint dwLowDateTime;
             public uint dwHighDateTime;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct BY_HANDLE_FILE_INFORMATION
+        {
+            public uint dwFileAttributes;
+            public FILETIME ftCreationTime;
+            public FILETIME ftLastAccessTime;
+            public FILETIME ftLastWriteTime;
+            public uint dwVolumeSerialNumber;
+            public uint nFileSizeHigh;
+            public uint nFileSizeLow;
+            public uint nNumberOfLinks;
+            public uint nFileIndexHigh;
+            public uint nFileIndexLow;
+        }
     }
 }

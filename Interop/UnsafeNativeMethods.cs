@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using Microsoft.Win32.SafeHandles;
 using System;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
@@ -46,5 +47,19 @@ namespace PSFilterPdn
         [DllImport("kernel32.dll", ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool SetThreadErrorMode(uint dwNewMode, out uint lpOldMode);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+        internal static extern SafeFileHandle CreateFileW(
+               [In(), MarshalAs(UnmanagedType.LPWStr)] string lpFileName,
+               [In()] uint dwDesiredAccess,
+               [In()] uint dwShareMode,
+               [In()] IntPtr lpSecurityAttributes,
+               [In()] uint dwCreationDisposition,
+               [In()] uint dwFlagsAndAttributes,
+               [In()] IntPtr hTemplateFile);
+
+        [DllImport("kernel32.dll", ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool GetFileInformationByHandle([In()] SafeFileHandle hFile, [Out()] out NativeStructs.BY_HANDLE_FILE_INFORMATION lpFileInformation);
     }
 }
