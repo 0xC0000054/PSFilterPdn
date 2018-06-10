@@ -537,31 +537,6 @@ namespace PSFilterPdn
                 this.path = path;
                 this.isShortcut = isShortcut;
             }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="SearchData"/> class with a sub directory of the parent <c>SearchData</c>.
-            /// </summary>
-            /// <param name="parent">The SearchData containing the current path.</param>
-            /// <param name="subDirectoryName">The name of the sub directory within the path of the parent SearchData.</param>
-            /// <exception cref="ArgumentNullException">
-            /// <paramref name="parent"/> is null.
-            /// or
-            /// <paramref name="subDirectoryName"/> is null.
-            /// </exception>
-            public SearchData(SearchData parent, string subDirectoryName)
-            {
-                if (parent == null)
-                {
-                    throw new ArgumentNullException(nameof(parent));
-                }
-                if (subDirectoryName == null)
-                {
-                    throw new ArgumentNullException(nameof(subDirectoryName));
-                }
-
-                path = Path.Combine(parent.path, subDirectoryName);
-                isShortcut = parent.isShortcut;
-            }
         }
     }
 }
