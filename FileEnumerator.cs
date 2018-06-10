@@ -80,7 +80,7 @@ namespace PSFilterPdn
 
             string fullPath = Path.GetFullPath(path);
 
-            searchData = new SearchData(fullPath, false);
+            searchData = new SearchData(fullPath);
             this.fileExtension = fileExtension;
             this.searchOption = searchOption;
             searchDirectories = new Queue<SearchData>();
@@ -243,7 +243,7 @@ namespace PSFilterPdn
 
             if (IsNewDirectory(path))
             {
-                searchDirectories.Enqueue(new SearchData(path, false));
+                searchDirectories.Enqueue(new SearchData(path));
             }
         }
 
@@ -268,8 +268,7 @@ namespace PSFilterPdn
         {
             if (findData.cFileName.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase) && dereferenceLinks)
             {
-                // Do not search shortcuts recursively.
-                if (!searchData.isShortcut && shellLink.Load(Path.Combine(searchData.path, findData.cFileName)))
+                if (shellLink.Load(Path.Combine(searchData.path, findData.cFileName)))
                 {
                     bool isDirectory;
                     string target = ResolveShortcutTarget(shellLink.Path, out isDirectory);
@@ -281,7 +280,7 @@ namespace PSFilterPdn
                             if (IsNewDirectory(target))
                             {
                                 // If the shortcut target is a directory, add it to the search list.
-                                searchDirectories.Enqueue(new SearchData(target, true));
+                                searchDirectories.Enqueue(new SearchData(target));
                             }
                         }
                         else if (FileMatchesFilter(target))
@@ -519,15 +518,13 @@ namespace PSFilterPdn
         private sealed class SearchData
         {
             public readonly string path;
-            public readonly bool isShortcut;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SearchData"/> class.
             /// </summary>
             /// <param name="path">The path.</param>
-            /// <param name="isShortcut"><c>true</c> if the path is the target of a shortcut; otherwise, <c>false</c>.</param>
             /// <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
-            public SearchData(string path, bool isShortcut)
+            public SearchData(string path)
             {
                 if (path == null)
                 {
@@ -535,7 +532,6 @@ namespace PSFilterPdn
                 }
 
                 this.path = path;
-                this.isShortcut = isShortcut;
             }
         }
     }
