@@ -194,7 +194,7 @@ namespace PSFilterPdn
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns><c>true</c> if <paramref name="path"/> is a new directory; otherwise, <c>false</c>.</returns>
-        private bool AddToVisitedDirectories(string path)
+        private unsafe bool AddToVisitedDirectories(string path)
         {
             bool result = false;
 
@@ -208,15 +208,28 @@ namespace PSFilterPdn
             {
                 if (!directoryHandle.IsInvalid)
                 {
-                    NativeStructs.BY_HANDLE_FILE_INFORMATION fileInfo;
+                    // The FILE_ID_INFO and BY_HANDLE_FILE_INFORMATION structures contain fields that uniquely identify a file or directory.
+                    // This information is used to track the directories that have been processed and prevent
+                    // an infinite loop if a recursive NTFS junction point or directory shortcut is encountered.
 
-                    if (UnsafeNativeMethods.GetFileInformationByHandle(directoryHandle, out fileInfo))
+                    if (OS.IsWindows8OrLater)
                     {
-                        // BY_HANDLE_FILE_INFORMATION contains fields that uniquely identify a file or directory.
-                        // This information is used to track the directories that have been processed and prevent
-                        // an infinite loop if a recursive NTFS junction point or directory shortcut is encountered.
+                        NativeStructs.FILE_ID_INFO fileInfo;
+                        uint bufferSize = (uint)sizeof(NativeStructs.FILE_ID_INFO);
 
-                        result = visitedDirectories.Add(new DirectoryIdentifier(fileInfo.dwVolumeSerialNumber, fileInfo.nFileIndexHigh, fileInfo.nFileIndexLow));
+                        if (UnsafeNativeMethods.GetFileInformationByHandleEx(directoryHandle, NativeEnums.FILE_INFO_BY_HANDLE_CLASS.FileIdInfo, &fileInfo, bufferSize))
+                        {
+                            result = visitedDirectories.Add(new DirectoryIdentifier(fileInfo));
+                        }
+                    }
+                    else
+                    {
+                        NativeStructs.BY_HANDLE_FILE_INFORMATION fileInfo;
+
+                        if (UnsafeNativeMethods.GetFileInformationByHandle(directoryHandle, out fileInfo))
+                        {
+                            result = visitedDirectories.Add(new DirectoryIdentifier(fileInfo.dwVolumeSerialNumber, fileInfo.nFileIndexHigh, fileInfo.nFileIndexLow));
+                        }
                     }
                 }
             }
@@ -465,15 +478,23 @@ namespace PSFilterPdn
 
         private struct DirectoryIdentifier : IEquatable<DirectoryIdentifier>
         {
-            public readonly uint volumeSerialNumber;
-            public readonly uint fileIndexHigh;
-            public readonly uint fileIndexLow;
+            public readonly ulong volumeSerialNumber;
+            public readonly ulong fileIndexHigh;
+            public readonly ulong fileIndexLow;
 
             public DirectoryIdentifier(uint volumeSerialNumber, uint fileIndexHigh, uint fileIndexLow)
             {
                 this.volumeSerialNumber = volumeSerialNumber;
                 this.fileIndexHigh = fileIndexHigh;
                 this.fileIndexLow = fileIndexLow;
+            }
+
+            public unsafe DirectoryIdentifier(NativeStructs.FILE_ID_INFO info)
+            {
+                volumeSerialNumber = info.VolumeSerialNumber;
+                // The FileId field stores the low index first.
+                fileIndexLow = *(ulong*)info.FileID;
+                fileIndexHigh = *(ulong*)(info.FileID + 8);
             }
 
             public override bool Equals(object obj)

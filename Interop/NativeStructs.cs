@@ -74,5 +74,12 @@ namespace PSFilterPdn
             public uint nFileIndexHigh;
             public uint nFileIndexLow;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal unsafe struct FILE_ID_INFO
+        {
+            public ulong VolumeSerialNumber;
+            public fixed byte FileID[16];
+        }
     }
 }
