@@ -175,9 +175,7 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Sets the plug-in settings for the current session.
 		/// </summary>
-		/// <returns>
-		/// The plug-in settings for the current session.
-		/// </returns>
+		/// <param name="value">The plug-in settings for the current session.</param>
 		internal void SetRegistryValues(DescriptorRegistryValues value)
 		{
 			basicSuiteProvider.SetRegistryValues(value);
