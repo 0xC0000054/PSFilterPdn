@@ -16,6 +16,10 @@ namespace PSFilterPdn
 {
     internal static class NativeEnums
     {
+#pragma warning disable RCS1135 // Declare enum member with zero value (when enum has FlagsAttribute).
+#pragma warning disable RCS1154 // Sort enum members.
+#pragma warning disable RCS1191 // Declare enum value as combination of names.
+
         [Flags]
         internal enum FOS : uint
         {
@@ -190,6 +194,10 @@ namespace PSFilterPdn
             FileIdExtdDirectoryInfo = 19, // 0x13
             FileIdExtdDirectoryRestartInfo = 20, // 0x14
         }
+
+#pragma warning restore RCS1135 // Declare enum member with zero value (when enum has FlagsAttribute).
+#pragma warning restore RCS1154 // Sort enum members.
+#pragma warning restore RCS1191 // Declare enum value as combination of names.
     }
 }
 
