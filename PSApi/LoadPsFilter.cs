@@ -795,7 +795,7 @@ namespace PSFilterLoad.PSApi
 			byte[] pluginDataBytes = globalParameters.GetPluginDataBytes();
 			if (pluginDataBytes != null)
 			{
-				parameterDataRestored = true;
+				pluginDataRestored = true;
 				switch (globalParameters.PluginDataStorageMethod)
 				{
 					case GlobalParameters.DataStorageMethod.HandleSuite:
