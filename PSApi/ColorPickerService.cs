@@ -63,7 +63,7 @@ namespace PSFilterLoad.PSApi
                 form.ForeColor = formForeColor;
                 form.SetDefaultColor(red, green, blue);
 
-                if (form.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                if (form.ShowDialog() == DialogResult.OK)
                 {
                     chosenColor = form.UserPrimaryColor;
                 }

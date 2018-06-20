@@ -1318,7 +1318,7 @@ namespace PSFilterPdn
                     }
                 }
 
-                if (ShowErrorMessage(message) == System.Windows.Forms.DialogResult.OK)
+                if (ShowErrorMessage(message) == DialogResult.OK)
                 {
                     Close();
                 }
