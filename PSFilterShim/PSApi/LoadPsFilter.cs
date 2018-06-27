@@ -1254,7 +1254,7 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Runs a filter from the specified PluginData
 		/// </summary>
-		/// <param name="proxyData">The PluginData to run</param>
+		/// <param name="pdata">The PluginData to run</param>
 		/// <param name="showAbout">Show the Filter's About Box</param>
 		/// <returns><c>true</c> if the filter completed processing; otherwise <c>false</c> if an error occurred.</returns>
 		internal bool RunPlugin(PluginData pdata, bool showAbout)
