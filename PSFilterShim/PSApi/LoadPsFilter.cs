@@ -2181,8 +2181,6 @@ namespace PSFilterLoad.PSApi
 									ptr->G = foregroundColor[1];
 									ptr->B = foregroundColor[2];
 									break;
-								default:
-									break;
 							}
 						}
 
