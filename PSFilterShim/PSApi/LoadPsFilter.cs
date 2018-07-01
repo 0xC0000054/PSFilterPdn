@@ -1592,6 +1592,7 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// Scales the temp surface.
 		/// </summary>
+		/// <param name="inputRate">The input scaling ratio.</param>
 		/// <param name="lockRect">The rectangle to clamp the size to.</param>
 		private unsafe void ScaleTempSurface(Fixed16 inputRate, Rectangle lockRect)
 		{
