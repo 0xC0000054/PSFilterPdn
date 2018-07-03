@@ -144,6 +144,7 @@ namespace PSFilterLoad.PSApi
 		/// <summary>
 		/// The filter progress callback.
 		/// </summary>
+		/// <param name="callback">The progress callback.</param>
 		internal void SetProgressCallback(Action<int, int> callback)
 		{
 			if (callback == null)
