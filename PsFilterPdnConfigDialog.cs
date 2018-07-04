@@ -261,6 +261,7 @@ namespace PSFilterPdn
             //
             // buttonCancel
             //
+            buttonCancel.FlatStyle = FlatStyle.System;
             buttonCancel.Location = new System.Drawing.Point(397, 368);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new System.Drawing.Size(75, 23);
@@ -271,6 +272,7 @@ namespace PSFilterPdn
             //
             // buttonOK
             //
+            buttonOK.FlatStyle = FlatStyle.System;
             buttonOK.Location = new System.Drawing.Point(316, 368);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new System.Drawing.Size(75, 23);
@@ -396,6 +398,7 @@ namespace PSFilterPdn
             //
             // runFilterBtn
             //
+            runFilterBtn.FlatStyle = FlatStyle.System;
             runFilterBtn.Enabled = false;
             runFilterBtn.Location = new System.Drawing.Point(243, 266);
             runFilterBtn.Name = "runFilterBtn";
@@ -450,6 +453,7 @@ namespace PSFilterPdn
             //
             // remDirBtn
             //
+            remDirBtn.FlatStyle = FlatStyle.System;
             remDirBtn.Location = new System.Drawing.Point(371, 251);
             remDirBtn.Name = "remDirBtn";
             remDirBtn.Size = new System.Drawing.Size(75, 23);
@@ -460,6 +464,7 @@ namespace PSFilterPdn
             //
             // addDirBtn
             //
+            addDirBtn.FlatStyle = FlatStyle.System;
             addDirBtn.Location = new System.Drawing.Point(290, 251);
             addDirBtn.Name = "addDirBtn";
             addDirBtn.Size = new System.Drawing.Size(75, 23);
