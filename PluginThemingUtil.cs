@@ -65,22 +65,14 @@ namespace PSFilterPdn
                 {
                     Control control = controls[i];
 
-                    if (control is Button button)
-                    {
-                        // Reset the BackColor of all Button controls.
-                        button.UseVisualStyleBackColor = true;
-                    }
-                    else
-                    {
-                        // Update the BackColor for all child controls as some controls
-                        // do not change the BackColor when the parent control does.
+                    // Update the BackColor for all child controls as some controls
+                    // do not change the BackColor when the parent control does.
 
-                        control.BackColor = backColor;
+                    control.BackColor = backColor;
 
-                        if (control.HasChildren)
-                        {
-                            stack.Push(control);
-                        }
+                    if (control.HasChildren)
+                    {
+                        stack.Push(control);
                     }
                 }
             }
@@ -103,12 +95,7 @@ namespace PSFilterPdn
                 {
                     Control control = controls[i];
 
-                    if (control is Button button)
-                    {
-                        // Reset the ForeColor of all Button controls.
-                        button.ForeColor = SystemColors.ControlText;
-                    }
-                    else if (control is LinkLabel link)
+                    if (control is LinkLabel link)
                     {
                         if (foreColor != Control.DefaultForeColor)
                         {
