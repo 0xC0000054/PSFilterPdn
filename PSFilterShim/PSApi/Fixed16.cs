@@ -20,6 +20,7 @@ namespace PSFilterLoad.PSApi
     /// Represents a 16.16 fixed point number
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplay, nq}")]
+    [DebuggerTypeProxy(typeof(Fixed16DebugView))]
     [StructLayout(LayoutKind.Sequential)]
     internal struct Fixed16 : IEquatable<Fixed16>
     {
@@ -156,6 +157,40 @@ namespace PSFilterLoad.PSApi
         public static explicit operator double(Fixed16 value)
         {
             return value.ToDouble();
+        }
+
+        private sealed class Fixed16DebugView
+        {
+            private readonly Fixed16 fixed16;
+
+            public Fixed16DebugView(Fixed16 fixed16)
+            {
+                this.fixed16 = fixed16;
+            }
+
+            public int FixedValue
+            {
+                get
+                {
+                    return fixed16.fixedValue;
+                }
+            }
+
+            public int Int32Value
+            {
+                get
+                {
+                    return fixed16.ToInt32();
+                }
+            }
+
+            public double DoubleValue
+            {
+                get
+                {
+                    return fixed16.ToDouble();
+                }
+            }
         }
     }
 }
