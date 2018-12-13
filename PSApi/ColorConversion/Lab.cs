@@ -17,9 +17,9 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <summary>
         /// Initializes a new instance of the <see cref="Lab"/> class.
         /// </summary>
-        /// <param name="luminance">The luminance component in the range of [0, 1].</param>
-        /// <param name="a">The a component in the range of [0, 1].</param>
-        /// <param name="b">The b component in the range of [0, 1].</param>
+        /// <param name="luminance">The luminance component in the range of [0, 100].</param>
+        /// <param name="a">The a component in the range of [-128, 127].</param>
+        /// <param name="b">The b component in the range of [-128, 127].</param>
         public Lab(double luminance, double a, double b)
         {
             L = luminance;

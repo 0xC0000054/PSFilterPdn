@@ -348,9 +348,9 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <summary>
         /// Converts a Lab color to XYZ.
         /// </summary>
-        /// <param name="l">The l component in the range of [0, 1].</param>
-        /// <param name="a">The a component in the range of [0, 1].</param>
-        /// <param name="b">The b component in the range of [0, 1].</param>
+        /// <param name="l">The l component in the range of [0, 100].</param>
+        /// <param name="a">The a component in the range of [-128, 127].</param>
+        /// <param name="b">The b component in the range of [-128, 127].</param>
         /// <returns>The converted color.</returns>
         public static CMYK LabtoCMYK(double l, double a, double b)
         {
@@ -361,9 +361,9 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <summary>
         /// Converts a Lab color to XYZ.
         /// </summary>
-        /// <param name="l">The l component in the range of [0, 1].</param>
-        /// <param name="a">The a component in the range of [0, 1].</param>
-        /// <param name="b">The b component in the range of [0, 1].</param>
+        /// <param name="l">The l component in the range of [0, 100].</param>
+        /// <param name="a">The a component in the range of [-128, 127].</param>
+        /// <param name="b">The b component in the range of [-128, 127].</param>
         /// <returns>The converted color.</returns>
         public static HSB LabtoHSB(double l, double a, double b)
         {
@@ -374,9 +374,9 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <summary>
         /// Converts a Lab color to XYZ.
         /// </summary>
-        /// <param name="l">The l component in the range of [0, 1].</param>
-        /// <param name="a">The a component in the range of [0, 1].</param>
-        /// <param name="b">The b component in the range of [0, 1].</param>
+        /// <param name="l">The l component in the range of [0, 100].</param>
+        /// <param name="a">The a component in the range of [-128, 127].</param>
+        /// <param name="b">The b component in the range of [-128, 127].</param>
         /// <returns>The converted color.</returns>
         public static HSL LabtoHSL(double l, double a, double b)
         {
@@ -387,9 +387,9 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <summary>
         /// Converts a Lab color to RGB.
         /// </summary>
-        /// <param name="l">The l component in the range of [0, 1].</param>
-        /// <param name="a">The a component in the range of [0, 1].</param>
-        /// <param name="b">The b component in the range of [0, 1].</param>
+        /// <param name="l">The l component in the range of [0, 100].</param>
+        /// <param name="a">The a component in the range of [-128, 127].</param>
+        /// <param name="b">The b component in the range of [-128, 127].</param>
         /// <returns>The converted color.</returns>
         public static RGB LabtoRGB(double l, double a, double b)
         {
@@ -400,9 +400,9 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <summary>
         /// Converts a Lab color to XYZ.
         /// </summary>
-        /// <param name="l">The l component in the range of [0, 1].</param>
-        /// <param name="a">The a component in the range of [0, 1].</param>
-        /// <param name="b">The b component in the range of [0, 1].</param>
+        /// <param name="l">The l component in the range of [0, 100].</param>
+        /// <param name="a">The a component in the range of [-128, 127].</param>
+        /// <param name="b">The b component in the range of [-128, 127].</param>
         /// <returns>The converted color.</returns>
         public static XYZ LabtoXYZ(double l, double a, double b)
         {
