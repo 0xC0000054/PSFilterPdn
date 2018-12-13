@@ -31,15 +31,6 @@ namespace PSFilterLoad.PSApi
 			public readonly double component3;
 			public readonly int maxChannelValue;
 
-			public ColorSource(double component0, BitsPerChannel bitsPerChannel) : this(component0, 0.0, 0.0, 0.0, bitsPerChannel)
-			{
-			}
-
-			public ColorSource(double component0, double component1, double component2, BitsPerChannel bitsPerChannel) :
-				this(component0, component1, component2, 0.0, bitsPerChannel)
-			{
-			}
-
 			public ColorSource(double component0, double component1, double component2, double component3, BitsPerChannel bitsPerChannel)
 			{
 				this.component0 = component0;
