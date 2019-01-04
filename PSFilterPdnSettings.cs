@@ -23,6 +23,7 @@ namespace PSFilterPdn
     {
         private readonly string path;
         private bool changed;
+        private bool createUserFilesDir;
         [DataMember(Name = "SearchDirectories")]
         private HashSet<string> searchDirectories;
         [DataMember(Name = "SearchSubdirectories")]
@@ -42,6 +43,7 @@ namespace PSFilterPdn
 
             this.path = path;
             changed = false;
+            createUserFilesDir = false;
             searchSubdirectories = true;
             searchDirectories = null;
         }
@@ -196,6 +198,10 @@ namespace PSFilterPdn
                     }
                 }
             }
+            catch (DirectoryNotFoundException)
+            {
+                createUserFilesDir = true;
+            }
             catch (FileNotFoundException)
             {
                 // Use the default settings if the file is not present.
@@ -204,6 +210,16 @@ namespace PSFilterPdn
 
         private void Save()
         {
+            if (createUserFilesDir)
+            {
+                DirectoryInfo info = new DirectoryInfo(Path.GetDirectoryName(path));
+
+                if (!info.Exists)
+                {
+                    info.Create();
+                }
+            }
+
             XmlWriterSettings writerSettings = new XmlWriterSettings
             {
                 Indent = true

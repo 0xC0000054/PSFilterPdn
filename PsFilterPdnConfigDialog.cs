@@ -1380,11 +1380,6 @@ namespace PSFilterPdn
             {
                 string userDataPath = Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
 
-                if (!Directory.Exists(userDataPath))
-                {
-                    Directory.CreateDirectory(userDataPath);
-                }
-
                 string path = Path.Combine(userDataPath, "PSFilterPdn.xml");
 
                 settings = new PSFilterPdnSettings(path);
