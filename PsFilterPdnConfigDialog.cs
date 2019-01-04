@@ -1388,6 +1388,10 @@ namespace PSFilterPdn
                 string path = Path.Combine(userDataPath, "PSFilterPdn.xml");
 
                 settings = new PSFilterPdnSettings(path);
+
+                // Loading the settings is split into a separate method to allow the defaults
+                // to be used if an error occurs when reading the saved settings.
+                settings.LoadSavedSettings();
             }
             catch (IOException ex)
             {

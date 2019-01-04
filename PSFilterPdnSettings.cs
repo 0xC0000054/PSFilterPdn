@@ -44,18 +44,6 @@ namespace PSFilterPdn
             changed = false;
             searchSubdirectories = true;
             searchDirectories = null;
-
-            try
-            {
-                using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
-                {
-                    Load(stream);
-                }
-            }
-            catch (FileNotFoundException)
-            {
-                // Use the default settings if the file is not present.
-            }
         }
 
         /// <summary>
@@ -117,87 +105,100 @@ namespace PSFilterPdn
             }
         }
 
-        private void Load(Stream stream)
+        /// <summary>
+        /// Loads the saved settings for this instance.
+        /// </summary>
+        public void LoadSavedSettings()
         {
-            XmlReaderSettings readerSettings = new XmlReaderSettings
+            try
             {
-                CloseInput = false,
-                IgnoreComments = true,
-                XmlResolver = null
-            };
-
-            using (XmlReader xmlReader = XmlReader.Create(stream, readerSettings))
-            {
-                // Detect the old settings format and convert it to the new format.
-                if (xmlReader.MoveToContent() == XmlNodeType.Element &&
-                    xmlReader.Name == OldXmlSettings.RootNodeName)
+                using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
                 {
-                    XmlDocument xmlDocument = new XmlDocument();
-                    xmlDocument.Load(xmlReader);
-
-                    XmlNode searchDirsNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchDirectoriesPath);
-                    if (searchDirsNode != null)
+                    XmlReaderSettings readerSettings = new XmlReaderSettings
                     {
-                        string dirs = searchDirsNode.InnerText.Trim();
+                        CloseInput = false,
+                        IgnoreComments = true,
+                        XmlResolver = null
+                    };
 
-                        if (!string.IsNullOrEmpty(dirs))
+                    using (XmlReader xmlReader = XmlReader.Create(stream, readerSettings))
+                    {
+                        // Detect the old settings format and convert it to the new format.
+                        if (xmlReader.MoveToContent() == XmlNodeType.Element &&
+                            xmlReader.Name == OldXmlSettings.RootNodeName)
                         {
-                            List<string> directories = new List<string>();
+                            XmlDocument xmlDocument = new XmlDocument();
+                            xmlDocument.Load(xmlReader);
 
-                            string[] splitDirs = dirs.Split(new char[] { ',' }, StringSplitOptions.None);
-
-                            for (int i = 0; i < splitDirs.Length; i++)
+                            XmlNode searchDirsNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchDirectoriesPath);
+                            if (searchDirsNode != null)
                             {
-                                string dir = splitDirs[i];
+                                string dirs = searchDirsNode.InnerText.Trim();
 
-                                try
+                                if (!string.IsNullOrEmpty(dirs))
                                 {
-                                    if (Path.IsPathRooted(dir))
+                                    List<string> directories = new List<string>();
+
+                                    string[] splitDirs = dirs.Split(new char[] { ',' }, StringSplitOptions.None);
+
+                                    for (int i = 0; i < splitDirs.Length; i++)
                                     {
-                                        directories.Add(dir);
+                                        string dir = splitDirs[i];
+
+                                        try
+                                        {
+                                            if (Path.IsPathRooted(dir))
+                                            {
+                                                directories.Add(dir);
+                                            }
+                                            else
+                                            {
+                                                // If the path contains a comma it will not be rooted
+                                                // append it to the previous path with a comma added.
+
+                                                int index = directories.Count - 1;
+                                                string lastPath = directories[index];
+
+                                                directories[index] = lastPath + "," + dir;
+                                            }
+                                        }
+                                        catch (ArgumentException)
+                                        {
+                                        }
                                     }
-                                    else
+
+                                    if (directories.Count > 0)
                                     {
-                                        // If the path contains a comma it will not be rooted
-                                        // append it to the previous path with a comma added.
-
-                                        int index = directories.Count - 1;
-                                        string lastPath = directories[index];
-
-                                        directories[index] = lastPath + "," + dir;
+                                        searchDirectories = new HashSet<string>(directories, StringComparer.OrdinalIgnoreCase);
                                     }
                                 }
-                                catch (ArgumentException)
+                            }
+                            XmlNode searchSubDirNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchSubdirectoriesPath);
+                            if (searchSubDirNode != null)
+                            {
+                                bool result;
+                                if (bool.TryParse(searchSubDirNode.InnerText.Trim(), out result))
                                 {
+                                    searchSubdirectories = result;
                                 }
                             }
 
-                            if (directories.Count > 0)
-                            {
-                                searchDirectories = new HashSet<string>(directories, StringComparer.OrdinalIgnoreCase);
-                            }
+                            changed = true;
                         }
-                    }
-                    XmlNode searchSubDirNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchSubdirectoriesPath);
-                    if (searchSubDirNode != null)
-                    {
-                        bool result;
-                        if (bool.TryParse(searchSubDirNode.InnerText.Trim(), out result))
+                        else
                         {
-                            searchSubdirectories = result;
+                            DataContractSerializer serializer = new DataContractSerializer(typeof(PSFilterPdnSettings));
+                            PSFilterPdnSettings settings = (PSFilterPdnSettings)serializer.ReadObject(xmlReader);
+
+                            searchDirectories = settings.searchDirectories;
+                            searchSubdirectories = settings.searchSubdirectories;
                         }
                     }
-
-                    changed = true;
                 }
-                else
-                {
-                    DataContractSerializer serializer = new DataContractSerializer(typeof(PSFilterPdnSettings));
-                    PSFilterPdnSettings settings = (PSFilterPdnSettings)serializer.ReadObject(xmlReader);
-
-                    searchDirectories = settings.searchDirectories;
-                    searchSubdirectories = settings.searchSubdirectories;
-                }
+            }
+            catch (FileNotFoundException)
+            {
+                // Use the default settings if the file is not present.
             }
         }
 
