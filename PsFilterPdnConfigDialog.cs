@@ -25,6 +25,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace PSFilterPdn
 {
@@ -1388,11 +1389,19 @@ namespace PSFilterPdn
                 // to be used if an error occurs when reading the saved settings.
                 settings.LoadSavedSettings();
             }
+            catch (ArgumentException ex)
+            {
+                ShowErrorMessage(ex.Message);
+            }
             catch (IOException ex)
             {
                 ShowErrorMessage(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
+            {
+                ShowErrorMessage(ex.Message);
+            }
+            catch (XmlException ex)
             {
                 ShowErrorMessage(ex.Message);
             }
