@@ -1004,7 +1004,7 @@ namespace PSFilterPdn
 
         private sealed class UpdateFilterListParam
         {
-            public Dictionary<string, List<TreeNode>> items;
+            public Dictionary<string, List<TreeNodeEx>> items;
             public string[] directories;
             public SearchOption searchOption;
 
@@ -1079,7 +1079,7 @@ namespace PSFilterPdn
         /// <param name="nodes">The collection of existing TreeNodes.</param>
         /// <param name="data">The PluginData to check.</param>
         /// <returns>True if the item is not a duplicate; otherwise false.</returns>
-        private static bool IsNotDuplicateNode(ref List<TreeNode> nodes, PluginData data)
+        private static bool IsNotDuplicateNode(ref List<TreeNodeEx> nodes, PluginData data)
         {
             if (IntPtr.Size == 8)
             {
@@ -1128,7 +1128,7 @@ namespace PSFilterPdn
             BackgroundWorker worker = (BackgroundWorker)sender;
             UpdateFilterListParam args = (UpdateFilterListParam)e.Argument;
 
-            Dictionary<string, List<TreeNode>> nodes = new Dictionary<string, List<TreeNode>>(StringComparer.Ordinal);
+            Dictionary<string, List<TreeNodeEx>> nodes = new Dictionary<string, List<TreeNodeEx>>(StringComparer.Ordinal);
 
             for (int i = 0; i < args.directories.Length; i++)
             {
@@ -1157,9 +1157,9 @@ namespace PSFilterPdn
                             // The **Hidden** category is used for filters that are not directly invoked by the user.
                             if (!plugin.Category.Equals("**Hidden**", StringComparison.Ordinal))
                             {
-                                TreeNode child = new TreeNode(plugin.Title) { Name = plugin.Title, Tag = plugin };
+                                TreeNodeEx child = new TreeNodeEx(plugin.Title) { Name = plugin.Title, Tag = plugin };
 
-                                List<TreeNode> childNodes;
+                                List<TreeNodeEx> childNodes;
                                 if (nodes.TryGetValue(plugin.Category, out childNodes))
                                 {
                                     if (IsNotDuplicateNode(ref childNodes, plugin))
@@ -1170,7 +1170,7 @@ namespace PSFilterPdn
                                 }
                                 else
                                 {
-                                    List<TreeNode> items = new List<TreeNode>
+                                    List<TreeNodeEx> items = new List<TreeNodeEx>
                                     {
                                         child
                                     };
@@ -1528,25 +1528,25 @@ namespace PSFilterPdn
                 }
                 else
                 {
-                    Dictionary<string, TreeNode> nodes = new Dictionary<string, TreeNode>(StringComparer.Ordinal);
+                    Dictionary<string, TreeNodeEx> nodes = new Dictionary<string, TreeNodeEx>(StringComparer.Ordinal);
                     foreach (var item in filterTreeNodes)
                     {
                         string category = item.Key;
-                        ReadOnlyCollection<TreeNode> childNodes = item.Value;
+                        ReadOnlyCollection<TreeNodeEx> childNodes = item.Value;
 
                         for (int i = 0; i < childNodes.Count; i++)
                         {
-                            TreeNode child = childNodes[i];
+                            TreeNodeEx child = childNodes[i];
                             if (child.Text.Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
                             {
                                 if (nodes.ContainsKey(category))
                                 {
-                                    TreeNode node = nodes[category];
+                                    TreeNodeEx node = nodes[category];
                                     node.Nodes.Add(child.CloneT());
                                 }
                                 else
                                 {
-                                    TreeNode node = new TreeNode(category);
+                                    TreeNodeEx node = new TreeNodeEx(category);
                                     node.Nodes.Add(child.CloneT());
 
                                     nodes.Add(category, node);
@@ -1647,7 +1647,7 @@ namespace PSFilterPdn
 
         private void filterTree_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
-            if (e.Action == TreeViewAction.Expand)
+            if (e.Action == TreeViewAction.Expand && !e.Cancel)
             {
                 TreeNode item = e.Node;
 
@@ -1658,9 +1658,9 @@ namespace PSFilterPdn
                     // Remove the placeholder node and add the real nodes.
                     parent.Nodes.RemoveAt(0);
 
-                    ReadOnlyCollection<TreeNode> values = filterTreeNodes[item.Text];
+                    ReadOnlyCollection<TreeNodeEx> values = filterTreeNodes[item.Text];
 
-                    TreeNode[] nodes = new TreeNode[values.Count];
+                    TreeNodeEx[] nodes = new TreeNodeEx[values.Count];
                     for (int i = 0; i < values.Count; i++)
                     {
                         // The TreeNode values must be cloned to prevent the Handle property

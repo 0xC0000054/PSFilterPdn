@@ -19,27 +19,27 @@ using System.Windows.Forms;
 namespace PSFilterPdn
 {
     [Serializable]
-    public sealed class FilterTreeNodeCollection : IEnumerable<KeyValuePair<string, ReadOnlyCollection<TreeNode>>>
+    public sealed class FilterTreeNodeCollection : IEnumerable<KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>>>
     {
-        private readonly Dictionary<string, ReadOnlyCollection<TreeNode>> nodes;
+        private readonly Dictionary<string, ReadOnlyCollection<TreeNodeEx>> nodes;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterTreeNodeCollection"/> class.
         /// </summary>
         /// <param name="items">The items.</param>
         /// <exception cref="ArgumentNullException"><paramref name="items"/> is null.</exception>
-        internal FilterTreeNodeCollection(IDictionary<string, List<TreeNode>> items)
+        internal FilterTreeNodeCollection(IDictionary<string, List<TreeNodeEx>> items)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            nodes = new Dictionary<string, ReadOnlyCollection<TreeNode>>(items.Count, StringComparer.Ordinal);
+            nodes = new Dictionary<string, ReadOnlyCollection<TreeNodeEx>>(items.Count, StringComparer.Ordinal);
 
             foreach (var item in items)
             {
-                nodes.Add(item.Key, new ReadOnlyCollection<TreeNode>(item.Value));
+                nodes.Add(item.Key, new ReadOnlyCollection<TreeNodeEx>(item.Value));
             }
         }
 
@@ -51,7 +51,7 @@ namespace PSFilterPdn
             }
         }
 
-        public ReadOnlyCollection<TreeNode> this[string key]
+        public ReadOnlyCollection<TreeNodeEx> this[string key]
         {
             get
             {
@@ -59,7 +59,7 @@ namespace PSFilterPdn
             }
         }
 
-        public IEnumerator<KeyValuePair<string, ReadOnlyCollection<TreeNode>>> GetEnumerator()
+        public IEnumerator<KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>>> GetEnumerator()
         {
             return nodes.GetEnumerator();
         }

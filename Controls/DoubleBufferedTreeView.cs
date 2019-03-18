@@ -13,6 +13,7 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
@@ -23,8 +24,10 @@ namespace PSFilterPdn.Controls
     internal sealed class DoubleBufferedTreeView : TreeView
     {
         private Bitmap collapseGlyph;
+        private Bitmap disabledGlyph;
         private Bitmap expandGlyph;
         private SolidBrush backgroundBrush;
+        private Color disabledGlyphBackColor;
         private Color previousForeColor;
 
         public DoubleBufferedTreeView()
@@ -88,6 +91,11 @@ namespace PSFilterPdn.Controls
                     collapseGlyph.Dispose();
                     collapseGlyph = null;
                 }
+                if (disabledGlyph != null)
+                {
+                    disabledGlyph.Dispose();
+                    disabledGlyph = null;
+                }
                 if (expandGlyph != null)
                 {
                     expandGlyph.Dispose();
@@ -107,6 +115,24 @@ namespace PSFilterPdn.Controls
                 backgroundBrush.Dispose();
                 backgroundBrush = new SolidBrush(BackColor);
             }
+            if (disabledGlyph != null && disabledGlyphBackColor != BackColor)
+            {
+                DrawDisbledGlyph();
+            }
+        }
+
+        protected override void OnBeforeExpand(TreeViewCancelEventArgs e)
+        {
+            e.Cancel = !NodeEnabled(e.Node);
+
+            base.OnBeforeExpand(e);
+        }
+
+        protected override void OnBeforeSelect(TreeViewCancelEventArgs e)
+        {
+            e.Cancel = !NodeEnabled(e.Node);
+
+            base.OnBeforeSelect(e);
         }
 
         protected override void OnForeColorChanged(EventArgs e)
@@ -131,6 +157,8 @@ namespace PSFilterPdn.Controls
                 return;
             }
 
+            bool enabled = NodeEnabled(e.Node);
+
             // Draw the expand / collapse glyphs
 
             if (e.Node.Parent == null)
@@ -140,13 +168,27 @@ namespace PSFilterPdn.Controls
                 int imageX = bounds.X - ImageSize - 4;
                 int imageY = bounds.Y + 2;
 
-                if (e.Node.IsExpanded)
+                if (enabled)
                 {
-                    e.Graphics.DrawImage(collapseGlyph, imageX, imageY);
+                    if (e.Node.IsExpanded)
+                    {
+                        e.Graphics.DrawImage(collapseGlyph, imageX, imageY);
+                    }
+                    else
+                    {
+                        e.Graphics.DrawImage(expandGlyph, imageX, imageY);
+                    }
                 }
                 else
                 {
-                    e.Graphics.DrawImage(expandGlyph, imageX, imageY);
+                    // A separate image is used because ControlPaint.DrawImageDisabled does not render
+                    // the image at the correct x and y offsets.
+                    if (disabledGlyph == null)
+                    {
+                        DrawDisbledGlyph();
+                    }
+
+                    e.Graphics.DrawImage(disabledGlyph, imageX, imageY);
                 }
             }
 
@@ -154,17 +196,26 @@ namespace PSFilterPdn.Controls
 
             Font nodeFont = e.Node.NodeFont ?? e.Node.TreeView.Font;
 
-            if ((e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected)
+            if (enabled)
             {
-                e.Graphics.FillRectangle(SystemBrushes.Highlight, bounds);
+                if ((e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected)
+                {
+                    e.Graphics.FillRectangle(SystemBrushes.Highlight, bounds);
 
-                TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, Rectangle.Inflate(bounds, 2, 2), ForeColor);
+                    TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, Rectangle.Inflate(bounds, 2, 2), ForeColor);
+                }
+                else
+                {
+                    e.Graphics.FillRectangle(backgroundBrush, bounds);
+
+                    TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, bounds, ForeColor);
+                }
             }
             else
             {
                 e.Graphics.FillRectangle(backgroundBrush, bounds);
 
-                TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, bounds, ForeColor);
+                TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, bounds, SystemColors.GrayText);
             }
         }
 
@@ -251,6 +302,37 @@ namespace PSFilterPdn.Controls
                 collapseGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.UnthemedCollapse.png");
                 expandGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.UnthemedExpand.png");
             }
+        }
+
+        private void DrawDisbledGlyph()
+        {
+            if (expandGlyph != null)
+            {
+                if (disabledGlyph == null || disabledGlyph.Size != expandGlyph.Size || disabledGlyphBackColor != BackColor)
+                {
+                    disabledGlyph?.Dispose();
+
+                    disabledGlyph = new Bitmap(expandGlyph.Width, expandGlyph.Height, PixelFormat.Format32bppArgb);
+                    disabledGlyphBackColor = BackColor;
+
+                    using (Graphics graphics = Graphics.FromImage(disabledGlyph))
+                    {
+                        ControlPaint.DrawImageDisabled(graphics, expandGlyph, 0, 0, disabledGlyphBackColor);
+                    }
+                }
+            }
+        }
+
+        private static bool NodeEnabled(TreeNode node)
+        {
+            bool enabled = true;
+
+            if (node is TreeNodeEx nodeEx)
+            {
+                enabled = nodeEx.Enabled;
+            }
+
+            return enabled;
         }
     }
 }
