@@ -414,7 +414,6 @@ namespace PSFilterPdn
             filterTree.HideSelection = false;
             filterTree.Location = new System.Drawing.Point(6, 32);
             filterTree.Name = "filterTree";
-            filterTree.ShowLines = false;
             filterTree.Size = new System.Drawing.Size(230, 260);
             filterTree.TabIndex = 0;
             filterTree.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(filterTree_AfterCollapse);

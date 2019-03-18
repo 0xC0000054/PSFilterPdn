@@ -305,6 +305,14 @@
       <SubType>Designer</SubType>
       <DependentUpon>PsFilterPdnConfigDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapse.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapseDark.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedExpand.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedExpandDark.png" />
+    <EmbeddedResource Include="Resources\Icons\UnthemedCollapse.png" />
+    <EmbeddedResource Include="Resources\Icons\UnthemedExpand.png" />
+    <EmbeddedResource Include="Resources\Icons\XPThemedCollapse.png" />
+    <EmbeddedResource Include="Resources\Icons\XPThemedExpand.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

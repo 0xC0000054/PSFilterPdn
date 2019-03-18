@@ -10,8 +10,13 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterPdn.Properties;
 using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 namespace PSFilterPdn.Controls
 {
@@ -19,6 +24,11 @@ namespace PSFilterPdn.Controls
 
     internal sealed class DoubleBufferedTreeView : TreeView
     {
+        private Bitmap collapseGlyph;
+        private Bitmap expandGlyph;
+        private SolidBrush backgroundBrush;
+        private Color previousForeColor;
+
         public DoubleBufferedTreeView()
         {
             // Enable default double buffering processing (DoubleBuffered returns true)
@@ -28,6 +38,135 @@ namespace PSFilterPdn.Controls
             if (!OS.IsVistaOrLater)
             {
                 SetStyle(ControlStyles.UserPaint, true);
+            }
+            base.DrawMode = TreeViewDrawMode.OwnerDrawAll;
+            backgroundBrush = new SolidBrush(BackColor);
+            previousForeColor = ForeColor;
+            InitTreeNodeGlyphs();
+        }
+
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new bool CheckBoxes => false;
+
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new TreeViewDrawMode DrawMode => TreeViewDrawMode.OwnerDrawAll;
+
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new bool ShowLines => false;
+
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new bool ShowPlusMinus => true;
+
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new bool ShowRootLines => false;
+
+#pragma warning disable 0067
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new event DrawTreeNodeEventHandler DrawNode;
+#pragma warning restore 0067
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (backgroundBrush != null)
+                {
+                    backgroundBrush.Dispose();
+                    backgroundBrush = null;
+                }
+                if (collapseGlyph != null)
+                {
+                    collapseGlyph.Dispose();
+                    collapseGlyph = null;
+                }
+                if (expandGlyph != null)
+                {
+                    expandGlyph.Dispose();
+                    expandGlyph = null;
+                }
+            }
+
+            base.Dispose(disposing);
+        }
+
+        protected override void OnBackColorChanged(EventArgs e)
+        {
+            base.OnBackColorChanged(e);
+
+            if (backgroundBrush.Color != BackColor)
+            {
+                backgroundBrush.Dispose();
+                backgroundBrush = new SolidBrush(BackColor);
+            }
+        }
+
+        protected override void OnForeColorChanged(EventArgs e)
+        {
+            base.OnForeColorChanged(e);
+
+            if (previousForeColor != ForeColor)
+            {
+                previousForeColor = ForeColor;
+                InitTreeNodeGlyphs();
+            }
+        }
+
+        protected override void OnDrawNode(DrawTreeNodeEventArgs e)
+        {
+            base.OnDrawNode(e);
+
+            Rectangle bounds = e.Node.Bounds;
+
+            if (bounds.IsEmpty || e.Node.TreeView.Nodes.Count == 0)
+            {
+                return;
+            }
+
+            // Draw the expand / collapse glyphs
+
+            if (e.Node.Parent == null)
+            {
+                const int ImageSize = 16;
+
+                int imageX = bounds.X - ImageSize - 4;
+                int imageY = bounds.Y + 2;
+
+                if (e.Node.IsExpanded)
+                {
+                    e.Graphics.DrawImage(collapseGlyph, imageX, imageY);
+                }
+                else
+                {
+                    e.Graphics.DrawImage(expandGlyph, imageX, imageY);
+                }
+            }
+
+            // Draw the node text
+
+            Font nodeFont = e.Node.NodeFont ?? e.Node.TreeView.Font;
+
+            if ((e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected)
+            {
+                e.Graphics.FillRectangle(SystemBrushes.Highlight, bounds);
+
+                TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, Rectangle.Inflate(bounds, 2, 2), ForeColor);
+            }
+            else
+            {
+                e.Graphics.FillRectangle(backgroundBrush, bounds);
+
+                TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, bounds, ForeColor);
             }
         }
 
@@ -69,6 +208,51 @@ namespace PSFilterPdn.Controls
             }
 
             base.OnPaint(e);
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+
+            const int WM_THEMECHANGED = 0x031A;
+
+            if (m.Msg == WM_THEMECHANGED)
+            {
+                InitTreeNodeGlyphs();
+            }
+        }
+
+        private void InitTreeNodeGlyphs()
+        {
+            collapseGlyph?.Dispose();
+            expandGlyph?.Dispose();
+
+            if (VisualStyleRenderer.IsSupported)
+            {
+                if (OS.IsVistaOrLater)
+                {
+                    if (ForeColor == Color.White)
+                    {
+                        collapseGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.VistaThemedCollapseDark.png");
+                        expandGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.VistaThemedExpandDark.png");
+                    }
+                    else
+                    {
+                        collapseGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.VistaThemedCollapse.png");
+                        expandGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.VistaThemedExpand.png");
+                    }
+                }
+                else
+                {
+                    collapseGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.XPThemedCollapse.png");
+                    expandGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.XPThemedExpand.png");
+                }
+            }
+            else
+            {
+                collapseGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.UnthemedCollapse.png");
+                expandGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.UnthemedExpand.png");
+            }
         }
     }
 }
