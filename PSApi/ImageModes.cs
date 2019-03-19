@@ -20,18 +20,18 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
     internal enum ImageModes
     {
-        plugInModeBitmap = 0,
-        plugInModeGrayScale = 1,
-        plugInModeIndexedColor = 2,
-        plugInModeRGBColor = 3,
-        plugInModeCMYKColor = 4,
-        plugInModeHSLColor = 5,
-        plugInModeHSBColor = 6,
-        plugInModeMultichannel = 7,
-        plugInModeDuotone = 8,
-        plugInModeLabColor = 9,
-        plugInModeGray16 = 10,
-        plugInModeRGB48 = 11
+        Bitmap = 0,
+        GrayScale = 1,
+        Indexed = 2,
+        RGB = 3,
+        CMYK = 4,
+        HSL = 5,
+        HSB = 6,
+        Multichannel = 7,
+        Duotone = 8,
+        Lab = 9,
+        Gray16 = 10,
+        RGB48 = 11
     }
 #endif
 }
