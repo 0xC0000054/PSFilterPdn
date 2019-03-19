@@ -1127,36 +1127,6 @@ namespace PSFilterPdn
             return true;
         }
 
-        private bool IsPluginEnabled(PluginData plugin)
-        {
-            bool enabled = true;
-
-            if (!string.IsNullOrEmpty(plugin.EnableInfo))
-            {
-                try
-                {
-                    Expression expression = EnableInfoParser.Parse(plugin.EnableInfo);
-
-                    enabled = enableInfoInterpreter.Evaluate(expression);
-                }
-                catch (EnableInfoException)
-                {
-                }
-            }
-
-            if (plugin.FilterInfo != null)
-            {
-                FilterCase filterCase = plugin.GetFilterTransparencyMode(ImageModes.RGB,
-                                                                         hasSelection,
-                                                                         () => SurfaceUtil.HasTransparentPixels(EffectSourceSurface));
-                int filterCaseIndex = (int)filterCase - 1;
-
-                enabled &= plugin.FilterInfo[filterCaseIndex].IsSupported();
-            }
-
-            return enabled;
-        }
-
         private void updateFilterListBw_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = (BackgroundWorker)sender;
@@ -1193,7 +1163,6 @@ namespace PSFilterPdn
                             {
                                 TreeNodeEx child = new TreeNodeEx(plugin.Title)
                                 {
-                                    Enabled = IsPluginEnabled(plugin),
                                     Name = plugin.Title,
                                     Tag = plugin
                                 };
@@ -1248,6 +1217,7 @@ namespace PSFilterPdn
 
                     filterTreeNodes = new FilterTreeNodeCollection(parm.items);
 
+                    EnableFiltersForHostState();
                     PopulateFilterTreeCategories(true);
 
                     folderLoadProgress.Value = 0;
@@ -1509,6 +1479,7 @@ namespace PSFilterPdn
             else
             {
                 searchDirListView.VirtualListSize = searchDirectories.Count;
+                EnableFiltersForHostState();
                 PopulateFilterTreeCategories(true);
             }
         }
@@ -1840,6 +1811,50 @@ namespace PSFilterPdn
                 catch (UnauthorizedAccessException ex)
                 {
                     ShowErrorMessage(ex.Message);
+                }
+            }
+        }
+
+        private void EnableFiltersForHostState()
+        {
+            if (filterTreeNodes != null && enableInfoInterpreter != null)
+            {
+                foreach (KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>> item in filterTreeNodes)
+                {
+                    ReadOnlyCollection<TreeNodeEx> filterCollection = item.Value;
+
+                    for (int i = 0; i < filterCollection.Count; i++)
+                    {
+                        TreeNodeEx node = filterCollection[i];
+                        PluginData plugin = (PluginData)node.Tag;
+
+                        bool enabled = true;
+
+                        if (!string.IsNullOrEmpty(plugin.EnableInfo))
+                        {
+                            try
+                            {
+                                Expression expression = EnableInfoParser.Parse(plugin.EnableInfo);
+
+                                enabled = enableInfoInterpreter.Evaluate(expression);
+                            }
+                            catch (EnableInfoException)
+                            {
+                            }
+                        }
+
+                        if (plugin.FilterInfo != null)
+                        {
+                            FilterCase filterCase = plugin.GetFilterTransparencyMode(ImageModes.RGB,
+                                                                                     hasSelection,
+                                                                                     () => SurfaceUtil.HasTransparentPixels(EffectSourceSurface));
+                            int filterCaseIndex = (int)filterCase - 1;
+
+                            enabled &= plugin.FilterInfo[filterCaseIndex].IsSupported();
+                        }
+
+                        node.Enabled = enabled;
+                    }
                 }
             }
         }
