@@ -451,73 +451,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="data">The plugin to check.</param>
 		private void SetFilterTransparencyMode(PluginData data)
 		{
-			if (data.FilterInfo == null ||
-				data.Category.Equals("Nik Collection", StringComparison.Ordinal) && data.Title.StartsWith("Dfine 2", StringComparison.Ordinal))
-			{
-				if (HasTransparentPixels())
-				{
-					filterCase = FilterCase.FloatingSelection;
-				}
-				else
-				{
-					filterCase = selectedRegion != null ? FilterCase.FlatImageWithSelection : FilterCase.FlatImageNoSelection;
-				}
-			}
-			else
-			{
-				filterCase = selectedRegion != null ? FilterCase.EditableTransparencyWithSelection : FilterCase.EditableTransparencyNoSelection;
-
-				int filterCaseIndex = (int)filterCase - 1;
-				System.Collections.ObjectModel.ReadOnlyCollection<FilterCaseInfo> filterInfo = data.FilterInfo;
-
-				if (!filterInfo[filterCaseIndex].IsSupported())
-				{
-					if (!HasTransparentPixels())
-					{
-						switch (filterCase)
-						{
-							case FilterCase.EditableTransparencyNoSelection:
-								filterCase = FilterCase.FlatImageNoSelection;
-								break;
-							case FilterCase.EditableTransparencyWithSelection:
-								filterCase = FilterCase.FlatImageWithSelection;
-								break;
-						}
-					}
-					else if (!filterInfo[filterCaseIndex + 2].IsSupported())
-					{
-						// If the protected transparency modes are not supported use the next most appropriate mode.
-						if (filterInfo[(int)FilterCase.FloatingSelection - 1].IsSupported())
-						{
-							filterCase = FilterCase.FloatingSelection;
-						}
-						else
-						{
-							switch (filterCase)
-							{
-								case FilterCase.EditableTransparencyNoSelection:
-									filterCase = FilterCase.FlatImageNoSelection;
-									break;
-								case FilterCase.EditableTransparencyWithSelection:
-									filterCase = FilterCase.FlatImageWithSelection;
-									break;
-							}
-						}
-					}
-					else
-					{
-						switch (filterCase)
-						{
-							case FilterCase.EditableTransparencyNoSelection:
-								filterCase = FilterCase.ProtectedTransparencyNoSelection;
-								break;
-							case FilterCase.EditableTransparencyWithSelection:
-								filterCase = FilterCase.ProtectedTransparencyWithSelection;
-								break;
-						}
-					}
-				}
-			}
+			filterCase = data.GetFilterTransparencyMode(ImageModes.RGB, selectedRegion != null, HasTransparentPixels);
 		}
 
 		/// <summary>

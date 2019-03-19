@@ -17,8 +17,7 @@
 
 namespace PSFilterLoad.PSApi
 {
-#if DEBUG
-    internal enum ImageModes
+    public enum ImageModes
     {
         Bitmap = 0,
         GrayScale = 1,
@@ -33,5 +32,4 @@ namespace PSFilterLoad.PSApi
         Gray16 = 10,
         RGB48 = 11
     }
-#endif
 }

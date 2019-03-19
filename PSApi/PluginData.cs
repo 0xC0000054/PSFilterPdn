@@ -216,6 +216,91 @@ namespace PSFilterLoad.PSApi
                     string.Equals(title, other.title, StringComparison.Ordinal));
         }
 
+        public FilterCase GetFilterTransparencyMode(ImageModes imageMode, bool hasSelection, Func<bool> hasTransparency)
+        {
+            if (hasTransparency == null)
+            {
+                throw new ArgumentNullException(nameof(hasTransparency));
+            }
+
+            FilterCase filterCase;
+
+            // Some filters do not handle transparency correctly despite what their filterInfo says.
+            if (filterInfo == null ||
+                category.Equals("Axion", StringComparison.Ordinal) ||
+                category.Equals("Vizros 4", StringComparison.Ordinal) && title.StartsWith("Lake", StringComparison.Ordinal) ||
+                category.Equals("Nik Collection", StringComparison.Ordinal) && title.StartsWith("Dfine 2", StringComparison.Ordinal))
+            {
+                if (hasTransparency())
+                {
+                    filterCase = FilterCase.FloatingSelection;
+                }
+                else
+                {
+                    filterCase = hasSelection ? FilterCase.FlatImageWithSelection : FilterCase.FlatImageNoSelection;
+                }
+            }
+            else
+            {
+                filterCase = hasSelection ? FilterCase.EditableTransparencyWithSelection : FilterCase.EditableTransparencyNoSelection;
+
+                int filterCaseIndex = (int)filterCase - 1;
+
+                if (!filterInfo[filterCaseIndex].IsSupported())
+                {
+                    if (hasTransparency())
+                    {
+                        if (filterInfo[filterCaseIndex + 2].IsSupported())
+                        {
+                            switch (filterCase)
+                            {
+                                case FilterCase.EditableTransparencyNoSelection:
+                                    filterCase = FilterCase.ProtectedTransparencyNoSelection;
+                                    break;
+                                case FilterCase.EditableTransparencyWithSelection:
+                                    filterCase = FilterCase.ProtectedTransparencyWithSelection;
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            // If the protected transparency modes are not supported use the next most appropriate mode.
+                            if (filterInfo[(int)FilterCase.FloatingSelection - 1].IsSupported())
+                            {
+                                filterCase = FilterCase.FloatingSelection;
+                            }
+                            else
+                            {
+                                switch (filterCase)
+                                {
+                                    case FilterCase.EditableTransparencyNoSelection:
+                                        filterCase = FilterCase.FlatImageNoSelection;
+                                        break;
+                                    case FilterCase.EditableTransparencyWithSelection:
+                                        filterCase = FilterCase.FlatImageWithSelection;
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        switch (filterCase)
+                        {
+                            case FilterCase.EditableTransparencyNoSelection:
+                                filterCase = FilterCase.FlatImageNoSelection;
+                                break;
+                            case FilterCase.EditableTransparencyWithSelection:
+                                filterCase = FilterCase.FlatImageWithSelection;
+                                break;
+                        }
+                    }
+                }
+            }
+
+            return filterCase;
+        }
+
         public override int GetHashCode()
         {
             int hash = 23;
