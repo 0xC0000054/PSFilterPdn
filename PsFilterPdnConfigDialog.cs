@@ -14,6 +14,7 @@ using PaintDotNet;
 using PaintDotNet.Effects;
 using PSFilterLoad.PSApi;
 using PSFilterPdn.Controls;
+using PSFilterPdn.EnableInfo;
 using PSFilterPdn.Properties;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using System.Xml;
@@ -91,6 +93,8 @@ namespace PSFilterPdn
         /// </summary>
         private bool useDEPProxy;
         private bool searchBoxIgnoreTextChanged;
+        private bool hasSelection;
+        private EnableInfoInterpreter enableInfoInterpreter;
 
         private readonly bool highDpiMode;
 
@@ -1123,6 +1127,36 @@ namespace PSFilterPdn
             return true;
         }
 
+        private bool IsPluginEnabled(PluginData plugin)
+        {
+            bool enabled = true;
+
+            if (!string.IsNullOrEmpty(plugin.EnableInfo))
+            {
+                try
+                {
+                    Expression expression = EnableInfoParser.Parse(plugin.EnableInfo);
+
+                    enabled = enableInfoInterpreter.Evaluate(expression);
+                }
+                catch (EnableInfoException)
+                {
+                }
+            }
+
+            if (plugin.FilterInfo != null)
+            {
+                FilterCase filterCase = plugin.GetFilterTransparencyMode(ImageModes.RGB,
+                                                                         hasSelection,
+                                                                         () => SurfaceUtil.HasTransparentPixels(EffectSourceSurface));
+                int filterCaseIndex = (int)filterCase - 1;
+
+                enabled &= plugin.FilterInfo[filterCaseIndex].IsSupported();
+            }
+
+            return enabled;
+        }
+
         private void updateFilterListBw_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = (BackgroundWorker)sender;
@@ -1157,7 +1191,12 @@ namespace PSFilterPdn
                             // The **Hidden** category is used for filters that are not directly invoked by the user.
                             if (!plugin.Category.Equals("**Hidden**", StringComparison.Ordinal))
                             {
-                                TreeNodeEx child = new TreeNodeEx(plugin.Title) { Name = plugin.Title, Tag = plugin };
+                                TreeNodeEx child = new TreeNodeEx(plugin.Title)
+                                {
+                                    Enabled = IsPluginEnabled(plugin),
+                                    Name = plugin.Title,
+                                    Tag = plugin
+                                };
 
                                 List<TreeNodeEx> childNodes;
                                 if (nodes.TryGetValue(plugin.Category, out childNodes))
@@ -1233,7 +1272,13 @@ namespace PSFilterPdn
             {
                 TreeNode dummy = new TreeNode() { Name = DummyTreeNodeName };
 
-                filterTree.Nodes.Add(new TreeNode(item.Key, new TreeNode[] { dummy }) { Name = item.Key });
+                TreeNodeEx categoryNode = new TreeNodeEx(item.Key, new TreeNode[] { dummy })
+                {
+                    Enabled = item.Value.Any(x => x.Enabled == true),
+                    Name = item.Key
+                };
+
+                filterTree.Nodes.Add(categoryNode);
             }
 
             filterTree.TreeViewNodeSorter = TreeNodeItemComparer.Instance;
@@ -1375,6 +1420,18 @@ namespace PSFilterPdn
             base.OnShown(e);
 
             CheckSourceSurfaceSize();
+
+            hasSelection = Selection.GetBoundsInt() != EffectSourceSurface.Bounds;
+            HostState hostState = new HostState
+            {
+                HasMultipleLayers = false,
+                HasSelection = hasSelection
+            };
+
+            EnableInfoVariables variables = new EnableInfoVariables(EffectSourceSurface.Width, EffectSourceSurface.Height, ImageModes.RGB,
+                true, 3, 4, hostState);
+
+            enableInfoInterpreter = new EnableInfoInterpreter(variables);
 
             try
             {

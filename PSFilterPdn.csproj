@@ -139,6 +139,23 @@
     <Compile Include="Dialogs\VistaFolderBrowserDialog.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="EnableInfo\EnableInfoException.cs" />
+    <Compile Include="EnableInfo\EnableInfoInterpreter.cs" />
+    <Compile Include="EnableInfo\EnableInfoLexer.cs" />
+    <Compile Include="EnableInfo\EnableInfoParser.cs" />
+    <Compile Include="EnableInfo\EnableInfoVariables.cs" />
+    <Compile Include="EnableInfo\HostState.cs" />
+    <Compile Include="EnableInfo\Syntax\BinaryExpression.cs" />
+    <Compile Include="EnableInfo\Syntax\ConstantExpression.cs" />
+    <Compile Include="EnableInfo\Syntax\Expression.cs" />
+    <Compile Include="EnableInfo\Syntax\ExpressionType.cs" />
+    <Compile Include="EnableInfo\Syntax\FunctionCallExpression.cs" />
+    <Compile Include="EnableInfo\Syntax\IExpressionVisitor.cs" />
+    <Compile Include="EnableInfo\Syntax\LogicalExpression.cs" />
+    <Compile Include="EnableInfo\Syntax\ParameterExpression.cs" />
+    <Compile Include="EnableInfo\Syntax\UnaryExpression.cs" />
+    <Compile Include="EnableInfo\Token.cs" />
+    <Compile Include="EnableInfo\TokenType.cs" />
     <Compile Include="FilterTreeNodeCollection.cs" />
     <Compile Include="Interop\SafeFindHandle.cs" />
     <Compile Include="Interop\UnsafeNativeMethods.cs" />
@@ -239,6 +256,7 @@
     <Compile Include="PSApi\SPBasicSuite.cs" />
     <Compile Include="PSApi\SPBasicSuiteProvider.cs" />
     <Compile Include="PSApi\StringUtil.cs" />
+    <Compile Include="PSApi\SurfaceUtil.cs" />
     <Compile Include="PSApi\TestAbortProc.cs" />
     <Compile Include="PSApi\UnsafeNativeMethods.cs" />
     <Compile Include="PsFilterPdnConfigToken.cs" />

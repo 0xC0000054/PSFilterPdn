@@ -429,6 +429,7 @@ namespace PSFilterLoad.PSApi
             ReadOnlyCollection<FilterCaseInfo> filterInfo = null;
             bool runWith32BitShim = false;
             AETEData aete = null;
+            string enableInfo = null;
 
             int count = Marshal.ReadInt32(lockRes, 6);
 
@@ -540,6 +541,10 @@ namespace PSFilterLoad.PSApi
                         }
                     }
                 }
+                else if (propKey == PIPropertyID.PIEnableInfoProperty)
+                {
+                    enableInfo = Marshal.PtrToStringAnsi((IntPtr)dataPtr, propertyLength).TrimEnd('\0');
+                }
                 else if (propKey == PIPropertyID.PIRequiredHostProperty)
                 {
                     uint host = *(uint*)dataPtr;
@@ -562,7 +567,7 @@ namespace PSFilterLoad.PSApi
                 propPtr += (PIProperty.SizeOf + propertyDataPaddedLength);
             }
 
-            PluginData enumData = new PluginData(query.fileName, entryPoint, category, title, filterInfo, runWith32BitShim, aete);
+            PluginData enumData = new PluginData(query.fileName, entryPoint, category, title, filterInfo, runWith32BitShim, aete, enableInfo);
 
             if (enumData.IsValid())
             {

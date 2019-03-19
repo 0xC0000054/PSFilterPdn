@@ -421,37 +421,12 @@ namespace PSFilterLoad.PSApi
 		}
 
 		/// <summary>
-		/// Determines whether the source image has transparent pixels.
-		/// </summary>
-		/// <returns>
-		///   <c>true</c> if the source image has transparent pixels; otherwise, <c>false</c>.
-		/// </returns>
-		private unsafe bool HasTransparentPixels()
-		{
-			for (int y = 0; y < source.Height; y++)
-			{
-				ColorBgra* src = source.GetRowAddressUnchecked(y);
-				for (int x = 0; x < source.Width; x++)
-				{
-					if (src->A < 255)
-					{
-						return true;
-					}
-
-					src++;
-				}
-			}
-
-			return false;
-		}
-
-		/// <summary>
 		/// Determines how images with transparent pixels are displayed to the filter.
 		/// </summary>
 		/// <param name="data">The plugin to check.</param>
 		private void SetFilterTransparencyMode(PluginData data)
 		{
-			filterCase = data.GetFilterTransparencyMode(ImageModes.RGB, selectedRegion != null, HasTransparentPixels);
+			filterCase = data.GetFilterTransparencyMode(ImageModes.RGB, selectedRegion != null, () => SurfaceUtil.HasTransparentPixels(source));
 		}
 
 		/// <summary>

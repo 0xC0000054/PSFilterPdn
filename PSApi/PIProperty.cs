@@ -87,5 +87,9 @@ namespace PSFilterLoad.PSApi
 		/// Creator code of required host, such as '8BIM' for Adobe Photoshop. - 'host'
 		/// </summary>
 		public const uint PIRequiredHostProperty = 0x686f7374U;
+		/// <summary>
+		/// EnableInfo property - 'enbl'
+		/// </summary>
+		public const uint PIEnableInfoProperty = 0x656e626cU;
 	}
 }

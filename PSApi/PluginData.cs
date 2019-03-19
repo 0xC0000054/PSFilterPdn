@@ -37,6 +37,8 @@ namespace PSFilterLoad.PSApi
         private AETEData aete;
         [DataMember(Name = nameof(ModuleEntryPoints))]
         private ReadOnlyCollection<string> moduleEntryPoints;
+        [NonSerialized]
+        private readonly string enableInfo;
 
         /// <summary>
         /// Gets the file path of the filter.
@@ -154,6 +156,8 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        public string EnableInfo => enableInfo;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginData"/> class.
         /// </summary>
@@ -161,7 +165,8 @@ namespace PSFilterLoad.PSApi
         /// <param name="entryPoint">The filter entry point.</param>
         /// <param name="category">The filter category.</param>
         /// <param name="title">The filter title.</param>
-        internal PluginData(string fileName, string entryPoint, string category, string title) : this(fileName, entryPoint, category, title, null, true, null)
+        internal PluginData(string fileName, string entryPoint, string category, string title) : this(fileName, entryPoint, category, title,
+            null, true, null, null)
         {
         }
 
@@ -176,7 +181,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="runWith32BitShim"><c>true</c> if the filter should be run with the 32-bit surrogate process; otherwise, <c>false</c>.</param>
         /// <param name="aete">The AETE scripting information.</param>
         internal PluginData(string fileName, string entryPoint, string category, string title, ReadOnlyCollection<FilterCaseInfo> filterInfo,
-            bool runWith32BitShim, AETEData aete)
+            bool runWith32BitShim, AETEData aete, string enableInfo)
         {
             this.fileName = fileName;
             this.entryPoint = entryPoint;
@@ -185,6 +190,7 @@ namespace PSFilterLoad.PSApi
             this.filterInfo = filterInfo;
             this.runWith32BitShim = runWith32BitShim;
             this.aete = aete;
+            this.enableInfo = enableInfo;
             moduleEntryPoints = null;
         }
 
