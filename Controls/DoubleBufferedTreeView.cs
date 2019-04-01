@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -30,9 +31,15 @@ namespace PSFilterPdn.Controls
         private SolidBrush backgroundBrush;
         private Color disabledGlyphBackColor;
         private Color previousForeColor;
-        private int controlDpi;
 
-        private static readonly int[] IconDpiScales = new int[] { 96, 120, 144, 192, 384 };
+        private static readonly Dictionary<int, int> IconSizesToDpi = new Dictionary<int, int>()
+        {
+            { 16, 96 },
+            { 20, 120 },
+            { 24, 144 },
+            { 32, 192 },
+            { 64, 384 }
+        };
 
         public DoubleBufferedTreeView()
         {
@@ -47,7 +54,6 @@ namespace PSFilterPdn.Controls
             base.DrawMode = TreeViewDrawMode.OwnerDrawAll;
             backgroundBrush = new SolidBrush(BackColor);
             previousForeColor = ForeColor;
-            controlDpi = DpiHelper.GetSystemDpi();
             InitTreeNodeGlyphs();
         }
 
@@ -166,20 +172,36 @@ namespace PSFilterPdn.Controls
 
             // Draw the expand / collapse glyphs
 
+            int textLeft = bounds.Left + 1;
+
             if (e.Node.Parent == null)
             {
-                int imageX = bounds.X - collapseGlyph.Width - 4;
-                int imageY = bounds.Y + 2;
+                int maxDimension = Math.Min(collapseGlyph.Height, bounds.Height);
+
+                if (maxDimension != bounds.Height)
+                {
+                    // Add additional padding when the glyph is smaller than the item height.
+                    textLeft += bounds.Height - collapseGlyph.Height;
+                }
+
+                const int imageX = 0;
+                int imageY = bounds.Y + (bounds.Height - maxDimension) / 2;
+                if ((bounds.Height % 2) != 0)
+                {
+                    imageY++;
+                }
+
+                Rectangle cropRect = new Rectangle(imageX, imageY, maxDimension, maxDimension);
 
                 if (enabled)
                 {
                     if (e.Node.IsExpanded)
                     {
-                        e.Graphics.DrawImage(collapseGlyph, imageX, imageY);
+                        e.Graphics.DrawImageUnscaledAndClipped(collapseGlyph, cropRect);
                     }
                     else
                     {
-                        e.Graphics.DrawImage(expandGlyph, imageX, imageY);
+                        e.Graphics.DrawImageUnscaledAndClipped(expandGlyph, cropRect);
                     }
                 }
                 else
@@ -191,34 +213,36 @@ namespace PSFilterPdn.Controls
                         DrawDisbledGlyph();
                     }
 
-                    e.Graphics.DrawImage(disabledGlyph, imageX, imageY);
+                    e.Graphics.DrawImageUnscaledAndClipped(disabledGlyph, cropRect);
                 }
             }
 
             // Draw the node text
 
             Font nodeFont = e.Node.NodeFont ?? e.Node.TreeView.Font;
+            Size textSize = TextRenderer.MeasureText(e.Graphics, e.Node.Text, nodeFont);
+            Rectangle textBounds = new Rectangle(textLeft, bounds.Top, textSize.Width, textSize.Height);
 
             if (enabled)
             {
                 if ((e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected)
                 {
-                    e.Graphics.FillRectangle(SystemBrushes.Highlight, bounds);
+                    e.Graphics.FillRectangle(SystemBrushes.Highlight, textBounds);
 
-                    TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, Rectangle.Inflate(bounds, 2, 2), ForeColor);
+                    TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, Rectangle.Inflate(textBounds, 2, 2), ForeColor);
                 }
                 else
                 {
-                    e.Graphics.FillRectangle(backgroundBrush, bounds);
+                    e.Graphics.FillRectangle(backgroundBrush, textBounds);
 
-                    TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, bounds, ForeColor);
+                    TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, textBounds, ForeColor);
                 }
             }
             else
             {
-                e.Graphics.FillRectangle(backgroundBrush, bounds);
+                e.Graphics.FillRectangle(backgroundBrush, textBounds);
 
-                TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, bounds, SystemColors.GrayText);
+                TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, textBounds, SystemColors.GrayText);
             }
         }
 
@@ -288,13 +312,13 @@ namespace PSFilterPdn.Controls
                 {
                     if (ForeColor == Color.White)
                     {
-                        collapseResourceName = GetBestResourceForDpi("Resources.Icons.VistaThemedCollapseDark-{0}.png");
-                        expandResourceName = GetBestResourceForDpi("Resources.Icons.VistaThemedExpandDark-{0}.png");
+                        collapseResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedCollapseDark-{0}.png");
+                        expandResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedExpandDark-{0}.png");
                     }
                     else
                     {
-                        collapseResourceName = GetBestResourceForDpi("Resources.Icons.VistaThemedCollapse-{0}.png");
-                        expandResourceName = GetBestResourceForDpi("Resources.Icons.VistaThemedExpand-{0}.png");
+                        collapseResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedCollapse-{0}.png");
+                        expandResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedExpand-{0}.png");
                     }
                 }
                 else
@@ -305,8 +329,8 @@ namespace PSFilterPdn.Controls
             }
             else
             {
-                collapseResourceName = GetBestResourceForDpi("Resources.Icons.UnthemedCollapse-{0}.png");
-                expandResourceName = GetBestResourceForDpi("Resources.Icons.UnthemedExpand-{0}.png");
+                collapseResourceName = GetBestResourceForItemHeight("Resources.Icons.UnthemedCollapse-{0}.png");
+                expandResourceName = GetBestResourceForItemHeight("Resources.Icons.UnthemedExpand-{0}.png");
             }
 
             collapseGlyph = new Bitmap(typeof(PSFilterPdnEffect), collapseResourceName);
@@ -332,22 +356,27 @@ namespace PSFilterPdn.Controls
             }
         }
 
-        private string GetBestResourceForDpi(string resourceFormat)
+        private string GetBestResourceForItemHeight(string resourceFormat)
         {
             int bestDpi = 0;
 
-            foreach (int iconDpi in IconDpiScales)
+            // The item height often includes two pixels of padding,
+            // e.g.the item height will be 22 when using a 20 pixel expand / collapse glyph.
+
+            int itemHeight = ItemHeight - 2;
+
+            foreach (KeyValuePair<int, int> iconSize in IconSizesToDpi)
             {
-                if (iconDpi >= controlDpi)
+                if (iconSize.Key >= itemHeight)
                 {
-                    bestDpi = iconDpi;
+                    bestDpi = iconSize.Value;
                     break;
                 }
             }
 
             if (bestDpi == 0)
             {
-                bestDpi = IconDpiScales[IconDpiScales.Length - 1];
+                bestDpi = 384;
             }
 
             return string.Format(CultureInfo.InvariantCulture, resourceFormat, bestDpi);
