@@ -310,20 +310,12 @@ namespace PSFilterPdn.Controls
                 SolidBrush background = null;
                 Pen border = null;
                 SolidBrush hotTrack = null;
-                SolidBrush text = null;
-                StringFormat format = null;
 
                 try
                 {
                     background = new SolidBrush(BackColor);
                     border = new Pen(borderColor);
                     hotTrack = new SolidBrush(hotTrackColor);
-                    text = new SolidBrush(ForeColor);
-                    format = new StringFormat()
-                    {
-                        Alignment = StringAlignment.Center,
-                        LineAlignment = StringAlignment.Center
-                    };
 
                     int activeTabIndex = SelectedIndex;
 
@@ -338,12 +330,12 @@ namespace PSFilterPdn.Controls
                                 state = TabState.MouseOver;
                             }
 
-                            DrawTab(e.Graphics, background, border, hotTrack, text, format, TabPages[index], GetTabRect(index), state);
+                            DrawTab(e.Graphics, background, border, hotTrack, TabPages[index], GetTabRect(index), state);
                         }
                     }
 
                     // Draw the active tab.
-                    DrawTab(e.Graphics, background, border, hotTrack, text, format, TabPages[activeTabIndex], GetTabRect(activeTabIndex), TabState.Active);
+                    DrawTab(e.Graphics, background, border, hotTrack, TabPages[activeTabIndex], GetTabRect(activeTabIndex), TabState.Active);
                 }
                 finally
                 {
@@ -361,16 +353,6 @@ namespace PSFilterPdn.Controls
                     {
                         hotTrack.Dispose();
                         hotTrack = null;
-                    }
-                    if (text != null)
-                    {
-                        text.Dispose();
-                        text = null;
-                    }
-                    if (format != null)
-                    {
-                        format.Dispose();
-                        format = null;
                     }
                 }
             }
@@ -390,7 +372,7 @@ namespace PSFilterPdn.Controls
             Invalidate();
         }
 
-        private void DrawTab(Graphics graphics, Brush background, Pen border, Brush hotTrack, SolidBrush text, StringFormat format,
+        private void DrawTab(Graphics graphics, Brush background, Pen border, Brush hotTrack,
             TabPage page, Rectangle bounds, TabState state)
         {
             if (state == TabState.Active)
@@ -411,7 +393,7 @@ namespace PSFilterPdn.Controls
                 DrawTabBorder(graphics, border, bounds);
             }
 
-            DrawTabText(graphics, text, format, bounds, page);
+            DrawTabText(graphics, bounds, page);
         }
 
         private void DrawTabBorder(Graphics graphics, Pen borderPen, Rectangle bounds)
@@ -459,7 +441,7 @@ namespace PSFilterPdn.Controls
             graphics.DrawLines(borderPen, points);
         }
 
-        private void DrawTabText(Graphics graphics, SolidBrush textBrush, StringFormat format, Rectangle bounds, TabPage page)
+        private void DrawTabText(Graphics graphics, Rectangle bounds, TabPage page)
         {
             // Set up rotation for left and right aligned tabs.
             if (Alignment == TabAlignment.Left || Alignment == TabAlignment.Right)
@@ -477,15 +459,12 @@ namespace PSFilterPdn.Controls
                 bounds = new Rectangle(-(bounds.Height / 2), -(bounds.Width / 2), bounds.Height, bounds.Width);
             }
 
+            Rectangle textBounds = Rectangle.Inflate(bounds, -3, -3);
+            Color textColor = page.Enabled ? ForeColor : SystemColors.GrayText;
+
             // Draw the Tab text.
-            if (page.Enabled)
-            {
-                graphics.DrawString(page.Text, Font, textBrush, bounds, format);
-            }
-            else
-            {
-                ControlPaint.DrawStringDisabled(graphics, page.Text, Font, textBrush.Color, bounds, format);
-            }
+            TextRenderer.DrawText(graphics, page.Text, Font, textBounds, textColor, BackColor,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
 
             graphics.ResetTransform();
         }
