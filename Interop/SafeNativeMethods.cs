@@ -42,5 +42,15 @@ namespace PSFilterPdn
 
         [DllImport("user32.dll")]
         internal static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, ref NativeStructs.TCHITTESTINFO lParam);
+
+        [DllImport("user32.dll", ExactSpelling = true)]
+        internal static extern SafeDCHandle GetDC(IntPtr hWnd);
+
+        [DllImport("user32.dll", ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool ReleaseDC(IntPtr hdc);
+
+        [DllImport("gdi32.dll", ExactSpelling = true)]
+        internal static extern int GetDeviceCaps(SafeDCHandle hdc, int nIndex);
     }
 }

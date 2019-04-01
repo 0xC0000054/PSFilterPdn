@@ -40,7 +40,7 @@ namespace PSFilterPdn
         {
             get
             {
-                return new Bitmap(typeof(PSFilterPdnEffect), "feather.png");
+                return new Bitmap(typeof(PSFilterPdnEffect), PluginIconUtil.GetIconResourceForCurrentDpi());
             }
         }
 

@@ -19,6 +19,8 @@ namespace PSFilterPdn
         internal const int S_OK = 0;
         internal const int S_FALSE = 1;
 
+        internal const int LOGPIXELSX = 88;
+
         internal const uint FILE_ATTRIBUTE_DIRECTORY = 16U;
         internal const uint FILE_ATTRIBUTE_REPARSE_POINT = 1024U;
 

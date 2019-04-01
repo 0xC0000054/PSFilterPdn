@@ -139,6 +139,7 @@
     <Compile Include="Dialogs\VistaFolderBrowserDialog.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="DpiHelper.cs" />
     <Compile Include="EnableInfo\EnableInfoException.cs" />
     <Compile Include="EnableInfo\EnableInfoInterpreter.cs" />
     <Compile Include="EnableInfo\EnableInfoLexer.cs" />
@@ -158,6 +159,7 @@
     <Compile Include="EnableInfo\TokenType.cs" />
     <Compile Include="FilterTreeNodeCollection.cs" />
     <Compile Include="Interop\SafeFindHandle.cs" />
+    <Compile Include="Interop\SafeDCHandle.cs" />
     <Compile Include="Interop\UnsafeNativeMethods.cs" />
     <Compile Include="Interop\Win32FindData.cs" />
     <Compile Include="ListExtensions.cs" />
@@ -173,6 +175,7 @@
     <Compile Include="Interop\NativeInterfaces.cs" />
     <Compile Include="Interop\NativeStructs.cs" />
     <Compile Include="OS.cs" />
+    <Compile Include="PluginIconUtil.cs" />
     <Compile Include="PluginThemingUtil.cs" />
     <Compile Include="PluginSupportInfo.cs" />
     <Compile Include="PSApi\ActivePICASuites.cs" />
@@ -324,14 +327,6 @@
       <SubType>Designer</SubType>
       <DependentUpon>PsFilterPdnConfigDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapse.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapseDark.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedExpand.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedExpandDark.png" />
-    <EmbeddedResource Include="Resources\Icons\UnthemedCollapse.png" />
-    <EmbeddedResource Include="Resources\Icons\UnthemedExpand.png" />
-    <EmbeddedResource Include="Resources\Icons\XPThemedCollapse.png" />
-    <EmbeddedResource Include="Resources\Icons\XPThemedExpand.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -357,9 +352,43 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="feather.png" />
+    <EmbeddedResource Include="Resources\Icons\feather-96.png" />
+    <EmbeddedResource Include="Resources\Icons\feather-144.png" />
+    <EmbeddedResource Include="Resources\Icons\feather-192.png" />
+    <EmbeddedResource Include="Resources\Icons\feather-384.png" />
+    <EmbeddedResource Include="Resources\Icons\UnthemedCollapse-96.png" />
+    <EmbeddedResource Include="Resources\Icons\UnthemedExpand-96.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapse-96.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapseDark-96.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-96.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedExpandDark-96.png" />
+    <EmbeddedResource Include="Resources\Icons\UnthemedCollapse-120.png" />
+    <EmbeddedResource Include="Resources\Icons\UnthemedCollapse-144.png" />
+    <EmbeddedResource Include="Resources\Icons\UnthemedCollapse-192.png" />
+    <EmbeddedResource Include="Resources\Icons\UnthemedCollapse-384.png" />
+    <EmbeddedResource Include="Resources\Icons\UnthemedExpand-120.png" />
+    <EmbeddedResource Include="Resources\Icons\UnthemedExpand-144.png" />
+    <EmbeddedResource Include="Resources\Icons\UnthemedExpand-192.png" />
+    <EmbeddedResource Include="Resources\Icons\UnthemedExpand-384.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapse-120.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapse-144.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapse-192.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapse-384.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapseDark-120.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapseDark-144.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapseDark-192.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapseDark-384.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-120.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-144.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-192.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-384.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedExpandDark-120.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedExpandDark-144.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedExpandDark-192.png" />
+    <EmbeddedResource Include="Resources\Icons\VistaThemedExpandDark-384.png" />
+    <EmbeddedResource Include="Resources\Icons\XPThemedCollapse.png" />
+    <EmbeddedResource Include="Resources\Icons\XPThemedExpand.png" />
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "D:\Program Files\Paint.NET\Effects" /y
 if "$(ConfigurationName)" == "Debug" copy "$(TargetDir)$(TargetName).pdb" "D:\Program Files\Paint.NET\Effects" /y</PostBuildEvent>

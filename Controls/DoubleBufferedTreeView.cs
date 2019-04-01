@@ -14,6 +14,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
@@ -29,6 +30,9 @@ namespace PSFilterPdn.Controls
         private SolidBrush backgroundBrush;
         private Color disabledGlyphBackColor;
         private Color previousForeColor;
+        private int controlDpi;
+
+        private static readonly int[] IconDpiScales = new int[] { 96, 120, 144, 192, 384 };
 
         public DoubleBufferedTreeView()
         {
@@ -43,6 +47,7 @@ namespace PSFilterPdn.Controls
             base.DrawMode = TreeViewDrawMode.OwnerDrawAll;
             backgroundBrush = new SolidBrush(BackColor);
             previousForeColor = ForeColor;
+            controlDpi = DpiHelper.GetSystemDpi();
             InitTreeNodeGlyphs();
         }
 
@@ -163,9 +168,7 @@ namespace PSFilterPdn.Controls
 
             if (e.Node.Parent == null)
             {
-                const int ImageSize = 16;
-
-                int imageX = bounds.X - ImageSize - 4;
+                int imageX = bounds.X - collapseGlyph.Width - 4;
                 int imageY = bounds.Y + 2;
 
                 if (enabled)
@@ -276,32 +279,38 @@ namespace PSFilterPdn.Controls
             collapseGlyph?.Dispose();
             expandGlyph?.Dispose();
 
+            string collapseResourceName;
+            string expandResourceName;
+
             if (VisualStyleRenderer.IsSupported)
             {
                 if (OS.IsVistaOrLater)
                 {
                     if (ForeColor == Color.White)
                     {
-                        collapseGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.VistaThemedCollapseDark.png");
-                        expandGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.VistaThemedExpandDark.png");
+                        collapseResourceName = GetBestResourceForDpi("Resources.Icons.VistaThemedCollapseDark-{0}.png");
+                        expandResourceName = GetBestResourceForDpi("Resources.Icons.VistaThemedExpandDark-{0}.png");
                     }
                     else
                     {
-                        collapseGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.VistaThemedCollapse.png");
-                        expandGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.VistaThemedExpand.png");
+                        collapseResourceName = GetBestResourceForDpi("Resources.Icons.VistaThemedCollapse-{0}.png");
+                        expandResourceName = GetBestResourceForDpi("Resources.Icons.VistaThemedExpand-{0}.png");
                     }
                 }
                 else
                 {
-                    collapseGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.XPThemedCollapse.png");
-                    expandGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.XPThemedExpand.png");
+                    collapseResourceName = "Resources.Icons.XPThemedCollapse.png";
+                    expandResourceName = "Resources.Icons.XPThemedExpand.png";
                 }
             }
             else
             {
-                collapseGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.UnthemedCollapse.png");
-                expandGlyph = new Bitmap(typeof(PSFilterPdnEffect), "Resources.Icons.UnthemedExpand.png");
+                collapseResourceName = GetBestResourceForDpi("Resources.Icons.UnthemedCollapse-{0}.png");
+                expandResourceName = GetBestResourceForDpi("Resources.Icons.UnthemedExpand-{0}.png");
             }
+
+            collapseGlyph = new Bitmap(typeof(PSFilterPdnEffect), collapseResourceName);
+            expandGlyph = new Bitmap(typeof(PSFilterPdnEffect), expandResourceName);
         }
 
         private void DrawDisbledGlyph()
@@ -321,6 +330,27 @@ namespace PSFilterPdn.Controls
                     }
                 }
             }
+        }
+
+        private string GetBestResourceForDpi(string resourceFormat)
+        {
+            int bestDpi = 0;
+
+            foreach (int iconDpi in IconDpiScales)
+            {
+                if (iconDpi >= controlDpi)
+                {
+                    bestDpi = iconDpi;
+                    break;
+                }
+            }
+
+            if (bestDpi == 0)
+            {
+                bestDpi = IconDpiScales[IconDpiScales.Length - 1];
+            }
+
+            return string.Format(CultureInfo.InvariantCulture, resourceFormat, bestDpi);
         }
 
         private static bool NodeEnabled(TreeNode node)
