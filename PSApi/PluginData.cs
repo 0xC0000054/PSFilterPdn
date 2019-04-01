@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterPdn.EnableInfo;
 using System;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
@@ -39,6 +40,10 @@ namespace PSFilterLoad.PSApi
         private ReadOnlyCollection<string> moduleEntryPoints;
         [NonSerialized]
         private readonly string enableInfo;
+        [NonSerialized]
+        private Expression enableInfoExpression;
+        [NonSerialized]
+        private bool enableInfoExpressionParsed;
 
         /// <summary>
         /// Gets the file path of the filter.
@@ -156,7 +161,31 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public string EnableInfo => enableInfo;
+        internal bool HasEnableInfo => !string.IsNullOrEmpty(enableInfo);
+
+        internal Expression EnableInfoExpression
+        {
+            get
+            {
+                if (!enableInfoExpressionParsed)
+                {
+                    enableInfoExpressionParsed = true;
+
+                    if (HasEnableInfo)
+                    {
+                        try
+                        {
+                            enableInfoExpression = EnableInfoParser.Parse(enableInfo);
+                        }
+                        catch (EnableInfoException)
+                        {
+                        }
+                    }
+                }
+
+                return enableInfoExpression;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginData"/> class.
@@ -192,6 +221,8 @@ namespace PSFilterLoad.PSApi
             this.aete = aete;
             this.enableInfo = enableInfo;
             moduleEntryPoints = null;
+            enableInfoExpression = null;
+            enableInfoExpressionParsed = false;
         }
 
         public override bool Equals(object obj)

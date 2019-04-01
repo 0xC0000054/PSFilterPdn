@@ -1830,13 +1830,16 @@ namespace PSFilterPdn
 
                         bool enabled = true;
 
-                        if (!string.IsNullOrEmpty(plugin.EnableInfo))
+                        if (plugin.HasEnableInfo)
                         {
                             try
                             {
-                                Expression expression = EnableInfoParser.Parse(plugin.EnableInfo);
+                                Expression expression = plugin.EnableInfoExpression;
 
-                                enabled = enableInfoInterpreter.Evaluate(expression);
+                                if (expression != null)
+                                {
+                                    enabled = enableInfoInterpreter.Evaluate(expression);
+                                }
                             }
                             catch (EnableInfoException)
                             {
