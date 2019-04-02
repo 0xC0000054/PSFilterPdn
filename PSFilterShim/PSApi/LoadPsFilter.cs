@@ -455,7 +455,7 @@ namespace PSFilterLoad.PSApi
 
 		private void SetFilterTransparencyMode(PluginData data)
 		{
-			filterCase = data.GetFilterTransparencyMode(ImageModes.RGB, selectedRegion != null, HasTransparentPixels);
+			filterCase = data.GetFilterTransparencyMode(selectedRegion != null, HasTransparentPixels);
 		}
 
 		/// <summary>

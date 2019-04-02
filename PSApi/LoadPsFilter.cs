@@ -426,7 +426,7 @@ namespace PSFilterLoad.PSApi
 		/// <param name="data">The plugin to check.</param>
 		private void SetFilterTransparencyMode(PluginData data)
 		{
-			filterCase = data.GetFilterTransparencyMode(ImageModes.RGB, selectedRegion != null, () => SurfaceUtil.HasTransparentPixels(source));
+			filterCase = data.GetFilterTransparencyMode(selectedRegion != null, () => SurfaceUtil.HasTransparentPixels(source));
 		}
 
 		/// <summary>

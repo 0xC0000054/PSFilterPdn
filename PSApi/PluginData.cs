@@ -230,12 +230,11 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Gets the mode that indicates how the filter processes transparency.
         /// </summary>
-        /// <param name="imageMode">The image mode.</param>
         /// <param name="hasSelection"><c>true</c> if the host has an active selection; otherwise, <c>false</c>.</param>
         /// <param name="hasTransparency">A delegate that allows the method to determine if the image has transparency.</param>
         /// <returns>One of the <see cref="FilterCase"/> values indicating how the filter processes transparency.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="hasTransparency"/> is null.</exception>
-        public FilterCase GetFilterTransparencyMode(ImageModes imageMode, bool hasSelection, Func<bool> hasTransparency)
+        public FilterCase GetFilterTransparencyMode(bool hasSelection, Func<bool> hasTransparency)
         {
             if (hasTransparency == null)
             {
@@ -359,7 +358,7 @@ namespace PSFilterLoad.PSApi
 
             const ImageModes imageMode = ImageModes.RGB;
 
-            FilterCase filterCase = GetFilterTransparencyMode(imageMode, hostState.HasSelection, () => hasTransparency);
+            FilterCase filterCase = GetFilterTransparencyMode(hostState.HasSelection, () => hasTransparency);
 
             if (!string.IsNullOrEmpty(enableInfo))
             {
