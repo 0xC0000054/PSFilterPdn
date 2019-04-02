@@ -438,7 +438,7 @@ namespace PSFilterLoad.PSApi
 		/// </returns>
 		private static bool IsMemoryExecutable(IntPtr ptr)
 		{
-			NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
+			NativeStructs.MEMORY_BASIC_INFORMATION mbi;
 			int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
 
 			if (SafeNativeMethods.VirtualQuery(ptr, out mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
