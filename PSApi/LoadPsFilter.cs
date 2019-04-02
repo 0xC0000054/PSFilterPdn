@@ -1176,7 +1176,7 @@ namespace PSFilterLoad.PSApi
 
 			if (pdata.FilterInfo != null)
 			{
-				FilterCaseInfo info = pdata.FilterInfo[(int)filterCase - 1];
+				FilterCaseInfo info = pdata.FilterInfo[filterCase];
 				inputHandling = info.InputHandling;
 				outputHandling = info.OutputHandling;
 				FilterCaseInfoFlags filterCaseFlags = info.Flags1;

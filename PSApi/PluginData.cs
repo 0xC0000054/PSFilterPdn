@@ -32,7 +32,7 @@ namespace PSFilterLoad.PSApi
         [DataMember(Name = nameof(Title))]
         private string title;
         [DataMember(Name = nameof(FilterInfo))]
-        private ReadOnlyCollection<FilterCaseInfo> filterInfo;
+        private FilterCaseInfoCollection filterInfo;
         private bool runWith32BitShim;
         [DataMember(Name = nameof(Aete))]
         private AETEData aete;
@@ -107,7 +107,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The filter information used to determine how transparency is processed.
         /// </value>
-        public ReadOnlyCollection<FilterCaseInfo> FilterInfo
+        public FilterCaseInfoCollection FilterInfo
         {
             get
             {
@@ -183,7 +183,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="filterInfo">The filter information used to determine how transparency is processed..</param>
         /// <param name="runWith32BitShim"><c>true</c> if the filter should be run with the 32-bit surrogate process; otherwise, <c>false</c>.</param>
         /// <param name="aete">The AETE scripting information.</param>
-        internal PluginData(string fileName, string entryPoint, string category, string title, ReadOnlyCollection<FilterCaseInfo> filterInfo,
+        internal PluginData(string fileName, string entryPoint, string category, string title, FilterCaseInfoCollection filterInfo,
             bool runWith32BitShim, AETEData aete, string enableInfo)
         {
             this.fileName = fileName;
@@ -284,7 +284,7 @@ namespace PSFilterLoad.PSApi
                         else
                         {
                             // If the protected transparency modes are not supported use the next most appropriate mode.
-                            if (filterInfo[(int)FilterCase.FloatingSelection - 1].IsSupported())
+                            if (filterInfo[FilterCase.FloatingSelection].IsSupported())
                             {
                                 filterCase = FilterCase.FloatingSelection;
                             }
@@ -409,7 +409,7 @@ namespace PSFilterLoad.PSApi
 
             if (filterInfo != null)
             {
-                result &= filterInfo[(int)filterCase - 1].IsSupported();
+                result &= filterInfo[filterCase].IsSupported();
             }
 
             return result;

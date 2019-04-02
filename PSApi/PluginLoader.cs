@@ -65,10 +65,10 @@ namespace PSFilterLoad.PSApi
 
         private sealed class FilterCaseInfoResult
         {
-            public readonly ReadOnlyCollection<FilterCaseInfo> filterCaseInfo;
+            public readonly FilterCaseInfoCollection filterCaseInfo;
             public readonly int propertyLength;
 
-            public FilterCaseInfoResult(ReadOnlyCollection<FilterCaseInfo> filterCaseInfo, int actualArrayLength)
+            public FilterCaseInfoResult(FilterCaseInfoCollection filterCaseInfo, int actualArrayLength)
             {
                 this.filterCaseInfo = filterCaseInfo;
                 propertyLength = actualArrayLength;
@@ -121,7 +121,7 @@ namespace PSFilterLoad.PSApi
                     }
                 }
 
-                return new FilterCaseInfoResult(filterInfoValid ? Array.AsReadOnly(info) : null, offset);
+                return new FilterCaseInfoResult(filterInfoValid ? new FilterCaseInfoCollection(info) : null, offset);
             }
 
             private static bool IsHexadecimalChar(char value)
@@ -426,7 +426,7 @@ namespace PSFilterLoad.PSApi
             string entryPoint = null;
             string category = null;
             string title = null;
-            ReadOnlyCollection<FilterCaseInfo> filterInfo = null;
+            FilterCaseInfoCollection filterInfo = null;
             bool runWith32BitShim = false;
             AETEData aete = null;
             string enableInfo = null;
