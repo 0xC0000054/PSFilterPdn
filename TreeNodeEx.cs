@@ -54,7 +54,7 @@ namespace PSFilterPdn
         {
             base.Deserialize(serializationInfo, context);
 
-            foreach (var item in serializationInfo)
+            foreach (SerializationEntry item in serializationInfo)
             {
                 if (string.Equals(item.Name, EnabledSerializationName, StringComparison.Ordinal))
                 {

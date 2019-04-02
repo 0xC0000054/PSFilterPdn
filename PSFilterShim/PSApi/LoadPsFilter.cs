@@ -793,7 +793,7 @@ namespace PSFilterLoad.PSApi
 				else
 				{
 					// call all the entry points in the module only one should show the about box.
-					foreach (var entryPoint in pdata.ModuleEntryPoints)
+					foreach (string entryPoint in pdata.ModuleEntryPoints)
 					{
 						PluginEntryPoint ep = module.GetEntryPoint(entryPoint);
 

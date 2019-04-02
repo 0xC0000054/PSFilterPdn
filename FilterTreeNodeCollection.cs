@@ -36,7 +36,7 @@ namespace PSFilterPdn
 
             nodes = new Dictionary<string, ReadOnlyCollection<TreeNodeEx>>(items.Count, StringComparer.Ordinal);
 
-            foreach (var item in items)
+            foreach (KeyValuePair<string, List<TreeNodeEx>> item in items)
             {
                 nodes.Add(item.Key, new ReadOnlyCollection<TreeNodeEx>(item.Value));
             }

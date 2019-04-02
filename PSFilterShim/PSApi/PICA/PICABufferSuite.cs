@@ -235,7 +235,7 @@ namespace PSFilterLoad.PSApi.PICA
 			{
 				disposed = true;
 
-				foreach (var item in buffers)
+				foreach (KeyValuePair<IntPtr, BufferEntry> item in buffers)
 				{
 					item.Value.Dispose();
 				}

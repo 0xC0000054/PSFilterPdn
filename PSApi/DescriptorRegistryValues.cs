@@ -47,7 +47,7 @@ namespace PSFilterLoad.PSApi
             Dictionary<string, DescriptorRegistryItem> persistentItems = new Dictionary<string, DescriptorRegistryItem>(StringComparer.Ordinal);
             Dictionary<string, DescriptorRegistryItem> sessionItems = new Dictionary<string, DescriptorRegistryItem>(StringComparer.Ordinal);
 
-            foreach (var item in values)
+            foreach (KeyValuePair<string, DescriptorRegistryItem> item in values)
             {
                 if (item.Value.IsPersistent)
                 {

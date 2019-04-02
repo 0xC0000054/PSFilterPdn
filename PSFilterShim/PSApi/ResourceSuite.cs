@@ -101,7 +101,7 @@ namespace PSFilterLoad.PSApi
 #endif
 			short count = 0;
 
-			foreach (var item in pseudoResources)
+			foreach (PseudoResource item in pseudoResources)
 			{
 				if (item.Equals(ofType))
 				{

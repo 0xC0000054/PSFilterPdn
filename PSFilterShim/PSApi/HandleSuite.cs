@@ -188,7 +188,7 @@ namespace PSFilterLoad.PSApi
 
 		public void FreeRemainingHandles()
 		{
-			foreach (var item in handles)
+			foreach (KeyValuePair<IntPtr, HandleEntry> item in handles)
 			{
 				item.Value.Dispose();
 			}

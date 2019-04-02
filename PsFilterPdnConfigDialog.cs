@@ -1154,7 +1154,7 @@ namespace PSFilterPdn
                             return;
                         }
 
-                        foreach (var plugin in PluginLoader.LoadFiltersFromFile(enumerator.Current))
+                        foreach (PluginData plugin in PluginLoader.LoadFiltersFromFile(enumerator.Current))
                         {
                             // The **Hidden** category is used for filters that are not directly invoked by the user.
                             if (!plugin.Category.Equals("**Hidden**", StringComparison.Ordinal))
@@ -1236,7 +1236,7 @@ namespace PSFilterPdn
             filterTree.Nodes.Clear();
             filterTree.TreeViewNodeSorter = null;
 
-            foreach (var item in filterTreeNodes)
+            foreach (KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>> item in filterTreeNodes)
             {
                 TreeNode dummy = new TreeNode() { Name = DummyTreeNodeName };
 
@@ -1254,7 +1254,7 @@ namespace PSFilterPdn
 
             if (expandLastUsedCategories && expandedNodes.Count > 0)
             {
-                foreach (var item in expandedNodes)
+                foreach (string item in expandedNodes)
                 {
                     if (filterTree.Nodes.ContainsKey(item))
                     {
@@ -1543,7 +1543,7 @@ namespace PSFilterPdn
                 else
                 {
                     Dictionary<string, TreeNodeEx> nodes = new Dictionary<string, TreeNodeEx>(StringComparer.Ordinal);
-                    foreach (var item in filterTreeNodes)
+                    foreach (KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>> item in filterTreeNodes)
                     {
                         string category = item.Key;
                         ReadOnlyCollection<TreeNodeEx> childNodes = item.Value;
@@ -1572,7 +1572,7 @@ namespace PSFilterPdn
                     filterTree.BeginUpdate();
                     filterTree.Nodes.Clear();
                     filterTree.TreeViewNodeSorter = null;
-                    foreach (var item in nodes)
+                    foreach (KeyValuePair<string, TreeNodeEx> item in nodes)
                     {
                         int index = filterTree.Nodes.Add(item.Value);
                         filterTree.Nodes[index].Expand();

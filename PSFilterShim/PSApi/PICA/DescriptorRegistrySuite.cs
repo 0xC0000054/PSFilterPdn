@@ -96,7 +96,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (persistedValues != null)
             {
-                foreach (var item in persistedValues)
+                foreach (KeyValuePair<string, DescriptorRegistryItem> item in persistedValues)
                 {
                     registry.Add(item.Key, item.Value);
                 }
@@ -104,7 +104,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (sessionValues != null)
             {
-                foreach (var item in sessionValues)
+                foreach (KeyValuePair<string, DescriptorRegistryItem> item in sessionValues)
                 {
                     registry.Add(item.Key, item.Value);
                 }
