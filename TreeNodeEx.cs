@@ -19,7 +19,7 @@ namespace PSFilterPdn
     [Serializable]
     public sealed class TreeNodeEx : TreeNode
     {
-        private const string EnabledSerialzationName = "TreeNodeEx_Enabled";
+        private const string EnabledSerializationName = "TreeNodeEx_Enabled";
 
         public TreeNodeEx() : base()
         {
@@ -56,7 +56,7 @@ namespace PSFilterPdn
 
             foreach (var item in serializationInfo)
             {
-                if (string.Equals(item.Name, EnabledSerialzationName, StringComparison.Ordinal))
+                if (string.Equals(item.Name, EnabledSerializationName, StringComparison.Ordinal))
                 {
                     Enabled = (bool)item.Value;
                 }
@@ -67,7 +67,7 @@ namespace PSFilterPdn
         {
             base.Serialize(si, context);
 
-            si.AddValue(EnabledSerialzationName, Enabled);
+            si.AddValue(EnabledSerializationName, Enabled);
         }
     }
 }
