@@ -343,7 +343,9 @@ namespace PSFilterLoad.PSApi
         /// <param name="imageHeight">The height of the image.</param>
         /// <param name="hasTransparency">Indicates if the image has transparency.</param>
         /// <param name="hostState">The current state of the host application.</param>
-        /// <returns></returns>
+        /// <returns>
+        /// <c>true</c> if the filter can process the image and host application state; otherwise, <c>false</c>.
+        /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="hostState"/> is null.
         /// </exception>
