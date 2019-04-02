@@ -93,8 +93,6 @@ namespace PSFilterPdn
         /// </summary>
         private bool useDEPProxy;
         private bool searchBoxIgnoreTextChanged;
-        private bool hasSelection;
-        private EnableInfoInterpreter enableInfoInterpreter;
 
         private readonly bool highDpiMode;
 
@@ -1391,18 +1389,6 @@ namespace PSFilterPdn
 
             CheckSourceSurfaceSize();
 
-            hasSelection = Selection.GetBoundsInt() != EffectSourceSurface.Bounds;
-            HostState hostState = new HostState
-            {
-                HasMultipleLayers = false,
-                HasSelection = hasSelection
-            };
-
-            EnableInfoVariables variables = new EnableInfoVariables(EffectSourceSurface.Width, EffectSourceSurface.Height, ImageModes.RGB,
-                true, 3, 4, hostState);
-
-            enableInfoInterpreter = new EnableInfoInterpreter(variables);
-
             try
             {
                 string userDataPath = Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
@@ -1817,8 +1803,18 @@ namespace PSFilterPdn
 
         private void EnableFiltersForHostState()
         {
-            if (filterTreeNodes != null && enableInfoInterpreter != null)
+            if (filterTreeNodes != null)
             {
+                int imageWidth = EffectSourceSurface.Width;
+                int imageHeight = EffectSourceSurface.Height;
+                bool hasTransparency = SurfaceUtil.HasTransparentPixels(EffectSourceSurface);
+
+                HostState hostState = new HostState
+                {
+                    HasMultipleLayers = false,
+                    HasSelection = Selection.GetBoundsInt() != EffectSourceSurface.Bounds
+                };
+
                 foreach (KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>> item in filterTreeNodes)
                 {
                     ReadOnlyCollection<TreeNodeEx> filterCollection = item.Value;
@@ -1828,35 +1824,7 @@ namespace PSFilterPdn
                         TreeNodeEx node = filterCollection[i];
                         PluginData plugin = (PluginData)node.Tag;
 
-                        bool enabled = true;
-
-                        if (plugin.HasEnableInfo)
-                        {
-                            try
-                            {
-                                Expression expression = plugin.EnableInfoExpression;
-
-                                if (expression != null)
-                                {
-                                    enabled = enableInfoInterpreter.Evaluate(expression);
-                                }
-                            }
-                            catch (EnableInfoException)
-                            {
-                            }
-                        }
-
-                        if (plugin.FilterInfo != null)
-                        {
-                            FilterCase filterCase = plugin.GetFilterTransparencyMode(ImageModes.RGB,
-                                                                                     hasSelection,
-                                                                                     () => SurfaceUtil.HasTransparentPixels(EffectSourceSurface));
-                            int filterCaseIndex = (int)filterCase - 1;
-
-                            enabled &= plugin.FilterInfo[filterCaseIndex].IsSupported();
-                        }
-
-                        node.Enabled = enabled;
+                        node.Enabled = plugin.SupportsHostState(imageWidth, imageHeight, hasTransparency, hostState);
                     }
                 }
             }

@@ -12,6 +12,7 @@
 
 using PSFilterPdn.EnableInfo;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 
@@ -158,32 +159,6 @@ namespace PSFilterLoad.PSApi
             internal set
             {
                 moduleEntryPoints = value;
-            }
-        }
-
-        internal bool HasEnableInfo => !string.IsNullOrEmpty(enableInfo);
-
-        internal Expression EnableInfoExpression
-        {
-            get
-            {
-                if (!enableInfoExpressionParsed)
-                {
-                    enableInfoExpressionParsed = true;
-
-                    if (HasEnableInfo)
-                    {
-                        try
-                        {
-                            enableInfoExpression = EnableInfoParser.Parse(enableInfo);
-                        }
-                        catch (EnableInfoException)
-                        {
-                        }
-                    }
-                }
-
-                return enableInfoExpression;
             }
         }
 
@@ -351,6 +326,84 @@ namespace PSFilterLoad.PSApi
             }
 
             return hash;
+        }
+
+        /// <summary>
+        /// Determines whether the filter can process the specified image and host application state.
+        /// </summary>
+        /// <param name="imageWidth">The width of the image.</param>
+        /// <param name="imageHeight">The height of the image.</param>
+        /// <param name="hasTransparency">Indicates if the image has transparency.</param>
+        /// <param name="hostState">The current state of the host application.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="hostState"/> is null.
+        /// </exception>
+        internal bool SupportsHostState(int imageWidth, int imageHeight, bool hasTransparency, HostState hostState)
+        {
+            if (hostState == null)
+            {
+                throw new ArgumentNullException(nameof(hostState));
+            }
+
+            bool result = true;
+
+            const ImageModes imageMode = ImageModes.RGB;
+
+            FilterCase filterCase = GetFilterTransparencyMode(imageMode, hostState.HasSelection, () => hasTransparency);
+
+            if (!string.IsNullOrEmpty(enableInfo))
+            {
+                int targetChannelCount = 3;
+                int trueChannelCount;
+                bool hasTransparencyMask;
+
+                switch (filterCase)
+                {
+                    case FilterCase.EditableTransparencyNoSelection:
+                    case FilterCase.EditableTransparencyWithSelection:
+                    case FilterCase.ProtectedTransparencyNoSelection:
+                    case FilterCase.ProtectedTransparencyWithSelection:
+                        trueChannelCount = 4;
+                        hasTransparencyMask = true;
+                        break;
+                    case FilterCase.FlatImageNoSelection:
+                    case FilterCase.FlatImageWithSelection:
+                    case FilterCase.FloatingSelection:
+                    default:
+                        trueChannelCount = 3;
+                        hasTransparencyMask = false;
+                        break;
+                }
+
+                EnableInfoVariables variables = new EnableInfoVariables(imageWidth, imageHeight, imageMode, hasTransparencyMask,
+                                                                        targetChannelCount, trueChannelCount, hostState);
+                try
+                {
+                    if (!enableInfoExpressionParsed)
+                    {
+                        enableInfoExpressionParsed = true;
+
+                        enableInfoExpression = EnableInfoParser.Parse(enableInfo);
+                    }
+
+                    if (enableInfoExpression != null)
+                    {
+                        result = new EnableInfoInterpreter(variables).Evaluate(enableInfoExpression);
+                    }
+                }
+                catch (EnableInfoException)
+                {
+                    // Ignore any errors that occur when parsing or evaluating the enable info expression.
+                }
+            }
+
+            if (filterInfo != null)
+            {
+                result &= filterInfo[(int)filterCase - 1].IsSupported();
+            }
+
+            return result;
         }
 
         public static bool operator ==(PluginData pluginData1, PluginData pluginData2)
