@@ -32,7 +32,7 @@ namespace PSFilterPdn
                 {
                     initAppThemeSetter = true;
 
-                    PropertyInfo propertyInfo = typeof(EffectConfigDialog).GetProperty("UseAppThemeColors");
+                    PropertyInfo propertyInfo = typeof(EffectConfigDialog).GetProperty("UseAppThemeColors", BindingFlags.Public | BindingFlags.Instance);
                     if (propertyInfo != null)
                     {
                         useAppThemeSetter = (Action<EffectConfigDialog, bool>)Delegate.CreateDelegate(typeof(Action<EffectConfigDialog, bool>), propertyInfo.GetSetMethod());
