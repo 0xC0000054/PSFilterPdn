@@ -20,26 +20,26 @@ using Microsoft.Win32.SafeHandles;
 
 namespace PSFilterLoad.PSApi
 {
-	/// <summary>
-	/// See http://msdn.microsoft.com/msdnmag/issues/05/10/Reliability/
-	/// for more about safe handles.
-	/// </summary>
-	[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
-	internal sealed class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
-	{
-		/// <summary>
-		/// Create safe library handle
-		/// </summary>
-		private SafeLibraryHandle() : base(true) { }
+    /// <summary>
+    /// See http://msdn.microsoft.com/msdnmag/issues/05/10/Reliability/
+    /// for more about safe handles.
+    /// </summary>
+    [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
+    internal sealed class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        /// <summary>
+        /// Create safe library handle
+        /// </summary>
+        private SafeLibraryHandle() : base(true) { }
 
-		/// <summary>
-		/// Release handle
-		/// </summary>
-		protected override bool ReleaseHandle()
-		{
-			return UnsafeNativeMethods.FreeLibrary(handle);
-		}
-	}
+        /// <summary>
+        /// Release handle
+        /// </summary>
+        protected override bool ReleaseHandle()
+        {
+            return UnsafeNativeMethods.FreeLibrary(handle);
+        }
+    }
 }
 
 

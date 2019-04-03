@@ -152,7 +152,7 @@ namespace PSFilterPdn
         {
             if (InvokeRequired)
             {
-                return (DialogResult)Invoke(new Func<string, DialogResult>(delegate(string error)
+                return (DialogResult)Invoke(new Func<string, DialogResult>(delegate (string error)
                     {
                         return MessageBox.Show(this, error, Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
                     }), message);
@@ -602,7 +602,7 @@ namespace PSFilterPdn
                 {
                     if (InvokeRequired)
                     {
-                        Invoke(new MethodInvoker(delegate() { Close(); }));
+                        Invoke(new MethodInvoker(delegate () { Close(); }));
                     }
                     else
                     {
@@ -771,7 +771,7 @@ namespace PSFilterPdn
 
             if (InvokeRequired)
             {
-                showAbout = (bool)Invoke(new Func<bool>(delegate()
+                showAbout = (bool)Invoke(new Func<bool>(delegate ()
                 {
                     return showAboutBoxCb.Checked;
                 }));
@@ -847,7 +847,7 @@ namespace PSFilterPdn
 
             if (InvokeRequired)
             {
-                Invoke(new MethodInvoker(delegate()
+                Invoke(new MethodInvoker(delegate ()
                 {
                     filterProgressBar.Value = 0;
                 }));

@@ -85,7 +85,7 @@ namespace PSFilterLoad.PSApi
 
         internal static class ChannelPorts
         {
-             /// <summary>
+            /// <summary>
             /// The index of the red channel.
             /// </summary>
             public const int Red = 0;

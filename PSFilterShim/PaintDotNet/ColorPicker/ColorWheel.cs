@@ -80,7 +80,7 @@ namespace PaintDotNet
             x = r * (float)Math.Cos(theta);
             y = r * (float)Math.Sin(theta);
 
-            return new PointF(x,y);
+            return new PointF(x, y);
         }
 
         private static PointF[] GetCirclePoints(float r, PointF center)
@@ -200,7 +200,7 @@ namespace PaintDotNet
 
         protected override void OnResize(EventArgs e)
         {
-            base.OnResize (e);
+            base.OnResize(e);
 
             if (renderBitmap != null && (ComputeRadius(Size) != ComputeRadius(renderBitmap.Size)))
             {
@@ -246,7 +246,7 @@ namespace PaintDotNet
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            base.OnMouseDown (e);
+            base.OnMouseDown(e);
 
             if (e.Button == MouseButtons.Left)
             {
@@ -256,7 +256,7 @@ namespace PaintDotNet
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            base.OnMouseUp (e);
+            base.OnMouseUp(e);
 
             if (tracking)
             {
@@ -268,7 +268,7 @@ namespace PaintDotNet
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            base.OnMouseMove (e);
+            base.OnMouseMove(e);
 
             lastMouseXY = new Point(e.X, e.Y);
 

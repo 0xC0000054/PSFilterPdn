@@ -32,7 +32,7 @@ namespace PSFilterPdn
         /// <summary>
         /// Initializes a new instance of the <see cref="ShellLink"/> class.
         /// </summary>
-        public ShellLink ()
+        public ShellLink()
         {
             shellLink = (NativeInterfaces.IShellLinkW)new ShellLinkCoClass();
         }

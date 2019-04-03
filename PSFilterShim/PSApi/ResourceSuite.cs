@@ -15,155 +15,155 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-	internal sealed class ResourceSuite
-	{
-		private CountPIResourcesProc countResourceProc;
-		private GetPIResourceProc getResourceProc;
-		private DeletePIResourceProc deleteResourceProc;
-		private AddPIResourceProc addResourceProc;
-		private PseudoResourceCollection pseudoResources;
+    internal sealed class ResourceSuite
+    {
+        private CountPIResourcesProc countResourceProc;
+        private GetPIResourceProc getResourceProc;
+        private DeletePIResourceProc deleteResourceProc;
+        private AddPIResourceProc addResourceProc;
+        private PseudoResourceCollection pseudoResources;
 
-		public ResourceSuite()
-		{
-			countResourceProc = new CountPIResourcesProc(CountResource);
-			addResourceProc = new AddPIResourceProc(AddResource);
-			deleteResourceProc = new DeletePIResourceProc(DeleteResource);
-			getResourceProc = new GetPIResourceProc(GetResource);
-			pseudoResources = new PseudoResourceCollection();
-		}
+        public ResourceSuite()
+        {
+            countResourceProc = new CountPIResourcesProc(CountResource);
+            addResourceProc = new AddPIResourceProc(AddResource);
+            deleteResourceProc = new DeletePIResourceProc(DeleteResource);
+            getResourceProc = new GetPIResourceProc(GetResource);
+            pseudoResources = new PseudoResourceCollection();
+        }
 
-		public PseudoResourceCollection PseudoResources
-		{
-			get
-			{
-				return pseudoResources;
-			}
-			set
-			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("value");
-				}
+        public PseudoResourceCollection PseudoResources
+        {
+            get
+            {
+                return pseudoResources;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException("value");
+                }
 
-				pseudoResources = value;
-			}
-		}
+                pseudoResources = value;
+            }
+        }
 
-		public IntPtr CreateResourceProcsPointer()
-		{
-			IntPtr resourceProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ResourceProcs)), true);
+        public IntPtr CreateResourceProcsPointer()
+        {
+            IntPtr resourceProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ResourceProcs)), true);
 
-			unsafe
-			{
-				ResourceProcs* resourceProcs = (ResourceProcs*)resourceProcsPtr.ToPointer();
-				resourceProcs->resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion;
-				resourceProcs->numResourceProcs = PSConstants.kCurrentResourceProcsCount;
-				resourceProcs->addProc = Marshal.GetFunctionPointerForDelegate(addResourceProc);
-				resourceProcs->countProc = Marshal.GetFunctionPointerForDelegate(countResourceProc);
-				resourceProcs->deleteProc = Marshal.GetFunctionPointerForDelegate(deleteResourceProc);
-				resourceProcs->getProc = Marshal.GetFunctionPointerForDelegate(getResourceProc);
-			}
+            unsafe
+            {
+                ResourceProcs* resourceProcs = (ResourceProcs*)resourceProcsPtr.ToPointer();
+                resourceProcs->resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion;
+                resourceProcs->numResourceProcs = PSConstants.kCurrentResourceProcsCount;
+                resourceProcs->addProc = Marshal.GetFunctionPointerForDelegate(addResourceProc);
+                resourceProcs->countProc = Marshal.GetFunctionPointerForDelegate(countResourceProc);
+                resourceProcs->deleteProc = Marshal.GetFunctionPointerForDelegate(deleteResourceProc);
+                resourceProcs->getProc = Marshal.GetFunctionPointerForDelegate(getResourceProc);
+            }
 
-			return resourceProcsPtr;
-		}
+            return resourceProcsPtr;
+        }
 
-		private short AddResource(uint ofType, IntPtr data)
-		{
+        private short AddResource(uint ofType, IntPtr data)
+        {
 #if DEBUG
-			DebugUtils.Ping(DebugFlags.ResourceSuite, DebugUtils.PropToString(ofType));
+            DebugUtils.Ping(DebugFlags.ResourceSuite, DebugUtils.PropToString(ofType));
 #endif
-			int size = HandleSuite.Instance.GetHandleSize(data);
-			try
-			{
-				byte[] bytes = new byte[size];
+            int size = HandleSuite.Instance.GetHandleSize(data);
+            try
+            {
+                byte[] bytes = new byte[size];
 
-				if (size > 0)
-				{
-					Marshal.Copy(HandleSuite.Instance.LockHandle(data, 0), bytes, 0, size);
-					HandleSuite.Instance.UnlockHandle(data);
-				}
+                if (size > 0)
+                {
+                    Marshal.Copy(HandleSuite.Instance.LockHandle(data, 0), bytes, 0, size);
+                    HandleSuite.Instance.UnlockHandle(data);
+                }
 
-				int index = CountResource(ofType) + 1;
-				pseudoResources.Add(new PseudoResource(ofType, index, bytes));
-			}
-			catch (OutOfMemoryException)
-			{
-				return PSError.memFullErr;
-			}
+                int index = CountResource(ofType) + 1;
+                pseudoResources.Add(new PseudoResource(ofType, index, bytes));
+            }
+            catch (OutOfMemoryException)
+            {
+                return PSError.memFullErr;
+            }
 
-			return PSError.noErr;
-		}
+            return PSError.noErr;
+        }
 
-		private short CountResource(uint ofType)
-		{
+        private short CountResource(uint ofType)
+        {
 #if DEBUG
-			DebugUtils.Ping(DebugFlags.ResourceSuite, DebugUtils.PropToString(ofType));
+            DebugUtils.Ping(DebugFlags.ResourceSuite, DebugUtils.PropToString(ofType));
 #endif
-			short count = 0;
+            short count = 0;
 
-			foreach (PseudoResource item in pseudoResources)
-			{
-				if (item.Equals(ofType))
-				{
-					count++;
-				}
-			}
+            foreach (PseudoResource item in pseudoResources)
+            {
+                if (item.Equals(ofType))
+                {
+                    count++;
+                }
+            }
 
-			return count;
-		}
+            return count;
+        }
 
-		private void DeleteResource(uint ofType, short index)
-		{
+        private void DeleteResource(uint ofType, short index)
+        {
 #if DEBUG
-			DebugUtils.Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", DebugUtils.PropToString(ofType), index));
+            DebugUtils.Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", DebugUtils.PropToString(ofType), index));
 #endif
-			int resourceIndex = pseudoResources.FindIndex(ofType, index);
+            int resourceIndex = pseudoResources.FindIndex(ofType, index);
 
-			if (resourceIndex >= 0)
-			{
-				pseudoResources.RemoveAt(resourceIndex);
+            if (resourceIndex >= 0)
+            {
+                pseudoResources.RemoveAt(resourceIndex);
 
-				int i = index + 1;
+                int i = index + 1;
 
-				while (true)
-				{
-					// Renumber the index of subsequent items.
-					int next = pseudoResources.FindIndex(ofType, i);
+                while (true)
+                {
+                    // Renumber the index of subsequent items.
+                    int next = pseudoResources.FindIndex(ofType, i);
 
-					if (next < 0)
-					{
-						break;
-					}
+                    if (next < 0)
+                    {
+                        break;
+                    }
 
-					pseudoResources[next].Index = i - 1;
+                    pseudoResources[next].Index = i - 1;
 
-					i++;
-				}
-			}
-		}
+                    i++;
+                }
+            }
+        }
 
-		private IntPtr GetResource(uint ofType, short index)
-		{
+        private IntPtr GetResource(uint ofType, short index)
+        {
 #if DEBUG
-			DebugUtils.Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", DebugUtils.PropToString(ofType), index));
+            DebugUtils.Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", DebugUtils.PropToString(ofType), index));
 #endif
-			PseudoResource res = pseudoResources.Find(ofType, index);
+            PseudoResource res = pseudoResources.Find(ofType, index);
 
-			if (res != null)
-			{
-				byte[] data = res.GetData();
+            if (res != null)
+            {
+                byte[] data = res.GetData();
 
-				IntPtr h = HandleSuite.Instance.NewHandle(data.Length);
-				if (h != IntPtr.Zero)
-				{
-					Marshal.Copy(data, 0, HandleSuite.Instance.LockHandle(h, 0), data.Length);
-					HandleSuite.Instance.UnlockHandle(h);
-				}
+                IntPtr h = HandleSuite.Instance.NewHandle(data.Length);
+                if (h != IntPtr.Zero)
+                {
+                    Marshal.Copy(data, 0, HandleSuite.Instance.LockHandle(h, 0), data.Length);
+                    HandleSuite.Instance.UnlockHandle(h);
+                }
 
-				return h;
-			}
+                return h;
+            }
 
-			return IntPtr.Zero;
-		}
-	}
+            return IntPtr.Zero;
+        }
+    }
 }

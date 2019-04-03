@@ -23,7 +23,7 @@ namespace PSFilterPdn
         private PluginData pluginData;
         private PSFilterShimSettings settings;
         private Action<string> errorCallback;
-        private Action<int,int> progressCallback;
+        private Action<int, int> progressCallback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PSFilterShimService"/> class.

@@ -16,7 +16,7 @@ using PaintDotNet;
 
 namespace PSFilterLoad.ColorPicker
 {
-    internal sealed class ColorGradientControl  : UserControl
+    internal sealed class ColorGradientControl : UserControl
     {
         private Point lastTrackingMouseXY = new Point(-1, -1);
 
@@ -480,7 +480,7 @@ namespace PSFilterLoad.ColorPicker
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            base.OnPaint (e);
+            base.OnPaint(e);
             DrawGradient(e.Graphics);
         }
 

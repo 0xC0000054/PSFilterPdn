@@ -27,7 +27,7 @@ using System.Windows.Forms;
 
 namespace PSFilterLoad.ColorPicker
 {
-    internal sealed class ColorPickerForm  : Form
+    internal sealed class ColorPickerForm : Form
     {
         private Label redLabel;
         private Label blueLabel;
@@ -169,13 +169,13 @@ namespace PSFilterLoad.ColorPicker
                     ignore++;
 
                     // only do the update on the last one, so partial RGB info isn't parsed.
-                   Utility.SetNumericUpDownValue(redUpDown, value.R);
-                   Utility.SetNumericUpDownValue(greenUpDown, value.G);
+                    Utility.SetNumericUpDownValue(redUpDown, value.R);
+                    Utility.SetNumericUpDownValue(greenUpDown, value.G);
                     SetColorGradientValuesRgb(value.R, value.G, value.B);
                     SetColorGradientMinMaxColorsRgb(value.R, value.G, value.B);
 
                     ignore--;
-                   Utility.SetNumericUpDownValue(blueUpDown, value.B);
+                    Utility.SetNumericUpDownValue(blueUpDown, value.B);
                     Update();
 
                     if (hexBox.Text.Length == 6) // skip this step if the hexBox is being edited
@@ -224,9 +224,9 @@ namespace PSFilterLoad.ColorPicker
                 ignore++;
                 HsvColor hsvColor = HsvColor.FromColor(newColor.ToColor());
 
-               Utility.SetNumericUpDownValue(hueUpDown, hsvColor.Hue);
-               Utility.SetNumericUpDownValue(saturationUpDown, hsvColor.Saturation);
-               Utility.SetNumericUpDownValue(valueUpDown, hsvColor.Value);
+                Utility.SetNumericUpDownValue(hueUpDown, hsvColor.Hue);
+                Utility.SetNumericUpDownValue(saturationUpDown, hsvColor.Saturation);
+                Utility.SetNumericUpDownValue(valueUpDown, hsvColor.Value);
 
                 SetColorGradientValuesHsv(hsvColor.Hue, hsvColor.Saturation, hsvColor.Value);
                 SetColorGradientMinMaxColorsHsv(hsvColor.Hue, hsvColor.Saturation, hsvColor.Value);
@@ -292,9 +292,9 @@ namespace PSFilterLoad.ColorPicker
                 ignore++;
                 RgbColor rgbColor = newColor.ToRgb();
 
-               Utility.SetNumericUpDownValue(redUpDown, rgbColor.Red);
-               Utility.SetNumericUpDownValue(greenUpDown, rgbColor.Green);
-               Utility.SetNumericUpDownValue(blueUpDown, rgbColor.Blue);
+                Utility.SetNumericUpDownValue(redUpDown, rgbColor.Red);
+                Utility.SetNumericUpDownValue(greenUpDown, rgbColor.Green);
+                Utility.SetNumericUpDownValue(blueUpDown, rgbColor.Blue);
 
                 string hexText = GetHexNumericUpDownValue(rgbColor.Red, rgbColor.Green, rgbColor.Blue);
                 hexBox.Text = hexText;
@@ -970,13 +970,13 @@ namespace PSFilterLoad.ColorPicker
             HsvColor hsvColor = HsvColor.FromColor(rgbColor);
 
             PushIgnoreChangedEvents();
-           Utility.SetNumericUpDownValue(hueUpDown, hsvColor.Hue);
-           Utility.SetNumericUpDownValue(saturationUpDown, hsvColor.Saturation);
-           Utility.SetNumericUpDownValue(valueUpDown, hsvColor.Value);
+            Utility.SetNumericUpDownValue(hueUpDown, hsvColor.Hue);
+            Utility.SetNumericUpDownValue(saturationUpDown, hsvColor.Saturation);
+            Utility.SetNumericUpDownValue(valueUpDown, hsvColor.Value);
 
-           Utility.SetNumericUpDownValue(redUpDown, rgbColor.R);
-           Utility.SetNumericUpDownValue(greenUpDown, rgbColor.G);
-           Utility.SetNumericUpDownValue(blueUpDown, rgbColor.B);
+            Utility.SetNumericUpDownValue(redUpDown, rgbColor.R);
+            Utility.SetNumericUpDownValue(greenUpDown, rgbColor.G);
+            Utility.SetNumericUpDownValue(blueUpDown, rgbColor.B);
             PopIgnoreChangedEvents();
 
             string hexText = GetHexNumericUpDownValue(rgbColor.R, rgbColor.G, rgbColor.B);
@@ -1031,13 +1031,13 @@ namespace PSFilterLoad.ColorPicker
             RgbColor rgbColor = hsvColor.ToRgb();
             ColorBgra color = ColorBgra.FromBgra((byte)rgbColor.Blue, (byte)rgbColor.Green, (byte)rgbColor.Red, 255);
 
-           Utility.SetNumericUpDownValue(hueUpDown, hsvColor.Hue);
-           Utility.SetNumericUpDownValue(saturationUpDown, hsvColor.Saturation);
-           Utility.SetNumericUpDownValue(valueUpDown, hsvColor.Value);
+            Utility.SetNumericUpDownValue(hueUpDown, hsvColor.Hue);
+            Utility.SetNumericUpDownValue(saturationUpDown, hsvColor.Saturation);
+            Utility.SetNumericUpDownValue(valueUpDown, hsvColor.Value);
 
-           Utility.SetNumericUpDownValue(redUpDown, rgbColor.Red);
-           Utility.SetNumericUpDownValue(greenUpDown, rgbColor.Green);
-           Utility.SetNumericUpDownValue(blueUpDown, rgbColor.Blue);
+            Utility.SetNumericUpDownValue(redUpDown, rgbColor.Red);
+            Utility.SetNumericUpDownValue(greenUpDown, rgbColor.Green);
+            Utility.SetNumericUpDownValue(blueUpDown, rgbColor.Blue);
 
             string hexText = GetHexNumericUpDownValue(rgbColor.Red, rgbColor.Green, rgbColor.Blue);
             hexBox.Text = hexText;
@@ -1156,9 +1156,9 @@ namespace PSFilterLoad.ColorPicker
                     int newGreen = ((hexInt & 0x00ff00) >> 8);
                     int newBlue = (hexInt & 0x0000ff);
 
-                   Utility.SetNumericUpDownValue(redUpDown, newRed);
-                   Utility.SetNumericUpDownValue(greenUpDown, newGreen);
-                   Utility.SetNumericUpDownValue(blueUpDown, newBlue);
+                    Utility.SetNumericUpDownValue(redUpDown, newRed);
+                    Utility.SetNumericUpDownValue(greenUpDown, newGreen);
+                    Utility.SetNumericUpDownValue(blueUpDown, newBlue);
 
                     SetColorGradientMinMaxColorsRgb(newRed, newGreen, newBlue);
                     SetColorGradientValuesRgb(newRed, newGreen, newBlue);

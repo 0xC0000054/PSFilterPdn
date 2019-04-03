@@ -19,89 +19,89 @@ using System;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-	internal struct PSBufferSuite1
-	{
-		public IntPtr New;
-		public IntPtr Dispose;
-		public IntPtr GetSize;
-		public IntPtr GetSpace;
-	}
+    internal struct PSBufferSuite1
+    {
+        public IntPtr New;
+        public IntPtr Dispose;
+        public IntPtr GetSize;
+        public IntPtr GetSpace;
+    }
 
 #pragma warning disable 0649
-	internal struct CS_XYZ
-	{
-		public ushort x; // all clamped to between 0 and 255, why is a ushort used instead of a byte?
-		public ushort y;
-		public ushort z;
-	}
+    internal struct CS_XYZ
+    {
+        public ushort x; // all clamped to between 0 and 255, why is a ushort used instead of a byte?
+        public ushort y;
+        public ushort z;
+    }
 
-	internal struct CS_Color8
-	{
-		public byte c0;
-		public byte c1;
-		public byte c2;
-		public byte c3;
-	}
+    internal struct CS_Color8
+    {
+        public byte c0;
+        public byte c1;
+        public byte c2;
+        public byte c3;
+    }
 
-	internal struct CS_Color16
-	{
-		public ushort c0;
-		public ushort c1;
-		public ushort c2;
-		public ushort c3;
-	}
+    internal struct CS_Color16
+    {
+        public ushort c0;
+        public ushort c1;
+        public ushort c2;
+        public ushort c3;
+    }
 #pragma warning restore 0649
 
-	internal struct PSColorSpaceSuite1
-	{
-		public IntPtr Make;
-		public IntPtr Delete;
-		public IntPtr StuffComponents;
-		public IntPtr ExtractComponents;
-		public IntPtr StuffXYZ;
-		public IntPtr ExtractXYZ;
-		public IntPtr Convert8;
-		public IntPtr Convert16;
-		public IntPtr GetNativeSpace;
-		public IntPtr IsBookColor;
-		public IntPtr ExtractColorName;
-		public IntPtr PickColor;
-		public IntPtr Convert8to16;
-		public IntPtr Convert16to8;
-		public IntPtr ConvertToMonitorRGB;
-	}
+    internal struct PSColorSpaceSuite1
+    {
+        public IntPtr Make;
+        public IntPtr Delete;
+        public IntPtr StuffComponents;
+        public IntPtr ExtractComponents;
+        public IntPtr StuffXYZ;
+        public IntPtr ExtractXYZ;
+        public IntPtr Convert8;
+        public IntPtr Convert16;
+        public IntPtr GetNativeSpace;
+        public IntPtr IsBookColor;
+        public IntPtr ExtractColorName;
+        public IntPtr PickColor;
+        public IntPtr Convert8to16;
+        public IntPtr Convert16to8;
+        public IntPtr ConvertToMonitorRGB;
+    }
 
-	internal struct PSHandleSuite1
-	{
-		public IntPtr New;
-		public IntPtr Dispose;
-		public IntPtr SetLock;
-		public IntPtr GetSize;
-		public IntPtr SetSize;
-		public IntPtr RecoverSpace;
-	}
-	internal struct PSHandleSuite2
-	{
-		public IntPtr New;
-		public IntPtr Dispose;
-		public IntPtr DisposeRegularHandle;
-		public IntPtr SetLock;
-		public IntPtr GetSize;
-		public IntPtr SetSize;
-		public IntPtr RecoverSpace;
-	}
+    internal struct PSHandleSuite1
+    {
+        public IntPtr New;
+        public IntPtr Dispose;
+        public IntPtr SetLock;
+        public IntPtr GetSize;
+        public IntPtr SetSize;
+        public IntPtr RecoverSpace;
+    }
+    internal struct PSHandleSuite2
+    {
+        public IntPtr New;
+        public IntPtr Dispose;
+        public IntPtr DisposeRegularHandle;
+        public IntPtr SetLock;
+        public IntPtr GetSize;
+        public IntPtr SetSize;
+        public IntPtr RecoverSpace;
+    }
 
-	internal struct PSUIHooksSuite1
-	{
-		public IntPtr processEvent;
-		public IntPtr displayPixels;
-		public IntPtr progressBar;
-		public IntPtr testAbort;
-		public IntPtr MainAppWindow;
-		public IntPtr SetCursor;
-		public IntPtr TickCount;
-		public IntPtr GetPluginName;
-	}
+    internal struct PSUIHooksSuite1
+    {
+        public IntPtr processEvent;
+        public IntPtr displayPixels;
+        public IntPtr progressBar;
+        public IntPtr testAbort;
+        public IntPtr MainAppWindow;
+        public IntPtr SetCursor;
+        public IntPtr TickCount;
+        public IntPtr GetPluginName;
+    }
 
 #if PICASUITEDEBUG
 	internal struct SPPluginsSuite4
@@ -141,30 +141,30 @@ namespace PSFilterLoad.PSApi.PICA
 	}
 #endif
 
-	internal struct ASZStringSuite1
-	{
-		public IntPtr MakeFromUnicode;
-		public IntPtr MakeFromCString;
-		public IntPtr MakeFromPascalString;
-		public IntPtr MakeRomanizationOfInteger;
-		public IntPtr MakeRomanizationOfFixed;
-		public IntPtr MakeRomanizationOfDouble;
-		public IntPtr GetEmpty;
-		public IntPtr Copy;
-		public IntPtr Replace;
-		public IntPtr TrimEllipsis;
-		public IntPtr TrimSpaces;
-		public IntPtr RemoveAccelerators;
-		public IntPtr AddRef;
-		public IntPtr Release;
-		public IntPtr IsAllWhiteSpace;
-		public IntPtr IsEmpty;
-		public IntPtr WillReplace;
-		public IntPtr LengthAsUnicodeCString;
-		public IntPtr AsUnicodeCString;
-		public IntPtr LengthAsCString;
-		public IntPtr AsCString;
-		public IntPtr LengthAsPascalString;
-		public IntPtr AsPascalString;
-	}
+    internal struct ASZStringSuite1
+    {
+        public IntPtr MakeFromUnicode;
+        public IntPtr MakeFromCString;
+        public IntPtr MakeFromPascalString;
+        public IntPtr MakeRomanizationOfInteger;
+        public IntPtr MakeRomanizationOfFixed;
+        public IntPtr MakeRomanizationOfDouble;
+        public IntPtr GetEmpty;
+        public IntPtr Copy;
+        public IntPtr Replace;
+        public IntPtr TrimEllipsis;
+        public IntPtr TrimSpaces;
+        public IntPtr RemoveAccelerators;
+        public IntPtr AddRef;
+        public IntPtr Release;
+        public IntPtr IsAllWhiteSpace;
+        public IntPtr IsEmpty;
+        public IntPtr WillReplace;
+        public IntPtr LengthAsUnicodeCString;
+        public IntPtr AsUnicodeCString;
+        public IntPtr LengthAsCString;
+        public IntPtr AsCString;
+        public IntPtr LengthAsPascalString;
+        public IntPtr AsPascalString;
+    }
 }

@@ -23,7 +23,7 @@ namespace PaintDotNet
         public int Saturation; // 0-100
         public int Value; // 0-100
 
-        public static bool operator== (HsvColor lhs, HsvColor rhs)
+        public static bool operator ==(HsvColor lhs, HsvColor rhs)
         {
             if ((lhs.Hue == rhs.Hue) &&
                 (lhs.Saturation == rhs.Saturation) &&
@@ -37,7 +37,7 @@ namespace PaintDotNet
             }
         }
 
-        public static bool operator!= (HsvColor lhs, HsvColor rhs)
+        public static bool operator !=(HsvColor lhs, HsvColor rhs)
         {
             return !(lhs == rhs);
         }
@@ -49,7 +49,7 @@ namespace PaintDotNet
 
         public override int GetHashCode()
         {
-            return (Hue + (Saturation << 8) + (Value << 16)).GetHashCode();;
+            return (Hue + (Saturation << 8) + (Value << 16)).GetHashCode(); ;
         }
 
         public HsvColor(int hue, int saturation, int value)
@@ -100,9 +100,9 @@ namespace PaintDotNet
 
             // Scale Hue to be between 0 and 360. Saturation
             // and value scale to be between 0 and 1.
-            h = (double) Hue % 360;
-            s = (double) Saturation / 100;
-            v = (double) Value / 100;
+            h = (double)Hue % 360;
+            s = (double)Saturation / 100;
+            v = (double)Value / 100;
 
             if (s == 0)
             {
