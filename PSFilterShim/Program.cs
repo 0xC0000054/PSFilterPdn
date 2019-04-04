@@ -250,7 +250,7 @@ namespace PSFilterShim
 #if DEBUG
                 serviceProxy.SetProxyErrorMessage(ex.Message + Environment.NewLine + ex.StackTrace);
 #else
-				serviceProxy.SetProxyErrorMessage(ex.Message);
+                serviceProxy.SetProxyErrorMessage(ex.Message);
 #endif
             }
             catch (Win32Exception ex)
