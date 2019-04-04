@@ -306,7 +306,7 @@ namespace PSFilterPdn.Controls
 
             if (GetStyle(ControlStyles.UserPaint))
             {
-                e.Graphics.Clear(backColor);
+                e.Graphics.Clear(BackColor);
 
                 if (TabCount <= 0)
                 {
