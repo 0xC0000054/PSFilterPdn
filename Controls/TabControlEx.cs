@@ -33,6 +33,9 @@ namespace PSFilterPdn.Controls
         private Color borderColor;
         private Color hotTrackColor;
         private int hotTabIndex;
+        private SolidBrush backgroundBrush;
+        private Pen borderPen;
+        private SolidBrush hotTrackBrush;
 
         private static readonly Color DefaultBorderColor = SystemColors.ControlDark;
         private static readonly Color DefaultHotTrackColor = Color.FromArgb(128, SystemColors.HotTrack);
@@ -66,6 +69,9 @@ namespace PSFilterPdn.Controls
             if (disposing)
             {
                 components?.Dispose();
+                backgroundBrush?.Dispose();
+                borderPen?.Dispose();
+                hotTrackBrush?.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -306,55 +312,25 @@ namespace PSFilterPdn.Controls
                 {
                     return;
                 }
+                int activeTabIndex = SelectedIndex;
 
-                SolidBrush background = null;
-                Pen border = null;
-                SolidBrush hotTrack = null;
-
-                try
+                // Draw the inactive tabs.
+                for (int index = 0; index < TabCount; index++)
                 {
-                    background = new SolidBrush(BackColor);
-                    border = new Pen(borderColor);
-                    hotTrack = new SolidBrush(hotTrackColor);
-
-                    int activeTabIndex = SelectedIndex;
-
-                    // Draw the inactive tabs.
-                    for (int index = 0; index < TabCount; index++)
+                    if (index != activeTabIndex)
                     {
-                        if (index != activeTabIndex)
+                        TabState state = TabState.Inactive;
+                        if (index == hotTabIndex && HotTrackingEnabled)
                         {
-                            TabState state = TabState.Inactive;
-                            if (index == hotTabIndex && HotTrackingEnabled)
-                            {
-                                state = TabState.MouseOver;
-                            }
-
-                            DrawTab(e.Graphics, background, border, hotTrack, TabPages[index], GetTabRect(index), state);
+                            state = TabState.MouseOver;
                         }
-                    }
 
-                    // Draw the active tab.
-                    DrawTab(e.Graphics, background, border, hotTrack, TabPages[activeTabIndex], GetTabRect(activeTabIndex), TabState.Active);
-                }
-                finally
-                {
-                    if (background != null)
-                    {
-                        background.Dispose();
-                        background = null;
-                    }
-                    if (border != null)
-                    {
-                        border.Dispose();
-                        border = null;
-                    }
-                    if (hotTrack != null)
-                    {
-                        hotTrack.Dispose();
-                        hotTrack = null;
+                        DrawTab(e.Graphics, TabPages[index], GetTabRect(index), state);
                     }
                 }
+
+                // Draw the active tab.
+                DrawTab(e.Graphics, TabPages[activeTabIndex], GetTabRect(activeTabIndex), TabState.Active);
             }
         }
 
@@ -369,34 +345,52 @@ namespace PSFilterPdn.Controls
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.UserPaint, UseOwnerDraw);
             UpdateTabPageVisualStyleBackColor();
+            if (GetStyle(ControlStyles.UserPaint))
+            {
+                if (backgroundBrush == null || backgroundBrush.Color != BackColor)
+                {
+                    backgroundBrush?.Dispose();
+                    backgroundBrush = new SolidBrush(BackColor);
+                }
+                if (borderPen == null || borderPen.Color != borderColor)
+                {
+                    borderPen?.Dispose();
+                    borderPen = new Pen(borderColor);
+                }
+                if (hotTrackBrush == null || hotTrackBrush.Color != hotTrackColor)
+                {
+                    hotTrackBrush?.Dispose();
+                    hotTrackBrush = new SolidBrush(hotTrackColor);
+                }
+            }
+
             Invalidate();
         }
 
-        private void DrawTab(Graphics graphics, Brush background, Pen border, Brush hotTrack,
-            TabPage page, Rectangle bounds, TabState state)
+        private void DrawTab(Graphics graphics, TabPage page, Rectangle bounds, TabState state)
         {
             if (state == TabState.Active)
             {
                 Rectangle activeTabRect = Rectangle.Inflate(bounds, 2, 2);
 
-                graphics.FillRectangle(background, activeTabRect);
-                DrawTabBorder(graphics, border, activeTabRect);
+                graphics.FillRectangle(backgroundBrush, activeTabRect);
+                DrawTabBorder(graphics, activeTabRect);
             }
             else if (state == TabState.MouseOver)
             {
-                graphics.FillRectangle(hotTrack, bounds);
-                DrawTabBorder(graphics, border, bounds);
+                graphics.FillRectangle(hotTrackBrush, bounds);
+                DrawTabBorder(graphics, bounds);
             }
             else
             {
-                graphics.FillRectangle(background, bounds);
-                DrawTabBorder(graphics, border, bounds);
+                graphics.FillRectangle(backgroundBrush, bounds);
+                DrawTabBorder(graphics, bounds);
             }
 
             DrawTabText(graphics, bounds, page);
         }
 
-        private void DrawTabBorder(Graphics graphics, Pen borderPen, Rectangle bounds)
+        private void DrawTabBorder(Graphics graphics, Rectangle bounds)
         {
             Point[] points = new Point[6];
 
