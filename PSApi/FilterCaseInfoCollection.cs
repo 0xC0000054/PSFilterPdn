@@ -10,11 +10,13 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace PSFilterLoad.PSApi
 {
+    [Serializable]
     public sealed class FilterCaseInfoCollection : ReadOnlyCollection<FilterCaseInfo>
     {
         public FilterCaseInfoCollection(IList<FilterCaseInfo> list) : base(list)
