@@ -92,11 +92,6 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                 System.Diagnostics.Debug.Assert(sourceSpace != ColorSpace.ChosenSpace);
 #endif
-                if (resultSpace == ColorSpace.ChosenSpace)
-                {
-                    resultSpace = sourceSpace;
-                    return PSError.noErr;
-                }
 
                 double component0 = 0;
                 double component1 = 0;
@@ -226,12 +221,6 @@ namespace PSFilterLoad.PSApi
 
             if (sourceSpace != resultSpace)
             {
-                if (resultSpace == ColorSpace.ChosenSpace)
-                {
-                    resultSpace = sourceSpace;
-                    return PSError.kSPNoError;
-                }
-
                 if (resultSpace < ColorSpace.RGBSpace || resultSpace > ColorSpace.XYZSpace)
                 {
                     return PSError.kSPBadParameterError;
