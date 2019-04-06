@@ -168,6 +168,13 @@ namespace PSFilterPdn.Controls
                 if (borderColor != value)
                 {
                     borderColor = value;
+
+                    if (borderPen != null)
+                    {
+                        borderPen.Dispose();
+                        borderPen = new Pen(borderColor);
+                    }
+
                     Invalidate();
                 }
             }
@@ -191,6 +198,13 @@ namespace PSFilterPdn.Controls
                 if (hotTrackColor != value)
                 {
                     hotTrackColor = value;
+
+                    if (hotTrackBrush != null)
+                    {
+                        hotTrackBrush.Dispose();
+                        hotTrackBrush = new SolidBrush(hotTrackColor);
+                    }
+
                     Invalidate();
                 }
             }
