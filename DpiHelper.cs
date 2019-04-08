@@ -16,11 +16,11 @@ namespace PSFilterPdn
 {
     internal static class DpiHelper
     {
-        private static readonly int systemDpi = InitializeSystemDpi();
+        private static readonly int SystemDpi = InitializeSystemDpi();
 
         public static int GetSystemDpi()
         {
-            return systemDpi;
+            return SystemDpi;
         }
 
         private static int InitializeSystemDpi()
