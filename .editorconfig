@@ -24,9 +24,9 @@ csharp_new_line_between_query_expression_clauses      = true
 csharp_style_expression_bodied_methods                = false : none
 csharp_style_expression_bodied_constructors           = false : none
 csharp_style_expression_bodied_operators              = false : none
-csharp_style_expression_bodied_properties             = false : none
-csharp_style_expression_bodied_indexers               = false : none
-csharp_style_expression_bodied_accessors              = false : none
+csharp_style_expression_bodied_properties             = true : none
+csharp_style_expression_bodied_indexers               = true : none
+csharp_style_expression_bodied_accessors              = true : none
 
 # Code block settings
 csharp_prefer_braces                                  = true : warning
