@@ -28,21 +28,9 @@ namespace PSFilterPdn
     [PluginSupportInfo(typeof(PluginSupportInfo))]
     public sealed class PSFilterPdnEffect : Effect
     {
-        public static string StaticName
-        {
-            get
-            {
-                return "8bf Filter";
-            }
-        }
+        public static string StaticName => "8bf Filter";
 
-        public static Bitmap StaticIcon
-        {
-            get
-            {
-                return new Bitmap(typeof(PSFilterPdnEffect), PluginIconUtil.GetIconResourceForCurrentDpi());
-            }
-        }
+        public static Bitmap StaticIcon => new Bitmap(typeof(PSFilterPdnEffect), PluginIconUtil.GetIconResourceForCurrentDpi());
 
         private bool repeatEffect;
         private Thread filterThread;
@@ -357,10 +345,7 @@ namespace PSFilterPdn
         {
             private IntPtr handle;
 
-            public IntPtr Handle
-            {
-                get { return handle; }
-            }
+            public IntPtr Handle => handle;
 
             internal Win32Window(IntPtr hWnd)
             {

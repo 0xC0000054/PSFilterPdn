@@ -41,13 +41,7 @@ namespace PSFilterPdn.EnableInfo
 
         public ReadOnlyCollection<Expression> Arguments { get; }
 
-        public override ExpressionType NodeType
-        {
-            get
-            {
-                return ExpressionType.FunctionCall;
-            }
-        }
+        public override ExpressionType NodeType => ExpressionType.FunctionCall;
 
         public override Expression Accept(IExpressionVisitor visitor)
         {

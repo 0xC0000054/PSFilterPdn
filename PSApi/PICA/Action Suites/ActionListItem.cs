@@ -20,21 +20,9 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly uint type;
         private readonly object value;
 
-        public uint Type
-        {
-            get
-            {
-                return type;
-            }
-        }
+        public uint Type => type;
 
-        public object Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        public object Value => value;
 
         public ActionListItem(uint type, object value)
         {

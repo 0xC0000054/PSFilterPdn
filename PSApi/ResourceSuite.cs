@@ -34,10 +34,7 @@ namespace PSFilterLoad.PSApi
 
         public PseudoResourceCollection PseudoResources
         {
-            get
-            {
-                return pseudoResources;
-            }
+            get => pseudoResources;
             set
             {
                 if (value == null)

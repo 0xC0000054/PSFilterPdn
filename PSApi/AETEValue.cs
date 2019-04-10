@@ -22,37 +22,13 @@ namespace PSFilterLoad.PSApi
         private int size;
         private object value;
 
-        public uint Type
-        {
-            get
-            {
-                return type;
-            }
-        }
+        public uint Type => type;
 
-        public int Flags
-        {
-            get
-            {
-                return flags;
-            }
-        }
+        public int Flags => flags;
 
-        public int Size
-        {
-            get
-            {
-                return size;
-            }
-        }
+        public int Size => size;
 
-        public object Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        public object Value => value;
 
         public AETEValue(uint type, int flags, int size, object value)
         {
@@ -69,21 +45,9 @@ namespace PSFilterLoad.PSApi
         private uint unit;
         private double value;
 
-        public uint Unit
-        {
-            get
-            {
-                return unit;
-            }
-        }
+        public uint Unit => unit;
 
-        public double Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        public double Value => value;
 
         public UnitFloat(uint unit, double value)
         {
@@ -98,21 +62,9 @@ namespace PSFilterLoad.PSApi
         private readonly uint type;
         private readonly uint value;
 
-        public uint Type
-        {
-            get
-            {
-                return type;
-            }
-        }
+        public uint Type => type;
 
-        public uint Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        public uint Value => value;
 
         public EnumeratedValue(uint type, uint value)
         {
@@ -126,13 +78,7 @@ namespace PSFilterLoad.PSApi
     {
         private string value;
 
-        public string Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        public string Value => value;
 
         public ActionDescriptorZString(string value)
         {

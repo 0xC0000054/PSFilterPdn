@@ -108,10 +108,7 @@ namespace PSFilterLoad.PSApi
 
         public AETEData Aete
         {
-            set
-            {
-                aete = value;
-            }
+            set => aete = value;
         }
 
         public DescriptorSuite()

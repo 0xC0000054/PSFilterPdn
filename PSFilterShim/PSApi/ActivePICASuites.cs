@@ -49,13 +49,7 @@ namespace PSFilterLoad.PSApi
             /// <value>
             /// The suite name.
             /// </value>
-            public string Name
-            {
-                get
-                {
-                    return name;
-                }
-            }
+            public string Name => name;
 
             /// <summary>
             /// Gets the suite version.
@@ -63,21 +57,9 @@ namespace PSFilterLoad.PSApi
             /// <value>
             /// The suite version.
             /// </value>
-            public int Version
-            {
-                get
-                {
-                    return version;
-                }
-            }
+            public int Version => version;
 
-            private string DebuggerDisplay
-            {
-                get
-                {
-                    return string.Format(CultureInfo.CurrentCulture, "{0}, version {1}", name, version);
-                }
-            }
+            private string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "{0}, version {1}", name, version);
 
             public override bool Equals(object obj)
             {
@@ -150,24 +132,12 @@ namespace PSFilterLoad.PSApi
             private int refCount;
             private bool disposed;
 
-            public IntPtr SuitePointer
-            {
-                get
-                {
-                    return suitePointer;
-                }
-            }
+            public IntPtr SuitePointer => suitePointer;
 
             public int RefCount
             {
-                get
-                {
-                    return refCount;
-                }
-                set
-                {
-                    refCount = value;
-                }
+                get => refCount;
+                set => refCount = value;
             }
 
             public PICASuite(IntPtr suite)

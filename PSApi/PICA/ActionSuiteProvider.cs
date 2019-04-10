@@ -43,13 +43,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <value>
         ///   <c>true</c> if the descriptor suite has been created; otherwise, <c>false</c>.
         /// </value>
-        public bool DescriptorSuiteCreated
-        {
-            get
-            {
-                return actionDescriptorSuite != null;
-            }
-        }
+        public bool DescriptorSuiteCreated => actionDescriptorSuite != null;
 
         /// <summary>
         /// Gets a value indicating whether the list suite has been created.
@@ -57,13 +51,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <value>
         ///   <c>true</c> if the list suite has been created; otherwise, <c>false</c>.
         /// </value>
-        public bool ListSuiteCreated
-        {
-            get
-            {
-                return actionListSuite != null;
-            }
-        }
+        public bool ListSuiteCreated => actionListSuite != null;
 
         /// <summary>
         /// Gets a value indicating whether the reference suite has been created.
@@ -71,13 +59,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <value>
         ///   <c>true</c> if the reference suite has been created; otherwise, <c>false</c>.
         /// </value>
-        public bool ReferenceSuiteCreated
-        {
-            get
-            {
-                return actionReferenceSuite != null;
-            }
-        }
+        public bool ReferenceSuiteCreated => actionReferenceSuite != null;
 
         /// <summary>
         /// Gets the action descriptor suite.

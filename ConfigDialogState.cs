@@ -44,13 +44,7 @@ namespace PSFilterPdn
         /// <value>
         /// The expanded nodes.
         /// </value>
-        public ReadOnlyCollection<string> ExpandedNodes
-        {
-            get
-            {
-                return expandedNodes;
-            }
-        }
+        public ReadOnlyCollection<string> ExpandedNodes => expandedNodes;
 
         /// <summary>
         /// Gets the filter tree nodes.
@@ -58,13 +52,7 @@ namespace PSFilterPdn
         /// <value>
         /// The filter tree nodes.
         /// </value>
-        public FilterTreeNodeCollection FilterTreeNodes
-        {
-            get
-            {
-                return filterTreeNodes;
-            }
-        }
+        public FilterTreeNodeCollection FilterTreeNodes => filterTreeNodes;
 
         /// <summary>
         /// Gets the search directories.
@@ -72,12 +60,6 @@ namespace PSFilterPdn
         /// <value>
         /// The search directories.
         /// </value>
-        public ReadOnlyCollection<string> SearchDirectories
-        {
-            get
-            {
-                return searchDirectories;
-            }
-        }
+        public ReadOnlyCollection<string> SearchDirectories => searchDirectories;
     }
 }

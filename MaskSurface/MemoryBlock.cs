@@ -28,13 +28,7 @@ namespace PSFilterLoad.PSApi
 
         private bool disposed = false;
 
-        public MemoryBlock Parent
-        {
-            get
-            {
-                return this.parentBlock;
-            }
-        }
+        public MemoryBlock Parent => this.parentBlock;
 
         public long Length
         {

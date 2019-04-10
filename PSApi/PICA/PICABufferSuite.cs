@@ -31,13 +31,7 @@ namespace PSFilterLoad.PSApi.PICA
                 disposed = false;
             }
 
-            public uint Size
-            {
-                get
-                {
-                    return size;
-                }
-            }
+            public uint Size => size;
 
             public void Dispose()
             {

@@ -78,14 +78,8 @@ namespace PSFilterPdn
         [Localizable(true)]
         public string ClassicFolderBrowserDescription
         {
-            get
-            {
-                return classicFolderBrowserDescription ?? string.Empty;
-            }
-            set
-            {
-                classicFolderBrowserDescription = value;
-            }
+            get => classicFolderBrowserDescription ?? string.Empty;
+            set => classicFolderBrowserDescription = value;
         }
 
         /// <summary>
@@ -104,14 +98,8 @@ namespace PSFilterPdn
         [Localizable(true)]
         public string VistaFolderBrowserTitle
         {
-            get
-            {
-                return vistaFolderBrowserTitle ?? string.Empty;
-            }
-            set
-            {
-                vistaFolderBrowserTitle = value;
-            }
+            get => vistaFolderBrowserTitle ?? string.Empty;
+            set => vistaFolderBrowserTitle = value;
         }
 
         /// <summary>
@@ -130,10 +118,7 @@ namespace PSFilterPdn
         [Localizable(false)]
         public Environment.SpecialFolder RootFolder
         {
-            get
-            {
-                return rootFolder;
-            }
+            get => rootFolder;
             set
             {
                 if (!Enum.IsDefined(typeof(Environment.SpecialFolder), value))
@@ -161,14 +146,8 @@ namespace PSFilterPdn
         [Localizable(false)]
         public string SelectedPath
         {
-            get
-            {
-                return selectedPath ?? string.Empty;
-            }
-            set
-            {
-                selectedPath = value;
-            }
+            get => selectedPath ?? string.Empty;
+            set => selectedPath = value;
         }
 
         /// <summary>

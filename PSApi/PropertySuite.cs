@@ -57,13 +57,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The get property callback pointer.
         /// </value>
-        public IntPtr GetPropertyCallback
-        {
-            get
-            {
-                return Marshal.GetFunctionPointerForDelegate(getPropertyProc);
-            }
-        }
+        public IntPtr GetPropertyCallback => Marshal.GetFunctionPointerForDelegate(getPropertyProc);
 
         /// <summary>
         /// Sets the number of channels.

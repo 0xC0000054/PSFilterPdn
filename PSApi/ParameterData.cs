@@ -24,21 +24,9 @@ namespace PSFilterLoad.PSApi
         private GlobalParameters globalParameters;
         private Dictionary<uint, AETEValue> aeteDictonary;
 
-        public GlobalParameters GlobalParameters
-        {
-            get
-            {
-                return globalParameters;
-            }
-        }
+        public GlobalParameters GlobalParameters => globalParameters;
 
-        public Dictionary<uint, AETEValue> AETEDictionary
-        {
-            get
-            {
-                return aeteDictonary;
-            }
-        }
+        public Dictionary<uint, AETEValue> AETEDictionary => aeteDictonary;
 
         public ParameterData(GlobalParameters globals, Dictionary<uint, AETEValue> aete)
         {

@@ -87,14 +87,8 @@ namespace PSFilterLoad.PSApi
         private byte InputHandlingValue
 #pragma warning restore RCS1213 // Remove unused member declaration.
         {
-            get
-            {
-                return (byte)InputHandling;
-            }
-            set
-            {
-                InputHandling = (FilterDataHandling)value;
-            }
+            get => (byte)InputHandling;
+            set => InputHandling = (FilterDataHandling)value;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -106,14 +100,8 @@ namespace PSFilterLoad.PSApi
         private byte OutputHandlingValue
 #pragma warning restore RCS1213 // Remove unused member declaration.
         {
-            get
-            {
-                return (byte)OutputHandling;
-            }
-            set
-            {
-                OutputHandling = (FilterDataHandling)value;
-            }
+            get => (byte)OutputHandling;
+            set => OutputHandling = (FilterDataHandling)value;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -125,14 +113,8 @@ namespace PSFilterLoad.PSApi
         private byte Flags1Value
 #pragma warning restore RCS1213 // Remove unused member declaration.
         {
-            get
-            {
-                return (byte)Flags1;
-            }
-            set
-            {
-                Flags1 = (FilterCaseInfoFlags)value;
-            }
+            get => (byte)Flags1;
+            set => Flags1 = (FilterCaseInfoFlags)value;
         }
 
         internal const int SizeOf = 4;

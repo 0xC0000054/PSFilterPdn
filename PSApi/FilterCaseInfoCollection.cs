@@ -23,12 +23,6 @@ namespace PSFilterLoad.PSApi
         {
         }
 
-        public FilterCaseInfo this[FilterCase filterCase]
-        {
-            get
-            {
-                return this[(int)filterCase - 1];
-            }
-        }
+        public FilterCaseInfo this[FilterCase filterCase] => this[(int)filterCase - 1];
     }
 }

@@ -92,13 +92,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The error suite message.
         /// </value>
-        public string ErrorSuiteMessage
-        {
-            get
-            {
-                return errorSuite?.ErrorMessage;
-            }
-        }
+        public string ErrorSuiteMessage => errorSuite?.ErrorMessage;
 
         /// <summary>
         /// Sets the scripting information used by the plug-in.
@@ -108,10 +102,7 @@ namespace PSFilterLoad.PSApi
         /// </value>
         public AETEData Aete
         {
-            set
-            {
-                aete = value;
-            }
+            set => aete = value;
         }
 
         private ASZStringSuite ASZStringSuite

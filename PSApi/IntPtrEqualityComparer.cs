@@ -31,13 +31,7 @@ namespace PSFilterLoad.PSApi
         {
         }
 
-        public static IntPtrEqualityComparer Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
+        public static IntPtrEqualityComparer Instance => instance;
 
         public bool Equals(IntPtr x, IntPtr y)
         {

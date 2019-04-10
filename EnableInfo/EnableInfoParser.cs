@@ -40,13 +40,7 @@ namespace PSFilterPdn.EnableInfo
             index = 0;
         }
 
-        private bool IsAtEnd
-        {
-            get
-            {
-                return index == tokens.Count;
-            }
-        }
+        private bool IsAtEnd => index == tokens.Count;
 
         /// <summary>
         /// Parses the specified enable information string.

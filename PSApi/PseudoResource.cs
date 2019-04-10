@@ -24,27 +24,15 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Gets the resource key.
         /// </summary>
-        public uint Key
-        {
-            get
-            {
-                return key;
-            }
-        }
+        public uint Key => key;
 
         /// <summary>
         /// Gets the resource index.
         /// </summary>
         public int Index
         {
-            get
-            {
-                return index;
-            }
-            set
-            {
-                index = value;
-            }
+            get => index;
+            set => index = value;
         }
 
         /// <summary>

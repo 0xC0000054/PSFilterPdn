@@ -20,21 +20,9 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly uint type;
         private readonly ReadOnlyDictionary<uint, AETEValue> descriptorValues;
 
-        public uint Type
-        {
-            get
-            {
-                return type;
-            }
-        }
+        public uint Type => type;
 
-        public ReadOnlyDictionary<uint, AETEValue> DescriptorValues
-        {
-            get
-            {
-                return descriptorValues;
-            }
-        }
+        public ReadOnlyDictionary<uint, AETEValue> DescriptorValues => descriptorValues;
 
         public ActionListDescriptor(uint type, ReadOnlyDictionary<uint, AETEValue> descriptorValues)
         {

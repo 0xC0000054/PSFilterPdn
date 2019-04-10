@@ -159,10 +159,7 @@ namespace PSFilterPdn.Controls
         [Description("The border color of the tabs.")]
         public Color BorderColor
         {
-            get
-            {
-                return borderColor;
-            }
+            get => borderColor;
             set
             {
                 if (borderColor != value)
@@ -189,10 +186,7 @@ namespace PSFilterPdn.Controls
         [Description("The color displayed when the mouse is over an inactive tab.")]
         public Color HotTrackColor
         {
-            get
-            {
-                return hotTrackColor;
-            }
+            get => hotTrackColor;
             set
             {
                 if (hotTrackColor != value)

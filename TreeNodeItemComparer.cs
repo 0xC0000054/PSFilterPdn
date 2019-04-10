@@ -23,13 +23,7 @@ namespace PSFilterPdn
         {
         }
 
-        public static TreeNodeItemComparer Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
+        public static TreeNodeItemComparer Instance => instance;
 
         public int Compare(object x, object y)
         {

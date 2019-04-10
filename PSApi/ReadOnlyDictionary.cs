@@ -53,13 +53,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Gets the number of elements contained in the <see cref="ReadOnlyDictionary{TKey, TValue}"/>.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return dictionary.Count;
-            }
-        }
+        public int Count => dictionary.Count;
 
         /// <summary>
         /// Gets a collection containing the keys in the dictionary.
@@ -101,13 +95,7 @@ namespace PSFilterLoad.PSApi
         /// </value>
         /// <param name="key">The key.</param>
         /// <returns></returns>
-        public TValue this[TKey key]
-        {
-            get
-            {
-                return dictionary[key];
-            }
-        }
+        public TValue this[TKey key] => dictionary[key];
 
         /// <summary>
         /// Determines whether the <see cref="ReadOnlyDictionary{TKey, TValue}"/> contains an element with the specified key.
@@ -155,13 +143,7 @@ namespace PSFilterLoad.PSApi
         }
 
         #region ICollection<KeyValuePair<TKey, TValue>> Methods
-        bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
-        {
-            get
-            {
-                return true;
-            }
-        }
+        bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly => true;
 
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item)
         {
@@ -191,40 +173,16 @@ namespace PSFilterLoad.PSApi
         #endregion
 
         #region IDictionary<TKey, TValue> Methods
-        ICollection<TKey> IDictionary<TKey, TValue>.Keys
-        {
-            get
-            {
-                return new KeyCollection(dictionary.Keys);
-            }
-        }
+        ICollection<TKey> IDictionary<TKey, TValue>.Keys => new KeyCollection(dictionary.Keys);
 
-        ICollection<TValue> IDictionary<TKey, TValue>.Values
-        {
-            get
-            {
-                return new ValueCollection(dictionary.Values);
-            }
-        }
+        ICollection<TValue> IDictionary<TKey, TValue>.Values => new ValueCollection(dictionary.Values);
 
-        int ICollection<KeyValuePair<TKey, TValue>>.Count
-        {
-            get
-            {
-                return dictionary.Count;
-            }
-        }
+        int ICollection<KeyValuePair<TKey, TValue>>.Count => dictionary.Count;
 
         TValue IDictionary<TKey, TValue>.this[TKey key]
         {
-            get
-            {
-                return dictionary[key];
-            }
-            set
-            {
-                ThrowNotSupportedException();
-            }
+            get => dictionary[key];
+            set => ThrowNotSupportedException();
         }
 
         void IDictionary<TKey, TValue>.Add(TKey key, TValue value)
@@ -274,13 +232,7 @@ namespace PSFilterLoad.PSApi
             /// <summary>
             /// Gets the number of elements contained in the collection.
             /// </summary>
-            public int Count
-            {
-                get
-                {
-                    return items.Count;
-                }
-            }
+            public int Count => items.Count;
 
             /// <summary>
             /// Determines whether the collection contains a specific value.
@@ -318,13 +270,7 @@ namespace PSFilterLoad.PSApi
                 return items.GetEnumerator();
             }
 
-            bool ICollection<TKey>.IsReadOnly
-            {
-                get
-                {
-                    return true;
-                }
-            }
+            bool ICollection<TKey>.IsReadOnly => true;
 
             void ICollection<TKey>.Add(TKey item)
             {
@@ -366,13 +312,7 @@ namespace PSFilterLoad.PSApi
             /// <summary>
             /// Gets the number of elements contained in the collection.
             /// </summary>
-            public int Count
-            {
-                get
-                {
-                    return items.Count;
-                }
-            }
+            public int Count => items.Count;
 
             /// <summary>
             /// Determines whether the collection contains a specific value.
@@ -410,13 +350,7 @@ namespace PSFilterLoad.PSApi
                 return items.GetEnumerator();
             }
 
-            bool ICollection<TValue>.IsReadOnly
-            {
-                get
-                {
-                    return true;
-                }
-            }
+            bool ICollection<TValue>.IsReadOnly => true;
 
             void ICollection<TValue>.Add(TValue item)
             {

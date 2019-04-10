@@ -55,13 +55,7 @@ namespace PSFilterPdn.EnableInfo
             return readOnlyTokens;
         }
 
-        private bool IsAtEnd
-        {
-            get
-            {
-                return index == length;
-            }
-        }
+        private bool IsAtEnd => index == length;
 
         private char Advance()
         {

@@ -29,86 +29,44 @@ namespace PSFilterPdn
 
         public Surface Dest
         {
-            get
-            {
-                return dest;
-            }
-            internal set
-            {
-                dest = value;
-            }
+            get => dest;
+            internal set => dest = value;
         }
 
         public PluginData FilterData
         {
-            get
-            {
-                return filterData;
-            }
-            internal set
-            {
-                filterData = value;
-            }
+            get => filterData;
+            internal set => filterData = value;
         }
 
         public bool RunWith32BitShim
         {
-            get
-            {
-                return runWith32BitShim;
-            }
-            internal set
-            {
-                runWith32BitShim = value;
-            }
+            get => runWith32BitShim;
+            internal set => runWith32BitShim = value;
         }
 
         public Dictionary<PluginData, ParameterData> FilterParameters
         {
-            get
-            {
-                return filterParameters;
-            }
-            internal set
-            {
-                filterParameters = value;
-            }
+            get => filterParameters;
+            internal set => filterParameters = value;
         }
 
         public PseudoResourceCollection PseudoResources
         {
-            get
-            {
-                return pseudoResources;
-            }
-            internal set
-            {
-                pseudoResources = value;
-            }
+            get => pseudoResources;
+            internal set => pseudoResources = value;
         }
 
         public DescriptorRegistryValues DescriptorRegistry
         {
-            get
-            {
-                return descriptorRegistry;
-            }
-            internal set
-            {
-                descriptorRegistry = value;
-            }
+            get => descriptorRegistry;
+            internal set => descriptorRegistry = value;
         }
 
         public ConfigDialogState DialogState
         {
-            get
-            {
-                return dialogState;
-            }
-            internal set
-            {
-                dialogState = value;
-            }
+            get => dialogState;
+            internal set => dialogState = value;
         }
 
         public PSFilterPdnConfigToken(Surface dest, PluginData filterData, bool useShim, Dictionary<PluginData, ParameterData> paramData,

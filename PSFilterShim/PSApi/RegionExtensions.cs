@@ -141,13 +141,7 @@ namespace PSFilterLoad.PSApi
             private Graphics graphics = null;
             private bool disposed = false;
 
-            internal Graphics Graphics
-            {
-                get
-                {
-                    return graphics;
-                }
-            }
+            internal Graphics Graphics => graphics;
 
             internal NullGraphics()
             {

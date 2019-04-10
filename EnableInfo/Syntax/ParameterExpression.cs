@@ -28,13 +28,7 @@ namespace PSFilterPdn.EnableInfo
 
         public string Name { get; }
 
-        public override ExpressionType NodeType
-        {
-            get
-            {
-                return ExpressionType.Parameter;
-            }
-        }
+        public override ExpressionType NodeType => ExpressionType.Parameter;
 
         public override Expression Accept(IExpressionVisitor visitor)
         {

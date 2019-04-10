@@ -25,13 +25,7 @@ namespace PSFilterLoad.PSApi
             this.handle = handle;
         }
 
-        public IntPtr Handle
-        {
-            get
-            {
-                return handle;
-            }
-        }
+        public IntPtr Handle => handle;
     }
 
     // This class is a singleton because plug-ins can use it to allocate memory for pointers embedded
@@ -52,21 +46,9 @@ namespace PSFilterLoad.PSApi
             private readonly int size;
             private bool disposed;
 
-            public IntPtr Pointer
-            {
-                get
-                {
-                    return pointer;
-                }
-            }
+            public IntPtr Pointer => pointer;
 
-            public int Size
-            {
-                get
-                {
-                    return size;
-                }
-            }
+            public int Size => size;
 
             public HandleEntry(IntPtr handle, IntPtr pointer, int size)
             {
@@ -125,13 +107,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public event EventHandler<HandleDisposedEventArgs> SuiteHandleDisposed;
 
-        public static HandleSuite Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
+        public static HandleSuite Instance => instance;
 
         public HandleProcs CreateHandleProcs()
         {

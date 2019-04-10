@@ -70,13 +70,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The values that are persisted between host sessions.
         /// </value>
-        public ReadOnlyDictionary<string, DescriptorRegistryItem> PersistedValues
-        {
-            get
-            {
-                return persistedValues;
-            }
-        }
+        public ReadOnlyDictionary<string, DescriptorRegistryItem> PersistedValues => persistedValues;
 
         /// <summary>
         /// Gets the values that are stored for the current session.
@@ -84,13 +78,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The values that are stored for the current session.
         /// </value>
-        public ReadOnlyDictionary<string, DescriptorRegistryItem> SessionValues
-        {
-            get
-            {
-                return sessionValues;
-            }
-        }
+        public ReadOnlyDictionary<string, DescriptorRegistryItem> SessionValues => sessionValues;
 
         /// <summary>
         /// Gets or sets a value indicating whether the persisted settings have been marked as changed.
@@ -100,14 +88,8 @@ namespace PSFilterLoad.PSApi
         /// </value>
         public bool Dirty
         {
-            get
-            {
-                return dirty;
-            }
-            set
-            {
-                dirty = value;
-            }
+            get => dirty;
+            set => dirty = value;
         }
     }
 }

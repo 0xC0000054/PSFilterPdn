@@ -57,10 +57,7 @@ namespace PSFilterPdn
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null</exception>
         public HashSet<string> SearchDirectories
         {
-            get
-            {
-                return searchDirectories;
-            }
+            get => searchDirectories;
             set
             {
                 if (value == null)
@@ -81,10 +78,7 @@ namespace PSFilterPdn
         /// </value>
         public bool SearchSubdirectories
         {
-            get
-            {
-                return searchSubdirectories;
-            }
+            get => searchSubdirectories;
             set
             {
                 if (searchSubdirectories != value)

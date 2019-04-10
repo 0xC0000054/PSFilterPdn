@@ -42,21 +42,9 @@ namespace PSFilterPdn
             }
         }
 
-        public int Count
-        {
-            get
-            {
-                return nodes.Count;
-            }
-        }
+        public int Count => nodes.Count;
 
-        public ReadOnlyCollection<TreeNodeEx> this[string key]
-        {
-            get
-            {
-                return nodes[key];
-            }
-        }
+        public ReadOnlyCollection<TreeNodeEx> this[string key] => nodes[key];
 
         public IEnumerator<KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>>> GetEnumerator()
         {

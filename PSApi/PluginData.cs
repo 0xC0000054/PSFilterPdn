@@ -51,13 +51,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The file path of the filter.
         /// </value>
-        public string FileName
-        {
-            get
-            {
-                return fileName;
-            }
-        }
+        public string FileName => fileName;
 
         /// <summary>
         /// Gets the filter entry point.
@@ -65,13 +59,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The entry point.
         /// </value>
-        public string EntryPoint
-        {
-            get
-            {
-                return entryPoint;
-            }
-        }
+        public string EntryPoint => entryPoint;
 
         /// <summary>
         /// Gets the filter category.
@@ -79,13 +67,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The filter category.
         /// </value>
-        public string Category
-        {
-            get
-            {
-                return category;
-            }
-        }
+        public string Category => category;
 
         /// <summary>
         /// Gets the filter title.
@@ -93,13 +75,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The filter title.
         /// </value>
-        public string Title
-        {
-            get
-            {
-                return title;
-            }
-        }
+        public string Title => title;
 
         /// <summary>
         /// Gets the filter information used to determine how transparency is processed.
@@ -107,13 +83,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The filter information used to determine how transparency is processed.
         /// </value>
-        public FilterCaseInfoCollection FilterInfo
-        {
-            get
-            {
-                return filterInfo;
-            }
-        }
+        public FilterCaseInfoCollection FilterInfo => filterInfo;
 
         /// <summary>
         /// Gets a value indicating whether the filter should be run with the 32-bit surrogate process.
@@ -121,13 +91,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         ///   <c>true</c> if the filter should be run with the 32-bit surrogate process; otherwise, <c>false</c>.
         /// </value>
-        internal bool RunWith32BitShim
-        {
-            get
-            {
-                return runWith32BitShim;
-            }
-        }
+        internal bool RunWith32BitShim => runWith32BitShim;
 
         /// <summary>
         /// Gets the AETE scripting information.
@@ -135,13 +99,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The AETE scripting information.
         /// </value>
-        public AETEData Aete
-        {
-            get
-            {
-                return aete;
-            }
-        }
+        public AETEData Aete => aete;
 
         /// <summary>
         /// Gets a collection containing all of the entry points in the filter module.
@@ -151,14 +109,8 @@ namespace PSFilterLoad.PSApi
         /// </value>
         public ReadOnlyCollection<string> ModuleEntryPoints
         {
-            get
-            {
-                return moduleEntryPoints;
-            }
-            internal set
-            {
-                moduleEntryPoints = value;
-            }
+            get => moduleEntryPoints;
+            internal set => moduleEntryPoints = value;
         }
 
         /// <summary>

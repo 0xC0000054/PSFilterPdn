@@ -19,14 +19,8 @@ namespace PSFilterLoad.PSApi
 
         internal static DebugFlags GlobalDebugFlags
         {
-            get
-            {
-                return debugFlags;
-            }
-            set
-            {
-                debugFlags = value;
-            }
+            get => debugFlags;
+            set => debugFlags = value;
         }
 
         internal static bool DebugFlagEnabled(DebugFlags flag)

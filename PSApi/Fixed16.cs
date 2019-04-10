@@ -54,22 +54,10 @@ namespace PSFilterLoad.PSApi
         /// Gets the 16.16 fixed point number.
         /// </summary>
         /// <returns>The 16.16 fixed point number.</returns>
-        public int Value
-        {
-            get
-            {
-                return fixedValue;
-            }
-        }
+        public int Value => fixedValue;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string DebuggerDisplay
-        {
-            get
-            {
-                return string.Format("Fixed = {0}", fixedValue);
-            }
-        }
+        private string DebuggerDisplay => string.Format("Fixed = {0}", fixedValue);
 
         /// <summary>
         /// Determines whether the specified <see cref="object"/>, is equal to this instance.
@@ -168,29 +156,11 @@ namespace PSFilterLoad.PSApi
                 this.fixed16 = fixed16;
             }
 
-            public int FixedValue
-            {
-                get
-                {
-                    return fixed16.fixedValue;
-                }
-            }
+            public int FixedValue => fixed16.fixedValue;
 
-            public int Int32Value
-            {
-                get
-                {
-                    return fixed16.ToInt32();
-                }
-            }
+            public int Int32Value => fixed16.ToInt32();
 
-            public double DoubleValue
-            {
-                get
-                {
-                    return fixed16.ToDouble();
-                }
-            }
+            public double DoubleValue => fixed16.ToDouble();
         }
     }
 }

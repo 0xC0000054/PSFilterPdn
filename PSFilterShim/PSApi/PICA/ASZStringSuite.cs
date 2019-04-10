@@ -34,26 +34,14 @@ namespace PSFilterLoad.PSApi.PICA
 
             public int RefCount
             {
-                get
-                {
-                    return refCount;
-                }
-                set
-                {
-                    refCount = value;
-                }
+                get => refCount;
+                set => refCount = value;
             }
 
             public string Data
             {
-                get
-                {
-                    return data ?? string.Empty;
-                }
-                set
-                {
-                    data = value;
-                }
+                get => data ?? string.Empty;
+                set => data = value;
             }
 
             private static unsafe string PtrToStringPascal(IntPtr ptr, int length)

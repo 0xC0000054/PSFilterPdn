@@ -39,51 +39,21 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Gets the width of the Surface.
         /// </summary>
-        public int Width
-        {
-            get
-            {
-                return width;
-            }
-        }
+        public int Width => width;
 
         /// <summary>
         /// Gets the height of the Surface.
         /// </summary>
-        public int Height
-        {
-            get
-            {
-                return height;
-            }
-        }
+        public int Height => height;
 
         /// <summary>
         /// Gets the stride of the Surface.
         /// </summary>
-        public long Stride
-        {
-            get
-            {
-                return stride;
-            }
-        }
+        public long Stride => stride;
 
-        public MemoryBlock Scan0
-        {
-            get
-            {
-                return scan0;
-            }
-        }
+        public MemoryBlock Scan0 => scan0;
 
-        public Rectangle Bounds
-        {
-            get
-            {
-                return new Rectangle(0, 0, width, height);
-            }
-        }
+        public Rectangle Bounds => new Rectangle(0, 0, width, height);
 
         public MaskSurface(int width, int height)
         {

@@ -133,13 +133,7 @@ namespace PSFilterLoad.PSApi
         /// </remarks>
         private const uint HostSignature = 0x4e44502e;
 
-        internal Surface Dest
-        {
-            get
-            {
-                return dest;
-            }
-        }
+        internal Surface Dest => dest;
 
         /// <summary>
         /// The filter progress callback.
@@ -185,20 +179,11 @@ namespace PSFilterLoad.PSApi
             basicSuiteProvider.SetRegistryValues(value);
         }
 
-        internal string ErrorMessage
-        {
-            get
-            {
-                return errorMessage;
-            }
-        }
+        internal string ErrorMessage => errorMessage;
 
         internal ParameterData FilterParameters
         {
-            get
-            {
-                return new ParameterData(globalParameters, scriptingData);
-            }
+            get => new ParameterData(globalParameters, scriptingData);
             set
             {
                 globalParameters = value.GlobalParameters;
@@ -211,22 +196,13 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         internal bool IsRepeatEffect
         {
-            set
-            {
-                isRepeatEffect = value;
-            }
+            set => isRepeatEffect = value;
         }
 
         internal PseudoResourceCollection PseudoResources
         {
-            get
-            {
-                return resourceSuite.PseudoResources;
-            }
-            set
-            {
-                resourceSuite.PseudoResources = value;
-            }
+            get => resourceSuite.PseudoResources;
+            set => resourceSuite.PseudoResources = value;
         }
 
         /// <summary>
@@ -356,69 +332,21 @@ namespace PSFilterLoad.PSApi
 #endif
         }
 
-        Surface IFilterImageProvider.Source
-        {
-            get
-            {
-                return source;
-            }
-        }
+        Surface IFilterImageProvider.Source => source;
 
-        Surface IFilterImageProvider.Destination
-        {
-            get
-            {
-                return dest;
-            }
-        }
+        Surface IFilterImageProvider.Destination => dest;
 
-        MaskSurface IFilterImageProvider.Mask
-        {
-            get
-            {
-                return mask;
-            }
-        }
+        MaskSurface IFilterImageProvider.Mask => mask;
 
-        IntPtr IPICASuiteDataProvider.ParentWindowHandle
-        {
-            get
-            {
-                return parentWindowHandle;
-            }
-        }
+        IntPtr IPICASuiteDataProvider.ParentWindowHandle => parentWindowHandle;
 
-        DisplayPixelsProc IPICASuiteDataProvider.DisplayPixels
-        {
-            get
-            {
-                return displayPixelsProc;
-            }
-        }
+        DisplayPixelsProc IPICASuiteDataProvider.DisplayPixels => displayPixelsProc;
 
-        ProcessEventProc IPICASuiteDataProvider.ProcessEvent
-        {
-            get
-            {
-                return processEventProc;
-            }
-        }
+        ProcessEventProc IPICASuiteDataProvider.ProcessEvent => processEventProc;
 
-        ProgressProc IPICASuiteDataProvider.Progress
-        {
-            get
-            {
-                return progressProc;
-            }
-        }
+        ProgressProc IPICASuiteDataProvider.Progress => progressProc;
 
-        TestAbortProc IPICASuiteDataProvider.TestAbort
-        {
-            get
-            {
-                return abortProc;
-            }
-        }
+        TestAbortProc IPICASuiteDataProvider.TestAbort => abortProc;
 
         /// <summary>
         /// Determines how images with transparent pixels are displayed to the filter.

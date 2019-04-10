@@ -26,13 +26,7 @@ namespace PSFilterPdn.EnableInfo
     {
         public abstract ConstantType ConstantType { get; }
 
-        public sealed override ExpressionType NodeType
-        {
-            get
-            {
-                return ExpressionType.Constant;
-            }
-        }
+        public sealed override ExpressionType NodeType => ExpressionType.Constant;
 
         public sealed override Expression Accept(IExpressionVisitor visitor)
         {
@@ -55,13 +49,7 @@ namespace PSFilterPdn.EnableInfo
             Value = value;
         }
 
-        public override ConstantType ConstantType
-        {
-            get
-            {
-                return ConstantType.Boolean;
-            }
-        }
+        public override ConstantType ConstantType => ConstantType.Boolean;
 
         public bool Value { get; }
 
@@ -83,13 +71,7 @@ namespace PSFilterPdn.EnableInfo
             Value = value;
         }
 
-        public override ConstantType ConstantType
-        {
-            get
-            {
-                return ConstantType.Integer;
-            }
-        }
+        public override ConstantType ConstantType => ConstantType.Integer;
 
         public int Value { get; }
 
@@ -111,13 +93,7 @@ namespace PSFilterPdn.EnableInfo
             Value = value ?? string.Empty;
         }
 
-        public override ConstantType ConstantType
-        {
-            get
-            {
-                return ConstantType.String;
-            }
-        }
+        public override ConstantType ConstantType => ConstantType.String;
 
         public string Value { get; }
 
@@ -139,13 +115,7 @@ namespace PSFilterPdn.EnableInfo
             Name = name ?? string.Empty;
         }
 
-        public override ConstantType ConstantType
-        {
-            get
-            {
-                return ConstantType.UndefinedVariable;
-            }
-        }
+        public override ConstantType ConstantType => ConstantType.UndefinedVariable;
 
         public string Name { get; }
 

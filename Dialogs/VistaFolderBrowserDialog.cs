@@ -83,14 +83,8 @@ namespace PSFilterPdn
         [Localizable(true)]
         public string Title
         {
-            get
-            {
-                return title ?? string.Empty;
-            }
-            set
-            {
-                title = value;
-            }
+            get => title ?? string.Empty;
+            set => title = value;
         }
 
         /// <summary>
@@ -105,14 +99,8 @@ namespace PSFilterPdn
         [Localizable(false)]
         public string DefaultFolder
         {
-            get
-            {
-                return defaultFolder ?? string.Empty;
-            }
-            set
-            {
-                defaultFolder = value;
-            }
+            get => defaultFolder ?? string.Empty;
+            set => defaultFolder = value;
         }
 
         /// <summary>
@@ -127,14 +115,8 @@ namespace PSFilterPdn
         [Localizable(false)]
         public string SelectedPath
         {
-            get
-            {
-                return selectedPath ?? string.Empty;
-            }
-            set
-            {
-                selectedPath = value;
-            }
+            get => selectedPath ?? string.Empty;
+            set => selectedPath = value;
         }
 
         /// <summary>
@@ -149,14 +131,8 @@ namespace PSFilterPdn
         [Localizable(false)]
         public bool AddToRecentDocuments
         {
-            get
-            {
-                return addToRecentDocuments;
-            }
-            set
-            {
-                addToRecentDocuments = value;
-            }
+            get => addToRecentDocuments;
+            set => addToRecentDocuments = value;
         }
 
         private static bool CreateShellItemFromPath(string path, out NativeInterfaces.IShellItem item)

@@ -43,13 +43,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The values.
         /// </value>
-        public ReadOnlyDictionary<uint, AETEValue> Values
-        {
-            get
-            {
-                return values;
-            }
-        }
+        public ReadOnlyDictionary<uint, AETEValue> Values => values;
 
         /// <summary>
         /// Gets a value indicating whether this <see cref="DescriptorRegistryItem"/> is persisted across host sessions.
@@ -57,12 +51,6 @@ namespace PSFilterLoad.PSApi
         /// <value>
         ///   <c>true</c> if this item is persisted across host sessions; otherwise, <c>false</c>.
         /// </value>
-        public bool IsPersistent
-        {
-            get
-            {
-                return isPersistent;
-            }
-        }
+        public bool IsPersistent => isPersistent;
     }
 }

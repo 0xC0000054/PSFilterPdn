@@ -33,29 +33,11 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly uint desiredClass;
         private readonly object value;
 
-        public ActionReferenceForm Form
-        {
-            get
-            {
-                return form;
-            }
-        }
+        public ActionReferenceForm Form => form;
 
-        public uint DesiredClass
-        {
-            get
-            {
-                return desiredClass;
-            }
-        }
+        public uint DesiredClass => desiredClass;
 
-        public object Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        public object Value => value;
 
         public ActionReferenceItem(ActionReferenceForm form, uint desiredClass, object value)
         {
