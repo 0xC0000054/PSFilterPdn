@@ -168,7 +168,7 @@ namespace PSFilterPdn
         /// <returns>One of the <see cref="DialogResult"/> values.</returns>
         public DialogResult ShowDialog(IWin32Window owner)
         {
-            DialogResult result = DialogResult.Cancel;
+            DialogResult result;
 
             if (VistaDialogSupported())
             {

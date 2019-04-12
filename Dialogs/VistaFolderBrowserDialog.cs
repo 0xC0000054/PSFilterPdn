@@ -252,7 +252,6 @@ namespace PSFilterPdn
                 if (dialog != null)
                 {
                     Marshal.ReleaseComObject(dialog);
-                    dialog = null;
                 }
             }
 
@@ -279,7 +278,6 @@ namespace PSFilterPdn
                 if (resultShellItem != null)
                 {
                     Marshal.ReleaseComObject(resultShellItem);
-                    resultShellItem = null;
                 }
             }
 

@@ -241,7 +241,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
 
             int error = PSError.kSPNoError;
-            byte c0 = 0;
+            byte c0;
             byte c1 = 0;
             byte c2 = 0;
             byte c3 = 0;
@@ -337,7 +337,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PickColor(ref IntPtr colorID, IntPtr promptZString)
         {
-            int error = PSError.kSPNoError;
+            int error;
 
             string prompt;
             if (zstringSuite.ConvertToString(promptZString, out prompt))

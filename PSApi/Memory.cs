@@ -228,7 +228,7 @@ namespace PSFilterLoad.PSApi
             {
                 InitializeHeap();
             }
-            IntPtr block = IntPtr.Zero;
+            IntPtr block;
 
             long oldSize = Size(pv);
 

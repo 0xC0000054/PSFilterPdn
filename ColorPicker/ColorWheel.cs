@@ -44,7 +44,6 @@ namespace PSFilterLoad.ColorPicker
             {
                 if (hsvColor != value)
                 {
-                    HsvColor oldColor = hsvColor;
                     hsvColor = value;
                     this.OnColorChanged();
                     Refresh();

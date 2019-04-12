@@ -379,8 +379,6 @@ namespace PaintDotNet
                 double srcColumn = (double)(dstX * (source.width - 1)) / (double)(width - 1);
                 double srcColumnFloor = Math.Floor(srcColumn);
                 double srcColumnFrac = srcColumn - srcColumnFloor;
-                int srcColumnInt = (int)srcColumn;
-
                 for (int m = -1; m <= 2; ++m)
                 {
                     int index = (m + 1) + ((dstX - roi.Left) * 4);
@@ -469,7 +467,6 @@ namespace PaintDotNet
                         gray = graySum / alphaSum;
 
                         // add 0.5 to ensure truncation to uint results in rounding
-                        alpha += 0.5;
                         gray += 0.5;
                     }
 
@@ -498,8 +495,6 @@ namespace PaintDotNet
                 double srcColumn = (double)(dstX * (source.width - 1)) / (double)(width - 1);
                 double srcColumnFloor = Math.Floor(srcColumn);
                 double srcColumnFrac = srcColumn - srcColumnFloor;
-                int srcColumnInt = (int)srcColumn;
-
                 for (int m = -1; m <= 2; ++m)
                 {
                     int index = (m + 1) + ((dstX - roi.Left) * 4);
@@ -573,7 +568,6 @@ namespace PaintDotNet
                     {
                         gray = graySum / alphaSum;
                         // add 0.5 to ensure truncation to uint results in rounding
-                        alpha += 0.5;
                         gray += 0.5;
                     }
 

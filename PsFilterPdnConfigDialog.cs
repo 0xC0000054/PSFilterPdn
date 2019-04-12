@@ -1318,7 +1318,7 @@ namespace PSFilterPdn
 
             if (width > 32000 || height > 32000)
             {
-                string message = string.Empty;
+                string message;
 
                 if (width > 32000 && height > 32000)
                 {

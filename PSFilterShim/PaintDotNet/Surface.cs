@@ -266,8 +266,6 @@ namespace PaintDotNet
                 double srcColumn = (double)(dstX * (source.width - 1)) / (double)(width - 1);
                 double srcColumnFloor = Math.Floor(srcColumn);
                 double srcColumnFrac = srcColumn - srcColumnFloor;
-                int srcColumnInt = (int)srcColumn;
-
                 for (int m = -1; m <= 2; ++m)
                 {
                     int index = (m + 1) + ((dstX - roi.Left) * 4);
@@ -397,8 +395,6 @@ namespace PaintDotNet
                 double srcColumn = (double)(dstX * (source.width - 1)) / (double)(width - 1);
                 double srcColumnFloor = Math.Floor(srcColumn);
                 double srcColumnFrac = srcColumn - srcColumnFloor;
-                int srcColumnInt = (int)srcColumn;
-
                 for (int m = -1; m <= 2; ++m)
                 {
                     int index = (m + 1) + ((dstX - roi.Left) * 4);

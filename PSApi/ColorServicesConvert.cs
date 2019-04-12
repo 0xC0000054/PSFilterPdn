@@ -226,7 +226,7 @@ namespace PSFilterLoad.PSApi
                     return PSError.kSPBadParameterError;
                 }
 
-                double component0 = 0;
+                double component0;
                 double component1 = 0;
                 double component2 = 0;
                 double component3 = 0;

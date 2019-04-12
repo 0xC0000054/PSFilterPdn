@@ -260,7 +260,7 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new ArgumentNullException(nameof(value));
             }
 
-            IntPtr newZString = IntPtr.Zero;
+            IntPtr newZString;
 
             if (value.Length == 0)
             {

@@ -147,7 +147,6 @@ namespace PSFilterLoad.PSApi
                 if (readDocumentPtr != IntPtr.Zero)
                 {
                     Memory.Free(readDocumentPtr);
-                    readDocumentPtr = IntPtr.Zero;
                 }
 
                 throw;
@@ -185,7 +184,6 @@ namespace PSFilterLoad.PSApi
                 if (namePtr != IntPtr.Zero)
                 {
                     Marshal.FreeHGlobal(namePtr);
-                    namePtr = IntPtr.Zero;
                 }
                 throw;
             }
