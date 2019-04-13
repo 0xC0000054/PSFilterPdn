@@ -54,7 +54,6 @@ namespace PSFilterPdn.Controls
             base.DrawMode = TreeViewDrawMode.OwnerDrawAll;
             backgroundBrush = new SolidBrush(BackColor);
             previousForeColor = ForeColor;
-            InitTreeNodeGlyphs();
         }
 
         [Browsable(false)]
@@ -258,6 +257,7 @@ namespace PSFilterPdn.Controls
                     (IntPtr)NativeConstants.TVS_EX_DOUBLEBUFFER,
                     (IntPtr)NativeConstants.TVS_EX_DOUBLEBUFFER);
             }
+            InitTreeNodeGlyphs();
         }
 
         protected override void OnPaint(PaintEventArgs e)
