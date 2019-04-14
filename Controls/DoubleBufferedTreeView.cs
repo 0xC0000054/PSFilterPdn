@@ -290,9 +290,7 @@ namespace PSFilterPdn.Controls
         {
             base.WndProc(ref m);
 
-            const int WM_THEMECHANGED = 0x031A;
-
-            if (m.Msg == WM_THEMECHANGED)
+            if (m.Msg == NativeConstants.WM_THEMECHANGED)
             {
                 InitTreeNodeGlyphs();
             }

@@ -41,6 +41,7 @@ namespace PSFilterPdn
         internal const int STGM_READ = 0;
 
         internal const int WM_PRINTCLIENT = 0x0318;
+        internal const int WM_THEMECHANGED = 0x031A;
 
         internal const int PRF_CLIENT = 0x00000004;
 
