@@ -358,16 +358,16 @@ namespace PSFilterPdn.Controls
         {
             int bestDpi = 0;
 
-            // The item height often includes two pixels of padding,
-            // e.g.the item height will be 22 when using a 20 pixel expand / collapse glyph.
-
-            int itemHeight = ItemHeight - 2;
+            int itemHeight = ItemHeight;
 
             foreach (KeyValuePair<int, int> iconSize in IconSizesToDpi)
             {
-                if (iconSize.Key >= itemHeight)
+                if (iconSize.Key <= itemHeight)
                 {
                     bestDpi = iconSize.Value;
+                }
+                else
+                {
                     break;
                 }
             }
