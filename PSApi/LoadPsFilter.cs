@@ -2895,13 +2895,17 @@ namespace PSFilterLoad.PSApi
             filterRecord->progressProc = Marshal.GetFunctionPointerForDelegate(progressProc);
             filterRecord->parameters = IntPtr.Zero;
 
-            filterRecord->background.red = (ushort)((backgroundColor[0] * 65535) / 255);
-            filterRecord->background.green = (ushort)((backgroundColor[1] * 65535) / 255);
-            filterRecord->background.blue = (ushort)((backgroundColor[2] * 65535) / 255);
+            // The RGBColor structure uses the range of [0, 65535] instead of [0, 255].
+            // Dividing 65535 by 255 produces a integer value of 257, floating point math is not required.
+            const int RGBColorMultiplier = 257;
 
-            filterRecord->foreground.red = (ushort)((foregroundColor[0] * 65535) / 255);
-            filterRecord->foreground.green = (ushort)((foregroundColor[1] * 65535) / 255);
-            filterRecord->foreground.blue = (ushort)((foregroundColor[2] * 65535) / 255);
+            filterRecord->background.red = (ushort)(backgroundColor[0] * RGBColorMultiplier);
+            filterRecord->background.green = (ushort)(backgroundColor[1] * RGBColorMultiplier);
+            filterRecord->background.blue = (ushort)(backgroundColor[2] * RGBColorMultiplier);
+
+            filterRecord->foreground.red = (ushort)(foregroundColor[0] * RGBColorMultiplier);
+            filterRecord->foreground.green = (ushort)(foregroundColor[1] * RGBColorMultiplier);
+            filterRecord->foreground.blue = (ushort)(foregroundColor[2] * RGBColorMultiplier);
 
             for (int i = 0; i < 4; i++)
             {
