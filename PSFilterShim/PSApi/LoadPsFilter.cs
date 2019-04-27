@@ -2909,8 +2909,7 @@ namespace PSFilterLoad.PSApi
             if (useChannelPorts)
             {
                 channelPortsPtr = channelPortsSuite.CreateChannelPortsPointer();
-                bool ignoreTransparency = filterCase != FilterCase.EditableTransparencyNoSelection && filterCase != FilterCase.EditableTransparencyWithSelection;
-                readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(ignoreTransparency, selectedRegion != null);
+                readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(filterCase, selectedRegion != null);
             }
             else
             {
