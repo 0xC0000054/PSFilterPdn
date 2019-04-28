@@ -31,6 +31,8 @@ namespace PSFilterPdn.Controls
         private SolidBrush backgroundBrush;
         private Color disabledGlyphBackColor;
         private Color previousForeColor;
+        private string disabledGlyphResourceName;
+        private string previousDisabledGlyphResourceName;
 
         private static readonly KeyValuePair<int, int>[] IconSizesToDpi = new KeyValuePair<int, int>[]
         {
@@ -333,18 +335,28 @@ namespace PSFilterPdn.Controls
 
             collapseGlyph = new Bitmap(typeof(PSFilterPdnEffect), collapseResourceName);
             expandGlyph = new Bitmap(typeof(PSFilterPdnEffect), expandResourceName);
+            disabledGlyphResourceName = expandResourceName;
+
+            if (disabledGlyph != null)
+            {
+                DrawDisbledGlyph();
+            }
         }
 
         private void DrawDisbledGlyph()
         {
             if (expandGlyph != null)
             {
-                if (disabledGlyph == null || disabledGlyph.Size != expandGlyph.Size || disabledGlyphBackColor != BackColor)
+                if (disabledGlyph == null ||
+                    disabledGlyph.Size != expandGlyph.Size ||
+                    disabledGlyphBackColor != BackColor ||
+                    !string.Equals(previousDisabledGlyphResourceName, disabledGlyphResourceName, StringComparison.Ordinal))
                 {
                     disabledGlyph?.Dispose();
 
                     disabledGlyph = new Bitmap(expandGlyph.Width, expandGlyph.Height, PixelFormat.Format32bppArgb);
                     disabledGlyphBackColor = BackColor;
+                    previousDisabledGlyphResourceName = disabledGlyphResourceName;
 
                     using (Graphics graphics = Graphics.FromImage(disabledGlyph))
                     {
