@@ -127,7 +127,7 @@ namespace PSFilterPdn.Controls
                 backgroundBrush.Dispose();
                 backgroundBrush = new SolidBrush(BackColor);
             }
-            if (disabledGlyph != null && disabledGlyphBackColor != BackColor)
+            if (disabledGlyph != null)
             {
                 DrawDisbledGlyph();
             }
