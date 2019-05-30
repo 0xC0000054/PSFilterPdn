@@ -33,7 +33,9 @@ namespace PSFilterLoad.PSApi
         private string title;
         [DataMember(Name = nameof(FilterInfo))]
         private FilterCaseInfoCollection filterInfo;
+#pragma warning disable IDE0032 // Use auto property
         private bool runWith32BitShim;
+#pragma warning restore IDE0032 // Use auto property
         [DataMember(Name = nameof(Aete))]
         private AETEData aete;
         [DataMember(Name = nameof(ModuleEntryPoints))]
