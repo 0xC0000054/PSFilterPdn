@@ -310,16 +310,8 @@ namespace PSFilterPdn.Controls
             {
                 if (OS.IsVistaOrLater)
                 {
-                    if (ForeColor == Color.White)
-                    {
-                        collapseResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedCollapseDark-{0}.png");
-                        expandResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedExpandDark-{0}.png");
-                    }
-                    else
-                    {
-                        collapseResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedCollapse-{0}.png");
-                        expandResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedExpand-{0}.png");
-                    }
+                    collapseResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedCollapse-{0}.png");
+                    expandResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedExpand-{0}.png");
                 }
                 else
                 {

@@ -11,10 +11,7 @@
    version="1.1"
    viewBox="0 0 16 16"
    sodipodi:docname="VistaThemedCollapse.svg"
-   inkscape:export-filename="C:\Dev_projects\PSFilterPdn\Resources\svg\VistaThemedCollapse.png"
-   inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96"
-   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)">
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -56,10 +53,12 @@
      d="M16 16H0V0h16v16z"
      class="icon-canvas-transparent" />
   <g
-     id="iconBg">
+     id="iconBg"
+     style="fill:#666666">
     <path
        id="path6"
        d="M5.068 5.044l-.897.898L7.765 9.54l3.865-3.598-.899-.898-2.966 2.699-2.697-2.699z"
-       class="icon-vs-bg" />
+       class="icon-vs-bg"
+       style="fill:#666666" />
   </g>
 </svg>

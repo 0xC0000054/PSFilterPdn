@@ -11,10 +11,7 @@
    version="1.1"
    id="svg9"
    sodipodi:docname="VistaThemedExpand.svg"
-   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
-   inkscape:export-filename="C:\Dev_projects\PSFilterPdn\Resources\svg\VistaThemedExpand.png"
-   inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96">
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
   <metadata
      id="metadata15">
     <rdf:RDF>
@@ -56,10 +53,12 @@
      d="M16 16H0V0h16v16z"
      id="canvas" />
   <g
-     id="iconBg">
+     id="iconBg"
+     style="fill:#666666">
     <path
        class="icon-vs-bg"
        d="M6.39 12.28l-1.06-1.06L8.549 8 5.33 4.78l1.06-1.06L10.67 8l-4.28 4.28z"
-       id="path6" />
+       id="path6"
+       style="fill:#666666" />
   </g>
 </svg>

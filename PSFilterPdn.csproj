@@ -360,9 +360,7 @@
     <EmbeddedResource Include="Resources\Icons\UnthemedCollapse-96.png" />
     <EmbeddedResource Include="Resources\Icons\UnthemedExpand-96.png" />
     <EmbeddedResource Include="Resources\Icons\VistaThemedCollapse-96.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapseDark-96.png" />
     <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-96.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedExpandDark-96.png" />
     <EmbeddedResource Include="Resources\Icons\UnthemedCollapse-120.png" />
     <EmbeddedResource Include="Resources\Icons\UnthemedCollapse-144.png" />
     <EmbeddedResource Include="Resources\Icons\UnthemedCollapse-192.png" />
@@ -375,18 +373,10 @@
     <EmbeddedResource Include="Resources\Icons\VistaThemedCollapse-144.png" />
     <EmbeddedResource Include="Resources\Icons\VistaThemedCollapse-192.png" />
     <EmbeddedResource Include="Resources\Icons\VistaThemedCollapse-384.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapseDark-120.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapseDark-144.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapseDark-192.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedCollapseDark-384.png" />
     <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-120.png" />
     <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-144.png" />
     <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-192.png" />
     <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-384.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedExpandDark-120.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedExpandDark-144.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedExpandDark-192.png" />
-    <EmbeddedResource Include="Resources\Icons\VistaThemedExpandDark-384.png" />
     <EmbeddedResource Include="Resources\Icons\XPThemedCollapse.png" />
     <EmbeddedResource Include="Resources\Icons\XPThemedExpand.png" />
   </ItemGroup>
