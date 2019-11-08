@@ -2508,9 +2508,11 @@ namespace PSFilterLoad.PSApi
 
                 try
                 {
-                    if (checkerBoardBitmap == null)
+                    if (checkerBoardBitmap == null ||
+                        checkerBoardBitmap.Width != width ||
+                        checkerBoardBitmap.Height != height)
                     {
-                        DrawCheckerBoardBitmap();
+                        DrawCheckerBoardBitmap(width, height);
                     }
 
                     // Use a temporary bitmap to prevent flickering when the image is rendered over the checker board.
@@ -2520,7 +2522,7 @@ namespace PSFilterLoad.PSApi
 
                         using (Graphics tempGr = Graphics.FromImage(temp))
                         {
-                            tempGr.DrawImageUnscaledAndClipped(checkerBoardBitmap, rect);
+                            tempGr.DrawImageUnscaled(checkerBoardBitmap, rect);
                             using (Bitmap bmp = displaySurface.CreateAliasedBitmap())
                             {
                                 tempGr.DrawImageUnscaled(bmp, rect);
@@ -2665,9 +2667,10 @@ namespace PSFilterLoad.PSApi
             return err;
         }
 
-        private unsafe void DrawCheckerBoardBitmap()
+        private unsafe void DrawCheckerBoardBitmap(int width, int height)
         {
-            checkerBoardBitmap = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
+            checkerBoardBitmap?.Dispose();
+            checkerBoardBitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
 
             BitmapData bd = checkerBoardBitmap.LockBits(new Rectangle(0, 0, checkerBoardBitmap.Width, checkerBoardBitmap.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
             try
