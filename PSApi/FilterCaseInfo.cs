@@ -84,7 +84,9 @@ namespace PSFilterLoad.PSApi
             Justification = "Required to allow WCF to serialize unknown enum values.")]
         [DataMember(Name = "InputHandling")]
 #pragma warning disable RCS1213 // Remove unused member declaration.
+#pragma warning disable IDE0051 // Remove unused private members
         private byte InputHandlingValue
+#pragma warning restore IDE0051 // Remove unused private members
 #pragma warning restore RCS1213 // Remove unused member declaration.
         {
             get => (byte)InputHandling;
@@ -97,7 +99,9 @@ namespace PSFilterLoad.PSApi
                     Justification = "Required to allow WCF to serialize unknown enum values.")]
         [DataMember(Name = "OutputHandling")]
 #pragma warning disable RCS1213 // Remove unused member declaration.
+#pragma warning disable IDE0051 // Remove unused private members
         private byte OutputHandlingValue
+#pragma warning restore IDE0051 // Remove unused private members
 #pragma warning restore RCS1213 // Remove unused member declaration.
         {
             get => (byte)OutputHandling;
@@ -110,7 +114,9 @@ namespace PSFilterLoad.PSApi
                     Justification = "Required to allow WCF to serialize unknown enum values.")]
         [DataMember(Name = "Flags1")]
 #pragma warning disable RCS1213 // Remove unused member declaration.
+#pragma warning disable IDE0051 // Remove unused private members
         private byte Flags1Value
+#pragma warning restore IDE0051 // Remove unused private members
 #pragma warning restore RCS1213 // Remove unused member declaration.
         {
             get => (byte)Flags1;
