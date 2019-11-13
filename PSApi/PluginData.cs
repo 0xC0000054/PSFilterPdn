@@ -218,11 +218,11 @@ namespace PSFilterLoad.PSApi
 
                 int filterCaseIndex = (int)filterCase - 1;
 
-                if (!filterInfo[filterCaseIndex].IsSupported())
+                if (!filterInfo[filterCaseIndex].IsSupported)
                 {
                     if (hasTransparency())
                     {
-                        if (filterInfo[filterCaseIndex + 2].IsSupported())
+                        if (filterInfo[filterCaseIndex + 2].IsSupported)
                         {
                             switch (filterCase)
                             {
@@ -237,7 +237,7 @@ namespace PSFilterLoad.PSApi
                         else
                         {
                             // If the protected transparency modes are not supported use the next most appropriate mode.
-                            if (filterInfo[FilterCase.FloatingSelection].IsSupported())
+                            if (filterInfo[FilterCase.FloatingSelection].IsSupported)
                             {
                                 filterCase = FilterCase.FloatingSelection;
                             }
@@ -362,7 +362,7 @@ namespace PSFilterLoad.PSApi
 
             if (filterInfo != null)
             {
-                result &= filterInfo[filterCase].IsSupported();
+                result &= filterInfo[filterCase].IsSupported;
             }
 
             return result;
