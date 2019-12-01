@@ -76,7 +76,7 @@ namespace PSFilterLoad.PSApi.PICA
             bufferSuiteDispose = new PSBufferSuiteDispose(PSBufferDispose);
             bufferSuiteGetSize = new PSBufferSuiteGetSize(PSBufferGetSize);
             bufferSuiteGetSpace = new PSBufferSuiteGetSpace(PSBufferGetSpace);
-            buffers = new Dictionary<IntPtr, BufferEntry>();
+            buffers = new Dictionary<IntPtr, BufferEntry>(IntPtrEqualityComparer.Instance);
             disposed = false;
         }
 
