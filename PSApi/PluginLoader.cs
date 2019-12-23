@@ -438,6 +438,12 @@ namespace PSFilterLoad.PSApi
             for (int i = 0; i < count; i++)
             {
                 PIProperty* pipp = (PIProperty*)propPtr;
+
+                if (pipp->vendorID != PSConstants.kPhotoshopSignature)
+                {
+                    continue;
+                }
+
                 uint propKey = pipp->propertyKey;
                 int propertyLength = pipp->propertyLength;
 
