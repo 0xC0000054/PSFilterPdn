@@ -441,6 +441,8 @@ namespace PSFilterLoad.PSApi
 
                 if (pipp->vendorID != PSConstants.kPhotoshopSignature)
                 {
+                    // The property data is padded to a 4 byte boundary.
+                    propPtr += PIProperty.SizeOf + ((pipp->propertyLength + 3) & ~3);
                     continue;
                 }
 
