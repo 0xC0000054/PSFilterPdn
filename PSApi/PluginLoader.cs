@@ -20,18 +20,6 @@ namespace PSFilterLoad.PSApi
 {
     internal static class PluginLoader
     {
-        private sealed class QueryAETE
-        {
-            public readonly IntPtr resourceID;
-            public PluginAETE enumAETE;
-
-            public QueryAETE(int terminologyID)
-            {
-                resourceID = new IntPtr(terminologyID);
-                enumAETE = null;
-            }
-        }
-
         private sealed class QueryFilter
         {
             public readonly string fileName;
@@ -195,187 +183,183 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private static unsafe bool EnumAETE(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
+        private static unsafe PluginAETE ParseAETEResource(IntPtr hModule, short resourceID)
         {
-            GCHandle handle = GCHandle.FromIntPtr(lParam);
-            QueryAETE query = (QueryAETE)handle.Target;
-            if (lpszName == query.resourceID)
+            IntPtr hRes = IntPtr.Zero;
+
+            fixed (char* typePtr = "AETE")
             {
-                IntPtr hRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, lpszType);
-                if (hRes == IntPtr.Zero)
-                {
-                    return false;
-                }
-
-                IntPtr loadRes = UnsafeNativeMethods.LoadResource(hModule, hRes);
-                if (loadRes == IntPtr.Zero)
-                {
-                    return false;
-                }
-
-                IntPtr lockRes = UnsafeNativeMethods.LockResource(loadRes);
-                if (lockRes == IntPtr.Zero)
-                {
-                    return false;
-                }
-
-                byte* ptr = (byte*)lockRes.ToPointer() + 2;
-                short version = *(short*)ptr;
-                ptr += 2;
-
-                short major = (short)(version & 0xff);
-                short minor = (short)((version >> 8) & 0xff);
-
-                short lang = *(short*)ptr;
-                ptr += 2;
-                short script = *(short*)ptr;
-                ptr += 2;
-                short suiteCount = *(short*)ptr;
-                ptr += 2;
-                byte* propPtr = ptr;
-
-                int stringLength;
-
-                if (suiteCount == 1) // There should only be one vendor suite
-                {
-                    string suiteVendor = StringUtil.FromPascalString(propPtr, out stringLength);
-                    propPtr += stringLength;
-                    string suiteDescription = StringUtil.FromPascalString(propPtr, out stringLength);
-                    propPtr += stringLength;
-                    uint suiteID = *(uint*)propPtr;
-                    propPtr += 4;
-                    short suiteLevel = *(short*)propPtr;
-                    propPtr += 2;
-                    short suiteVersion = *(short*)propPtr;
-                    propPtr += 2;
-                    short eventCount = *(short*)propPtr;
-                    propPtr += 2;
-
-                    if (eventCount == 1) // There should only be one scripting event
-                    {
-                        string eventVendor = StringUtil.FromPascalString(propPtr, out stringLength);
-                        propPtr += stringLength;
-                        string eventDescription = StringUtil.FromPascalString(propPtr, out stringLength);
-                        propPtr += stringLength;
-                        int eventClass = *(int*)propPtr;
-                        propPtr += 4;
-                        int eventType = *(int*)propPtr;
-                        propPtr += 4;
-
-                        uint replyType = *(uint*)propPtr;
-                        propPtr += 7;
-                        byte[] bytes = new byte[4];
-
-                        int idx = 0;
-                        while (*propPtr != 0)
-                        {
-                            if (*propPtr != 0x27) // the ' char
-                            {
-                                bytes[idx] = *propPtr;
-                                idx++;
-                            }
-                            propPtr++;
-                        }
-                        propPtr++; // skip the second null byte
-
-                        uint paramType = BitConverter.ToUInt32(bytes, 0);
-
-                        short eventFlags = *(short*)propPtr;
-                        propPtr += 2;
-                        short paramCount = *(short*)propPtr;
-                        propPtr += 2;
-
-                        AETEEvent evnt = new AETEEvent()
-                        {
-                            vendor = eventVendor,
-                            desc = eventDescription,
-                            eventClass = eventClass,
-                            type = eventType,
-                            replyType = replyType,
-                            paramType = paramType,
-                            flags = eventFlags
-                        };
-
-                        if (paramCount > 0)
-                        {
-                            AETEParameter[] parameters = new AETEParameter[paramCount];
-                            for (int p = 0; p < paramCount; p++)
-                            {
-                                string name = StringUtil.FromPascalString(propPtr, out stringLength);
-                                propPtr += stringLength;
-
-                                uint key = *(uint*)propPtr;
-                                propPtr += 4;
-
-                                uint type = *(uint*)propPtr;
-                                propPtr += 4;
-
-                                string description = StringUtil.FromPascalString(propPtr, out stringLength);
-                                propPtr += stringLength;
-
-                                short parameterFlags = *(short*)propPtr;
-                                propPtr += 2;
-
-                                parameters[p] = new AETEParameter(name, key, type, description, parameterFlags);
-                            }
-                            evnt.parameters = parameters;
-                        }
-
-                        short classCount = *(short*)propPtr;
-                        propPtr += 2;
-                        if (classCount == 0)
-                        {
-                            short compOps = *(short*)propPtr;
-                            propPtr += 2;
-                            short enumCount = *(short*)propPtr;
-                            propPtr += 2;
-                            if (enumCount > 0)
-                            {
-                                AETEEnums[] enums = new AETEEnums[enumCount];
-                                for (int enc = 0; enc < enumCount; enc++)
-                                {
-                                    uint type = *(uint*)propPtr;
-                                    propPtr += 4;
-                                    short count = *(short*)propPtr;
-                                    propPtr += 2;
-                                    AETEEnum[] values = new AETEEnum[count];
-
-                                    for (int e = 0; e < count; e++)
-                                    {
-                                        string name = StringUtil.FromPascalString(propPtr, out stringLength);
-                                        propPtr += stringLength;
-
-                                        uint key = *(uint*)propPtr;
-                                        propPtr += 4;
-
-                                        string description = StringUtil.FromPascalString(propPtr, out stringLength);
-                                        propPtr += stringLength;
-
-                                        values[e] = new AETEEnum(name, key, description);
-                                    }
-                                    enums[enc] = new AETEEnums(type, count, values);
-                                }
-                                evnt.enums = enums;
-                            }
-                        }
-
-                        if (evnt.parameters != null &&
-                            major == PSConstants.AETEMajorVersion &&
-                            minor == PSConstants.AETEMinorVersion &&
-                            suiteLevel == PSConstants.AETESuiteLevel &&
-                            suiteVersion == PSConstants.AETESuiteVersion)
-                        {
-                            query.enumAETE = new PluginAETE(major, minor, suiteLevel, suiteVersion, evnt);
-                            handle.Target = query;
-                            lParam = GCHandle.ToIntPtr(handle);
-                        }
-                    }
-                }
-
-                return false;
+                hRes = UnsafeNativeMethods.FindResourceW(hModule, (IntPtr)resourceID, (IntPtr)typePtr);
             }
 
-            return true;
+            if (hRes == IntPtr.Zero)
+            {
+                return null;
+            }
+
+            IntPtr loadRes = UnsafeNativeMethods.LoadResource(hModule, hRes);
+            if (loadRes == IntPtr.Zero)
+            {
+                return null;
+            }
+
+            IntPtr lockRes = UnsafeNativeMethods.LockResource(loadRes);
+            if (lockRes == IntPtr.Zero)
+            {
+                return null;
+            }
+
+            byte* ptr = (byte*)lockRes.ToPointer() + 2;
+            short version = *(short*)ptr;
+            ptr += 2;
+
+            short major = (short)(version & 0xff);
+            short minor = (short)((version >> 8) & 0xff);
+
+            short lang = *(short*)ptr;
+            ptr += 2;
+            short script = *(short*)ptr;
+            ptr += 2;
+            short suiteCount = *(short*)ptr;
+            ptr += 2;
+            byte* propPtr = ptr;
+            if (suiteCount == 1) // There should only be one vendor suite
+            {
+                int stringLength;
+                string suiteVendor = StringUtil.FromPascalString(propPtr, out stringLength);
+                propPtr += stringLength;
+                string suiteDescription = StringUtil.FromPascalString(propPtr, out stringLength);
+                propPtr += stringLength;
+                uint suiteID = *(uint*)propPtr;
+                propPtr += 4;
+                short suiteLevel = *(short*)propPtr;
+                propPtr += 2;
+                short suiteVersion = *(short*)propPtr;
+                propPtr += 2;
+                short eventCount = *(short*)propPtr;
+                propPtr += 2;
+
+                if (eventCount == 1) // There should only be one scripting event
+                {
+                    string eventVendor = StringUtil.FromPascalString(propPtr, out stringLength);
+                    propPtr += stringLength;
+                    string eventDescription = StringUtil.FromPascalString(propPtr, out stringLength);
+                    propPtr += stringLength;
+                    int eventClass = *(int*)propPtr;
+                    propPtr += 4;
+                    int eventType = *(int*)propPtr;
+                    propPtr += 4;
+
+                    uint replyType = *(uint*)propPtr;
+                    propPtr += 7;
+                    byte[] bytes = new byte[4];
+
+                    int idx = 0;
+                    while (*propPtr != 0)
+                    {
+                        if (*propPtr != 0x27) // The ' char, some filters encode the #ImR parameter type as '#'ImR.
+                        {
+                            bytes[idx] = *propPtr;
+                            idx++;
+                        }
+                        propPtr++;
+                    }
+                    propPtr++; // skip the second null byte
+
+                    uint paramType = BitConverter.ToUInt32(bytes, 0);
+
+                    short eventFlags = *(short*)propPtr;
+                    propPtr += 2;
+                    short paramCount = *(short*)propPtr;
+                    propPtr += 2;
+
+                    AETEEvent evnt = new AETEEvent()
+                    {
+                        vendor = eventVendor,
+                        desc = eventDescription,
+                        eventClass = eventClass,
+                        type = eventType,
+                        replyType = replyType,
+                        paramType = paramType,
+                        flags = eventFlags
+                    };
+
+                    if (paramCount > 0)
+                    {
+                        AETEParameter[] parameters = new AETEParameter[paramCount];
+                        for (int p = 0; p < paramCount; p++)
+                        {
+                            string name = StringUtil.FromPascalString(propPtr, out stringLength);
+                            propPtr += stringLength;
+
+                            uint key = *(uint*)propPtr;
+                            propPtr += 4;
+
+                            uint type = *(uint*)propPtr;
+                            propPtr += 4;
+
+                            string description = StringUtil.FromPascalString(propPtr, out stringLength);
+                            propPtr += stringLength;
+
+                            short parameterFlags = *(short*)propPtr;
+                            propPtr += 2;
+
+                            parameters[p] = new AETEParameter(name, key, type, description, parameterFlags);
+                        }
+                        evnt.parameters = parameters;
+                    }
+
+                    short classCount = *(short*)propPtr;
+                    propPtr += 2;
+                    if (classCount == 0)
+                    {
+                        short compOps = *(short*)propPtr;
+                        propPtr += 2;
+                        short enumCount = *(short*)propPtr;
+                        propPtr += 2;
+                        if (enumCount > 0)
+                        {
+                            AETEEnums[] enums = new AETEEnums[enumCount];
+                            for (int enc = 0; enc < enumCount; enc++)
+                            {
+                                uint type = *(uint*)propPtr;
+                                propPtr += 4;
+                                short count = *(short*)propPtr;
+                                propPtr += 2;
+
+                                AETEEnum[] values = new AETEEnum[count];
+
+                                for (int e = 0; e < count; e++)
+                                {
+                                    string name = StringUtil.FromPascalString(propPtr, out stringLength);
+                                    propPtr += stringLength;
+
+                                    uint key = *(uint*)propPtr;
+                                    propPtr += 4;
+
+                                    string description = StringUtil.FromPascalString(propPtr, out stringLength);
+                                    propPtr += stringLength;
+
+                                    values[e] = new AETEEnum(name, key, description);
+                                }
+                                enums[enc] = new AETEEnums(type, count, values);
+                            }
+                            evnt.enums = enums;
+                        }
+                    }
+
+                    if (evnt.parameters != null &&
+                        major == PSConstants.AETEMajorVersion &&
+                        minor == PSConstants.AETEMinorVersion &&
+                        suiteLevel == PSConstants.AETESuiteLevel &&
+                        suiteVersion == PSConstants.AETESuiteVersion)
+                    {
+                        return new PluginAETE(major, minor, suiteLevel, suiteVersion, evnt);
+                    }
+                }
+            }
+
+            return null;
         }
 
         private static unsafe bool EnumPiPL(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
@@ -524,28 +508,11 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                         string aeteName = Marshal.PtrToStringAnsi(new IntPtr(dataPtr + PITerminology.SizeOf)).TrimEnd('\0');
 #endif
-                        QueryAETE queryAETE = new QueryAETE(term->terminologyID);
+                        PluginAETE pluginAETE = ParseAETEResource(hModule, term->terminologyID);
 
-                        GCHandle aeteHandle = GCHandle.Alloc(queryAETE, GCHandleType.Normal);
-                        try
+                        if (pluginAETE != null)
                         {
-                            IntPtr callback = GCHandle.ToIntPtr(aeteHandle);
-                            if (!UnsafeNativeMethods.EnumResourceNamesW(hModule, "AETE", new UnsafeNativeMethods.EnumResNameDelegate(EnumAETE), callback))
-                            {
-                                queryAETE = (QueryAETE)GCHandle.FromIntPtr(callback).Target;
-                            }
-                        }
-                        finally
-                        {
-                            if (aeteHandle.IsAllocated)
-                            {
-                                aeteHandle.Free();
-                            }
-                        }
-
-                        if (queryAETE.enumAETE != null)
-                        {
-                            aete = new AETEData(queryAETE.enumAETE);
+                            aete = new AETEData(pluginAETE);
                         }
                     }
                 }
