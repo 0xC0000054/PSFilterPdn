@@ -27,7 +27,7 @@ namespace PSFilterLoad.PSApi
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool EnumResourceNamesW(IntPtr hModule, string lpszType, EnumResNameDelegate lpEnumFunc, IntPtr lParam);
+        internal static extern bool EnumResourceNamesW(SafeLibraryHandle hModule, string lpszType, EnumResNameDelegate lpEnumFunc, IntPtr lParam);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
         internal static extern IntPtr FindResourceW(IntPtr hModule, IntPtr lpName, IntPtr lpType);
