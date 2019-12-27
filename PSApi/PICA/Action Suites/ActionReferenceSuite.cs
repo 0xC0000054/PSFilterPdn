@@ -91,7 +91,7 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly ActionReferenceGetProperty getProperty;
         private readonly ActionReferenceGetContainer getContainer;
 
-        private Dictionary<IntPtr, ActionReferenceContainer> actionReferences;
+        private Dictionary<PIActionReference, ActionReferenceContainer> actionReferences;
         private int actionReferencesIndex;
 
         /// <summary>
@@ -119,11 +119,11 @@ namespace PSFilterLoad.PSApi.PICA
             getProperty = new ActionReferenceGetProperty(GetProperty);
             getContainer = new ActionReferenceGetContainer(GetContainer);
 
-            actionReferences = new Dictionary<IntPtr, ActionReferenceContainer>(IntPtrEqualityComparer.Instance);
+            actionReferences = new Dictionary<PIActionReference, ActionReferenceContainer>();
             actionReferencesIndex = 0;
         }
 
-        bool IActionReferenceSuite.TryGetReferenceValues(IntPtr reference, out ReadOnlyCollection<ActionReferenceItem> values)
+        bool IActionReferenceSuite.TryGetReferenceValues(PIActionReference reference, out ReadOnlyCollection<ActionReferenceItem> values)
         {
             values = null;
 
@@ -138,14 +138,14 @@ namespace PSFilterLoad.PSApi.PICA
             return false;
         }
 
-        IntPtr IActionReferenceSuite.CreateReference(ReadOnlyCollection<ActionReferenceItem> values)
+        PIActionReference IActionReferenceSuite.CreateReference(ReadOnlyCollection<ActionReferenceItem> values)
         {
             if (values == null)
             {
                 throw new ArgumentNullException(nameof(values));
             }
 
-            IntPtr reference = GenerateDictionaryKey();
+            PIActionReference reference = GenerateDictionaryKey();
             actionReferences.Add(reference, new ActionReferenceContainer(values));
 
             return reference;
@@ -183,14 +183,14 @@ namespace PSFilterLoad.PSApi.PICA
             return suite;
         }
 
-        private IntPtr GenerateDictionaryKey()
+        private PIActionReference GenerateDictionaryKey()
         {
             actionReferencesIndex++;
 
-            return new IntPtr(actionReferencesIndex);
+            return new PIActionReference(actionReferencesIndex);
         }
 
-        private int Make(ref IntPtr reference)
+        private int Make(ref PIActionReference reference)
         {
             try
             {
@@ -205,10 +205,10 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int Free(IntPtr reference)
+        private int Free(PIActionReference reference)
         {
             actionReferences.Remove(reference);
-            if (actionReferencesIndex == reference.ToInt32())
+            if (actionReferencesIndex == reference.Index)
             {
                 actionReferencesIndex--;
             }
@@ -216,7 +216,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int GetForm(IntPtr reference, ref uint value)
+        private int GetForm(PIActionReference reference, ref uint value)
         {
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
@@ -233,7 +233,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetDesiredClass(IntPtr reference, ref uint value)
+        private int GetDesiredClass(PIActionReference reference, ref uint value)
         {
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
@@ -250,7 +250,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int PutName(IntPtr reference, uint desiredClass, IntPtr cstrValue)
+        private int PutName(PIActionReference reference, uint desiredClass, IntPtr cstrValue)
         {
             if (cstrValue != IntPtr.Zero)
             {
@@ -273,7 +273,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int PutIndex(IntPtr reference, uint desiredClass, uint value)
+        private int PutIndex(PIActionReference reference, uint desiredClass, uint value)
         {
             try
             {
@@ -287,7 +287,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutIdentifier(IntPtr reference, uint desiredClass, uint value)
+        private int PutIdentifier(PIActionReference reference, uint desiredClass, uint value)
         {
             try
             {
@@ -301,7 +301,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutOffset(IntPtr reference, uint desiredClass, int value)
+        private int PutOffset(PIActionReference reference, uint desiredClass, int value)
         {
             try
             {
@@ -315,7 +315,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutEnumerated(IntPtr reference, uint desiredClass, uint type, uint value)
+        private int PutEnumerated(PIActionReference reference, uint desiredClass, uint type, uint value)
         {
             try
             {
@@ -329,7 +329,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutProperty(IntPtr reference, uint desiredClass, uint value)
+        private int PutProperty(PIActionReference reference, uint desiredClass, uint value)
         {
             try
             {
@@ -343,7 +343,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutClass(IntPtr reference, uint desiredClass)
+        private int PutClass(PIActionReference reference, uint desiredClass)
         {
             try
             {
@@ -357,7 +357,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int GetNameLength(IntPtr reference, ref uint stringLength)
+        private int GetNameLength(PIActionReference reference, ref uint stringLength)
         {
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
@@ -375,7 +375,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetName(IntPtr reference, IntPtr cstrValue, uint maxLength)
+        private int GetName(PIActionReference reference, IntPtr cstrValue, uint maxLength)
         {
             if (cstrValue != IntPtr.Zero)
             {
@@ -404,7 +404,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetIndex(IntPtr reference, ref uint value)
+        private int GetIndex(PIActionReference reference, ref uint value)
         {
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
@@ -421,7 +421,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetIdentifier(IntPtr reference, ref uint value)
+        private int GetIdentifier(PIActionReference reference, ref uint value)
         {
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
@@ -438,7 +438,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetOffset(IntPtr reference, ref int value)
+        private int GetOffset(PIActionReference reference, ref int value)
         {
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
@@ -455,7 +455,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetEnumerated(IntPtr reference, ref uint type, ref uint enumValue)
+        private int GetEnumerated(PIActionReference reference, ref uint type, ref uint enumValue)
         {
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
@@ -474,7 +474,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetProperty(IntPtr reference, ref uint value)
+        private int GetProperty(PIActionReference reference, ref uint value)
         {
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
@@ -491,7 +491,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetContainer(IntPtr reference, ref IntPtr value)
+        private int GetContainer(PIActionReference reference, ref PIActionReference value)
         {
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
@@ -506,7 +506,7 @@ namespace PSFilterLoad.PSApi.PICA
                     }
                     else
                     {
-                        value = IntPtr.Zero;
+                        value = PIActionReference.Null;
                     }
                 }
                 catch (OutOfMemoryException)

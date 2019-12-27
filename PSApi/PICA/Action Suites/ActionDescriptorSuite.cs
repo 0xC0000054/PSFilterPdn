@@ -100,7 +100,7 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly IActionReferenceSuite actionReferenceSuite;
         private readonly IASZStringSuite zstringSuite;
 
-        private Dictionary<IntPtr, ScriptingParameters> actionDescriptors;
+        private Dictionary<PIActionDescriptor, ScriptingParameters> actionDescriptors;
         private Dictionary<IntPtr, ScriptingParameters> descriptorHandles;
         private int actionDescriptorsIndex;
         private bool disposed;
@@ -236,14 +236,14 @@ namespace PSFilterLoad.PSApi.PICA
             this.actionListSuite = actionListSuite;
             this.actionReferenceSuite = actionReferenceSuite;
             this.zstringSuite = zstringSuite;
-            actionDescriptors = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
+            actionDescriptors = new Dictionary<PIActionDescriptor, ScriptingParameters>();
             descriptorHandles = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
             actionDescriptorsIndex = 0;
             HandleSuite.Instance.SuiteHandleDisposed += SuiteHandleDisposed;
             disposed = false;
         }
 
-        bool IActionDescriptorSuite.TryGetDescriptorValues(IntPtr descriptor, out ReadOnlyDictionary<uint, AETEValue> values)
+        bool IActionDescriptorSuite.TryGetDescriptorValues(PIActionDescriptor descriptor, out ReadOnlyDictionary<uint, AETEValue> values)
         {
             values = null;
             ScriptingParameters scriptingData;
@@ -256,14 +256,14 @@ namespace PSFilterLoad.PSApi.PICA
             return false;
         }
 
-        IntPtr IActionDescriptorSuite.CreateDescriptor(ReadOnlyDictionary<uint, AETEValue> values)
+        PIActionDescriptor IActionDescriptorSuite.CreateDescriptor(ReadOnlyDictionary<uint, AETEValue> values)
         {
             if (values == null)
             {
                 throw new ArgumentNullException(nameof(values));
             }
 
-            IntPtr descriptor = GenerateDictionaryKey();
+            PIActionDescriptor descriptor = GenerateDictionaryKey();
             actionDescriptors.Add(descriptor, new ScriptingParameters(values));
 
             return descriptor;
@@ -363,17 +363,17 @@ namespace PSFilterLoad.PSApi.PICA
             descriptorHandles.Remove(e.Handle);
         }
 
-        private IntPtr GenerateDictionaryKey()
+        private PIActionDescriptor GenerateDictionaryKey()
         {
             actionDescriptorsIndex++;
 
-            return new IntPtr(actionDescriptorsIndex);
+            return new PIActionDescriptor(actionDescriptorsIndex);
         }
 
-        private int Make(ref IntPtr descriptor)
+        private int Make(ref PIActionDescriptor descriptor)
         {
 #if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: 0x{0}", descriptor.ToHexString()));
+            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             try
             {
@@ -388,13 +388,13 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int Free(IntPtr descriptor)
+        private int Free(PIActionDescriptor descriptor)
         {
 #if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: 0x{0}", descriptor.ToHexString()));
+            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: {0}", descriptor.Index));
 #endif
             actionDescriptors.Remove(descriptor);
-            if (actionDescriptorsIndex == descriptor.ToInt32())
+            if (actionDescriptorsIndex == descriptor.Index)
             {
                 actionDescriptorsIndex--;
             }
@@ -402,7 +402,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int HandleToDescriptor(IntPtr handle, ref IntPtr descriptor)
+        private int HandleToDescriptor(IntPtr handle, ref PIActionDescriptor descriptor)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("handle: 0x{0}", handle.ToHexString()));
@@ -426,10 +426,10 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int AsHandle(IntPtr descriptor, ref IntPtr handle)
+        private int AsHandle(PIActionDescriptor descriptor, ref IntPtr handle)
         {
 #if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: 0x{0}", descriptor.ToHexString()));
+            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: {0}", descriptor.Index));
 #endif
             handle = HandleSuite.Instance.NewHandle(1);
             if (handle == IntPtr.Zero)
@@ -448,7 +448,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int GetType(IntPtr descriptor, uint key, ref uint type)
+        private int GetType(PIActionDescriptor descriptor, uint key, ref uint type)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -472,7 +472,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetKey(IntPtr descriptor, uint index, ref uint key)
+        private int GetKey(PIActionDescriptor descriptor, uint index, ref uint key)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("index: {0}", index));
@@ -488,7 +488,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int HasKey(IntPtr descriptor, uint key, ref byte hasKey)
+        private int HasKey(PIActionDescriptor descriptor, uint key, ref byte hasKey)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -498,7 +498,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int GetCount(IntPtr descriptor, ref uint count)
+        private int GetCount(PIActionDescriptor descriptor, ref uint count)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -510,7 +510,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int IsEqual(IntPtr firstDescriptor, IntPtr secondDescriptor, ref byte isEqual)
+        private int IsEqual(PIActionDescriptor firstDescriptor, PIActionDescriptor secondDescriptor, ref byte isEqual)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -520,7 +520,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPUnimplementedError;
         }
 
-        private int Erase(IntPtr descriptor, uint key)
+        private int Erase(PIActionDescriptor descriptor, uint key)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -530,7 +530,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int Clear(IntPtr descriptor)
+        private int Clear(PIActionDescriptor descriptor)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -540,7 +540,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int HasKeys(IntPtr descriptor, IntPtr keyArray, ref byte hasKeys)
+        private int HasKeys(PIActionDescriptor descriptor, IntPtr keyArray, ref byte hasKeys)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
@@ -590,7 +590,7 @@ namespace PSFilterLoad.PSApi.PICA
             return 0;
         }
 
-        private int PutInteger(IntPtr descriptor, uint key, int data)
+        private int PutInteger(PIActionDescriptor descriptor, uint key, int data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -606,7 +606,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutFloat(IntPtr descriptor, uint key, double data)
+        private int PutFloat(PIActionDescriptor descriptor, uint key, double data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -622,7 +622,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutUnitFloat(IntPtr descriptor, uint key, uint unit, double data)
+        private int PutUnitFloat(PIActionDescriptor descriptor, uint key, uint unit, double data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -640,7 +640,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutString(IntPtr descriptor, uint key, IntPtr cstrValue)
+        private int PutString(PIActionDescriptor descriptor, uint key, IntPtr cstrValue)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -666,7 +666,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutBoolean(IntPtr descriptor, uint key, byte data)
+        private int PutBoolean(PIActionDescriptor descriptor, uint key, byte data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -682,7 +682,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutList(IntPtr descriptor, uint key, IntPtr list)
+        private int PutList(PIActionDescriptor descriptor, uint key, PIActionList list)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -707,7 +707,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutObject(IntPtr descriptor, uint key, uint type, IntPtr descriptorHandle)
+        private int PutObject(PIActionDescriptor descriptor, uint key, uint type, PIActionDescriptor descriptorHandle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -733,12 +733,12 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutGlobalObject(IntPtr descriptor, uint key, uint type, IntPtr descriptorHandle)
+        private int PutGlobalObject(PIActionDescriptor descriptor, uint key, uint type, PIActionDescriptor descriptorHandle)
         {
             return PutObject(descriptor, key, type, descriptorHandle);
         }
 
-        private int PutEnumerated(IntPtr descriptor, uint key, uint type, uint data)
+        private int PutEnumerated(PIActionDescriptor descriptor, uint key, uint type, uint data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -755,7 +755,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutReference(IntPtr descriptor, uint key, IntPtr reference)
+        private int PutReference(PIActionDescriptor descriptor, uint key, PIActionReference reference)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -780,7 +780,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutClass(IntPtr descriptor, uint key, uint data)
+        private int PutClass(PIActionDescriptor descriptor, uint key, uint data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -797,7 +797,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutGlobalClass(IntPtr descriptor, uint key, uint data)
+        private int PutGlobalClass(PIActionDescriptor descriptor, uint key, uint data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -814,7 +814,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutAlias(IntPtr descriptor, uint key, IntPtr aliasHandle)
+        private int PutAlias(PIActionDescriptor descriptor, uint key, IntPtr aliasHandle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -843,7 +843,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutIntegers(IntPtr descriptor, uint key, uint count, IntPtr arrayPointer)
+        private int PutIntegers(PIActionDescriptor descriptor, uint key, uint count, IntPtr arrayPointer)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -878,7 +878,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutZString(IntPtr descriptor, uint key, IntPtr zstring)
+        private int PutZString(PIActionDescriptor descriptor, uint key, ASZString zstring)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -901,7 +901,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int PutData(IntPtr descriptor, uint key, int length, IntPtr blob)
+        private int PutData(PIActionDescriptor descriptor, uint key, int length, IntPtr blob)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -929,7 +929,7 @@ namespace PSFilterLoad.PSApi.PICA
         #endregion
 
         #region Descriptor read methods
-        private int GetInteger(IntPtr descriptor, uint key, ref int data)
+        private int GetInteger(PIActionDescriptor descriptor, uint key, ref int data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -945,7 +945,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetFloat(IntPtr descriptor, uint key, ref double data)
+        private int GetFloat(PIActionDescriptor descriptor, uint key, ref double data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -961,7 +961,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetUnitFloat(IntPtr descriptor, uint key, ref uint unit, ref double data)
+        private int GetUnitFloat(PIActionDescriptor descriptor, uint key, ref uint unit, ref double data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -987,7 +987,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetStringLength(IntPtr descriptor, uint key, ref uint length)
+        private int GetStringLength(PIActionDescriptor descriptor, uint key, ref uint length)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1005,7 +1005,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetString(IntPtr descriptor, uint key, IntPtr cstrValue, uint maxLength)
+        private int GetString(PIActionDescriptor descriptor, uint key, IntPtr cstrValue, uint maxLength)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1034,7 +1034,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetBoolean(IntPtr descriptor, uint key, ref byte data)
+        private int GetBoolean(PIActionDescriptor descriptor, uint key, ref byte data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1050,7 +1050,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetList(IntPtr descriptor, uint key, ref IntPtr list)
+        private int GetList(PIActionDescriptor descriptor, uint key, ref PIActionList list)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1075,7 +1075,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetObject(IntPtr descriptor, uint key, ref uint retType, ref IntPtr descriptorHandle)
+        private int GetObject(PIActionDescriptor descriptor, uint key, ref uint retType, ref PIActionDescriptor descriptorHandle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1107,12 +1107,12 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetGlobalObject(IntPtr descriptor, uint key, ref uint retType, ref IntPtr descriptorHandle)
+        private int GetGlobalObject(PIActionDescriptor descriptor, uint key, ref uint retType, ref PIActionDescriptor descriptorHandle)
         {
             return GetObject(descriptor, key, ref retType, ref descriptorHandle);
         }
 
-        private int GetEnumerated(IntPtr descriptor, uint key, ref uint type, ref uint data)
+        private int GetEnumerated(PIActionDescriptor descriptor, uint key, ref uint type, ref uint data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1137,7 +1137,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetReference(IntPtr descriptor, uint key, ref IntPtr reference)
+        private int GetReference(PIActionDescriptor descriptor, uint key, ref PIActionReference reference)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1162,7 +1162,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetClass(IntPtr descriptor, uint key, ref uint data)
+        private int GetClass(PIActionDescriptor descriptor, uint key, ref uint data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1178,12 +1178,12 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetGlobalClass(IntPtr descriptor, uint key, ref uint data)
+        private int GetGlobalClass(PIActionDescriptor descriptor, uint key, ref uint data)
         {
             return GetClass(descriptor, key, ref data);
         }
 
-        private int GetAlias(IntPtr descriptor, uint key, ref IntPtr data)
+        private int GetAlias(PIActionDescriptor descriptor, uint key, ref IntPtr data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1208,7 +1208,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetIntegers(IntPtr descriptor, uint key, uint count, IntPtr data)
+        private int GetIntegers(PIActionDescriptor descriptor, uint key, uint count, IntPtr data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1235,7 +1235,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetZString(IntPtr descriptor, uint key, ref IntPtr zstring)
+        private int GetZString(PIActionDescriptor descriptor, uint key, ref ASZString zstring)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1261,7 +1261,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetDataLength(IntPtr descriptor, uint key, ref int length)
+        private int GetDataLength(PIActionDescriptor descriptor, uint key, ref int length)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1280,7 +1280,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetData(IntPtr descriptor, uint key, IntPtr blob)
+        private int GetData(PIActionDescriptor descriptor, uint key, IntPtr blob)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));

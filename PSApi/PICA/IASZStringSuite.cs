@@ -22,26 +22,26 @@ namespace PSFilterLoad.PSApi.PICA
         /// <param name="zstring">The ZString to convert.</param>
         /// <param name="descriptor">The <see cref="ActionDescriptorZString"/> that contains the value of the specified ZString.</param>
         /// <returns><c>true</c> if the ZString was converted to an action descriptor; otherwise, <c>false</c> if the ZString is invalid.</returns>
-        bool ConvertToActionDescriptor(IntPtr zstring, out ActionDescriptorZString descriptor);
+        bool ConvertToActionDescriptor(ASZString zstring, out ActionDescriptorZString descriptor);
         /// <summary>
         /// Creates a ZString from an action descriptor.
         /// </summary>
         /// <param name="descriptor">The descriptor.</param>
         /// <returns>The new ZString value.</returns>
-        IntPtr CreateFromActionDescriptor(ActionDescriptorZString descriptor);
+        ASZString CreateFromActionDescriptor(ActionDescriptorZString descriptor);
         /// <summary>
         /// Gets the value of the specified ZString.
         /// </summary>
         /// <param name="zstring">The ZString to convert.</param>
         /// <param name="value">The <see cref="string"/> that contains the value of the specified ZString.</param>
         /// <returns><c>true</c> if the ZString was converted to a string; otherwise, <c>false</c> if the ZString is invalid.</returns>
-        bool ConvertToString(IntPtr zstring, out string value);
+        bool ConvertToString(ASZString zstring, out string value);
         /// <summary>
         /// Creates a ZString from the specified string.
         /// </summary>
         /// <param name="value">The string to use.</param>
         /// <returns>The new ZString value.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
-        IntPtr CreateFromString(string value);
+        ASZString CreateFromString(string value);
     }
 }

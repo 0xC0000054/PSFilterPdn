@@ -76,7 +76,7 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly CSConvertToMonitorRGB csConvertToMonitorRGB;
         private readonly IASZStringSuite zstringSuite;
 
-        private Dictionary<IntPtr, Color> colors;
+        private Dictionary<ColorID, Color> colors;
         private int colorsIndex;
         private byte[] lookup16To8;
         private ushort[] lookup8To16;
@@ -108,7 +108,7 @@ namespace PSFilterLoad.PSApi.PICA
             csConvert16to8 = new CSConvert(Convert16to8);
             csConvertToMonitorRGB = new CSConvertToMonitorRGB(ConvertToMonitorRGB);
             this.zstringSuite = zstringSuite;
-            colors = new Dictionary<IntPtr, Color>(IntPtrEqualityComparer.Instance);
+            colors = new Dictionary<ColorID, Color>();
             colorsIndex = 0;
             lookup16To8 = null;
             lookup8To16 = null;
@@ -119,12 +119,12 @@ namespace PSFilterLoad.PSApi.PICA
             return (colorSpace >= ColorSpace.RGBSpace && colorSpace <= ColorSpace.XYZSpace);
         }
 
-        private int Make(ref IntPtr colorID)
+        private int Make(ref ColorID colorID)
         {
             try
             {
                 colorsIndex++;
-                colorID = new IntPtr(colorsIndex);
+                colorID = new ColorID(colorsIndex);
                 colors.Add(colorID, new Color());
             }
             catch (OutOfMemoryException)
@@ -135,10 +135,10 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int Delete(ref IntPtr colorID)
+        private int Delete(ref ColorID colorID)
         {
             colors.Remove(colorID);
-            if (colorsIndex == colorID.ToInt32())
+            if (colorsIndex == colorID.Index)
             {
                 colorsIndex--;
             }
@@ -146,7 +146,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int StuffComponents(IntPtr colorID, ColorSpace colorSpace, byte c0, byte c1, byte c2, byte c3)
+        private int StuffComponents(ColorID colorID, ColorSpace colorSpace, byte c0, byte c1, byte c2, byte c3)
         {
             if (!IsValidColorSpace(colorSpace))
             {
@@ -158,7 +158,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int ExtractComponents(IntPtr colorID, ColorSpace colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3, ref byte gamutFlag)
+        private int ExtractComponents(ColorID colorID, ColorSpace colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3, ref byte gamutFlag)
         {
             if (!IsValidColorSpace(colorSpace))
             {
@@ -182,7 +182,7 @@ namespace PSFilterLoad.PSApi.PICA
             return error;
         }
 
-        private int StuffXYZ(IntPtr colorID, CS_XYZ xyz)
+        private int StuffXYZ(ColorID colorID, CS_XYZ xyz)
         {
             // Clamp the values to the range of [0, 255].
             ushort x = xyz.x;
@@ -208,7 +208,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int ExtractXYZ(IntPtr colorID, ref CS_XYZ xyz)
+        private int ExtractXYZ(ColorID colorID, ref CS_XYZ xyz)
         {
             Color item = colors[colorID];
 
@@ -314,28 +314,28 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPUnimplementedError;
         }
 
-        private int GetNativeSpace(IntPtr colorID, ref ColorSpace nativeSpace)
+        private int GetNativeSpace(ColorID colorID, ref ColorSpace nativeSpace)
         {
             nativeSpace = colors[colorID].ColorSpace;
 
             return PSError.kSPNoError;
         }
 
-        private int IsBookColor(IntPtr colorID, ref bool isBookColor)
+        private int IsBookColor(ColorID colorID, ref bool isBookColor)
         {
             isBookColor = false;
 
             return PSError.kSPNoError;
         }
 
-        private int ExtractColorName(IntPtr colorID, ref IntPtr colorName)
+        private int ExtractColorName(ColorID colorID, ref ASZString colorName)
         {
             colorName = zstringSuite.CreateFromString(string.Empty);
 
             return PSError.kSPNoError;
         }
 
-        private int PickColor(ref IntPtr colorID, IntPtr promptZString)
+        private int PickColor(ref ColorID colorID, ASZString promptZString)
         {
             int error;
 

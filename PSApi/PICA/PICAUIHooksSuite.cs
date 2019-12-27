@@ -57,7 +57,7 @@ namespace PSFilterLoad.PSApi.PICA
             return 60U;
         }
 
-        private int GetPluginName(IntPtr pluginRef, ref IntPtr name)
+        private int GetPluginName(IntPtr pluginRef, ref ASZString name)
         {
             name = zstringSuite.CreateFromString(pluginName);
 

@@ -111,7 +111,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
         }
 
-        private int Register(IntPtr key, IntPtr descriptor, bool isPersistent)
+        private int Register(IntPtr key, PIActionDescriptor descriptor, bool isPersistent)
         {
             try
             {
@@ -164,7 +164,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int Get(IntPtr key, ref IntPtr descriptor)
+        private int Get(IntPtr key, ref PIActionDescriptor descriptor)
         {
             try
             {
@@ -182,7 +182,7 @@ namespace PSFilterLoad.PSApi.PICA
                 }
                 else
                 {
-                    descriptor = IntPtr.Zero;
+                    descriptor = PIActionDescriptor.Null;
                 }
             }
             catch (OutOfMemoryException)

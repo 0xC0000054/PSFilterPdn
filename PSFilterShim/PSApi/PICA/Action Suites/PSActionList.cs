@@ -20,82 +20,119 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {
+    internal struct PIActionList : IEquatable<PIActionList>
+    {
+        private readonly IntPtr value;
+
+        public PIActionList(int index)
+        {
+            value = new IntPtr(index);
+        }
+
+        public int Index => value.ToInt32();
+
+        public override bool Equals(object obj)
+        {
+            return obj is PIActionList other && Equals(other);
+        }
+
+        public bool Equals(PIActionList other)
+        {
+            return value == other.value;
+        }
+
+        public override int GetHashCode()
+        {
+            return -1584136870 + value.GetHashCode();
+        }
+
+        public static bool operator ==(PIActionList left, PIActionList right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(PIActionList left, PIActionList right)
+        {
+            return !left.Equals(right);
+        }
+    }
+
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListMake(ref IntPtr actionList);
+    internal delegate int ActionListMake(ref PIActionList actionList);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListFree(IntPtr actionList);
+    internal delegate int ActionListFree(PIActionList actionList);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetType(IntPtr list, uint index, ref uint value);
+    internal delegate int ActionListGetType(PIActionList list, uint index, ref uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetCount(IntPtr list, ref uint value);
+    internal delegate int ActionListGetCount(PIActionList list, ref uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutInteger(IntPtr list, int value);
+    internal delegate int ActionListPutInteger(PIActionList list, int value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutFloat(IntPtr list, double value);
+    internal delegate int ActionListPutFloat(PIActionList list, double value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutUnitFloat(IntPtr list, uint unit, double value);
+    internal delegate int ActionListPutUnitFloat(PIActionList list, uint unit, double value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutString(IntPtr list, IntPtr cstr);
+    internal delegate int ActionListPutString(PIActionList list, IntPtr cstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutBoolean(IntPtr list, byte value);
+    internal delegate int ActionListPutBoolean(PIActionList list, byte value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutList(IntPtr list, IntPtr value);
+    internal delegate int ActionListPutList(PIActionList list, PIActionList value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutObject(IntPtr list, uint type, IntPtr descriptor);
+    internal delegate int ActionListPutObject(PIActionList list, uint type, PIActionDescriptor descriptor);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutGlobalObject(IntPtr list, uint type, IntPtr descriptor);
+    internal delegate int ActionListPutGlobalObject(PIActionList list, uint type, PIActionDescriptor descriptor);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutEnumerated(IntPtr list, uint type, uint value);
+    internal delegate int ActionListPutEnumerated(PIActionList list, uint type, uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutReference(IntPtr list, IntPtr value);
+    internal delegate int ActionListPutReference(PIActionList list, PIActionReference value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutClass(IntPtr list, uint value);
+    internal delegate int ActionListPutClass(PIActionList list, uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutGlobalClass(IntPtr list, uint value);
+    internal delegate int ActionListPutGlobalClass(PIActionList list, uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutAlias(IntPtr list, IntPtr value);
+    internal delegate int ActionListPutAlias(PIActionList list, IntPtr value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetInteger(IntPtr list, uint index, ref int value);
+    internal delegate int ActionListGetInteger(PIActionList list, uint index, ref int value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetFloat(IntPtr list, uint index, ref double value);
+    internal delegate int ActionListGetFloat(PIActionList list, uint index, ref double value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetUnitFloat(IntPtr list, uint index, ref uint unit, ref double value);
+    internal delegate int ActionListGetUnitFloat(PIActionList list, uint index, ref uint unit, ref double value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetStringLength(IntPtr list, uint index, ref uint stringLength);
+    internal delegate int ActionListGetStringLength(PIActionList list, uint index, ref uint stringLength);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetString(IntPtr list, uint index, IntPtr cstr, uint maxLength);
+    internal delegate int ActionListGetString(PIActionList list, uint index, IntPtr cstr, uint maxLength);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetBoolean(IntPtr list, uint index, ref byte value);
+    internal delegate int ActionListGetBoolean(PIActionList list, uint index, ref byte value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetList(IntPtr list, uint index, ref IntPtr value);
+    internal delegate int ActionListGetList(PIActionList list, uint index, ref PIActionList value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetObject(IntPtr list, uint index, ref uint type, ref IntPtr descriptor);
+    internal delegate int ActionListGetObject(PIActionList list, uint index, ref uint type, ref PIActionDescriptor descriptor);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetGlobalObject(IntPtr list, uint index, ref uint type, ref IntPtr descriptor);
+    internal delegate int ActionListGetGlobalObject(PIActionList list, uint index, ref uint type, ref PIActionDescriptor descriptor);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetEnumerated(IntPtr list, uint index, ref uint type, ref uint value);
+    internal delegate int ActionListGetEnumerated(PIActionList list, uint index, ref uint type, ref uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetReference(IntPtr list, uint index, ref IntPtr value);
+    internal delegate int ActionListGetReference(PIActionList list, uint index, ref PIActionReference value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetClass(IntPtr list, uint index, ref uint value);
+    internal delegate int ActionListGetClass(PIActionList list, uint index, ref uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetGlobalClass(IntPtr list, uint index, ref uint value);
+    internal delegate int ActionListGetGlobalClass(PIActionList list, uint index, ref uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetAlias(IntPtr list, uint index, ref IntPtr aliasHandle);
+    internal delegate int ActionListGetAlias(PIActionList list, uint index, ref IntPtr aliasHandle);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutIntegers(IntPtr list, uint count, IntPtr value);
+    internal delegate int ActionListPutIntegers(PIActionList list, uint count, IntPtr value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetIntegers(IntPtr list, uint count, IntPtr value);
+    internal delegate int ActionListGetIntegers(PIActionList list, uint count, IntPtr value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutData(IntPtr list, int length, IntPtr data);
+    internal delegate int ActionListPutData(PIActionList list, int length, IntPtr data);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetDataLength(IntPtr list, uint index, ref int length);
+    internal delegate int ActionListGetDataLength(PIActionList list, uint index, ref int length);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetData(IntPtr list, uint index, IntPtr value);
+    internal delegate int ActionListGetData(PIActionList list, uint index, IntPtr value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutZString(IntPtr list, IntPtr zstring);
+    internal delegate int ActionListPutZString(PIActionList list, ASZString zstring);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetZString(IntPtr list, uint index, ref IntPtr zstring);
+    internal delegate int ActionListGetZString(PIActionList list, uint index, ref ASZString zstring);
 
 #pragma warning disable 108
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable")]

@@ -23,13 +23,13 @@ namespace PSFilterLoad.PSApi.PICA
         /// <param name="list">The reference.</param>
         /// <param name="values">The values contained within the list.</param>
         /// <returns><c>true</c> if the reference is valid; otherwise, <c>false</c>.</returns>
-        bool TryGetReferenceValues(IntPtr reference, out ReadOnlyCollection<ActionReferenceItem> values);
+        bool TryGetReferenceValues(PIActionReference reference, out ReadOnlyCollection<ActionReferenceItem> values);
 
         /// <summary>
         /// Creates a reference that contains the specified values.
         /// </summary>
         /// <param name="values">The values to place in the reference.</param>
         /// <returns>The new reference.</returns>
-        IntPtr CreateReference(ReadOnlyCollection<ActionReferenceItem> values);
+        PIActionReference CreateReference(ReadOnlyCollection<ActionReferenceItem> values);
     }
 }

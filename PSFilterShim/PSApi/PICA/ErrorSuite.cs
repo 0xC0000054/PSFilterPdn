@@ -80,7 +80,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int SetErrorFromZString(IntPtr str)
+        private int SetErrorFromZString(ASZString str)
         {
             string value;
             if (zstringSuite.ConvertToString(str, out value))

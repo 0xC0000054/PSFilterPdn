@@ -21,11 +21,11 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi.PICA
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int DescriptorRegistryRegister(IntPtr key, IntPtr descriptor, [MarshalAs(UnmanagedType.U1)] bool isPersistent);
+    internal delegate int DescriptorRegistryRegister(IntPtr key, PIActionDescriptor descriptor, [MarshalAs(UnmanagedType.U1)] bool isPersistent);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int DescriptorRegistryErase(IntPtr key);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int DescriptorRegistryGet(IntPtr key, ref IntPtr descriptor);
+    internal delegate int DescriptorRegistryGet(IntPtr key, ref PIActionDescriptor descriptor);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable")]
     internal struct PSDescriptorRegistryProcs

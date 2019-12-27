@@ -52,6 +52,43 @@ namespace PSFilterLoad.PSApi.PICA
     }
 #pragma warning restore 0649
 
+    internal struct ColorID : IEquatable<ColorID>
+    {
+        private readonly IntPtr value;
+
+        public ColorID(int index)
+        {
+            value = new IntPtr(index);
+        }
+
+        public int Index => value.ToInt32();
+
+        public override bool Equals(object obj)
+        {
+            return obj is ColorID other && Equals(other);
+        }
+
+        public bool Equals(ColorID other)
+        {
+            return value == other.value;
+        }
+
+        public override int GetHashCode()
+        {
+            return -1584136870 + value.GetHashCode();
+        }
+
+        public static bool operator ==(ColorID left, ColorID right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(ColorID left, ColorID right)
+        {
+            return !left.Equals(right);
+        }
+    }
+
     internal struct PSColorSpaceSuite1
     {
         public IntPtr Make;
@@ -140,6 +177,43 @@ namespace PSFilterLoad.PSApi.PICA
         public IntPtr SetPluginPropertyList;
     }
 #endif
+
+    internal struct ASZString : IEquatable<ASZString>
+    {
+        private readonly IntPtr value;
+
+        public ASZString(int index)
+        {
+            value = new IntPtr(index);
+        }
+
+        public int Index => value.ToInt32();
+
+        public override bool Equals(object obj)
+        {
+            return obj is ASZString other && Equals(other);
+        }
+
+        public bool Equals(ASZString other)
+        {
+            return value == other.value;
+        }
+
+        public override int GetHashCode()
+        {
+            return -1584136870 + value.GetHashCode();
+        }
+
+        public static bool operator ==(ASZString left, ASZString right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(ASZString left, ASZString right)
+        {
+            return !left.Equals(right);
+        }
+    }
 
     internal struct ASZStringSuite1
     {

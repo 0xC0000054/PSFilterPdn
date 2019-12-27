@@ -33,29 +33,29 @@ namespace PSFilterLoad.PSApi.PICA
 
     #region ColorSpaceSuite Delegates
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSMake(ref IntPtr colorID);
+    internal delegate int CSMake(ref ColorID colorID);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSDelete(ref IntPtr colorID);
+    internal delegate int CSDelete(ref ColorID colorID);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSStuffComponents(IntPtr colorID, ColorSpace colorSpace, byte c0, byte c1, byte c2, byte c3);
+    internal delegate int CSStuffComponents(ColorID colorID, ColorSpace colorSpace, byte c0, byte c1, byte c2, byte c3);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSExtractComponents(IntPtr colorID, ColorSpace colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3, ref byte gamutFlag);
+    internal delegate int CSExtractComponents(ColorID colorID, ColorSpace colorSpace, ref byte c0, ref byte c1, ref byte c2, ref byte c3, ref byte gamutFlag);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSStuffXYZ(IntPtr colorID, CS_XYZ xyz);
+    internal delegate int CSStuffXYZ(ColorID colorID, CS_XYZ xyz);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSExtractXYZ(IntPtr colorID, ref CS_XYZ xyz);
+    internal delegate int CSExtractXYZ(ColorID colorID, ref CS_XYZ xyz);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSConvert8(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSConvert16(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSGetNativeSpace(IntPtr colorID, ref ColorSpace nativeSpace);
+    internal delegate int CSGetNativeSpace(ColorID colorID, ref ColorSpace nativeSpace);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSIsBookColor(IntPtr colorID, [MarshalAs(UnmanagedType.U1)] ref bool isBookColor);
+    internal delegate int CSIsBookColor(ColorID colorID, [MarshalAs(UnmanagedType.U1)] ref bool isBookColor);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSExtractColorName(IntPtr colorID, ref IntPtr colorName);
+    internal delegate int CSExtractColorName(ColorID colorID, ref ASZString colorName);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int CSPickColor(ref IntPtr colorID, IntPtr promptString);
+    internal delegate int CSPickColor(ref ColorID colorID, ASZString promptString);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSConvert(IntPtr inputData, IntPtr outputData, short count);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -75,7 +75,7 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate uint UISuiteHostTickCount();
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int UISuiteGetPluginName(IntPtr plugInRef, ref IntPtr plugInName);
+    internal delegate int UISuiteGetPluginName(IntPtr plugInRef, ref ASZString plugInName);
     #endregion
 
 #if PICASUITEDEBUG
@@ -143,54 +143,54 @@ namespace PSFilterLoad.PSApi.PICA
 
     #region ASZStringSuite Delegates
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringMakeFromUnicode(IntPtr src, UIntPtr byteCount, ref IntPtr newZString);
+    internal delegate int ASZStringMakeFromUnicode(IntPtr src, UIntPtr byteCount, ref ASZString newZString);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringMakeFromCString(IntPtr src, UIntPtr byteCount, ref IntPtr newZString);
+    internal delegate int ASZStringMakeFromCString(IntPtr src, UIntPtr byteCount, ref ASZString newZString);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringMakeFromPascalString(IntPtr src, UIntPtr byteCount, ref IntPtr newZString);
+    internal delegate int ASZStringMakeFromPascalString(IntPtr src, UIntPtr byteCount, ref ASZString newZString);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringMakeRomanizationOfInteger(int value, ref IntPtr newZString);
+    internal delegate int ASZStringMakeRomanizationOfInteger(int value, ref ASZString newZString);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ASZStringMakeRomanizationOfFixed(int value, short places, [MarshalAs(UnmanagedType.Bool)] bool trim,
-                                                           [MarshalAs(UnmanagedType.Bool)] bool isSigned, ref IntPtr newZString);
+                                                           [MarshalAs(UnmanagedType.Bool)] bool isSigned, ref ASZString newZString);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringMakeRomanizationOfDouble(double value, ref IntPtr newZString);
+    internal delegate int ASZStringMakeRomanizationOfDouble(double value, ref ASZString newZString);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate IntPtr ASZStringGetEmpty();
+    internal delegate ASZString ASZStringGetEmpty();
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringCopy(IntPtr source, ref IntPtr copy);
+    internal delegate int ASZStringCopy(ASZString source, ref ASZString copy);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringReplace(IntPtr zstr, uint index, IntPtr replacement);
+    internal delegate int ASZStringReplace(ASZString zstr, uint index, ASZString replacement);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringTrimEllipsis(IntPtr zstr);
+    internal delegate int ASZStringTrimEllipsis(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringTrimSpaces(IntPtr zstr);
+    internal delegate int ASZStringTrimSpaces(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringRemoveAccelerators(IntPtr zstr);
+    internal delegate int ASZStringRemoveAccelerators(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringAddRef(IntPtr zstr);
+    internal delegate int ASZStringAddRef(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringRelease(IntPtr zstr);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal delegate bool ASZStringIsAllWhiteSpace(IntPtr zstr);
+    internal delegate int ASZStringRelease(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    internal delegate bool ASZStringIsEmpty(IntPtr zstr);
+    internal delegate bool ASZStringIsAllWhiteSpace(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    internal delegate bool ASZStringWillReplace(IntPtr zstr, uint index);
+    internal delegate bool ASZStringIsEmpty(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate uint ASZStringLengthAsUnicodeCString(IntPtr zstr);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal delegate bool ASZStringWillReplace(ASZString zstr, uint index);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringAsUnicodeCString(IntPtr zstr, IntPtr str, uint strSize, [MarshalAs(UnmanagedType.Bool)] bool checkStrSize);
+    internal delegate uint ASZStringLengthAsUnicodeCString(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate uint ASZStringLengthAsCString(IntPtr zstr);
+    internal delegate int ASZStringAsUnicodeCString(ASZString zstr, IntPtr str, uint strSize, [MarshalAs(UnmanagedType.Bool)] bool checkStrSize);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringAsCString(IntPtr zstr, IntPtr str, uint strSize, [MarshalAs(UnmanagedType.Bool)] bool checkStrSize);
+    internal delegate uint ASZStringLengthAsCString(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate uint ASZStringLengthAsPascalString(IntPtr zstr);
+    internal delegate int ASZStringAsCString(ASZString zstr, IntPtr str, uint strSize, [MarshalAs(UnmanagedType.Bool)] bool checkStrSize);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringAsPascalString(IntPtr zstr, IntPtr str, uint strBufferSize, [MarshalAs(UnmanagedType.Bool)] bool checkBufferSize);
+    internal delegate uint ASZStringLengthAsPascalString(ASZString zstr);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate int ASZStringAsPascalString(ASZString zstr, IntPtr str, uint strBufferSize, [MarshalAs(UnmanagedType.Bool)] bool checkBufferSize);
     #endregion
 }

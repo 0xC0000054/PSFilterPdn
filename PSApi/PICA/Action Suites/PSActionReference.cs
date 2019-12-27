@@ -20,44 +20,83 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {
+    internal struct PIActionReference : IEquatable<PIActionReference>
+    {
+        private readonly IntPtr value;
+
+        public static readonly PIActionReference Null = new PIActionReference(0);
+
+        public PIActionReference(int index)
+        {
+            value = new IntPtr(index);
+        }
+
+        public int Index => value.ToInt32();
+
+        public override bool Equals(object obj)
+        {
+            return obj is PIActionReference other && Equals(other);
+        }
+
+        public bool Equals(PIActionReference other)
+        {
+            return value == other.value;
+        }
+
+        public override int GetHashCode()
+        {
+            return -1584136870 + value.GetHashCode();
+        }
+
+        public static bool operator ==(PIActionReference left, PIActionReference right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(PIActionReference left, PIActionReference right)
+        {
+            return !left.Equals(right);
+        }
+    }
+
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceMake(ref IntPtr reference);
+    internal delegate int ActionReferenceMake(ref PIActionReference reference);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceFree(IntPtr reference);
+    internal delegate int ActionReferenceFree(PIActionReference reference);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetForm(IntPtr reference, ref uint value);
+    internal delegate int ActionReferenceGetForm(PIActionReference reference, ref uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetDesiredClass(IntPtr reference, ref uint value);
+    internal delegate int ActionReferenceGetDesiredClass(PIActionReference reference, ref uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferencePutName(IntPtr reference, uint desiredClass, IntPtr cstrValue);
+    internal delegate int ActionReferencePutName(PIActionReference reference, uint desiredClass, IntPtr cstrValue);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferencePutIndex(IntPtr reference, uint desiredClass, uint value);
+    internal delegate int ActionReferencePutIndex(PIActionReference reference, uint desiredClass, uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferencePutIdentifier(IntPtr reference, uint desiredClass, uint value);
+    internal delegate int ActionReferencePutIdentifier(PIActionReference reference, uint desiredClass, uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferencePutOffset(IntPtr reference, uint desiredClass, int value);
+    internal delegate int ActionReferencePutOffset(PIActionReference reference, uint desiredClass, int value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferencePutEnumerated(IntPtr reference, uint desiredClass, uint type, uint value);
+    internal delegate int ActionReferencePutEnumerated(PIActionReference reference, uint desiredClass, uint type, uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferencePutProperty(IntPtr reference, uint desiredClass, uint value);
+    internal delegate int ActionReferencePutProperty(PIActionReference reference, uint desiredClass, uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferencePutClass(IntPtr reference, uint desiredClass);
+    internal delegate int ActionReferencePutClass(PIActionReference reference, uint desiredClass);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetNameLength(IntPtr reference, ref uint stringLength);
+    internal delegate int ActionReferenceGetNameLength(PIActionReference reference, ref uint stringLength);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetName(IntPtr reference, IntPtr name, uint maxLength);
+    internal delegate int ActionReferenceGetName(PIActionReference reference, IntPtr name, uint maxLength);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetIndex(IntPtr reference, ref uint value);
+    internal delegate int ActionReferenceGetIndex(PIActionReference reference, ref uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetIdentifier(IntPtr reference, ref uint value);
+    internal delegate int ActionReferenceGetIdentifier(PIActionReference reference, ref uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetOffset(IntPtr reference, ref int value);
+    internal delegate int ActionReferenceGetOffset(PIActionReference reference, ref int value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetEnumerated(IntPtr reference, ref uint type, ref uint enumValue);
+    internal delegate int ActionReferenceGetEnumerated(PIActionReference reference, ref uint type, ref uint enumValue);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetProperty(IntPtr reference, ref uint value);
+    internal delegate int ActionReferenceGetProperty(PIActionReference reference, ref uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetContainer(IntPtr reference, ref IntPtr value);
+    internal delegate int ActionReferenceGetContainer(PIActionReference reference, ref PIActionReference value);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable")]
     [StructLayout(LayoutKind.Sequential)]
