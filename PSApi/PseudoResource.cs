@@ -53,7 +53,7 @@ namespace PSFilterLoad.PSApi
 
         public bool Equals(uint otherKey, int otherIndex)
         {
-            return (key == otherKey && index == otherIndex);
+            return key == otherKey && index == otherIndex;
         }
     }
 }

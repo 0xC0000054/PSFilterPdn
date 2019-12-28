@@ -226,7 +226,7 @@ namespace PSFilterPdn.Controls
                     return false;
                 }
 
-                return (!backColor.IsEmpty && backColor != DefaultBackColor || !foreColor.IsEmpty && foreColor != DefaultForeColor);
+                return !backColor.IsEmpty && backColor != DefaultBackColor || !foreColor.IsEmpty && foreColor != DefaultForeColor;
             }
         }
 

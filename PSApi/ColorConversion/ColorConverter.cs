@@ -293,7 +293,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
             }
             if (adjustedHue < (2.0 / 3.0))
             {
-                return (color1 + (color2 - color1) * (2 / 3 - adjustedHue) * 6);
+                return color1 + (color2 - color1) * (2 / 3 - adjustedHue) * 6;
             }
 
             return color1;
@@ -733,7 +733,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
 
             if (var_R > 0.0031308)
             {
-                var_R = 1.055 * (Math.Pow(var_R, (1.0 / 2.4))) - 0.055;
+                var_R = 1.055 * Math.Pow(var_R, 1.0 / 2.4) - 0.055;
             }
             else
             {
@@ -741,7 +741,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
             }
             if (var_G > 0.0031308)
             {
-                var_G = 1.055 * (Math.Pow(var_G, (1.0 / 2.4))) - 0.055;
+                var_G = 1.055 * Math.Pow(var_G, 1.0 / 2.4) - 0.055;
             }
             else
             {
@@ -749,7 +749,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
             }
             if (var_B > 0.0031308)
             {
-                var_B = 1.055 * (Math.Pow(var_B, (1.0 / 2.4))) - 0.055;
+                var_B = 1.055 * Math.Pow(var_B, 1.0 / 2.4) - 0.055;
             }
             else
             {

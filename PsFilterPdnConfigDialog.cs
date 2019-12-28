@@ -1197,7 +1197,7 @@ namespace PSFilterPdn
         private void updateFilterListBw_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             folderLoadProgress.PerformStep();
-            folderCountLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderCount_Format, (e.ProgressPercentage + 1), searchDirectories.Count);
+            folderCountLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderCount_Format, e.ProgressPercentage + 1, searchDirectories.Count);
             folderNameLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderName_Format, e.UserState);
         }
 
@@ -1357,7 +1357,7 @@ namespace PSFilterPdn
                 {
                     if (SafeNativeMethods.GetProcessDEPPolicy(SafeNativeMethods.GetCurrentProcess(), out depFlags, out permanent))
                     {
-                        useDEPProxy = (depFlags != NativeEnums.ProcessDEPPolicy.PROCESS_DEP_DISABLED);
+                        useDEPProxy = depFlags != NativeEnums.ProcessDEPPolicy.PROCESS_DEP_DISABLED;
                     }
                 }
                 catch (EntryPointNotFoundException)

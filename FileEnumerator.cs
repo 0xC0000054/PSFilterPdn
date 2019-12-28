@@ -503,9 +503,9 @@ namespace PSFilterPdn
 
             public bool Equals(DirectoryIdentifier other)
             {
-                return (volumeSerialNumber == other.volumeSerialNumber &&
-                        fileIndexHigh == other.fileIndexHigh &&
-                        fileIndexLow == other.fileIndexLow);
+                return volumeSerialNumber == other.volumeSerialNumber &&
+                       fileIndexHigh == other.fileIndexHigh &&
+                       fileIndexLow == other.fileIndexLow;
             }
 
             public override int GetHashCode()

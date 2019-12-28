@@ -175,10 +175,10 @@ namespace PSFilterLoad.PSApi
                 return false;
             }
 
-            return (string.Equals(fileName, other.fileName, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(entryPoint, other.entryPoint, StringComparison.Ordinal) &&
-                    string.Equals(category, other.category, StringComparison.Ordinal) &&
-                    string.Equals(title, other.title, StringComparison.Ordinal));
+            return string.Equals(fileName, other.fileName, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(entryPoint, other.entryPoint, StringComparison.Ordinal) &&
+                   string.Equals(category, other.category, StringComparison.Ordinal) &&
+                   string.Equals(title, other.title, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -390,7 +390,7 @@ namespace PSFilterLoad.PSApi
 
         internal bool IsValid()
         {
-            return (!string.IsNullOrEmpty(category) && !string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(entryPoint));
+            return !string.IsNullOrEmpty(category) && !string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(entryPoint);
         }
     }
 }

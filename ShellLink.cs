@@ -43,7 +43,7 @@ namespace PSFilterPdn
         /// <param name="linkPath">The shortcut to load.</param>
         public bool Load(string linkPath)
         {
-            return (((NativeInterfaces.IPersistFile)shellLink).Load(linkPath, NativeConstants.STGM_READ) == NativeConstants.S_OK);
+            return ((NativeInterfaces.IPersistFile)shellLink).Load(linkPath, NativeConstants.STGM_READ) == NativeConstants.S_OK;
         }
 
         /// <summary>

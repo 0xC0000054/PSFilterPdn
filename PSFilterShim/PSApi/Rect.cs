@@ -42,13 +42,13 @@ namespace PSFilterLoad.PSApi
         }
         public bool Equals(Rect16 rect)
         {
-            return (left == rect.left && top == rect.top && right == rect.right && bottom == rect.bottom);
+            return left == rect.left && top == rect.top && right == rect.right && bottom == rect.bottom;
         }
 
 #if DEBUG
         public override string ToString()
         {
-            return ("Top=" + top.ToString() + ",Bottom=" + bottom.ToString() + ",Left=" + left.ToString() + ",Right=" + right.ToString());
+            return "Top=" + top.ToString() + ",Bottom=" + bottom.ToString() + ",Left=" + left.ToString() + ",Right=" + right.ToString();
         }
 #endif
         public static readonly Rect16 Empty = new Rect16();

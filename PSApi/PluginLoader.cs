@@ -114,9 +114,9 @@ namespace PSFilterLoad.PSApi
 
             private static bool IsHexadecimalChar(char value)
             {
-                return (value >= '0' && value <= '9' ||
-                        value >= 'A' && value <= 'F' ||
-                        value >= 'a' && value <= 'f');
+                return value >= '0' && value <= '9' ||
+                       value >= 'A' && value <= 'F' ||
+                       value >= 'a' && value <= 'f';
             }
 
             private static unsafe byte? ParseField(byte* data, int startOffset, out int fieldLength)
@@ -436,7 +436,7 @@ namespace PSFilterLoad.PSApi
                 byte* dataPtr = propPtr + PIProperty.SizeOf;
                 if (propKey == PIPropertyID.PIKindProperty)
                 {
-                    if (*((uint*)dataPtr) != PSConstants.FilterKind)
+                    if (*(uint*)dataPtr != PSConstants.FilterKind)
                     {
 #if DEBUG
                         System.Diagnostics.Debug.WriteLine(string.Format("{0} is not a valid Photoshop Filter.", query.fileName));
@@ -448,13 +448,13 @@ namespace PSFilterLoad.PSApi
                 {
                     entryPoint = Marshal.PtrToStringAnsi((IntPtr)dataPtr, propertyLength).TrimEnd('\0');
                     // If it is a 32-bit plug-in on a 64-bit OS run it with the 32-bit shim.
-                    runWith32BitShim = (IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty);
+                    runWith32BitShim = IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty;
                 }
                 else if (propKey == PIPropertyID.PIVersionProperty)
                 {
                     int packedVersion = *(int*)dataPtr;
-                    int major = (packedVersion >> 16);
-                    int minor = (packedVersion & 0xffff);
+                    int major = packedVersion >> 16;
+                    int minor = packedVersion & 0xffff;
 
                     if (major > PSConstants.latestFilterVersion ||
                         major == PSConstants.latestFilterVersion && minor > PSConstants.latestFilterSubVersion)
@@ -539,7 +539,7 @@ namespace PSFilterLoad.PSApi
 #endif
 
                 int propertyDataPaddedLength = (propertyLength + 3) & ~3;
-                propPtr += (PIProperty.SizeOf + propertyDataPaddedLength);
+                propPtr += PIProperty.SizeOf + propertyDataPaddedLength;
             }
 
             PluginData enumData = new PluginData(query.fileName, entryPoint, category, title, filterInfo, runWith32BitShim, aete, enableInfo);

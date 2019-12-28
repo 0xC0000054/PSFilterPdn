@@ -194,8 +194,8 @@ namespace PSFilterLoad.PSApi
             desc->depth = depth;
             desc->bounds = bounds;
 
-            desc->target = (channel < PSConstants.ChannelPorts.Alpha);
-            desc->shown = (channel < PSConstants.ChannelPorts.SelectionMask);
+            desc->target = channel < PSConstants.ChannelPorts.Alpha;
+            desc->shown = channel < PSConstants.ChannelPorts.SelectionMask;
 
             desc->tileOrigin.h = 0;
             desc->tileOrigin.v = 0;

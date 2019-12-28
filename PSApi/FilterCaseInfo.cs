@@ -44,10 +44,10 @@ namespace PSFilterLoad.PSApi
     public enum FilterCaseInfoFlags : byte
     {
         None = 0,
-        DontCopyToDestination = (1 << 0),
-        WorksWithBlankData = (1 << 1),
-        FiltersLayerMask = (1 << 2),
-        WritesOutsideSelection = (1 << 3)
+        DontCopyToDestination = 1 << 0,
+        WorksWithBlankData = 1 << 1,
+        FiltersLayerMask = 1 << 2,
+        WritesOutsideSelection = 1 << 3
     }
 
     [DataContract()]

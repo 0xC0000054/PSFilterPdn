@@ -80,11 +80,11 @@ namespace PSFilterLoad.PSApi
             // Use a comparison where any non zero value is true.
             if (value != 0)
             {
-                return (other.value != 0);
+                return other.value != 0;
             }
             else
             {
-                return (other.value == 0);
+                return other.value == 0;
             }
         }
 
@@ -96,7 +96,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public override int GetHashCode()
         {
-            return (value != 0 ? True : False);
+            return value != 0 ? True : False;
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public override string ToString()
         {
-            return (value != 0 ? bool.TrueString : bool.FalseString);
+            return value != 0 ? bool.TrueString : bool.FalseString;
         }
 
         public static bool operator ==(PSBoolean left, PSBoolean right)
@@ -122,7 +122,7 @@ namespace PSFilterLoad.PSApi
 
         public static implicit operator bool(PSBoolean value)
         {
-            return (value.value != 0);
+            return value.value != 0;
         }
 
         public static implicit operator PSBoolean(bool value)

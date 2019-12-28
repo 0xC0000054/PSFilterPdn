@@ -26,7 +26,7 @@ namespace PSFilterLoad.PSApi
     {
         static bool RectNonEmpty(Rect16 rect)
         {
-            return (rect.left < rect.right && rect.top < rect.bottom);
+            return rect.left < rect.right && rect.top < rect.bottom;
         }
 
         private static readonly long OTOFHandleSize = IntPtr.Size + 4L;
@@ -379,7 +379,7 @@ namespace PSFilterLoad.PSApi
                                        NativeConstants.PAGE_EXECUTE_READWRITE |
                                        NativeConstants.PAGE_EXECUTE_WRITECOPY;
 
-            return ((mbi.Protect & ExecuteProtect) != 0);
+            return (mbi.Protect & ExecuteProtect) != 0;
         }
 
         /// <summary>
@@ -1109,9 +1109,9 @@ namespace PSFilterLoad.PSApi
                 outputHandling = info.OutputHandling;
                 FilterCaseInfoFlags filterCaseFlags = info.Flags1;
 
-                copyToDest = ((filterCaseFlags & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None);
+                copyToDest = (filterCaseFlags & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None;
 
-                bool worksWithBlankData = ((filterCaseFlags & FilterCaseInfoFlags.WorksWithBlankData) != FilterCaseInfoFlags.None);
+                bool worksWithBlankData = (filterCaseFlags & FilterCaseInfoFlags.WorksWithBlankData) != FilterCaseInfoFlags.None;
 
                 if ((filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection) && !worksWithBlankData)
                 {
@@ -1272,7 +1272,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         private static bool IsSinglePlane(short loPlane, short hiPlane)
         {
-            return (((hiPlane - loPlane) + 1) == 1);
+            return (hiPlane - loPlane + 1) == 1;
         }
 
         /// <summary>
@@ -1291,9 +1291,9 @@ namespace PSFilterLoad.PSApi
             int height = inRect.bottom - inRect.top;
             int nplanes = hiplane - loplane + 1;
 
-            long bufferSize = ((width * nplanes) * height);
+            long bufferSize = width * nplanes * height;
 
-            return (bufferSize != size);
+            return bufferSize != size;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -1431,7 +1431,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="mask">The mask.</param>
         private static unsafe short SetMaskPadding(IntPtr maskData, int maskRowBytes, Rect16 rect, short maskPadding, Rectangle lockRect, MaskSurface mask)
         {
-            if ((lockRect.Right > mask.Width || lockRect.Bottom > mask.Height) || rect.top < 0 || rect.left < 0)
+            if (lockRect.Right > mask.Width || lockRect.Bottom > mask.Height || rect.top < 0 || rect.left < 0)
             {
                 switch (maskPadding)
                 {
@@ -1553,7 +1553,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="surface">The surface.</param>
         private static unsafe short SetFilterPadding(IntPtr inData, int inRowBytes, Rect16 rect, int nplanes, short ofs, short inputPadding, Rectangle lockRect, Surface surface)
         {
-            if ((lockRect.Right > surface.Width || lockRect.Bottom > surface.Height) || (rect.top < 0 || rect.left < 0))
+            if (lockRect.Right > surface.Width || lockRect.Bottom > surface.Height || rect.top < 0 || rect.left < 0)
             {
                 switch (inputPadding)
                 {
@@ -2448,7 +2448,7 @@ namespace PSFilterLoad.PSApi
 
                     Point16* point = (Point16*)info.selectorParameter.globalSamplePoint.ToPointer();
 
-                    if ((point->h >= 0 && point->h < source.Width) && (point->v >= 0 && point->v < source.Height))
+                    if (point->h >= 0 && point->h < source.Width && point->v >= 0 && point->v < source.Height)
                     {
                         ColorBgra pixel = source.GetPointUnchecked(point->h, point->v);
                         info.colorComponents[0] = pixel.R;

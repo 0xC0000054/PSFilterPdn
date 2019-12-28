@@ -27,7 +27,7 @@ namespace PSFilterLoad.PSApi
 
         public bool Equals(VRect rect)
         {
-            return (left == rect.left && top == rect.top && right == rect.right && bottom == rect.bottom);
+            return left == rect.left && top == rect.top && right == rect.right && bottom == rect.bottom;
         }
 
         public override bool Equals(object obj)
@@ -68,7 +68,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
         public override string ToString()
         {
-            return ("Top=" + top.ToString() + ",Bottom=" + bottom.ToString() + ",Left=" + left.ToString() + ",Right=" + right.ToString());
+            return "Top=" + top.ToString() + ",Bottom=" + bottom.ToString() + ",Left=" + left.ToString() + ",Right=" + right.ToString();
         }
 #endif
     }
