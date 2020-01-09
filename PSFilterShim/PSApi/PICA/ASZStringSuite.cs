@@ -371,7 +371,7 @@ namespace PSFilterLoad.PSApi.PICA
                 {
                     try
                     {
-                        ZString zstring = new ZString(string.Copy(existing.Data));
+                        ZString zstring = new ZString(existing.Data);
                         copy = GenerateDictionaryKey();
                         strings.Add(copy, zstring);
                     }
