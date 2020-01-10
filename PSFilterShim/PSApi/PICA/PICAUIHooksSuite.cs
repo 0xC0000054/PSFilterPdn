@@ -59,7 +59,14 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetPluginName(IntPtr pluginRef, ref ASZString name)
         {
-            name = zstringSuite.CreateFromString(pluginName);
+            try
+            {
+                name = zstringSuite.CreateFromString(pluginName);
+            }
+            catch (OutOfMemoryException)
+            {
+                return PSError.memFullErr;
+            }
 
             return PSError.kSPNoError;
         }
