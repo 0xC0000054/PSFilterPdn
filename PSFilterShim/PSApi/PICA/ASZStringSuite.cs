@@ -336,9 +336,16 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int MakeRomanizationOfInteger(int value, ref ASZString newZString)
         {
-            ZString zstring = new ZString(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            newZString = GenerateDictionaryKey();
-            strings.Add(newZString, zstring);
+            try
+            {
+                ZString zstring = new ZString(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                newZString = GenerateDictionaryKey();
+                strings.Add(newZString, zstring);
+            }
+            catch (OutOfMemoryException)
+            {
+                return PSError.kASOutOfMemory;
+            }
 
             return PSError.kASNoErr;
         }
