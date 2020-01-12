@@ -197,9 +197,11 @@ namespace PSFilterLoad.PSApi.PICA
 
         bool IASZStringSuite.ConvertToActionDescriptor(ASZString zstring, out ActionDescriptorZString descriptor)
         {
-            descriptor = null;
-
-            if (zstring != Empty)
+            if (zstring == Empty)
+            {
+                descriptor = null;
+            }
+            else
             {
                 ZString value;
                 if (strings.TryGetValue(zstring, out value))
@@ -208,6 +210,7 @@ namespace PSFilterLoad.PSApi.PICA
                 }
                 else
                 {
+                    descriptor = null;
                     return false;
                 }
             }
@@ -231,8 +234,6 @@ namespace PSFilterLoad.PSApi.PICA
 
         bool IASZStringSuite.ConvertToString(ASZString zstring, out string value)
         {
-            value = null;
-
             if (zstring == Empty)
             {
                 value = string.Empty;
@@ -246,6 +247,7 @@ namespace PSFilterLoad.PSApi.PICA
                 }
                 else
                 {
+                    value = null;
                     return false;
                 }
             }
