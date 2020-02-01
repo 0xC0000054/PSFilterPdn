@@ -42,10 +42,6 @@ namespace PSFilterLoad.PSApi
         private ReadOnlyCollection<string> moduleEntryPoints;
         [NonSerialized]
         private readonly string enableInfo;
-        [NonSerialized]
-        private Expression enableInfoExpression;
-        [NonSerialized]
-        private bool enableInfoExpressionParsed;
 
         /// <summary>
         /// Gets the file path of the filter.
@@ -149,8 +145,6 @@ namespace PSFilterLoad.PSApi
             this.aete = aete;
             this.enableInfo = enableInfo;
             moduleEntryPoints = null;
-            enableInfoExpression = null;
-            enableInfoExpressionParsed = false;
         }
 
         public override bool Equals(object obj)
@@ -340,23 +334,11 @@ namespace PSFilterLoad.PSApi
 
                 EnableInfoVariables variables = new EnableInfoVariables(imageWidth, imageHeight, imageMode, hasTransparencyMask,
                                                                         targetChannelCount, trueChannelCount, hostState);
-                try
-                {
-                    if (!enableInfoExpressionParsed)
-                    {
-                        enableInfoExpressionParsed = true;
 
-                        enableInfoExpression = EnableInfoParser.Parse(enableInfo);
-                    }
-
-                    if (enableInfoExpression != null)
-                    {
-                        result = new EnableInfoInterpreter(variables).Evaluate(enableInfoExpression);
-                    }
-                }
-                catch (EnableInfoException)
+                bool? enableInfoResult = EnableInfoResultCache.Instance.TryGetValue(enableInfo, variables);
+                if (enableInfoResult.HasValue)
                 {
-                    // Ignore any errors that occur when parsing or evaluating the enable info expression.
+                    result = enableInfoResult.Value;
                 }
             }
 
