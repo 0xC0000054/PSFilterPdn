@@ -20,69 +20,12 @@ namespace PSFilterLoad.PSApi
     // in the API structures that will be freed when the LoadPsFilter class is finalized.
     internal sealed class BufferSuite
     {
-        // This class is used in place of List<T> because IntPtr does not implement IEquatable<T>
-        // which causes boxing in List<T> methods that use the default EqualityComparer.
-        private sealed class BufferIDCollection
-        {
-            private List<IntPtr> items;
-
-            public BufferIDCollection()
-            {
-                items = new List<IntPtr>();
-            }
-
-            public int Count => items.Count;
-
-            public IntPtr this[int index] => items[index];
-
-            public void Add(IntPtr value)
-            {
-                items.Add(value);
-            }
-
-            public void Clear()
-            {
-                items.Clear();
-            }
-
-            public bool Contains(IntPtr value)
-            {
-                return IndexOf(value) >= 0;
-            }
-
-            public int IndexOf(IntPtr value)
-            {
-                for (int i = 0; i < items.Count; i++)
-                {
-                    if (items[i] == value)
-                    {
-                        return i;
-                    }
-                }
-
-                return -1;
-            }
-
-            public bool Remove(IntPtr value)
-            {
-                int index = IndexOf(value);
-
-                if (index >= 0)
-                {
-                    items.RemoveAt(index);
-                    return true;
-                }
-
-                return false;
-            }
-        }
-
         private readonly AllocateBufferProc allocProc;
         private readonly FreeBufferProc freeProc;
         private readonly LockBufferProc lockProc;
         private readonly UnlockBufferProc unlockProc;
         private readonly BufferSpaceProc spaceProc;
-        private readonly BufferIDCollection bufferIDs;
+        private readonly Dictionary<IntPtr, int> bufferIDs;
 
         private static readonly BufferSuite instance = new BufferSuite();
 
@@ -93,7 +36,7 @@ namespace PSFilterLoad.PSApi
             lockProc = new LockBufferProc(BufferLockProc);
             unlockProc = new UnlockBufferProc(BufferUnlockProc);
             spaceProc = new BufferSpaceProc(BufferSpaceProc);
-            bufferIDs = new BufferIDCollection();
+            bufferIDs = new Dictionary<IntPtr, int>(IntPtrEqualityComparer.Instance);
         }
 
         public static BufferSuite Instance => instance;
@@ -102,7 +45,7 @@ namespace PSFilterLoad.PSApi
 
         public bool AllocatedBySuite(IntPtr buffer)
         {
-            return bufferIDs.Contains(buffer);
+            return bufferIDs.ContainsKey(buffer);
         }
 
         public IntPtr CreateBufferProcsPointer()
@@ -132,16 +75,21 @@ namespace PSFilterLoad.PSApi
 
         public void FreeRemainingBuffers()
         {
-            for (int i = 0; i < bufferIDs.Count; i++)
+            foreach (KeyValuePair<IntPtr, int> item in bufferIDs)
             {
-                Memory.Free(bufferIDs[i]);
+                Memory.Free(item.Key);
             }
             bufferIDs.Clear();
         }
 
         public long GetBufferSize(IntPtr bufferID)
         {
-            return Memory.Size(bufferID);
+            if (bufferIDs.TryGetValue(bufferID, out int size))
+            {
+                return size;
+            }
+
+            return 0;
         }
 
         private short AllocateBufferProc(int size, ref IntPtr bufferID)
@@ -159,7 +107,7 @@ namespace PSFilterLoad.PSApi
             {
                 bufferID = Memory.Allocate(size, false);
 
-                bufferIDs.Add(bufferID);
+                bufferIDs.Add(bufferID, size);
             }
             catch (OutOfMemoryException)
             {
