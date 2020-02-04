@@ -542,58 +542,70 @@ namespace PSFilterLoad.PSApi
             }
             if (filterRecord->parameters != IntPtr.Zero && dataPtr != IntPtr.Zero)
             {
-                long pluginDataSize = 0L;
-                if (!HandleSuite.Instance.AllocatedBySuite(dataPtr))
+                if (HandleSuite.Instance.AllocatedBySuite(dataPtr))
                 {
+                    int ps = HandleSuite.Instance.GetHandleSize(dataPtr);
+                    byte[] dataBuf = new byte[ps];
+
+                    Marshal.Copy(HandleSuite.Instance.LockHandle(dataPtr, 0), dataBuf, 0, dataBuf.Length);
+                    HandleSuite.Instance.UnlockHandle(dataPtr);
+
+                    globalParameters.SetPluginDataBytes(dataBuf);
+                    globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
+                }
+                else
+                {
+                    long pluginDataSize;
+                    bool allocatedByBufferSuite;
+                    IntPtr ptr;
+
                     if (BufferSuite.Instance.AllocatedBySuite(dataPtr))
                     {
                         pluginDataSize = BufferSuite.Instance.GetBufferSize(dataPtr);
+                        allocatedByBufferSuite = true;
+                        ptr = BufferSuite.Instance.LockBuffer(dataPtr);
                     }
                     else
                     {
                         pluginDataSize = SafeNativeMethods.GlobalSize(dataPtr).ToInt64();
+                        allocatedByBufferSuite = false;
+                        ptr = SafeNativeMethods.GlobalLock(dataPtr);
                     }
-                }
 
-                IntPtr ptr = SafeNativeMethods.GlobalLock(dataPtr);
-
-                try
-                {
-                    if (HandleSuite.Instance.AllocatedBySuite(ptr))
+                    try
                     {
-                        int ps = HandleSuite.Instance.GetHandleSize(ptr);
-                        byte[] dataBuf = new byte[ps];
-
-                        Marshal.Copy(HandleSuite.Instance.LockHandle(ptr, 0), dataBuf, 0, dataBuf.Length);
-                        HandleSuite.Instance.UnlockHandle(ptr);
-
-                        globalParameters.SetPluginDataBytes(dataBuf);
-                        globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
-                    }
-                    else if (pluginDataSize == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == OTOFSignature)
-                    {
-                        IntPtr hPtr = Marshal.ReadIntPtr(ptr);
-                        long ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64();
-                        if (ps > 0L)
+                        if (pluginDataSize == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == OTOFSignature)
                         {
-                            byte[] dataBuf = new byte[(int)ps];
-                            Marshal.Copy(hPtr, dataBuf, 0, dataBuf.Length);
+                            IntPtr hPtr = Marshal.ReadIntPtr(ptr);
+                            long ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64();
+                            if (ps > 0L)
+                            {
+                                byte[] dataBuf = new byte[(int)ps];
+                                Marshal.Copy(hPtr, dataBuf, 0, dataBuf.Length);
+                                globalParameters.SetPluginDataBytes(dataBuf);
+                                globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.OTOFHandle;
+                                globalParameters.PluginDataExecutable = IsMemoryExecutable(hPtr);
+                            }
+                        }
+                        else if (pluginDataSize > 0)
+                        {
+                            byte[] dataBuf = new byte[(int)pluginDataSize];
+                            Marshal.Copy(ptr, dataBuf, 0, dataBuf.Length);
                             globalParameters.SetPluginDataBytes(dataBuf);
-                            globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.OTOFHandle;
-                            globalParameters.PluginDataExecutable = IsMemoryExecutable(hPtr);
+                            globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.RawBytes;
                         }
                     }
-                    else if (pluginDataSize > 0L)
+                    finally
                     {
-                        byte[] dataBuf = new byte[(int)pluginDataSize];
-                        Marshal.Copy(ptr, dataBuf, 0, dataBuf.Length);
-                        globalParameters.SetPluginDataBytes(dataBuf);
-                        globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.RawBytes;
+                        if (allocatedByBufferSuite)
+                        {
+                            BufferSuite.Instance.UnlockBuffer(dataPtr);
+                        }
+                        else
+                        {
+                            SafeNativeMethods.GlobalUnlock(ptr);
+                        }
                     }
-                }
-                finally
-                {
-                    SafeNativeMethods.GlobalUnlock(ptr);
                 }
             }
         }
