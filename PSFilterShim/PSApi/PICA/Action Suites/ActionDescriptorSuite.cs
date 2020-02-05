@@ -101,7 +101,7 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly IASZStringSuite zstringSuite;
 
         private Dictionary<PIActionDescriptor, ScriptingParameters> actionDescriptors;
-        private Dictionary<IntPtr, ScriptingParameters> descriptorHandles;
+        private Dictionary<Handle, ScriptingParameters> descriptorHandles;
         private int actionDescriptorsIndex;
         private bool disposed;
 
@@ -237,7 +237,7 @@ namespace PSFilterLoad.PSApi.PICA
             this.actionReferenceSuite = actionReferenceSuite;
             this.zstringSuite = zstringSuite;
             actionDescriptors = new Dictionary<PIActionDescriptor, ScriptingParameters>();
-            descriptorHandles = new Dictionary<IntPtr, ScriptingParameters>(IntPtrEqualityComparer.Instance);
+            descriptorHandles = new Dictionary<Handle, ScriptingParameters>();
             actionDescriptorsIndex = 0;
             HandleSuite.Instance.SuiteHandleDisposed += SuiteHandleDisposed;
             disposed = false;
@@ -335,7 +335,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
         }
 
-        public bool TryGetScriptingData(IntPtr descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
+        public bool TryGetScriptingData(Handle descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
         {
             scriptingData = null;
 
@@ -350,9 +350,9 @@ namespace PSFilterLoad.PSApi.PICA
             return false;
         }
 
-        public void SetScriptingData(IntPtr descriptorHandle, Dictionary<uint, AETEValue> scriptingData)
+        public void SetScriptingData(Handle descriptorHandle, Dictionary<uint, AETEValue> scriptingData)
         {
-            if (descriptorHandle != IntPtr.Zero)
+            if (descriptorHandle != Handle.Null)
             {
                 descriptorHandles.Add(descriptorHandle, new ScriptingParameters(scriptingData));
             }
@@ -402,7 +402,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int HandleToDescriptor(IntPtr handle, ref PIActionDescriptor descriptor)
+        private int HandleToDescriptor(Handle handle, ref PIActionDescriptor descriptor)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("handle: 0x{0}", handle.ToHexString()));
@@ -426,13 +426,13 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int AsHandle(PIActionDescriptor descriptor, ref IntPtr handle)
+        private int AsHandle(PIActionDescriptor descriptor, ref Handle handle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: {0}", descriptor.Index));
 #endif
             handle = HandleSuite.Instance.NewHandle(1);
-            if (handle == IntPtr.Zero)
+            if (handle == Handle.Null)
             {
                 return PSError.memFullErr;
             }
@@ -814,7 +814,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutAlias(PIActionDescriptor descriptor, uint key, IntPtr aliasHandle)
+        private int PutAlias(PIActionDescriptor descriptor, uint key, Handle aliasHandle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1183,7 +1183,7 @@ namespace PSFilterLoad.PSApi.PICA
             return GetClass(descriptor, key, ref data);
         }
 
-        private int GetAlias(PIActionDescriptor descriptor, uint key, ref IntPtr data)
+        private int GetAlias(PIActionDescriptor descriptor, uint key, ref Handle data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
@@ -1194,7 +1194,7 @@ namespace PSFilterLoad.PSApi.PICA
                 int size = item.Size;
                 data = HandleSuite.Instance.NewHandle(size);
 
-                if (data == IntPtr.Zero)
+                if (data == Handle.Null)
                 {
                     return PSError.memFullErr;
                 }

@@ -205,6 +205,7 @@
     <Compile Include="PSApi\FilterCaseInfoCollection.cs" />
     <Compile Include="PSApi\Fixed16.cs" />
     <Compile Include="PSApi\GlobalParameters.cs" />
+    <Compile Include="PSApi\Handle.cs" />
     <Compile Include="PSApi\HandleSuite.cs" />
     <Compile Include="PSApi\IFilterImageProvider.cs" />
     <Compile Include="PSApi\ImageServicesProc.cs" />

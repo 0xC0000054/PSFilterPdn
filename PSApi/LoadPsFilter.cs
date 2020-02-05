@@ -425,7 +425,7 @@ namespace PSFilterLoad.PSApi
         private unsafe void SaveScriptingParameters()
         {
             PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
-            if (descriptorParameters->descriptor != IntPtr.Zero)
+            if (descriptorParameters->descriptor != Handle.Null)
             {
                 Dictionary<uint, AETEValue> data;
                 if (basicSuiteProvider.TryGetScriptingData(descriptorParameters->descriptor, out data))
@@ -438,7 +438,7 @@ namespace PSFilterLoad.PSApi
                 }
                 HandleSuite.Instance.UnlockHandle(descriptorParameters->descriptor);
                 HandleSuite.Instance.DisposeHandle(descriptorParameters->descriptor);
-                descriptorParameters->descriptor = IntPtr.Zero;
+                descriptorParameters->descriptor = Handle.Null;
             }
         }
 
@@ -449,7 +449,7 @@ namespace PSFilterLoad.PSApi
         {
             FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
-            if (filterRecord->parameters != IntPtr.Zero)
+            if (filterRecord->parameters != Handle.Null)
             {
                 if (HandleSuite.Instance.AllocatedBySuite(filterRecord->parameters))
                 {
@@ -464,11 +464,11 @@ namespace PSFilterLoad.PSApi
                 }
                 else
                 {
-                    long size = SafeNativeMethods.GlobalSize(filterRecord->parameters).ToInt64();
+                    long size = SafeNativeMethods.GlobalSize(filterRecord->parameters.Value).ToInt64();
 
                     if (size > 0L)
                     {
-                        IntPtr parameters = SafeNativeMethods.GlobalLock(filterRecord->parameters);
+                        IntPtr parameters = SafeNativeMethods.GlobalLock(filterRecord->parameters.Value);
 
                         try
                         {
@@ -510,20 +510,22 @@ namespace PSFilterLoad.PSApi
                         }
                         finally
                         {
-                            SafeNativeMethods.GlobalUnlock(filterRecord->parameters);
+                            SafeNativeMethods.GlobalUnlock(filterRecord->parameters.Value);
                         }
                     }
                 }
             }
-            if (filterRecord->parameters != IntPtr.Zero && dataPtr != IntPtr.Zero)
+            if (filterRecord->parameters != Handle.Null && dataPtr != IntPtr.Zero)
             {
                 if (HandleSuite.Instance.AllocatedBySuite(dataPtr))
                 {
-                    int ps = HandleSuite.Instance.GetHandleSize(dataPtr);
+                    Handle dataHandle = new Handle(dataPtr);
+
+                    int ps = HandleSuite.Instance.GetHandleSize(dataHandle);
                     byte[] dataBuf = new byte[ps];
 
-                    Marshal.Copy(HandleSuite.Instance.LockHandle(dataPtr, 0), dataBuf, 0, dataBuf.Length);
-                    HandleSuite.Instance.UnlockHandle(dataPtr);
+                    Marshal.Copy(HandleSuite.Instance.LockHandle(dataHandle, 0), dataBuf, 0, dataBuf.Length);
+                    HandleSuite.Instance.UnlockHandle(dataHandle);
 
                     globalParameters.SetPluginDataBytes(dataBuf);
                     globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
@@ -605,7 +607,7 @@ namespace PSFilterLoad.PSApi
                 {
                     case GlobalParameters.DataStorageMethod.HandleSuite:
                         filterRecord->parameters = HandleSuite.Instance.NewHandle(parameterDataBytes.Length);
-                        if (filterRecord->parameters == IntPtr.Zero)
+                        if (filterRecord->parameters == Handle.Null)
                         {
                             throw new OutOfMemoryException(Resources.OutOfMemoryError);
                         }
@@ -616,7 +618,7 @@ namespace PSFilterLoad.PSApi
 
                         break;
                     case GlobalParameters.DataStorageMethod.OTOFHandle:
-                        filterRecord->parameters = Memory.Allocate(OTOFHandleSize, false);
+                        filterRecord->parameters = new Handle(Memory.Allocate(OTOFHandleSize, false));
 
                         if (globalParameters.ParameterDataExecutable)
                         {
@@ -629,13 +631,13 @@ namespace PSFilterLoad.PSApi
 
                         Marshal.Copy(parameterDataBytes, 0, filterParametersHandle, parameterDataBytes.Length);
 
-                        Marshal.WriteIntPtr(filterRecord->parameters, filterParametersHandle);
-                        Marshal.WriteInt32(filterRecord->parameters, IntPtr.Size, OTOFSignature);
+                        Marshal.WriteIntPtr(filterRecord->parameters.Value, filterParametersHandle);
+                        Marshal.WriteInt32(filterRecord->parameters.Value, IntPtr.Size, OTOFSignature);
 
                         break;
                     case GlobalParameters.DataStorageMethod.RawBytes:
-                        filterRecord->parameters = Memory.Allocate(parameterDataBytes.Length, false);
-                        Marshal.Copy(parameterDataBytes, 0, filterRecord->parameters, parameterDataBytes.Length);
+                        filterRecord->parameters = new Handle(Memory.Allocate(parameterDataBytes.Length, false));
+                        Marshal.Copy(parameterDataBytes, 0, filterRecord->parameters.Value, parameterDataBytes.Length);
 
                         break;
                     default:
@@ -649,15 +651,15 @@ namespace PSFilterLoad.PSApi
                 switch (globalParameters.PluginDataStorageMethod)
                 {
                     case GlobalParameters.DataStorageMethod.HandleSuite:
-                        dataPtr = HandleSuite.Instance.NewHandle(pluginDataBytes.Length);
-                        if (dataPtr == IntPtr.Zero)
+                        Handle dataHandle = HandleSuite.Instance.NewHandle(pluginDataBytes.Length);
+                        if (dataHandle == Handle.Null)
                         {
                             throw new OutOfMemoryException(Resources.OutOfMemoryError);
                         }
 
-                        Marshal.Copy(pluginDataBytes, 0, HandleSuite.Instance.LockHandle(dataPtr, 0), pluginDataBytes.Length);
-                        HandleSuite.Instance.UnlockHandle(dataPtr);
-
+                        Marshal.Copy(pluginDataBytes, 0, HandleSuite.Instance.LockHandle(dataHandle, 0), pluginDataBytes.Length);
+                        HandleSuite.Instance.UnlockHandle(dataHandle);
+                        dataPtr = dataHandle.Value;
                         break;
                     case GlobalParameters.DataStorageMethod.OTOFHandle:
                         dataPtr = Memory.Allocate(OTOFHandleSize, false);
@@ -2865,7 +2867,7 @@ namespace PSFilterLoad.PSApi
             if (scriptingData != null)
             {
                 descriptorParameters->descriptor = HandleSuite.Instance.NewHandle(0);
-                if (descriptorParameters->descriptor == IntPtr.Zero)
+                if (descriptorParameters->descriptor == Handle.Null)
                 {
                     throw new OutOfMemoryException(Resources.OutOfMemoryError);
                 }
@@ -2907,7 +2909,7 @@ namespace PSFilterLoad.PSApi
             filterRecord->serial = 0;
             filterRecord->abortProc = Marshal.GetFunctionPointerForDelegate(abortProc);
             filterRecord->progressProc = Marshal.GetFunctionPointerForDelegate(progressProc);
-            filterRecord->parameters = IntPtr.Zero;
+            filterRecord->parameters = Handle.Null;
 
             // The RGBColor structure uses the range of [0, 65535] instead of [0, 255].
             // Dividing 65535 by 255 produces a integer value of 257, floating point math is not required.
@@ -3131,7 +3133,7 @@ namespace PSFilterLoad.PSApi
                 {
                     PIDescriptorParameters* descParam = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
 
-                    if (descParam->descriptor != IntPtr.Zero)
+                    if (descParam->descriptor != Handle.Null)
                     {
                         HandleSuite.Instance.UnlockHandle(descParam->descriptor);
                         HandleSuite.Instance.DisposeHandle(descParam->descriptor);
@@ -3178,7 +3180,7 @@ namespace PSFilterLoad.PSApi
                 {
                     FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
-                    if (filterRecord->parameters != IntPtr.Zero)
+                    if (filterRecord->parameters != Handle.Null)
                     {
                         if (parameterDataRestored && !HandleSuite.Instance.AllocatedBySuite(filterRecord->parameters))
                         {
@@ -3194,18 +3196,14 @@ namespace PSFilterLoad.PSApi
                                 }
                                 filterParametersHandle = IntPtr.Zero;
                             }
-                            Memory.Free(filterRecord->parameters);
-                        }
-                        else if (BufferSuite.Instance.AllocatedBySuite(filterRecord->parameters))
-                        {
-                            BufferSuite.Instance.FreeBuffer(filterRecord->parameters);
+                            Memory.Free(filterRecord->parameters.Value);
                         }
                         else
                         {
                             HandleSuite.Instance.UnlockHandle(filterRecord->parameters);
                             HandleSuite.Instance.DisposeHandle(filterRecord->parameters);
                         }
-                        filterRecord->parameters = IntPtr.Zero;
+                        filterRecord->parameters = Handle.Null;
                     }
 
                     if (inDataPtr != IntPtr.Zero)
@@ -3257,8 +3255,10 @@ namespace PSFilterLoad.PSApi
                     }
                     else
                     {
-                        HandleSuite.Instance.UnlockHandle(dataPtr);
-                        HandleSuite.Instance.DisposeHandle(dataPtr);
+                        Handle dataHandle = new Handle(dataPtr);
+
+                        HandleSuite.Instance.UnlockHandle(dataHandle);
+                        HandleSuite.Instance.DisposeHandle(dataHandle);
                     }
                     dataPtr = IntPtr.Zero;
                 }

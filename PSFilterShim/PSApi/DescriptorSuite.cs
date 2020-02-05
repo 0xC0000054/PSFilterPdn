@@ -99,7 +99,7 @@ namespace PSFilterLoad.PSApi
         private readonly PutScopedObjectProc putScopedObjectProc;
 
         private Dictionary<PIReadDescriptor, ReadDescriptorState> readDescriptors;
-        private Dictionary<IntPtr, Dictionary<uint, AETEValue>> descriptorHandles;
+        private Dictionary<Handle, Dictionary<uint, AETEValue>> descriptorHandles;
         private Dictionary<PIWriteDescriptor, Dictionary<uint, AETEValue>> writeDescriptors;
         private AETEData aete;
         private int readDescriptorsIndex;
@@ -149,7 +149,7 @@ namespace PSFilterLoad.PSApi
             putUnitFloatProc = new PutUnitFloatProc(PutUnitFloatProc);
 
             readDescriptors = new Dictionary<PIReadDescriptor, ReadDescriptorState>();
-            descriptorHandles = new Dictionary<IntPtr, Dictionary<uint, AETEValue>>(IntPtrEqualityComparer.Instance);
+            descriptorHandles = new Dictionary<Handle, Dictionary<uint, AETEValue>>();
             writeDescriptors = new Dictionary<PIWriteDescriptor, Dictionary<uint, AETEValue>>();
             readDescriptorsIndex = 0;
             writeDescriptorsIndex = 0;
@@ -229,7 +229,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public bool TryGetScriptingData(IntPtr descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
+        public bool TryGetScriptingData(Handle descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
         {
             scriptingData = null;
 
@@ -244,7 +244,7 @@ namespace PSFilterLoad.PSApi
             return false;
         }
 
-        public void SetScriptingData(IntPtr descriptorHandle, Dictionary<uint, AETEValue> scriptingData)
+        public void SetScriptingData(Handle descriptorHandle, Dictionary<uint, AETEValue> scriptingData)
         {
             descriptorHandles.Add(descriptorHandle, scriptingData);
         }
@@ -255,12 +255,12 @@ namespace PSFilterLoad.PSApi
         }
 
         #region ReadDescriptorProcs
-        private unsafe PIReadDescriptor OpenReadDescriptorProc(IntPtr descriptorHandle, IntPtr keyArray)
+        private unsafe PIReadDescriptor OpenReadDescriptorProc(Handle descriptorHandle, IntPtr keyArray)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: 0x{0}", descriptorHandle.ToHexString()));
 #endif
-            if (descriptorHandle != IntPtr.Zero)
+            if (descriptorHandle != Handle.Null)
             {
                 Dictionary<uint, AETEValue> dictionary = descriptorHandles[descriptorHandle];
 
@@ -428,7 +428,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private short GetTextProc(PIReadDescriptor descriptor, ref IntPtr data)
+        private short GetTextProc(PIReadDescriptor descriptor, ref Handle data)
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
@@ -440,7 +440,7 @@ namespace PSFilterLoad.PSApi
             int size = item.Size;
             data = HandleSuite.Instance.NewHandle(size);
 
-            if (data == IntPtr.Zero)
+            if (data == Handle.Null)
             {
                 state.lastReadError = PSError.memFullErr;
                 return PSError.memFullErr;
@@ -452,7 +452,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private short GetAliasProc(PIReadDescriptor descriptor, ref IntPtr data)
+        private short GetAliasProc(PIReadDescriptor descriptor, ref Handle data)
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
@@ -464,7 +464,7 @@ namespace PSFilterLoad.PSApi
             int size = item.Size;
             data = HandleSuite.Instance.NewHandle(size);
 
-            if (data == IntPtr.Zero)
+            if (data == Handle.Null)
             {
                 state.lastReadError = PSError.memFullErr;
                 return PSError.memFullErr;
@@ -518,7 +518,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private short GetObjectProc(PIReadDescriptor descriptor, ref uint retType, ref IntPtr descriptorHandle)
+        private short GetObjectProc(PIReadDescriptor descriptor, ref uint retType, ref Handle descriptorHandle)
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
@@ -542,7 +542,7 @@ namespace PSFilterLoad.PSApi
             if (value != null)
             {
                 descriptorHandle = HandleSuite.Instance.NewHandle(0); // assign a zero byte handle to allow it to work correctly in the OpenReadDescriptorProc().
-                if (descriptorHandle == IntPtr.Zero)
+                if (descriptorHandle == Handle.Null)
                 {
                     state.lastReadError = PSError.memFullErr;
                     return PSError.memFullErr;
@@ -705,13 +705,13 @@ namespace PSFilterLoad.PSApi
             return handle;
         }
 
-        private short CloseWriteDescriptorProc(PIWriteDescriptor descriptor, ref IntPtr descriptorHandle)
+        private short CloseWriteDescriptorProc(PIWriteDescriptor descriptor, ref Handle descriptorHandle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             descriptorHandle = HandleSuite.Instance.NewHandle(0);
-            if (descriptorHandle == IntPtr.Zero)
+            if (descriptorHandle == Handle.Null)
             {
                 return PSError.memFullErr;
             }
@@ -819,13 +819,13 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private short PutTextProc(PIWriteDescriptor descriptor, uint key, IntPtr textHandle)
+        private short PutTextProc(PIWriteDescriptor descriptor, uint key, Handle textHandle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
 #endif
 
-            if (textHandle != IntPtr.Zero)
+            if (textHandle != Handle.Null)
             {
                 try
                 {
@@ -853,7 +853,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private short PutAliasProc(PIWriteDescriptor descriptor, uint key, IntPtr aliasHandle)
+        private short PutAliasProc(PIWriteDescriptor descriptor, uint key, Handle aliasHandle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
@@ -934,7 +934,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private short PutObjectProc(PIWriteDescriptor descriptor, uint key, uint type, IntPtr descriptorHandle)
+        private short PutObjectProc(PIWriteDescriptor descriptor, uint key, uint type, Handle descriptorHandle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0}, type: {1}", DebugUtils.PropToString(key), DebugUtils.PropToString(type)));
@@ -1008,7 +1008,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private short PutScopedObjectProc(PIWriteDescriptor descriptor, uint key, uint type, IntPtr descriptorHandle)
+        private short PutScopedObjectProc(PIWriteDescriptor descriptor, uint key, uint type, Handle descriptorHandle)
         {
             return PutObjectProc(descriptor, key, type, descriptorHandle);
         }

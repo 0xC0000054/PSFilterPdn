@@ -18,14 +18,12 @@ namespace PSFilterLoad.PSApi
 {
     internal sealed class HandleDisposedEventArgs : EventArgs
     {
-        private readonly IntPtr handle;
-
-        public HandleDisposedEventArgs(IntPtr handle)
+        public HandleDisposedEventArgs(Handle handle)
         {
-            this.handle = handle;
+            Handle = handle;
         }
 
-        public IntPtr Handle => handle;
+        public Handle Handle { get; }
     }
 
     // This class is a singleton because plug-ins can use it to allocate memory for pointers embedded
@@ -41,7 +39,7 @@ namespace PSFilterLoad.PSApi
 
         private sealed class HandleEntry
         {
-            private IntPtr handle;
+            private Handle handle;
             private IntPtr pointer;
             private readonly int size;
             private bool disposed;
@@ -50,7 +48,7 @@ namespace PSFilterLoad.PSApi
 
             public int Size => size;
 
-            public HandleEntry(IntPtr handle, IntPtr pointer, int size)
+            public HandleEntry(Handle handle, IntPtr pointer, int size)
             {
                 this.handle = handle;
                 this.pointer = pointer;
@@ -62,10 +60,10 @@ namespace PSFilterLoad.PSApi
             {
                 if (!disposed)
                 {
-                    if (handle != IntPtr.Zero)
+                    if (handle != Handle.Null)
                     {
-                        Memory.Free(handle);
-                        handle = IntPtr.Zero;
+                        Memory.Free(handle.Value);
+                        handle = Handle.Null;
                     }
                     if (pointer != IntPtr.Zero)
                     {
@@ -85,7 +83,7 @@ namespace PSFilterLoad.PSApi
         private readonly UnlockPIHandleProc handleUnlockProc;
         private readonly RecoverSpaceProc handleRecoverSpaceProc;
         private readonly DisposeRegularPIHandleProc handleDisposeRegularProc;
-        private readonly Dictionary<IntPtr, HandleEntry> handles;
+        private readonly Dictionary<Handle, HandleEntry> handles;
 
         private static readonly HandleSuite instance = new HandleSuite();
 
@@ -99,7 +97,7 @@ namespace PSFilterLoad.PSApi
             handleUnlockProc = new UnlockPIHandleProc(UnlockHandle);
             handleRecoverSpaceProc = new RecoverSpaceProc(RecoverHandleSpace);
             handleDisposeRegularProc = new DisposeRegularPIHandleProc(DisposeRegularHandle);
-            handles = new Dictionary<IntPtr, HandleEntry>(IntPtrEqualityComparer.Instance);
+            handles = new Dictionary<Handle, HandleEntry>();
         }
 
         /// <summary>
@@ -157,14 +155,26 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         ///   <c>true</c> if the handle was allocated using the handle suite; otherwise, <c>false</c>.
         /// </returns>
-        public bool AllocatedBySuite(IntPtr handle)
+        public bool AllocatedBySuite(Handle handle)
         {
             return handles.ContainsKey(handle);
         }
 
+        /// <summary>
+        /// Determines whether the handle was allocated using the handle suite.
+        /// </summary>
+        /// <param name="handle">The handle to check.</param>
+        /// <returns>
+        ///   <c>true</c> if the handle was allocated using the handle suite; otherwise, <c>false</c>.
+        /// </returns>
+        public bool AllocatedBySuite(IntPtr handle)
+        {
+            return AllocatedBySuite(new Handle(handle));
+        }
+
         public void FreeRemainingHandles()
         {
-            foreach (KeyValuePair<IntPtr, HandleEntry> item in handles)
+            foreach (KeyValuePair<Handle, HandleEntry> item in handles)
             {
                 item.Value.Dispose();
             }
@@ -237,21 +247,21 @@ namespace PSFilterLoad.PSApi
             return (mbi.Protect & WriteProtect) != 0;
         }
 
-        internal unsafe IntPtr NewHandle(int size)
+        internal unsafe Handle NewHandle(int size)
         {
             if (size < 0)
             {
-                return IntPtr.Zero;
+                return Handle.Null;
             }
 
-            IntPtr handle = IntPtr.Zero;
+            Handle handle = Handle.Null;
             try
             {
                 // The Photoshop API 'Handle' is an indirect pointer.
                 // As some plug-ins may dereference the pointer instead of calling HandleLockProc we recreate that implementation.
-                handle = Memory.Allocate(PSHandle.SizeOf, true);
+                handle = new Handle(Memory.Allocate(PSHandle.SizeOf, true));
 
-                PSHandle* hand = (PSHandle*)handle.ToPointer();
+                PSHandle* hand = (PSHandle*)handle.Value;
 
                 hand->pointer = Memory.Allocate(size, true);
 
@@ -263,28 +273,28 @@ namespace PSFilterLoad.PSApi
             }
             catch (OutOfMemoryException)
             {
-                if (handle != IntPtr.Zero)
+                if (handle != Handle.Null)
                 {
                     // Free the handle pointer if it has been allocated.
                     // This would occur if the framework throws an OutOfMemoryException when adding to the handles dictionary.
-                    PSHandle* hand = (PSHandle*)handle.ToPointer();
+                    PSHandle* hand = (PSHandle*)handle.Value;
                     if (hand->pointer != IntPtr.Zero)
                     {
                         Memory.Free(hand->pointer);
                         hand->pointer = IntPtr.Zero;
                     }
 
-                    Memory.Free(handle);
-                    handle = IntPtr.Zero;
+                    Memory.Free(handle.Value);
+                    handle = Handle.Null;
                 }
 
-                return IntPtr.Zero;
+                return Handle.Null;
             }
 
             return handle;
         }
 
-        internal unsafe void DisposeHandle(IntPtr h)
+        internal unsafe void DisposeHandle(Handle h)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
@@ -292,7 +302,7 @@ namespace PSFilterLoad.PSApi
             DisposeHandleImpl(h);
         }
 
-        private unsafe void DisposeRegularHandle(IntPtr h)
+        private unsafe void DisposeRegularHandle(Handle h)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
@@ -300,9 +310,9 @@ namespace PSFilterLoad.PSApi
             DisposeHandleImpl(h);
         }
 
-        private unsafe void DisposeHandleImpl(IntPtr handle)
+        private unsafe void DisposeHandleImpl(Handle handle)
         {
-            if (handle != IntPtr.Zero && IsValidReadPtr(handle))
+            if (handle != Handle.Null && IsValidReadPtr(handle.Value))
             {
                 HandleEntry item;
                 if (handles.TryGetValue(handle, out item))
@@ -313,22 +323,22 @@ namespace PSFilterLoad.PSApi
                 }
                 else
                 {
-                    if (SafeNativeMethods.GlobalSize(handle).ToInt64() > 0L)
+                    if (SafeNativeMethods.GlobalSize(handle.Value).ToInt64() > 0L)
                     {
-                        IntPtr hPtr = Marshal.ReadIntPtr(handle);
+                        IntPtr hPtr = Marshal.ReadIntPtr(handle.Value);
 
                         if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
                         {
                             SafeNativeMethods.GlobalFree(hPtr);
                         }
 
-                        SafeNativeMethods.GlobalFree(handle);
+                        SafeNativeMethods.GlobalFree(handle.Value);
                     }
                 }
             }
         }
 
-        internal IntPtr LockHandle(IntPtr h, byte moveHigh)
+        internal IntPtr LockHandle(Handle h, byte moveHigh)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}, moveHigh: {1}", h.ToHexString(), moveHigh));
@@ -340,26 +350,26 @@ namespace PSFilterLoad.PSApi
             }
             else
             {
-                if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
+                if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)
                 {
-                    IntPtr hPtr = Marshal.ReadIntPtr(h);
+                    IntPtr hPtr = Marshal.ReadIntPtr(h.Value);
 
                     if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
                     {
                         return SafeNativeMethods.GlobalLock(hPtr);
                     }
 
-                    return SafeNativeMethods.GlobalLock(h);
+                    return SafeNativeMethods.GlobalLock(h.Value);
                 }
-                if (IsValidReadPtr(h) && IsValidWritePtr(h)) // Pointer to a pointer?
+                if (IsValidReadPtr(h.Value) && IsValidWritePtr(h.Value)) // Pointer to a pointer?
                 {
-                    return h;
+                    return h.Value;
                 }
                 return IntPtr.Zero;
             }
         }
 
-        internal int GetHandleSize(IntPtr h)
+        internal int GetHandleSize(Handle h)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
@@ -371,9 +381,9 @@ namespace PSFilterLoad.PSApi
             }
             else
             {
-                if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
+                if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)
                 {
-                    IntPtr hPtr = Marshal.ReadIntPtr(h);
+                    IntPtr hPtr = Marshal.ReadIntPtr(h.Value);
 
                     if (IsValidReadPtr(hPtr))
                     {
@@ -381,7 +391,7 @@ namespace PSFilterLoad.PSApi
                     }
                     else
                     {
-                        return SafeNativeMethods.GlobalSize(h).ToInt32();
+                        return SafeNativeMethods.GlobalSize(h.Value).ToInt32();
                     }
                 }
                 return 0;
@@ -395,7 +405,7 @@ namespace PSFilterLoad.PSApi
 #endif
         }
 
-        private unsafe short SetHandleSize(IntPtr h, int newSize)
+        private unsafe short SetHandleSize(Handle h, int newSize)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
@@ -409,7 +419,7 @@ namespace PSFilterLoad.PSApi
             {
                 try
                 {
-                    PSHandle* handle = (PSHandle*)h.ToPointer();
+                    PSHandle* handle = (PSHandle*)h.Value;
                     IntPtr ptr = Memory.ReAlloc(handle->pointer, newSize);
 
                     handle->pointer = ptr;
@@ -423,9 +433,9 @@ namespace PSFilterLoad.PSApi
             }
             else
             {
-                if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
+                if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)
                 {
-                    IntPtr hPtr = Marshal.ReadIntPtr(h);
+                    IntPtr hPtr = Marshal.ReadIntPtr(h.Value);
 
                     if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
                     {
@@ -434,11 +444,11 @@ namespace PSFilterLoad.PSApi
                         {
                             return PSError.memFullErr;
                         }
-                        Marshal.WriteIntPtr(h, hMem);
+                        Marshal.WriteIntPtr(h.Value, hMem);
                     }
                     else
                     {
-                        if (SafeNativeMethods.GlobalReAlloc(h, new UIntPtr((uint)newSize), NativeConstants.GPTR) == IntPtr.Zero)
+                        if (SafeNativeMethods.GlobalReAlloc(h.Value, new UIntPtr((uint)newSize), NativeConstants.GPTR) == IntPtr.Zero)
                         {
                             return PSError.memFullErr;
                         }
@@ -453,16 +463,16 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        internal void UnlockHandle(IntPtr h)
+        internal void UnlockHandle(Handle h)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
 #endif
             if (!AllocatedBySuite(h))
             {
-                if (SafeNativeMethods.GlobalSize(h).ToInt64() > 0L)
+                if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)
                 {
-                    IntPtr hPtr = Marshal.ReadIntPtr(h);
+                    IntPtr hPtr = Marshal.ReadIntPtr(h.Value);
 
                     if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
                     {
@@ -470,13 +480,13 @@ namespace PSFilterLoad.PSApi
                     }
                     else
                     {
-                        SafeNativeMethods.GlobalUnlock(h);
+                        SafeNativeMethods.GlobalUnlock(h.Value);
                     }
                 }
             }
         }
 
-        private void OnSuiteHandleDisposed(IntPtr handle)
+        private void OnSuiteHandleDisposed(Handle handle)
         {
             EventHandler<HandleDisposedEventArgs> handler = SuiteHandleDisposed;
 

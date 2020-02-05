@@ -24,25 +24,25 @@ namespace PSFilterLoad.PSApi
     internal delegate void RecoverSpaceProc(int size);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate IntPtr NewPIHandleProc(int size);
+    internal delegate Handle NewPIHandleProc(int size);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate void DisposePIHandleProc(IntPtr h);
+    internal delegate void DisposePIHandleProc(Handle h);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int GetPIHandleSizeProc(IntPtr h);
+    internal delegate int GetPIHandleSizeProc(Handle h);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short SetPIHandleSizeProc(IntPtr h, int newSize);
+    internal delegate short SetPIHandleSizeProc(Handle h, int newSize);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate IntPtr LockPIHandleProc(IntPtr h, byte moveHigh);
+    internal delegate IntPtr LockPIHandleProc(Handle h, byte moveHigh);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate void UnlockPIHandleProc(IntPtr h);
+    internal delegate void UnlockPIHandleProc(Handle h);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate void DisposeRegularPIHandleProc(IntPtr h);
+    internal delegate void DisposeRegularPIHandleProc(Handle h);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayoutAttribute(LayoutKind.Sequential)]
     internal struct HandleProcs

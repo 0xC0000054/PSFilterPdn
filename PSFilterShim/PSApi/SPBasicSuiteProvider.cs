@@ -40,7 +40,7 @@ namespace PSFilterLoad.PSApi
 
         private ActivePICASuites activePICASuites;
         private string pluginName;
-        private IntPtr descriptorHandle;
+        private Handle descriptorHandle;
         private Dictionary<uint, AETEValue> scriptingData;
         private AETEData aete;
         private DescriptorRegistryValues registryValues;
@@ -212,7 +212,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="descriptorHandle">The descriptor handle.</param>
         /// <param name="scriptingData">The scripting data.</param>
-        public void SetScriptingData(IntPtr descriptorHandle, Dictionary<uint, AETEValue> scriptingData)
+        public void SetScriptingData(Handle descriptorHandle, Dictionary<uint, AETEValue> scriptingData)
         {
             this.descriptorHandle = descriptorHandle;
             this.scriptingData = scriptingData;
@@ -224,7 +224,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="descriptorHandle">The descriptor handle.</param>
         /// <param name="scriptingData">The scripting data.</param>
         /// <returns><c>true</c> if the descriptor handle contains scripting data; otherwise, <c>false</c></returns>
-        public bool TryGetScriptingData(IntPtr descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
+        public bool TryGetScriptingData(Handle descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
         {
             if (actionSuites.DescriptorSuiteCreated)
             {

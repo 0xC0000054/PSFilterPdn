@@ -26,7 +26,7 @@ namespace PSFilterLoad.PSApi.PICA
             setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
         }
 
-        private void SetHandleLock(IntPtr handle, byte lockHandle, ref IntPtr address, ref byte oldLock)
+        private void SetHandleLock(Handle handle, byte lockHandle, ref IntPtr address, ref byte oldLock)
         {
             try
             {

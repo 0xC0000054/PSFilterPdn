@@ -64,7 +64,7 @@ namespace PSFilterLoad.PSApi
             return resourceProcsPtr;
         }
 
-        private short AddResource(uint ofType, IntPtr data)
+        private short AddResource(uint ofType, Handle data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.ResourceSuite, DebugUtils.PropToString(ofType));
@@ -139,7 +139,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private IntPtr GetResource(uint ofType, short index)
+        private Handle GetResource(uint ofType, short index)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", DebugUtils.PropToString(ofType), index));
@@ -150,8 +150,8 @@ namespace PSFilterLoad.PSApi
             {
                 byte[] data = res.GetData();
 
-                IntPtr h = HandleSuite.Instance.NewHandle(data.Length);
-                if (h != IntPtr.Zero)
+                Handle h = HandleSuite.Instance.NewHandle(data.Length);
+                if (h != Handle.Null)
                 {
                     Marshal.Copy(data, 0, HandleSuite.Instance.LockHandle(h, 0), data.Length);
                     HandleSuite.Instance.UnlockHandle(h);
@@ -160,7 +160,7 @@ namespace PSFilterLoad.PSApi
                 return h;
             }
 
-            return IntPtr.Zero;
+            return Handle.Null;
         }
     }
 }

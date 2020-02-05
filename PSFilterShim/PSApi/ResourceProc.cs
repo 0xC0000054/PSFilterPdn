@@ -23,13 +23,13 @@ namespace PSFilterLoad.PSApi
     internal delegate short CountPIResourcesProc(uint type);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate IntPtr GetPIResourceProc(uint type, short index);
+    internal delegate Handle GetPIResourceProc(uint type, short index);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void DeletePIResourceProc(uint type, short index);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short AddPIResourceProc(uint type, IntPtr data);
+    internal delegate short AddPIResourceProc(uint type, Handle data);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayout(LayoutKind.Sequential)]
     internal struct ResourceProcs

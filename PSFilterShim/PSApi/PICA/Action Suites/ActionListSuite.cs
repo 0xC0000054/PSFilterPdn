@@ -506,7 +506,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int PutAlias(PIActionList list, IntPtr aliasHandle)
+        private int PutAlias(PIActionList list, Handle aliasHandle)
         {
             try
             {
@@ -840,7 +840,7 @@ namespace PSFilterLoad.PSApi.PICA
             return GetClass(list, index, ref data);
         }
 
-        private int GetAlias(PIActionList list, uint index, ref IntPtr data)
+        private int GetAlias(PIActionList list, uint index, ref Handle data)
         {
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
@@ -848,7 +848,7 @@ namespace PSFilterLoad.PSApi.PICA
                 byte[] bytes = (byte[])items[(int)index].Value;
                 data = HandleSuite.Instance.NewHandle(bytes.Length);
 
-                if (data == IntPtr.Zero)
+                if (data == Handle.Null)
                 {
                     return PSError.memFullErr;
                 }

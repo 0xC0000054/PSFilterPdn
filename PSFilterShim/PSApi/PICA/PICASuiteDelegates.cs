@@ -64,7 +64,7 @@ namespace PSFilterLoad.PSApi.PICA
 
     #region HandleSuite Delegates
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate void SetPIHandleLockDelegate(IntPtr handle, byte lockHandle, ref IntPtr address, ref byte oldLock);
+    internal delegate void SetPIHandleLockDelegate(Handle handle, byte lockHandle, ref IntPtr address, ref byte oldLock);
     #endregion
 
     #region UIHooks Delegates

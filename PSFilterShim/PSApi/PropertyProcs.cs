@@ -21,10 +21,10 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetPropertyProc(uint signature, uint key, int index, ref IntPtr simpleProperty, ref IntPtr complexProperty);
+    internal delegate short GetPropertyProc(uint signature, uint key, int index, ref IntPtr simpleProperty, ref Handle complexProperty);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short SetPropertyProc(uint signature, uint key, int index, IntPtr simpleProperty, IntPtr complexProperty);
+    internal delegate short SetPropertyProc(uint signature, uint key, int index, IntPtr simpleProperty, Handle complexProperty);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayout(LayoutKind.Sequential)]
     internal struct PropertyProcs

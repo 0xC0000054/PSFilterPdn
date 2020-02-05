@@ -93,7 +93,7 @@ namespace PSFilterLoad.PSApi
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        private unsafe short PropertyGetProc(uint signature, uint key, int index, ref IntPtr simpleProperty, ref IntPtr complexProperty)
+        private unsafe short PropertyGetProc(uint signature, uint key, int index, ref IntPtr simpleProperty, ref Handle complexProperty)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.PropertySuite, string.Format("Sig: {0}, Key: {1}, Index: {2}", DebugUtils.PropToString(signature), DebugUtils.PropToString(key), index.ToString()));
@@ -112,7 +112,7 @@ namespace PSFilterLoad.PSApi
                     simpleProperty = new IntPtr(new Fixed16(PSConstants.Properties.BigNudgeDistance).Value);
                     break;
                 case PSProperties.Caption:
-                    if (complexProperty != IntPtr.Zero)
+                    if (complexProperty != Handle.Null)
                     {
                         complexProperty = HandleSuite.Instance.NewHandle(0);
                     }
@@ -143,7 +143,7 @@ namespace PSFilterLoad.PSApi
 
                     complexProperty = HandleSuite.Instance.NewHandle(bytes.Length);
 
-                    if (complexProperty == IntPtr.Zero)
+                    if (complexProperty == Handle.Null)
                     {
                         return PSError.memFullErr;
                     }
@@ -157,7 +157,7 @@ namespace PSFilterLoad.PSApi
                     break;
                 case PSProperties.EXIFData:
                 case PSProperties.XMPData:
-                    if (complexProperty != IntPtr.Zero)
+                    if (complexProperty != Handle.Null)
                     {
                         // If the complexProperty is not IntPtr.Zero we return a valid zero byte handle, otherwise some filters will crash with an access violation.
                         complexProperty = HandleSuite.Instance.NewHandle(0);
@@ -197,7 +197,7 @@ namespace PSFilterLoad.PSApi
                     bytes = Encoding.ASCII.GetBytes(HostSerial);
                     complexProperty = HandleSuite.Instance.NewHandle(bytes.Length);
 
-                    if (complexProperty == IntPtr.Zero)
+                    if (complexProperty == Handle.Null)
                     {
                         return PSError.memFullErr;
                     }
@@ -206,7 +206,7 @@ namespace PSFilterLoad.PSApi
                     HandleSuite.Instance.UnlockHandle(complexProperty);
                     break;
                 case PSProperties.URL:
-                    if (complexProperty != IntPtr.Zero)
+                    if (complexProperty != Handle.Null)
                     {
                         complexProperty = HandleSuite.Instance.NewHandle(0);
                     }
@@ -224,7 +224,7 @@ namespace PSFilterLoad.PSApi
                     }
                     complexProperty = HandleSuite.Instance.NewHandle(bytes.Length);
 
-                    if (complexProperty == IntPtr.Zero)
+                    if (complexProperty == Handle.Null)
                     {
                         return PSError.memFullErr;
                     }
@@ -255,7 +255,7 @@ namespace PSFilterLoad.PSApi
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        private short PropertySetProc(uint signature, uint key, int index, IntPtr simpleProperty, IntPtr complexProperty)
+        private short PropertySetProc(uint signature, uint key, int index, IntPtr simpleProperty, Handle complexProperty)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.PropertySuite, string.Format("Sig: {0}, Key: {1}, Index: {2}", DebugUtils.PropToString(signature), DebugUtils.PropToString(key), index.ToString()));

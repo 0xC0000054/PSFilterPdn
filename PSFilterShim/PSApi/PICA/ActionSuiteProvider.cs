@@ -148,7 +148,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <param name="zstringSuite">The ASZString suite instance.</param>
         /// <exception cref="ArgumentNullException"><paramref name="zstringSuite"/> is null.</exception>
         /// <exception cref="ObjectDisposedException">The class has been disposed.</exception>
-        public void CreateDescriptorSuite(AETEData aete, IntPtr descriptorHandle, Dictionary<uint, AETEValue> scriptingData, IASZStringSuite zstringSuite)
+        public void CreateDescriptorSuite(AETEData aete, Handle descriptorHandle, Dictionary<uint, AETEValue> scriptingData, IASZStringSuite zstringSuite)
         {
             if (zstringSuite == null)
             {

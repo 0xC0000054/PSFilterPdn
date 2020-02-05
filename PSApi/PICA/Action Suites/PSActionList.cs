@@ -90,7 +90,7 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionListPutGlobalClass(PIActionList list, uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListPutAlias(PIActionList list, IntPtr value);
+    internal delegate int ActionListPutAlias(PIActionList list, Handle value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionListGetInteger(PIActionList list, uint index, ref int value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -118,7 +118,7 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionListGetGlobalClass(PIActionList list, uint index, ref uint value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionListGetAlias(PIActionList list, uint index, ref IntPtr aliasHandle);
+    internal delegate int ActionListGetAlias(PIActionList list, uint index, ref Handle aliasHandle);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionListPutIntegers(PIActionList list, uint count, IntPtr value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

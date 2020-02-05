@@ -102,7 +102,7 @@ namespace PSFilterLoad.PSApi
     internal delegate PIWriteDescriptor OpenWriteDescriptorProc();
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short CloseWriteDescriptorProc([In()] PIWriteDescriptor descriptor, [In(), Out()] ref IntPtr descriptorHandle);
+    internal delegate short CloseWriteDescriptorProc([In()] PIWriteDescriptor descriptor, [In(), Out()] ref Handle descriptorHandle);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short PutIntegerProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] int data);
@@ -117,10 +117,10 @@ namespace PSFilterLoad.PSApi
     internal delegate short PutBooleanProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] byte data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutTextProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] IntPtr data);
+    internal delegate short PutTextProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] Handle data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutAliasProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] IntPtr data);
+    internal delegate short PutAliasProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] Handle data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short PutEnumeratedProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] uint type, [In()] uint data);
@@ -132,7 +132,7 @@ namespace PSFilterLoad.PSApi
     internal delegate short PutSimpleReferenceProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] ref PIDescriptorSimpleReference data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutObjectProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] uint type, [In()] IntPtr data);
+    internal delegate short PutObjectProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] uint type, [In()] Handle data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short PutCountProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] uint count);
@@ -144,7 +144,7 @@ namespace PSFilterLoad.PSApi
     internal delegate short PutScopedClassProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] uint type);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutScopedObjectProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] uint type, [In()] IntPtr data);
+    internal delegate short PutScopedObjectProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] uint type, [In()] Handle data);
 
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct PIDescriptorSimpleReference__keyData
@@ -164,7 +164,7 @@ namespace PSFilterLoad.PSApi
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate PIReadDescriptor OpenReadDescriptorProc([In()] IntPtr descriptor, [In()] IntPtr keyData);
+    internal delegate PIReadDescriptor OpenReadDescriptorProc([In()] Handle descriptor, [In()] IntPtr keyData);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short CloseReadDescriptorProc([In()] PIReadDescriptor descriptor);
@@ -186,10 +186,10 @@ namespace PSFilterLoad.PSApi
     internal delegate short GetBooleanProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref byte data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetTextProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref IntPtr data);
+    internal delegate short GetTextProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref Handle data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetAliasProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref IntPtr data);
+    internal delegate short GetAliasProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref Handle data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short GetEnumeratedProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref uint data);
@@ -201,7 +201,7 @@ namespace PSFilterLoad.PSApi
     internal delegate short GetSimpleReferenceProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref PIDescriptorSimpleReference data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetObjectProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref uint type, [In(), Out()] ref IntPtr data);
+    internal delegate short GetObjectProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref uint type, [In(), Out()] ref Handle data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short GetCountProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref uint count);
@@ -274,7 +274,7 @@ namespace PSFilterLoad.PSApi
         public short descriptorParametersVersion;
         public PlayInfo playInfo;
         public RecordInfo recordInfo;
-        public IntPtr descriptor;
+        public Handle descriptor;
         public IntPtr writeDescriptorProcs;
         public IntPtr readDescriptorProcs;
     }

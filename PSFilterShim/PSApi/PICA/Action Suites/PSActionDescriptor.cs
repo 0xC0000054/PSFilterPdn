@@ -123,7 +123,7 @@ namespace PSFilterLoad.PSApi.PICA
     internal delegate int ActionDescriptorPutGlobalClass(PIActionDescriptor descriptor, uint key, uint value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorPutAlias(PIActionDescriptor descriptor, uint key, IntPtr value);
+    internal delegate int ActionDescriptorPutAlias(PIActionDescriptor descriptor, uint key, Handle value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionDescriptorGetInteger(PIActionDescriptor descriptor, uint key, ref int value);
@@ -165,7 +165,7 @@ namespace PSFilterLoad.PSApi.PICA
     internal delegate int ActionDescriptorGetGlobalClass(PIActionDescriptor descriptor, uint key, ref uint value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetAlias(PIActionDescriptor descriptor, uint key, ref IntPtr value);
+    internal delegate int ActionDescriptorGetAlias(PIActionDescriptor descriptor, uint key, ref Handle value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionDescriptorHasKeys(PIActionDescriptor descriptor, IntPtr requiredKeys, ref byte hasKeys);
@@ -177,10 +177,10 @@ namespace PSFilterLoad.PSApi.PICA
     internal delegate int ActionDescriptorGetIntegers(PIActionDescriptor descriptor, uint key, uint count, IntPtr value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorAsHandle(PIActionDescriptor descriptor, ref IntPtr value);
+    internal delegate int ActionDescriptorAsHandle(PIActionDescriptor descriptor, ref Handle value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorHandleToDescriptor(IntPtr value, ref PIActionDescriptor descriptor);
+    internal delegate int ActionDescriptorHandleToDescriptor(Handle value, ref PIActionDescriptor descriptor);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionDescriptorPutZString(PIActionDescriptor descriptor, uint key, ASZString zstring);

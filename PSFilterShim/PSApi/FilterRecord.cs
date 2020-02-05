@@ -27,7 +27,7 @@ namespace PSFilterLoad.PSApi
         public int serial;
         public IntPtr abortProc;
         public IntPtr progressProc;
-        public IntPtr parameters;
+        public Handle parameters;
         public Point16 imageSize;
         public short planes;
         public Rect16 filterRect;
