@@ -411,7 +411,42 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Replace(ASZString zstr, uint index, ASZString replacement)
         {
-            return PSError.kASNotImplmented;
+            // Inserting an empty string is a no-op.
+            if (replacement != Empty)
+            {
+                if (strings.TryGetValue(replacement, out ZString source) &&
+                    strings.TryGetValue(zstr, out ZString target))
+                {
+                    string valueToInsert = source.Data;
+                    string originalValue = target.Data;
+
+                    if (valueToInsert != null && originalValue != null)
+                    {
+                        if (index <= (uint)originalValue.Length)
+                        {
+                            try
+                            {
+                                target.Data = originalValue.Insert((int)index, valueToInsert);
+                                strings[zstr] = target;
+                            }
+                            catch (OutOfMemoryException)
+                            {
+                                return PSError.kASOutOfMemory;
+                            }
+                        }
+                        else
+                        {
+                            return PSError.kASBadParameter;
+                        }
+                    }
+                }
+                else
+                {
+                    return PSError.kASBadParameter;
+                }
+            }
+
+            return PSError.kASNoErr;
         }
 
         private int TrimEllipsis(ASZString zstr)
@@ -604,6 +639,19 @@ namespace PSFilterLoad.PSApi.PICA
 
         private bool WillReplace(ASZString zstr, uint index)
         {
+            if (zstr != Empty)
+            {
+                ZString item;
+                if (strings.TryGetValue(zstr, out item))
+                {
+                    string value = item.Data;
+                    if (value != null)
+                    {
+                        return index <= (uint)value.Length;
+                    }
+                }
+            }
+
             return false;
         }
 
