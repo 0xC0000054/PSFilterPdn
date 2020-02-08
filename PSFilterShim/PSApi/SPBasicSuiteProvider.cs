@@ -468,7 +468,7 @@ namespace PSFilterLoad.PSApi
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;
@@ -536,7 +536,7 @@ namespace PSFilterLoad.PSApi
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;
@@ -562,7 +562,7 @@ namespace PSFilterLoad.PSApi
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;

@@ -382,7 +382,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;
@@ -417,7 +417,7 @@ namespace PSFilterLoad.PSApi.PICA
                 }
                 catch (OutOfMemoryException)
                 {
-                    return PSError.memFullErr;
+                    return PSError.kSPOutOfMemoryError;
                 }
 
                 return PSError.kSPNoError;
@@ -434,7 +434,7 @@ namespace PSFilterLoad.PSApi.PICA
             handle = HandleSuite.Instance.NewHandle(1);
             if (handle == Handle.Null)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
             try
             {
@@ -442,7 +442,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;
@@ -601,7 +601,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
             return PSError.kSPNoError;
         }
@@ -617,7 +617,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
             return PSError.kSPNoError;
         }
@@ -635,7 +635,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
             return PSError.kSPNoError;
         }
@@ -660,7 +660,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;
@@ -677,7 +677,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
             return PSError.kSPNoError;
         }
@@ -701,7 +701,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;
@@ -722,7 +722,7 @@ namespace PSFilterLoad.PSApi.PICA
                 }
                 catch (OutOfMemoryException)
                 {
-                    return PSError.memFullErr;
+                    return PSError.kSPOutOfMemoryError;
                 }
             }
             else
@@ -750,7 +750,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
             return PSError.kSPNoError;
         }
@@ -774,7 +774,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;
@@ -791,7 +791,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;
@@ -808,7 +808,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;
@@ -838,7 +838,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
             return PSError.kSPNoError;
         }
@@ -872,7 +872,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;
@@ -895,7 +895,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPBadParameterError;
@@ -921,7 +921,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;
@@ -1066,7 +1066,7 @@ namespace PSFilterLoad.PSApi.PICA
                 }
                 catch (OutOfMemoryException)
                 {
-                    return PSError.memFullErr;
+                    return PSError.kSPOutOfMemoryError;
                 }
 
                 return PSError.kSPNoError;
@@ -1153,7 +1153,7 @@ namespace PSFilterLoad.PSApi.PICA
                 }
                 catch (OutOfMemoryException)
                 {
-                    return PSError.memFullErr;
+                    return PSError.kSPOutOfMemoryError;
                 }
 
                 return PSError.kSPNoError;
@@ -1196,7 +1196,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 if (data == Handle.Null)
                 {
-                    return PSError.memFullErr;
+                    return PSError.kSPOutOfMemoryError;
                 }
 
                 Marshal.Copy((byte[])item.Value, 0, HandleSuite.Instance.LockHandle(data, 0), size);
@@ -1252,7 +1252,7 @@ namespace PSFilterLoad.PSApi.PICA
                 }
                 catch (OutOfMemoryException)
                 {
-                    return PSError.memFullErr;
+                    return PSError.kSPOutOfMemoryError;
                 }
 
                 return PSError.kSPNoError;

@@ -60,6 +60,7 @@ namespace PSFilterLoad.PSApi
         public const int kSPNoError = 0;
         public const int kSPBadParameterError = 0x5061726d;
         public const int kSPLogicError = 0x66626172;
+        public const int kSPOutOfMemoryError = memFullErr;
         public const int kSPSuiteNotFoundError = 0x53214664;
         public const int kSPUnimplementedError = 0x21494d50;
         public const int kSPUserCanceledError = 0x73746f70;

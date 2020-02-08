@@ -65,7 +65,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             catch (OutOfMemoryException)
             {
-                return PSError.memFullErr;
+                return PSError.kSPOutOfMemoryError;
             }
 
             return PSError.kSPNoError;
