@@ -256,11 +256,18 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 try
                 {
-                    int length = SafeNativeMethods.lstrlenA(cstrValue);
-                    byte[] bytes = new byte[length];
-                    Marshal.Copy(cstrValue, bytes, 0, length);
+                    if (StringUtil.TryGetCStringLength(cstrValue, out int length))
+                    {
+                        byte[] bytes = new byte[length];
+                        Marshal.Copy(cstrValue, bytes, 0, length);
 
-                    actionReferences[reference].Add(new ActionReferenceItem(ActionReferenceForm.Name, desiredClass, bytes));
+                        actionReferences[reference].Add(new ActionReferenceItem(ActionReferenceForm.Name, desiredClass, bytes));
+                    }
+                    else
+                    {
+                        // The string length exceeds int.MaxValue.
+                        return PSError.kSPOutOfMemoryError;
+                    }
                 }
                 catch (OutOfMemoryException)
                 {

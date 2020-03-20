@@ -76,5 +76,44 @@ namespace PSFilterLoad.PSApi
 
             return TrimWhiteSpaceAndNull(new string((sbyte*)ptr, 1, length, Windows1252Encoding));
         }
+
+        /// <summary>
+        /// Gets the length of a single-byte null-terminated C string.
+        /// </summary>
+        /// <param name="ptr">The pointer to read from.</param>
+        /// <param name="length">The string length.</param>
+        /// <returns>
+        /// <c>true</c> if the pointer is not <see cref="IntPtr.Zero"/> and the string length
+        /// is less than or equal to <see cref="int.MaxValue"/>; otherwise, <c>false</c>.
+        /// </returns>
+        internal static unsafe bool TryGetCStringLength(IntPtr ptr, out int length)
+        {
+            if (ptr == IntPtr.Zero)
+            {
+                length = 0;
+                return false;
+            }
+
+            const int MaxStringLength = int.MaxValue;
+
+            byte* str = (byte*)ptr;
+            int maxLength = MaxStringLength;
+
+            while (*str != 0 && maxLength > 0)
+            {
+                str++;
+                maxLength--;
+            }
+
+            if (maxLength == 0)
+            {
+                // The string is longer than MaxStringLength.
+                length = 0;
+                return false;
+            }
+
+            length = MaxStringLength - maxLength;
+            return true;
+        }
     }
 }

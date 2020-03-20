@@ -80,11 +80,6 @@ namespace PSFilterLoad.PSApi
         internal static extern bool DeleteDC(IntPtr hdc);
 
         [DllImport("kernel32.dll", ExactSpelling = true)]
-#pragma warning disable IDE1006 // Naming Styles
-        internal static extern int lstrlenA(IntPtr ptr);
-#pragma warning restore IDE1006 // Naming Styles
-
-        [DllImport("kernel32.dll", ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool GlobalMemoryStatusEx(ref NativeStructs.MEMORYSTATUSEX lpBuffer);
     }
