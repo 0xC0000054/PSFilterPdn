@@ -449,17 +449,17 @@ namespace PSFilterLoad.PSApi
                     suitePointer = activePICASuites.AllocateSuite(suiteKey, errorProcs);
                 }
 #if PICASUITEDEBUG
-				else if (suiteName.Equals(PSConstants.PICA.SPPluginsSuite, StringComparison.Ordinal))
-				{
-					if (version != 4)
-					{
-						return PSError.kSPSuiteNotFoundError;
-					}
+                else if (suiteName.Equals(PSConstants.PICA.SPPluginsSuite, StringComparison.Ordinal))
+                {
+                    if (version != 4)
+                    {
+                        return PSError.kSPSuiteNotFoundError;
+                    }
 
-					SPPluginsSuite4 plugs = PICASPPluginsSuite.CreateSPPluginsSuite4();
+                    SPPluginsSuite4 plugs = PICASPPluginsSuite.CreateSPPluginsSuite4();
 
-					suite = activePICASuites.AllocateSuite(suiteKey, plugs);
-				}
+                    suite = activePICASuites.AllocateSuite(suiteKey, plugs);
+                }
 #endif
                 else
                 {
