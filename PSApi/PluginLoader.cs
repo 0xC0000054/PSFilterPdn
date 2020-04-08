@@ -446,7 +446,7 @@ namespace PSFilterLoad.PSApi
                 }
                 else if (propKey == query.platformEntryPoint)
                 {
-                    entryPoint = Marshal.PtrToStringAnsi((IntPtr)dataPtr, propertyLength).TrimEnd('\0');
+                    entryPoint = StringUtil.FromCString(dataPtr, propertyLength, StringUtil.StringTrimOption.NullTerminator);
                     // If it is a 32-bit plug-in on a 64-bit OS run it with the 32-bit shim.
                     runWith32BitShim = IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty;
                 }
@@ -506,7 +506,7 @@ namespace PSFilterLoad.PSApi
                     if (term->version == PSConstants.LatestTerminologyVersion)
                     {
 #if DEBUG
-                        string aeteName = Marshal.PtrToStringAnsi(new IntPtr(dataPtr + PITerminology.SizeOf)).TrimEnd('\0');
+                        string aeteName = StringUtil.FromCString(new IntPtr(dataPtr + PITerminology.SizeOf), StringUtil.StringTrimOption.NullTerminator);
 #endif
                         PluginAETE pluginAETE = ParseAETEResource(hModule, term->terminologyID);
 
@@ -518,7 +518,7 @@ namespace PSFilterLoad.PSApi
                 }
                 else if (propKey == PIPropertyID.PIEnableInfoProperty)
                 {
-                    enableInfo = Marshal.PtrToStringAnsi((IntPtr)dataPtr, propertyLength).TrimEnd('\0');
+                    enableInfo = StringUtil.FromCString(dataPtr, propertyLength, StringUtil.StringTrimOption.NullTerminator);
                 }
                 else if (propKey == PIPropertyID.PIRequiredHostProperty)
                 {
@@ -663,7 +663,7 @@ namespace PSFilterLoad.PSApi
 
             IntPtr resPtr = new IntPtr(filterLock.ToInt64() + 2L);
 
-            string title = StringUtil.FromCString(resPtr);
+            string title = StringUtil.FromCString(resPtr, StringUtil.StringTrimOption.WhiteSpaceAndNullTerminator);
             // The entry point number is the same as the resource number.
             string entryPoint = "ENTRYPOINT" + lpszName.ToInt32().ToString(CultureInfo.InvariantCulture);
 
