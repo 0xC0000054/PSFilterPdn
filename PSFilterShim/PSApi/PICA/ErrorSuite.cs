@@ -72,7 +72,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (str != IntPtr.Zero)
             {
-                errorMessage = Marshal.PtrToStringAnsi(str);
+                errorMessage = StringUtil.FromCString(str);
 
                 return PSError.kSPNoError;
             }

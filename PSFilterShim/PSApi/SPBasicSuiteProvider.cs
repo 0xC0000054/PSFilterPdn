@@ -237,7 +237,7 @@ namespace PSFilterLoad.PSApi
 
         private int SPBasicAcquireSuite(IntPtr name, int version, ref IntPtr suite)
         {
-            string suiteName = Marshal.PtrToStringAnsi(name);
+            string suiteName = StringUtil.FromCString(name);
             if (suiteName == null)
             {
                 return PSError.kSPBadParameterError;
@@ -476,7 +476,7 @@ namespace PSFilterLoad.PSApi
 
         private int SPBasicReleaseSuite(IntPtr name, int version)
         {
-            string suiteName = Marshal.PtrToStringAnsi(name);
+            string suiteName = StringUtil.FromCString(name);
 
 #if DEBUG
             DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("name: {0}, version: {1}", suiteName, version.ToString()));
@@ -492,7 +492,7 @@ namespace PSFilterLoad.PSApi
         private unsafe bool SPBasicIsEqual(IntPtr token1, IntPtr token2)
         {
 #if DEBUG
-            DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("token1: {0}, token2: {1}", Marshal.PtrToStringAnsi(token1), Marshal.PtrToStringAnsi(token2)));
+            DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("token1: {0}, token2: {1}", StringUtil.FromCString(token1), StringUtil.FromCString(token2)));
 #endif
             if (token1 == IntPtr.Zero)
             {
