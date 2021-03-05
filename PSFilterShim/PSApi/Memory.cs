@@ -20,6 +20,7 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterShim;
 using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -104,7 +105,7 @@ namespace PSFilterLoad.PSApi
 
             if (size > 0L)
             {
-                GC.AddMemoryPressure((long)size);
+                MemoryPressureManager.AddMemoryPressure((long)size);
             }
 
             return block;
@@ -126,7 +127,7 @@ namespace PSFilterLoad.PSApi
 
             if (size > 0L)
             {
-                GC.AddMemoryPressure(size);
+                MemoryPressureManager.AddMemoryPressure(size);
             }
 
             return block;
@@ -150,7 +151,7 @@ namespace PSFilterLoad.PSApi
 
                 if (size > 0L)
                 {
-                    GC.RemoveMemoryPressure(size);
+                    MemoryPressureManager.RemoveMemoryPressure(size);
                 }
             }
         }
@@ -170,7 +171,7 @@ namespace PSFilterLoad.PSApi
 
             if (size > 0L)
             {
-                GC.RemoveMemoryPressure(size);
+                MemoryPressureManager.RemoveMemoryPressure(size);
             }
         }
 
@@ -206,12 +207,12 @@ namespace PSFilterLoad.PSApi
 
             if (oldSize > 0L)
             {
-                GC.RemoveMemoryPressure(oldSize);
+                MemoryPressureManager.RemoveMemoryPressure(oldSize);
             }
 
             if (newSize > 0)
             {
-                GC.AddMemoryPressure(newSize);
+                MemoryPressureManager.AddMemoryPressure(newSize);
             }
 
             return block;

@@ -21,6 +21,7 @@
 
 //#define REPORTLEAKS
 
+using PSFilterShim;
 using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -84,7 +85,7 @@ namespace PaintDotNet.SystemLayer
 
             if (bytes > 0)
             {
-                GC.AddMemoryPressure((long)bytes);
+                MemoryPressureManager.AddMemoryPressure((long)bytes);
             }
 
             return block;
@@ -112,7 +113,7 @@ namespace PaintDotNet.SystemLayer
 
             if (bytes > 0)
             {
-                GC.AddMemoryPressure((long)bytes);
+                MemoryPressureManager.AddMemoryPressure((long)bytes);
             }
 
             return block;
@@ -139,7 +140,7 @@ namespace PaintDotNet.SystemLayer
 
                 if (bytes > 0)
                 {
-                    GC.RemoveMemoryPressure(bytes);
+                    MemoryPressureManager.RemoveMemoryPressure(bytes);
                 }
             }
             else
@@ -167,7 +168,7 @@ namespace PaintDotNet.SystemLayer
 
             if (bytes > 0)
             {
-                GC.RemoveMemoryPressure((long)bytes);
+                MemoryPressureManager.RemoveMemoryPressure((long)bytes);
             }
         }
 

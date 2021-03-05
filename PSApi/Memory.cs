@@ -104,7 +104,7 @@ namespace PSFilterLoad.PSApi
 
             if (size > 0L)
             {
-                GC.AddMemoryPressure((long)size);
+                MemoryPressureManager.AddMemoryPressure((long)size);
             }
 
             return block;
@@ -126,7 +126,7 @@ namespace PSFilterLoad.PSApi
 
             if (size > 0)
             {
-                GC.AddMemoryPressure(size);
+                MemoryPressureManager.AddMemoryPressure(size);
             }
 
             return block;
@@ -149,7 +149,7 @@ namespace PSFilterLoad.PSApi
 
             if (bytes > 0)
             {
-                GC.AddMemoryPressure((long)bytes);
+                MemoryPressureManager.AddMemoryPressure((long)bytes);
             }
 
             return block;
@@ -173,7 +173,7 @@ namespace PSFilterLoad.PSApi
 
                 if (size > 0L)
                 {
-                    GC.RemoveMemoryPressure(size);
+                    MemoryPressureManager.RemoveMemoryPressure(size);
                 }
             }
         }
@@ -193,7 +193,7 @@ namespace PSFilterLoad.PSApi
 
             if (size > 0L)
             {
-                GC.RemoveMemoryPressure(size);
+                MemoryPressureManager.RemoveMemoryPressure(size);
             }
         }
 
@@ -212,7 +212,7 @@ namespace PSFilterLoad.PSApi
 
             if (bytes > 0)
             {
-                GC.RemoveMemoryPressure((long)bytes);
+                MemoryPressureManager.RemoveMemoryPressure((long)bytes);
             }
         }
 
@@ -248,12 +248,12 @@ namespace PSFilterLoad.PSApi
 
             if (oldSize > 0L)
             {
-                GC.RemoveMemoryPressure(oldSize);
+                MemoryPressureManager.RemoveMemoryPressure(oldSize);
             }
 
             if (newSize > 0)
             {
-                GC.AddMemoryPressure(newSize);
+                MemoryPressureManager.AddMemoryPressure(newSize);
             }
 
             return block;
@@ -307,6 +307,52 @@ namespace PSFilterLoad.PSApi
         public static void SetToZero(IntPtr ptr, ulong length)
         {
             SafeNativeMethods.memset(ptr, 0, new UIntPtr(length));
+        }
+
+        // Adapted from: http://joeduffyblog.com/2005/04/08/dg-update-dispose-finalization-and-resource-management/
+        private static class MemoryPressureManager
+        {
+            private const long threshold = 524288; // only add pressure in 500KB chunks
+
+            private static long pressure;
+            private static long committedPressure;
+
+            private static readonly object sync = new object();
+
+            internal static void AddMemoryPressure(long amount)
+            {
+                System.Threading.Interlocked.Add(ref pressure, amount);
+                PressureCheck();
+            }
+
+            internal static void RemoveMemoryPressure(long amount)
+            {
+                AddMemoryPressure(-amount);
+            }
+
+            private static void PressureCheck()
+            {
+                if (Math.Abs(pressure - committedPressure) >= threshold)
+                {
+                    lock (sync)
+                    {
+                        long diff = pressure - committedPressure;
+                        if (Math.Abs(diff) >= threshold) // double check
+                        {
+                            if (diff < 0)
+                            {
+                                GC.RemoveMemoryPressure(-diff);
+                            }
+                            else
+                            {
+                                GC.AddMemoryPressure(diff);
+                            }
+
+                            committedPressure += diff;
+                        }
+                    }
+                }
+            }
         }
     }
 }
