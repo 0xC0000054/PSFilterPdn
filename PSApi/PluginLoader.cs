@@ -446,7 +446,7 @@ namespace PSFilterLoad.PSApi
                 }
                 else if (propKey == query.platformEntryPoint)
                 {
-                    entryPoint = StringUtil.FromCString(dataPtr, propertyLength, StringUtil.StringTrimOption.NullTerminator);
+                    entryPoint = StringUtil.FromCString(dataPtr);
                     // If it is a 32-bit plug-in on a 64-bit OS run it with the 32-bit shim.
                     runWith32BitShim = IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty;
                 }
@@ -506,7 +506,7 @@ namespace PSFilterLoad.PSApi
                     if (term->version == PSConstants.LatestTerminologyVersion)
                     {
 #if DEBUG
-                        string aeteName = StringUtil.FromCString(new IntPtr(dataPtr + PITerminology.SizeOf), StringUtil.StringTrimOption.NullTerminator);
+                        string aeteName = StringUtil.FromCString(dataPtr + PITerminology.SizeOf);
 #endif
                         PluginAETE pluginAETE = ParseAETEResource(hModule, term->terminologyID);
 
@@ -518,7 +518,7 @@ namespace PSFilterLoad.PSApi
                 }
                 else if (propKey == PIPropertyID.PIEnableInfoProperty)
                 {
-                    enableInfo = StringUtil.FromCString(dataPtr, propertyLength, StringUtil.StringTrimOption.NullTerminator);
+                    enableInfo = StringUtil.FromCString(dataPtr);
                 }
                 else if (propKey == PIPropertyID.PIRequiredHostProperty)
                 {

@@ -146,6 +146,37 @@ namespace PSFilterLoad.PSApi
         /// Creates a <see cref="string"/> from a C string.
         /// </summary>
         /// <param name="ptr">The pointer to read from.</param>
+        /// <returns>
+        /// A managed string that holds a copy of the C string.
+        /// </returns>
+        internal static unsafe string FromCString(byte* ptr)
+        {
+            return FromCString(ptr, StringTrimOption.None);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="string"/> from a C string.
+        /// </summary>
+        /// <param name="ptr">The pointer to read from.</param>
+        /// <param name="option">The string trim options.</param>
+        /// <returns>
+        /// A managed string that holds a copy of the C string.
+        /// </returns>
+        internal static unsafe string FromCString(byte* ptr, StringTrimOption option)
+        {
+            int length;
+            if (!TryGetCStringLength(ptr, out length))
+            {
+                return null;
+            }
+
+            return FromCString(ptr, length, option);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="string"/> from a C string.
+        /// </summary>
+        /// <param name="ptr">The pointer to read from.</param>
         /// <param name="lengthWithTerminator">The length of the resulting string including the NUL terminator.</param>
         /// <returns>
         /// A managed string that holds a copy of the C string.
@@ -238,9 +269,29 @@ namespace PSFilterLoad.PSApi
                 return false;
             }
 
+            return TryGetCStringLength((byte*)ptr, out length);
+        }
+
+        /// <summary>
+        /// Gets the length of a single-byte null-terminated C string.
+        /// </summary>
+        /// <param name="ptr">The pointer to read from.</param>
+        /// <param name="length">The string length.</param>
+        /// <returns>
+        /// <c>true</c> if the pointer is not <see langword="null"/> and the string length
+        /// is less than or equal to <see cref="int.MaxValue"/>; otherwise, <c>false</c>.
+        /// </returns>
+        internal static unsafe bool TryGetCStringLength(byte* ptr, out int length)
+        {
+            if (ptr == null)
+            {
+                length = 0;
+                return false;
+            }
+
             const int MaxStringLength = int.MaxValue;
 
-            byte* str = (byte*)ptr;
+            byte* str = ptr;
             int maxLength = MaxStringLength;
 
             while (*str != 0 && maxLength > 0)
