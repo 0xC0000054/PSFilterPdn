@@ -85,6 +85,7 @@ namespace PSFilterLoad.PSApi
         private PluginModule module;
         private PluginPhase previousPhase;
         private Action<byte> progressFunc;
+        private byte lastProgressPercentage;
         private IntPtr dataPtr;
         private short result;
 
@@ -289,6 +290,7 @@ namespace PSFilterLoad.PSApi
             lastOutRect = Rect16.Empty;
             lastInRect = Rect16.Empty;
             lastMaskRect = Rect16.Empty;
+            lastProgressPercentage = 255;
 
             maskDataPtr = inDataPtr = outDataPtr = IntPtr.Zero;
 
@@ -2832,7 +2834,13 @@ namespace PSFilterLoad.PSApi
                     progress = 100.0;
                 }
 
-                callback.Invoke((byte)progress);
+                byte progressPercentage = (byte)progress;
+
+                if (progressPercentage != lastProgressPercentage)
+                {
+                    lastProgressPercentage = progressPercentage;
+                    callback.Invoke(progressPercentage);
+                }
             }
         }
 
