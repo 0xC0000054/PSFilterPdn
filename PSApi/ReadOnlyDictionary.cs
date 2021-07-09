@@ -14,6 +14,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
 {
@@ -23,11 +24,15 @@ namespace PSFilterLoad.PSApi
     /// <typeparam name="TKey">The type of keys in the dictionary.</typeparam>
     /// <typeparam name="TValue">The type of values in the dictionary.</typeparam>
     /// <seealso cref="System.Collections.Generic.IDictionary{TKey, TValue}"/>
+    [DataContract]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
     public sealed class ReadOnlyDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
-        private readonly IDictionary<TKey, TValue> dictionary;
+#pragma warning disable IDE0044 // Add readonly modifier
+        [DataMember]
+        private IDictionary<TKey, TValue> dictionary;
+#pragma warning restore IDE0044 // Add readonly modifier
         [NonSerialized]
         private KeyCollection keys;
         [NonSerialized]

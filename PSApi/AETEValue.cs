@@ -11,16 +11,27 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
 {
+    [DataContract]
+    [KnownType(typeof(UnitFloat))]
+    [KnownType(typeof(EnumeratedValue))]
+    [KnownType(typeof(ActionDescriptorZString))]
     [Serializable]
     public sealed class AETEValue
     {
+#pragma warning disable IDE0044 // Add readonly modifier
+        [DataMember]
         private uint type;
+        [DataMember]
         private int flags;
+        [DataMember]
         private int size;
+        [DataMember]
         private object value;
+#pragma warning restore IDE0044 // Add readonly modifier
 
         public uint Type => type;
 
@@ -39,11 +50,16 @@ namespace PSFilterLoad.PSApi
         }
     }
 
+    [DataContract]
     [Serializable]
     public sealed class UnitFloat
     {
+#pragma warning disable IDE0044 // Add readonly modifier
+        [DataMember]
         private uint unit;
+        [DataMember]
         private double value;
+#pragma warning restore IDE0044 // Add readonly modifier
 
         public uint Unit => unit;
 
@@ -56,11 +72,16 @@ namespace PSFilterLoad.PSApi
         }
     }
 
+    [DataContract]
     [Serializable]
     public sealed class EnumeratedValue
     {
-        private readonly uint type;
-        private readonly uint value;
+#pragma warning disable IDE0044 // Add readonly modifier
+        [DataMember]
+        private uint type;
+        [DataMember]
+        private uint value;
+#pragma warning restore IDE0044 // Add readonly modifier
 
         public uint Type => type;
 
@@ -73,10 +94,14 @@ namespace PSFilterLoad.PSApi
         }
     }
 
+    [DataContract]
     [Serializable]
     public sealed class ActionDescriptorZString
     {
+#pragma warning disable IDE0044 // Add readonly modifier
+        [DataMember]
         private string value;
+#pragma warning restore IDE0044 // Add readonly modifier
 
         public string Value => value;
 

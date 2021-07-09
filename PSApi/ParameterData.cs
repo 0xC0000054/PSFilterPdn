@@ -12,17 +12,23 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
 {
     /// <summary>
     /// The class that holds the saved filter parameter and scripting data.
     /// </summary>
-    [Serializable]
+    [DataContract]
+    [KnownType(typeof(GlobalParameters))]
     public sealed class ParameterData
     {
+#pragma warning disable IDE0044 // Add readonly modifier
+        [DataMember]
         private GlobalParameters globalParameters;
+        [DataMember]
         private Dictionary<uint, AETEValue> aeteDictonary;
+#pragma warning restore IDE0044 // Add readonly modifier
 
         public GlobalParameters GlobalParameters => globalParameters;
 

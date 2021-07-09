@@ -126,18 +126,14 @@ namespace PSFilterPdn
                 case Command.GetPluginData:
                     using (MemoryStream stream = new MemoryStream())
                     {
-                        DataContractSerializer serializer = new DataContractSerializer(typeof(PluginData));
-                        serializer.WriteObject(stream, pluginData);
-
+                        DataContractSerializerUtil.Serialize(stream, pluginData);
                         SendReplyToClient(stream.GetBuffer(), 0, (int)stream.Length);
                     }
                     break;
                 case Command.GetSettings:
                     using (MemoryStream stream = new MemoryStream())
                     {
-                        DataContractSerializer serializer = new DataContractSerializer(typeof(PSFilterShimSettings));
-                        serializer.WriteObject(stream, settings);
-
+                        DataContractSerializerUtil.Serialize(stream, settings);
                         SendReplyToClient(stream.GetBuffer(), 0, (int)stream.Length);
                     }
                     break;

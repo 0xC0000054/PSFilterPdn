@@ -17,8 +17,6 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.ServiceModel;
 using PSFilterLoad.PSApi;
 using PSFilterPdn;
 
@@ -88,18 +86,14 @@ namespace PSFilterShim
 
             if (!string.IsNullOrEmpty(settings.RegionDataPath))
             {
-                using (FileStream fs = new FileStream(settings.RegionDataPath, FileMode.Open, FileAccess.Read, FileShare.None))
+                RegionDataWrapper wrapper = DataContractSerializerUtil.Deserialize<RegionDataWrapper>(settings.RegionDataPath);
+
+                using (Region temp = new Region())
                 {
-                    BinaryFormatter bf = new BinaryFormatter();
-                    RegionDataWrapper wrapper = (RegionDataWrapper)bf.Deserialize(fs);
+                    RegionData rgnData = temp.GetRegionData();
+                    rgnData.Data = wrapper.GetData();
 
-                    using (Region temp = new Region())
-                    {
-                        RegionData rgnData = temp.GetRegionData();
-                        rgnData.Data = wrapper.GetData();
-
-                        selectionRegion = new Region(rgnData);
-                    }
+                    selectionRegion = new Region(rgnData);
                 }
             }
             try
@@ -107,11 +101,7 @@ namespace PSFilterShim
                 ParameterData filterParameters = null;
                 try
                 {
-                    using (FileStream fs = new FileStream(settings.ParameterDataPath, FileMode.Open, FileAccess.Read, FileShare.None))
-                    {
-                        BinaryFormatter bf = new BinaryFormatter();
-                        filterParameters = (ParameterData)bf.Deserialize(fs);
-                    }
+                    filterParameters = DataContractSerializerUtil.Deserialize<ParameterData>(settings.ParameterDataPath);
                 }
                 catch (FileNotFoundException)
                 {
@@ -120,11 +110,7 @@ namespace PSFilterShim
                 PseudoResourceCollection pseudoResources = null;
                 try
                 {
-                    using (FileStream fs = new FileStream(settings.PseudoResourcePath, FileMode.Open, FileAccess.Read, FileShare.None))
-                    {
-                        BinaryFormatter bf = new BinaryFormatter();
-                        pseudoResources = (PseudoResourceCollection)bf.Deserialize(fs);
-                    }
+                    pseudoResources = DataContractSerializerUtil.Deserialize<PseudoResourceCollection>(settings.PseudoResourcePath);
                 }
                 catch (FileNotFoundException)
                 {
@@ -133,11 +119,7 @@ namespace PSFilterShim
                 DescriptorRegistryValues registryValues = null;
                 try
                 {
-                    using (FileStream fs = new FileStream(settings.DescriptorRegistryPath, FileMode.Open, FileAccess.Read, FileShare.None))
-                    {
-                        BinaryFormatter bf = new BinaryFormatter();
-                        registryValues = (DescriptorRegistryValues)bf.Deserialize(fs);
-                    }
+                    registryValues = DataContractSerializerUtil.Deserialize<DescriptorRegistryValues>(settings.DescriptorRegistryPath);
                 }
                 catch (FileNotFoundException)
                 {
@@ -188,26 +170,13 @@ namespace PSFilterShim
 
                             if (!lps.IsRepeatEffect)
                             {
-                                using (FileStream fs = new FileStream(settings.ParameterDataPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                                {
-                                    BinaryFormatter bf = new BinaryFormatter();
-                                    bf.Serialize(fs, lps.FilterParameters);
-                                }
-
-                                using (FileStream fs = new FileStream(settings.PseudoResourcePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                                {
-                                    BinaryFormatter bf = new BinaryFormatter();
-                                    bf.Serialize(fs, lps.PseudoResources);
-                                }
+                                DataContractSerializerUtil.Serialize(settings.ParameterDataPath, lps.FilterParameters);
+                                DataContractSerializerUtil.Serialize(settings.PseudoResourcePath, lps.PseudoResources);
 
                                 registryValues = lps.GetRegistryValues();
                                 if (registryValues != null)
                                 {
-                                    using (FileStream fs = new FileStream(settings.DescriptorRegistryPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                                    {
-                                        BinaryFormatter bf = new BinaryFormatter();
-                                        bf.Serialize(fs, registryValues);
-                                    }
+                                    DataContractSerializerUtil.Serialize(settings.DescriptorRegistryPath, registryValues);
                                 }
                             }
                         }

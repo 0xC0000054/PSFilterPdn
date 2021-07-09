@@ -11,14 +11,20 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
 {
+    [DataContract]
     [Serializable]
     public sealed class DescriptorRegistryItem
     {
-        private readonly ReadOnlyDictionary<uint, AETEValue> values;
-        private readonly bool isPersistent;
+#pragma warning disable IDE0044 // Add readonly modifier
+        [DataMember]
+        private ReadOnlyDictionary<uint, AETEValue> values;
+        [DataMember]
+        private bool isPersistent;
+#pragma warning restore IDE0044 // Add readonly modifier
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DescriptorRegistryItem"/> class.

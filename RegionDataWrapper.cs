@@ -10,16 +10,15 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
 using System.Drawing.Drawing2D;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace PSFilterPdn
 {
-    [Serializable]
-    public sealed class RegionDataWrapper : ISerializable
+    [DataContract]
+    public sealed class RegionDataWrapper
     {
+        [DataMember]
         private byte[] rgnData;
 
         internal RegionDataWrapper(RegionData rgn)
@@ -27,25 +26,9 @@ namespace PSFilterPdn
             rgnData = rgn.Data;
         }
 
-        private RegionDataWrapper(SerializationInfo info, StreamingContext context)
-        {
-            rgnData = (byte[])info.GetValue("rgnData", typeof(byte[]));
-        }
-
         public byte[] GetData()
         {
             return rgnData;
-        }
-
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
-
-            info.AddValue("rgnData", rgnData, typeof(byte[]));
         }
     }
 }

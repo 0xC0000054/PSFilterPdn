@@ -96,11 +96,7 @@ namespace PSFilterPdn
                     regionFileName = Path.Combine(proxyTempDir, "selection.dat");
                     RegionDataWrapper selectedRegion = new RegionDataWrapper(EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
 
-                    using (FileStream fs = new FileStream(regionFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        BinaryFormatter bf = new BinaryFormatter();
-                        bf.Serialize(fs, selectedRegion);
-                    }
+                    DataContractSerializerUtil.Serialize(regionFileName, selectedRegion);
                 }
 
                 bool proxyResult = true;
@@ -142,29 +138,17 @@ namespace PSFilterPdn
                     ParameterData parameterData;
                     if (token.FilterParameters.TryGetValue(token.FilterData, out parameterData))
                     {
-                        using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                        {
-                            BinaryFormatter bf = new BinaryFormatter();
-                            bf.Serialize(fs, parameterData);
-                        }
+                        DataContractSerializerUtil.Serialize(parameterDataFileName, parameterData);
                     }
 
                     if (token.PseudoResources.Count > 0)
                     {
-                        using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                        {
-                            BinaryFormatter bf = new BinaryFormatter();
-                            bf.Serialize(fs, token.PseudoResources);
-                        }
+                        DataContractSerializerUtil.Serialize(resourceDataFileName, token.PseudoResources);
                     }
 
                     if (token.DescriptorRegistry != null)
                     {
-                        using (FileStream fs = new FileStream(descriptorRegistryFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                        {
-                            BinaryFormatter bf = new BinaryFormatter();
-                            bf.Serialize(fs, token.DescriptorRegistry);
-                        }
+                        DataContractSerializerUtil.Serialize(descriptorRegistryFileName, token.DescriptorRegistry);
                     }
 
                     ProcessStartInfo psi = new ProcessStartInfo(shimPath, server.PipeName);
