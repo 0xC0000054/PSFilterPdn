@@ -312,8 +312,7 @@
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
     <Compile Include="PSFilterPdnSettings.cs" />
-    <Compile Include="PSFilterShimServer.cs" />
-    <Compile Include="PSFilterShimService.cs" />
+    <Compile Include="PSFilterShimPipeServer.cs" />
     <Compile Include="PSFilterShimSettings.cs" />
     <Compile Include="PSApi\PluginUISettings.cs" />
     <Compile Include="RegionDataWrapper.cs" />

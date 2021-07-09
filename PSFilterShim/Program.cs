@@ -38,12 +38,12 @@ namespace PSFilterShim
             internal const uint SEM_FAILCRITICALERRORS = 1U;
         }
 
-        static IPSFilterShim serviceProxy;
+        static PSFilterShimPipeClient pipeClient;
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = (Exception)e.ExceptionObject;
-            serviceProxy.SetProxyErrorMessage(ex.ToString());
+            pipeClient.SetProxyErrorMessage(ex.ToString());
 
             Environment.Exit(1);
         }
@@ -70,20 +70,9 @@ namespace PSFilterShim
             // Disable the critical-error-handler message box displayed when a filter cannot find a dependency.
             NativeMethods.SetErrorMode(NativeMethods.SetErrorMode(0U) | NativeMethods.SEM_FAILCRITICALERRORS);
 
-            string endpointName = args[0];
+            string pipeName = args[0];
 
-            EndpointAddress address = new EndpointAddress(endpointName);
-            NetNamedPipeBinding netNamedPipe = new NetNamedPipeBinding
-            {
-                MaxBufferPoolSize = int.MaxValue,
-                MaxBufferSize = int.MaxValue,
-                MaxReceivedMessageSize = int.MaxValue,
-            };
-            netNamedPipe.ReaderQuotas.MaxArrayLength = int.MaxValue;
-            netNamedPipe.ReaderQuotas.MaxStringContentLength = int.MaxValue;
-            netNamedPipe.Security.Mode = NetNamedPipeSecurityMode.None;
-
-            serviceProxy = ChannelFactory<IPSFilterShim>.CreateChannel(netNamedPipe, address);
+            pipeClient = new PSFilterShimPipeClient(pipeName);
 
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
@@ -92,8 +81,8 @@ namespace PSFilterShim
 
         static void RunFilter()
         {
-            PluginData pdata = serviceProxy.GetPluginData();
-            PSFilterShimSettings settings = serviceProxy.GetShimSettings();
+            PluginData pdata = pipeClient.GetPluginData();
+            PSFilterShimSettings settings = pipeClient.GetShimSettings();
 
             Region selectionRegion = null;
 
@@ -156,12 +145,12 @@ namespace PSFilterShim
 
                 using (LoadPsFilter lps = new LoadPsFilter(settings, selectionRegion))
                 {
-                    lps.SetAbortCallback(serviceProxy.AbortFilter);
+                    lps.SetAbortCallback(pipeClient.AbortFilter);
 
                     if (!settings.RepeatEffect)
                     {
                         // As Paint.NET does not currently allow custom progress reporting only set this callback for the effect dialog.
-                        lps.SetProgressCallback(serviceProxy.UpdateFilterProgress);
+                        lps.SetProgressCallback(pipeClient.UpdateFilterProgress);
                     }
 
                     if (filterParameters != null)
@@ -225,37 +214,37 @@ namespace PSFilterShim
                     }
                     else
                     {
-                        serviceProxy.SetProxyErrorMessage(lps.ErrorMessage);
+                        pipeClient.SetProxyErrorMessage(lps.ErrorMessage);
                     }
                 }
             }
             catch (BadImageFormatException ex)
             {
-                serviceProxy.SetProxyErrorMessage(ex.Message);
+                pipeClient.SetProxyErrorMessage(ex.Message);
             }
             catch (EntryPointNotFoundException epnf)
             {
-                serviceProxy.SetProxyErrorMessage(epnf.Message);
+                pipeClient.SetProxyErrorMessage(epnf.Message);
             }
             catch (FileNotFoundException fx)
             {
-                serviceProxy.SetProxyErrorMessage(fx.Message);
+                pipeClient.SetProxyErrorMessage(fx.Message);
             }
             catch (ImageSizeTooLargeException ex)
             {
-                serviceProxy.SetProxyErrorMessage(ex.Message);
+                pipeClient.SetProxyErrorMessage(ex.Message);
             }
             catch (NullReferenceException ex)
             {
 #if DEBUG
-                serviceProxy.SetProxyErrorMessage(ex.Message + Environment.NewLine + ex.StackTrace);
+                pipeClient.SetProxyErrorMessage(ex.Message + Environment.NewLine + ex.StackTrace);
 #else
-                serviceProxy.SetProxyErrorMessage(ex.Message);
+                pipeClient.SetProxyErrorMessage(ex.Message);
 #endif
             }
             catch (Win32Exception ex)
             {
-                serviceProxy.SetProxyErrorMessage(ex.Message);
+                pipeClient.SetProxyErrorMessage(ex.Message);
             }
             finally
             {

@@ -122,54 +122,57 @@ namespace PSFilterPdn
                     PluginUISettings = null
                 };
 
-                PSFilterShimService service = new PSFilterShimService(
-                    AbortCallback,
-                    token.FilterData,
-                    settings,
-                    delegate (string data) { proxyResult = false; proxyErrorMessage = data; },
-                    null);
-
-                PSFilterShimServer.Start(service);
-
-                using (FileStream fs = new FileStream(srcFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                using (Bitmap bmp = EnvironmentParameters.SourceSurface.CreateAliasedBitmap())
+                using (PSFilterShimPipeServer server = new PSFilterShimPipeServer(AbortCallback,
+                                                                                  token.FilterData,
+                                                                                  settings,
+                                                                                  delegate (string data)
+                                                                                  {
+                                                                                      proxyResult = false;
+                                                                                      proxyErrorMessage = data;
+                                                                                  },
+                                                                                  null))
                 {
-                    bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
-                }
 
-                ParameterData parameterData;
-                if (token.FilterParameters.TryGetValue(token.FilterData, out parameterData))
-                {
-                    using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    using (FileStream fs = new FileStream(srcFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    using (Bitmap bmp = EnvironmentParameters.SourceSurface.CreateAliasedBitmap())
                     {
-                        BinaryFormatter bf = new BinaryFormatter();
-                        bf.Serialize(fs, parameterData);
+                        bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
                     }
-                }
 
-                if (token.PseudoResources.Count > 0)
-                {
-                    using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    ParameterData parameterData;
+                    if (token.FilterParameters.TryGetValue(token.FilterData, out parameterData))
                     {
-                        BinaryFormatter bf = new BinaryFormatter();
-                        bf.Serialize(fs, token.PseudoResources);
+                        using (FileStream fs = new FileStream(parameterDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            BinaryFormatter bf = new BinaryFormatter();
+                            bf.Serialize(fs, parameterData);
+                        }
                     }
-                }
 
-                if (token.DescriptorRegistry != null)
-                {
-                    using (FileStream fs = new FileStream(descriptorRegistryFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    if (token.PseudoResources.Count > 0)
                     {
-                        BinaryFormatter bf = new BinaryFormatter();
-                        bf.Serialize(fs, token.DescriptorRegistry);
+                        using (FileStream fs = new FileStream(resourceDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            BinaryFormatter bf = new BinaryFormatter();
+                            bf.Serialize(fs, token.PseudoResources);
+                        }
                     }
-                }
 
-                ProcessStartInfo psi = new ProcessStartInfo(shimPath, PSFilterShimServer.EndpointName);
+                    if (token.DescriptorRegistry != null)
+                    {
+                        using (FileStream fs = new FileStream(descriptorRegistryFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            BinaryFormatter bf = new BinaryFormatter();
+                            bf.Serialize(fs, token.DescriptorRegistry);
+                        }
+                    }
 
-                using (Process proxy = Process.Start(psi))
-                {
-                    proxy.WaitForExit();
+                    ProcessStartInfo psi = new ProcessStartInfo(shimPath, server.PipeName);
+
+                    using (Process proxy = Process.Start(psi))
+                    {
+                        proxy.WaitForExit();
+                    }
                 }
 
                 if (proxyResult && File.Exists(destFileName))
@@ -222,8 +225,6 @@ namespace PSFilterPdn
                     {
                     }
                 }
-
-                PSFilterShimServer.Stop();
             }
         }
 

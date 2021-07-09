@@ -68,6 +68,7 @@ namespace PSFilterPdn
         private string proxyErrorMessage;
         private Process proxyProcess;
         private bool proxyRunning;
+        private PSFilterShimPipeServer server;
         private string srcFileName;
         private string destFileName;
         private string parameterDataFileName;
@@ -570,12 +571,15 @@ namespace PSFilterPdn
             return formClosePending;
         }
 
-        private void UpdateProgress(int done, int total)
+        private void UpdateProgress(byte progressPercentage)
         {
-            double progress = ((double)done / (double)total) * 100.0;
-            if (progress.IsFinite())
+            if (InvokeRequired)
             {
-                filterProgressBar.Value = (int)progress.Clamp(0.0, 100.0);
+                Invoke(new Action(() => filterProgressBar.Value = progressPercentage));
+            }
+            else
+            {
+                filterProgressBar.Value = progressPercentage;
             }
         }
 
@@ -594,7 +598,8 @@ namespace PSFilterPdn
                     SetProxyResultData();
                 }
 
-                PSFilterShimServer.Stop();
+                server.Dispose();
+                server = null;
 
                 proxyRunning = false;
 
@@ -694,9 +699,14 @@ namespace PSFilterPdn
                 PluginUISettings = new PluginUISettings(highDpiMode, BackColor, ForeColor)
             };
 
-            PSFilterShimService service = new PSFilterShimService(AbortCallback, data, settings, SetProxyErrorResult, UpdateProgress);
+            if (server != null)
+            {
+                server.Dispose();
+                server = null;
+            }
 
-            PSFilterShimServer.Start(service);
+            server = new PSFilterShimPipeServer(AbortCallback, data, settings, SetProxyErrorResult, UpdateProgress);
+
             proxyData = data;
             try
             {
@@ -734,7 +744,7 @@ namespace PSFilterPdn
                     }
                 }
 
-                ProcessStartInfo psi = new ProcessStartInfo(PSFilterShimPath, PSFilterShimServer.EndpointName);
+                ProcessStartInfo psi = new ProcessStartInfo(PSFilterShimPath, server.PipeName);
 
                 proxyResult = true; // assume the filter succeeded this will be set to false if it failed
                 proxyErrorMessage = string.Empty;

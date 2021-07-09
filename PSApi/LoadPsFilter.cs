@@ -84,7 +84,7 @@ namespace PSFilterLoad.PSApi
         private bool disposed;
         private PluginModule module;
         private PluginPhase previousPhase;
-        private Action<int, int> progressFunc;
+        private Action<byte> progressFunc;
         private IntPtr dataPtr;
         private short result;
 
@@ -139,14 +139,9 @@ namespace PSFilterLoad.PSApi
         /// The filter progress callback.
         /// </summary>
         /// <param name="callback">The progress callback.</param>
-        internal void SetProgressCallback(Action<int, int> callback)
+        internal void SetProgressCallback(Action<byte> callback)
         {
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
-
-            progressFunc = callback;
+            progressFunc = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
         internal void SetAbortCallback(Func<bool> callback)
@@ -2780,10 +2775,26 @@ namespace PSFilterLoad.PSApi
             {
                 done = 0;
             }
+
+            double progress = ((double)done / total) * 100.0;
 #if DEBUG
-            DebugUtils.Ping(DebugFlags.MiscCallbacks, string.Format("Done: {0}, Total: {1}, Progress: {2}%", done, total, (((double)done / (double)total) * 100.0)));
+            DebugUtils.Ping(DebugFlags.MiscCallbacks, string.Format("Done: {0}, Total: {1}, Progress: {2}%", done, total, progress));
 #endif
-            progressFunc?.Invoke(done, total);
+            Action<byte> callback = progressFunc;
+
+            if (callback != null)
+            {
+                if (progress < 0.0)
+                {
+                    progress = 0.0;
+                }
+                else if (progress > 100.0)
+                {
+                    progress = 100.0;
+                }
+
+                callback.Invoke((byte)progress);
+            }
         }
 
         private unsafe void SetupSizes()

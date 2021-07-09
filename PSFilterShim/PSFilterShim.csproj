@@ -73,6 +73,7 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GlobalSuppressions.cs" />
@@ -105,7 +106,6 @@
     <Compile Include="PaintDotNet\ColorPicker\UI.cs" />
     <Compile Include="PaintDotNet\ColorPicker\Utility.cs" />
     <Compile Include="PaintDotNet\ColorPicker\VisualStyleClass.cs" />
-    <Compile Include="IPSFilterShim.cs" />
     <Compile Include="PaintDotNet\ColorBgra.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -225,6 +225,8 @@
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
     <Compile Include="PSApi\RegionExtensions.cs" />
+    <Compile Include="PSFilterShimPipeClient.cs" />
+    <Compile Include="StreamExtensions.cs" />
     <EmbeddedResource Include="PaintDotNet\ColorPicker\ColorPickerForm.resx">
       <DependentUpon>ColorPickerForm.cs</DependentUpon>
     </EmbeddedResource>
