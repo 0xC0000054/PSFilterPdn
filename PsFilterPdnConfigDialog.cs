@@ -1776,6 +1776,10 @@ namespace PSFilterPdn
                         }
                     }
                 }
+                catch (DirectoryNotFoundException)
+                {
+                    // The Paint.NET user files folder does not exist.
+                }
                 catch (FileNotFoundException)
                 {
                     // This file would only exist if a plugin has persisted settings.
