@@ -47,7 +47,7 @@ namespace PaintDotNet
         /// <summary>
         /// Gets the stride of the Surface.
         /// </summary>
-        public long Stride
+        public int Stride
         {
             get
             {
@@ -75,9 +75,17 @@ namespace PaintDotNet
         {
             this.width = width;
             this.height = height;
-            this.stride = width * 4;
-            long bytes = (long)(width * height * 4);
-            scan0 = new MemoryBlock(bytes);
+
+            try
+            {
+                stride = checked(width * ColorBgra.SizeOf);
+            }
+            catch (OverflowException ex)
+            {
+                throw new OutOfMemoryException("Dimensions are too large - not enough memory, width=" + width.ToString() + ", height=" + height.ToString(), ex);
+            }
+
+            this.scan0 = new MemoryBlock((long)height * stride);
             this.disposed = false;
         }
 
