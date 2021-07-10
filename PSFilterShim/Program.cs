@@ -199,10 +199,6 @@ namespace PSFilterShim
             {
                 pipeClient.SetProxyErrorMessage(fx.Message);
             }
-            catch (ImageSizeTooLargeException ex)
-            {
-                pipeClient.SetProxyErrorMessage(ex.Message);
-            }
             catch (NullReferenceException ex)
             {
 #if DEBUG

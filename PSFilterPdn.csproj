@@ -293,7 +293,6 @@
     <Compile Include="PSApi\HandleProc.cs" />
     <Compile Include="PSApi\HostProcs.cs" />
     <Compile Include="PSApi\ImageModes.cs" />
-    <Compile Include="PSApi\ImageSizeTooLargeException.cs" />
     <Compile Include="PSApi\NativeConstants.cs" />
     <Compile Include="PSApi\NativeStructs.cs" />
     <Compile Include="PSApi\PIProperty.cs" />

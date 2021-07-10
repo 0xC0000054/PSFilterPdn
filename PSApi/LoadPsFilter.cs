@@ -236,28 +236,6 @@ namespace PSFilterLoad.PSApi
             resourceSuite = new ResourceSuite();
             parentWindowHandle = owner;
 
-            if (eep.SourceSurface.Width > 32000 || eep.SourceSurface.Height > 32000)
-            {
-                string message = string.Empty;
-                if (eep.SourceSurface.Width > 32000 && eep.SourceSurface.Height > 32000)
-                {
-                    message = Resources.ImageSizeTooLarge;
-                }
-                else
-                {
-                    if (eep.SourceSurface.Width > 32000)
-                    {
-                        message = Resources.ImageWidthTooLarge;
-                    }
-                    else
-                    {
-                        message = Resources.ImageHeightTooLarge;
-                    }
-                }
-
-                throw new ImageSizeTooLargeException(message);
-            }
-
             unsafe
             {
                 platFormDataPtr = Memory.Allocate(Marshal.SizeOf(typeof(PlatformData)), true);

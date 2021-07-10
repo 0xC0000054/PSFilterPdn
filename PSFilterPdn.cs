@@ -248,10 +248,6 @@ namespace PSFilterPdn
             {
                 ShowErrorMessage(window, fnfex.Message);
             }
-            catch (ImageSizeTooLargeException ex)
-            {
-                ShowErrorMessage(window, ex.Message);
-            }
             catch (NullReferenceException nrex)
             {
                 // The filter probably tried to access an unimplemented callback function without checking if it is valid.
@@ -271,6 +267,40 @@ namespace PSFilterPdn
             }
         }
 
+        private bool CheckSourceSurfaceSize(IWin32Window window)
+        {
+            int width = EnvironmentParameters.SourceSurface.Width;
+            int height = EnvironmentParameters.SourceSurface.Height;
+
+            if (width > 32000 || height > 32000)
+            {
+                string message;
+
+                if (width > 32000 && height > 32000)
+                {
+                    message = Resources.ImageSizeTooLarge;
+                }
+                else
+                {
+                    if (width > 32000)
+                    {
+                        message = Resources.ImageWidthTooLarge;
+                    }
+                    else
+                    {
+                        message = Resources.ImageHeightTooLarge;
+                    }
+                }
+
+                ShowErrorMessage(window, message);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
         protected override void OnSetRenderInfo(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs)
         {
             if (repeatEffect)
@@ -284,29 +314,33 @@ namespace PSFilterPdn
                 }
 
                 Win32Window win32Window = new Win32Window(Process.GetCurrentProcess().MainWindowHandle);
-                if (token.RunWith32BitShim)
-                {
-                    Run32BitFilterProxy(ref token, win32Window);
-                }
-                else
-                {
-                    filterDone = new ManualResetEvent(false);
 
-                    filterThread = new Thread(() => RunRepeatFilter(ref token, win32Window))
+                if (CheckSourceSurfaceSize(win32Window))
+                {
+                    if (token.RunWith32BitShim)
                     {
-                        IsBackground = true,
-                        Priority = ThreadPriority.AboveNormal
-                    };
-                    // Some filters may use OLE which requires Single Threaded Apartment mode.
-                    filterThread.SetApartmentState(ApartmentState.STA);
-                    filterThread.Start();
+                        Run32BitFilterProxy(ref token, win32Window);
+                    }
+                    else
+                    {
+                        filterDone = new ManualResetEvent(false);
 
-                    filterDone.WaitOne();
-                    filterDone.Close();
-                    filterDone = null;
+                        filterThread = new Thread(() => RunRepeatFilter(ref token, win32Window))
+                        {
+                            IsBackground = true,
+                            Priority = ThreadPriority.AboveNormal
+                        };
+                        // Some filters may use OLE which requires Single Threaded Apartment mode.
+                        filterThread.SetApartmentState(ApartmentState.STA);
+                        filterThread.Start();
 
-                    filterThread.Join();
-                    filterThread = null;
+                        filterDone.WaitOne();
+                        filterDone.Close();
+                        filterDone = null;
+
+                        filterThread.Join();
+                        filterThread = null;
+                    }
                 }
             }
 
