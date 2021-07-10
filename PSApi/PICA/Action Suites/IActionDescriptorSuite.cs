@@ -10,8 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
-
 namespace PSFilterLoad.PSApi.PICA
 {
     internal interface IActionDescriptorSuite
