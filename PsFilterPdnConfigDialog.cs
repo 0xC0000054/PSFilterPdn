@@ -625,7 +625,17 @@ namespace PSFilterPdn
             {
                 DirectoryInfo info = new DirectoryInfo(proxyTempDir);
 
-                if (!info.Exists)
+                if (info.Exists)
+                {
+                    // Remove all the existing files in the directory.
+                    FileInfo[] existingFiles = info.GetFiles();
+
+                    foreach (FileInfo file in existingFiles)
+                    {
+                        file.Delete();
+                    }
+                }
+                else
                 {
                     info.Create();
                 }
