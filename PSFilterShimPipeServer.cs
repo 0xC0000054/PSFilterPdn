@@ -82,7 +82,6 @@ namespace PSFilterPdn
 
         public string PipeName { get; }
 
-
         public void Dispose()
         {
             if (server != null)
