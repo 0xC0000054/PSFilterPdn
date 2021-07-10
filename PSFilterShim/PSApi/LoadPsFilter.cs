@@ -273,7 +273,7 @@ namespace PSFilterLoad.PSApi
             imageServicesSuite = new ImageServicesSuite();
             propertySuite = new PropertySuite(source.Width, source.Height, settings.PluginUISettings);
             readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
-            basicSuiteProvider = new SPBasicSuiteProvider(this, propertySuite);
+            basicSuiteProvider = new SPBasicSuiteProvider(this, propertySuite, resourceSuite);
 
             inputHandling = FilterDataHandling.None;
             outputHandling = FilterDataHandling.None;

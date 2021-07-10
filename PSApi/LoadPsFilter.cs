@@ -293,7 +293,7 @@ namespace PSFilterLoad.PSApi
             channelPortsSuite = new ChannelPortsSuite(this);
             imageServicesSuite = new ImageServicesSuite();
             propertySuite = new PropertySuite(source.Width, source.Height, pluginUISettings);
-            basicSuiteProvider = new SPBasicSuiteProvider(this, propertySuite);
+            basicSuiteProvider = new SPBasicSuiteProvider(this, propertySuite, resourceSuite);
 
             backgroundColor = new byte[4] { eep.SecondaryColor.R, eep.SecondaryColor.G, eep.SecondaryColor.B, 0 };
             foregroundColor = new byte[4] { eep.PrimaryColor.R, eep.PrimaryColor.G, eep.PrimaryColor.B, 0 };

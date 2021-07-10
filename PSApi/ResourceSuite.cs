@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class ResourceSuite
+    internal sealed class ResourceSuite : IResourceSuite
     {
         private CountPIResourcesProc countResourceProc;
         private GetPIResourceProc getResourceProc;
@@ -44,6 +44,19 @@ namespace PSFilterLoad.PSApi
 
                 pseudoResources = value;
             }
+        }
+
+        ResourceProcs IResourceSuite.CreateResourceProcs()
+        {
+            return new ResourceProcs
+            {
+                resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion,
+                numResourceProcs = PSConstants.kCurrentResourceProcsCount,
+                addProc = Marshal.GetFunctionPointerForDelegate(addResourceProc),
+                countProc = Marshal.GetFunctionPointerForDelegate(countResourceProc),
+                deleteProc = Marshal.GetFunctionPointerForDelegate(deleteResourceProc),
+                getProc = Marshal.GetFunctionPointerForDelegate(getResourceProc)
+            };
         }
 
         public IntPtr CreateResourceProcsPointer()

@@ -165,6 +165,7 @@
     <Compile Include="PSApi\IntPtrExtensions.cs" />
     <Compile Include="PSApi\IPICASuiteDataProvider.cs" />
     <Compile Include="PSApi\IPropertySuite.cs" />
+    <Compile Include="PSApi\IResourceSuite.cs" />
     <Compile Include="PSApi\LoadPsFilter.cs" />
     <Compile Include="PSApi\Memory.cs" />
     <Compile Include="PSApi\NativeConstants.cs" />

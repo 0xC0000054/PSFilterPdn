@@ -21,6 +21,7 @@ namespace PSFilterLoad.PSApi
     {
         private readonly IPICASuiteDataProvider picaSuiteData;
         private readonly IPropertySuite propertySuite;
+        private readonly IResourceSuite resourceSuite;
         private readonly SPBasicAcquireSuite spAcquireSuite;
         private readonly SPBasicAllocateBlock spAllocateBlock;
         private readonly SPBasicFreeBlock spFreeBlock;
@@ -51,24 +52,21 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="picaSuiteData">The filter record provider.</param>
         /// <param name="propertySuite">The property suite.</param>
+        /// <param name="resourceSuite">the resource suite.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="picaSuiteData"/> is null.
         /// or
         /// <paramref name="propertySuite"/> is null.
+        /// or
+        /// <paramref name="resourceSuite"/> is null.
         /// </exception>
-        public SPBasicSuiteProvider(IPICASuiteDataProvider picaSuiteData, IPropertySuite propertySuite)
+        public SPBasicSuiteProvider(IPICASuiteDataProvider picaSuiteData,
+                                    IPropertySuite propertySuite,
+                                    IResourceSuite resourceSuite)
         {
-            if (picaSuiteData == null)
-            {
-                throw new ArgumentNullException(nameof(picaSuiteData));
-            }
-            if (propertySuite == null)
-            {
-                throw new ArgumentNullException(nameof(propertySuite));
-            }
-
-            this.picaSuiteData = picaSuiteData;
-            this.propertySuite = propertySuite;
+            this.picaSuiteData = picaSuiteData ?? throw new ArgumentNullException(nameof(picaSuiteData));
+            this.propertySuite = propertySuite ?? throw new ArgumentNullException(nameof(propertySuite));
+            this.resourceSuite = resourceSuite ?? throw new ArgumentNullException(nameof(resourceSuite));
             spAcquireSuite = new SPBasicAcquireSuite(SPBasicAcquireSuite);
             spReleaseSuite = new SPBasicReleaseSuite(SPBasicReleaseSuite);
             spIsEqual = new SPBasicIsEqual(SPBasicIsEqual);
@@ -325,6 +323,16 @@ namespace PSFilterLoad.PSApi
                     }
 
                     PropertyProcs suite = propertySuite.CreatePropertySuite();
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
+                }
+                else if (suiteName.Equals(PSConstants.PICA.ResourceSuite, StringComparison.Ordinal))
+                {
+                    if (version != PSConstants.kCurrentResourceProcsVersion)
+                    {
+                        return PSError.kSPSuiteNotFoundError;
+                    }
+
+                    ResourceProcs suite = resourceSuite.CreateResourceProcs();
                     suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.UIHooksSuite, StringComparison.Ordinal))

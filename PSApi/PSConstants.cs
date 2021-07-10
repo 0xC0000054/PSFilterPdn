@@ -202,6 +202,7 @@ namespace PSFilterLoad.PSApi
             public const string ErrorSuite = "Photoshop Error Suite for Plug-ins";
             public const string HandleSuite = "Photoshop Handle Suite for Plug-ins";
             public const string PropertySuite = "Photoshop Property Suite for Plug-ins";
+            public const string ResourceSuite = "Photoshop Resource Suite for Plug-ins";
             public const string UIHooksSuite = "Photoshop UIHooks Suite for Plug-ins";
             public const string ActionDescriptorSuite = "df135115-c769-11d0-8079-00c04fd7ec47";
             public const string ActionListSuite = "df135116-c769-11d0-8079-00c04fd7ec47";
