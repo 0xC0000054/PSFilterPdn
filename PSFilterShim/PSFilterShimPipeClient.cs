@@ -48,7 +48,7 @@ namespace PSFilterShim
 
         public bool AbortFilter()
         {
-            byte[] reply = SendMessageSynchronously(Command.AbortCallback);
+            byte[] reply = SendMessageToServer(Command.AbortCallback);
 
             return reply != null && reply[0] != 0;
         }
@@ -65,12 +65,12 @@ namespace PSFilterShim
 
         public void SetProxyErrorMessage(string errorMessage)
         {
-            SendMessageSynchronously(Command.SetErrorMessage, errorMessage);
+            SendMessageToServer(Command.SetErrorMessage, errorMessage);
         }
 
         public void UpdateFilterProgress(byte progressPercentage)
         {
-            SendMessageSynchronously(Command.ReportProgress, progressPercentage);
+            SendMessageToServer(Command.ReportProgress, progressPercentage);
         }
 
         private static byte[] CreateNoParameterMessageBuffer()
@@ -105,7 +105,7 @@ namespace PSFilterShim
         {
             T deserialized = null;
 
-            byte[] reply = SendMessageSynchronously(command);
+            byte[] reply = SendMessageToServer(command);
 
             using (MemoryStream stream = new MemoryStream(reply))
             {
@@ -117,7 +117,7 @@ namespace PSFilterShim
             return deserialized;
         }
 
-        private byte[] SendMessageSynchronously(Command command)
+        private byte[] SendMessageToServer(Command command)
         {
             byte[] reply = null;
 
@@ -146,7 +146,7 @@ namespace PSFilterShim
             return reply;
         }
 
-        private byte[] SendMessageSynchronously(Command command, byte value)
+        private byte[] SendMessageToServer(Command command, byte value)
         {
             byte[] reply = null;
 
@@ -176,7 +176,7 @@ namespace PSFilterShim
             return reply;
         }
 
-        private byte[] SendMessageSynchronously(Command command, string value)
+        private byte[] SendMessageToServer(Command command, string value)
         {
             byte[] reply = null;
 
