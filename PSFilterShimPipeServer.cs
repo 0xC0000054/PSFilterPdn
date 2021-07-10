@@ -132,7 +132,7 @@ namespace PSFilterPdn
                     SendReplyToClient((byte)(abortFunc() ? 1 : 0));
                     break;
                 case Command.ReportProgress:
-                    progressCallback(messageBytes[messageLength - 1]);
+                    progressCallback(messageBytes[1]);
                     SendEmptyReplyToClient();
                     break;
                 case Command.GetPluginData:
