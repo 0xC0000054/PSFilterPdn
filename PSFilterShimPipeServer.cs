@@ -61,6 +61,7 @@ namespace PSFilterPdn
             progressCallback = progress;
             // One byte for the command index and one byte for the payload.
             oneByteParameterMessageBuffer = new byte[2];
+            // 4 bytes for the payload length and one byte for the payload.
             oneByteParameterReplyBuffer = new byte[5];
             Array.Copy(BitConverter.GetBytes(sizeof(byte)), oneByteParameterReplyBuffer, sizeof(int));
             replySizeBuffer = new byte[sizeof(int)];
