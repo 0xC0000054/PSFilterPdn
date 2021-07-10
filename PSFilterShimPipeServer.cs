@@ -23,6 +23,7 @@ namespace PSFilterPdn
     internal sealed class PSFilterShimPipeServer : IDisposable
     {
         private NamedPipeServerStream server;
+        private readonly byte[] oneByteParameterMessageBuffer;
         private readonly byte[] oneByteParameterReplyBuffer;
         private readonly byte[] replySizeBuffer;
         private readonly byte[] doneMessageBuffer;
@@ -58,6 +59,8 @@ namespace PSFilterPdn
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
             errorCallback = error;
             progressCallback = progress;
+            // One byte for the command index and one byte for the payload.
+            oneByteParameterMessageBuffer = new byte[2];
             oneByteParameterReplyBuffer = new byte[5];
             Array.Copy(BitConverter.GetBytes(sizeof(byte)), oneByteParameterReplyBuffer, sizeof(int));
             replySizeBuffer = new byte[sizeof(int)];
@@ -108,7 +111,16 @@ namespace PSFilterPdn
 
             int messageLength = BitConverter.ToInt32(replySizeBuffer, 0);
 
-            byte[] messageBytes = new byte[messageLength];
+            byte[] messageBytes;
+
+            if (messageLength <= oneByteParameterMessageBuffer.Length)
+            {
+                messageBytes = oneByteParameterMessageBuffer;
+            }
+            else
+            {
+                messageBytes = new byte[messageLength];
+            }
 
             server.ProperRead(messageBytes, 0, messageLength);
 
@@ -120,7 +132,7 @@ namespace PSFilterPdn
                     SendReplyToClient((byte)(abortFunc() ? 1 : 0));
                     break;
                 case Command.ReportProgress:
-                    progressCallback(messageBytes[messageBytes.Length - 1]);
+                    progressCallback(messageBytes[messageLength - 1]);
                     SendEmptyReplyToClient();
                     break;
                 case Command.GetPluginData:
