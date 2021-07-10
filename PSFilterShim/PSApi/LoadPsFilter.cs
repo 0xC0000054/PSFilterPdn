@@ -228,13 +228,7 @@ namespace PSFilterLoad.PSApi
             resourceSuite = new ResourceSuite();
             parentWindowHandle = settings.ParentWindowHandle;
 
-            using (Bitmap bmp = new Bitmap(settings.SourceImagePath))
-            {
-                source = Surface.CopyFromBitmap(bmp);
-
-                dpiX = bmp.HorizontalResolution;
-                dpiY = bmp.VerticalResolution;
-            }
+            source = PSFilterShim.PSFilterShimImage.Load(settings.SourceImagePath, out dpiX, out dpiY);
             dest = new Surface(source.Width, source.Height);
 
             advanceProc = new AdvanceStateProc(AdvanceStateProc);

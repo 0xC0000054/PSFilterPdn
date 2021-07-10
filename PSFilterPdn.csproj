@@ -312,6 +312,8 @@
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
     <Compile Include="PSFilterPdnSettings.cs" />
+    <Compile Include="PSFilterShimImage.cs" />
+    <Compile Include="PSFilterShimImageHeader.cs" />
     <Compile Include="PSFilterShimPipeServer.cs" />
     <Compile Include="DataContractSerializerUtil.cs" />
     <Compile Include="PSFilterShimSettings.cs" />

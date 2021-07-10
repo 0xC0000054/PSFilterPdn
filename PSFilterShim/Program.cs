@@ -163,10 +163,7 @@ namespace PSFilterShim
                     {
                         if (!settings.ShowAboutDialog)
                         {
-                            using (Bitmap dst = lps.Dest.CreateAliasedBitmap())
-                            {
-                                dst.Save(settings.DestinationImagePath, ImageFormat.Png);
-                            }
+                            PSFilterShimImage.Save(settings.DestinationImagePath, lps.Dest);
 
                             if (!lps.IsRepeatEffect)
                             {

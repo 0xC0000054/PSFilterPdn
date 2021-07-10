@@ -663,8 +663,8 @@ namespace PSFilterPdn
                 return;
             }
 
-            srcFileName = Path.Combine(proxyTempDir, "source.png");
-            destFileName = Path.Combine(proxyTempDir, "result.png");
+            srcFileName = Path.Combine(proxyTempDir, "source.psi");
+            destFileName = Path.Combine(proxyTempDir, "result.psi");
             parameterDataFileName = Path.Combine(proxyTempDir, "parameters.dat");
             resourceDataFileName = Path.Combine(proxyTempDir, "PseudoResources.dat");
             descriptorRegistryFileName = Path.Combine(proxyTempDir, "registry.dat");
@@ -709,11 +709,7 @@ namespace PSFilterPdn
             proxyData = data;
             try
             {
-                using (FileStream fs = new FileStream(srcFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                using (Bitmap bmp = EffectSourceSurface.CreateAliasedBitmap())
-                {
-                    bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
-                }
+                PSFilterShimImage.Save(srcFileName, EffectSourceSurface, 96.0f, 96.0f);
 
                 ParameterData parameterData;
                 if ((filterParameters != null) && filterParameters.TryGetValue(data, out parameterData))
@@ -782,10 +778,7 @@ namespace PSFilterPdn
             {
                 filterData = proxyData;
 
-                using (Bitmap dst = new Bitmap(destFileName))
-                {
-                    destSurface = Surface.CopyFromBitmap(dst);
-                }
+                destSurface = PSFilterShimImage.Load(destFileName);
 
                 try
                 {

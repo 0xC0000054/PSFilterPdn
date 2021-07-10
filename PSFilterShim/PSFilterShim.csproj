@@ -226,6 +226,7 @@
     <Compile Include="PSApi\VPoint.cs" />
     <Compile Include="PSApi\VRect.cs" />
     <Compile Include="PSApi\RegionExtensions.cs" />
+    <Compile Include="PSFilterShimImage.cs" />
     <Compile Include="PSFilterShimPipeClient.cs" />
     <Compile Include="StreamExtensions.cs" />
     <EmbeddedResource Include="PaintDotNet\ColorPicker\ColorPickerForm.resx">

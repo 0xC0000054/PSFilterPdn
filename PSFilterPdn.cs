@@ -80,8 +80,8 @@ namespace PSFilterPdn
             {
                 Directory.CreateDirectory(proxyTempDir);
 
-                string srcFileName = Path.Combine(proxyTempDir, "source.png");
-                string destFileName = Path.Combine(proxyTempDir, "result.png");
+                string srcFileName = Path.Combine(proxyTempDir, "source.psi");
+                string destFileName = Path.Combine(proxyTempDir, "result.psi");
                 string parameterDataFileName = Path.Combine(proxyTempDir, "parameters.dat");
                 string resourceDataFileName = Path.Combine(proxyTempDir, "PseudoResources.dat");
                 string descriptorRegistryFileName = Path.Combine(proxyTempDir, "registry.dat");
@@ -129,11 +129,7 @@ namespace PSFilterPdn
                                                                                   null))
                 {
 
-                    using (FileStream fs = new FileStream(srcFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                    using (Bitmap bmp = EnvironmentParameters.SourceSurface.CreateAliasedBitmap())
-                    {
-                        bmp.Save(fs, System.Drawing.Imaging.ImageFormat.Png);
-                    }
+                    PSFilterShimImage.Save(srcFileName, EnvironmentParameters.SourceSurface, 96.0f, 96.0f);
 
                     ParameterData parameterData;
                     if (token.FilterParameters.TryGetValue(token.FilterData, out parameterData))
@@ -161,10 +157,7 @@ namespace PSFilterPdn
 
                 if (proxyResult && File.Exists(destFileName))
                 {
-                    using (Bitmap bmp = new Bitmap(destFileName))
-                    {
-                        token.Dest = Surface.CopyFromBitmap(bmp);
-                    }
+                    token.Dest = PSFilterShimImage.Load(destFileName);
                 }
                 else if (!string.IsNullOrEmpty(proxyErrorMessage))
                 {
