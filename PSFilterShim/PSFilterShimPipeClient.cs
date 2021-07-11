@@ -195,7 +195,7 @@ namespace PSFilterShim
                 messageBuffer[4] = (byte)command;
                 Encoding.UTF8.GetBytes(value, 0, value.Length, messageBuffer, 5);
 
-                stream.Write(oneByteParameterMessageBuffer, 0, oneByteParameterMessageBuffer.Length);
+                stream.Write(messageBuffer, 0, messageBuffer.Length);
 
                 stream.ProperRead(replyLengthBuffer, 0, replyLengthBuffer.Length);
 
