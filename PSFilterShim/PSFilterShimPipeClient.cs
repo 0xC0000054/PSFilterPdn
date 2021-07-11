@@ -91,14 +91,14 @@ namespace PSFilterShim
         {
             const int dataLength = sizeof(byte) * 2;
 
-            byte[] noParameterMessageBuffer = new byte[sizeof(int) + dataLength];
+            byte[] oneByteParameterMessageBuffer = new byte[sizeof(int) + dataLength];
 
-            noParameterMessageBuffer[0] = dataLength & 0xff;
-            noParameterMessageBuffer[1] = (dataLength >> 8) & 0xff;
-            noParameterMessageBuffer[2] = (dataLength >> 16) & 0xff;
-            noParameterMessageBuffer[3] = (dataLength >> 24) & 0xff;
+            oneByteParameterMessageBuffer[0] = dataLength & 0xff;
+            oneByteParameterMessageBuffer[1] = (dataLength >> 8) & 0xff;
+            oneByteParameterMessageBuffer[2] = (dataLength >> 16) & 0xff;
+            oneByteParameterMessageBuffer[3] = (dataLength >> 24) & 0xff;
 
-            return noParameterMessageBuffer;
+            return oneByteParameterMessageBuffer;
         }
 
         private T DeserializeClass<T>(Command command) where T : class
