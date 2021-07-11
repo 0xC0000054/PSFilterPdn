@@ -78,7 +78,7 @@ namespace PSFilterPdn
         private string regionFileName;
         private string descriptorRegistryFileName;
         private PluginData proxyData;
-        private readonly string proxyTempDir;
+        private PSFilterShimDataFolder proxyTempDir;
 
         private bool filterRunning;
         private bool formClosePending;
@@ -114,7 +114,6 @@ namespace PSFilterPdn
             pseudoResources = new PseudoResourceCollection();
             fileNameLbl.Text = string.Empty;
             folderNameLbl.Text = string.Empty;
-            proxyTempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             searchDirectories = new List<string>();
             PSFilterLoad.ColorPicker.UI.InitScaling(this);
             highDpiMode = PSFilterLoad.ColorPicker.UI.GetXScaleFactor() > 1.0f;
@@ -130,21 +129,10 @@ namespace PSFilterPdn
                     proxyProcess = null;
                 }
 
-                if (Directory.Exists(proxyTempDir))
+                if (proxyTempDir != null)
                 {
-                    try
-                    {
-                        Directory.Delete(proxyTempDir, true);
-                    }
-                    catch (ArgumentException)
-                    {
-                    }
-                    catch (IOException)
-                    {
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                    }
+                    proxyTempDir.Dispose();
+                    proxyTempDir = null;
                 }
             }
 
@@ -623,21 +611,13 @@ namespace PSFilterPdn
         {
             try
             {
-                DirectoryInfo info = new DirectoryInfo(proxyTempDir);
-
-                if (info.Exists)
+                if (proxyTempDir is null)
                 {
-                    // Remove all the existing files in the directory.
-                    FileInfo[] existingFiles = info.GetFiles();
-
-                    foreach (FileInfo file in existingFiles)
-                    {
-                        file.Delete();
-                    }
+                    proxyTempDir = new PSFilterShimDataFolder();
                 }
                 else
                 {
-                    info.Create();
+                    proxyTempDir.Clean();
                 }
 
                 return true;
@@ -672,11 +652,11 @@ namespace PSFilterPdn
                 return;
             }
 
-            srcFileName = Path.Combine(proxyTempDir, "source.psi");
-            destFileName = Path.Combine(proxyTempDir, "result.psi");
-            parameterDataFileName = Path.Combine(proxyTempDir, "parameters.dat");
-            resourceDataFileName = Path.Combine(proxyTempDir, "PseudoResources.dat");
-            descriptorRegistryFileName = Path.Combine(proxyTempDir, "registry.dat");
+            srcFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+            destFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+            parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
+            resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
+            descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
             regionFileName = string.Empty;
 
             Rectangle sourceBounds = eep.SourceSurface.Bounds;
@@ -685,7 +665,7 @@ namespace PSFilterPdn
 
             if (selection != sourceBounds)
             {
-                regionFileName = Path.Combine(proxyTempDir, "selection.dat");
+                regionFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
                 RegionDataWrapper selectedRegion = new RegionDataWrapper(eep.GetSelection(sourceBounds).GetRegionData());
 
                 DataContractSerializerUtil.Serialize(regionFileName, selectedRegion);

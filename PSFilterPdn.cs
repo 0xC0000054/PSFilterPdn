@@ -74,93 +74,93 @@ namespace PSFilterPdn
                 return;
             }
 
-            string proxyTempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             try
             {
-                Directory.CreateDirectory(proxyTempDir);
-
-                string srcFileName = Path.Combine(proxyTempDir, "source.psi");
-                string destFileName = Path.Combine(proxyTempDir, "result.psi");
-                string parameterDataFileName = Path.Combine(proxyTempDir, "parameters.dat");
-                string resourceDataFileName = Path.Combine(proxyTempDir, "PseudoResources.dat");
-                string descriptorRegistryFileName = Path.Combine(proxyTempDir, "registry.dat");
-                string regionFileName = string.Empty;
-
-                Rectangle sourceBounds = EnvironmentParameters.SourceSurface.Bounds;
-
-                Rectangle selection = EnvironmentParameters.GetSelection(sourceBounds).GetBoundsInt();
-
-                if (selection != sourceBounds)
+                using (PSFilterShimDataFolder proxyTempDir = new PSFilterShimDataFolder())
                 {
-                    regionFileName = Path.Combine(proxyTempDir, "selection.dat");
-                    RegionDataWrapper selectedRegion = new RegionDataWrapper(EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
+                    string srcFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+                    string destFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+                    string parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
+                    string resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
+                    string descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
+                    string regionFileName = string.Empty;
 
-                    DataContractSerializerUtil.Serialize(regionFileName, selectedRegion);
-                }
+                    Rectangle sourceBounds = EnvironmentParameters.SourceSurface.Bounds;
 
-                bool proxyResult = true;
-                string proxyErrorMessage = string.Empty;
+                    Rectangle selection = EnvironmentParameters.GetSelection(sourceBounds).GetBoundsInt();
 
-                PSFilterShimSettings settings = new PSFilterShimSettings
-                {
-                    RepeatEffect = true,
-                    ShowAboutDialog = false,
-                    SourceImagePath = srcFileName,
-                    DestinationImagePath = destFileName,
-                    ParentWindowHandle = window.Handle,
-                    PrimaryColor = EnvironmentParameters.PrimaryColor.ToColor(),
-                    SecondaryColor = EnvironmentParameters.SecondaryColor.ToColor(),
-                    RegionDataPath = regionFileName,
-                    ParameterDataPath = parameterDataFileName,
-                    PseudoResourcePath = resourceDataFileName,
-                    DescriptorRegistryPath = descriptorRegistryFileName,
-                    PluginUISettings = null
-                };
-
-                using (PSFilterShimPipeServer server = new PSFilterShimPipeServer(AbortCallback,
-                                                                                  token.FilterData,
-                                                                                  settings,
-                                                                                  delegate (string data)
-                                                                                  {
-                                                                                      proxyResult = false;
-                                                                                      proxyErrorMessage = data;
-                                                                                  },
-                                                                                  null))
-                {
-
-                    PSFilterShimImage.Save(srcFileName, EnvironmentParameters.SourceSurface, 96.0f, 96.0f);
-
-                    ParameterData parameterData;
-                    if (token.FilterParameters.TryGetValue(token.FilterData, out parameterData))
+                    if (selection != sourceBounds)
                     {
-                        DataContractSerializerUtil.Serialize(parameterDataFileName, parameterData);
+                        regionFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
+                        RegionDataWrapper selectedRegion = new RegionDataWrapper(EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
+
+                        DataContractSerializerUtil.Serialize(regionFileName, selectedRegion);
                     }
 
-                    if (token.PseudoResources.Count > 0)
+                    bool proxyResult = true;
+                    string proxyErrorMessage = string.Empty;
+
+                    PSFilterShimSettings settings = new PSFilterShimSettings
                     {
-                        DataContractSerializerUtil.Serialize(resourceDataFileName, token.PseudoResources);
+                        RepeatEffect = true,
+                        ShowAboutDialog = false,
+                        SourceImagePath = srcFileName,
+                        DestinationImagePath = destFileName,
+                        ParentWindowHandle = window.Handle,
+                        PrimaryColor = EnvironmentParameters.PrimaryColor.ToColor(),
+                        SecondaryColor = EnvironmentParameters.SecondaryColor.ToColor(),
+                        RegionDataPath = regionFileName,
+                        ParameterDataPath = parameterDataFileName,
+                        PseudoResourcePath = resourceDataFileName,
+                        DescriptorRegistryPath = descriptorRegistryFileName,
+                        PluginUISettings = null
+                    };
+
+                    using (PSFilterShimPipeServer server = new PSFilterShimPipeServer(AbortCallback,
+                                                                                      token.FilterData,
+                                                                                      settings,
+                                                                                      delegate (string data)
+                                                                                      {
+                                                                                          proxyResult = false;
+                                                                                          proxyErrorMessage = data;
+                                                                                      },
+                                                                                      null))
+                    {
+
+                        PSFilterShimImage.Save(srcFileName, EnvironmentParameters.SourceSurface, 96.0f, 96.0f);
+
+                        ParameterData parameterData;
+                        if (token.FilterParameters.TryGetValue(token.FilterData, out parameterData))
+                        {
+                            DataContractSerializerUtil.Serialize(parameterDataFileName, parameterData);
+                        }
+
+                        if (token.PseudoResources.Count > 0)
+                        {
+                            DataContractSerializerUtil.Serialize(resourceDataFileName, token.PseudoResources);
+                        }
+
+                        if (token.DescriptorRegistry != null)
+                        {
+                            DataContractSerializerUtil.Serialize(descriptorRegistryFileName, token.DescriptorRegistry);
+                        }
+
+                        ProcessStartInfo psi = new ProcessStartInfo(shimPath, server.PipeName);
+
+                        using (Process proxy = Process.Start(psi))
+                        {
+                            proxy.WaitForExit();
+                        }
                     }
 
-                    if (token.DescriptorRegistry != null)
+                    if (proxyResult && File.Exists(destFileName))
                     {
-                        DataContractSerializerUtil.Serialize(descriptorRegistryFileName, token.DescriptorRegistry);
+                        token.Dest = PSFilterShimImage.Load(destFileName);
                     }
-
-                    ProcessStartInfo psi = new ProcessStartInfo(shimPath, server.PipeName);
-
-                    using (Process proxy = Process.Start(psi))
+                    else if (!string.IsNullOrEmpty(proxyErrorMessage))
                     {
-                        proxy.WaitForExit();
+                        ShowErrorMessage(window, proxyErrorMessage);
                     }
-                }
-
-                if (proxyResult && File.Exists(destFileName))
-                {
-                    token.Dest = PSFilterShimImage.Load(destFileName);
-                }
-                else if (!string.IsNullOrEmpty(proxyErrorMessage))
-                {
-                    ShowErrorMessage(window, proxyErrorMessage);
                 }
             }
             catch (ArgumentException ax)
@@ -182,25 +182,6 @@ namespace PSFilterPdn
             catch (Win32Exception wx)
             {
                 ShowErrorMessage(window, wx.Message);
-            }
-            finally
-            {
-                if (Directory.Exists(proxyTempDir))
-                {
-                    try
-                    {
-                        Directory.Delete(proxyTempDir, true);
-                    }
-                    catch (ArgumentException)
-                    {
-                    }
-                    catch (IOException)
-                    {
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                    }
-                }
             }
         }
 
