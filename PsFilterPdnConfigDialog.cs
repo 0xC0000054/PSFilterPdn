@@ -91,12 +91,12 @@ namespace PSFilterPdn
         private PSFilterPdnSettings settings;
         private string lastSelectedFilterTitle;
         private bool foundEffectsDir;
+        private bool searchBoxIgnoreTextChanged;
+
         /// <summary>
         /// If DEP is enabled on a 32-bit OS use the shim process.
         /// </summary>
-        private bool useDEPProxy;
-        private bool searchBoxIgnoreTextChanged;
-
+        private readonly bool useDEPProxy;
         private readonly bool highDpiMode;
 
         private const string DummyTreeNodeName = "dummyTreeNode";
@@ -117,6 +117,25 @@ namespace PSFilterPdn
             searchDirectories = new List<string>();
             PSFilterLoad.ColorPicker.UI.InitScaling(this);
             highDpiMode = PSFilterLoad.ColorPicker.UI.GetXScaleFactor() > 1.0f;
+
+            // set the useDEPProxy flag when on a 32-bit OS.
+            useDEPProxy = false;
+            if (IntPtr.Size == 4)
+            {
+                try
+                {
+                    if (SafeNativeMethods.GetProcessDEPPolicy(SafeNativeMethods.GetCurrentProcess(),
+                                                              out NativeEnums.ProcessDEPPolicy depFlags,
+                                                              out int permanent))
+                    {
+                        useDEPProxy = depFlags != NativeEnums.ProcessDEPPolicy.PROCESS_DEP_DISABLED;
+                    }
+                }
+                catch (EntryPointNotFoundException)
+                {
+                    // This method is only present on Vista SP1 or XP SP3 and later.
+                }
+            }
         }
 
         protected override void Dispose(bool disposing)
@@ -1311,24 +1330,6 @@ namespace PSFilterPdn
         {
             base.OnLoad(e);
 
-            // set the useDEPProxy flag when on a 32-bit OS.
-            useDEPProxy = false;
-            if (IntPtr.Size == 4)
-            {
-                NativeEnums.ProcessDEPPolicy depFlags;
-                int permanent;
-                try
-                {
-                    if (SafeNativeMethods.GetProcessDEPPolicy(SafeNativeMethods.GetCurrentProcess(), out depFlags, out permanent))
-                    {
-                        useDEPProxy = depFlags != NativeEnums.ProcessDEPPolicy.PROCESS_DEP_DISABLED;
-                    }
-                }
-                catch (EntryPointNotFoundException)
-                {
-                    // This method is only present on Vista SP1 or XP SP3 and later.
-                }
-            }
             PluginThemingUtil.EnableEffectDialogTheme(this);
         }
 
