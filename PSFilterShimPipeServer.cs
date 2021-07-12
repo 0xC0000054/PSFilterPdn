@@ -25,7 +25,6 @@ namespace PSFilterPdn
         private readonly byte[] oneByteParameterMessageBuffer;
         private readonly byte[] oneByteParameterReplyBuffer;
         private readonly byte[] replySizeBuffer;
-        private readonly byte[] doneMessageBuffer;
 
         private readonly Func<bool> abortFunc;
         private readonly PluginData pluginData;
@@ -64,7 +63,6 @@ namespace PSFilterPdn
             oneByteParameterReplyBuffer = new byte[5];
             Array.Copy(BitConverter.GetBytes(sizeof(byte)), oneByteParameterReplyBuffer, sizeof(int));
             replySizeBuffer = new byte[sizeof(int)];
-            doneMessageBuffer = new byte[4];
 
             server = new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
@@ -156,21 +154,7 @@ namespace PSFilterPdn
                     throw new InvalidOperationException($"Unknown command value: { command }.");
             }
 
-            // Wait for the acknowledgment that the client is done reading.
-            if (server.IsConnected)
-            {
-                int bytesRead = 0;
-                int bytesToRead = doneMessageBuffer.Length;
-
-                do
-                {
-                    int n = server.Read(doneMessageBuffer, bytesRead, bytesToRead);
-
-                    bytesRead += n;
-                    bytesToRead -= n;
-
-                } while (bytesToRead > 0 && server.IsConnected);
-            }
+            server.WaitForPipeDrain();
 
             // Start a new server and wait for the next connection.
             server.Dispose();

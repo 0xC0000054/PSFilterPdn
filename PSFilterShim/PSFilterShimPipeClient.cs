@@ -27,8 +27,6 @@ namespace PSFilterShim
         private readonly byte[] noParameterMessageBuffer;
         private readonly byte[] oneByteParameterMessageBuffer;
 
-        private static readonly byte[] DoneMessageBytes = Encoding.UTF8.GetBytes("done");
-
         public PSFilterShimPipeClient(string pipeName)
         {
             this.pipeName = pipeName ?? throw new ArgumentNullException(nameof(pipeName));
@@ -140,7 +138,7 @@ namespace PSFilterShim
                     stream.ProperRead(reply, 0, replyLength);
                 }
 
-                stream.Write(DoneMessageBytes, 0, DoneMessageBytes.Length);
+                stream.WaitForPipeDrain();
             }
 
             return reply;
@@ -170,7 +168,7 @@ namespace PSFilterShim
                     stream.ProperRead(reply, 0, replyLength);
                 }
 
-                stream.Write(DoneMessageBytes, 0, DoneMessageBytes.Length);
+                stream.WaitForPipeDrain();
             }
 
             return reply;
@@ -208,7 +206,7 @@ namespace PSFilterShim
                     stream.ProperRead(reply, 0, replyLength);
                 }
 
-                stream.Write(DoneMessageBytes, 0, DoneMessageBytes.Length);
+                stream.WaitForPipeDrain();
             }
 
             return reply;
