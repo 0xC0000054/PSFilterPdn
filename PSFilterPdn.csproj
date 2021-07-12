@@ -160,6 +160,7 @@
     <Compile Include="FilterTreeNodeCollection.cs" />
     <Compile Include="Interop\SafeFindHandle.cs" />
     <Compile Include="Interop\SafeDCHandle.cs" />
+    <Compile Include="Interop\SafeLibraryHandle.cs" />
     <Compile Include="Interop\UnsafeNativeMethods.cs" />
     <Compile Include="Interop\Win32FindData.cs" />
     <Compile Include="ListExtensions.cs" />
@@ -260,14 +261,11 @@
     <Compile Include="PSApi\ReadImageDocumentDesc.cs" />
     <Compile Include="PSApi\ReadOnlyDictionary.cs" />
     <Compile Include="PSApi\ResourceSuite.cs" />
-    <Compile Include="PSApi\SafeLibraryHandle.cs" />
-    <Compile Include="PSApi\SafeNativeMethods.cs" />
     <Compile Include="PSApi\SPBasicSuite.cs" />
     <Compile Include="PSApi\SPBasicSuiteProvider.cs" />
     <Compile Include="PSApi\StringUtil.cs" />
     <Compile Include="PSApi\SurfaceUtil.cs" />
     <Compile Include="PSApi\TestAbortProc.cs" />
-    <Compile Include="PSApi\UnsafeNativeMethods.cs" />
     <Compile Include="PsFilterPdnConfigToken.cs" />
     <Compile Include="PSFilterPdn.cs" />
     <Compile Include="PsFilterPdnConfigDialog.cs">
@@ -293,8 +291,6 @@
     <Compile Include="PSApi\HandleProc.cs" />
     <Compile Include="PSApi\HostProcs.cs" />
     <Compile Include="PSApi\ImageModes.cs" />
-    <Compile Include="PSApi\NativeConstants.cs" />
-    <Compile Include="PSApi\NativeStructs.cs" />
     <Compile Include="PSApi\PIProperty.cs" />
     <Compile Include="PSApi\PlatformData.cs" />
     <Compile Include="PSApi\PluginData.cs" />

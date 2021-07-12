@@ -18,6 +18,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using PaintDotNet;
+using PSFilterPdn;
 using PSFilterPdn.Properties;
 
 namespace PSFilterLoad.PSApi
