@@ -13,7 +13,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace PSFilterPdn
+namespace PSFilterPdn.Interop
 {
     [System.Security.SuppressUnmanagedCodeSecurity]
     internal static class SafeNativeMethods

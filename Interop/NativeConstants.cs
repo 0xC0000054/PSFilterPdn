@@ -10,7 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-namespace PSFilterPdn
+namespace PSFilterPdn.Interop
 {
     internal static class NativeConstants
     {

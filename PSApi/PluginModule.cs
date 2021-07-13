@@ -10,7 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PSFilterPdn;
+using PSFilterPdn.Interop;
 using PSFilterPdn.Properties;
 using System;
 using System.Globalization;

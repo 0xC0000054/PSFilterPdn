@@ -16,7 +16,7 @@ using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace PSFilterPdn
+namespace PSFilterPdn.Interop
 {
     [SuppressUnmanagedCodeSecurity]
     internal static class UnsafeNativeMethods

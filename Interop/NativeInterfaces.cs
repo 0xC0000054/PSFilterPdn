@@ -14,7 +14,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace PSFilterPdn
+namespace PSFilterPdn.Interop
 {
     static class NativeInterfaces
     {

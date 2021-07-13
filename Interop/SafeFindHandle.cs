@@ -12,7 +12,7 @@
 
 using Microsoft.Win32.SafeHandles;
 
-namespace PSFilterPdn
+namespace PSFilterPdn.Interop
 {
     internal sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
     {

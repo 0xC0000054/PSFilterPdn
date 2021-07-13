@@ -12,7 +12,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace PSFilterPdn
+namespace PSFilterPdn.Interop
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     [BestFitMapping(false)]

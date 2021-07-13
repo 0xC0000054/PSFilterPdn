@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using Microsoft.Win32.SafeHandles;
+using PSFilterPdn.Interop;
 using System;
 using System.Collections;
 using System.Collections.Generic;

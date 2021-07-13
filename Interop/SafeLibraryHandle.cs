@@ -18,7 +18,7 @@ using Microsoft.Win32.SafeHandles;
  * http://blogs.msdn.com/b/jmstall/archive/2007/01/06/typesafe-getprocaddress.aspx
  */
 
-namespace PSFilterPdn
+namespace PSFilterPdn.Interop
 {
     /// <summary>
     /// See http://msdn.microsoft.com/msdnmag/issues/05/10/Reliability/
