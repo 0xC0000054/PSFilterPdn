@@ -22,14 +22,9 @@ namespace PSFilterLoad.PSApi
         private const uint IMAGE_NT_SIGNATURE = 0x00004550; // PE00
         private const ushort IMAGE_FILE_MACHINE_I386 = 0x14C;
         private const ushort IMAGE_FILE_MACHINE_AMD64 = 0x8664;
+        private const ushort IMAGE_FILE_MACHINE_ARM = 0x01C0;
+        private const ushort IMAGE_FILE_MACHINE_ARM64 = 0xAA64;
         private const int NTSignatureOffsetLocation = 0x3C;
-
-        internal enum ProcessorArchitecture
-        {
-            Unknown = 0,
-            X86,
-            X64
-        }
 
         /// <summary>
         /// Gets the processor architecture that the module was built for.
@@ -101,6 +96,12 @@ namespace PSFilterLoad.PSApi
                             break;
                         case IMAGE_FILE_MACHINE_AMD64:
                             architecture = ProcessorArchitecture.X64;
+                            break;
+                        case IMAGE_FILE_MACHINE_ARM:
+                            architecture = ProcessorArchitecture.Arm;
+                            break;
+                        case IMAGE_FILE_MACHINE_ARM64:
+                            architecture = ProcessorArchitecture.Arm64;
                             break;
                     }
                 }

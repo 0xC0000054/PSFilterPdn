@@ -57,6 +57,11 @@ namespace PSFilterPdn.Interop
         internal const uint MEM_COMMIT = 0x1000;
         internal const uint MEM_RELEASE = 0x8000;
 
+        internal const ushort PROCESSOR_ARCHITECTURE_INTEL = 0;
+        internal const ushort PROCESSOR_ARCHITECTURE_AMD64 = 9;
+        internal const ushort PROCESSOR_ARCHITECTURE_ARM = 5;
+        internal const ushort PROCESSOR_ARCHITECTURE_ARM64 = 12;
+
         internal const uint SEM_FAILCRITICALERRORS = 1U;
 
         internal const int STGM_READ = 0;

@@ -33,18 +33,18 @@ namespace PSFilterLoad.PSApi
             /// <param name="fileName">The file name of the plug-in.</param>
             /// <param name="platform">The processor architecture that the plug-in was built for.</param>
             /// <exception cref="System.PlatformNotSupportedException">The processor architecture specified by <paramref name="platform"/> is not supported.</exception>
-            public QueryFilter(string fileName, PEFile.ProcessorArchitecture platform)
+            public QueryFilter(string fileName, ProcessorArchitecture platform)
             {
                 this.fileName = fileName;
                 switch (platform)
                 {
-                    case PEFile.ProcessorArchitecture.X86:
+                    case ProcessorArchitecture.X86:
                         platformEntryPoint = PIPropertyID.PIWin32X86CodeProperty;
                         break;
-                    case PEFile.ProcessorArchitecture.X64:
+                    case ProcessorArchitecture.X64:
                         platformEntryPoint = PIPropertyID.PIWin64X86CodeProperty;
                         break;
-                    case PEFile.ProcessorArchitecture.Unknown:
+                    case ProcessorArchitecture.Unknown:
                     default:
                         throw new PlatformNotSupportedException();
                 }
@@ -681,6 +681,41 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
+        /// Determines whether the processor architecture of the DLL is supported.
+        /// </summary>
+        /// <param name="platform">The processor architecture that the DLL was built for.</param>
+        /// <returns>
+        /// <see langword="true"/> if the DLL processor architecture is supported; otherwise, <see langword="false"/>.
+        /// </returns>
+        private static bool DllProcessorArchtectureIsSupported(ProcessorArchitecture platform)
+        {
+            bool result;
+
+            switch (ProcessInformation.Architecture)
+            {
+                case ProcessorArchitecture.X86:
+                    result = platform == ProcessorArchitecture.X86;
+                    break;
+                case ProcessorArchitecture.X64:
+                    // A x86_64 OS can use both 64-bit and 32-bit plugins, the 32-bit plugins will be run using the PSFilterShim process.
+                    result = platform == ProcessorArchitecture.X64 || platform == ProcessorArchitecture.X86;
+                    break;
+                case ProcessorArchitecture.Arm:
+                    result = platform == ProcessorArchitecture.Arm;
+                    break;
+                case ProcessorArchitecture.Arm64:
+                    result = platform == ProcessorArchitecture.Arm64;
+                    break;
+                case ProcessorArchitecture.Unknown:
+                default:
+                    result = false;
+                    break;
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Loads the 8bf filters from the specified file.
         /// </summary>
         /// <param name="fileName">The plug-in file name.</param>
@@ -693,10 +728,11 @@ namespace PSFilterLoad.PSApi
                 throw new ArgumentNullException(nameof(fileName));
             }
 
-            PEFile.ProcessorArchitecture platform = PEFile.GetProcessorArchitecture(fileName);
-            // When running as a 32-bit process ignore any plug-ins that are not 32-bit.
-            if ((IntPtr.Size == 4 && platform != PEFile.ProcessorArchitecture.X86) || platform == PEFile.ProcessorArchitecture.Unknown)
+            ProcessorArchitecture platform = PEFile.GetProcessorArchitecture(fileName);
+
+            if (!DllProcessorArchtectureIsSupported(platform))
             {
+                // Ignore any DLLs that cannot be used on the current platform.
                 return System.Linq.Enumerable.Empty<PluginData>();
             }
 

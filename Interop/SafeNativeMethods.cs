@@ -115,5 +115,8 @@ namespace PSFilterPdn.Interop
         [DllImport("kernel32.dll", ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool GlobalMemoryStatusEx(ref NativeStructs.MEMORYSTATUSEX lpBuffer);
+
+        [DllImport("kernel32.dll", ExactSpelling = true)]
+        internal static extern void GetSystemInfo(ref NativeStructs.SYSTEM_INFO lpSystemInfo);
     }
 }
