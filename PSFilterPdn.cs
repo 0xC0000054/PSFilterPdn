@@ -286,33 +286,36 @@ namespace PSFilterPdn
                     token.Dest = null;
                 }
 
-                Win32Window win32Window = new Win32Window(Process.GetCurrentProcess().MainWindowHandle);
-
-                if (CheckSourceSurfaceSize(win32Window))
+                if (token.FilterData != null)
                 {
-                    if (token.RunWith32BitShim)
-                    {
-                        Run32BitFilterProxy(ref token, win32Window);
-                    }
-                    else
-                    {
-                        filterDone = new ManualResetEvent(false);
+                    Win32Window win32Window = new Win32Window(Process.GetCurrentProcess().MainWindowHandle);
 
-                        filterThread = new Thread(() => RunRepeatFilter(ref token, win32Window))
+                    if (CheckSourceSurfaceSize(win32Window))
+                    {
+                        if (token.RunWith32BitShim)
                         {
-                            IsBackground = true,
-                            Priority = ThreadPriority.AboveNormal
-                        };
-                        // Some filters may use OLE which requires Single Threaded Apartment mode.
-                        filterThread.SetApartmentState(ApartmentState.STA);
-                        filterThread.Start();
+                            Run32BitFilterProxy(ref token, win32Window);
+                        }
+                        else
+                        {
+                            filterDone = new ManualResetEvent(false);
 
-                        filterDone.WaitOne();
-                        filterDone.Close();
-                        filterDone = null;
+                            filterThread = new Thread(() => RunRepeatFilter(ref token, win32Window))
+                            {
+                                IsBackground = true,
+                                Priority = ThreadPriority.AboveNormal
+                            };
+                            // Some filters may use OLE which requires Single Threaded Apartment mode.
+                            filterThread.SetApartmentState(ApartmentState.STA);
+                            filterThread.Start();
 
-                        filterThread.Join();
-                        filterThread = null;
+                            filterDone.WaitOne();
+                            filterDone.Close();
+                            filterDone = null;
+
+                            filterThread.Join();
+                            filterThread = null;
+                        }
                     }
                 }
             }
