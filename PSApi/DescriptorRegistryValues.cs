@@ -141,11 +141,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         ///   <c>true</c> if the persisted settings have changed; otherwise, <c>false</c>.
         /// </value>
-        public bool Dirty
-        {
-            get => dirty;
-            set => dirty = value;
-        }
+        public bool Dirty => dirty;
 
         /// <summary>
         /// Saves the persisted values.
@@ -164,6 +160,7 @@ namespace PSFilterLoad.PSApi
                     fs.Write(ms.GetBuffer(), 0, (int)ms.Length);
                 }
             }
+            dirty = false;
         }
 
         private sealed class DescriptorRegistryFileHeader

@@ -1729,7 +1729,6 @@ namespace PSFilterPdn
                 try
                 {
                     descriptorRegistry.SavePersistedValues(path);
-                    descriptorRegistry.Dirty = false;
                 }
                 catch (IOException ex)
                 {
