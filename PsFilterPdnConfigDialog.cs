@@ -565,17 +565,6 @@ namespace PSFilterPdn
             Close();
         }
 
-        /// <summary>
-        /// Binds the serialization to types in the currently loaded assembly.
-        /// </summary>
-        private class SelfBinder : System.Runtime.Serialization.SerializationBinder
-        {
-            public override Type BindToType(string assemblyName, string typeName)
-            {
-                return Type.GetType(string.Format(CultureInfo.InvariantCulture, "{0},{1}", typeName, assemblyName));
-            }
-        }
-
         private bool AbortCallback()
         {
             return formClosePending;
@@ -1708,31 +1697,6 @@ namespace PSFilterPdn
             }
         }
 
-        private static bool IsNewDescriptorRegistryFormat(FileStream stream, out int fileVersion)
-        {
-            fileVersion = 0;
-
-            bool result = false;
-
-            if (stream.Length > 8)
-            {
-                byte[] headerBytes = new byte[8];
-
-                stream.ProperRead(headerBytes, 0, headerBytes.Length);
-
-                string signature = Encoding.UTF8.GetString(headerBytes, 0, 4);
-
-                // PFPR = PSFilterPdn registry
-                if (string.Equals(signature, "PFPR", StringComparison.Ordinal))
-                {
-                    fileVersion = BitConverter.ToInt32(headerBytes, 4);
-                    result = true;
-                }
-            }
-
-            return result;
-        }
-
         private void LoadDescriptorRegistry()
         {
             if (descriptorRegistry == null)
@@ -1742,45 +1706,7 @@ namespace PSFilterPdn
 
                 try
                 {
-                    using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
-                    {
-                        ReadOnlyDictionary<string, DescriptorRegistryItem> values = null;
-                        bool isOldFormat = false;
-
-                        if (IsNewDescriptorRegistryFormat(fs, out int fileVersion))
-                        {
-                            if (fileVersion == 1)
-                            {
-                                long dataLength = fs.Length - fs.Position;
-
-                                byte[] data = new byte[dataLength];
-
-                                fs.ProperRead(data, 0, data.Length);
-
-                                using (MemoryStream ms = new MemoryStream(data))
-                                {
-                                    values = DataContractSerializerUtil.Deserialize<ReadOnlyDictionary<string, DescriptorRegistryItem>>(ms);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            fs.Position = 0;
-
-                            SelfBinder binder = new SelfBinder();
-                            BinaryFormatter bf = new BinaryFormatter() { Binder = binder };
-                            values = (ReadOnlyDictionary<string, DescriptorRegistryItem>)bf.Deserialize(fs);
-                            isOldFormat = true;
-                        }
-
-                        if (values != null && values.Count > 0)
-                        {
-                            descriptorRegistry = new DescriptorRegistryValues(values)
-                            {
-                                Dirty = isOldFormat
-                            };
-                        }
-                    }
+                    descriptorRegistry = new DescriptorRegistryValues(path);
                 }
                 catch (DirectoryNotFoundException)
                 {
@@ -1802,33 +1728,7 @@ namespace PSFilterPdn
 
                 try
                 {
-                    FileStream fs = null;
-                    try
-                    {
-                        fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-                        using (BinaryWriter writer = new BinaryWriter(fs))
-                        {
-                            fs = null;
-
-                            // PFPR = PSFilterPdn registry
-                            writer.Write(Encoding.UTF8.GetBytes("PFPR"));
-
-                            const int FileVersion = 1;
-
-                            writer.Write(FileVersion);
-
-                            using (MemoryStream ms = new MemoryStream())
-                            {
-                                DataContractSerializerUtil.Serialize(ms, descriptorRegistry.PersistedValues);
-
-                                writer.Write(ms.GetBuffer(), 0, (int)ms.Length);
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        fs?.Dispose();
-                    }
+                    descriptorRegistry.SavePersistedValues(path);
                     descriptorRegistry.Dirty = false;
                 }
                 catch (IOException ex)
