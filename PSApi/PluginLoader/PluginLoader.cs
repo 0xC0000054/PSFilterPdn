@@ -25,6 +25,7 @@ namespace PSFilterLoad.PSApi
         {
             public readonly string fileName;
             public readonly uint platformEntryPoint;
+            public readonly bool runWith32BitShim;
             public List<PluginData> plugins;
 
             /// <summary>
@@ -49,6 +50,7 @@ namespace PSFilterLoad.PSApi
                         throw new PlatformNotSupportedException();
                 }
                 plugins = new List<PluginData>();
+                runWith32BitShim = platform == ProcessorArchitecture.X86 && ProcessInformation.Architecture != ProcessorArchitecture.X86;
             }
         }
 
@@ -412,7 +414,6 @@ namespace PSFilterLoad.PSApi
             string category = null;
             string title = null;
             FilterCaseInfoCollection filterInfo = null;
-            bool runWith32BitShim = false;
             AETEData aete = null;
             string enableInfo = null;
 
@@ -448,8 +449,6 @@ namespace PSFilterLoad.PSApi
                 else if (propKey == query.platformEntryPoint)
                 {
                     entryPoint = StringUtil.FromCString(dataPtr);
-                    // If it is a 32-bit plug-in on a 64-bit OS run it with the 32-bit shim.
-                    runWith32BitShim = IntPtr.Size == 8 && propKey == PIPropertyID.PIWin32X86CodeProperty;
                 }
                 else if (propKey == PIPropertyID.PIVersionProperty)
                 {
@@ -543,7 +542,7 @@ namespace PSFilterLoad.PSApi
                 propPtr += PIProperty.SizeOf + propertyDataPaddedLength;
             }
 
-            PluginData enumData = new PluginData(query.fileName, entryPoint, category, title, filterInfo, runWith32BitShim, aete, enableInfo);
+            PluginData enumData = new PluginData(query.fileName, entryPoint, category, title, filterInfo, query.runWith32BitShim, aete, enableInfo);
 
             if (enumData.IsValid())
             {
@@ -704,7 +703,9 @@ namespace PSFilterLoad.PSApi
                     result = platform == ProcessorArchitecture.Arm;
                     break;
                 case ProcessorArchitecture.Arm64:
-                    result = platform == ProcessorArchitecture.Arm64;
+                    // An ARM64 OS should be able to run ARM64 and x86 plugins, the x86 plugins will be run using the PSFilterShim process.
+                    // The ARM64 version of Windows has emulation support for running x86 processes.
+                    result = platform == ProcessorArchitecture.Arm64 || platform == ProcessorArchitecture.X86;
                     break;
                 case ProcessorArchitecture.Unknown:
                 default:
