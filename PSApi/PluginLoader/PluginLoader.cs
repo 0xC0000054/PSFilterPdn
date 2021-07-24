@@ -47,7 +47,7 @@ namespace PSFilterLoad.PSApi
                         break;
                     case ProcessorArchitecture.Unknown:
                     default:
-                        throw new PlatformNotSupportedException();
+                        throw new PlatformNotSupportedException($"No platform entry point was defined for { nameof(ProcessorArchitecture) }.{ platform }.");
                 }
                 plugins = new List<PluginData>();
                 runWith32BitShim = platform == ProcessorArchitecture.X86 && ProcessInformation.Architecture != ProcessorArchitecture.X86;
