@@ -147,7 +147,7 @@ namespace PSFilterPdn
                     }
                     break;
                 case Command.SetErrorMessage:
-                    errorCallback(GetErrorMessageString(messageBytes));
+                    errorCallback(Encoding.UTF8.GetString(messageBytes, 1, messageLength - 1));
                     SendEmptyReplyToClient();
                     break;
                 default:
@@ -161,14 +161,6 @@ namespace PSFilterPdn
             server = new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
-        }
-
-        private static string GetErrorMessageString(byte[] messageBytes)
-        {
-            int startIndex = 1;
-            int count = messageBytes.Length - startIndex;
-
-            return Encoding.UTF8.GetString(messageBytes, startIndex, count);
         }
 
         private void SendEmptyReplyToClient()
