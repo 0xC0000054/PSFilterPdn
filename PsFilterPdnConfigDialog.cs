@@ -70,7 +70,6 @@ namespace PSFilterPdn
         private bool proxyResult;
         private string proxyErrorMessage;
         private Process proxyProcess;
-        private bool proxyRunning;
         private PSFilterShimPipeServer server;
         private string srcFileName;
         private string destFileName;
@@ -590,28 +589,26 @@ namespace PSFilterPdn
 
         private void proxyProcess_Exited(object sender, EventArgs e)
         {
-            if (proxyRunning)
+            if (!formClosePending)
             {
-                if (!formClosePending)
+                SetProxyResultData();
+            }
+
+            server.Dispose();
+            server = null;
+
+            proxyProcess.Dispose();
+            proxyProcess = null;
+
+            if (formClosePending)
+            {
+                if (InvokeRequired)
                 {
-                    SetProxyResultData();
+                    Invoke(new MethodInvoker(delegate () { Close(); }));
                 }
-
-                server.Dispose();
-                server = null;
-
-                proxyRunning = false;
-
-                if (formClosePending)
+                else
                 {
-                    if (InvokeRequired)
-                    {
-                        Invoke(new MethodInvoker(delegate () { Close(); }));
-                    }
-                    else
-                    {
-                        Close();
-                    }
+                    Close();
                 }
             }
         }
@@ -730,17 +727,16 @@ namespace PSFilterPdn
                 proxyResult = true; // assume the filter succeeded this will be set to false if it failed
                 proxyErrorMessage = string.Empty;
 
-                if (proxyProcess == null)
+                if (proxyProcess is null)
                 {
                     proxyProcess = new Process
                     {
-                        EnableRaisingEvents = true
+                        EnableRaisingEvents = true,
+                        StartInfo = psi
                     };
                     proxyProcess.Exited += new EventHandler(proxyProcess_Exited);
+                    proxyProcess.Start();
                 }
-                proxyProcess.StartInfo = psi;
-                proxyProcess.Start();
-                proxyRunning = true;
             }
             catch (ArgumentException ax)
             {
@@ -839,7 +835,7 @@ namespace PSFilterPdn
             {
                 PluginData data = (PluginData)filterTree.SelectedNode.Tag;
 
-                if (!proxyRunning && !filterRunning)
+                if (proxyProcess is null && !filterRunning)
                 {
                     if (data.RunWith32BitShim || useDEPProxy)
                     {
@@ -1252,7 +1248,7 @@ namespace PSFilterPdn
                 e.Cancel = true;
             }
 
-            if (proxyRunning || filterRunning)
+            if (proxyProcess != null || filterRunning)
             {
                 if (DialogResult == DialogResult.Cancel)
                 {
