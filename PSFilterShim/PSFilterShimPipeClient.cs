@@ -24,6 +24,7 @@ namespace PSFilterShim
     {
         private readonly string pipeName;
         private readonly byte[] replyLengthBuffer;
+        private readonly byte[] oneByteReplyBuffer;
         private readonly byte[] noParameterMessageBuffer;
         private readonly byte[] oneByteParameterMessageBuffer;
 
@@ -31,6 +32,7 @@ namespace PSFilterShim
         {
             this.pipeName = pipeName ?? throw new ArgumentNullException(nameof(pipeName));
             replyLengthBuffer = new byte[4];
+            oneByteReplyBuffer = new byte[1];
             noParameterMessageBuffer = CreateNoParameterMessageBuffer();
             oneByteParameterMessageBuffer = CreateOneByteParameterMessageBuffer();
         }
@@ -133,7 +135,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = new byte[replyLength];
+                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
 
                     stream.ProperRead(reply, 0, replyLength);
                 }
@@ -163,7 +165,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = new byte[replyLength];
+                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
 
                     stream.ProperRead(reply, 0, replyLength);
                 }
@@ -201,7 +203,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = new byte[replyLength];
+                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
 
                     stream.ProperRead(reply, 0, replyLength);
                 }
