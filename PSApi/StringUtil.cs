@@ -96,7 +96,7 @@ namespace PSFilterLoad.PSApi
         /// A managed string that holds a copy of the Pascal string.
         /// If <paramref name="pascalString"/> is null, the method returns null.
         /// </returns>
-        internal static unsafe string FromPascalString(byte* pascalString, out int lengthWithPrefix)
+        internal static unsafe string FromPascalString(byte* pascalString, out uint lengthWithPrefix)
         {
             if (pascalString == null)
             {
@@ -105,7 +105,7 @@ namespace PSFilterLoad.PSApi
             }
 
             // Include the length prefix byte in the total.
-            lengthWithPrefix = pascalString[0] + 1;
+            lengthWithPrefix = (uint)pascalString[0] + 1;
 
             return new string((sbyte*)pascalString, 1, pascalString[0], Windows1252Encoding);
         }
@@ -180,7 +180,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A managed string that holds a copy of the C string.
         /// </returns>
-        internal static unsafe string FromCString(IntPtr ptr, out int lengthWithTerminator)
+        internal static unsafe string FromCString(byte* ptr, out uint lengthWithTerminator)
         {
             int length;
             if (!TryGetCStringLength(ptr, out length))
@@ -190,9 +190,9 @@ namespace PSFilterLoad.PSApi
             }
 
             // Add the terminating NUL to the total length.
-            lengthWithTerminator = length + 1;
+            lengthWithTerminator = (uint)length + 1;
 
-            return FromCString((byte*)ptr, length, StringTrimOption.WhiteSpaceAndNullTerminator);
+            return FromCString(ptr, length, StringTrimOption.WhiteSpaceAndNullTerminator);
         }
 
         /// <summary>

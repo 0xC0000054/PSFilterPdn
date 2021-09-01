@@ -64,9 +64,9 @@ namespace PSFilterLoad.PSApi
         public string desc;
         public int eventClass;
         public int type;
-        public uint replyType;
-        public uint paramType;
-        public short flags;
+        public string replyType;
+        public string paramType;
+        public ushort flags;
         public AETEParameter[] parameters;
         public AETEEnums[] enums;
     }

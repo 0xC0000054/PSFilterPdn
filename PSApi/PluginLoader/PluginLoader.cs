@@ -228,7 +228,7 @@ namespace PSFilterLoad.PSApi
             byte* propPtr = ptr;
             if (suiteCount == 1) // There should only be one vendor suite
             {
-                int stringLength;
+                uint stringLength;
                 string suiteVendor = StringUtil.FromPascalString(propPtr, out stringLength);
                 propPtr += stringLength;
                 string suiteDescription = StringUtil.FromPascalString(propPtr, out stringLength);
@@ -253,25 +253,16 @@ namespace PSFilterLoad.PSApi
                     int eventType = *(int*)propPtr;
                     propPtr += 4;
 
-                    uint replyType = *(uint*)propPtr;
-                    propPtr += 7;
-                    byte[] bytes = new byte[4];
+                    string replyType = StringUtil.FromCString(propPtr, out stringLength);
+                    propPtr += stringLength;
 
-                    int idx = 0;
-                    while (*propPtr != 0)
-                    {
-                        if (*propPtr != 0x27) // The ' char, some filters encode the #ImR parameter type as '#'ImR.
-                        {
-                            bytes[idx] = *propPtr;
-                            idx++;
-                        }
-                        propPtr++;
-                    }
-                    propPtr++; // skip the second null byte
+                    ushort eventFlags = *(ushort*)propPtr;
+                    propPtr += 2;
 
-                    uint paramType = BitConverter.ToUInt32(bytes, 0);
+                    string paramType = StringUtil.FromCString(propPtr, out stringLength);
+                    propPtr += stringLength;
 
-                    short eventFlags = *(short*)propPtr;
+                    ushort paramTypeFlags = *(ushort*)propPtr;
                     propPtr += 2;
                     short paramCount = *(short*)propPtr;
                     propPtr += 2;
@@ -585,10 +576,9 @@ namespace PSFilterLoad.PSApi
 #endif
                 return true;
             }
-            int length = 0;
             byte* ptr = (byte*)lockRes.ToPointer() + 2;
 
-            string category = StringUtil.FromCString((IntPtr)ptr, out length);
+            string category = StringUtil.FromCString(ptr, out uint length);
 
             ptr += length;
 
