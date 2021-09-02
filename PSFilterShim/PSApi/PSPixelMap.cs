@@ -50,5 +50,12 @@ namespace PSFilterLoad.PSApi
         public System.IntPtr masks;
         public int maskPhaseRow;
         public int maskPhaseCol;
+
+#if DEBUG
+        public override string ToString() => string.Format(
+                "version = {0}, bounds = {1}, ImageMode = {2}, colBytes = {3}, rowBytes = {4},planeBytes = {5}, BaseAddress = 0x{6}, mat = 0x{7}, masks = 0x{8}",
+                new object[]{ version, bounds, ((ImageModes)imageMode).ToString("G"), colBytes, rowBytes, planeBytes, baseAddr.ToHexString(),
+                     mat.ToHexString(), masks.ToHexString() });
+#endif
     }
 }

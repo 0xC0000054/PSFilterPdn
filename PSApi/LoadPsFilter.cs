@@ -2534,9 +2534,9 @@ namespace PSFilterLoad.PSApi
         private unsafe short DisplayPixelsProc(ref PSPixelMap srcPixelMap, ref VRect srcRect, int dstRow, int dstCol, IntPtr platformContext)
         {
 #if DEBUG
-            DebugUtils.Ping(DebugFlags.DisplayPixels, string.Format("source: bounds = {0}, ImageMode = {1}, colBytes = {2}, rowBytes = {3},planeBytes = {4}, BaseAddress = {5}", new object[]{srcPixelMap.bounds, ((ImageModes)srcPixelMap.imageMode).ToString("G"),
-            srcPixelMap.colBytes, srcPixelMap.rowBytes, srcPixelMap.planeBytes, srcPixelMap.baseAddr.ToHexString()}));
-            DebugUtils.Ping(DebugFlags.DisplayPixels, string.Format("srcRect = {0} dstCol (x, width) = {1}, dstRow (y, height) = {2}", srcRect, dstCol, dstRow));
+            DebugUtils.Ping(DebugFlags.DisplayPixels, string.Format(
+                "srcPixelMap = [ {0} ], srcRect = {1}, dstCol (x, width) = {2}, dstRow (y, height) = {3}",
+                new object[] { srcPixelMap, srcRect, dstCol, dstRow }));
 #endif
 
             if (platformContext == IntPtr.Zero || srcPixelMap.rowBytes == 0 || srcPixelMap.baseAddr == IntPtr.Zero)
