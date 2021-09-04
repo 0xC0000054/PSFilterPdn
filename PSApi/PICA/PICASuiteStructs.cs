@@ -140,44 +140,6 @@ namespace PSFilterLoad.PSApi.PICA
         public IntPtr GetPluginName;
     }
 
-#if PICASUITEDEBUG
-    internal struct SPPluginsSuite4
-    {
-        public IntPtr AllocatePluginList;
-        public IntPtr FreePluginList;
-
-        public IntPtr AddPlugin;
-
-        public IntPtr NewPluginListIterator;
-        public IntPtr NextPlugin;
-        public IntPtr DeletePluginListIterator;
-        public IntPtr GetPluginListNeededSuiteAvailable;
-
-        public IntPtr GetPluginHostEntry;
-        public IntPtr GetPluginFileSpecification;
-        public IntPtr GetPluginPropertyList;
-        public IntPtr GetPluginGlobals;
-        public IntPtr SetPluginGlobals;
-        public IntPtr GetPluginStarted;
-        public IntPtr SetPluginStarted;
-        public IntPtr GetPluginSkipShutdown;
-        public IntPtr SetPluginSkipShutdown;
-        public IntPtr GetPluginBroken;
-        public IntPtr SetPluginBroken;
-        public IntPtr GetPluginAdapter;
-        public IntPtr GetPluginAdapterInfo;
-        public IntPtr SetPluginAdapterInfo;
-
-        public IntPtr FindPluginProperty;
-
-        public IntPtr GetPluginName;
-        public IntPtr SetPluginName;
-        public IntPtr GetNamedPlugin;
-
-        public IntPtr SetPluginPropertyList;
-    }
-#endif
-
     internal struct ASZString : IEquatable<ASZString>
     {
         private readonly IntPtr value;

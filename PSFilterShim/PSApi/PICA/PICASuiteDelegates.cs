@@ -78,69 +78,6 @@ namespace PSFilterLoad.PSApi.PICA
     internal delegate int UISuiteGetPluginName(IntPtr plugInRef, ref ASZString plugInName);
     #endregion
 
-#if PICASUITEDEBUG
-    #region SPPlugin Delegates
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPAllocatePluginList(IntPtr strings, ref IntPtr pluginList);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPFreePluginList(ref IntPtr pluginList);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPGetPluginListNeededSuiteAvailable(IntPtr pluginList, ref int available);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPAddPlugin(IntPtr pluginList, IntPtr fileSpec, IntPtr PiPL, IntPtr adapterName, IntPtr adapterInfo, IntPtr plugin);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPNewPluginListIterator(IntPtr pluginList, ref IntPtr iter);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPNextPlugin(IntPtr iter, ref IntPtr plugin);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPDeletePluginListIterator(IntPtr iter);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPGetHostPluginEntry(IntPtr plugin, ref IntPtr host);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPGetPluginFileSpecification(IntPtr plugin, ref IntPtr fileSpec);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPGetPluginPropertyList(IntPtr plugin, ref IntPtr propertyList);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPGetPluginGlobals(IntPtr plugin, ref IntPtr globals);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPSetPluginGlobals(IntPtr plugin, IntPtr globals);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPGetPluginStarted(IntPtr plugin, ref int started);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPSetPluginStarted(IntPtr plugin, long started);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPGetPluginSkipShutdown(IntPtr plugin, ref int skipShutdown);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPSetPluginSkipShutdown(IntPtr plugin, long skipShutdown);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPGetPluginBroken(IntPtr plugin, ref int broken);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPSetPluginBroken(IntPtr plugin, long broken);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPGetPluginAdapter(IntPtr plugin, ref IntPtr adapter);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPGetPluginAdapterInfo(IntPtr plugin, ref IntPtr adapterInfo);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPSetPluginAdapterInfo(IntPtr plugin, IntPtr adapterInfo);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPFindPluginProperty(IntPtr plugin, uint vendorID, uint propertyKey, long propertyID, ref IntPtr p);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPGetPluginName(IntPtr plugin, ref IntPtr name);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPSetPluginName(IntPtr plugin, IntPtr name);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPGetNamedPlugin(IntPtr name, ref IntPtr plugin);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int SPSetPluginPropertyList(IntPtr plugin, IntPtr file);
-    #endregion
-#endif
-
     #region ASZStringSuite Delegates
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ASZStringMakeFromUnicode(IntPtr src, UIntPtr byteCount, ref ASZString newZString);

@@ -239,7 +239,6 @@
     <Compile Include="PSApi\PICA\PICABufferSuite.cs" />
     <Compile Include="PSApi\PICA\PICAColorSpaceSuite.cs" />
     <Compile Include="PSApi\PICA\PICAHandleSuite.cs" />
-    <Compile Include="PSApi\PICA\PICASPPluginsSuite.cs" />
     <Compile Include="PSApi\PICA\PICASuiteDelegates.cs" />
     <Compile Include="PSApi\PICA\PICASuiteStructs.cs" />
     <Compile Include="PSApi\PICA\PICAUIHooksSuite.cs" />
