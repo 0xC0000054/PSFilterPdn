@@ -25,7 +25,7 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly UISuiteGetPluginName uiPluginName;
         private readonly IASZStringSuite zstringSuite;
 
-        public PICAUIHooksSuite(IntPtr parentWindowHandle, string name, IASZStringSuite zstringSuite)
+        public unsafe PICAUIHooksSuite(IntPtr parentWindowHandle, string name, IASZStringSuite zstringSuite)
         {
             if (zstringSuite == null)
             {
@@ -57,11 +57,16 @@ namespace PSFilterLoad.PSApi.PICA
             return 60U;
         }
 
-        private int GetPluginName(IntPtr pluginRef, ref ASZString name)
+        private unsafe int GetPluginName(IntPtr pluginRef, ASZString* name)
         {
+            if (name == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             try
             {
-                name = zstringSuite.CreateFromString(pluginName);
+                *name = zstringSuite.CreateFromString(pluginName);
             }
             catch (OutOfMemoryException)
             {

@@ -97,7 +97,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <summary>
         /// Initializes a new instance of the <see cref="ActionReferenceSuite"/> class.
         /// </summary>
-        public ActionReferenceSuite()
+        public unsafe ActionReferenceSuite()
         {
             make = new ActionReferenceMake(Make);
             free = new ActionReferenceFree(Free);
@@ -190,12 +190,12 @@ namespace PSFilterLoad.PSApi.PICA
             return new PIActionReference(actionReferencesIndex);
         }
 
-        private int Make(ref PIActionReference reference)
+        private unsafe int Make(PIActionReference* reference)
         {
             try
             {
-                reference = GenerateDictionaryKey();
-                actionReferences.Add(reference, new ActionReferenceContainer());
+                *reference = GenerateDictionaryKey();
+                actionReferences.Add(*reference, new ActionReferenceContainer());
             }
             catch (OutOfMemoryException)
             {
@@ -216,15 +216,20 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int GetForm(PIActionReference reference, ref uint value)
+        private unsafe int GetForm(PIActionReference reference, uint* value)
         {
+            if (value == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
                 {
-                    value = (uint)item.Form;
+                    *value = (uint)item.Form;
 
                     return PSError.kSPNoError;
                 }
@@ -233,15 +238,20 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetDesiredClass(PIActionReference reference, ref uint value)
+        private unsafe int GetDesiredClass(PIActionReference reference, uint* value)
         {
+            if (value == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
                 {
-                    value = item.DesiredClass;
+                    *value = item.DesiredClass;
 
                     return PSError.kSPNoError;
                 }
@@ -364,8 +374,13 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int GetNameLength(PIActionReference reference, ref uint stringLength)
+        private unsafe int GetNameLength(PIActionReference reference, uint* stringLength)
         {
+            if (stringLength == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
             {
@@ -373,7 +388,7 @@ namespace PSFilterLoad.PSApi.PICA
                 if (item != null)
                 {
                     byte[] bytes = (byte[])item.Value;
-                    stringLength = (uint)bytes.Length;
+                    *stringLength = (uint)bytes.Length;
 
                     return PSError.kSPNoError;
                 }
@@ -411,15 +426,20 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetIndex(PIActionReference reference, ref uint value)
+        private unsafe int GetIndex(PIActionReference reference, uint* value)
         {
+            if (value == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
                 {
-                    value = (uint)item.Value;
+                    *value = (uint)item.Value;
 
                     return PSError.kSPNoError;
                 }
@@ -428,15 +448,20 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetIdentifier(PIActionReference reference, ref uint value)
+        private unsafe int GetIdentifier(PIActionReference reference, uint* value)
         {
+            if (value == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
                 {
-                    value = (uint)item.Value;
+                    *value = (uint)item.Value;
 
                     return PSError.kSPNoError;
                 }
@@ -445,15 +470,20 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetOffset(PIActionReference reference, ref int value)
+        private unsafe int GetOffset(PIActionReference reference, int* value)
         {
+            if (value == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
                 {
-                    value = (int)item.Value;
+                    *value = (int)item.Value;
 
                     return PSError.kSPNoError;
                 }
@@ -462,8 +492,13 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetEnumerated(PIActionReference reference, ref uint type, ref uint enumValue)
+        private unsafe int GetEnumerated(PIActionReference reference, uint* type, uint* enumValue)
         {
+            if (enumValue == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
             {
@@ -471,8 +506,11 @@ namespace PSFilterLoad.PSApi.PICA
                 if (item != null)
                 {
                     EnumeratedValue enumerated = (EnumeratedValue)item.Value;
-                    type = enumerated.Type;
-                    enumValue = enumerated.Value;
+                    if (type != null)
+                    {
+                        *type = enumerated.Type;
+                    }
+                    *enumValue = enumerated.Value;
 
                     return PSError.kSPNoError;
                 }
@@ -481,15 +519,20 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetProperty(PIActionReference reference, ref uint value)
+        private unsafe int GetProperty(PIActionReference reference, uint* value)
         {
+            if (value == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
                 {
-                    value = (uint)item.Value;
+                    *value = (uint)item.Value;
 
                     return PSError.kSPNoError;
                 }
@@ -498,8 +541,13 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int GetContainer(PIActionReference reference, ref PIActionReference value)
+        private unsafe int GetContainer(PIActionReference reference, PIActionReference* value)
         {
+            if (value == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             ActionReferenceContainer container;
             if (actionReferences.TryGetValue(reference, out container))
             {
@@ -508,12 +556,12 @@ namespace PSFilterLoad.PSApi.PICA
                     ActionReferenceContainer nextContainer = container.GetNextContainer();
                     if (nextContainer != null)
                     {
-                        value = GenerateDictionaryKey();
-                        actionReferences.Add(value, nextContainer);
+                        *value = GenerateDictionaryKey();
+                        actionReferences.Add(*value, nextContainer);
                     }
                     else
                     {
-                        value = PIActionReference.Null;
+                        *value = PIActionReference.Null;
                     }
                 }
                 catch (OutOfMemoryException)

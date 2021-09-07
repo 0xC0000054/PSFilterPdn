@@ -33,6 +33,8 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        internal static unsafe string PointerToString<T>(T* value) where T : unmanaged => value != null ? (*value).ToString() : "<null>";
+
         internal static string PropToString(uint prop)
         {
             byte[] bytes = System.BitConverter.GetBytes(prop);

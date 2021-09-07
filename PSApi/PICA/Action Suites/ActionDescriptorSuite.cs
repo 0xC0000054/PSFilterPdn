@@ -169,8 +169,10 @@ namespace PSFilterLoad.PSApi.PICA
         /// <paramref name="zstringSuite"/> is null.
         /// </exception>
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        public ActionDescriptorSuite(AETEData aete, IActionListSuite actionListSuite, IActionReferenceSuite actionReferenceSuite,
-            IASZStringSuite zstringSuite)
+        public unsafe ActionDescriptorSuite(AETEData aete,
+                                            IActionListSuite actionListSuite,
+                                            IActionReferenceSuite actionReferenceSuite,
+                                            IASZStringSuite zstringSuite)
         {
             if (actionListSuite == null)
             {
@@ -370,15 +372,20 @@ namespace PSFilterLoad.PSApi.PICA
             return new PIActionDescriptor(actionDescriptorsIndex);
         }
 
-        private int Make(ref PIActionDescriptor descriptor)
+        private unsafe int Make(PIActionDescriptor* descriptor)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
+            if (descriptor == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             try
             {
-                descriptor = GenerateDictionaryKey();
-                actionDescriptors.Add(descriptor, new ScriptingParameters());
+                *descriptor = GenerateDictionaryKey();
+                actionDescriptors.Add(*descriptor, new ScriptingParameters());
             }
             catch (OutOfMemoryException)
             {
@@ -402,18 +409,23 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int HandleToDescriptor(Handle handle, ref PIActionDescriptor descriptor)
+        private unsafe int HandleToDescriptor(Handle handle, PIActionDescriptor* descriptor)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("handle: 0x{0}", handle.ToHexString()));
 #endif
+            if (descriptor == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             ScriptingParameters parameters;
             if (descriptorHandles.TryGetValue(handle, out parameters))
             {
                 try
                 {
-                    descriptor = GenerateDictionaryKey();
-                    actionDescriptors.Add(descriptor, parameters);
+                    *descriptor = GenerateDictionaryKey();
+                    actionDescriptors.Add(*descriptor, parameters);
                 }
                 catch (OutOfMemoryException)
                 {
@@ -426,19 +438,25 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPBadParameterError;
         }
 
-        private int AsHandle(PIActionDescriptor descriptor, ref Handle handle)
+        private unsafe int AsHandle(PIActionDescriptor descriptor, Handle* handle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: {0}", descriptor.Index));
 #endif
-            handle = HandleSuite.Instance.NewHandle(1);
-            if (handle == Handle.Null)
+            if (handle == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
+            *handle = HandleSuite.Instance.NewHandle(1);
+            if (*handle == Handle.Null)
             {
                 return PSError.kSPOutOfMemoryError;
             }
+
             try
             {
-                descriptorHandles.Add(handle, actionDescriptors[descriptor].Clone());
+                descriptorHandles.Add(*handle, actionDescriptors[descriptor].Clone());
             }
             catch (OutOfMemoryException)
             {
@@ -448,22 +466,27 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int GetType(PIActionDescriptor descriptor, uint key, ref uint type)
+        private unsafe int GetType(PIActionDescriptor descriptor, uint key, uint* type)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (type == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item = null;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 // If the value is a sub-descriptor it must be retrieved with GetObject.
                 if (item.Value is Dictionary<uint, AETEValue>)
                 {
-                    type = DescriptorTypes.Object;
+                    *type = DescriptorTypes.Object;
                 }
                 else
                 {
-                    type = item.Type;
+                    *type = item.Type;
                 }
 
                 return PSError.kSPNoError;
@@ -472,50 +495,70 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetKey(PIActionDescriptor descriptor, uint index, ref uint key)
+        private unsafe int GetKey(PIActionDescriptor descriptor, uint index, uint* key)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("index: {0}", index));
 #endif
+            if (key == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             ScriptingParameters parameters = actionDescriptors[descriptor];
 
             if (index < parameters.Count)
             {
-                key = parameters.GetKeyAtIndex((int)index);
+                *key = parameters.GetKeyAtIndex((int)index);
                 return PSError.kSPNoError;
             }
 
             return PSError.errMissingParameter;
         }
 
-        private int HasKey(PIActionDescriptor descriptor, uint key, ref byte hasKey)
+        private unsafe int HasKey(PIActionDescriptor descriptor, uint key, byte* hasKey)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            hasKey = actionDescriptors[descriptor].ContainsKey(key) ? (byte)1 : (byte)0;
+            if (hasKey == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
+            *hasKey = actionDescriptors[descriptor].ContainsKey(key) ? (byte)1 : (byte)0;
 
             return PSError.kSPNoError;
         }
 
-        private int GetCount(PIActionDescriptor descriptor, ref uint count)
+        private unsafe int GetCount(PIActionDescriptor descriptor, uint* count)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
+            if (count == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             ScriptingParameters parameters = actionDescriptors[descriptor];
 
-            count = (uint)parameters.Count;
+            *count = (uint)parameters.Count;
 
             return PSError.kSPNoError;
         }
 
-        private int IsEqual(PIActionDescriptor firstDescriptor, PIActionDescriptor secondDescriptor, ref byte isEqual)
+        private unsafe int IsEqual(PIActionDescriptor firstDescriptor, PIActionDescriptor secondDescriptor, byte* isEqual)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-            isEqual = 0;
+            if (isEqual == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
+            *isEqual = 0;
 
             return PSError.kSPUnimplementedError;
         }
@@ -540,37 +583,33 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int HasKeys(PIActionDescriptor descriptor, IntPtr keyArray, ref byte hasKeys)
+        private unsafe int HasKeys(PIActionDescriptor descriptor, IntPtr keyArray, byte* hasKeys)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
-            if (keyArray != IntPtr.Zero)
-            {
-                ScriptingParameters parameters = actionDescriptors[descriptor];
-                bool result = true;
-
-                unsafe
-                {
-                    uint* key = (uint*)keyArray.ToPointer();
-
-                    while (*key != 0U)
-                    {
-                        if (!parameters.ContainsKey(*key))
-                        {
-                            result = false;
-                            break;
-                        }
-
-                        key++;
-                    }
-                }
-                hasKeys = result ? (byte)1 : (byte)0;
-            }
-            else
+            if (hasKey == null || keyArray == IntPtr.Zero)
             {
                 return PSError.kSPBadParameterError;
             }
+
+            ScriptingParameters parameters = actionDescriptors[descriptor];
+            bool result = true;
+
+            uint* key = (uint*)keyArray.ToPointer();
+
+            while (*key != 0U)
+            {
+                if (!parameters.ContainsKey(*key))
+                {
+                    result = false;
+                    break;
+                }
+
+                key++;
+            }
+
+            *hasKeys = result ? (byte)1 : (byte)0;
 
             return PSError.kSPNoError;
         }
@@ -936,15 +975,20 @@ namespace PSFilterLoad.PSApi.PICA
         #endregion
 
         #region Descriptor read methods
-        private int GetInteger(PIActionDescriptor descriptor, uint key, ref int data)
+        private unsafe int GetInteger(PIActionDescriptor descriptor, uint key, int* data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (data == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
-                data = (int)item.Value;
+                *data = (int)item.Value;
 
                 return PSError.kSPNoError;
             }
@@ -952,15 +996,20 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetFloat(PIActionDescriptor descriptor, uint key, ref double data)
+        private unsafe int GetFloat(PIActionDescriptor descriptor, uint key, double* data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (data == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
-                data = (double)item.Value;
+                *data = (double)item.Value;
 
                 return PSError.kSPNoError;
             }
@@ -968,25 +1017,27 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetUnitFloat(PIActionDescriptor descriptor, uint key, ref uint unit, ref double data)
+        private unsafe int GetUnitFloat(PIActionDescriptor descriptor, uint key, uint* unit, double* data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (data == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 UnitFloat unitFloat = (UnitFloat)item.Value;
 
-                try
+                if (unit != null)
                 {
-                    unit = unitFloat.Unit;
-                }
-                catch (NullReferenceException)
-                {
+                    *unit = unitFloat.Unit;
                 }
 
-                data = unitFloat.Value;
+                *data = unitFloat.Value;
 
                 return PSError.kSPNoError;
             }
@@ -994,17 +1045,22 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetStringLength(PIActionDescriptor descriptor, uint key, ref uint length)
+        private unsafe int GetStringLength(PIActionDescriptor descriptor, uint key, uint* length)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (length == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 byte[] bytes = (byte[])item.Value;
 
-                length = (uint)bytes.Length;
+                *length = (uint)bytes.Length;
 
                 return PSError.kSPNoError;
             }
@@ -1041,15 +1097,20 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetBoolean(PIActionDescriptor descriptor, uint key, ref byte data)
+        private unsafe int GetBoolean(PIActionDescriptor descriptor, uint key, byte* data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (data == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
-                data = (byte)item.Value;
+                *data = (byte)item.Value;
 
                 return PSError.kSPNoError;
             }
@@ -1057,11 +1118,16 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetList(PIActionDescriptor descriptor, uint key, ref PIActionList list)
+        private unsafe int GetList(PIActionDescriptor descriptor, uint key, PIActionList* list)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (list == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
@@ -1069,7 +1135,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 try
                 {
-                    list = actionListSuite.CreateList(values);
+                    *list = actionListSuite.CreateList(values);
                 }
                 catch (OutOfMemoryException)
                 {
@@ -1082,30 +1148,31 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetObject(PIActionDescriptor descriptor, uint key, ref uint retType, ref PIActionDescriptor descriptorHandle)
+        private unsafe int GetObject(PIActionDescriptor descriptor, uint key, uint* retType, PIActionDescriptor* descriptorHandle)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (descriptorHandle == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 uint type = item.Type;
 
-                try
+                if (retType != null)
                 {
-                    retType = type;
-                }
-                catch (NullReferenceException)
-                {
-                    // ignore it
+                    *retType = type;
                 }
 
                 Dictionary<uint, AETEValue> parameters = item.Value as Dictionary<uint, AETEValue>;
                 if (parameters != null)
                 {
-                    descriptorHandle = GenerateDictionaryKey();
-                    actionDescriptors.Add(descriptorHandle, new ScriptingParameters(parameters));
+                    *descriptorHandle = GenerateDictionaryKey();
+                    actionDescriptors.Add(*descriptorHandle, new ScriptingParameters(parameters));
 
                     return PSError.kSPNoError;
                 }
@@ -1114,29 +1181,31 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetGlobalObject(PIActionDescriptor descriptor, uint key, ref uint retType, ref PIActionDescriptor descriptorHandle)
+        private unsafe int GetGlobalObject(PIActionDescriptor descriptor, uint key, uint* retType, PIActionDescriptor* descriptorHandle)
         {
-            return GetObject(descriptor, key, ref retType, ref descriptorHandle);
+            return GetObject(descriptor, key, retType, descriptorHandle);
         }
 
-        private int GetEnumerated(PIActionDescriptor descriptor, uint key, ref uint type, ref uint data)
+        private unsafe int GetEnumerated(PIActionDescriptor descriptor, uint key, uint* type, uint* data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (data == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 EnumeratedValue enumerated = (EnumeratedValue)item.Value;
-                try
+                if (type != null)
                 {
-                    type = enumerated.Type;
-                }
-                catch (NullReferenceException)
-                {
+                    *type = enumerated.Type;
                 }
 
-                data = enumerated.Value;
+                *data = enumerated.Value;
 
                 return PSError.kSPNoError;
             }
@@ -1144,11 +1213,16 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetReference(PIActionDescriptor descriptor, uint key, ref PIActionReference reference)
+        private unsafe int GetReference(PIActionDescriptor descriptor, uint key, PIActionReference* reference)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (reference == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
@@ -1156,7 +1230,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 try
                 {
-                    reference = actionReferenceSuite.CreateReference(values);
+                    *reference = actionReferenceSuite.CreateReference(values);
                 }
                 catch (OutOfMemoryException)
                 {
@@ -1169,15 +1243,20 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetClass(PIActionDescriptor descriptor, uint key, ref uint data)
+        private unsafe int GetClass(PIActionDescriptor descriptor, uint key, uint* data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (data == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
-                data = (uint)item.Value;
+                *data = (uint)item.Value;
 
                 return PSError.kSPNoError;
             }
@@ -1185,29 +1264,34 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetGlobalClass(PIActionDescriptor descriptor, uint key, ref uint data)
+        private unsafe int GetGlobalClass(PIActionDescriptor descriptor, uint key, uint* data)
         {
-            return GetClass(descriptor, key, ref data);
+            return GetClass(descriptor, key, data);
         }
 
-        private int GetAlias(PIActionDescriptor descriptor, uint key, ref Handle data)
+        private unsafe int GetAlias(PIActionDescriptor descriptor, uint key, Handle* data)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (data == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 int size = item.Size;
-                data = HandleSuite.Instance.NewHandle(size);
+                *data = HandleSuite.Instance.NewHandle(size);
 
-                if (data == Handle.Null)
+                if (*data == Handle.Null)
                 {
                     return PSError.kSPOutOfMemoryError;
                 }
 
-                Marshal.Copy((byte[])item.Value, 0, HandleSuite.Instance.LockHandle(data, 0), size);
-                HandleSuite.Instance.UnlockHandle(data);
+                Marshal.Copy((byte[])item.Value, 0, HandleSuite.Instance.LockHandle(*data, 0), size);
+                HandleSuite.Instance.UnlockHandle(*data);
 
                 return PSError.kSPNoError;
             }
@@ -1242,11 +1326,15 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetZString(PIActionDescriptor descriptor, uint key, ref ASZString zstring)
+        private unsafe int GetZString(PIActionDescriptor descriptor, uint key, ASZString* zstring)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (zstring == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
 
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
@@ -1255,7 +1343,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 try
                 {
-                    zstring = zstringSuite.CreateFromActionDescriptor(value);
+                    *zstring = zstringSuite.CreateFromActionDescriptor(value);
                 }
                 catch (OutOfMemoryException)
                 {
@@ -1268,18 +1356,22 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private int GetDataLength(PIActionDescriptor descriptor, uint key, ref int length)
+        private unsafe int GetDataLength(PIActionDescriptor descriptor, uint key, int* length)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
+            if (length == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
 
             AETEValue item;
             if (actionDescriptors[descriptor].TryGetValue(key, out item))
             {
                 byte[] bytes = (byte[])item.Value;
 
-                length = bytes.Length;
+                *length = bytes.Length;
 
                 return PSError.kSPNoError;
             }

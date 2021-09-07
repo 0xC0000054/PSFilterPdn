@@ -60,13 +60,13 @@ namespace PSFilterLoad.PSApi.PICA
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceMake(ref PIActionReference reference);
+    internal unsafe delegate int ActionReferenceMake(PIActionReference* reference);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionReferenceFree(PIActionReference reference);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetForm(PIActionReference reference, ref uint value);
+    internal unsafe delegate int ActionReferenceGetForm(PIActionReference reference, uint* value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetDesiredClass(PIActionReference reference, ref uint value);
+    internal unsafe delegate int ActionReferenceGetDesiredClass(PIActionReference reference, uint* value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionReferencePutName(PIActionReference reference, uint desiredClass, IntPtr cstrValue);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -82,21 +82,21 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionReferencePutClass(PIActionReference reference, uint desiredClass);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetNameLength(PIActionReference reference, ref uint stringLength);
+    internal unsafe delegate int ActionReferenceGetNameLength(PIActionReference reference, uint* stringLength);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionReferenceGetName(PIActionReference reference, IntPtr name, uint maxLength);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetIndex(PIActionReference reference, ref uint value);
+    internal unsafe delegate int ActionReferenceGetIndex(PIActionReference reference, uint* value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetIdentifier(PIActionReference reference, ref uint value);
+    internal unsafe delegate int ActionReferenceGetIdentifier(PIActionReference reference, uint* value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetOffset(PIActionReference reference, ref int value);
+    internal unsafe delegate int ActionReferenceGetOffset(PIActionReference reference, int* value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetEnumerated(PIActionReference reference, ref uint type, ref uint enumValue);
+    internal unsafe delegate int ActionReferenceGetEnumerated(PIActionReference reference, uint* type, uint* enumValue);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetProperty(PIActionReference reference, ref uint value);
+    internal unsafe delegate int ActionReferenceGetProperty(PIActionReference reference, uint* value);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionReferenceGetContainer(PIActionReference reference, ref PIActionReference value);
+    internal unsafe delegate int ActionReferenceGetContainer(PIActionReference reference, PIActionReference* value);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable")]
     [StructLayout(LayoutKind.Sequential)]

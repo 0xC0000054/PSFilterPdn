@@ -20,31 +20,27 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly HandleProcs handleProcs;
         private readonly SetPIHandleLockDelegate setHandleLock;
 
-        public PICAHandleSuite()
+        public unsafe PICAHandleSuite()
         {
             handleProcs = HandleSuite.Instance.CreateHandleProcs();
             setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
         }
 
-        private void SetHandleLock(Handle handle, byte lockHandle, ref IntPtr address, ref byte oldLock)
+        private unsafe void SetHandleLock(Handle handle, byte lockHandle, IntPtr* address, byte* oldLock)
         {
-            try
+            if (oldLock != null)
             {
-                oldLock = lockHandle == 0 ? (byte)1 : (byte)0;
-            }
-            catch (NullReferenceException)
-            {
-                // ignore it
+                *oldLock = lockHandle == 0 ? (byte)1 : (byte)0;
             }
 
             if (lockHandle != 0)
             {
-                address = HandleSuite.Instance.LockHandle(handle, 0);
+                *address = HandleSuite.Instance.LockHandle(handle, 0);
             }
             else
             {
                 HandleSuite.Instance.UnlockHandle(handle);
-                address = IntPtr.Zero;
+                *address = IntPtr.Zero;
             }
         }
 

@@ -28,7 +28,7 @@ namespace PSFilterLoad.PSApi
 
         private const string HostSerial = "0";
 
-        public PropertySuite(int documentWidth, int documentHeight, PluginUISettings pluginUISettings)
+        public unsafe PropertySuite(int documentWidth, int documentHeight, PluginUISettings pluginUISettings)
         {
             getPropertyProc = new GetPropertyProc(PropertyGetProc);
             setPropertyProc = new SetPropertyProc(PropertySetProc);
@@ -92,8 +92,39 @@ namespace PSFilterLoad.PSApi
             return propertyProcsPtr;
         }
 
+        private static unsafe short CreateComplexPropertyHandle(byte[] bytes, Handle* complexProperty)
+        {
+            if (complexProperty == null)
+            {
+                return PSError.paramErr;
+            }
+
+            *complexProperty = HandleSuite.Instance.NewHandle(bytes.Length);
+
+            if (*complexProperty == Handle.Null)
+            {
+                return PSError.memFullErr;
+            }
+
+            Marshal.Copy(bytes, 0, HandleSuite.Instance.LockHandle(*complexProperty, 0), bytes.Length);
+            HandleSuite.Instance.UnlockHandle(*complexProperty);
+
+            return PSError.noErr;
+        }
+
+        private static unsafe short GetSimpleProperty(int value, IntPtr* simpleProperty)
+        {
+            if (simpleProperty == null)
+            {
+                return PSError.paramErr;
+            }
+
+            *simpleProperty = new IntPtr(value);
+            return PSError.noErr;
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        private unsafe short PropertyGetProc(uint signature, uint key, int index, ref IntPtr simpleProperty, ref Handle complexProperty)
+        private unsafe short PropertyGetProc(uint signature, uint key, int index, IntPtr* simpleProperty, Handle* complexProperty)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.PropertySuite, string.Format("Sig: {0}, Key: {1}, Index: {2}", DebugUtils.PropToString(signature), DebugUtils.PropToString(key), index.ToString()));
@@ -103,18 +134,20 @@ namespace PSFilterLoad.PSApi
                 return PSError.errPlugInPropertyUndefined;
             }
 
+            short error = PSError.noErr;
+
             byte[] bytes = null;
 
             switch (key)
             {
                 case PSProperties.BigNudgeH:
                 case PSProperties.BigNudgeV:
-                    simpleProperty = new IntPtr(new Fixed16(PSConstants.Properties.BigNudgeDistance).Value);
+                    error = GetSimpleProperty(new Fixed16(PSConstants.Properties.BigNudgeDistance).Value, simpleProperty);
                     break;
                 case PSProperties.Caption:
-                    if (complexProperty != Handle.Null)
+                    if (complexProperty != null)
                     {
-                        complexProperty = HandleSuite.Instance.NewHandle(0);
+                        *complexProperty = HandleSuite.Instance.NewHandle(0);
                     }
                     break;
                 case PSProperties.ChannelName:
@@ -141,74 +174,59 @@ namespace PSFilterLoad.PSApi
 
                     bytes = Encoding.ASCII.GetBytes(name);
 
-                    complexProperty = HandleSuite.Instance.NewHandle(bytes.Length);
-
-                    if (complexProperty == Handle.Null)
-                    {
-                        return PSError.memFullErr;
-                    }
-
-                    Marshal.Copy(bytes, 0, HandleSuite.Instance.LockHandle(complexProperty, 0), bytes.Length);
-                    HandleSuite.Instance.UnlockHandle(complexProperty);
+                    error = CreateComplexPropertyHandle(bytes, complexProperty);
                     break;
                 case PSProperties.Copyright:
                 case PSProperties.Copyright2:
-                    simpleProperty = new IntPtr(0);
+                    error = GetSimpleProperty(0, simpleProperty);
                     break;
                 case PSProperties.EXIFData:
                 case PSProperties.XMPData:
-                    if (complexProperty != Handle.Null)
+                    if (complexProperty != null)
                     {
                         // If the complexProperty is not IntPtr.Zero we return a valid zero byte handle, otherwise some filters will crash with an access violation.
-                        complexProperty = HandleSuite.Instance.NewHandle(0);
+                        *complexProperty = HandleSuite.Instance.NewHandle(0);
                     }
                     break;
                 case PSProperties.GridMajor:
-                    simpleProperty = new IntPtr(new Fixed16(PSConstants.Properties.GridMajor).Value);
+                    error = GetSimpleProperty(new Fixed16(PSConstants.Properties.GridMajor).Value, simpleProperty);
                     break;
                 case PSProperties.GridMinor:
-                    simpleProperty = new IntPtr(PSConstants.Properties.GridMinor);
+                    error = GetSimpleProperty(PSConstants.Properties.GridMinor, simpleProperty);
                     break;
                 case PSProperties.ImageMode:
-                    simpleProperty = new IntPtr(PSConstants.plugInModeRGBColor);
+                    error = GetSimpleProperty(PSConstants.plugInModeRGBColor, simpleProperty);
                     break;
                 case PSProperties.InterpolationMethod:
-                    simpleProperty = new IntPtr(PSConstants.Properties.InterpolationMethod.NearestNeghbor);
+                    error = GetSimpleProperty(PSConstants.Properties.InterpolationMethod.NearestNeghbor, simpleProperty);
                     break;
                 case PSProperties.NumberOfChannels:
-                    simpleProperty = new IntPtr(numberOfChannels);
+                    error = GetSimpleProperty(numberOfChannels, simpleProperty);
                     break;
                 case PSProperties.NumberOfPaths:
-                    simpleProperty = new IntPtr(0);
+                    error = GetSimpleProperty(0, simpleProperty);
                     break;
                 case PSProperties.WorkPathIndex:
                 case PSProperties.ClippingPathIndex:
                 case PSProperties.TargetPathIndex:
-                    simpleProperty = new IntPtr(PSConstants.Properties.NoPathIndex);
+                    error = GetSimpleProperty(PSConstants.Properties.NoPathIndex, simpleProperty);
                     break;
                 case PSProperties.RulerUnits:
-                    simpleProperty = new IntPtr(PSConstants.Properties.RulerUnits.Pixels);
+                    error = GetSimpleProperty(PSConstants.Properties.RulerUnits.Pixels, simpleProperty);
                     break;
                 case PSProperties.RulerOriginH:
                 case PSProperties.RulerOriginV:
-                    simpleProperty = new IntPtr(new Fixed16(0).Value);
+                    error = GetSimpleProperty(new Fixed16(0).Value, simpleProperty);
                     break;
                 case PSProperties.SerialString:
                     bytes = Encoding.ASCII.GetBytes(HostSerial);
-                    complexProperty = HandleSuite.Instance.NewHandle(bytes.Length);
 
-                    if (complexProperty == Handle.Null)
-                    {
-                        return PSError.memFullErr;
-                    }
-
-                    Marshal.Copy(bytes, 0, HandleSuite.Instance.LockHandle(complexProperty, 0), bytes.Length);
-                    HandleSuite.Instance.UnlockHandle(complexProperty);
+                    error = CreateComplexPropertyHandle(bytes, complexProperty);
                     break;
                 case PSProperties.URL:
-                    if (complexProperty != Handle.Null)
+                    if (complexProperty != null)
                     {
-                        complexProperty = HandleSuite.Instance.NewHandle(0);
+                        *complexProperty = HandleSuite.Instance.NewHandle(0);
                     }
                     break;
                 case PSProperties.Title:
@@ -222,36 +240,29 @@ namespace PSFilterLoad.PSApi
                     {
                         bytes = Encoding.ASCII.GetBytes(title);
                     }
-                    complexProperty = HandleSuite.Instance.NewHandle(bytes.Length);
 
-                    if (complexProperty == Handle.Null)
-                    {
-                        return PSError.memFullErr;
-                    }
-
-                    Marshal.Copy(bytes, 0, HandleSuite.Instance.LockHandle(complexProperty, 0), bytes.Length);
-                    HandleSuite.Instance.UnlockHandle(complexProperty);
+                    error = CreateComplexPropertyHandle(bytes, complexProperty);
                     break;
                 case PSProperties.WatchSuspension:
-                    simpleProperty = new IntPtr(0);
+                    error = GetSimpleProperty(0, simpleProperty);
                     break;
                 case PSProperties.DocumentWidth:
-                    simpleProperty = new IntPtr(documentWidth);
+                    error = GetSimpleProperty(documentWidth, simpleProperty);
                     break;
                 case PSProperties.DocumentHeight:
-                    simpleProperty = new IntPtr(documentHeight);
+                    error = GetSimpleProperty(documentHeight, simpleProperty);
                     break;
                 case PSProperties.ToolTips:
-                    simpleProperty = new IntPtr(1);
+                    error = GetSimpleProperty(1, simpleProperty);
                     break;
                 case PSProperties.HighDpi:
-                    simpleProperty = new IntPtr(highDpi ? 1 : 0);
+                    error = GetSimpleProperty(highDpi ? 1 : 0, simpleProperty);
                     break;
                 default:
                     return PSError.errPlugInPropertyUndefined;
             }
 
-            return PSError.noErr;
+            return error;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]

@@ -20,7 +20,7 @@ namespace PSFilterLoad.PSApi
         private readonly PIResampleProc interpolate1DProc;
         private readonly PIResampleProc interpolate2DProc;
 
-        public ImageServicesSuite()
+        public unsafe ImageServicesSuite()
         {
             interpolate1DProc = new PIResampleProc(Interpolate1DProc);
             interpolate2DProc = new PIResampleProc(Interpolate2DProc);
@@ -40,12 +40,12 @@ namespace PSFilterLoad.PSApi
             return imageServicesProcsPtr;
         }
 
-        private short Interpolate1DProc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
+        private unsafe short Interpolate1DProc(PSImagePlane* source, PSImagePlane* destination, Rect16* area, IntPtr coords, short method)
         {
             return PSError.memFullErr;
         }
 
-        private short Interpolate2DProc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method)
+        private unsafe short Interpolate2DProc(PSImagePlane* source, PSImagePlane* destination, Rect16* area, IntPtr coords, short method)
         {
             return PSError.memFullErr;
         }

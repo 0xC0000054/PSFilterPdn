@@ -60,25 +60,25 @@ namespace PSFilterLoad.PSApi.PICA
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorMake(ref PIActionDescriptor descriptor);
+    internal unsafe delegate int ActionDescriptorMake(PIActionDescriptor* descriptor);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionDescriptorFree(PIActionDescriptor descriptor);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetType(PIActionDescriptor descriptor, uint key, ref uint type);
+    internal unsafe delegate int ActionDescriptorGetType(PIActionDescriptor descriptor, uint key, uint* type);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetKey(PIActionDescriptor descriptor, uint index, ref uint key);
+    internal unsafe delegate int ActionDescriptorGetKey(PIActionDescriptor descriptor, uint index, uint* key);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorHasKey(PIActionDescriptor descriptor, uint key, ref byte hasKey);
+    internal unsafe delegate int ActionDescriptorHasKey(PIActionDescriptor descriptor, uint key, byte* hasKey);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetCount(PIActionDescriptor descriptor, ref uint count);
+    internal unsafe delegate int ActionDescriptorGetCount(PIActionDescriptor descriptor, uint* count);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorIsEqual(PIActionDescriptor descriptor, PIActionDescriptor other, ref byte isEqual);
+    internal unsafe delegate int ActionDescriptorIsEqual(PIActionDescriptor descriptor, PIActionDescriptor other, byte* isEqual);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionDescriptorErase(PIActionDescriptor descriptor, uint key);
@@ -126,49 +126,49 @@ namespace PSFilterLoad.PSApi.PICA
     internal delegate int ActionDescriptorPutAlias(PIActionDescriptor descriptor, uint key, Handle value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetInteger(PIActionDescriptor descriptor, uint key, ref int value);
+    internal unsafe delegate int ActionDescriptorGetInteger(PIActionDescriptor descriptor, uint key, int* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetFloat(PIActionDescriptor descriptor, uint key, ref double value);
+    internal unsafe delegate int ActionDescriptorGetFloat(PIActionDescriptor descriptor, uint key, double* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetUnitFloat(PIActionDescriptor descriptor, uint key, ref uint unit, ref double value);
+    internal unsafe delegate int ActionDescriptorGetUnitFloat(PIActionDescriptor descriptor, uint key, uint* unit, double* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetStringLength(PIActionDescriptor descriptor, uint key, ref uint stringLength);
+    internal unsafe delegate int ActionDescriptorGetStringLength(PIActionDescriptor descriptor, uint key, uint* stringLength);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionDescriptorGetString(PIActionDescriptor descriptor, uint key, IntPtr cstrValue, uint maxLength);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetBoolean(PIActionDescriptor descriptor, uint key, ref byte value);
+    internal unsafe delegate int ActionDescriptorGetBoolean(PIActionDescriptor descriptor, uint key, byte* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetList(PIActionDescriptor descriptor, uint key, ref PIActionList value);
+    internal unsafe delegate int ActionDescriptorGetList(PIActionDescriptor descriptor, uint key, PIActionList* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetObject(PIActionDescriptor descriptor, uint key, ref uint type, ref PIActionDescriptor value);
+    internal unsafe delegate int ActionDescriptorGetObject(PIActionDescriptor descriptor, uint key, uint* type, PIActionDescriptor* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetGlobalObject(PIActionDescriptor descriptor, uint key, ref uint type, ref PIActionDescriptor value);
+    internal unsafe delegate int ActionDescriptorGetGlobalObject(PIActionDescriptor descriptor, uint key, uint* type, PIActionDescriptor* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetEnumerated(PIActionDescriptor descriptor, uint key, ref uint type, ref uint value);
+    internal unsafe delegate int ActionDescriptorGetEnumerated(PIActionDescriptor descriptor, uint key, uint* type, uint* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetReference(PIActionDescriptor descriptor, uint key, ref PIActionReference value);
+    internal unsafe delegate int ActionDescriptorGetReference(PIActionDescriptor descriptor, uint key, PIActionReference* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetClass(PIActionDescriptor descriptor, uint key, ref uint value);
+    internal unsafe delegate int ActionDescriptorGetClass(PIActionDescriptor descriptor, uint key, uint* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetGlobalClass(PIActionDescriptor descriptor, uint key, ref uint value);
+    internal unsafe delegate int ActionDescriptorGetGlobalClass(PIActionDescriptor descriptor, uint key, uint* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetAlias(PIActionDescriptor descriptor, uint key, ref Handle value);
+    internal unsafe delegate int ActionDescriptorGetAlias(PIActionDescriptor descriptor, uint key, Handle* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorHasKeys(PIActionDescriptor descriptor, IntPtr requiredKeys, ref byte hasKeys);
+    internal unsafe delegate int ActionDescriptorHasKeys(PIActionDescriptor descriptor, IntPtr requiredKeys, byte* hasKeys);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionDescriptorPutIntegers(PIActionDescriptor descriptor, uint key, uint count, IntPtr value);
@@ -177,22 +177,22 @@ namespace PSFilterLoad.PSApi.PICA
     internal delegate int ActionDescriptorGetIntegers(PIActionDescriptor descriptor, uint key, uint count, IntPtr value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorAsHandle(PIActionDescriptor descriptor, ref Handle value);
+    internal unsafe delegate int ActionDescriptorAsHandle(PIActionDescriptor descriptor, Handle* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorHandleToDescriptor(Handle value, ref PIActionDescriptor descriptor);
+    internal unsafe delegate int ActionDescriptorHandleToDescriptor(Handle value, PIActionDescriptor* descriptor);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionDescriptorPutZString(PIActionDescriptor descriptor, uint key, ASZString zstring);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetZString(PIActionDescriptor descriptor, uint key, ref ASZString zstring);
+    internal unsafe delegate int ActionDescriptorGetZString(PIActionDescriptor descriptor, uint key, ASZString* zstring);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionDescriptorPutData(PIActionDescriptor descriptor, uint key, int length, IntPtr value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ActionDescriptorGetDataLength(PIActionDescriptor descriptor, uint key, ref int value);
+    internal unsafe delegate int ActionDescriptorGetDataLength(PIActionDescriptor descriptor, uint key, int* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionDescriptorGetData(PIActionDescriptor descriptor, uint key, IntPtr value);

@@ -23,11 +23,6 @@ namespace PSFilterLoad.PSApi
             set => debugFlags = value;
         }
 
-        internal static bool DebugFlagEnabled(DebugFlags flag)
-        {
-            return (debugFlags & flag) == flag;
-        }
-
         internal static void Ping(DebugFlags flag, string message)
         {
             if ((debugFlags & flag) == flag)
@@ -37,6 +32,8 @@ namespace PSFilterLoad.PSApi
                 System.Diagnostics.Debug.WriteLine(string.Format("Function: {0}, {1}\r\n", name, message));
             }
         }
+
+        internal static unsafe string PointerToString<T>(T* value) where T : unmanaged => value != null ? (*value).ToString() : "<null>";
 
         internal static string PropToString(uint prop)
         {

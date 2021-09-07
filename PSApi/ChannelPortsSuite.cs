@@ -32,7 +32,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="filterImageProvider">The filter image provider.</param>
         /// <exception cref="ArgumentNullException"><paramref name="filterImageProvider"/> is null.</exception>
-        public ChannelPortsSuite(IFilterImageProvider filterImageProvider)
+        public unsafe ChannelPortsSuite(IFilterImageProvider filterImageProvider)
         {
             if (filterImageProvider == null)
             {
@@ -82,12 +82,12 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private static unsafe void FillChannelData(int channel, PixelMemoryDesc destiniation, Surface source, VRect srcRect)
+        private static unsafe void FillChannelData(int channel, PixelMemoryDesc* destiniation, Surface source, VRect srcRect)
         {
-            byte* dstPtr = (byte*)destiniation.data.ToPointer();
-            int stride = destiniation.rowBits / 8;
-            int bpp = destiniation.colBits / 8;
-            int offset = destiniation.bitOffset / 8;
+            byte* dstPtr = (byte*)destiniation->data.ToPointer();
+            int stride = destiniation->rowBits / 8;
+            int bpp = destiniation->colBits / 8;
+            int offset = destiniation->bitOffset / 8;
 
             for (int y = srcRect.top; y < srcRect.bottom; y++)
             {
@@ -116,12 +116,12 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private static unsafe void FillSelectionMask(PixelMemoryDesc destiniation, MaskSurface source, VRect srcRect)
+        private static unsafe void FillSelectionMask(PixelMemoryDesc* destiniation, MaskSurface source, VRect srcRect)
         {
-            byte* dstPtr = (byte*)destiniation.data.ToPointer();
-            int stride = destiniation.rowBits / 8;
-            int bpp = destiniation.colBits / 8;
-            int offset = destiniation.bitOffset / 8;
+            byte* dstPtr = (byte*)destiniation->data.ToPointer();
+            int stride = destiniation->rowBits / 8;
+            int bpp = destiniation->colBits / 8;
+            int offset = destiniation->bitOffset / 8;
 
             for (int y = srcRect.top; y < srcRect.bottom; y++)
             {
@@ -137,27 +137,32 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private unsafe short ReadPixelsProc(IntPtr port, ref PSScaling scaling, ref VRect writeRect, ref PixelMemoryDesc destination, ref VRect wroteRect)
+        private unsafe short ReadPixelsProc(IntPtr port, PSScaling* scaling, VRect* writeRect, PixelMemoryDesc* destination, VRect* wroteRect)
         {
 #if DEBUG
-            DebugUtils.Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), writeRect.ToString()));
+            DebugUtils.Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), DebugUtils.PointerToString(writeRect)));
 #endif
-            if (destination.depth != 8)
+            if (scaling == null || writeRect == null || destination == null)
+            {
+                return PSError.paramErr;
+            }
+
+            if (destination->depth != 8)
             {
                 return PSError.errUnsupportedDepth;
             }
 
-            if ((destination.bitOffset % 8) != 0)
+            if ((destination->bitOffset % 8) != 0)
             {
                 return PSError.errUnsupportedBitOffset;
             }
 
-            if ((destination.colBits % 8) != 0)
+            if ((destination->colBits % 8) != 0)
             {
                 return PSError.errUnsupportedColBits;
             }
 
-            if ((destination.rowBits % 8) != 0)
+            if ((destination->rowBits % 8) != 0)
             {
                 return PSError.errUnsupportedRowBits;
             }
@@ -169,8 +174,8 @@ namespace PSFilterLoad.PSApi
                 return PSError.errUnknownPort;
             }
 
-            VRect srcRect = scaling.sourceRect;
-            VRect dstRect = scaling.destinationRect;
+            VRect srcRect = scaling->sourceRect;
+            VRect dstRect = scaling->destinationRect;
 
             int srcWidth = srcRect.right - srcRect.left;
             int srcHeight = srcRect.bottom - srcRect.top;
@@ -256,23 +261,26 @@ namespace PSFilterLoad.PSApi
                 }
             }
 
-            wroteRect = dstRect;
+            if (wroteRect != null)
+            {
+                *wroteRect = dstRect; 
+            }
 
             return PSError.noErr;
         }
 
-        private short WriteBasePixels(IntPtr port, ref VRect writeRect, PixelMemoryDesc srcDesc)
+        private unsafe short WriteBasePixels(IntPtr port, VRect* writeRect, PixelMemoryDesc srcDesc)
         {
 #if DEBUG
-            DebugUtils.Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), writeRect.ToString()));
+            DebugUtils.Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), DebugUtils.PointerToString(writeRect)));
 #endif
             return PSError.memFullErr;
         }
 
-        private short ReadPortForWritePort(ref IntPtr readPort, IntPtr writePort)
+        private unsafe short ReadPortForWritePort(IntPtr* readPort, IntPtr writePort)
         {
 #if DEBUG
-            DebugUtils.Ping(DebugFlags.ChannelPorts, string.Format("readPort: {0}, writePort: {1}", readPort.ToString(), writePort.ToString()));
+            DebugUtils.Ping(DebugFlags.ChannelPorts, string.Format("readPort: {0}, writePort: {1}", DebugUtils.PointerToString(readPort), writePort.ToString()));
 #endif
             return PSError.memFullErr;
         }

@@ -70,7 +70,7 @@ namespace PSFilterLoad.PSApi.PICA
         private Dictionary<IntPtr, BufferEntry> buffers;
         private bool disposed;
 
-        public PICABufferSuite()
+        public unsafe PICABufferSuite()
         {
             bufferSuiteNew = new PSBufferSuiteNew(PSBufferNew);
             bufferSuiteDispose = new PSBufferSuiteDispose(PSBufferDispose);
@@ -80,26 +80,16 @@ namespace PSFilterLoad.PSApi.PICA
             disposed = false;
         }
 
-        private IntPtr PSBufferNew(ref uint requestedSizePtr, uint minimumSize)
+        private unsafe IntPtr PSBufferNew(uint* requestedSize, uint minimumSize)
         {
-            uint? requestedSize = null;
-            try
-            {
-                // The requested size pointer may be null.
-                requestedSize = requestedSizePtr;
-            }
-            catch (NullReferenceException)
-            {
-            }
-
             IntPtr ptr = IntPtr.Zero;
 
             try
             {
-                if (requestedSize.HasValue && requestedSize.Value > minimumSize)
+                if (requestedSize != null && *requestedSize > minimumSize)
                 {
                     uint allocatedSize = 0;
-                    uint size = requestedSize.Value;
+                    uint size = *requestedSize;
                     while (size > minimumSize)
                     {
                         // Allocate the largest buffer we can that is greater than the specified minimum size.
@@ -128,7 +118,7 @@ namespace PSFilterLoad.PSApi.PICA
                     }
 
                     // The requested size pointer is used as an output parameter to return the actual number of bytes allocated.
-                    requestedSizePtr = allocatedSize;
+                    *requestedSize = allocatedSize;
                 }
                 else
                 {
@@ -152,25 +142,14 @@ namespace PSFilterLoad.PSApi.PICA
             return ptr;
         }
 
-        private void PSBufferDispose(ref IntPtr bufferPtr)
+        private unsafe void PSBufferDispose(IntPtr* buffer)
         {
-            IntPtr buffer = IntPtr.Zero;
-            try
-            {
-                // The buffer pointer may be null.
-                buffer = bufferPtr;
-            }
-            catch (NullReferenceException)
-            {
-            }
-
-            BufferEntry entry;
-            if (buffer != IntPtr.Zero && buffers.TryGetValue(buffer, out entry))
+            if (buffer != null && buffers.TryGetValue(*buffer, out BufferEntry entry))
             {
                 entry.Dispose();
-                buffers.Remove(buffer);
+                buffers.Remove(*buffer);
                 // This method is documented to set the pointer to null after it has been freed.
-                bufferPtr = IntPtr.Zero;
+                *buffer = IntPtr.Zero;
             }
         }
 

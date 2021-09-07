@@ -30,7 +30,7 @@ namespace PSFilterLoad.PSApi
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PIResampleProc(ref PSImagePlane source, ref PSImagePlane destination, ref Rect16 area, IntPtr coords, short method);
+    internal unsafe delegate short PIResampleProc(PSImagePlane* source, PSImagePlane* destination, Rect16* area, IntPtr coords, short method);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable")]
     [StructLayoutAttribute(LayoutKind.Sequential)]

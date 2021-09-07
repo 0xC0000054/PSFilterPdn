@@ -60,9 +60,9 @@ namespace PSFilterLoad.PSApi
         /// or
         /// <paramref name="resourceSuite"/> is null.
         /// </exception>
-        public SPBasicSuiteProvider(IPICASuiteDataProvider picaSuiteData,
-                                    IPropertySuite propertySuite,
-                                    IResourceSuite resourceSuite)
+        public unsafe SPBasicSuiteProvider(IPICASuiteDataProvider picaSuiteData,
+                                           IPropertySuite propertySuite,
+                                           IResourceSuite resourceSuite)
         {
             this.picaSuiteData = picaSuiteData ?? throw new ArgumentNullException(nameof(picaSuiteData));
             this.propertySuite = propertySuite ?? throw new ArgumentNullException(nameof(propertySuite));
@@ -233,8 +233,13 @@ namespace PSFilterLoad.PSApi
             return false;
         }
 
-        private int SPBasicAcquireSuite(IntPtr name, int version, ref IntPtr suite)
+        private unsafe int SPBasicAcquireSuite(IntPtr name, int version, IntPtr* suite)
         {
+            if (suite == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             string suiteName = StringUtil.FromCString(name);
             if (suiteName == null)
             {
@@ -248,11 +253,11 @@ namespace PSFilterLoad.PSApi
 
             if (activePICASuites.IsLoaded(suiteKey))
             {
-                suite = activePICASuites.AddRef(suiteKey);
+                *suite = activePICASuites.AddRef(suiteKey);
             }
             else
             {
-                error = AllocatePICASuite(suiteKey, ref suite);
+                error = AllocatePICASuite(suiteKey, ref *suite);
             }
 
             return error;
@@ -520,14 +525,19 @@ namespace PSFilterLoad.PSApi
             return true;
         }
 
-        private int SPBasicAllocateBlock(int size, ref IntPtr block)
+        private unsafe int SPBasicAllocateBlock(int size, IntPtr* block)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("size: {0}", size));
 #endif
+            if (block == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             try
             {
-                block = Memory.Allocate(size, false);
+                *block = Memory.Allocate(size, false);
             }
             catch (OutOfMemoryException)
             {
@@ -546,14 +556,19 @@ namespace PSFilterLoad.PSApi
             return PSError.kSPNoError;
         }
 
-        private int SPBasicReallocateBlock(IntPtr block, int newSize, ref IntPtr newblock)
+        private unsafe int SPBasicReallocateBlock(IntPtr block, int newSize, IntPtr* newblock)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("block: 0x{0}, size: {1}", block.ToHexString(), newSize));
 #endif
+            if (block == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             try
             {
-                newblock = Memory.ReAlloc(block, newSize);
+                *newblock = Memory.ReAlloc(block, newSize);
             }
             catch (OutOfMemoryException)
             {

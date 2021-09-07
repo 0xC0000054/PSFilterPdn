@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetPropertyProc(uint signature, uint key, int index, ref IntPtr simpleProperty, ref Handle complexProperty);
+    internal unsafe delegate short GetPropertyProc(uint signature, uint key, int index, IntPtr* simpleProperty, Handle* complexProperty);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short SetPropertyProc(uint signature, uint key, int index, IntPtr simpleProperty, Handle complexProperty);

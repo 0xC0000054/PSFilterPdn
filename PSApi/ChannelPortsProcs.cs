@@ -38,13 +38,17 @@ namespace PSFilterLoad.PSApi
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short ReadPixelsProc([In()] IntPtr port, [In()] ref PSScaling scaling, [In()] ref VRect writeRect, [In()] ref PixelMemoryDesc destination, ref VRect wroteRect);
+    internal unsafe delegate short ReadPixelsProc(IntPtr port,
+                                                  [In()] PSScaling* scaling,
+                                                  [In()] VRect* writeRect,
+                                                  [In()] PixelMemoryDesc* destination,
+                                                  VRect* wroteRect);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short WriteBasePixelsProc([In()] IntPtr port, [In()] ref VRect writeRect, [In()] PixelMemoryDesc source);
+    internal unsafe delegate short WriteBasePixelsProc(IntPtr port, [In()] VRect* writeRect, [In()] PixelMemoryDesc source);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short ReadPortForWritePortProc(ref IntPtr readPort, [In()] IntPtr writePort);
+    internal unsafe delegate short ReadPortForWritePortProc(IntPtr* readPort, [In()] IntPtr writePort);
 
     [StructLayout(LayoutKind.Sequential)]
     internal struct ChannelPortProcs

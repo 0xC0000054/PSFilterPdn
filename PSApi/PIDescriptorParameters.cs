@@ -102,16 +102,16 @@ namespace PSFilterLoad.PSApi
     internal delegate PIWriteDescriptor OpenWriteDescriptorProc();
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short CloseWriteDescriptorProc([In()] PIWriteDescriptor descriptor, [In(), Out()] ref Handle descriptorHandle);
+    internal unsafe delegate short CloseWriteDescriptorProc([In()] PIWriteDescriptor descriptor, [In(), Out()] Handle* descriptorHandle);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short PutIntegerProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] int data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutFloatProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] ref double data);
+    internal unsafe delegate short PutFloatProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] double* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutUnitFloatProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] uint unit, [In()] ref double data);
+    internal unsafe delegate short PutUnitFloatProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] uint unit, [In()] double* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short PutBooleanProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] byte data);
@@ -129,7 +129,7 @@ namespace PSFilterLoad.PSApi
     internal delegate short PutClassProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] uint data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short PutSimpleReferenceProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] ref PIDescriptorSimpleReference data);
+    internal unsafe delegate short PutSimpleReferenceProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] PIDescriptorSimpleReference* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short PutObjectProc([In()] PIWriteDescriptor descriptor, [In()] uint key, [In()] uint type, [In()] Handle data);
@@ -171,52 +171,52 @@ namespace PSFilterLoad.PSApi
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     [return: MarshalAs(UnmanagedType.U1)]
-    internal delegate bool GetKeyProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref uint key, [In(), Out()] ref uint type, [In(), Out()] ref int flags);
+    internal unsafe delegate bool GetKeyProc([In()] PIReadDescriptor descriptor, [In(), Out()] uint* key, [In(), Out()] uint* type, [In(), Out()] int* flags);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetIntegerProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref int data);
+    internal unsafe delegate short GetIntegerProc([In()] PIReadDescriptor descriptor, [In(), Out()] int* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetFloatProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref double data);
+    internal unsafe delegate short GetFloatProc([In()] PIReadDescriptor descriptor, [In(), Out()] double* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetUnitFloatProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref uint unit, [In(), Out()] ref double data);
+    internal unsafe delegate short GetUnitFloatProc([In()] PIReadDescriptor descriptor, [In(), Out()] uint* unit, [In(), Out()] double* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetBooleanProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref byte data);
+    internal unsafe delegate short GetBooleanProc([In()] PIReadDescriptor descriptor, [In(), Out()] byte* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetTextProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref Handle data);
+    internal unsafe delegate short GetTextProc([In()] PIReadDescriptor descriptor, [In(), Out()] Handle* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetAliasProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref Handle data);
+    internal unsafe delegate short GetAliasProc([In()] PIReadDescriptor descriptor, [In(), Out()] Handle* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetEnumeratedProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref uint data);
+    internal unsafe delegate short GetEnumeratedProc([In()] PIReadDescriptor descriptor, [In(), Out()] uint* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetClassProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref uint data);
+    internal unsafe delegate short GetClassProc([In()] PIReadDescriptor descriptor, [In(), Out()] uint* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetSimpleReferenceProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref PIDescriptorSimpleReference data);
+    internal unsafe delegate short GetSimpleReferenceProc([In()] PIReadDescriptor descriptor, [In(), Out()] PIDescriptorSimpleReference* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetObjectProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref uint type, [In(), Out()] ref Handle data);
+    internal unsafe delegate short GetObjectProc([In()] PIReadDescriptor descriptor, [In(), Out()] uint* type, [In(), Out()] Handle* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetCountProc([In()] PIReadDescriptor descriptor, [In(), Out()] ref uint count);
+    internal unsafe delegate short GetCountProc([In()] PIReadDescriptor descriptor, [In(), Out()] uint* count);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate short GetStringProc([In()] PIReadDescriptor descriptor, [In()] IntPtr data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetPinnedIntegerProc([In()] PIReadDescriptor descriptor, [In()] int min, [In()] int max, [In(), Out()] ref int data);
+    internal unsafe delegate short GetPinnedIntegerProc([In()] PIReadDescriptor descriptor, [In()] int min, [In()] int max, [In(), Out()] int* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetPinnedFloatProc([In()] PIReadDescriptor descriptor, [In()] ref double min, [In()] ref double max, [In(), Out()] ref double data);
+    internal unsafe delegate short GetPinnedFloatProc([In()] PIReadDescriptor descriptor, [In()] double* min, [In()] double* max, [In(), Out()] double* data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate short GetPinnedUnitFloatProc([In()] PIReadDescriptor descriptor, [In()] ref double min, [In()] ref double max, [In()] ref uint unit, [In(), Out()] ref double data);
+    internal unsafe delegate short GetPinnedUnitFloatProc([In()] PIReadDescriptor descriptor, [In()] double* min, [In()] double* max, [In()] uint* unit, [In(), Out()] double* data);
 
     [StructLayout(LayoutKind.Sequential)]
     internal struct WriteDescriptorProcs

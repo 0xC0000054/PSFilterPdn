@@ -31,7 +31,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// </summary>
         /// <param name="actionDescriptorSuite">The action descriptor suite instance.</param>
         /// <exception cref="ArgumentNullException"><paramref name="actionDescriptorSuite"/> is null.</exception>
-        public DescriptorRegistrySuite(IActionDescriptorSuite actionDescriptorSuite)
+        public unsafe DescriptorRegistrySuite(IActionDescriptorSuite actionDescriptorSuite)
         {
             if (actionDescriptorSuite == null)
             {
@@ -164,8 +164,13 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private int Get(IntPtr key, ref PIActionDescriptor descriptor)
+        private unsafe int Get(IntPtr key, PIActionDescriptor* descriptor)
         {
+            if (descriptor == null)
+            {
+                return PSError.kSPBadParameterError;
+            }
+
             try
             {
                 string registryKey = StringUtil.FromCString(key);
@@ -178,11 +183,11 @@ namespace PSFilterLoad.PSApi.PICA
 
                 if (registry.TryGetValue(registryKey, out item))
                 {
-                    descriptor = actionDescriptorSuite.CreateDescriptor(item.Values);
+                    *descriptor = actionDescriptorSuite.CreateDescriptor(item.Values);
                 }
                 else
                 {
-                    descriptor = PIActionDescriptor.Null;
+                    *descriptor = PIActionDescriptor.Null;
                 }
             }
             catch (OutOfMemoryException)

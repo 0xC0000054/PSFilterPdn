@@ -79,7 +79,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="resultSpace">The result space.</param>
         /// <param name="colorComponents">The color to convert.</param>
         /// <returns>The status of the conversion</returns>
-        public static short Convert(ColorSpace sourceSpace, ColorSpace resultSpace, ref short[] colorComponents)
+        public static unsafe short Convert(ColorSpace sourceSpace, ColorSpace resultSpace, short* colorComponents)
         {
             if (sourceSpace < ColorSpace.RGBSpace || sourceSpace > ColorSpace.XYZSpace)
             {
