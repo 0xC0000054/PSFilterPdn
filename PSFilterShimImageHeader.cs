@@ -59,14 +59,13 @@ namespace PSFilterPdn
 
         public PSFilterShimImageHeader(int width,
                                        int height,
-                                       int stride,
                                        float dpiX,
                                        float dpiY)
         {
             fileVersion = 1;
             this.width = width;
             this.height = height;
-            this.stride = stride;
+            this.stride = checked(width * 4);
             this.dpiX = dpiX;
             this.dpiY = dpiY;
         }

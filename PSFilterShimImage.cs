@@ -41,12 +41,6 @@ namespace PSFilterPdn
 
                 surface = new Surface(header.Width, header.Height);
 
-                // The PSFilterShimImage uses the same format as a Paint.NET Surface (32-bits-per-pixel BGRA).
-                if (header.Stride != surface.Stride)
-                {
-                    throw new InvalidOperationException("The PSFilterShimImage stride does not match the Surface.");
-                }
-
                 byte[] buffer = new byte[header.Stride];
 
                 unsafe
@@ -81,7 +75,6 @@ namespace PSFilterPdn
             {
                 PSFilterShimImageHeader header = new PSFilterShimImageHeader(surface.Width,
                                                                              surface.Height,
-                                                                             surface.Stride,
                                                                              dpiX,
                                                                              dpiY);
                 header.Save(stream);
