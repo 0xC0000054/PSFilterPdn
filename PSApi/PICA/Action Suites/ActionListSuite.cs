@@ -772,7 +772,7 @@ namespace PSFilterLoad.PSApi.PICA
                 try
                 {
                     *data = GenerateDictionaryKey();
-                    actionLists.Add(list, new ActionListItemCollection(value));
+                    actionLists.Add(*data, new ActionListItemCollection(value));
                 }
                 catch (OutOfMemoryException)
                 {
