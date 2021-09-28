@@ -92,7 +92,7 @@ namespace PSFilterLoad.PSApi
             return propertyProcsPtr;
         }
 
-        private static unsafe short CreateComplexPropertyHandle(byte[] bytes, Handle* complexProperty)
+        private static unsafe short CreateComplexPropertyHandle(Handle* complexProperty, byte[] bytes)
         {
             if (complexProperty == null)
             {
@@ -112,7 +112,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private static unsafe short GetSimpleProperty(int value, IntPtr* simpleProperty)
+        private static unsafe short GetSimpleProperty(IntPtr* simpleProperty, int value)
         {
             if (simpleProperty == null)
             {
@@ -142,7 +142,7 @@ namespace PSFilterLoad.PSApi
             {
                 case PSProperties.BigNudgeH:
                 case PSProperties.BigNudgeV:
-                    error = GetSimpleProperty(new Fixed16(PSConstants.Properties.BigNudgeDistance).Value, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, new Fixed16(PSConstants.Properties.BigNudgeDistance).Value);
                     break;
                 case PSProperties.Caption:
                     if (complexProperty != null)
@@ -174,11 +174,11 @@ namespace PSFilterLoad.PSApi
 
                     bytes = Encoding.ASCII.GetBytes(name);
 
-                    error = CreateComplexPropertyHandle(bytes, complexProperty);
+                    error = CreateComplexPropertyHandle(complexProperty, bytes);
                     break;
                 case PSProperties.Copyright:
                 case PSProperties.Copyright2:
-                    error = GetSimpleProperty(0, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, 0);
                     break;
                 case PSProperties.EXIFData:
                 case PSProperties.XMPData:
@@ -189,39 +189,39 @@ namespace PSFilterLoad.PSApi
                     }
                     break;
                 case PSProperties.GridMajor:
-                    error = GetSimpleProperty(new Fixed16(PSConstants.Properties.GridMajor).Value, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, new Fixed16(PSConstants.Properties.GridMajor).Value);
                     break;
                 case PSProperties.GridMinor:
-                    error = GetSimpleProperty(PSConstants.Properties.GridMinor, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, PSConstants.Properties.GridMinor);
                     break;
                 case PSProperties.ImageMode:
-                    error = GetSimpleProperty(PSConstants.plugInModeRGBColor, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, PSConstants.plugInModeRGBColor);
                     break;
                 case PSProperties.InterpolationMethod:
-                    error = GetSimpleProperty(PSConstants.Properties.InterpolationMethod.NearestNeghbor, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, PSConstants.Properties.InterpolationMethod.NearestNeghbor);
                     break;
                 case PSProperties.NumberOfChannels:
-                    error = GetSimpleProperty(numberOfChannels, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, numberOfChannels);
                     break;
                 case PSProperties.NumberOfPaths:
-                    error = GetSimpleProperty(0, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, 0);
                     break;
                 case PSProperties.WorkPathIndex:
                 case PSProperties.ClippingPathIndex:
                 case PSProperties.TargetPathIndex:
-                    error = GetSimpleProperty(PSConstants.Properties.NoPathIndex, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, PSConstants.Properties.NoPathIndex);
                     break;
                 case PSProperties.RulerUnits:
-                    error = GetSimpleProperty(PSConstants.Properties.RulerUnits.Pixels, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, PSConstants.Properties.RulerUnits.Pixels);
                     break;
                 case PSProperties.RulerOriginH:
                 case PSProperties.RulerOriginV:
-                    error = GetSimpleProperty(new Fixed16(0).Value, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, new Fixed16(0).Value);
                     break;
                 case PSProperties.SerialString:
                     bytes = Encoding.ASCII.GetBytes(HostSerial);
 
-                    error = CreateComplexPropertyHandle(bytes, complexProperty);
+                    error = CreateComplexPropertyHandle(complexProperty, bytes);
                     break;
                 case PSProperties.URL:
                     if (complexProperty != null)
@@ -241,22 +241,22 @@ namespace PSFilterLoad.PSApi
                         bytes = Encoding.ASCII.GetBytes(title);
                     }
 
-                    error = CreateComplexPropertyHandle(bytes, complexProperty);
+                    error = CreateComplexPropertyHandle(complexProperty, bytes);
                     break;
                 case PSProperties.WatchSuspension:
-                    error = GetSimpleProperty(0, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, 0);
                     break;
                 case PSProperties.DocumentWidth:
-                    error = GetSimpleProperty(documentWidth, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, documentWidth);
                     break;
                 case PSProperties.DocumentHeight:
-                    error = GetSimpleProperty(documentHeight, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, documentHeight);
                     break;
                 case PSProperties.ToolTips:
-                    error = GetSimpleProperty(1, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, 1);
                     break;
                 case PSProperties.HighDpi:
-                    error = GetSimpleProperty(highDpi ? 1 : 0, simpleProperty);
+                    error = GetSimpleProperty(simpleProperty, highDpi ? 1 : 0);
                     break;
                 default:
                     return PSError.errPlugInPropertyUndefined;
