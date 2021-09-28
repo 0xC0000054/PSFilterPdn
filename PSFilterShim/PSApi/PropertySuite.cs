@@ -153,10 +153,6 @@ namespace PSFilterLoad.PSApi
                     }
                     break;
                 case PSProperties.ChannelName:
-                    if (index < 0 || index >= numberOfChannels)
-                    {
-                        return PSError.errPlugInPropertyUndefined;
-                    }
                     string name = string.Empty;
                     switch (index)
                     {
@@ -172,6 +168,8 @@ namespace PSFilterLoad.PSApi
                         case 3:
                             name = Resources.AlphaChannelName;
                             break;
+                        default:
+                            return PSError.errPlugInPropertyUndefined;
                     }
 
                     bytes = Encoding.ASCII.GetBytes(name);
