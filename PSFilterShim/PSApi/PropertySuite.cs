@@ -112,6 +112,8 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
+        private static unsafe short GetSimpleProperty(IntPtr* simpleProperty, bool value) => GetSimpleProperty(simpleProperty, value ? 1 : 0);
+
         private static unsafe short GetSimpleProperty(IntPtr* simpleProperty, int value)
         {
             if (simpleProperty == null)
@@ -178,7 +180,7 @@ namespace PSFilterLoad.PSApi
                     break;
                 case PSProperties.Copyright:
                 case PSProperties.Copyright2:
-                    error = GetSimpleProperty(simpleProperty, 0);
+                    error = GetSimpleProperty(simpleProperty, false);
                     break;
                 case PSProperties.EXIFData:
                 case PSProperties.XMPData:
@@ -244,7 +246,7 @@ namespace PSFilterLoad.PSApi
                     error = CreateComplexPropertyHandle(complexProperty, bytes);
                     break;
                 case PSProperties.WatchSuspension:
-                    error = GetSimpleProperty(simpleProperty, 0);
+                    error = GetSimpleProperty(simpleProperty, false);
                     break;
                 case PSProperties.DocumentWidth:
                     error = GetSimpleProperty(simpleProperty, documentWidth);
@@ -253,10 +255,10 @@ namespace PSFilterLoad.PSApi
                     error = GetSimpleProperty(simpleProperty, documentHeight);
                     break;
                 case PSProperties.ToolTips:
-                    error = GetSimpleProperty(simpleProperty, 1);
+                    error = GetSimpleProperty(simpleProperty, true);
                     break;
                 case PSProperties.HighDpi:
-                    error = GetSimpleProperty(simpleProperty, highDpi ? 1 : 0);
+                    error = GetSimpleProperty(simpleProperty, highDpi);
                     break;
                 default:
                     return PSError.errPlugInPropertyUndefined;
