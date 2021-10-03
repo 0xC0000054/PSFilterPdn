@@ -87,7 +87,7 @@ namespace PSFilterLoad.PSApi
         private PluginPhase previousPhase;
         private Action<byte> progressFunc;
         private byte lastProgressPercentage;
-        private IntPtr dataPtr;
+        private IntPtr filterGlobalData;
         private short result;
 
         private Func<bool> abortFunc;
@@ -221,7 +221,7 @@ namespace PSFilterLoad.PSApi
             outputHandling = FilterDataHandling.None;
             copyToDest = true;
 
-            dataPtr = IntPtr.Zero;
+            filterGlobalData = IntPtr.Zero;
             previousPhase = PluginPhase.None;
             errorMessage = string.Empty;
             disposed = false;
@@ -488,11 +488,11 @@ namespace PSFilterLoad.PSApi
                     }
                 }
             }
-            if (filterRecord->parameters != Handle.Null && dataPtr != IntPtr.Zero)
+            if (filterRecord->parameters != Handle.Null && filterGlobalData != IntPtr.Zero)
             {
-                if (HandleSuite.Instance.AllocatedBySuite(dataPtr))
+                if (HandleSuite.Instance.AllocatedBySuite(filterGlobalData))
                 {
-                    Handle dataHandle = new Handle(dataPtr);
+                    Handle dataHandle = new Handle(filterGlobalData);
 
                     int ps = HandleSuite.Instance.GetHandleSize(dataHandle);
                     byte[] dataBuf = new byte[ps];
@@ -509,17 +509,17 @@ namespace PSFilterLoad.PSApi
                     bool allocatedByBufferSuite;
                     IntPtr ptr;
 
-                    if (BufferSuite.Instance.AllocatedBySuite(dataPtr))
+                    if (BufferSuite.Instance.AllocatedBySuite(filterGlobalData))
                     {
-                        pluginDataSize = BufferSuite.Instance.GetBufferSize(dataPtr);
+                        pluginDataSize = BufferSuite.Instance.GetBufferSize(filterGlobalData);
                         allocatedByBufferSuite = true;
-                        ptr = BufferSuite.Instance.LockBuffer(dataPtr);
+                        ptr = BufferSuite.Instance.LockBuffer(filterGlobalData);
                     }
                     else
                     {
-                        pluginDataSize = SafeNativeMethods.GlobalSize(dataPtr).ToInt64();
+                        pluginDataSize = SafeNativeMethods.GlobalSize(filterGlobalData).ToInt64();
                         allocatedByBufferSuite = false;
-                        ptr = SafeNativeMethods.GlobalLock(dataPtr);
+                        ptr = SafeNativeMethods.GlobalLock(filterGlobalData);
                     }
 
                     try
@@ -549,7 +549,7 @@ namespace PSFilterLoad.PSApi
                     {
                         if (allocatedByBufferSuite)
                         {
-                            BufferSuite.Instance.UnlockBuffer(dataPtr);
+                            BufferSuite.Instance.UnlockBuffer(filterGlobalData);
                         }
                         else
                         {
@@ -632,10 +632,10 @@ namespace PSFilterLoad.PSApi
 
                         Marshal.Copy(pluginDataBytes, 0, HandleSuite.Instance.LockHandle(dataHandle, 0), pluginDataBytes.Length);
                         HandleSuite.Instance.UnlockHandle(dataHandle);
-                        dataPtr = dataHandle.Value;
+                        filterGlobalData = dataHandle.Value;
                         break;
                     case GlobalParameters.DataStorageMethod.OTOFHandle:
-                        dataPtr = Memory.Allocate(OTOFHandleSize, false);
+                        filterGlobalData = Memory.Allocate(OTOFHandleSize, false);
 
                         if (globalParameters.PluginDataExecutable)
                         {
@@ -648,13 +648,13 @@ namespace PSFilterLoad.PSApi
 
                         Marshal.Copy(pluginDataBytes, 0, pluginDataHandle, pluginDataBytes.Length);
 
-                        Marshal.WriteIntPtr(dataPtr, pluginDataHandle);
-                        Marshal.WriteInt32(dataPtr, IntPtr.Size, OTOFSignature);
+                        Marshal.WriteIntPtr(filterGlobalData, pluginDataHandle);
+                        Marshal.WriteInt32(filterGlobalData, IntPtr.Size, OTOFSignature);
 
                         break;
                     case GlobalParameters.DataStorageMethod.RawBytes:
-                        dataPtr = Memory.Allocate(pluginDataBytes.Length, false);
-                        Marshal.Copy(pluginDataBytes, 0, dataPtr, pluginDataBytes.Length);
+                        filterGlobalData = Memory.Allocate(pluginDataBytes.Length, false);
+                        Marshal.Copy(pluginDataBytes, 0, filterGlobalData, pluginDataBytes.Length);
 
                         break;
                     default:
@@ -682,7 +682,7 @@ namespace PSFilterLoad.PSApi
 
                 if (pdata.ModuleEntryPoints == null)
                 {
-                    module.entryPoint(FilterSelector.About, aboutRecordPtr, ref dataPtr, ref result);
+                    module.entryPoint(FilterSelector.About, aboutRecordPtr, ref filterGlobalData, ref result);
                 }
                 else
                 {
@@ -691,7 +691,7 @@ namespace PSFilterLoad.PSApi
                     {
                         PluginEntryPoint ep = module.GetEntryPoint(entryPoint);
 
-                        ep(FilterSelector.About, aboutRecordPtr, ref dataPtr, ref result);
+                        ep(FilterSelector.About, aboutRecordPtr, ref filterGlobalData, ref result);
 
                         if (result != PSError.noErr)
                         {
@@ -734,7 +734,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.Call, "Before FilterSelectorStart");
 #endif
 
-            module.entryPoint(FilterSelector.Start, filterRecordPtr, ref dataPtr, ref result);
+            module.entryPoint(FilterSelector.Start, filterRecordPtr, ref filterGlobalData, ref result);
 
 #if DEBUG
             DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorStart");
@@ -761,7 +761,7 @@ namespace PSFilterLoad.PSApi
                 DebugUtils.Ping(DebugFlags.Call, "Before FilterSelectorContinue");
 #endif
 
-                module.entryPoint(FilterSelector.Continue, filterRecordPtr, ref dataPtr, ref result);
+                module.entryPoint(FilterSelector.Continue, filterRecordPtr, ref filterGlobalData, ref result);
 
 #if DEBUG
                 DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorContinue");
@@ -779,7 +779,7 @@ namespace PSFilterLoad.PSApi
                     DebugUtils.Ping(DebugFlags.Call, "Before FilterSelectorFinish");
 #endif
 
-                    module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
+                    module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref filterGlobalData, ref result);
 
 #if DEBUG
                     DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorFinish");
@@ -795,7 +795,7 @@ namespace PSFilterLoad.PSApi
 
                 if (AbortProc())
                 {
-                    module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
+                    module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref filterGlobalData, ref result);
 
                     if (result != PSError.noErr)
                     {
@@ -812,7 +812,7 @@ namespace PSFilterLoad.PSApi
 #endif
             result = PSError.noErr;
 
-            module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref dataPtr, ref result);
+            module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref filterGlobalData, ref result);
 
 #if DEBUG
             DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorFinish");
@@ -841,11 +841,11 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.Call, "Before filterSelectorParameters");
 #endif
 
-            module.entryPoint(FilterSelector.Parameters, filterRecordPtr, ref dataPtr, ref result);
+            module.entryPoint(FilterSelector.Parameters, filterRecordPtr, ref filterGlobalData, ref result);
 #if DEBUG
             unsafe
             {
-                DebugUtils.Ping(DebugFlags.Call, string.Format("data = {0:X},  parameters = {1:X}", dataPtr, ((FilterRecord*)filterRecordPtr)->parameters));
+                DebugUtils.Ping(DebugFlags.Call, string.Format("data = {0:X},  parameters = {1:X}", filterGlobalData, ((FilterRecord*)filterRecordPtr)->parameters));
             }
 
             DebugUtils.Ping(DebugFlags.Call, "After filterSelectorParameters");
@@ -986,7 +986,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.Call, "Before filterSelectorPrepare");
 #endif
-            module.entryPoint(FilterSelector.Prepare, filterRecordPtr, ref dataPtr, ref result);
+            module.entryPoint(FilterSelector.Prepare, filterRecordPtr, ref filterGlobalData, ref result);
 
 #if DEBUG
             DebugUtils.Ping(DebugFlags.Call, "After filterSelectorPrepare");
@@ -3234,9 +3234,9 @@ namespace PSFilterLoad.PSApi
                     filterRecordPtr = IntPtr.Zero;
                 }
 
-                if (dataPtr != IntPtr.Zero)
+                if (filterGlobalData != IntPtr.Zero)
                 {
-                    if (pluginDataRestored && !HandleSuite.Instance.AllocatedBySuite(dataPtr))
+                    if (pluginDataRestored && !HandleSuite.Instance.AllocatedBySuite(filterGlobalData))
                     {
                         if (pluginDataHandle != IntPtr.Zero)
                         {
@@ -3250,20 +3250,20 @@ namespace PSFilterLoad.PSApi
                             }
                             pluginDataHandle = IntPtr.Zero;
                         }
-                        Memory.Free(dataPtr);
+                        Memory.Free(filterGlobalData);
                     }
-                    else if (BufferSuite.Instance.AllocatedBySuite(dataPtr))
+                    else if (BufferSuite.Instance.AllocatedBySuite(filterGlobalData))
                     {
-                        BufferSuite.Instance.FreeBuffer(dataPtr);
+                        BufferSuite.Instance.FreeBuffer(filterGlobalData);
                     }
                     else
                     {
-                        Handle dataHandle = new Handle(dataPtr);
+                        Handle dataHandle = new Handle(filterGlobalData);
 
                         HandleSuite.Instance.UnlockHandle(dataHandle);
                         HandleSuite.Instance.DisposeHandle(dataHandle);
                     }
-                    dataPtr = IntPtr.Zero;
+                    filterGlobalData = IntPtr.Zero;
                 }
 
                 BufferSuite.Instance.FreeRemainingBuffers();
