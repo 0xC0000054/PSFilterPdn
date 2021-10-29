@@ -10,12 +10,15 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PaintDotNet;
 using PSFilterPdn.Interop;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PSFilterLoad.PSApi
 {
@@ -186,6 +189,91 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        [DebuggerDisplay("{DebuggerDisplay, nq}")]
+        private unsafe readonly ref struct AeteResourceCString
+        {
+            private readonly byte* firstChar;
+            private readonly int length;
+
+            public AeteResourceCString(byte* ptr)
+            {
+                if (ptr == null)
+                {
+                    ExceptionUtil.ThrowArgumentNullException(nameof(ptr));
+                }
+
+                firstChar = ptr;
+                length = StringUtil.TryGetCStringLength(ptr, out int stringLength) ? stringLength : 0;
+            }
+
+            public uint LengthWithTerminator => (uint)length + 1;
+
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            private string DebuggerDisplay
+            {
+                get
+                {
+                    string result;
+
+                    switch (length)
+                    {
+                        case 0:
+                            // Use a string with escaped quotes to represent an empty string as
+                            // the DebuggerDisplay attribute will remove the first set of quotes.
+                            result = "\"\"";
+                            break;
+                        default:
+                            result = new string((sbyte*)firstChar, 0, length, Encoding.ASCII);
+                            break;
+                    }
+
+                    return result;
+                }
+            }
+        }
+
+        [DebuggerDisplay("{DebuggerDisplay, nq}")]
+        private unsafe readonly ref struct AeteResourcePascalString
+        {
+            private readonly byte* firstChar;
+            private readonly int length;
+
+            public AeteResourcePascalString(byte* ptr)
+            {
+                if (ptr == null)
+                {
+                    ExceptionUtil.ThrowArgumentNullException(nameof(ptr));
+                }
+
+                firstChar = ptr + 1;
+                length = ptr[0];
+            }
+
+            public uint LengthWithPrefix => (uint)length + 1;
+
+            private string DebuggerDisplay
+            {
+                get
+                {
+                    string result;
+
+                    switch (length)
+                    {
+                        case 0:
+                            // Use a string with escaped quotes to represent an empty string as
+                            // the DebuggerDisplay attribute will remove the first set of quotes.
+                            result = "\"\"";
+                            break;
+                        default:
+                            result = new string((sbyte*)firstChar, 0, length, Encoding.ASCII);
+                            break;
+                    }
+
+                    return result;
+                }
+            }
+        }
+
         private static unsafe AETEData ParseAETEResource(IntPtr hModule, short resourceID)
         {
             IntPtr hRes = IntPtr.Zero;
@@ -228,11 +316,10 @@ namespace PSFilterLoad.PSApi
             byte* propPtr = ptr;
             if (suiteCount == 1) // There should only be one vendor suite
             {
-                uint stringLength;
-                string suiteVendor = StringUtil.FromPascalString(propPtr, out stringLength);
-                propPtr += stringLength;
-                string suiteDescription = StringUtil.FromPascalString(propPtr, out stringLength);
-                propPtr += stringLength;
+                AeteResourcePascalString suiteVendor = new AeteResourcePascalString(propPtr);
+                propPtr += suiteVendor.LengthWithPrefix;
+                AeteResourcePascalString suiteDescription = new AeteResourcePascalString(propPtr);
+                propPtr += suiteDescription.LengthWithPrefix;
                 uint suiteID = *(uint*)propPtr;
                 propPtr += 4;
                 short suiteLevel = *(short*)propPtr;
@@ -244,23 +331,23 @@ namespace PSFilterLoad.PSApi
 
                 if (eventCount == 1) // There should only be one scripting event
                 {
-                    string eventVendor = StringUtil.FromPascalString(propPtr, out stringLength);
-                    propPtr += stringLength;
-                    string eventDescription = StringUtil.FromPascalString(propPtr, out stringLength);
-                    propPtr += stringLength;
+                    AeteResourcePascalString eventVendor = new AeteResourcePascalString(propPtr);
+                    propPtr += eventVendor.LengthWithPrefix;
+                    AeteResourcePascalString eventDescription = new AeteResourcePascalString(propPtr);
+                    propPtr += eventDescription.LengthWithPrefix;
                     int eventClass = *(int*)propPtr;
                     propPtr += 4;
                     int eventType = *(int*)propPtr;
                     propPtr += 4;
 
-                    string replyType = StringUtil.FromCString(propPtr, out stringLength);
-                    propPtr += stringLength;
+                    AeteResourceCString replyType = new AeteResourceCString(propPtr);
+                    propPtr += replyType.LengthWithTerminator;
 
                     ushort eventFlags = *(ushort*)propPtr;
                     propPtr += 2;
 
-                    string paramType = StringUtil.FromCString(propPtr, out stringLength);
-                    propPtr += stringLength;
+                    AeteResourceCString paramType = new AeteResourceCString(propPtr);
+                    propPtr += paramType.LengthWithTerminator;
 
                     ushort paramTypeFlags = *(ushort*)propPtr;
                     propPtr += 2;
@@ -271,8 +358,8 @@ namespace PSFilterLoad.PSApi
 
                     for (int p = 0; p < paramCount; p++)
                     {
-                        string name = StringUtil.FromPascalString(propPtr, out stringLength);
-                        propPtr += stringLength;
+                        AeteResourcePascalString name = new AeteResourcePascalString(propPtr);
+                        propPtr += name.LengthWithPrefix;
 
                         uint key = *(uint*)propPtr;
                         propPtr += 4;
@@ -280,8 +367,8 @@ namespace PSFilterLoad.PSApi
                         uint type = *(uint*)propPtr;
                         propPtr += 4;
 
-                        string description = StringUtil.FromPascalString(propPtr, out stringLength);
-                        propPtr += stringLength;
+                        AeteResourcePascalString description = new AeteResourcePascalString(propPtr);
+                        propPtr += description.LengthWithPrefix;
 
                         short parameterFlags = *(short*)propPtr;
                         propPtr += 2;
@@ -311,14 +398,14 @@ namespace PSFilterLoad.PSApi
 
                                 for (int e = 0; e < count; e++)
                                 {
-                                    string name = StringUtil.FromPascalString(propPtr, out stringLength);
-                                    propPtr += stringLength;
+                                    AeteResourcePascalString name = new AeteResourcePascalString(propPtr);
+                                    propPtr += name.LengthWithPrefix;
 
                                     uint key = *(uint*)propPtr;
                                     propPtr += 4;
 
-                                    string description = StringUtil.FromPascalString(propPtr, out stringLength);
-                                    propPtr += stringLength;
+                                    AeteResourcePascalString description = new AeteResourcePascalString(propPtr);
+                                    propPtr += description.LengthWithPrefix;
                                 }
                             }
                         }
