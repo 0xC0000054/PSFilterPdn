@@ -19,17 +19,9 @@ namespace PSFilterLoad.PSApi
     {
         private Dictionary<uint, short> flagList;
 
-        internal AETEData(PluginAETE enumAETE)
+        internal AETEData(Dictionary<uint, short> aeteParameterFlags)
         {
-            flagList = new Dictionary<uint, short>();
-
-            foreach (AETEParameter parm in enumAETE.scriptEvent.parameters)
-            {
-                if (!flagList.ContainsKey(parm.key))
-                {
-                    flagList.Add(parm.key, parm.flags);
-                }
-            }
+            flagList = new Dictionary<uint, short>(aeteParameterFlags);
         }
 
         public bool TryGetParameterFlags(uint key, out short flags)

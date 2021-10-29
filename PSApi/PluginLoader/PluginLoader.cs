@@ -186,7 +186,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private static unsafe PluginAETE ParseAETEResource(IntPtr hModule, short resourceID)
+        private static unsafe AETEData ParseAETEResource(IntPtr hModule, short resourceID)
         {
             IntPtr hRes = IntPtr.Zero;
 
@@ -267,40 +267,29 @@ namespace PSFilterLoad.PSApi
                     short paramCount = *(short*)propPtr;
                     propPtr += 2;
 
-                    AETEEvent evnt = new AETEEvent()
-                    {
-                        vendor = eventVendor,
-                        desc = eventDescription,
-                        eventClass = eventClass,
-                        type = eventType,
-                        replyType = replyType,
-                        paramType = paramType,
-                        flags = eventFlags
-                    };
+                    Dictionary<uint, short> aeteParameterFlags = new Dictionary<uint, short>(paramCount);
 
-                    if (paramCount > 0)
+                    for (int p = 0; p < paramCount; p++)
                     {
-                        AETEParameter[] parameters = new AETEParameter[paramCount];
-                        for (int p = 0; p < paramCount; p++)
+                        string name = StringUtil.FromPascalString(propPtr, out stringLength);
+                        propPtr += stringLength;
+
+                        uint key = *(uint*)propPtr;
+                        propPtr += 4;
+
+                        uint type = *(uint*)propPtr;
+                        propPtr += 4;
+
+                        string description = StringUtil.FromPascalString(propPtr, out stringLength);
+                        propPtr += stringLength;
+
+                        short parameterFlags = *(short*)propPtr;
+                        propPtr += 2;
+
+                        if (!aeteParameterFlags.ContainsKey(key))
                         {
-                            string name = StringUtil.FromPascalString(propPtr, out stringLength);
-                            propPtr += stringLength;
-
-                            uint key = *(uint*)propPtr;
-                            propPtr += 4;
-
-                            uint type = *(uint*)propPtr;
-                            propPtr += 4;
-
-                            string description = StringUtil.FromPascalString(propPtr, out stringLength);
-                            propPtr += stringLength;
-
-                            short parameterFlags = *(short*)propPtr;
-                            propPtr += 2;
-
-                            parameters[p] = new AETEParameter(name, key, type, description, parameterFlags);
+                            aeteParameterFlags.Add(key, parameterFlags);
                         }
-                        evnt.parameters = parameters;
                     }
 
                     short classCount = *(short*)propPtr;
@@ -313,15 +302,12 @@ namespace PSFilterLoad.PSApi
                         propPtr += 2;
                         if (enumCount > 0)
                         {
-                            AETEEnums[] enums = new AETEEnums[enumCount];
                             for (int enc = 0; enc < enumCount; enc++)
                             {
                                 uint type = *(uint*)propPtr;
                                 propPtr += 4;
                                 short count = *(short*)propPtr;
                                 propPtr += 2;
-
-                                AETEEnum[] values = new AETEEnum[count];
 
                                 for (int e = 0; e < count; e++)
                                 {
@@ -333,22 +319,18 @@ namespace PSFilterLoad.PSApi
 
                                     string description = StringUtil.FromPascalString(propPtr, out stringLength);
                                     propPtr += stringLength;
-
-                                    values[e] = new AETEEnum(name, key, description);
                                 }
-                                enums[enc] = new AETEEnums(type, count, values);
                             }
-                            evnt.enums = enums;
                         }
                     }
 
-                    if (evnt.parameters != null &&
+                    if (aeteParameterFlags.Count > 0 &&
                         major == PSConstants.AETEMajorVersion &&
                         minor == PSConstants.AETEMinorVersion &&
                         suiteLevel == PSConstants.AETESuiteLevel &&
                         suiteVersion == PSConstants.AETESuiteVersion)
                     {
-                        return new PluginAETE(major, minor, suiteLevel, suiteVersion, evnt);
+                        return new AETEData(aeteParameterFlags);
                     }
                 }
             }
@@ -499,12 +481,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                         string aeteName = StringUtil.FromCString(dataPtr + PITerminology.SizeOf);
 #endif
-                        PluginAETE pluginAETE = ParseAETEResource(hModule, term->terminologyID);
-
-                        if (pluginAETE != null)
-                        {
-                            aete = new AETEData(pluginAETE);
-                        }
+                        aete = ParseAETEResource(hModule, term->terminologyID);
                     }
                 }
                 else if (propKey == PIPropertyID.PIEnableInfoProperty)
