@@ -604,8 +604,6 @@ namespace PSFilterLoad.PSApi
             if (enumData.IsValid())
             {
                 query.plugins.Add(enumData);
-                handle.Target = query;
-                lParam = GCHandle.ToIntPtr(handle);
             }
 
             return true;
@@ -728,8 +726,6 @@ namespace PSFilterLoad.PSApi
             if (enumData.IsValid())
             {
                 query.plugins.Add(enumData);
-                handle.Target = query;
-                lParam = GCHandle.ToIntPtr(handle);
             }
 
             return true;
