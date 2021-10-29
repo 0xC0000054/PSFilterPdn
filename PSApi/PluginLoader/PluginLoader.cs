@@ -379,6 +379,7 @@ namespace PSFilterLoad.PSApi
                         }
                     }
 
+#if DEBUG
                     short classCount = *(short*)propPtr;
                     propPtr += 2;
                     if (classCount == 0)
@@ -410,6 +411,7 @@ namespace PSFilterLoad.PSApi
                             }
                         }
                     }
+#endif
 
                     if (aeteParameterFlags.Count > 0 &&
                         major == PSConstants.AETEMajorVersion &&
