@@ -203,7 +203,14 @@ namespace PSFilterLoad.PSApi
                 }
 
                 firstChar = ptr;
-                length = StringUtil.TryGetCStringLength(ptr, out int stringLength) ? stringLength : 0;
+                if (StringUtil.TryGetCStringLength(ptr, out int stringLength))
+                {
+                    length = stringLength;
+                }
+                else
+                {
+                    throw new ArgumentException("The string must be null-terminated.");
+                }
             }
 
             public uint LengthWithTerminator => (uint)length + 1;
