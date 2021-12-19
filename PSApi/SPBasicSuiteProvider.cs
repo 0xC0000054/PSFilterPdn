@@ -512,17 +512,15 @@ namespace PSFilterLoad.PSApi
             byte* src = (byte*)token1.ToPointer();
             byte* dst = (byte*)token2.ToPointer();
 
-            while (*dst != 0)
+            int diff;
+
+            while ((diff = *src - *dst) == 0 && *dst != 0)
             {
-                if ((*src - *dst) != 0)
-                {
-                    return false;
-                }
                 src++;
                 dst++;
             }
 
-            return true;
+            return diff == 0;
         }
 
         private unsafe int SPBasicAllocateBlock(int size, IntPtr* block)
