@@ -60,6 +60,11 @@ namespace PSFilterLoad.PSApi
         /// <remarks>Taken from the PiPL resources of a 64-bit Photoshop Plugin.</remarks>
         public const uint PIWin64X86CodeProperty = 0x38363634U;
         /// <summary>
+        /// Win64 ARM code descriptor, Entrypoint - 'wa64'
+        /// </summary>
+        /// <remarks>Taken from the PiPL resources of an ARM64 Photoshop Plugin.</remarks>
+        public const uint PIWin64ARMCodeProperty = 0x77613634U;
+        /// <summary>
         /// Major(int16).Minor(int16) version number
         /// </summary>
         public const uint PIVersionProperty = 0x76657273U;

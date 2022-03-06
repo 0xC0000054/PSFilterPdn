@@ -48,6 +48,9 @@ namespace PSFilterLoad.PSApi
                     case ProcessorArchitecture.X64:
                         platformEntryPoint = PIPropertyID.PIWin64X86CodeProperty;
                         break;
+                    case ProcessorArchitecture.Arm64:
+                        platformEntryPoint = PIPropertyID.PIWin64ARMCodeProperty;
+                        break;
                     case ProcessorArchitecture.Unknown:
                     default:
                         throw new PlatformNotSupportedException($"No platform entry point was defined for { nameof(ProcessorArchitecture) }.{ platform }.");
