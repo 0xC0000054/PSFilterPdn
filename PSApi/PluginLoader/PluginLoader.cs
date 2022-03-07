@@ -770,7 +770,7 @@ namespace PSFilterLoad.PSApi
                     result = platform == ProcessorArchitecture.X86;
                     break;
                 case ProcessorArchitecture.X64:
-                    // A x86_64 OS can use both 64-bit and 32-bit plugins, the 32-bit plugins will be run using the PSFilterShim process.
+                    // A x86_64 OS can use both x64 and x86 plugins, the x86 plugins will be run using the PSFilterShim process.
                     result = platform == ProcessorArchitecture.X64 || platform == ProcessorArchitecture.X86;
                     break;
                 case ProcessorArchitecture.Arm:
