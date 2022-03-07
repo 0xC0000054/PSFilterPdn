@@ -652,9 +652,21 @@ namespace PSFilterLoad.PSApi
             }
             byte* ptr = (byte*)lockRes.ToPointer() + 2;
 
-            string category = StringUtil.FromCString(ptr, out uint length);
+            string category;
 
-            ptr += length;
+            if (StringUtil.TryGetCStringLength(ptr, out int categoryStringLength))
+            {
+                category = StringUtil.FromCString(ptr, categoryStringLength, StringUtil.StringTrimOption.WhiteSpace);
+
+                uint lengthWithTerminator = (uint)categoryStringLength + 1;
+                ptr += lengthWithTerminator;
+            }
+            else
+            {
+                // The category string is longer than int.MaxValue.
+                return true;
+            }
+
 
             if (string.IsNullOrEmpty(category))
             {

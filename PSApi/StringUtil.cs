@@ -176,29 +176,6 @@ namespace PSFilterLoad.PSApi
         /// Creates a <see cref="string"/> from a C string.
         /// </summary>
         /// <param name="ptr">The pointer to read from.</param>
-        /// <param name="lengthWithTerminator">The length of the resulting string including the NUL terminator.</param>
-        /// <returns>
-        /// A managed string that holds a copy of the C string.
-        /// </returns>
-        internal static unsafe string FromCString(byte* ptr, out uint lengthWithTerminator)
-        {
-            int length;
-            if (!TryGetCStringLength(ptr, out length))
-            {
-                lengthWithTerminator = 0;
-                return null;
-            }
-
-            // Add the terminating NUL to the total length.
-            lengthWithTerminator = (uint)length + 1;
-
-            return FromCString(ptr, length, StringTrimOption.WhiteSpaceAndNullTerminator);
-        }
-
-        /// <summary>
-        /// Creates a <see cref="string"/> from a C string.
-        /// </summary>
-        /// <param name="ptr">The pointer to read from.</param>
         /// <param name="length">The length of the string.</param>
         /// <param name="option">The string trim options.</param>
         /// <returns>
