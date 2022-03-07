@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.ComponentModel;
 using System.Text;
 
 namespace PSFilterLoad.PSApi
@@ -20,12 +19,13 @@ namespace PSFilterLoad.PSApi
     {
         private static readonly Encoding Windows1252Encoding = Encoding.GetEncoding(1252);
 
+        [Flags]
         internal enum StringTrimOption
         {
             None = 0,
-            NullTerminator,
-            WhiteSpace,
-            WhiteSpaceAndNullTerminator
+            NullTerminator = 1 << 0,
+            WhiteSpace = 1 << 1,
+            WhiteSpaceAndNullTerminator = NullTerminator | WhiteSpace
         }
 
         /// <summary>
@@ -294,15 +294,18 @@ namespace PSFilterLoad.PSApi
                 return new TrimmedStringOffsets(startIndex, length);
             }
 
+            bool trimNullTerminator = (option & StringTrimOption.NullTerminator) != 0;
+            bool trimWhiteSpace = (option & StringTrimOption.WhiteSpace) != 0;
+
             int start = startIndex;
             int end = length;
 
             // The search at the start of the string can be skipped if we not trimming white space.
-            if (option == StringTrimOption.WhiteSpaceAndNullTerminator || option == StringTrimOption.WhiteSpace)
+            if (trimWhiteSpace)
             {
                 while (start < length)
                 {
-                    if (!IsTrimmedValue(ptr[start], option))
+                    if (!IsTrimmedValue(ptr[start], trimNullTerminator, trimWhiteSpace))
                     {
                         break;
                     }
@@ -312,7 +315,7 @@ namespace PSFilterLoad.PSApi
 
             while (end >= start)
             {
-                if (!IsTrimmedValue(ptr[end], option))
+                if (!IsTrimmedValue(ptr[end], trimNullTerminator, trimWhiteSpace))
                 {
                     break;
                 }
@@ -329,15 +332,18 @@ namespace PSFilterLoad.PSApi
                 return new TrimmedStringOffsets(startIndex, length);
             }
 
+            bool trimNullTerminator = (option & StringTrimOption.NullTerminator) != 0;
+            bool trimWhiteSpace = (option & StringTrimOption.WhiteSpace) != 0;
+
             int start = startIndex;
             int end = length;
 
             // The search at the start of the string can be skipped if we not trimming white space.
-            if (option == StringTrimOption.WhiteSpaceAndNullTerminator || option == StringTrimOption.WhiteSpace)
+            if (trimWhiteSpace)
             {
                 while (start < length)
                 {
-                    if (!IsTrimmedValue(ptr[start], option))
+                    if (!IsTrimmedValue(ptr[start], trimNullTerminator, trimWhiteSpace))
                     {
                         break;
                     }
@@ -347,7 +353,7 @@ namespace PSFilterLoad.PSApi
 
             while (end >= start)
             {
-                if (!IsTrimmedValue(ptr[end], option))
+                if (!IsTrimmedValue(ptr[end], trimNullTerminator, trimWhiteSpace))
                 {
                     break;
                 }
@@ -357,38 +363,14 @@ namespace PSFilterLoad.PSApi
             return new TrimmedStringOffsets(start, end - start + 1);
         }
 
-        private static bool IsTrimmedValue(byte value, StringTrimOption option)
+        private static bool IsTrimmedValue(byte value, bool trimNullTerminator, bool trimWhiteSpace)
         {
-            switch (option)
-            {
-                case StringTrimOption.None:
-                    return false;
-                case StringTrimOption.NullTerminator:
-                    return value == 0;
-                case StringTrimOption.WhiteSpace:
-                    return IsWhiteSpaceWindows1252(value);
-                case StringTrimOption.WhiteSpaceAndNullTerminator:
-                    return value == 0 || IsWhiteSpaceWindows1252(value);
-                default:
-                    throw new InvalidEnumArgumentException(nameof(option), (int)option, typeof(StringTrimOption));
-            }
+            return (trimNullTerminator && value == 0) || (trimWhiteSpace && IsWhiteSpaceWindows1252(value));
         }
 
-        private static bool IsTrimmedValue(char value, StringTrimOption option)
+        private static bool IsTrimmedValue(char value, bool trimNullTerminator, bool trimWhiteSpace)
         {
-            switch (option)
-            {
-                case StringTrimOption.None:
-                    return false;
-                case StringTrimOption.NullTerminator:
-                    return value == '\0';
-                case StringTrimOption.WhiteSpace:
-                    return char.IsWhiteSpace(value);
-                case StringTrimOption.WhiteSpaceAndNullTerminator:
-                    return value == '\0' || char.IsWhiteSpace(value);
-                default:
-                    throw new InvalidEnumArgumentException(nameof(option), (int)option, typeof(StringTrimOption));
-            }
+            return (trimNullTerminator && value == '\0') || (trimWhiteSpace && char.IsWhiteSpace(value));
         }
 
         private static bool IsWhiteSpaceWindows1252(byte value)
