@@ -739,7 +739,7 @@ namespace PSFilterLoad.PSApi
 
             IntPtr resPtr = new IntPtr(filterLock.ToInt64() + 2L);
 
-            string title = StringUtil.FromCString(resPtr, StringUtil.StringTrimOption.WhiteSpaceAndNullTerminator);
+            string title = StringUtil.FromCString(resPtr, StringUtil.StringTrimOption.WhiteSpace);
             // The entry point number is the same as the resource number.
             string entryPoint = "ENTRYPOINT" + lpszName.ToInt32().ToString(CultureInfo.InvariantCulture);
 
