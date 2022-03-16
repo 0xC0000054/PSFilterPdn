@@ -249,6 +249,8 @@
     <Compile Include="PSApi\PluginLoader\AeteResource.cs" />
     <Compile Include="PSApi\PluginLoader\PEFile.cs" />
     <Compile Include="PSApi\PluginLoader\PluginLoader.cs" />
+    <Compile Include="PSApi\PluginLoader\PluginLoader.FilterCaseInfoParser.cs" />
+    <Compile Include="PSApi\PluginLoader\PluginLoader.QueryFilter.cs" />
     <Compile Include="PSApi\PluginLoader\ProcessInformation.cs" />
     <Compile Include="PSApi\PluginLoader\ProcessorArchitecture.cs" />
     <Compile Include="PSApi\PluginModule.cs" />
