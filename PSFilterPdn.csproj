@@ -246,6 +246,7 @@
     <Compile Include="PSApi\PICA\PSErrorSuite.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\PlugInInfo.cs" />
+    <Compile Include="PSApi\PluginLoader\AeteResource.cs" />
     <Compile Include="PSApi\PluginLoader\PEFile.cs" />
     <Compile Include="PSApi\PluginLoader\PluginLoader.cs" />
     <Compile Include="PSApi\PluginLoader\ProcessInformation.cs" />
