@@ -80,6 +80,13 @@ namespace PSFilterPdn
 
         public float DpiY => dpiY;
 
+        public long GetTotalFileSize()
+        {
+            long imageDataSize = (long)stride * height;
+
+            return GetHeaderSize() + imageDataSize;
+        }
+
         public void Save(Stream stream)
         {
             if (stream is null)
@@ -94,6 +101,19 @@ namespace PSFilterPdn
             WriteInt32LittleEndian(stream, stride);
             WriteSingleLittleEndian(stream, dpiX);
             WriteSingleLittleEndian(stream, dpiY);
+        }
+
+        private static long GetHeaderSize()
+        {
+            long headerSize = sizeof(int); // FileSignature
+            headerSize += sizeof(int); // version
+            headerSize += sizeof(int); // width
+            headerSize += sizeof(int); // height
+            headerSize += sizeof(int); // stride
+            headerSize += sizeof(float); // dpiX
+            headerSize += sizeof(float); // dpiY            
+
+            return headerSize;
         }
 
         private static int ReadInt32LittleEndian(Stream stream)

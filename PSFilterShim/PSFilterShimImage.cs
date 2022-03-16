@@ -80,6 +80,8 @@ namespace PSFilterShim
                                                                              surface.Height,
                                                                              96.0f,
                                                                              96.0f);
+                stream.SetLength(header.GetTotalFileSize());
+
                 header.Save(stream);
 
                 byte[] buffer = new byte[header.Stride];

@@ -77,6 +77,8 @@ namespace PSFilterPdn
                                                                              surface.Height,
                                                                              dpiX,
                                                                              dpiY);
+                stream.SetLength(header.GetTotalFileSize());
+
                 header.Save(stream);
 
                 byte[] buffer = new byte[header.Stride];
