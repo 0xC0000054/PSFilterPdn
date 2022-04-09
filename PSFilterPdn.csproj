@@ -219,6 +219,8 @@
     <Compile Include="PSApi\Loader\AeteResource.cs" />
     <Compile Include="PSApi\Loader\PEFile.cs" />
     <Compile Include="PSApi\Loader\PIProperty.cs" />
+    <Compile Include="PSApi\Loader\PIPropertyID.cs" />
+    <Compile Include="PSApi\Loader\PITerminology.cs" />
     <Compile Include="PSApi\Loader\PlugInInfo.cs" />
     <Compile Include="PSApi\Loader\PluginLoader.cs" />
     <Compile Include="PSApi\Loader\PluginLoader.FilterCaseInfoParser.cs" />
