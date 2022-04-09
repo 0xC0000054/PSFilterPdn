@@ -12,7 +12,7 @@
 
 using PSFilterPdn.Interop;
 
-namespace PSFilterLoad.PSApi
+namespace PSFilterLoad.PSApi.Loader
 {
     internal static class ProcessInformation
     {

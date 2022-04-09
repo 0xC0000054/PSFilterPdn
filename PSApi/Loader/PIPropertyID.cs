@@ -15,7 +15,7 @@
  * All rights reserved.
 */
 
-namespace PSFilterLoad.PSApi
+namespace PSFilterLoad.PSApi.Loader
 {
     internal static class PIPropertyID
     {

@@ -10,7 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-namespace PSFilterLoad.PSApi
+namespace PSFilterLoad.PSApi.Loader
 {
     internal enum ProcessorArchitecture
     {

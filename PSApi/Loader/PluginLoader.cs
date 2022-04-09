@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Loader;
 using PSFilterPdn.Interop;
 using System;
 using System.Collections.Generic;

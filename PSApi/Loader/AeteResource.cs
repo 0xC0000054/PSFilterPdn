@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace PSFilterLoad.PSApi
+namespace PSFilterLoad.PSApi.Loader
 {
     internal static class AeteResource
     {
