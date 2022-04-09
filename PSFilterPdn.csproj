@@ -216,6 +216,13 @@
     <Compile Include="PSApi\IPICASuiteDataProvider.cs" />
     <Compile Include="PSApi\IPropertySuite.cs" />
     <Compile Include="PSApi\IResourceSuite.cs" />
+    <Compile Include="PSApi\Loader\AeteResource.cs" />
+    <Compile Include="PSApi\Loader\PEFile.cs" />
+    <Compile Include="PSApi\Loader\PluginLoader.cs" />
+    <Compile Include="PSApi\Loader\PluginLoader.FilterCaseInfoParser.cs" />
+    <Compile Include="PSApi\Loader\PluginLoader.QueryFilter.cs" />
+    <Compile Include="PSApi\Loader\ProcessInformation.cs" />
+    <Compile Include="PSApi\Loader\ProcessorArchitecture.cs" />
     <Compile Include="PSApi\LoadPsFilter.cs" />
     <Compile Include="PSApi\Memory.cs" />
     <Compile Include="PSApi\ParameterData.cs" />
@@ -246,13 +253,6 @@
     <Compile Include="PSApi\PICA\PSErrorSuite.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="PSApi\PlugInInfo.cs" />
-    <Compile Include="PSApi\PluginLoader\AeteResource.cs" />
-    <Compile Include="PSApi\PluginLoader\PEFile.cs" />
-    <Compile Include="PSApi\PluginLoader\PluginLoader.cs" />
-    <Compile Include="PSApi\PluginLoader\PluginLoader.FilterCaseInfoParser.cs" />
-    <Compile Include="PSApi\PluginLoader\PluginLoader.QueryFilter.cs" />
-    <Compile Include="PSApi\PluginLoader\ProcessInformation.cs" />
-    <Compile Include="PSApi\PluginLoader\ProcessorArchitecture.cs" />
     <Compile Include="PSApi\PluginModule.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\PropertySuite.cs" />
