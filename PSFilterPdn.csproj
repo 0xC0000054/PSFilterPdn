@@ -218,6 +218,8 @@
     <Compile Include="PSApi\IResourceSuite.cs" />
     <Compile Include="PSApi\Loader\AeteResource.cs" />
     <Compile Include="PSApi\Loader\PEFile.cs" />
+    <Compile Include="PSApi\Loader\PIProperty.cs" />
+    <Compile Include="PSApi\Loader\PlugInInfo.cs" />
     <Compile Include="PSApi\Loader\PluginLoader.cs" />
     <Compile Include="PSApi\Loader\PluginLoader.FilterCaseInfoParser.cs" />
     <Compile Include="PSApi\Loader\PluginLoader.QueryFilter.cs" />
@@ -252,7 +254,6 @@
     <Compile Include="PSApi\PICA\PSDescriptorRegistry.cs" />
     <Compile Include="PSApi\PICA\PSErrorSuite.cs" />
     <Compile Include="PSApi\PIDescriptorParameters.cs" />
-    <Compile Include="PSApi\PlugInInfo.cs" />
     <Compile Include="PSApi\PluginModule.cs" />
     <Compile Include="PSApi\PropertyProcs.cs" />
     <Compile Include="PSApi\PropertySuite.cs" />
@@ -294,7 +295,6 @@
     <Compile Include="PSApi\HandleProc.cs" />
     <Compile Include="PSApi\HostProcs.cs" />
     <Compile Include="PSApi\ImageModes.cs" />
-    <Compile Include="PSApi\PIProperty.cs" />
     <Compile Include="PSApi\PlatformData.cs" />
     <Compile Include="PSApi\PluginData.cs" />
     <Compile Include="PSApi\PlugInMonitor.cs" />
