@@ -111,7 +111,7 @@ namespace PSFilterPdn
             headerSize += sizeof(int); // height
             headerSize += sizeof(int); // stride
             headerSize += sizeof(float); // dpiX
-            headerSize += sizeof(float); // dpiY            
+            headerSize += sizeof(float); // dpiY
 
             return headerSize;
         }
