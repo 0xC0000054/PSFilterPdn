@@ -2566,8 +2566,9 @@ namespace PSFilterLoad.PSApi
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DisplayPixels, string.Format(
-                "srcPixelMap = [ {0} ], srcRect = {1}, dstCol (x, width) = {2}, dstRow (y, height) = {3}",
-                new object[] { DebugUtils.PointerToString(srcPixelMap), DebugUtils.PointerToString(srcRect), dstCol, dstRow }));
+                "srcPixelMap=[{0}], srcRect={1}, dstCol={2}, dstRow={3}, platformContext=0x{4}",
+                new object[] { DebugUtils.PointerToString(srcPixelMap), DebugUtils.PointerToString(srcRect), dstCol, dstRow,
+                    platformContext.ToHexString() }));
 #endif
 
             if (srcPixelMap == null ||
@@ -2582,7 +2583,7 @@ namespace PSFilterLoad.PSApi
             int width = srcRect->right - srcRect->left;
             int height = srcRect->bottom - srcRect->top;
 
-            bool hasTransparencyMask = srcPixelMap->version >= 1 && srcPixelMap->masks != IntPtr.Zero;
+            bool hasTransparencyMask = srcPixelMap->version >= 1 && srcPixelMap->masks != null;
 
             try
             {
@@ -2655,7 +2656,7 @@ namespace PSFilterLoad.PSApi
                 if (hasTransparencyMask)
                 {
                     bool allOpaque = true;
-                    PSPixelMask* mask = (PSPixelMask*)srcPixelMap->masks.ToPointer();
+                    PSPixelMask* mask = srcPixelMap->masks;
 
                     if (mask->maskData != IntPtr.Zero && mask->colBytes != 0 && mask->rowBytes != 0)
                     {

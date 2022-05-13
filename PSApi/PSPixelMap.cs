@@ -27,17 +27,47 @@ namespace PSFilterLoad.PSApi
     }
 
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    internal struct PSPixelMask
+    internal unsafe struct PSPixelMask
     {
-        public System.IntPtr next;
+        public PSPixelMask* next;
         public System.IntPtr maskData;
         public int rowBytes;
         public int colBytes;
         public MaskDescription maskDescription;
+
+#if DEBUG
+        public override unsafe string ToString()
+        {
+            System.Text.StringBuilder builder = new System.Text.StringBuilder(256);
+
+            builder.Append("{ [");
+            builder.Append(GetFormattedString());
+            builder.Append(']');
+
+            PSPixelMask* mask = next;
+
+            while (mask != null)
+            {
+                builder.Append(", [");
+                builder.Append((*mask).GetFormattedString());
+                builder.Append(']');
+
+                mask = mask->next;
+            }
+
+            builder.Append(" }");
+
+            return builder.ToString();
+        }
+
+        private string GetFormattedString()
+            => string.Format("maskData=0x{0}, rowBytes={1}, colBytes{2}, maskDescription={3}",
+                             new object[] { maskData.ToHexString(), rowBytes, colBytes, maskDescription });
+#endif
     }
 
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    internal struct PSPixelMap
+    internal unsafe struct PSPixelMap
     {
         public int version;
         public VRect bounds;
@@ -46,16 +76,19 @@ namespace PSFilterLoad.PSApi
         public int colBytes;
         public int planeBytes;
         public System.IntPtr baseAddr;
-        public System.IntPtr mat;
-        public System.IntPtr masks;
+        public PSPixelMask* mat;
+        public PSPixelMask* masks;
         public int maskPhaseRow;
         public int maskPhaseCol;
 
 #if DEBUG
         public override string ToString() => string.Format(
-                "version = {0}, bounds = {1}, ImageMode = {2}, colBytes = {3}, rowBytes = {4},planeBytes = {5}, BaseAddress = 0x{6}, mat = 0x{7}, masks = 0x{8}",
-                new object[]{ version, bounds, ((ImageModes)imageMode).ToString("G"), colBytes, rowBytes, planeBytes, baseAddr.ToHexString(),
-                     mat.ToHexString(), masks.ToHexString() });
+                "version={0}, bounds={1}, imageMode={2}, rowBytes={3}, colBytes={4}, planeBytes={5}, baseAddress=0x{6}, mat={7}, masks={8}",
+                new object[]{ version, bounds, ((ImageModes)imageMode).ToString("G"), rowBytes, colBytes, planeBytes, baseAddr.ToHexString(),
+                     FormatPSPixelMask(mat), FormatPSPixelMask(masks) });
+
+        private static unsafe string FormatPSPixelMask(PSPixelMask* mask)
+            => mask != null ? (*mask).ToString() : "null";
 #endif
     }
 }
