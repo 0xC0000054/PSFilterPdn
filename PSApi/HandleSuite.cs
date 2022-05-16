@@ -17,15 +17,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class HandleDisposedEventArgs : EventArgs
-    {
-        public HandleDisposedEventArgs(Handle handle)
-        {
-            Handle = handle;
-        }
-
-        public Handle Handle { get; }
-    }
+    internal delegate void HandleDisposedEventHandler(Handle handle);
 
     // This class is a singleton because plug-ins can use it to allocate memory for pointers embedded
     // in the API structures that will be freed when the LoadPsFilter class is finalized.
@@ -104,7 +96,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Occurs when a handle allocated by the suite is disposed.
         /// </summary>
-        public event EventHandler<HandleDisposedEventArgs> SuiteHandleDisposed;
+        public event HandleDisposedEventHandler SuiteHandleDisposed;
 
         public static HandleSuite Instance => instance;
 
@@ -489,12 +481,7 @@ namespace PSFilterLoad.PSApi
 
         private void OnSuiteHandleDisposed(Handle handle)
         {
-            EventHandler<HandleDisposedEventArgs> handler = SuiteHandleDisposed;
-
-            if (handler != null)
-            {
-                handler(this, new HandleDisposedEventArgs(handle));
-            }
+            SuiteHandleDisposed?.Invoke(handle);
         }
     }
 }

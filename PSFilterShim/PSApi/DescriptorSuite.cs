@@ -249,9 +249,9 @@ namespace PSFilterLoad.PSApi
             descriptorHandles.Add(descriptorHandle, scriptingData);
         }
 
-        private void SuiteHandleDisposed(object sender, HandleDisposedEventArgs e)
+        private void SuiteHandleDisposed(Handle handle)
         {
-            descriptorHandles.Remove(e.Handle);
+            descriptorHandles.Remove(handle);
         }
 
         #region ReadDescriptorProcs
