@@ -17,7 +17,7 @@
 
 namespace PSFilterLoad.PSApi
 {
-    public enum ImageModes
+    public enum ImageMode
     {
         Bitmap = 0,
         GrayScale = 1,

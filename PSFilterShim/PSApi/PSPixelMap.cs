@@ -84,7 +84,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
         public override string ToString() => string.Format(
                 "version={0}, bounds={1}, imageMode={2}, rowBytes={3}, colBytes={4}, planeBytes={5}, baseAddress=0x{6}, mat={7}, masks={8}",
-                new object[]{ version, bounds, ((ImageModes)imageMode).ToString("G"), rowBytes, colBytes, planeBytes, baseAddr.ToHexString(),
+                new object[]{ version, bounds, ((ImageMode)imageMode).ToString("G"), rowBytes, colBytes, planeBytes, baseAddr.ToHexString(),
                      FormatPSPixelMask(mat), FormatPSPixelMask(masks) });
 
         private static unsafe string FormatPSPixelMask(PSPixelMask* mask)

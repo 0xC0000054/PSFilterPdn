@@ -41,7 +41,7 @@ namespace PSFilterPdn.EnableInfo
         /// <param name="hostState">The current host state.</param>
         /// <exception cref="ArgumentNullException"><paramref name="hostState"/> is null.</exception>
         /// <exception cref="InvalidEnumArgumentException"><paramref name="imageMode"/> is not a supported value.</exception>
-        public EnableInfoVariables(int imageWidth, int imageHeight, ImageModes imageMode, bool hasTransparencyMask, int targetChannelCount,
+        public EnableInfoVariables(int imageWidth, int imageHeight, ImageMode imageMode, bool hasTransparencyMask, int targetChannelCount,
             int trueChannelCount, HostState hostState)
         {
             if (hostState == null)
@@ -51,56 +51,56 @@ namespace PSFilterPdn.EnableInfo
 
             switch (imageMode)
             {
-                case ImageModes.Bitmap:
+                case ImageMode.Bitmap:
                     this.imageMode = "BitmapMode";
                     imageDepth = 1;
                     break;
-                case ImageModes.GrayScale:
+                case ImageMode.GrayScale:
                     this.imageMode = "GrayScaleMode";
                     imageDepth = 8;
                     break;
-                case ImageModes.Indexed:
+                case ImageMode.Indexed:
                     this.imageMode = "IndexedMode";
                     imageDepth = 8;
                     break;
-                case ImageModes.RGB:
+                case ImageMode.RGB:
                     this.imageMode = "RGBMode";
                     imageDepth = 8;
                     break;
-                case ImageModes.CMYK:
+                case ImageMode.CMYK:
                     this.imageMode = "CMYKMode";
                     imageDepth = 8;
                     break;
-                case ImageModes.HSL:
+                case ImageMode.HSL:
                     this.imageMode = "HSLMode";
                     imageDepth = 8;
                     break;
-                case ImageModes.HSB:
+                case ImageMode.HSB:
                     this.imageMode = "HSBMode";
                     imageDepth = 8;
                     break;
-                case ImageModes.Multichannel:
+                case ImageMode.Multichannel:
                     this.imageMode = "MultichannelMode";
                     imageDepth = 8;
                     break;
-                case ImageModes.Duotone:
+                case ImageMode.Duotone:
                     this.imageMode = "DuotoneMode";
                     imageDepth = 8;
                     break;
-                case ImageModes.Lab:
+                case ImageMode.Lab:
                     this.imageMode = "LabMode";
                     imageDepth = 8;
                     break;
-                case ImageModes.Gray16:
+                case ImageMode.Gray16:
                     this.imageMode = "Gray16Mode";
                     imageDepth = 16;
                     break;
-                case ImageModes.RGB48:
+                case ImageMode.RGB48:
                     this.imageMode = "RGB48Mode";
                     imageDepth = 16;
                     break;
                 default:
-                    throw new InvalidEnumArgumentException(nameof(imageMode), (int)imageMode, typeof(ImageModes));
+                    throw new InvalidEnumArgumentException(nameof(imageMode), (int)imageMode, typeof(ImageMode));
             }
 
             // Layer masks are not supported.

@@ -304,7 +304,7 @@ namespace PSFilterLoad.PSApi
 
             bool result = true;
 
-            const ImageModes imageMode = ImageModes.RGB;
+            const ImageMode imageMode = ImageMode.RGB;
 
             FilterCase filterCase = GetFilterTransparencyMode(hostState.HasSelection, () => hasTransparency);
 
