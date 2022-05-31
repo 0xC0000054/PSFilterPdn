@@ -48,6 +48,11 @@ namespace PSFilterPdn
             }
         }
 
+        public static bool IsDarkMode(Color backColor)
+        {
+            return backColor.R < 128 && backColor.G < 128 && backColor.B < 128;
+        }
+
         public static void UpdateControlBackColor(Control root)
         {
             Color backColor = root.BackColor;

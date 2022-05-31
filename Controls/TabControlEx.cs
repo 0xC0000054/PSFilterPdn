@@ -31,10 +31,12 @@ namespace PSFilterPdn.Controls
         private Container components;
         private Color backColor;
         private Color foreColor;
+        private Color inactiveTabColor;
         private Color borderColor;
         private Color hotTrackColor;
         private int hotTabIndex;
         private SolidBrush backgroundBrush;
+        private SolidBrush inactiveTabBrush;
         private Pen borderPen;
         private SolidBrush hotTrackBrush;
 
@@ -71,6 +73,7 @@ namespace PSFilterPdn.Controls
             {
                 components?.Dispose();
                 backgroundBrush?.Dispose();
+                inactiveTabBrush?.Dispose();
                 borderPen?.Dispose();
                 hotTrackBrush?.Dispose();
             }
@@ -112,6 +115,11 @@ namespace PSFilterPdn.Controls
                 if (backColor != value)
                 {
                     backColor = value;
+
+                    // Negative values darken the specified color while positive values lighen it.
+                    float correctionFactor = PluginThemingUtil.IsDarkMode(backColor) ? -0.5f : 0.5f;
+                    
+                    inactiveTabColor = ChangeColorBrightness(value, correctionFactor);
                     DetermineDrawingMode();
                     // Let the Tabpages know that the backcolor has changed.
                     OnBackColorChanged(EventArgs.Empty);
@@ -350,6 +358,41 @@ namespace PSFilterPdn.Controls
             DetermineDrawingMode();
         }
 
+        /// <summary>
+        /// Creates color with corrected brightness.
+        /// </summary>
+        /// <param name="color">Color to correct.</param>
+        /// <param name="correctionFactor">The brightness correction factor. Must be between -1 and 1. 
+        /// Negative values produce darker colors.</param>
+        /// <returns>
+        /// Corrected <see cref="Color"/> structure.
+        /// </returns>
+        /// <remarks>
+        /// From https://stackoverflow.com/a/12598573
+        /// </remarks>
+        private static Color ChangeColorBrightness(Color color, float correctionFactor)
+        {
+            float red = color.R;
+            float green = color.G;
+            float blue = color.B;
+
+            if (correctionFactor < 0)
+            {
+                correctionFactor = 1 + correctionFactor;
+                red *= correctionFactor;
+                green *= correctionFactor;
+                blue *= correctionFactor;
+            }
+            else
+            {
+                red = (255 - red) * correctionFactor + red;
+                green = (255 - green) * correctionFactor + green;
+                blue = (255 - blue) * correctionFactor + blue;
+            }
+
+            return Color.FromArgb(color.A, (int)red, (int)green, (int)blue);
+        }
+
         private void DetermineDrawingMode()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.UserPaint, UseOwnerDraw);
@@ -360,6 +403,11 @@ namespace PSFilterPdn.Controls
                 {
                     backgroundBrush?.Dispose();
                     backgroundBrush = new SolidBrush(BackColor);
+                }
+                if (inactiveTabBrush == null || inactiveTabBrush.Color != inactiveTabColor)
+                {
+                    inactiveTabBrush?.Dispose();
+                    inactiveTabBrush = new SolidBrush(inactiveTabColor);
                 }
                 if (borderPen == null || borderPen.Color != borderColor)
                 {
@@ -392,11 +440,11 @@ namespace PSFilterPdn.Controls
             }
             else
             {
-                graphics.FillRectangle(backgroundBrush, bounds);
+                graphics.FillRectangle(inactiveTabBrush, bounds);
                 DrawTabBorder(graphics, bounds);
             }
 
-            DrawTabText(graphics, bounds, page);
+            DrawTabText(graphics, bounds, page, state);
         }
 
         private void DrawTabBorder(Graphics graphics, Rectangle bounds)
@@ -444,7 +492,7 @@ namespace PSFilterPdn.Controls
             graphics.DrawLines(borderPen, points);
         }
 
-        private void DrawTabText(Graphics graphics, Rectangle bounds, TabPage page)
+        private void DrawTabText(Graphics graphics, Rectangle bounds, TabPage page, TabState state)
         {
             // Set up rotation for left and right aligned tabs.
             if (Alignment == TabAlignment.Left || Alignment == TabAlignment.Right)
@@ -464,9 +512,10 @@ namespace PSFilterPdn.Controls
 
             Rectangle textBounds = Rectangle.Inflate(bounds, -3, -3);
             Color textColor = page.Enabled ? ForeColor : SystemColors.GrayText;
+            Color backColor = state == TabState.Active ? BackColor : inactiveTabColor;
 
             // Draw the Tab text.
-            TextRenderer.DrawText(graphics, page.Text, Font, textBounds, textColor, BackColor,
+            TextRenderer.DrawText(graphics, page.Text, Font, textBounds, textColor, backColor,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
 
             graphics.ResetTransform();
