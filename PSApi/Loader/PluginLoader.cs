@@ -43,38 +43,28 @@ namespace PSFilterLoad.PSApi
                 return System.Linq.Enumerable.Empty<PluginData>();
             }
 
-            List<PluginData> pluginData = new List<PluginData>();
+            QueryFilter queryFilter = new QueryFilter(fileName, platform);
 
             // Use LOAD_LIBRARY_AS_DATAFILE to prevent a BadImageFormatException from being thrown if the file is a different processor architecture than the parent process.
             using (SafeLibraryHandle dll = UnsafeNativeMethods.LoadLibraryExW(fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE))
             {
                 if (!dll.IsInvalid)
                 {
-                    QueryFilter queryFilter = new QueryFilter(fileName, platform);
 
                     GCHandle handle = GCHandle.Alloc(queryFilter, GCHandleType.Normal);
                     try
                     {
                         IntPtr callback = GCHandle.ToIntPtr(handle);
-                        if (UnsafeNativeMethods.EnumResourceNamesW(dll, "PiPl", new UnsafeNativeMethods.EnumResNameDelegate(EnumPiPL), callback))
-                        {
-                            queryFilter = (QueryFilter)GCHandle.FromIntPtr(callback).Target;
-
-                            pluginData.AddRange(queryFilter.plugins);
-                        }
-                        else if (UnsafeNativeMethods.EnumResourceNamesW(dll, "PiMI", new UnsafeNativeMethods.EnumResNameDelegate(EnumPiMI), callback))
+                        if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "PiPl", new UnsafeNativeMethods.EnumResNameDelegate(EnumPiPL), callback))
                         {
                             // If there are no PiPL resources scan for Photoshop 2.5's PiMI resources.
-                            queryFilter = (QueryFilter)GCHandle.FromIntPtr(callback).Target;
-
-                            pluginData.AddRange(queryFilter.plugins);
-                        }
+                            if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "PiMI", new UnsafeNativeMethods.EnumResNameDelegate(EnumPiMI), callback))
+                            {
 #if DEBUG
-                        else
-                        {
-                            DebugUtils.Ping(DebugFlags.PiPL, string.Format("EnumResourceNames(PiPL, PiMI) failed for {0}", fileName));
-                        }
+                                DebugUtils.Ping(DebugFlags.PiPL, string.Format("EnumResourceNames(PiPL, PiMI) failed for {0}", fileName));
 #endif
+                            }
+                        }
                     }
                     finally
                     {
@@ -86,6 +76,7 @@ namespace PSFilterLoad.PSApi
                 }
             }
 
+            List<PluginData> pluginData = queryFilter.plugins;
             int count = pluginData.Count;
             if (count > 1)
             {
