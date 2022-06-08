@@ -58,7 +58,13 @@ namespace PSFilterLoad.PSApi
                         if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "PiPl", new UnsafeNativeMethods.EnumResNameDelegate(EnumPiPL), callback))
                         {
                             // If there are no PiPL resources scan for Photoshop 2.5's PiMI resources.
-                            if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "PiMI", new UnsafeNativeMethods.EnumResNameDelegate(EnumPiMI), callback))
+                            // The PiMI resources are stored in two parts:
+                            // The first resource identifies the plug-in type and stores a plug-in identifier string.
+                            // The general plug-in data is located in a PiMI resource with the same resource number
+                            // as the type-specific resource.
+                            //
+                            // Filter plug-ins use the type-specific resource _8BFM.
+                            if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "_8BFM", new UnsafeNativeMethods.EnumResNameDelegate(EnumPiMI), callback))
                             {
 #if DEBUG
                                 DebugUtils.Ping(DebugFlags.PiPL, string.Format("EnumResourceNames(PiPL, PiMI) failed for {0}", fileName));
@@ -140,90 +146,7 @@ namespace PSFilterLoad.PSApi
             GCHandle handle = GCHandle.FromIntPtr(lParam);
             QueryFilter query = (QueryFilter)handle.Target;
 
-            IntPtr hRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, lpszType);
-            if (hRes == IntPtr.Zero)
-            {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("FindResource failed for PiMI in {0}", query.fileName));
-#endif
-                return true;
-            }
-
-            IntPtr loadRes = UnsafeNativeMethods.LoadResource(hModule, hRes);
-            if (loadRes == IntPtr.Zero)
-            {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("LoadResource failed for PiMI in {0}", query.fileName));
-#endif
-                return true;
-            }
-
-            IntPtr lockRes = UnsafeNativeMethods.LockResource(loadRes);
-            if (lockRes == IntPtr.Zero)
-            {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("LockResource failed for PiMI in {0}", query.fileName));
-#endif
-                return true;
-            }
-            byte* ptr = (byte*)lockRes.ToPointer() + 2;
-
-            string category;
-
-            if (StringUtil.TryGetCStringLength(ptr, out int categoryStringLength))
-            {
-                category = StringUtil.FromCString(ptr, categoryStringLength, StringUtil.StringTrimOption.WhiteSpace);
-
-                uint lengthWithTerminator = (uint)categoryStringLength + 1;
-                ptr += lengthWithTerminator;
-            }
-            else
-            {
-                // The category string is longer than int.MaxValue.
-                return true;
-            }
-
-
-            if (string.IsNullOrEmpty(category))
-            {
-                category = PSFilterPdn.Properties.Resources.PiMIDefaultCategoryName;
-            }
-
-            PlugInInfo* info = (PlugInInfo*)ptr;
-
-            if (info->version > PSConstants.latestFilterVersion ||
-               (info->version == PSConstants.latestFilterVersion && info->subVersion > PSConstants.latestFilterSubVersion))
-            {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported",
-                    new object[] { query.fileName, info->version, info->subVersion, PSConstants.latestFilterVersion, PSConstants.latestFilterSubVersion }));
-#endif
-                return true;
-            }
-
-            if ((info->supportsMode & PSConstants.supportsRGBColor) != PSConstants.supportsRGBColor)
-            {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", query.fileName));
-#endif
-                return true;
-            }
-
-            if (info->requireHost != PSConstants.kPhotoshopSignature && info->requireHost != PSConstants.AnyHostSignature)
-            {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("{0} requires host '{1}'.", query.fileName, DebugUtils.PropToString(info->requireHost)));
-#endif
-                return true;
-            }
-
-            IntPtr filterRes = IntPtr.Zero;
-
-            fixed (char* typePtr = "_8BFM")
-            {
-                // Load the _8BFM resource to get the filter title.
-                filterRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, (IntPtr)typePtr);
-            }
+            IntPtr filterRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, lpszType);
 
             if (filterRes == IntPtr.Zero)
             {
@@ -256,6 +179,13 @@ namespace PSFilterLoad.PSApi
             IntPtr resPtr = new IntPtr(filterLock.ToInt64() + 2L);
 
             string title = StringUtil.FromCString(resPtr, StringUtil.StringTrimOption.WhiteSpace);
+
+            if (!GetPiMIResourceData(hModule, lpszName, query, out string category))
+            {
+                // The filter is incompatible or some other error occurred.
+                return true;
+            }
+
             // The entry point number is the same as the resource number.
             string entryPoint = "ENTRYPOINT" + lpszName.ToInt32().ToString(CultureInfo.InvariantCulture);
 
@@ -446,6 +376,99 @@ namespace PSFilterLoad.PSApi
             if (enumData.IsValid())
             {
                 query.plugins.Add(enumData);
+            }
+
+            return true;
+        }
+
+        private static unsafe bool GetPiMIResourceData(IntPtr hModule, IntPtr lpszName, QueryFilter query, out string category)
+        {
+            category = string.Empty;
+
+            IntPtr hRes = IntPtr.Zero;
+
+            fixed (char* typePtr = "PiMI")
+            {
+                hRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, (IntPtr)typePtr);
+            }
+
+            if (hRes == IntPtr.Zero)
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(string.Format("FindResource failed for PiMI in {0}", query.fileName));
+#endif
+                return true;
+            }
+
+            IntPtr loadRes = UnsafeNativeMethods.LoadResource(hModule, hRes);
+            if (loadRes == IntPtr.Zero)
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(string.Format("LoadResource failed for PiMI in {0}", query.fileName));
+#endif
+                return true;
+            }
+
+            IntPtr lockRes = UnsafeNativeMethods.LockResource(loadRes);
+            if (lockRes == IntPtr.Zero)
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(string.Format("LockResource failed for PiMI in {0}", query.fileName));
+#endif
+                return true;
+            }
+
+            byte* ptr = (byte*)lockRes.ToPointer() + 2;
+
+            if (StringUtil.TryGetCStringLength(ptr, out int categoryStringLength))
+            {
+                category = StringUtil.FromCString(ptr, categoryStringLength, StringUtil.StringTrimOption.WhiteSpace);
+
+                uint lengthWithTerminator = (uint)categoryStringLength + 1;
+                ptr += lengthWithTerminator;
+            }
+            else
+            {
+                // The category string is longer than int.MaxValue.
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(string.Format("PiMI resource {0} has an invalid category name in {1}",
+                                                   lpszName,
+                                                   query.fileName));
+#endif
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(category))
+            {
+                category = PSFilterPdn.Properties.Resources.PiMIDefaultCategoryName;
+            }
+
+            PlugInInfo* info = (PlugInInfo*)ptr;
+
+            if (info->version > PSConstants.latestFilterVersion ||
+               (info->version == PSConstants.latestFilterVersion && info->subVersion > PSConstants.latestFilterSubVersion))
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported",
+                    new object[] { query.fileName, info->version, info->subVersion, PSConstants.latestFilterVersion, PSConstants.latestFilterSubVersion }));
+#endif
+                return false;
+            }
+
+            if ((info->supportsMode & PSConstants.supportsRGBColor) != PSConstants.supportsRGBColor)
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", query.fileName));
+#endif
+                return false;
+            }
+
+            if (info->requireHost != PSConstants.kPhotoshopSignature && info->requireHost != PSConstants.AnyHostSignature)
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(string.Format("{0} requires host '{1}'.", query.fileName, DebugUtils.PropToString(info->requireHost)));
+#endif
+                return false;
             }
 
             return true;
