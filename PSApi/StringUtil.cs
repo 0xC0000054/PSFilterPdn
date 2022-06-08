@@ -298,7 +298,7 @@ namespace PSFilterLoad.PSApi
             bool trimWhiteSpace = (option & StringTrimOption.WhiteSpace) != 0;
 
             int start = startIndex;
-            int end = length;
+            int end = length - 1;
 
             // The search at the start of the string can be skipped if we not trimming white space.
             if (trimWhiteSpace)
@@ -336,7 +336,7 @@ namespace PSFilterLoad.PSApi
             bool trimWhiteSpace = (option & StringTrimOption.WhiteSpace) != 0;
 
             int start = startIndex;
-            int end = length;
+            int end = length - 1;
 
             // The search at the start of the string can be skipped if we not trimming white space.
             if (trimWhiteSpace)
