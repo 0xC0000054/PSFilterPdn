@@ -232,10 +232,9 @@ namespace PSFilterLoad.PSApi
                 return true;
             }
 
-#if DEBUG
-            short fb = Marshal.ReadInt16(lockRes); // PiPL Resources always start with 1, this seems to be Photoshop's signature
-#endif
-            int version = Marshal.ReadInt32(lockRes, 2);
+            PiPLResourceHeader* resourceHeader = (PiPLResourceHeader*)lockRes;
+
+            int version = resourceHeader->version;
 
             if (version != PSConstants.LatestPiPLVersion)
             {
@@ -251,9 +250,9 @@ namespace PSFilterLoad.PSApi
             AETEData aete = null;
             string enableInfo = null;
 
-            int count = Marshal.ReadInt32(lockRes, 6);
+            int count = resourceHeader->count;
 
-            byte* propPtr = (byte*)lockRes.ToPointer() + 10;
+            byte* propPtr = resourceHeader->propertyDataStart;
 
             for (int i = 0; i < count; i++)
             {

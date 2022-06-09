@@ -219,6 +219,7 @@
     <Compile Include="PSApi\IResourceSuite.cs" />
     <Compile Include="PSApi\Loader\AeteResource.cs" />
     <Compile Include="PSApi\Loader\PEFile.cs" />
+    <Compile Include="PSApi\Loader\PiPLResourceHeader.cs" />
     <Compile Include="PSApi\Loader\PIProperty.cs" />
     <Compile Include="PSApi\Loader\PIPropertyID.cs" />
     <Compile Include="PSApi\Loader\PITerminology.cs" />
