@@ -178,7 +178,7 @@ namespace PSFilterLoad.PSApi
 
             // The _8BFM resource format starts with a 2-byte version number, this is followed by the NUL-terminated filter
             // title string.
-            IntPtr resPtr = new IntPtr(filterLock.ToInt64() + 2L);
+            byte* resPtr = (byte*)filterLock.ToPointer() + 2;
 
             string title = StringUtil.FromCString(resPtr, StringUtil.StringTrimOption.WhiteSpace);
 
