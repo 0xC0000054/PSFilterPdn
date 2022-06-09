@@ -176,6 +176,8 @@ namespace PSFilterLoad.PSApi
                 return true;
             }
 
+            // The _8BFM resource format starts with a 2-byte version number, this is followed by the NUL-terminated filter
+            // title string.
             IntPtr resPtr = new IntPtr(filterLock.ToInt64() + 2L);
 
             string title = StringUtil.FromCString(resPtr, StringUtil.StringTrimOption.WhiteSpace);
@@ -417,6 +419,8 @@ namespace PSFilterLoad.PSApi
                 return true;
             }
 
+            // The PiMI resource format starts with a 2-byte version number, this is followed by the NUL-terminated filter
+            // category string and PlugInInfo structure.
             byte* ptr = (byte*)lockRes.ToPointer() + 2;
 
             if (StringUtil.TryGetCStringLength(ptr, out int categoryStringLength))
