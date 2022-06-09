@@ -261,14 +261,14 @@ namespace PSFilterLoad.PSApi
                 if (pipp->vendorID != PSConstants.kPhotoshopSignature)
                 {
                     // The property data is padded to a 4 byte boundary.
-                    propPtr += PIProperty.SizeOf + ((pipp->propertyLength + 3) & ~3);
+                    propPtr = pipp->propertyData + ((pipp->propertyLength + 3) & ~3);
                     continue;
                 }
 
                 uint propKey = pipp->propertyKey;
                 int propertyLength = pipp->propertyLength;
 
-                byte* dataPtr = propPtr + PIProperty.SizeOf;
+                byte* dataPtr = pipp->propertyData;
                 if (propKey == PIPropertyID.PIKindProperty)
                 {
                     if (*(uint*)dataPtr != PSConstants.FilterKind)
@@ -367,7 +367,7 @@ namespace PSFilterLoad.PSApi
 #endif
 
                 int propertyDataPaddedLength = (propertyLength + 3) & ~3;
-                propPtr += PIProperty.SizeOf + propertyDataPaddedLength;
+                propPtr = pipp->propertyData + propertyDataPaddedLength;
             }
 
             PluginData enumData = new PluginData(query.fileName, entryPoint, category, title, filterInfo, query.runWith32BitShim, aete, enableInfo);

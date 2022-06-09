@@ -20,14 +20,13 @@ namespace PSFilterLoad.PSApi.Loader
     // Disable CS0649, Field 'field' is never assigned to, and will always have its default value 'value'
 #pragma warning disable 0649
 
-    internal struct PIProperty
+    internal unsafe struct PIProperty
     {
         public uint vendorID;  /* Vendor specific identifier. */
         public uint propertyKey;        /* Identification key for this property type. */
         public int propertyID;      /* Index within this property type. Must be unique for properties of a given type in a PiPL. */
         public int propertyLength;  /* Length of following data array. Will be rounded to a multiple of 4. */
-
-        public const int SizeOf = 16;
+        public fixed byte propertyData[1];
     }
 #pragma warning restore 0649
 
