@@ -339,7 +339,7 @@ namespace PSFilterLoad.PSApi
                     if (term->version == PSConstants.LatestTerminologyVersion)
                     {
 #if DEBUG
-                        string aeteName = StringUtil.FromCString(dataPtr + PITerminology.SizeOf);
+                        string aeteName = StringUtil.FromCString(term->scopeString);
 #endif
                         aete = AeteResource.Parse(hModule, term->terminologyID);
                     }
