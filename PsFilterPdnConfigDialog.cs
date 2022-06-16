@@ -1126,7 +1126,12 @@ namespace PSFilterPdn
                         foreach (PluginData plugin in PluginLoader.LoadFiltersFromFile(enumerator.Current))
                         {
                             // The **Hidden** category is used for filters that are not directly invoked by the user.
-                            if (!plugin.Category.Equals("**Hidden**", StringComparison.Ordinal))
+                            // The filters in this category are invoked by other plug-ins using the Photoshop Actions
+                            // scripting suites.
+                            //
+                            // We check for the category name **Hidden* because that is what the Dfine 2 filter in
+                            // the Google Nik Collection uses for its additional helper filters.
+                            if (!plugin.Category.StartsWith("**Hidden*", StringComparison.Ordinal))
                             {
                                 TreeNodeEx child = new TreeNodeEx(plugin.Title)
                                 {
