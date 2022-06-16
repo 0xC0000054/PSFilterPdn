@@ -75,7 +75,11 @@ namespace PSFilterLoad.PSApi
                 return null;
             }
 
-            TrimmedStringOffsets trimmed = GetTrimmedStringOffsets(pascalString, 1, pascalString[0], option);
+            TrimmedStringOffsets trimmed = GetTrimmedStringOffsets(pascalString,
+                                                                   1,
+                                                                   pascalString[0],
+                                                                   option,
+                                                                   isPascalString: true);
 
             if (trimmed.IsEmptyString)
             {
@@ -188,7 +192,11 @@ namespace PSFilterLoad.PSApi
                 return null;
             }
 
-            TrimmedStringOffsets stringOffsets = GetTrimmedStringOffsets(ptr, 0, length, option);
+            TrimmedStringOffsets stringOffsets = GetTrimmedStringOffsets(ptr,
+                                                                         0,
+                                                                         length,
+                                                                         option,
+                                                                         isPascalString: false);
 
             if (stringOffsets.IsEmptyString)
             {
@@ -287,7 +295,11 @@ namespace PSFilterLoad.PSApi
             return true;
         }
 
-        private static unsafe TrimmedStringOffsets GetTrimmedStringOffsets(byte* ptr, int startIndex, int length, StringTrimOption option)
+        private static unsafe TrimmedStringOffsets GetTrimmedStringOffsets(byte* ptr,
+                                                                           int startIndex,
+                                                                           int length,
+                                                                           StringTrimOption option,
+                                                                           bool isPascalString)
         {
             if (length == 0 || option == StringTrimOption.None)
             {
@@ -298,7 +310,7 @@ namespace PSFilterLoad.PSApi
             bool trimWhiteSpace = (option & StringTrimOption.WhiteSpace) != 0;
 
             int start = startIndex;
-            int end = length - 1;
+            int end = isPascalString ? length : length - 1;
 
             // The search at the start of the string can be skipped if we not trimming white space.
             if (trimWhiteSpace)
