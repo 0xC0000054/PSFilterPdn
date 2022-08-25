@@ -118,7 +118,7 @@ namespace PSFilterPdn.Controls
 
                     // Negative values darken the specified color while positive values lighen it.
                     float correctionFactor = PluginThemingUtil.IsDarkMode(backColor) ? -0.5f : 0.5f;
-                    
+
                     inactiveTabColor = ChangeColorBrightness(value, correctionFactor);
                     DetermineDrawingMode();
                     // Let the Tabpages know that the backcolor has changed.
@@ -362,7 +362,7 @@ namespace PSFilterPdn.Controls
         /// Creates color with corrected brightness.
         /// </summary>
         /// <param name="color">Color to correct.</param>
-        /// <param name="correctionFactor">The brightness correction factor. Must be between -1 and 1. 
+        /// <param name="correctionFactor">The brightness correction factor. Must be between -1 and 1.
         /// Negative values produce darker colors.</param>
         /// <returns>
         /// Corrected <see cref="Color"/> structure.
