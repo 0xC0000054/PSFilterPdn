@@ -65,19 +65,19 @@ namespace PaintDotNet.SystemLayer
         /// Allocates a block of memory at least as large as the amount requested.
         /// </summary>
         /// <param name="bytes">The number of bytes you want to allocate.</param>
+        /// <param name="zeroFill"><see langword="true"/> if the memory block should be filled with zeros; otherwise, <see langword="false"/>.</param>
         /// <returns>A pointer to a block of memory at least as large as <b>bytes</b>.</returns>
         /// <exception cref="OutOfMemoryException">Thrown if the memory manager could not fulfill the request for a memory block at least as large as <b>bytes</b>.</exception>
-        public static IntPtr Allocate(ulong bytes)
+        public static IntPtr Allocate(ulong bytes, bool zeroFill = false)
         {
             if (hHeap == IntPtr.Zero)
             {
                 CreateHeap();
             }
 
-            // Always initialize the memory to zero.
-            // This ensures that the behavior of Allocate is the same as AllocateLarge.
-            // AllocateLarge uses VirtualAlloc which is documented to initialize the allocated memory to zero.
-            IntPtr block = SafeNativeMethods.HeapAlloc(hHeap, NativeConstants.HEAP_ZERO_MEMORY, new UIntPtr(bytes));
+            uint dwFlags = zeroFill ? NativeConstants.HEAP_ZERO_MEMORY : 0;
+
+            IntPtr block = SafeNativeMethods.HeapAlloc(hHeap, dwFlags, new UIntPtr(bytes));
             if (block == IntPtr.Zero)
             {
                 throw new OutOfMemoryException("HeapAlloc returned a null pointer");

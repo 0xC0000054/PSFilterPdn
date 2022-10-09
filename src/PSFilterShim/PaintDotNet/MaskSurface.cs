@@ -37,6 +37,20 @@ namespace PaintDotNet
         private MemoryBlock scan0;
         private bool disposed;
 
+        public MaskSurface(int width, int height)
+            : this(width, height, zeroFill: true)
+        {
+        }
+
+        private MaskSurface(int width ,int height, bool zeroFill)
+        {
+            disposed = false;
+            this.width = width;
+            this.height = height;
+            stride = width;
+            scan0 = new MemoryBlock(width * height, zeroFill);
+        }
+
         /// <summary>
         /// Gets the width of the Surface.
         /// </summary>
@@ -86,18 +100,9 @@ namespace PaintDotNet
             }
         }
 
-        public MaskSurface(int width, int height)
-        {
-            disposed = false;
-            this.width = width;
-            this.height = height;
-            stride = width;
-            scan0 = new MemoryBlock(width * height);
-        }
-
         public MaskSurface Clone()
         {
-            MaskSurface surface = new MaskSurface(width, height);
+            MaskSurface surface = new MaskSurface(width, height, zeroFill: false);
             surface.CopySurface(this);
             return surface;
         }

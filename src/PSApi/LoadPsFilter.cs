@@ -2697,8 +2697,6 @@ namespace PSFilterLoad.PSApi
         {
             mask = new MaskSurface(source.Width, source.Height);
 
-            Memory.SetToZero(mask.Scan0.Pointer, (ulong)mask.Scan0.Length);
-
             Rectangle[] scans = selectedRegion.GetRegionScansReadOnlyInt();
 
             for (int i = 0; i < scans.Length; i++)
@@ -2724,8 +2722,6 @@ namespace PSFilterLoad.PSApi
             int width = source.Width;
             int height = source.Height;
             mask = new MaskSurface(width, height);
-
-            Memory.SetToZero(mask.Scan0.Pointer, (ulong)mask.Scan0.Length);
 
             for (int y = 0; y < height; y++)
             {

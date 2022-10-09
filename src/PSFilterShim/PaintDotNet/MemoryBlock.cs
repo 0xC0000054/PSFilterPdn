@@ -131,7 +131,7 @@ namespace PaintDotNet
         /// Creates a new MemoryBlock instance and allocates the requested number of bytes.
         /// </summary>
         /// <param name="bytes"></param>
-        public MemoryBlock(long bytes)
+        public MemoryBlock(long bytes, bool zeroFill = false)
         {
             if (bytes <= 0)
             {
@@ -140,7 +140,7 @@ namespace PaintDotNet
 
             this.length = bytes;
             this.parentBlock = null;
-            this.voidStar = Allocate(bytes).ToPointer();
+            this.voidStar = Allocate(bytes, zeroFill).ToPointer();
             this.valid = true;
         }
 
@@ -202,12 +202,12 @@ namespace PaintDotNet
             }
         }
 
-        private static IntPtr Allocate(long bytes)
+        private static IntPtr Allocate(long bytes, bool zeroFill)
         {
-            return Allocate(bytes, true);
+            return Allocate(bytes, allowRetry: true, zeroFill);
         }
 
-        private static IntPtr Allocate(long bytes, bool allowRetry)
+        private static IntPtr Allocate(long bytes, bool allowRetry, bool zeroFill)
         {
             IntPtr block;
 
@@ -215,11 +215,12 @@ namespace PaintDotNet
             {
                 if (bytes >= largeBlockThreshold)
                 {
+                    // AllocateLarge uses VirtualAlloc which always zero fills the allocated memory.
                     block = Memory.AllocateLarge((ulong)bytes);
                 }
                 else
                 {
-                    block = Memory.Allocate((ulong)bytes);
+                    block = Memory.Allocate((ulong)bytes, zeroFill);
                 }
             }
             catch (OutOfMemoryException)
