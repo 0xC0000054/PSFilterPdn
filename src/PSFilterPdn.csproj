@@ -43,15 +43,15 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PaintDotNet.Base">
-      <HintPath>References\PaintDotNet.Base.dll</HintPath>
+      <HintPath>..\References\PaintDotNet.Base.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PaintDotNet.Core">
-      <HintPath>References\PaintDotNet.Core.dll</HintPath>
+      <HintPath>..\References\PaintDotNet.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PaintDotNet.Effects">
-      <HintPath>References\PaintDotNet.Effects.dll</HintPath>
+      <HintPath>..\References\PaintDotNet.Effects.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
