@@ -83,18 +83,22 @@ namespace PSFilterPdn
                     string parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
                     string resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
                     string descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-                    string regionFileName = string.Empty;
+                    string selectionMaskFileName = string.Empty;
 
                     Rectangle sourceBounds = EnvironmentParameters.SourceSurface.Bounds;
 
-                    Rectangle selection = EnvironmentParameters.GetSelection(sourceBounds).GetBoundsInt();
+                    PdnRegion selection = EnvironmentParameters.GetSelection(sourceBounds);
+                    Rectangle selectionBounds = selection.GetBoundsInt();
 
-                    if (selection != sourceBounds)
+                    if (selectionBounds != sourceBounds)
                     {
-                        regionFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-                        RegionDataWrapper selectedRegion = new RegionDataWrapper(EnvironmentParameters.GetSelection(sourceBounds).GetRegionData());
+                        selectionMaskFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
 
-                        DataContractSerializerUtil.Serialize(regionFileName, selectedRegion);
+                        using (MaskSurface mask = SelectionMaskRenderer.FromPdnSelection(EnvironmentParameters.SourceSurface.Size,
+                                                                                         selection))
+                        {
+                            PSFilterShimImage.SaveSelectionMask(selectionMaskFileName, mask);
+                        }
                     }
 
                     bool proxyResult = true;
@@ -109,7 +113,7 @@ namespace PSFilterPdn
                         ParentWindowHandle = window.Handle,
                         PrimaryColor = EnvironmentParameters.PrimaryColor.ToColor(),
                         SecondaryColor = EnvironmentParameters.SecondaryColor.ToColor(),
-                        RegionDataPath = regionFileName,
+                        SelectionMaskPath = selectionMaskFileName,
                         ParameterDataPath = parameterDataFileName,
                         PseudoResourcePath = resourceDataFileName,
                         DescriptorRegistryPath = descriptorRegistryFileName,

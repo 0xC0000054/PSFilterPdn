@@ -39,6 +39,11 @@ namespace PSFilterShim
             {
                 PSFilterShimImageHeader header = new PSFilterShimImageHeader(stream);
 
+                if (header.Format != PSFilterShimImageFormat.Bgra32)
+                {
+                    throw new InvalidOperationException("This method requires an image that uses the Bgra32 format.");
+                }
+
                 dpiX = header.DpiX;
                 dpiY = header.DpiY;
 
@@ -62,6 +67,45 @@ namespace PSFilterShim
             return surface;
         }
 
+        public static MaskSurface LoadSelectionMask(string path)
+        {
+            MaskSurface surface = null;
+
+            using (FileStream stream = new FileStream(path,
+                                                      FileMode.Open,
+                                                      FileAccess.Read,
+                                                      FileShare.Read,
+                                                      BufferSize,
+                                                      FileOptions.SequentialScan))
+            {
+                PSFilterShimImageHeader header = new PSFilterShimImageHeader(stream);
+
+                if (header.Format != PSFilterShimImageFormat.Alpha8)
+                {
+                    throw new InvalidOperationException("This method requires an image that uses the Alpha8 format.");
+                }
+
+                surface = new MaskSurface(header.Width, header.Height);
+
+                byte[] buffer = new byte[header.Stride];
+
+                unsafe
+                {
+                    for (int y = 0; y < header.Height; y++)
+                    {
+                        stream.ProperRead(buffer, 0, buffer.Length);
+
+                        byte* dst = surface.GetRowAddressUnchecked(y);
+
+                        Marshal.Copy(buffer, 0, new IntPtr(dst), buffer.Length);
+                    }
+                }
+            }
+
+            return surface;
+        }
+
+
         public static void Save(string path, Surface surface)
         {
             if (surface is null)
@@ -78,6 +122,7 @@ namespace PSFilterShim
             {
                 PSFilterShimImageHeader header = new PSFilterShimImageHeader(surface.Width,
                                                                              surface.Height,
+                                                                             PSFilterShimImageFormat.Bgra32,
                                                                              96.0f,
                                                                              96.0f);
                 stream.SetLength(header.GetTotalFileSize());

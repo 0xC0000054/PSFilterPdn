@@ -95,7 +95,7 @@ namespace PSFilterLoad.PSApi
         private FilterCase filterCase;
         private float dpiX;
         private float dpiY;
-        private PdnRegion selectedRegion;
+        private bool hasSelectionMask;
         private byte[] backgroundColor;
         private byte[] foregroundColor;
 
@@ -278,13 +278,17 @@ namespace PSFilterLoad.PSApi
 
             readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
 
-            if (eep.GetSelection(eep.SourceSurface.Bounds).GetBoundsInt() != eep.SourceSurface.Bounds)
+            PdnRegion selection = eep.GetSelection(eep.SourceSurface.Bounds);
+
+            if (selection.GetBoundsInt() != eep.SourceSurface.Bounds)
             {
-                selectedRegion = eep.GetSelection(eep.SourceSurface.Bounds).Clone();
+                mask = SelectionMaskRenderer.FromPdnSelection(source.Width, source.Height, selection);
+                hasSelectionMask = true;
             }
             else
             {
-                selectedRegion = null;
+                mask = null;
+                hasSelectionMask = false;
             }
 
 #if DEBUG
@@ -327,7 +331,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="data">The plugin to check.</param>
         private void SetFilterTransparencyMode(PluginData data)
         {
-            filterCase = data.GetFilterTransparencyMode(selectedRegion != null, () => SurfaceUtil.HasTransparentPixels(source));
+            filterCase = data.GetFilterTransparencyMode(hasSelectionMask, () => SurfaceUtil.HasTransparentPixels(source));
         }
 
         /// <summary>
@@ -896,7 +900,6 @@ namespace PSFilterLoad.PSApi
                 case FilterCase.FlatImageWithSelection:
                 case FilterCase.EditableTransparencyWithSelection:
                 case FilterCase.ProtectedTransparencyWithSelection:
-                    DrawSelectionMask();
                     filterRecord->isFloating = false;
                     filterRecord->haveMask = true;
                     filterRecord->autoMask = true;
@@ -2693,30 +2696,6 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private unsafe void DrawSelectionMask()
-        {
-            mask = new MaskSurface(source.Width, source.Height);
-
-            Rectangle[] scans = selectedRegion.GetRegionScansReadOnlyInt();
-
-            for (int i = 0; i < scans.Length; i++)
-            {
-                Rectangle rect = scans[i];
-
-                for (int y = rect.Top; y < rect.Bottom; y++)
-                {
-                    byte* ptr = mask.GetPointAddressUnchecked(rect.Left, y);
-                    byte* ptrEnd = ptr + rect.Width;
-
-                    while (ptr < ptrEnd)
-                    {
-                        *ptr = 255;
-                        ptr++;
-                    }
-                }
-            }
-        }
-
         private unsafe void DrawFloatingSelectionMask()
         {
             int width = source.Width;
@@ -2890,7 +2869,7 @@ namespace PSFilterLoad.PSApi
             if (useChannelPorts)
             {
                 channelPortsPtr = channelPortsSuite.CreateChannelPortsPointer();
-                readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(filterCase, selectedRegion != null);
+                readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(filterCase, hasSelectionMask);
             }
             else
             {
@@ -3056,12 +3035,6 @@ namespace PSFilterLoad.PSApi
                     {
                         tempMask.Dispose();
                         tempMask = null;
-                    }
-
-                    if (selectedRegion != null)
-                    {
-                        selectedRegion.Dispose();
-                        selectedRegion = null;
                     }
 
                     if (displaySurface != null)

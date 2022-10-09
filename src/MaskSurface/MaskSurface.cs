@@ -36,6 +36,11 @@ namespace PSFilterLoad.PSApi
         private MemoryBlock scan0;
         private bool disposed;
 
+        public MaskSurface(Size size)
+            : this(size.Width, size.Height)
+        {
+        }
+
         public MaskSurface(int width, int height)
             : this(width, height, zeroFill: true)
         {

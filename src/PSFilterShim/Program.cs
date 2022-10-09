@@ -81,20 +81,6 @@ namespace PSFilterShim
             PluginData pdata = pipeClient.GetPluginData();
             PSFilterShimSettings settings = pipeClient.GetShimSettings();
 
-            Region selectionRegion = null;
-
-            if (!string.IsNullOrEmpty(settings.RegionDataPath))
-            {
-                RegionDataWrapper wrapper = DataContractSerializerUtil.Deserialize<RegionDataWrapper>(settings.RegionDataPath);
-
-                using (Region temp = new Region())
-                {
-                    RegionData rgnData = temp.GetRegionData();
-                    rgnData.Data = wrapper.GetData();
-
-                    selectionRegion = new Region(rgnData);
-                }
-            }
             try
             {
                 ParameterData filterParameters = null;
@@ -124,7 +110,7 @@ namespace PSFilterShim
                 {
                 }
 
-                using (LoadPsFilter lps = new LoadPsFilter(settings, selectionRegion))
+                using (LoadPsFilter lps = new LoadPsFilter(settings))
                 {
                     lps.SetAbortCallback(pipeClient.AbortFilter);
 
@@ -206,14 +192,6 @@ namespace PSFilterShim
             catch (Win32Exception ex)
             {
                 pipeClient.SetProxyErrorMessage(ex.Message);
-            }
-            finally
-            {
-                if (selectionRegion != null)
-                {
-                    selectionRegion.Dispose();
-                    selectionRegion = null;
-                }
             }
         }
     }

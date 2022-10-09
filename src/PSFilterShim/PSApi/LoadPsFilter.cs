@@ -18,6 +18,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using PaintDotNet;
+using PSFilterShim;
 using PSFilterShim.Properties;
 
 namespace PSFilterLoad.PSApi
@@ -94,7 +95,7 @@ namespace PSFilterLoad.PSApi
         private FilterCase filterCase;
         private float dpiX;
         private float dpiY;
-        private Region selectedRegion;
+        private bool hasSelectionMask;
         private byte[] backgroundColor;
         private byte[] foregroundColor;
 
@@ -201,9 +202,8 @@ namespace PSFilterLoad.PSApi
         /// Loads and runs Photoshop Filters
         /// </summary>
         /// <param name="settings">The execution parameters for the filter.</param>
-        /// <param name="selection">The <see cref="Region"/> describing the selected area within the image.</param>
         /// <exception cref="System.ArgumentNullException"><paramref name="settings"/> is null.</exception>
-        public unsafe LoadPsFilter(PSFilterPdn.PSFilterShimSettings settings, Region selection)
+        public unsafe LoadPsFilter(PSFilterPdn.PSFilterShimSettings settings)
         {
             if (settings == null)
             {
@@ -228,7 +228,7 @@ namespace PSFilterLoad.PSApi
             resourceSuite = new ResourceSuite();
             parentWindowHandle = settings.ParentWindowHandle;
 
-            source = PSFilterShim.PSFilterShimImage.Load(settings.SourceImagePath, out dpiX, out dpiY);
+            source = PSFilterShimImage.Load(settings.SourceImagePath, out dpiX, out dpiY);
             dest = new Surface(source.Width, source.Height);
 
             advanceProc = new AdvanceStateProc(AdvanceStateProc);
@@ -277,13 +277,15 @@ namespace PSFilterLoad.PSApi
             backgroundColor = new byte[4] { secondary.R, secondary.G, secondary.B, 0 };
             foregroundColor = new byte[4] { primary.R, primary.G, primary.B, 0 };
 
-            if (selection != null)
+            if (!string.IsNullOrEmpty(settings.SelectionMaskPath))
             {
-                selectedRegion = selection.Clone();
+                mask = PSFilterShimImage.LoadSelectionMask(settings.SelectionMaskPath);
+                hasSelectionMask = true;
             }
             else
             {
-                selectedRegion = null;
+                mask = null;
+                hasSelectionMask = false;
             }
 
 #if DEBUG
@@ -349,7 +351,7 @@ namespace PSFilterLoad.PSApi
 
         private void SetFilterTransparencyMode(PluginData data)
         {
-            filterCase = data.GetFilterTransparencyMode(selectedRegion != null, HasTransparentPixels);
+            filterCase = data.GetFilterTransparencyMode(hasSelectionMask, HasTransparentPixels);
         }
 
         /// <summary>
@@ -912,7 +914,6 @@ namespace PSFilterLoad.PSApi
                 case FilterCase.FlatImageWithSelection:
                 case FilterCase.EditableTransparencyWithSelection:
                 case FilterCase.ProtectedTransparencyWithSelection:
-                    DrawSelectionMask();
                     filterRecord->isFloating = false;
                     filterRecord->haveMask = true;
                     filterRecord->autoMask = true;
@@ -2723,30 +2724,6 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private unsafe void DrawSelectionMask()
-        {
-            mask = new MaskSurface(source.Width, source.Height);
-
-            Rectangle[] scans = selectedRegion.GetRegionScansReadOnlyInt();
-
-            for (int i = 0; i < scans.Length; i++)
-            {
-                Rectangle rect = scans[i];
-
-                for (int y = rect.Top; y < rect.Bottom; y++)
-                {
-                    byte* ptr = mask.GetPointAddressUnchecked(rect.Left, y);
-                    byte* ptrEnd = ptr + rect.Width;
-
-                    while (ptr < ptrEnd)
-                    {
-                        *ptr = 255;
-                        ptr++;
-                    }
-                }
-            }
-        }
-
         private unsafe void DrawFloatingSelectionMask()
         {
             int width = source.Width;
@@ -2919,7 +2896,7 @@ namespace PSFilterLoad.PSApi
             if (useChannelPorts)
             {
                 channelPortsPtr = channelPortsSuite.CreateChannelPortsPointer();
-                readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(filterCase, selectedRegion != null);
+                readDocumentPtr = readImageDocument.CreateReadImageDocumentPointer(filterCase, hasSelectionMask);
             }
             else
             {
@@ -3086,12 +3063,6 @@ namespace PSFilterLoad.PSApi
                     {
                         tempMask.Dispose();
                         tempMask = null;
-                    }
-
-                    if (selectedRegion != null)
-                    {
-                        selectedRegion.Dispose();
-                        selectedRegion = null;
                     }
 
                     if (displaySurface != null)

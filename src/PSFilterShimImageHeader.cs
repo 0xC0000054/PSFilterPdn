@@ -23,6 +23,7 @@ namespace PSFilterPdn
 #pragma warning disable IDE0032 // Use auto property
         private readonly int width;
         private readonly int height;
+        private readonly PSFilterShimImageFormat format;
         private readonly int stride;
         private readonly float dpiX;
         private readonly float dpiY;
@@ -45,13 +46,14 @@ namespace PSFilterPdn
 
             fileVersion = ReadInt32LittleEndian(stream);
 
-            if (fileVersion != 1)
+            if (fileVersion != 2)
             {
                 throw new FormatException("The PSFilterShimImage has an unsupported file version.");
             }
 
             width = ReadInt32LittleEndian(stream);
             height = ReadInt32LittleEndian(stream);
+            format = (PSFilterShimImageFormat)ReadInt32LittleEndian(stream);
             stride = ReadInt32LittleEndian(stream);
             dpiX = ReadSingleLittleEndian(stream);
             dpiY = ReadSingleLittleEndian(stream);
@@ -59,13 +61,27 @@ namespace PSFilterPdn
 
         public PSFilterShimImageHeader(int width,
                                        int height,
+                                       PSFilterShimImageFormat format,
                                        float dpiX,
                                        float dpiY)
         {
-            fileVersion = 1;
+            fileVersion = 2;
             this.width = width;
             this.height = height;
-            this.stride = checked(width * 4);
+            this.format = format;
+
+            switch (format)
+            {
+                case PSFilterShimImageFormat.Bgra32:
+                    stride = checked(width * 4);
+                    break;
+                case PSFilterShimImageFormat.Alpha8:
+                    stride = width;
+                    break;
+                default:
+                    throw new ArgumentException($"Unsupported {nameof(PSFilterShimImageFormat)} value: {format}.");
+            }
+
             this.dpiX = dpiX;
             this.dpiY = dpiY;
         }
@@ -73,6 +89,8 @@ namespace PSFilterPdn
         public int Width => width;
 
         public int Height => height;
+
+        public PSFilterShimImageFormat Format => format;
 
         public int Stride => stride;
 
@@ -98,6 +116,7 @@ namespace PSFilterPdn
             WriteInt32LittleEndian(stream, fileVersion);
             WriteInt32LittleEndian(stream, width);
             WriteInt32LittleEndian(stream, height);
+            WriteInt32LittleEndian(stream, (int)format);
             WriteInt32LittleEndian(stream, stride);
             WriteSingleLittleEndian(stream, dpiX);
             WriteSingleLittleEndian(stream, dpiY);
@@ -109,6 +128,7 @@ namespace PSFilterPdn
             headerSize += sizeof(int); // version
             headerSize += sizeof(int); // width
             headerSize += sizeof(int); // height
+            headerSize += sizeof(int); // format
             headerSize += sizeof(int); // stride
             headerSize += sizeof(float); // dpiX
             headerSize += sizeof(float); // dpiY

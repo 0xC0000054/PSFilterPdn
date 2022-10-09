@@ -12,6 +12,7 @@
 
 using PaintDotNet;
 using PaintDotNet.IO;
+using PSFilterLoad.PSApi;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -38,6 +39,11 @@ namespace PSFilterPdn
                                                       FileOptions.SequentialScan))
             {
                 PSFilterShimImageHeader header = new PSFilterShimImageHeader(stream);
+
+                if (header.Format != PSFilterShimImageFormat.Bgra32)
+                {
+                    throw new InvalidOperationException("This method requires an image that uses the Bgra32 format.");
+                }
 
                 surface = new Surface(header.Width, header.Height);
 
@@ -75,6 +81,7 @@ namespace PSFilterPdn
             {
                 PSFilterShimImageHeader header = new PSFilterShimImageHeader(surface.Width,
                                                                              surface.Height,
+                                                                             PSFilterShimImageFormat.Bgra32,
                                                                              dpiX,
                                                                              dpiY);
                 stream.SetLength(header.GetTotalFileSize());
@@ -88,6 +95,45 @@ namespace PSFilterPdn
                     for (int y = 0; y < header.Height; y++)
                     {
                         ColorBgra* src = surface.GetRowAddressUnchecked(y);
+
+                        Marshal.Copy(new IntPtr(src), buffer, 0, buffer.Length);
+
+                        stream.Write(buffer, 0, buffer.Length);
+                    }
+                }
+            }
+        }
+
+        public static void SaveSelectionMask(string path, MaskSurface surface)
+        {
+            if (surface is null)
+            {
+                throw new ArgumentNullException(nameof(surface));
+            }
+
+            using (FileStream stream = new FileStream(path,
+                                                      FileMode.Create,
+                                                      FileAccess.Write,
+                                                      FileShare.None,
+                                                      BufferSize,
+                                                      FileOptions.SequentialScan))
+            {
+                PSFilterShimImageHeader header = new PSFilterShimImageHeader(surface.Width,
+                                                                             surface.Height,
+                                                                             PSFilterShimImageFormat.Alpha8,
+                                                                             96.0f,
+                                                                             96.0f);
+                stream.SetLength(header.GetTotalFileSize());
+
+                header.Save(stream);
+
+                byte[] buffer = new byte[header.Stride];
+
+                unsafe
+                {
+                    for (int y = 0; y < header.Height; y++)
+                    {
+                        byte* src = surface.GetRowAddressUnchecked(y);
 
                         Marshal.Copy(new IntPtr(src), buffer, 0, buffer.Length);
 

@@ -75,7 +75,7 @@ namespace PSFilterPdn
         private string destFileName;
         private string parameterDataFileName;
         private string resourceDataFileName;
-        private string regionFileName;
+        private string selectionMaskFileName;
         private string descriptorRegistryFileName;
         private PluginData proxyData;
         private PSFilterShimDataFolder proxyTempDir;
@@ -663,18 +663,22 @@ namespace PSFilterPdn
             parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
             resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
             descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-            regionFileName = string.Empty;
+            selectionMaskFileName = string.Empty;
 
             Rectangle sourceBounds = eep.SourceSurface.Bounds;
 
-            Rectangle selection = eep.GetSelection(sourceBounds).GetBoundsInt();
+            PdnRegion selection = eep.GetSelection(sourceBounds);
+            Rectangle selectionBounds = selection.GetBoundsInt();
 
-            if (selection != sourceBounds)
+            if (selectionBounds != sourceBounds)
             {
-                regionFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-                RegionDataWrapper selectedRegion = new RegionDataWrapper(eep.GetSelection(sourceBounds).GetRegionData());
+                selectionMaskFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
 
-                DataContractSerializerUtil.Serialize(regionFileName, selectedRegion);
+                using (MaskSurface mask = SelectionMaskRenderer.FromPdnSelection(eep.SourceSurface.Size,
+                                                                                 selection))
+                {
+                    PSFilterShimImage.SaveSelectionMask(selectionMaskFileName, mask);
+                }
             }
 
             PSFilterShimSettings settings = new PSFilterShimSettings
@@ -686,7 +690,7 @@ namespace PSFilterPdn
                 ParentWindowHandle = Handle,
                 PrimaryColor = eep.PrimaryColor.ToColor(),
                 SecondaryColor = eep.SecondaryColor.ToColor(),
-                RegionDataPath = regionFileName,
+                SelectionMaskPath = selectionMaskFileName,
                 ParameterDataPath = parameterDataFileName,
                 PseudoResourcePath = resourceDataFileName,
                 DescriptorRegistryPath = descriptorRegistryFileName,

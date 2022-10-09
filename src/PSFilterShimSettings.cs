@@ -69,7 +69,7 @@ namespace PSFilterPdn
         }
 
         [DataMember]
-        public string RegionDataPath
+        public string SelectionMaskPath
         {
             get;
             internal set;
