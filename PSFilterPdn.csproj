@@ -1,22 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{56D67AEC-EA75-48D3-8CF5-745324C7E25E}</ProjectGuid>
+    <TargetFramework>net35</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PSFilterPdn</RootNamespace>
-    <AssemblyName>PSFilterPdn</AssemblyName>
-    <StartupObject>
-    </StartupObject>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>2.0</OldToolsVersion>
-    <UpgradeBackupLocation />
+    <StartupObject></StartupObject>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -32,42 +18,29 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
-    <SccProjectName>Svn</SccProjectName>
-    <SccLocalPath>Svn</SccLocalPath>
-    <SccAuxPath>Svn</SccAuxPath>
-    <SccProvider>SubversionScc</SccProvider>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>PSFilterPdn.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <ItemGroup>
+    <Compile Remove="PSFilterShim\**" />
+    <Compile Remove="References\**" />
+    <EmbeddedResource Remove="PSFilterShim\**" />
+    <EmbeddedResource Remove="References\**" />
+    <None Remove="PSFilterShim\**" />
+    <None Remove="References\**" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="PaintDotNet.Base">
       <HintPath>References\PaintDotNet.Base.dll</HintPath>
@@ -81,260 +54,41 @@
       <HintPath>References\PaintDotNet.Effects.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.XML" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ColorPicker\ColorGradientControl.cs">
+    <Compile Update="ColorPicker\ColorGradientControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ColorPicker\ColorPickerForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ColorPicker\ColorRectangleControl.cs">
+    <Compile Update="ColorPicker\ColorRectangleControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ColorPicker\ColorWheel.cs">
+    <Compile Update="ColorPicker\ColorWheel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ColorPicker\EtchedLine.cs">
+    <Compile Update="ColorPicker\EtchedLine.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ColorPicker\HeaderLabel.cs">
+    <Compile Update="ColorPicker\HeaderLabel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ColorPicker\IndexEventArgs.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ColorPicker\SwatchControl.cs">
+    <Compile Update="ColorPicker\SwatchControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ColorPicker\UI.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ColorPicker\Utility.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ColorPicker\VisualStyleClass.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ConfigDialogState.cs" />
-    <Compile Include="Controls\DoubleBufferedListView.cs">
+    <Compile Update="Controls\DoubleBufferedListView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\DoubleBufferedTreeView.cs">
+    <Compile Update="Controls\DoubleBufferedTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\TabControlEx.cs">
+    <Compile Update="Controls\TabControlEx.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Dialogs\PlatformFolderBrowserDialog.cs">
+    <Compile Update="Dialogs\PlatformFolderBrowserDialog.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Dialogs\VistaFolderBrowserDialog.cs">
+    <Compile Update="Dialogs\VistaFolderBrowserDialog.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="DpiHelper.cs" />
-    <Compile Include="EnableInfo\EnableInfoException.cs" />
-    <Compile Include="EnableInfo\EnableInfoInterpreter.cs" />
-    <Compile Include="EnableInfo\EnableInfoLexer.cs" />
-    <Compile Include="EnableInfo\EnableInfoParser.cs" />
-    <Compile Include="EnableInfo\EnableInfoVariables.cs" />
-    <Compile Include="EnableInfo\HostState.cs" />
-    <Compile Include="EnableInfo\Syntax\BinaryExpression.cs" />
-    <Compile Include="EnableInfo\Syntax\ConstantExpression.cs" />
-    <Compile Include="EnableInfo\Syntax\Expression.cs" />
-    <Compile Include="EnableInfo\Syntax\ExpressionType.cs" />
-    <Compile Include="EnableInfo\Syntax\FunctionCallExpression.cs" />
-    <Compile Include="EnableInfo\Syntax\IExpressionVisitor.cs" />
-    <Compile Include="EnableInfo\Syntax\LogicalExpression.cs" />
-    <Compile Include="EnableInfo\Syntax\ParameterExpression.cs" />
-    <Compile Include="EnableInfo\Syntax\UnaryExpression.cs" />
-    <Compile Include="EnableInfo\Token.cs" />
-    <Compile Include="EnableInfo\TokenType.cs" />
-    <Compile Include="FilterTreeNodeCollection.cs" />
-    <Compile Include="Interop\SafeFindHandle.cs" />
-    <Compile Include="Interop\SafeDCHandle.cs" />
-    <Compile Include="Interop\SafeLibraryHandle.cs" />
-    <Compile Include="Interop\UnsafeNativeMethods.cs" />
-    <Compile Include="Interop\Win32FindData.cs" />
-    <Compile Include="ListExtensions.cs" />
-    <Compile Include="FileEnumerator.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="MaskSurface\MaskSurface.cs" />
-    <Compile Include="MaskSurface\MemoryBlock.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Interop\NativeConstants.cs" />
-    <Compile Include="Interop\NativeEnums.cs" />
-    <Compile Include="Interop\NativeInterfaces.cs" />
-    <Compile Include="Interop\NativeStructs.cs" />
-    <Compile Include="OS.cs" />
-    <Compile Include="PluginIconUtil.cs" />
-    <Compile Include="PluginThemingUtil.cs" />
-    <Compile Include="PluginSupportInfo.cs" />
-    <Compile Include="PSApi\ActivePICASuites.cs" />
-    <Compile Include="PSApi\AETEData.cs" />
-    <Compile Include="PSApi\AETEValue.cs" />
-    <Compile Include="PSApi\BufferSuite.cs" />
-    <Compile Include="PSApi\ChannelPortsProcs.cs" />
-    <Compile Include="PSApi\ChannelPortsSuite.cs" />
-    <Compile Include="PSApi\ColorConversion\CMYK.cs" />
-    <Compile Include="PSApi\ColorConversion\ColorConverter.cs" />
-    <Compile Include="PSApi\ColorConversion\HSB.cs" />
-    <Compile Include="PSApi\ColorConversion\HSL.cs" />
-    <Compile Include="PSApi\ColorConversion\Lab.cs" />
-    <Compile Include="PSApi\ColorConversion\RGB.cs" />
-    <Compile Include="PSApi\ColorConversion\XYZ.cs" />
-    <Compile Include="PSApi\ColorPickerService.cs" />
-    <Compile Include="PSApi\DebugUtils.cs" />
-    <Compile Include="PSApi\DescriptorRegistryItem.cs" />
-    <Compile Include="PSApi\DescriptorRegistryValues.cs" />
-    <Compile Include="PSApi\DescriptorSuite.cs" />
-    <Compile Include="PSApi\DescriptorTypes.cs" />
-    <Compile Include="PSApi\DictionaryExtensions.cs" />
-    <Compile Include="PSApi\ColorConversion\DoubleExtensions.cs" />
-    <Compile Include="PSApi\EnableInfoResultCache.cs" />
-    <Compile Include="PSApi\EndianBinaryReader.cs" />
-    <Compile Include="PSApi\Endianess.cs" />
-    <Compile Include="PSApi\FilterCaseInfoCollection.cs" />
-    <Compile Include="PSApi\Fixed16.cs" />
-    <Compile Include="PSApi\GlobalParameters.cs" />
-    <Compile Include="PSApi\Handle.cs" />
-    <Compile Include="PSApi\HandleSuite.cs" />
-    <Compile Include="PSApi\IFilterImageProvider.cs" />
-    <Compile Include="PSApi\ImageMode.cs" />
-    <Compile Include="PSApi\ImageServicesProc.cs" />
-    <Compile Include="PSApi\ImageServicesSuite.cs" />
-    <Compile Include="PSApi\IntPtrEqualityComparer.cs" />
-    <Compile Include="PSApi\IntPtrExtensions.cs" />
-    <Compile Include="PSApi\IPICASuiteDataProvider.cs" />
-    <Compile Include="PSApi\IPropertySuite.cs" />
-    <Compile Include="PSApi\IResourceSuite.cs" />
-    <Compile Include="PSApi\Loader\AeteResource.cs" />
-    <Compile Include="PSApi\Loader\PEFile.cs" />
-    <Compile Include="PSApi\Loader\PiPLResourceHeader.cs" />
-    <Compile Include="PSApi\Loader\PIProperty.cs" />
-    <Compile Include="PSApi\Loader\PIPropertyID.cs" />
-    <Compile Include="PSApi\Loader\PITerminology.cs" />
-    <Compile Include="PSApi\Loader\PlugInInfo.cs" />
-    <Compile Include="PSApi\Loader\PluginLoader.cs" />
-    <Compile Include="PSApi\Loader\PluginLoader.FilterCaseInfoParser.cs" />
-    <Compile Include="PSApi\Loader\PluginLoader.QueryFilter.cs" />
-    <Compile Include="PSApi\Loader\ProcessInformation.cs" />
-    <Compile Include="PSApi\Loader\ProcessorArchitecture.cs" />
-    <Compile Include="PSApi\LoadPsFilter.cs" />
-    <Compile Include="PSApi\Memory.cs" />
-    <Compile Include="PSApi\ParameterData.cs" />
-    <Compile Include="PSApi\PICA\Action Suites\ActionDescriptorSuite.cs" />
-    <Compile Include="PSApi\PICA\Action Suites\ActionListDescriptor.cs" />
-    <Compile Include="PSApi\PICA\Action Suites\ActionListItem.cs" />
-    <Compile Include="PSApi\PICA\Action Suites\ActionListSuite.cs" />
-    <Compile Include="PSApi\PICA\Action Suites\ActionReferenceItem.cs" />
-    <Compile Include="PSApi\PICA\Action Suites\ActionReferenceSuite.cs" />
-    <Compile Include="PSApi\PICA\Action Suites\IActionDescriptorSuite.cs" />
-    <Compile Include="PSApi\PICA\Action Suites\IActionListSuite.cs" />
-    <Compile Include="PSApi\PICA\Action Suites\IActionReferenceSuite.cs" />
-    <Compile Include="PSApi\PICA\Action Suites\PSActionDescriptor.cs" />
-    <Compile Include="PSApi\PICA\Action Suites\PSActionList.cs" />
-    <Compile Include="PSApi\PICA\Action Suites\PSActionReference.cs" />
-    <Compile Include="PSApi\PICA\ActionSuiteProvider.cs" />
-    <Compile Include="PSApi\PICA\ASZStringSuite.cs" />
-    <Compile Include="PSApi\PICA\DescriptorRegistrySuite.cs" />
-    <Compile Include="PSApi\PICA\ErrorSuite.cs" />
-    <Compile Include="PSApi\PICA\IASZStringSuite.cs" />
-    <Compile Include="PSApi\PICA\PICABufferSuite.cs" />
-    <Compile Include="PSApi\PICA\PICAColorSpaceSuite.cs" />
-    <Compile Include="PSApi\PICA\PICAHandleSuite.cs" />
-    <Compile Include="PSApi\PICA\PICASuiteDelegates.cs" />
-    <Compile Include="PSApi\PICA\PICASuiteStructs.cs" />
-    <Compile Include="PSApi\PICA\PICAUIHooksSuite.cs" />
-    <Compile Include="PSApi\PICA\PSDescriptorRegistry.cs" />
-    <Compile Include="PSApi\PICA\PSErrorSuite.cs" />
-    <Compile Include="PSApi\PIDescriptorParameters.cs" />
-    <Compile Include="PSApi\PluginModule.cs" />
-    <Compile Include="PSApi\PropertyProcs.cs" />
-    <Compile Include="PSApi\PropertySuite.cs" />
-    <Compile Include="PSApi\PSBoolean.cs" />
-    <Compile Include="PSApi\PseudoResource.cs" />
-    <Compile Include="PSApi\PseudoResourceCollection.cs" />
-    <Compile Include="PSApi\PSProperties.cs" />
-    <Compile Include="PSApi\ReadImageDocument.cs" />
-    <Compile Include="PSApi\ReadImageDocumentDesc.cs" />
-    <Compile Include="PSApi\ReadOnlyDictionary.cs" />
-    <Compile Include="PSApi\ResourceSuite.cs" />
-    <Compile Include="PSApi\SPBasicSuite.cs" />
-    <Compile Include="PSApi\SPBasicSuiteProvider.cs" />
-    <Compile Include="PSApi\StringUtil.cs" />
-    <Compile Include="PSApi\SurfaceUtil.cs" />
-    <Compile Include="PSApi\TestAbortProc.cs" />
-    <Compile Include="PsFilterPdnConfigToken.cs" />
-    <Compile Include="PSFilterPdn.cs" />
-    <Compile Include="PsFilterPdnConfigDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="PSApi\AboutRecord.cs" />
-    <Compile Include="PSApi\AdvanceStateProc.cs" />
-    <Compile Include="PSApi\BufferProcs.cs" />
-    <Compile Include="PSApi\ColorServicesConvert.cs" />
-    <Compile Include="PSApi\ColorServicesProc.cs" />
-    <Compile Include="PSApi\DebugFlags.cs" />
-    <Compile Include="PSApi\DisplayPixelsProc.cs" />
-    <Compile Include="PSApi\FilterCase.cs" />
-    <Compile Include="PSApi\FilterCaseInfo.cs" />
-    <Compile Include="PSApi\FilterRecord.cs" />
-    <Compile Include="PSApi\FilterSelector.cs" />
-    <Compile Include="PSApi\HandleProc.cs" />
-    <Compile Include="PSApi\HostProcs.cs" />
-    <Compile Include="PSApi\PlatformData.cs" />
-    <Compile Include="PSApi\PluginData.cs" />
-    <Compile Include="PSApi\PlugInMonitor.cs" />
-    <Compile Include="PSApi\PluginPhase.cs" />
-    <Compile Include="PSApi\Point.cs" />
-    <Compile Include="PSApi\ProcessEventProc.cs" />
-    <Compile Include="PSApi\ProgressProc.cs" />
-    <Compile Include="PSApi\PSConstants.cs" />
-    <Compile Include="PSApi\PSError.cs" />
-    <Compile Include="PSApi\PSPixelMap.cs" />
-    <Compile Include="PSApi\Rect.cs" />
-    <Compile Include="PSApi\ResourceProc.cs" />
-    <Compile Include="PSApi\RGBColor.cs" />
-    <Compile Include="PSApi\VPoint.cs" />
-    <Compile Include="PSApi\VRect.cs" />
-    <Compile Include="PSFilterPdnSettings.cs" />
-    <Compile Include="PSFilterShimDataFolder.cs" />
-    <Compile Include="PSFilterShimImage.cs" />
-    <Compile Include="PSFilterShimImageHeader.cs" />
-    <Compile Include="PSFilterShimPipeServer.cs" />
-    <Compile Include="DataContractSerializerUtil.cs" />
-    <Compile Include="PSFilterShimSettings.cs" />
-    <Compile Include="PSApi\PluginUISettings.cs" />
-    <Compile Include="RegionDataWrapper.cs" />
-    <Compile Include="Interop\SafeNativeMethods.cs" />
-    <Compile Include="ShellLink.cs" />
-    <Compile Include="StringExtensions.cs" />
-    <Compile Include="StringLogicalComparer.cs" />
-    <Compile Include="TreeNodeEx.cs" />
-    <Compile Include="TreeNodeItemComparer.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="ColorPicker\ColorPickerForm.resx">
-      <DependentUpon>ColorPickerForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="PsFilterPdnConfigDialog.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>PsFilterPdnConfigDialog.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -352,12 +106,6 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icons\feather-96.png" />
@@ -387,12 +135,7 @@
     <EmbeddedResource Include="Resources\Icons\XPThemedCollapse.png" />
     <EmbeddedResource Include="Resources\Icons\XPThemedExpand.png" />
   </ItemGroup>
-  <ItemGroup />
-  <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "D:\Program Files\Paint.NET\Effects" /y
-if "$(ConfigurationName)" == "Debug" copy "$(TargetDir)$(TargetName).pdb" "D:\Program Files\Paint.NET\Effects" /y</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>del "D:\Program Files\Paint.NET\Effects\$(TargetName).pdb"</PreBuildEvent>
-  </PropertyGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\Program Files\Paint.NET\Effects&quot; /y" />
+  </Target>
 </Project>

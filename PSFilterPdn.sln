@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28729.10
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32922.545
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSFilterPdn", "PSFilterPdn.csproj", "{56D67AEC-EA75-48D3-8CF5-745324C7E25E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSFilterPdn", "PSFilterPdn.csproj", "{56D67AEC-EA75-48D3-8CF5-745324C7E25E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSFilterShim", "PSFilterShim\PSFilterShim.csproj", "{02970578-949F-4B9E-A373-75A28DF880EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSFilterShim", "PSFilterShim\PSFilterShim.csproj", "{02970578-949F-4B9E-A373-75A28DF880EA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5E94B0F6-BC88-4F23-84B0-C5B3A7C9CBD3}"
 	ProjectSection(SolutionItems) = preProject
@@ -16,35 +16,17 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Debug|Mixed Platforms = Debug|Mixed Platforms
-		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
-		Release|Mixed Platforms = Release|Mixed Platforms
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Release|x86.ActiveCfg = Release|Any CPU
-		{02970578-949F-4B9E-A373-75A28DF880EA}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{02970578-949F-4B9E-A373-75A28DF880EA}.Debug|Any CPU.Build.0 = Debug|x86
-		{02970578-949F-4B9E-A373-75A28DF880EA}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{02970578-949F-4B9E-A373-75A28DF880EA}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{02970578-949F-4B9E-A373-75A28DF880EA}.Debug|x86.ActiveCfg = Debug|x86
-		{02970578-949F-4B9E-A373-75A28DF880EA}.Debug|x86.Build.0 = Debug|x86
+		{02970578-949F-4B9E-A373-75A28DF880EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02970578-949F-4B9E-A373-75A28DF880EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02970578-949F-4B9E-A373-75A28DF880EA}.Release|Any CPU.ActiveCfg = Release|x86
 		{02970578-949F-4B9E-A373-75A28DF880EA}.Release|Any CPU.Build.0 = Release|x86
-		{02970578-949F-4B9E-A373-75A28DF880EA}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{02970578-949F-4B9E-A373-75A28DF880EA}.Release|Mixed Platforms.Build.0 = Release|x86
-		{02970578-949F-4B9E-A373-75A28DF880EA}.Release|x86.ActiveCfg = Release|x86
-		{02970578-949F-4B9E-A373-75A28DF880EA}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
