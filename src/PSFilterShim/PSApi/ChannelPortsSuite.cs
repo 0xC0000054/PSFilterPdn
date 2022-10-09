@@ -199,7 +199,7 @@ namespace PSFilterLoad.PSApi
                         }
 
                         scaledSelectionMask = new MaskSurface(dstWidth, dstHeight);
-                        scaledSelectionMask.SuperSampleFitSurface(filterImageProvider.Mask);
+                        scaledSelectionMask.FitSurface(filterImageProvider.Mask);
                     }
 
                     FillSelectionMask(destination, scaledSelectionMask, dstRect);
@@ -215,7 +215,7 @@ namespace PSFilterLoad.PSApi
                         }
 
                         scaledSelectionMask = new MaskSurface(dstWidth, dstHeight);
-                        scaledSelectionMask.BicubicFitSurface(filterImageProvider.Mask);
+                        scaledSelectionMask.FitSurface(filterImageProvider.Mask);
                     }
 
                     FillSelectionMask(destination, scaledSelectionMask, dstRect);
@@ -263,7 +263,7 @@ namespace PSFilterLoad.PSApi
 
             if (wroteRect != null)
             {
-                *wroteRect = dstRect; 
+                *wroteRect = dstRect;
             }
 
             return PSError.noErr;

@@ -2083,7 +2083,7 @@ namespace PSFilterLoad.PSApi
                 if (scaleFactor > 1) // Filter preview
                 {
                     tempMask = new MaskSurface(scaleWidth, scaleHeight);
-                    tempMask.SuperSampleFitSurface(mask);
+                    tempMask.FitSurface(mask);
                 }
                 else
                 {
