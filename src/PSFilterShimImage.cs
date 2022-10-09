@@ -55,7 +55,7 @@ namespace PSFilterPdn
                     {
                         stream.ProperRead(buffer, 0, buffer.Length);
 
-                        ColorBgra* dst = surface.GetRowAddressUnchecked(y);
+                        ColorBgra* dst = surface.GetRowPointerUnchecked(y);
 
                         Marshal.Copy(buffer, 0, new IntPtr(dst), buffer.Length);
                     }
@@ -94,7 +94,7 @@ namespace PSFilterPdn
                 {
                     for (int y = 0; y < header.Height; y++)
                     {
-                        ColorBgra* src = surface.GetRowAddressUnchecked(y);
+                        ColorBgra* src = surface.GetRowPointerUnchecked(y);
 
                         Marshal.Copy(new IntPtr(src), buffer, 0, buffer.Length);
 

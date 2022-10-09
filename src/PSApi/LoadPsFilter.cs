@@ -18,6 +18,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using PaintDotNet;
+using PaintDotNet.Effects;
 using PSFilterPdn.Interop;
 using PSFilterPdn.Properties;
 
@@ -278,9 +279,9 @@ namespace PSFilterLoad.PSApi
 
             readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
 
-            PdnRegion selection = eep.GetSelection(eep.SourceSurface.Bounds);
+            IEffectSelectionInfo selection = eep.Selection;
 
-            if (selection.GetBoundsInt() != eep.SourceSurface.Bounds)
+            if (selection.RenderBounds != eep.SourceSurface.Bounds)
             {
                 mask = SelectionMaskRenderer.FromPdnSelection(source.Width, source.Height, selection);
                 hasSelectionMask = true;
@@ -1016,8 +1017,8 @@ namespace PSFilterLoad.PSApi
             {
                 for (int y = 0; y < dest.Height; y++)
                 {
-                    ColorBgra* src = source.GetRowAddressUnchecked(y);
-                    ColorBgra* dst = dest.GetRowAddressUnchecked(y);
+                    ColorBgra* src = source.GetRowPointerUnchecked(y);
+                    ColorBgra* dst = dest.GetRowPointerUnchecked(y);
 
                     for (int x = 0; x < dest.Width; x++)
                     {
@@ -1050,7 +1051,7 @@ namespace PSFilterLoad.PSApi
 
             for (int y = 0; y < height; y++)
             {
-                ColorBgra* ptr = source.GetRowAddressUnchecked(y);
+                ColorBgra* ptr = source.GetRowPointerUnchecked(y);
                 ColorBgra* endPtr = ptr + width;
 
                 while (ptr < endPtr)
@@ -1566,7 +1567,7 @@ namespace PSFilterLoad.PSApi
                         {
                             for (int y = 0; y < top; y++)
                             {
-                                ColorBgra* p = surface.GetRowAddressUnchecked(0);
+                                ColorBgra* p = surface.GetRowPointerUnchecked(0);
                                 byte* q = inDataPtr + (y * inRowBytes);
 
                                 for (int x = 0; x < width; x++)
@@ -1641,7 +1642,7 @@ namespace PSFilterLoad.PSApi
                             int lockBottom = height - 1;
                             for (int y = 0; y < bottom; y++)
                             {
-                                ColorBgra* p = surface.GetRowAddressUnchecked(col);
+                                ColorBgra* p = surface.GetRowPointerUnchecked(col);
                                 byte* q = inDataPtr + ((lockBottom - y) * inRowBytes);
 
                                 for (int x = 0; x < width; x++)
@@ -1784,7 +1785,7 @@ namespace PSFilterLoad.PSApi
                 if (scaleFactor > 1) // Filter preview
                 {
                     tempSurface = new Surface(scaleWidth, scaleHeight);
-                    tempSurface.FitSurface(ResamplingAlgorithm.SuperSampling, source);
+                    tempSurface.FitSurface(ResamplingAlgorithm.AdaptiveBestQuality, source);
                 }
                 else
                 {
@@ -1880,7 +1881,7 @@ namespace PSFilterLoad.PSApi
 
             for (int y = top; y < bottom; y++)
             {
-                byte* src = (byte*)tempSurface.GetPointAddressUnchecked(left, y);
+                byte* src = (byte*)tempSurface.GetPointPointerUnchecked(left, y);
                 byte* dst = (byte*)ptr + ((y - top) * stride);
 
                 for (int x = left; x < right; x++)
@@ -1998,7 +1999,7 @@ namespace PSFilterLoad.PSApi
 
             for (int y = top; y < bottom; y++)
             {
-                byte* src = (byte*)dest.GetPointAddressUnchecked(left, y);
+                byte* src = (byte*)dest.GetPointPointerUnchecked(left, y);
                 byte* dst = (byte*)ptr + ((y - top) * stride);
 
                 for (int x = left; x < right; x++)
@@ -2239,7 +2240,7 @@ namespace PSFilterLoad.PSApi
                 for (int y = top; y < bottom; y++)
                 {
                     byte* src = (byte*)outDataPtr + ((y - top) * outRowBytes);
-                    byte* dst = (byte*)dest.GetPointAddressUnchecked(left, y);
+                    byte* dst = (byte*)dest.GetPointPointerUnchecked(left, y);
 
                     for (int x = left; x < right; x++)
                     {
@@ -2281,7 +2282,7 @@ namespace PSFilterLoad.PSApi
 
                 for (int y = 0; y < height; y++)
                 {
-                    ColorBgra* ptr = source.GetRowAddressUnchecked(y);
+                    ColorBgra* ptr = source.GetRowPointerUnchecked(y);
                     ColorBgra* endPtr = ptr + width;
 
                     while (ptr < endPtr)
@@ -2339,7 +2340,7 @@ namespace PSFilterLoad.PSApi
 
                 for (int y = 0; y < height; y++)
                 {
-                    ColorBgra* ptr = dest.GetRowAddressUnchecked(y);
+                    ColorBgra* ptr = dest.GetRowPointerUnchecked(y);
                     ColorBgra* endPtr = ptr + width;
 
                     while (ptr < endPtr)
@@ -2588,7 +2589,7 @@ namespace PSFilterLoad.PSApi
                     byte* greenPlane = redPlane + greenPlaneOffset;
                     byte* bluePlane = redPlane + bluePlaneOffset;
 
-                    ColorBgra* dst = displaySurface.GetRowAddressUnchecked(y - top);
+                    ColorBgra* dst = displaySurface.GetRowPointerUnchecked(y - top);
 
                     for (int x = 0; x < width; x++)
                     {
@@ -2608,7 +2609,7 @@ namespace PSFilterLoad.PSApi
                 for (int y = top; y < bottom; y++)
                 {
                     byte* src = baseAddr + (y * srcPixelMap->rowBytes) + (left * srcPixelMap->colBytes);
-                    ColorBgra* dst = displaySurface.GetRowAddressUnchecked(y - top);
+                    ColorBgra* dst = displaySurface.GetRowPointerUnchecked(y - top);
 
                     for (int x = 0; x < width; x++)
                     {
@@ -2637,7 +2638,7 @@ namespace PSFilterLoad.PSApi
                         for (int y = top; y < bottom; y++)
                         {
                             byte* src = maskPtr + (y * mask->rowBytes) + left;
-                            ColorBgra* dst = displaySurface.GetRowAddressUnchecked(y - top);
+                            ColorBgra* dst = displaySurface.GetRowPointerUnchecked(y - top);
                             for (int x = 0; x < width; x++)
                             {
                                 dst->A = *src;
@@ -2704,7 +2705,7 @@ namespace PSFilterLoad.PSApi
 
             for (int y = 0; y < height; y++)
             {
-                ColorBgra* src = source.GetRowAddressUnchecked(y);
+                ColorBgra* src = source.GetRowPointerUnchecked(y);
                 byte* dst = mask.GetRowAddressUnchecked(y);
 
                 for (int x = 0; x < width; x++)

@@ -36,7 +36,7 @@ namespace PSFilterPdn
         private static ManualResetEvent filterDone;
 
         public PSFilterPdnEffect()
-            : base(StaticName, StaticIcon, EffectFlags.Configurable)
+            : base(StaticName, StaticIcon, null, new EffectOptions { Flags = EffectFlags.Configurable })
         {
             repeatEffect = true;
             filterThread = null;
@@ -87,8 +87,8 @@ namespace PSFilterPdn
 
                     Rectangle sourceBounds = EnvironmentParameters.SourceSurface.Bounds;
 
-                    PdnRegion selection = EnvironmentParameters.GetSelection(sourceBounds);
-                    Rectangle selectionBounds = selection.GetBoundsInt();
+                    IEffectSelectionInfo selection = EnvironmentParameters.Selection;
+                    Rectangle selectionBounds = selection.RenderBounds;
 
                     if (selectionBounds != sourceBounds)
                     {

@@ -10,27 +10,28 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PaintDotNet;
-using System.Drawing;
+using PaintDotNet.Effects;
+using PaintDotNet.Rendering;
+using System.Collections.Generic;
 
 namespace PSFilterLoad.PSApi
 {
     internal static class SelectionMaskRenderer
     {
-        public static unsafe MaskSurface FromPdnSelection(Size canvasSize, PdnRegion selection)
+        public static unsafe MaskSurface FromPdnSelection(SizeInt32 canvasSize, IEffectSelectionInfo selection)
         {
             return FromPdnSelection(canvasSize.Width, canvasSize.Height, selection);
         }
 
-        public static unsafe MaskSurface FromPdnSelection(int width, int height, PdnRegion selection)
+        public static unsafe MaskSurface FromPdnSelection(int width, int height, IEffectSelectionInfo selection)
         {
             MaskSurface mask = new MaskSurface(width, height);
 
-            Rectangle[] scans = selection.GetRegionScansReadOnlyInt();
+            IReadOnlyList<RectInt32> scans = selection.RenderScans;
 
-            for (int i = 0; i < scans.Length; i++)
+            for (int i = 0; i < scans.Count; i++)
             {
-                Rectangle rect = scans[i];
+                RectInt32 rect = scans[i];
 
                 for (int y = rect.Top; y < rect.Bottom; y++)
                 {

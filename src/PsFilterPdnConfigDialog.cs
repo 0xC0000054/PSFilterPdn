@@ -667,8 +667,8 @@ namespace PSFilterPdn
 
             Rectangle sourceBounds = eep.SourceSurface.Bounds;
 
-            PdnRegion selection = eep.GetSelection(sourceBounds);
-            Rectangle selectionBounds = selection.GetBoundsInt();
+            IEffectSelectionInfo selection = eep.Selection;
+            Rectangle selectionBounds = selection.RenderBounds;
 
             if (selectionBounds != sourceBounds)
             {
@@ -708,7 +708,7 @@ namespace PSFilterPdn
             proxyData = data;
             try
             {
-                PSFilterShimImage.Save(srcFileName, EffectSourceSurface, 96.0f, 96.0f);
+                PSFilterShimImage.Save(srcFileName, Effect.EnvironmentParameters.SourceSurface, 96.0f, 96.0f);
 
                 ParameterData parameterData;
                 if ((filterParameters != null) && filterParameters.TryGetValue(data, out parameterData))
@@ -1291,8 +1291,8 @@ namespace PSFilterPdn
 
         private void CheckSourceSurfaceSize()
         {
-            int width = EffectSourceSurface.Width;
-            int height = EffectSourceSurface.Height;
+            int width = Effect.EnvironmentParameters.SourceSurface.Width;
+            int height = Effect.EnvironmentParameters.SourceSurface.Height;
 
             if (width > 32000 || height > 32000)
             {
@@ -1351,7 +1351,7 @@ namespace PSFilterPdn
 
             try
             {
-                string userDataPath = Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
+                string userDataPath = Services.GetService<PaintDotNet.AppModel.IUserFilesService>().UserFilesPath;
 
                 string path = Path.Combine(userDataPath, "PSFilterPdn.xml");
 
@@ -1706,7 +1706,7 @@ namespace PSFilterPdn
         {
             if (descriptorRegistry == null)
             {
-                string userDataPath = Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
+                string userDataPath = Services.GetService<PaintDotNet.AppModel.IUserFilesService>().UserFilesPath;
                 string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
 
                 try
@@ -1728,7 +1728,7 @@ namespace PSFilterPdn
         {
             if (descriptorRegistry != null && descriptorRegistry.Dirty)
             {
-                string userDataPath = Services.GetService<PaintDotNet.AppModel.IAppInfoService>().UserDataDirectory;
+                string userDataPath = Services.GetService<PaintDotNet.AppModel.IUserFilesService>().UserFilesPath;
                 string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
 
                 try
@@ -1750,14 +1750,16 @@ namespace PSFilterPdn
         {
             if (filterTreeNodes != null)
             {
-                int imageWidth = EffectSourceSurface.Width;
-                int imageHeight = EffectSourceSurface.Height;
-                bool hasTransparency = SurfaceUtil.HasTransparentPixels(EffectSourceSurface);
+                EffectEnvironmentParameters eep = Effect.EnvironmentParameters;
+
+                int imageWidth = eep.SourceSurface.Width;
+                int imageHeight = eep.SourceSurface.Height;
+                bool hasTransparency = SurfaceUtil.HasTransparentPixels(eep.SourceSurface);
 
                 HostState hostState = new HostState
                 {
                     HasMultipleLayers = false,
-                    HasSelection = Selection.GetBoundsInt() != EffectSourceSurface.Bounds
+                    HasSelection = eep.Selection.RenderBounds != eep.SourceSurface.Bounds
                 };
 
                 foreach (KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>> item in filterTreeNodes)

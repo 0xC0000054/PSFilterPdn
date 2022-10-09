@@ -54,8 +54,20 @@
     <Reference Include="PaintDotNet.Effects.Core">
       <HintPath>..\..\..\src\paint.net\PaintDotNet\bin\Debug\PaintDotNet.Effects.Core.dll</HintPath>
     </Reference>
+    <Reference Include="PaintDotNet.Fundamentals">
+      <HintPath>..\..\..\src\paint.net\PaintDotNet\bin\Debug\PaintDotNet.Fundamentals.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.ObjectModel">
+      <HintPath>..\..\..\src\paint.net\PaintDotNet\bin\Debug\PaintDotNet.ObjectModel.dll</HintPath>
+    </Reference>
     <Reference Include="PaintDotNet.Primitives">
       <HintPath>..\..\..\src\paint.net\PaintDotNet\bin\Debug\PaintDotNet.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Windows">
+      <HintPath>..\..\..\src\paint.net\PaintDotNet\bin\Debug\PaintDotNet.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Windows.Core">
+      <HintPath>..\..\..\src\paint.net\PaintDotNet\bin\Debug\PaintDotNet.Windows.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

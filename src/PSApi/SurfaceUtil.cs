@@ -34,7 +34,7 @@ namespace PSFilterLoad.PSApi
 
             for (int y = 0; y < surface.Height; y++)
             {
-                ColorBgra* src = surface.GetRowAddressUnchecked(y);
+                ColorBgra* src = surface.GetRowPointerUnchecked(y);
                 ColorBgra* srcEnd = src + surface.Width;
 
                 while (src < srcEnd)

@@ -91,7 +91,7 @@ namespace PSFilterLoad.PSApi
 
             for (int y = srcRect.top; y < srcRect.bottom; y++)
             {
-                ColorBgra* src = source.GetPointAddressUnchecked(srcRect.left, y);
+                ColorBgra* src = source.GetPointPointerUnchecked(srcRect.left, y);
                 byte* dst = dstPtr + (y * stride) + offset;
                 for (int x = srcRect.left; x < srcRect.right; x++)
                 {
@@ -238,7 +238,7 @@ namespace PSFilterLoad.PSApi
                         }
 
                         scaledChannelSurface = new Surface(dstWidth, dstHeight);
-                        scaledChannelSurface.FitSurface(ResamplingAlgorithm.SuperSampling, filterImageProvider.Source);
+                        scaledChannelSurface.FitSurface(ResamplingAlgorithm.AdaptiveBestQuality, filterImageProvider.Source);
                     }
 
                     FillChannelData(channel, destination, scaledChannelSurface, dstRect);
@@ -254,7 +254,7 @@ namespace PSFilterLoad.PSApi
                         }
 
                         scaledChannelSurface = new Surface(dstWidth, dstHeight);
-                        scaledChannelSurface.FitSurface(ResamplingAlgorithm.Bicubic, filterImageProvider.Source);
+                        scaledChannelSurface.FitSurface(ResamplingAlgorithm.Cubic, filterImageProvider.Source);
                     }
 
                     FillChannelData(channel, destination, scaledChannelSurface, dstRect);
