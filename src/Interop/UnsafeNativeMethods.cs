@@ -34,7 +34,7 @@ namespace PSFilterPdn.Interop
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool FindNextFileW(SafeFindHandle hndFindFile, [Out()] WIN32_FIND_DATAW lpFindFileData);
 
-        [DllImport("kernel32.dll", ExactSpelling = true), ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+        [DllImport("kernel32.dll", ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool FindClose(IntPtr handle);
 
@@ -89,7 +89,6 @@ namespace PSFilterPdn.Interop
         [DllImport("kernel32.dll", ExactSpelling = true)]
         internal static extern IntPtr LockResource(IntPtr hGlobal);
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         [DllImport("kernel32.dll", ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool FreeLibrary(IntPtr hModule);

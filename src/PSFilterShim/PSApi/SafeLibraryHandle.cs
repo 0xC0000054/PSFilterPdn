@@ -24,7 +24,6 @@ namespace PSFilterLoad.PSApi
     /// See http://msdn.microsoft.com/msdnmag/issues/05/10/Reliability/
     /// for more about safe handles.
     /// </summary>
-    [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
     internal sealed class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         /// <summary>
