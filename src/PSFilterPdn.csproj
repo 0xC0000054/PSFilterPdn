@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <OutputType>Library</OutputType>
     <StartupObject></StartupObject>
     <PublishUrl>publish\</PublishUrl>
@@ -43,16 +43,19 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PaintDotNet.Base">
-      <HintPath>..\References\PaintDotNet.Base.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\src\paint.net\PaintDotNet\bin\Debug\PaintDotNet.Base.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.ComponentModel">
+      <HintPath>..\..\..\src\paint.net\PaintDotNet\bin\Debug\PaintDotNet.ComponentModel.dll</HintPath>
     </Reference>
     <Reference Include="PaintDotNet.Core">
-      <HintPath>..\References\PaintDotNet.Core.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\src\paint.net\PaintDotNet\bin\Debug\PaintDotNet.Core.dll</HintPath>
     </Reference>
-    <Reference Include="PaintDotNet.Effects">
-      <HintPath>..\References\PaintDotNet.Effects.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="PaintDotNet.Effects.Core">
+      <HintPath>..\..\..\src\paint.net\PaintDotNet\bin\Debug\PaintDotNet.Effects.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Primitives">
+      <HintPath>..\..\..\src\paint.net\PaintDotNet\bin\Debug\PaintDotNet.Primitives.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <PlatformTarget>x86</PlatformTarget>
     <OutputType>WinExe</OutputType>
     <SccProjectName>Svn</SccProjectName>
@@ -39,9 +39,6 @@
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System.ServiceModel" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Update="PaintDotNet\ColorPicker\ColorGradientControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -60,23 +57,6 @@
     <Compile Update="PaintDotNet\ColorPicker\SwatchControl.cs">
       <SubType>Component</SubType>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PSFilterPdn.csproj" />
