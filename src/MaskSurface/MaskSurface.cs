@@ -150,150 +150,6 @@ namespace PSFilterLoad.PSApi
             return ((byte*)scan0.VoidStar + (y * stride));
         }
 
-        public unsafe void SuperSampleFitSurface(MaskSurface source)
-        {
-            Rectangle dstRoi2 = Rectangle.Intersect(source.Bounds, Bounds);
-            int srcHeight = source.Height;
-            int srcWidth = source.Width;
-            long srcStride = source.Stride;
-
-            for (int dstY = dstRoi2.Top; dstY < dstRoi2.Bottom; ++dstY)
-            {
-                double srcTop = (double)(dstY * srcHeight) / (double)height;
-                double srcTopFloor = Math.Floor(srcTop);
-                double srcTopWeight = 1 - (srcTop - srcTopFloor);
-                int srcTopInt = (int)srcTopFloor;
-
-                double srcBottom = (double)((dstY + 1) * srcHeight) / (double)height;
-                double srcBottomFloor = Math.Floor(srcBottom - 0.00001);
-                double srcBottomWeight = srcBottom - srcBottomFloor;
-                int srcBottomInt = (int)srcBottomFloor;
-
-                byte* dstPtr = GetPointAddressUnchecked(dstRoi2.Left, dstY);
-
-                for (int dstX = dstRoi2.Left; dstX < dstRoi2.Right; ++dstX)
-                {
-                    double srcLeft = (double)(dstX * srcWidth) / (double)width;
-                    double srcLeftFloor = Math.Floor(srcLeft);
-                    double srcLeftWeight = 1 - (srcLeft - srcLeftFloor);
-                    int srcLeftInt = (int)srcLeftFloor;
-
-                    double srcRight = (double)((dstX + 1) * srcWidth) / (double)width;
-                    double srcRightFloor = Math.Floor(srcRight - 0.00001);
-                    double srcRightWeight = srcRight - srcRightFloor;
-                    int srcRightInt = (int)srcRightFloor;
-
-                    double graySum = 0;
-                    double alphaSum = 0;
-
-                    // left fractional edge
-                    byte* srcLeftPtr = source.GetPointAddressUnchecked(srcLeftInt, srcTopInt + 1);
-
-                    for (int srcY = srcTopInt + 1; srcY < srcBottomInt; ++srcY)
-                    {
-                        graySum += *srcLeftPtr * srcLeftWeight * 255.0;
-                        srcLeftPtr = (byte*)((byte*)srcLeftPtr + srcStride);
-                    }
-
-                    // right fractional edge
-                    byte* srcRightPtr = source.GetPointAddressUnchecked(srcRightInt, srcTopInt + 1);
-                    for (int srcY = srcTopInt + 1; srcY < srcBottomInt; ++srcY)
-                    {
-                        graySum += *srcLeftPtr * srcLeftWeight * 255.0;
-                        srcRightPtr = (byte*)((byte*)srcRightPtr + srcStride);
-                    }
-
-                    // top fractional edge
-                    byte* srcTopPtr = source.GetPointAddressUnchecked(srcLeftInt + 1, srcTopInt);
-                    for (int srcX = srcLeftInt + 1; srcX < srcRightInt; ++srcX)
-                    {
-                        graySum += *srcLeftPtr * srcLeftWeight * 255.0;
-
-                        ++srcTopPtr;
-                    }
-
-                    // bottom fractional edge
-                    byte* srcBottomPtr = source.GetPointAddressUnchecked(srcLeftInt + 1, srcBottomInt);
-                    for (int srcX = srcLeftInt + 1; srcX < srcRightInt; ++srcX)
-                    {
-                        graySum += *srcLeftPtr * srcLeftWeight * 255.0;
-
-                        ++srcBottomPtr;
-                    }
-
-                    // center area
-                    for (int srcY = srcTopInt + 1; srcY < srcBottomInt; ++srcY)
-                    {
-                        byte* srcPtr = source.GetPointAddressUnchecked(srcLeftInt + 1, srcY);
-
-                        for (int srcX = srcLeftInt + 1; srcX < srcRightInt; ++srcX)
-                        {
-                            graySum += *srcLeftPtr * srcLeftWeight * 255.0;
-
-                            ++srcPtr;
-                        }
-                    }
-
-                    // four corner pixels
-                    byte srcTL = source.GetPoint(srcLeftInt, srcTopInt);
-                    graySum += srcTL * (srcTopWeight * srcLeftWeight) * 255.0;
-                    alphaSum += 255.0 * (srcTopWeight * srcLeftWeight);
-
-                    byte srcTR = source.GetPoint(srcRightInt, srcTopInt);
-                    graySum += srcTR * (srcTopWeight * srcRightWeight) * 255.0;
-                    alphaSum += 255.0 * (srcTopWeight * srcRightWeight);
-
-                    byte srcBL = source.GetPoint(srcLeftInt, srcBottomInt);
-                    graySum += srcBL * (srcBottomWeight * srcLeftWeight) * 255.0;
-                    alphaSum += 255.0 * (srcBottomWeight * srcLeftWeight);
-
-                    byte srcBR = source.GetPoint(srcRightInt, srcBottomInt);
-                    graySum += srcBR * (srcBottomWeight * srcRightWeight) * 255.0;
-                    alphaSum += 255.0 * (srcBottomWeight * srcRightWeight);
-
-                    double area = (srcRight - srcLeft) * (srcBottom - srcTop);
-
-                    double alpha = 255.0 / area;
-                    double gray;
-
-                    if (alpha == 0)
-                    {
-                        gray = 0;
-                    }
-                    else
-                    {
-                        gray = graySum / alphaSum;
-                    }
-
-                    // add 0.5 so that rounding goes in the direction we want it to
-                    gray += 0.5;
-
-                    *dstPtr = (byte)gray;
-                    ++dstPtr;
-                }
-            }
-        }
-
-        private static double CubeClamped(double x)
-        {
-            if (x >= 0)
-            {
-                return x * x * x;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        /// <summary>
-        /// Implements R() as defined at http://astronomy.swin.edu.au/%7Epbourke/colour/bicubic/
-        /// </summary>
-        private static double R(double x)
-        {
-            return (CubeClamped(x + 2) - (4 * CubeClamped(x + 1)) + (6 * CubeClamped(x)) - (4 * CubeClamped(x - 1))) / 6;
-        }
-
         /// <summary>
         /// Fits the source surface to this surface using bicubic interpolation.
         /// </summary>
@@ -303,261 +159,141 @@ namespace PSFilterLoad.PSApi
         /// Based on: "Bicubic Interpolation for Image Scaling" by Paul Bourke,
         ///           http://astronomy.swin.edu.au/%7Epbourke/colour/bicubic/
         /// </remarks>
-        public void BicubicFitSurface(MaskSurface source)
+        public unsafe void FitSurface(MaskSurface source)
         {
-            float leftF = (1 * (float)(width - 1)) / (float)(source.width - 1);
-            float topF = (1 * (height - 1)) / (float)(source.height - 1);
-            float rightF = ((float)(source.width - 3) * (float)(width - 1)) / (float)(source.width - 1);
-            float bottomF = ((float)(source.Height - 3) * (float)(height - 1)) / (float)(source.height - 1);
+            float lastRowIndex = height - 1;
+            float lastColumnIndex = width - 1;
 
-            int left = (int)Math.Ceiling((double)leftF);
-            int top = (int)Math.Ceiling((double)topF);
-            int right = (int)Math.Floor((double)rightF);
-            int bottom = (int)Math.Floor((double)bottomF);
+            IntPtr srcColCachePtr = IntPtr.Zero;
 
-            Rectangle[] rois = new Rectangle[] {
-                                                   Rectangle.FromLTRB(left, top, right, bottom),
-                                                   new Rectangle(0, 0, width, top),
-                                                   new Rectangle(0, top, left, height - top),
-                                                   new Rectangle(right, top, width - right, height - top),
-                                                   new Rectangle(left, bottom, right - left, height - bottom)
-                                               };
-            Rectangle dstRoi = Bounds;
-            for (int i = 0; i < rois.Length; ++i)
+            try
             {
-                rois[i].Intersect(dstRoi);
+                float* srcColCache;
 
-                if (rois[i].Width > 0 && rois[i].Height > 0)
+                if (width > 128)
                 {
-                    if (i == 0)
-                    {
-                        BicubicFitSurfaceUnchecked(source, rois[i]);
-                    }
-                    else
-                    {
-                        BicubicFitSurfaceChecked(source, rois[i]);
-                    }
+                    srcColCachePtr = Memory.Allocate((ulong)width * sizeof(float), MemoryAllocationFlags.Default);
+                    srcColCache = (float*)srcColCachePtr;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Implements bicubic filtering with bounds checking at every pixel.
-        /// </summary>
-        private unsafe void BicubicFitSurfaceChecked(MaskSurface source, Rectangle dstRoi)
-        {
-            Rectangle roi = Rectangle.Intersect(dstRoi, Bounds);
-            Rectangle roiIn = Rectangle.Intersect(dstRoi, new Rectangle(1, 1, width - 1, height - 1));
-
-            IntPtr rColCacheIP = Memory.Allocate(4 * (long)roi.Width * (long)sizeof(double), false);
-            double* rColCache = (double*)rColCacheIP.ToPointer();
-
-            // Precompute and then cache the value of R() for each column
-            for (int dstX = roi.Left; dstX < roi.Right; ++dstX)
-            {
-                double srcColumn = (double)(dstX * (source.width - 1)) / (double)(width - 1);
-                double srcColumnFloor = Math.Floor(srcColumn);
-                double srcColumnFrac = srcColumn - srcColumnFloor;
-                for (int m = -1; m <= 2; ++m)
+                else
                 {
-                    int index = (m + 1) + ((dstX - roi.Left) * 4);
-                    double x = m - srcColumnFrac;
-                    rColCache[index] = R(x);
-                }
-            }
-
-            // Set this up so we can cache the R()'s for every row
-            double* rRowCache = stackalloc double[4];
-
-            for (int dstY = roi.Top; dstY < roi.Bottom; ++dstY)
-            {
-                double srcRow = (double)(dstY * (source.height - 1)) / (double)(height - 1);
-                double srcRowFloor = (double)Math.Floor(srcRow);
-                double srcRowFrac = srcRow - srcRowFloor;
-                int srcRowInt = (int)srcRow;
-                byte* dstPtr = GetPointAddressUnchecked(roi.Left, dstY);
-
-                // Compute the R() values for this row
-                for (int n = -1; n <= 2; ++n)
-                {
-                    double x = srcRowFrac - n;
-                    rRowCache[n + 1] = R(x);
+                    float* stackAllocPtr = stackalloc float[width];
+                    srcColCache = stackAllocPtr;
                 }
 
-                // See Perf Note below
-                //int nFirst = Math.Max(-srcRowInt, -1);
-                //int nLast = Math.Min(source.height - srcRowInt - 1, 2);
-
-                for (int dstX = roi.Left; dstX < roi.Right; dstX++)
+                // Precompute the source column indexes.
+                for (int x = 0; x < width; x++)
                 {
-                    double srcColumn = (double)(dstX * (source.width - 1)) / (double)(width - 1);
-                    double srcColumnFloor = Math.Floor(srcColumn);
-                    double srcColumnFrac = srcColumn - srcColumnFloor;
-                    int srcColumnInt = (int)srcColumn;
+                    float u = x / lastColumnIndex;
 
-                    double graySum = 0;
-                    double alphaSum = 0;
-                    double totalWeight = 0;
+                    srcColCache[x] = (u * source.Width) - 0.5f;
+                }
 
-                    // See Perf Note below
-                    //int mFirst = Math.Max(-srcColumnInt, -1);
-                    //int mLast = Math.Min(source.width - srcColumnInt - 1, 2);
+                for (int y = 0; y < height; y++)
+                {
+                    byte* destRow = GetRowAddressUnchecked(y);
+                    float v = y / lastRowIndex;
 
-                    byte* srcPtr = source.GetPointAddressUnchecked(srcColumnInt - 1, srcRowInt - 1);
+                    float srcY = (v * source.Height) - 0.5f;
+                    int yint = (int)srcY;
+                    float yfract = srcY - (float)Math.Floor(srcY);
 
-                    for (int n = -1; n <= 2; ++n)
+                    for (int x = 0; x < width; x++)
                     {
-                        int srcY = srcRowInt + n;
+                        float srcX = srcColCache[x];
+                        int xint = (int)srcX;
+                        float xfract = srcX - (float)Math.Floor(srcX);
 
-                        for (int m = -1; m <= 2; ++m)
+                        // 1st row
+                        byte p00 = *source.GetPointAddressClamped(xint - 1, yint - 1);
+                        byte p10 = *source.GetPointAddressClamped(xint + 0, yint - 1);
+                        byte p20 = *source.GetPointAddressClamped(xint + 1, yint - 1);
+                        byte p30 = *source.GetPointAddressClamped(xint + 2, yint - 1);
+
+                        // 2nd row
+                        byte p01 = *source.GetPointAddressClamped(xint - 1, yint + 0);
+                        byte p11 = *source.GetPointAddressClamped(xint + 0, yint + 0);
+                        byte p21 = *source.GetPointAddressClamped(xint + 1, yint + 0);
+                        byte p31 = *source.GetPointAddressClamped(xint + 2, yint + 0);
+
+                        // 3rd row
+                        byte p02 = *source.GetPointAddressClamped(xint - 1, yint + 1);
+                        byte p12 = *source.GetPointAddressClamped(xint + 0, yint + 1);
+                        byte p22 = *source.GetPointAddressClamped(xint + 1, yint + 1);
+                        byte p32 = *source.GetPointAddressClamped(xint + 2, yint + 1);
+
+                        // 4th row
+                        byte p03 = *source.GetPointAddressClamped(xint - 1, yint + 2);
+                        byte p13 = *source.GetPointAddressClamped(xint + 0, yint + 2);
+                        byte p23 = *source.GetPointAddressClamped(xint + 1, yint + 2);
+                        byte p33 = *source.GetPointAddressClamped(xint + 2, yint + 2);
+
+                        float gray0 = CubicHermite(p00, p10, p20, p30, xfract);
+                        float gray1 = CubicHermite(p01, p11, p21, p31, xfract);
+                        float gray2 = CubicHermite(p02, p12, p22, p32, xfract);
+                        float gray3 = CubicHermite(p03, p13, p23, p33, xfract);
+
+                        float gray = CubicHermite(gray0, gray1, gray2, gray3, yfract);
+
+                        if (gray < 0)
                         {
-                            // Perf Note: It actually benchmarks faster on my system to do
-                            // a bounds check for every (m,n) than it is to limit the loop
-                            // to nFirst-Last and mFirst-mLast.
-                            // I'm leaving the code above, albeit commented out, so that
-                            // benchmarking between these two can still be performed.
-                            if (source.IsVisible(srcColumnInt + m, srcY))
-                            {
-                                double w0 = rColCache[(m + 1) + (4 * (dstX - roi.Left))];
-                                double w1 = rRowCache[n + 1];
-                                double w = w0 * w1;
-
-                                graySum += *srcPtr * w * 255.0;
-                                alphaSum += 255.0 * w;
-
-                                totalWeight += w;
-                            }
-
-                            ++srcPtr;
+                            gray = 0;
+                        }
+                        else if (gray > 255)
+                        {
+                            gray = 255;
                         }
 
-                        srcPtr = ((byte*)(srcPtr - 4) + source.stride);
+                        *destRow = (byte)gray;
+                        destRow++;
                     }
-
-                    double alpha = alphaSum / totalWeight;
-                    double gray;
-
-                    if (alpha == 0)
-                    {
-                        gray = 0;
-                    }
-                    else
-                    {
-                        gray = graySum / alphaSum;
-
-                        // add 0.5 to ensure truncation to uint results in rounding
-                        gray += 0.5;
-                    }
-
-                    *dstPtr = (byte)gray;
-                    ++dstPtr;
-                } // for (dstX...
-            } // for (dstY...
-
-            Memory.Free(rColCacheIP);
-        }
-
-        /// <summary>
-        /// Implements bicubic filtering with NO bounds checking at any pixel.
-        /// </summary>
-        private unsafe void BicubicFitSurfaceUnchecked(MaskSurface source, Rectangle dstRoi)
-        {
-            Rectangle roi = Rectangle.Intersect(dstRoi, Bounds);
-            Rectangle roiIn = Rectangle.Intersect(dstRoi, new Rectangle(1, 1, width - 1, height - 1));
-
-            IntPtr rColCacheIP = Memory.Allocate(4 * (long)roi.Width * (long)sizeof(double), false);
-            double* rColCache = (double*)rColCacheIP.ToPointer();
-
-            // Precompute and then cache the value of R() for each column
-            for (int dstX = roi.Left; dstX < roi.Right; ++dstX)
-            {
-                double srcColumn = (double)(dstX * (source.width - 1)) / (double)(width - 1);
-                double srcColumnFloor = Math.Floor(srcColumn);
-                double srcColumnFrac = srcColumn - srcColumnFloor;
-
-                for (int m = -1; m <= 2; ++m)
-                {
-                    int index = (m + 1) + ((dstX - roi.Left) * 4);
-                    double x = m - srcColumnFrac;
-                    rColCache[index] = R(x);
                 }
             }
-
-            // Set this up so we can cache the R()'s for every row
-            double* rRowCache = stackalloc double[4];
-
-            for (int dstY = roi.Top; dstY < roi.Bottom; ++dstY)
+            finally
             {
-                double srcRow = (double)(dstY * (source.height - 1)) / (double)(height - 1);
-                double srcRowFloor = Math.Floor(srcRow);
-                double srcRowFrac = srcRow - srcRowFloor;
-                int srcRowInt = (int)srcRow;
-                byte* dstPtr = GetPointAddressUnchecked(roi.Left, dstY);
-
-                // Compute the R() values for this row
-                for (int n = -1; n <= 2; ++n)
+                if (srcColCachePtr != IntPtr.Zero)
                 {
-                    double x = srcRowFrac - n;
-                    rRowCache[n + 1] = R(x);
+                    Memory.Free(srcColCachePtr);
+                    srcColCachePtr = IntPtr.Zero;
                 }
+            }
+        }
 
-                rColCache = (double*)rColCacheIP.ToPointer();
-                byte* srcRowPtr = source.GetRowAddressUnchecked(srcRowInt - 1);
+        // From https://blog.demofox.org/2015/08/15/resizing-images-with-bicubic-interpolation/
+        // t is a value that goes from 0 to 1 to interpolate in a C1 continuous way across uniformly sampled data points.
+        // when t is 0, this will return B.  When t is 1, this will return C. Inbetween values will return an interpolation
+        // between B and C.  A and B are used to calculate slopes at the edges.
+        private static float CubicHermite(float A, float B, float C, float D, float t)
+        {
+            float a = -A / 2.0f + (3.0f * B) / 2.0f - (3.0f * C) / 2.0f + D / 2.0f;
+            float b = A - (5.0f * B) / 2.0f + 2.0f * C - D / 2.0f;
+            float c = -A / 2.0f + C / 2.0f;
+            float d = B;
 
-                for (int dstX = roi.Left; dstX < roi.Right; dstX++)
-                {
-                    double srcColumn = (double)(dstX * (source.width - 1)) / (double)(width - 1);
-                    double srcColumnFloor = Math.Floor(srcColumn);
-                    double srcColumnFrac = srcColumn - srcColumnFloor;
-                    int srcColumnInt = (int)srcColumn;
+            return a * t * t * t + b * t * t + c * t + d;
+        }
 
-                    double graySum = 0;
-                    double alphaSum = 0;
-                    double totalWeight = 0;
+        private unsafe byte* GetPointAddressClamped(int x, int y)
+        {
+            if (x < 0)
+            {
+                x = 0;
+            }
+            else if (x >= width)
+            {
+                x = width - 1;
+            }
 
-                    byte* srcPtr = srcRowPtr + srcColumnInt - 1;
-                    for (int n = 0; n <= 3; ++n)
-                    {
-                        double w0 = rColCache[0] * rRowCache[n];
-                        double w1 = rColCache[1] * rRowCache[n];
-                        double w2 = rColCache[2] * rRowCache[n];
-                        double w3 = rColCache[3] * rRowCache[n];
+            if (y < 0)
+            {
+                y = 0;
+            }
+            else if (y >= height)
+            {
+                y = height - 1;
+            }
 
-                        double a0 = 255.0;
-                        double a1 = 255.0;
-                        double a2 = 255.0;
-                        double a3 = 255.0;
-
-                        alphaSum += (a0 * w0) + (a1 * w1) + (a2 * w2) + (a3 * w3);
-                        totalWeight += w0 + w1 + w2 + w3;
-
-                        graySum += (a0 * srcPtr[0] * w0) + (a1 * srcPtr[1] * w1) + (a2 * srcPtr[2] * w2) + (a3 * srcPtr[3] * w3);
-
-                        srcPtr = ((byte*)srcPtr + source.stride);
-                    }
-
-                    double alpha = alphaSum / totalWeight;
-
-                    double gray;
-
-                    if (alpha == 0)
-                    {
-                        gray = 0;
-                    }
-                    else
-                    {
-                        gray = graySum / alphaSum;
-                        // add 0.5 to ensure truncation to uint results in rounding
-                        gray += 0.5;
-                    }
-
-                    *dstPtr = (byte)gray;
-                    ++dstPtr;
-                    rColCache += 4;
-                } // for (dstX...
-            } // for (dstY...
-
-            Memory.Free(rColCacheIP);
+            return GetPointAddressUnchecked(x, y);
         }
 
         /// <summary>
