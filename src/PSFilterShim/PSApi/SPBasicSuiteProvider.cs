@@ -559,7 +559,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("block: 0x{0}, size: {1}", block.ToHexString(), newSize));
 #endif
-            if (block == null)
+            if (newblock == null)
             {
                 return PSError.kSPBadParameterError;
             }
