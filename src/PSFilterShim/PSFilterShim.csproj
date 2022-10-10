@@ -62,6 +62,6 @@
     <ProjectReference Include="..\PSFilterPdn.csproj" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="call &quot;$(DevEnvDir)..\tools\VsDevCmd.bat&quot;&#xD;&#xA;editbin.exe /NXCOMPAT:NO &quot;$(TargetPath)&quot; &#xD;&#xA;&#xD;&#xA;copy &quot;$(TargetPath)&quot; &quot;D:\Program Files\Paint.NET\Effects&quot; /y" />
+    <Exec Command="call &quot;$(DevEnvDir)..\tools\VsDevCmd.bat&quot;&#xD;&#xA;editbin.exe /NXCOMPAT:NO &quot;$(TargetPath)&quot; &#xD;&#xA;&#xD;&#xA;copy &quot;$(TargetPath)&quot; &quot;D:\src\paint.net\PaintDotNet\bin\Debug\Effects&quot; /y" />
   </Target>
 </Project>

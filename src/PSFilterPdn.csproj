@@ -151,6 +151,6 @@
     <EmbeddedResource Include="Resources\Icons\XPThemedExpand.png" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\Program Files\Paint.NET\Effects&quot; /y" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\src\paint.net\PaintDotNet\bin\Debug\Effects&quot; /y" />
   </Target>
 </Project>
