@@ -10,8 +10,10 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PaintDotNet;
 using PSFilterPdn.Interop;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -39,30 +41,57 @@ namespace PSFilterPdn
         }
 
         /// <summary>
-        /// Loads a shortcut from a file.
+        /// Attempts to get the shortcut target path.
         /// </summary>
-        /// <param name="linkPath">The shortcut to load.</param>
-        public bool Load(string linkPath)
+        /// <param name="path">The shortcut to load.</param>
+        /// <param name="targetPath">The path of the shortcut target.</param>
+        /// <returns>
+        /// <see langword="true"/> if the shortcut target path was retrieved; otherwise, <see langword="false"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="path"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="path"/> is empty.</exception>
+        public unsafe bool TryGetTargetPath(string path, [NotNullWhen(true)] out string targetPath)
         {
-            return ((NativeInterfaces.IPersistFile)shellLink).Load(linkPath, NativeConstants.STGM_READ) == NativeConstants.S_OK;
-        }
+            ArgumentNullException.ThrowIfNull(path, nameof(path));
 
-        /// <summary>
-        /// Gets the target path of the shortcut.
-        /// </summary>
-        public string Path
-        {
-            get
+            if (path.Length == 0)
             {
-                StringBuilder sb = new StringBuilder(NativeConstants.MAX_PATH);
-
-                if (shellLink.GetPath(sb, sb.Capacity, IntPtr.Zero, 0U) != NativeConstants.S_OK)
-                {
-                    return string.Empty;
-                }
-
-                return sb.ToString();
+                ExceptionUtil.ThrowArgumentException("Must not be empty.", nameof(path));
             }
+
+            if (disposed)
+            {
+                ExceptionUtil.ThrowObjectDisposedException(nameof(ShellLink));
+            }
+
+            int hr;
+
+            fixed (char* pszFileName = path)
+            {
+                hr = ((NativeInterfaces.IPersistFile)shellLink).Load((ushort*)pszFileName, NativeConstants.STGM_READ);
+            }
+
+            if (hr == NativeConstants.S_OK)
+            {
+                const int cchMaxPath = NativeConstants.MAX_PATH;
+
+                // We use stackalloc instead of a an ArrayPool because the IShellLinkW.GetPath method
+                // does not provide the length of the native string.
+                // The runtime will determine the length of the native string when it reads from the
+                // allocated buffer.
+                char* pszFile = stackalloc char[cchMaxPath];
+
+                hr = shellLink.GetPath((ushort*)pszFile, cchMaxPath, IntPtr.Zero, 0U);
+
+                if (hr == NativeConstants.S_OK)
+                {
+                    targetPath = new string(pszFile);
+                    return true;
+                }
+            }
+
+            targetPath = null;
+            return false;
         }
 
         /// <summary>

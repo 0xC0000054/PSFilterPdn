@@ -981,14 +981,14 @@ namespace PSFilterPdn
         {
             public Dictionary<string, List<TreeNodeEx>> items;
             public string[] directories;
-            public SearchOption searchOption;
+            public bool recurseSubDirectories;
 
             public UpdateFilterListParam(ICollection<string> searchDirectories, bool searchSubDirectories)
             {
                 items = null;
                 directories = new string[searchDirectories.Count];
                 searchDirectories.CopyTo(directories, 0);
-                searchOption = searchSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+                recurseSubDirectories = searchSubDirectories;
             }
         }
 
@@ -1108,16 +1108,16 @@ namespace PSFilterPdn
             for (int i = 0; i < args.directories.Length; i++)
             {
                 string directory = args.directories[i];
-                SearchOption searchOption = args.searchOption;
+                bool recurseSubDirectories = args.recurseSubDirectories;
                 if (i == 0 && foundEffectsDir)
                 {
                     // The sub directories of the Effects folder are always searched.
-                    searchOption = SearchOption.AllDirectories;
+                    recurseSubDirectories = true;
                 }
 
                 worker.ReportProgress(i, Path.GetFileName(directory));
 
-                using (FileEnumerator enumerator = new FileEnumerator(directory, ".8bf", searchOption, true))
+                using (FileEnumerator enumerator = new FileEnumerator(directory, ".8bf", recurseSubDirectories, true))
                 {
                     while (enumerator.MoveNext())
                     {

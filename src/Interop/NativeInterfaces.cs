@@ -24,7 +24,7 @@ namespace PSFilterPdn.Interop
         {
             /// <summary>Retrieves the path and file name of a Shell link object</summary>
             [PreserveSig]
-            int GetPath([Out(), MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszFile, int cchMaxPath, IntPtr pfd, uint fFlags);
+            unsafe int GetPath(ushort* pszFile, int cchMaxPath, IntPtr pfd, uint fFlags);
             /// <summary>Retrieves the list of item identifiers for a Shell link object</summary>
             [PreserveSig]
             int GetIDList(out IntPtr ppidl);
@@ -33,19 +33,19 @@ namespace PSFilterPdn.Interop
             int SetIDList(IntPtr pidl);
             /// <summary>Retrieves the description string for a Shell link object</summary>
             [PreserveSig]
-            int GetDescription([Out(), MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszName, int cchMaxName);
+            unsafe int GetDescription(ushort* pszName, int cchMaxName);
             /// <summary>Sets the description for a Shell link object. The description can be any application-defined string</summary>
             [PreserveSig]
             int SetDescription([MarshalAs(UnmanagedType.LPWStr)] string pszName);
             /// <summary>Retrieves the name of the working directory for a Shell link object</summary>
             [PreserveSig]
-            int GetWorkingDirectory([Out(), MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszDir, int cchMaxPath);
+            unsafe int GetWorkingDirectory(ushort* pszDir, int cchMaxPath);
             /// <summary>Sets the name of the working directory for a Shell link object</summary>
             [PreserveSig]
             int SetWorkingDirectory([MarshalAs(UnmanagedType.LPWStr)] string pszDir);
             /// <summary>Retrieves the command-line arguments associated with a Shell link object</summary>
             [PreserveSig]
-            int GetArguments([Out(), MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszArgs, int cchMaxPath);
+            unsafe int GetArguments(ushort* pszArgs, int cchMaxPath);
             /// <summary>Sets the command-line arguments for a Shell link object</summary>
             [PreserveSig]
             int SetArguments([MarshalAs(UnmanagedType.LPWStr)] string pszArgs);
@@ -63,19 +63,19 @@ namespace PSFilterPdn.Interop
             int SetShowCmd(int iShowCmd);
             /// <summary>Retrieves the location (path and index) of the icon for a Shell link object</summary>
             [PreserveSig]
-            int GetIconLocation([Out(), MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszIconPath, int cchIconPath, out int piIcon);
+            unsafe int GetIconLocation(ushort* pszIconPath, int cchIconPath, out int piIcon);
             /// <summary>Sets the location (path and index) of the icon for a Shell link object</summary>
             [PreserveSig]
-            int SetIconLocation([MarshalAs(UnmanagedType.LPWStr)] string pszIconPath, int iIcon);
+            unsafe int SetIconLocation(ushort* pszIconPath, int iIcon);
             /// <summary>Sets the relative path to the Shell link object</summary>
             [PreserveSig]
-            int SetRelativePath([MarshalAs(UnmanagedType.LPWStr)] string pszPathRel, uint dwReserved);
+            unsafe int SetRelativePath(ushort* pszPathRel, int dwReserved);
             /// <summary>Attempts to find the target of a Shell link, even if it has been moved or renamed</summary>
             [PreserveSig]
             int Resolve(IntPtr hwnd, uint fFlags);
             /// <summary>Sets the path and file name of a Shell link object</summary>
             [PreserveSig]
-            int SetPath([MarshalAs(UnmanagedType.LPWStr)] string pszFile);
+            unsafe int SetPath(ushort* pszFile);
         }
 
         [ComImport(), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid(NativeConstants.IID_IPersist)]
@@ -95,16 +95,16 @@ namespace PSFilterPdn.Interop
             int IsDirty();
 
             [PreserveSig]
-            int Load([In, MarshalAs(UnmanagedType.LPWStr)] string pszFileName, uint dwMode);
+            unsafe int Load(ushort* pszFileName, uint dwMode);
 
             [PreserveSig]
-            int Save([In, MarshalAs(UnmanagedType.LPWStr)] string pszFileName, [In, MarshalAs(UnmanagedType.Bool)] bool fRemember);
+            unsafe int Save(ushort* pszFileName, [In, MarshalAs(UnmanagedType.Bool)] bool fRemember);
 
             [PreserveSig]
-            int SaveCompleted([In, MarshalAs(UnmanagedType.LPWStr)] string pszFileName);
+            unsafe int SaveCompleted(ushort* pszFileName);
 
             [PreserveSig]
-            int GetCurFile([In, MarshalAs(UnmanagedType.LPWStr)] string ppszFileName);
+            unsafe int GetCurFile(ushort* ppszFileName);
         }
 
         [ComImport(), Guid(NativeConstants.IID_IModalWindow), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]

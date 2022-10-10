@@ -10,81 +10,83 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using Microsoft.Win32.SafeHandles;
+using PaintDotNet;
 using PSFilterPdn.Interop;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Enumeration;
+
+#nullable enable
 
 namespace PSFilterPdn
 {
     /// <summary>
-    /// Enumerates through a directory using the native API.
+    /// Enumerates through the files in a directory, optionally dereferencing shortcuts.
     /// </summary>
-    internal sealed class FileEnumerator : IEnumerator<string>
+    internal sealed class FileEnumerator : Disposable, IEnumerator<string>
     {
         private const int STATE_INIT = 0;
-        private const int STATE_FIND_FILES = 1;
-        private const int STATE_FINISH = 2;
+        private const int STATE_FIND_NEXT_FILE = 1;
+        private const int STATE_SEARCH_NEXT_DIRECTORY = 2;
+        private const int STATE_FINISH = 3;
 
-        private SafeFindHandle handle;
-        private ShellLink shellLink;
-        private Queue<SearchData> searchDirectories;
-        private SearchData searchData;
-        private string current;
         private int state;
-        private bool disposed;
-        private string shellLinkTarget;
-        private HashSet<DirectoryIdentifier> visitedDirectories;
-
-        private readonly NativeEnums.FindExInfoLevel infoLevel;
-        private readonly NativeEnums.FindExAdditionalFlags additionalFlags;
+        private FileExtensionEnumerator? fileEnumerator;
+        private ShellLink? shellLink;
+        private string? shellLinkTarget;
+        private string? current;
         private readonly string fileExtension;
-        private readonly SearchOption searchOption;
+        private readonly EnumerationOptions enumerationOptions;
         private readonly bool dereferenceLinks;
-        private readonly uint oldErrorMode;
+        private readonly Queue<string> searchDirectories;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileEnumerator"/> class.
         /// </summary>
         /// <param name="path">The directory to search.</param>
         /// <param name="fileExtension">The file extension to search for.</param>
-        /// <param name="searchOption">
-        /// One of the <see cref="SearchOption"/> values that specifies whether the search operation should include
-        /// only the current directory or should include all subdirectories.
+        /// <param name="recurseSubdirectories">
+        /// <see langword="true"/> if the subdirectories of <paramref name="path"/> should be included
+        /// in the search; otherwise, <see langword="false"/>.
         /// </param>
-        /// <param name="dereferenceLinks">if set to <c>true</c> search the target of shortcuts.</param>
+        /// <param name="dereferenceLinks">
+        /// <see langword="true"/> if shortcut targets should be included in the search; otherwise, <see langword="false"/>.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="path"/> in null.
         /// -or-
         /// <paramref name="fileExtension"/> is null.
         /// </exception>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="searchOption"/> is not a valid <see cref="SearchOption"/> value.</exception>
-        /// <exception cref="PathTooLongException">The specified path, file name, or combined exceed the system-defined maximum length.</exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="path"/> is a 0 length string, or contains only white-space,
+        /// or contains one or more invalid characters as defined by <see cref="Path.GetInvalidPathChars"/>.</exception>
+        /// <exception cref="DirectoryNotFoundException">The directory specified by <paramref name="path"/> does not exist.</exception>
+        /// <exception cref="IOException"><paramref name="path"/> is a file.</exception>
+        /// <exception cref="PathTooLongException">
+        /// The specified path, file name, or combined exceed the system-defined maximum length.
+        /// For example, on Windows-based platforms, paths must be less than 248 characters and file names must be less than 260 characters.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission.</exception>
         /// <exception cref="SecurityException">The caller does not have the required permission.</exception>
-        public FileEnumerator(string path, string fileExtension, SearchOption searchOption, bool dereferenceLinks)
+        public FileEnumerator(string path, string fileExtension, bool recurseSubdirectories, bool dereferenceLinks)
         {
-            if (path == null)
+            if (path is null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
 
-            if (fileExtension == null)
+            if (fileExtension is null)
             {
                 throw new ArgumentNullException(nameof(fileExtension));
             }
-            if (searchOption != SearchOption.AllDirectories && searchOption != SearchOption.TopDirectoryOnly)
-            {
-                throw new ArgumentOutOfRangeException(nameof(searchOption));
-            }
 
-            string fullPath = Path.GetFullPath(path);
-
-            searchData = new SearchData(fullPath);
             this.fileExtension = fileExtension;
-            this.searchOption = searchOption;
-            searchDirectories = new Queue<SearchData>();
+            enumerationOptions = new EnumerationOptions
+            {
+                RecurseSubdirectories = recurseSubdirectories
+            };
+            searchDirectories = new Queue<string>();
             if (dereferenceLinks)
             {
                 shellLink = new ShellLink();
@@ -96,263 +98,28 @@ namespace PSFilterPdn
                 this.dereferenceLinks = false;
             }
             shellLinkTarget = null;
-            visitedDirectories = new HashSet<DirectoryIdentifier>();
-
-            if (OS.IsWindows7OrLater)
-            {
-                // Suppress the querying of short filenames and use a larger buffer on Windows 7 and later.
-                infoLevel = NativeEnums.FindExInfoLevel.Basic;
-                additionalFlags = NativeEnums.FindExAdditionalFlags.LargeFetch;
-            }
-            else
-            {
-                infoLevel = NativeEnums.FindExInfoLevel.Standard;
-                additionalFlags = NativeEnums.FindExAdditionalFlags.None;
-            }
-            oldErrorMode = SetErrorModeWrapper(NativeConstants.SEM_FAILCRITICALERRORS);
-            state = -1;
             current = null;
-            disposed = false;
-            Init();
-        }
 
-        private static uint SetErrorModeWrapper(uint newMode)
-        {
-            uint oldMode;
-
-            if (OS.IsWindows7OrLater)
+            try
             {
-                UnsafeNativeMethods.SetThreadErrorMode(newMode, out oldMode);
-            }
-            else
-            {
-                oldMode = UnsafeNativeMethods.SetErrorMode(newMode);
-            }
-
-            return oldMode;
-        }
-
-        private void Init()
-        {
-            WIN32_FIND_DATAW findData = new WIN32_FIND_DATAW();
-            string searchPath = Path.Combine(searchData.path, "*");
-            handle = UnsafeNativeMethods.FindFirstFileExW(
-                searchPath,
-                infoLevel,
-                findData,
-                NativeEnums.FindExSearchOp.NameMatch,
-                IntPtr.Zero,
-                additionalFlags);
-
-            if (handle.IsInvalid)
-            {
-                handle.Dispose();
-                handle = null;
-
-                state = STATE_FINISH;
-            }
-            else
-            {
-                AddToVisitedDirectories(searchData.path);
+                fileEnumerator = CreateFileEnumerator(path);
                 state = STATE_INIT;
-                if (FirstFileIncluded(findData))
+            }
+            catch (Exception)
+            {
+                if (shellLink is not null)
                 {
-                    current = CreateFilePath(findData);
+                    shellLink.Dispose();
+                    shellLink = null;
                 }
+                throw;
             }
-        }
-
-        private bool FileMatchesFilter(string file)
-        {
-            return file.EndsWith(fileExtension, StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
-        /// Resolves the shortcut target.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <param name="isDirectory">set to <c>true</c> if the target is a directory.</param>
-        /// <returns>The target of the shortcut; or null if the target does not exist.</returns>
-        private static string ResolveShortcutTarget(string path, out bool isDirectory)
-        {
-            isDirectory = false;
-
-            if (!string.IsNullOrEmpty(path))
-            {
-                uint attributes = UnsafeNativeMethods.GetFileAttributesW(path);
-                if (attributes != NativeConstants.INVALID_FILE_ATTRIBUTES)
-                {
-                    isDirectory = (attributes & NativeConstants.FILE_ATTRIBUTE_DIRECTORY) == NativeConstants.FILE_ATTRIBUTE_DIRECTORY;
-                    return path;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Adds the specified path to the directories that have been processed.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <returns><c>true</c> if <paramref name="path"/> is a new directory; otherwise, <c>false</c>.</returns>
-        private unsafe bool AddToVisitedDirectories(string path)
-        {
-            bool result = false;
-
-            // FILE_FLAG_BACKUP_SEMANTICS is required to open a directory handle.
-            // See https://msdn.microsoft.com/en-us/library/windows/desktop/aa365258(v=vs.85).aspx
-            // The directory handle is opened with write and delete permissions so that other processes
-            // can change the files and subdirectories it contains.
-            using (SafeFileHandle directoryHandle = UnsafeNativeMethods.CreateFileW(path, NativeConstants.GENERIC_READ,
-                   NativeConstants.FILE_SHARE_READ | NativeConstants.FILE_SHARE_WRITE | NativeConstants.FILE_SHARE_DELETE,
-                   IntPtr.Zero, NativeConstants.OPEN_EXISTING, NativeConstants.FILE_FLAG_BACKUP_SEMANTICS, IntPtr.Zero))
-            {
-                if (!directoryHandle.IsInvalid)
-                {
-                    // The FILE_ID_INFO and BY_HANDLE_FILE_INFORMATION structures contain fields that uniquely identify a file or directory.
-                    // This information is used to track the directories that have been processed and prevent
-                    // an infinite loop if a recursive NTFS junction point or directory shortcut is encountered.
-
-                    if (OS.IsWindows8OrLater)
-                    {
-                        NativeStructs.FILE_ID_INFO fileInfo;
-                        uint bufferSize = (uint)sizeof(NativeStructs.FILE_ID_INFO);
-
-                        if (UnsafeNativeMethods.GetFileInformationByHandleEx(directoryHandle, NativeEnums.FILE_INFO_BY_HANDLE_CLASS.FileIdInfo, &fileInfo, bufferSize))
-                        {
-                            result = visitedDirectories.Add(new DirectoryIdentifier(fileInfo));
-                        }
-                    }
-                    else
-                    {
-                        NativeStructs.BY_HANDLE_FILE_INFORMATION fileInfo;
-
-                        if (UnsafeNativeMethods.GetFileInformationByHandle(directoryHandle, out fileInfo))
-                        {
-                            result = visitedDirectories.Add(new DirectoryIdentifier(fileInfo.dwVolumeSerialNumber, fileInfo.nFileIndexHigh, fileInfo.nFileIndexLow));
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Determines whether the specified path has not been searched.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified path has not been searched; otherwise, <c>false</c>.
-        /// </returns>
-        private bool IsNewDirectory(string path)
-        {
-            return AddToVisitedDirectories(path);
-        }
-
-        /// <summary>
-        /// Adds the directory to search list if it has not already been searched.
-        /// </summary>
-        /// <param name="findData">The find data.</param>
-        private void AddDirectoryToSearchList(WIN32_FIND_DATAW findData)
-        {
-            string path = Path.Combine(searchData.path, findData.cFileName);
-
-            if (IsNewDirectory(path))
-            {
-                searchDirectories.Enqueue(new SearchData(path));
-            }
-        }
-
-        private bool FirstFileIncluded(WIN32_FIND_DATAW findData)
-        {
-            if ((findData.dwFileAttributes & NativeConstants.FILE_ATTRIBUTE_DIRECTORY) == NativeConstants.FILE_ATTRIBUTE_DIRECTORY)
-            {
-                if (searchOption == SearchOption.AllDirectories && !findData.cFileName.Equals(".") && !findData.cFileName.Equals(".."))
-                {
-                    AddDirectoryToSearchList(findData);
-                }
-            }
-            else
-            {
-                return IsFileIncluded(findData);
-            }
-
-            return false;
-        }
-
-        private bool IsFileIncluded(WIN32_FIND_DATAW findData)
-        {
-            if (findData.cFileName.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase) && dereferenceLinks)
-            {
-                if (shellLink.Load(Path.Combine(searchData.path, findData.cFileName)))
-                {
-                    bool isDirectory;
-                    string target = ResolveShortcutTarget(shellLink.Path, out isDirectory);
-
-                    if (!string.IsNullOrEmpty(target))
-                    {
-                        if (isDirectory)
-                        {
-                            if (IsNewDirectory(target))
-                            {
-                                // If the shortcut target is a directory, add it to the search list.
-                                searchDirectories.Enqueue(new SearchData(target));
-                            }
-                        }
-                        else if (FileMatchesFilter(target))
-                        {
-                            shellLinkTarget = target;
-                            return true;
-                        }
-                    }
-                }
-            }
-            else if (FileMatchesFilter(findData.cFileName))
-            {
-                shellLinkTarget = null;
-
-                return true;
-            }
-
-            return false;
-        }
-
-        private string CreateFilePath(WIN32_FIND_DATAW findData)
-        {
-            return shellLinkTarget ?? Path.Combine(searchData.path, findData.cFileName);
         }
 
         /// <summary>
         /// Gets the element in the collection at the current position of the enumerator.
         /// </summary>
-        public string Current => current;
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            if (!disposed)
-            {
-                disposed = true;
-
-                if (handle != null)
-                {
-                    handle.Dispose();
-                    handle = null;
-                }
-
-                if (shellLink != null)
-                {
-                    shellLink.Dispose();
-                    shellLink = null;
-                }
-                current = null;
-                state = -1;
-                SetErrorModeWrapper(oldErrorMode);
-            }
-        }
+        public string Current => current!;
 
         /// <summary>
         /// Gets the element in the collection at the current position of the enumerator.
@@ -361,14 +128,19 @@ namespace PSFilterPdn
         {
             get
             {
-                if (current == null)
+                if (Current is null)
                 {
                     throw new InvalidOperationException();
                 }
 
-                return current;
+                return Current;
             }
         }
+
+        /// <summary>
+        /// Sets the enumerator to its initial position, which is before the first element in the collection.
+        /// </summary>
+        void IEnumerator.Reset() => throw new NotSupportedException();
 
         /// <summary>
         /// Advances the enumerator to the next element of the collection.
@@ -378,81 +150,72 @@ namespace PSFilterPdn
         /// </returns>
         public bool MoveNext()
         {
-            WIN32_FIND_DATAW findData = new WIN32_FIND_DATAW();
-
             switch (state)
             {
                 case STATE_INIT:
-                    state = STATE_FIND_FILES;
-
-                    if (current != null)
+                    if (fileEnumerator!.MoveNext())
                     {
-                        return true;
+                        state = STATE_FIND_NEXT_FILE;
+
+                        if (IsFileIncluded(fileEnumerator.Current))
+                        {
+                            current = CreateFilePath(fileEnumerator.Current);
+                            return true;
+                        }
+                        else
+                        {
+                            goto case STATE_FIND_NEXT_FILE;
+                        }
                     }
                     else
                     {
-                        goto case STATE_FIND_FILES;
+                        state = STATE_FINISH;
+                        goto case STATE_FINISH;
                     }
-                case STATE_FIND_FILES:
-                    do
+                case STATE_FIND_NEXT_FILE:
+                    while (fileEnumerator!.MoveNext())
                     {
-                        if (handle == null)
+                        if (IsFileIncluded(fileEnumerator.Current))
                         {
-                            searchData = searchDirectories.Dequeue();
+                            current = CreateFilePath(fileEnumerator.Current);
+                            return true;
+                        }
+                    }
 
-                            string searchPath = Path.Combine(searchData.path, "*");
-                            handle = UnsafeNativeMethods.FindFirstFileExW(
-                                searchPath,
-                                infoLevel,
-                                findData,
-                                NativeEnums.FindExSearchOp.NameMatch,
-                                IntPtr.Zero,
-                                additionalFlags);
+                    if (searchDirectories.Count > 0)
+                    {
+                        state = STATE_SEARCH_NEXT_DIRECTORY;
+                        goto case STATE_SEARCH_NEXT_DIRECTORY;
+                    }
+                    else
+                    {
+                        state = STATE_FINISH;
+                        goto case STATE_FINISH;
+                    }
+                case STATE_SEARCH_NEXT_DIRECTORY:
+                    while (searchDirectories.Count > 0)
+                    {
+                        fileEnumerator?.Dispose();
 
-                            if (handle.IsInvalid)
+                        // Additional search directories can be added if one of the folders that are being
+                        // searched contains a shortcut to a directory.
+                        fileEnumerator = CreateFileEnumerator(searchDirectories.Dequeue());
+
+                        if (fileEnumerator.MoveNext())
+                        {
+                            state = STATE_FIND_NEXT_FILE;
+
+                            if (IsFileIncluded(fileEnumerator.Current))
                             {
-                                handle.Dispose();
-                                handle = null;
-
-                                if (searchDirectories.Count > 0)
-                                {
-                                    continue;
-                                }
-                                else
-                                {
-                                    state = STATE_FINISH;
-                                    goto case STATE_FINISH;
-                                }
-                            }
-
-                            if (FirstFileIncluded(findData))
-                            {
-                                current = CreateFilePath(findData);
+                                current = CreateFilePath(fileEnumerator.Current);
                                 return true;
                             }
-                        }
-
-                        while (UnsafeNativeMethods.FindNextFileW(handle, findData))
-                        {
-                            if ((findData.dwFileAttributes & NativeConstants.FILE_ATTRIBUTE_DIRECTORY) == 0)
+                            else
                             {
-                                if (IsFileIncluded(findData))
-                                {
-                                    current = CreateFilePath(findData);
-                                    return true;
-                                }
-                            }
-                            else if (searchOption == SearchOption.AllDirectories && !findData.cFileName.Equals(".") && !findData.cFileName.Equals(".."))
-                            {
-                                AddDirectoryToSearchList(findData);
+                                goto case STATE_FIND_NEXT_FILE;
                             }
                         }
-
-                        handle.Dispose();
-                        handle = null;
-
-                    } while (searchDirectories.Count > 0);
-
+                    }
                     state = STATE_FINISH;
                     goto case STATE_FINISH;
                 case STATE_FINISH:
@@ -463,95 +226,100 @@ namespace PSFilterPdn
             return false;
         }
 
-        /// <summary>
-        /// Sets the enumerator to its initial position, which is before the first element in the collection.
-        /// </summary>
-        void IEnumerator.Reset()
+        protected override void Dispose(bool disposing)
         {
-            throw new NotSupportedException();
-        }
-
-        private struct DirectoryIdentifier : IEquatable<DirectoryIdentifier>
-        {
-            public readonly ulong volumeSerialNumber;
-            public readonly ulong fileIndexHigh;
-            public readonly ulong fileIndexLow;
-
-            public DirectoryIdentifier(uint volumeSerialNumber, uint fileIndexHigh, uint fileIndexLow)
+            if (disposing)
             {
-                this.volumeSerialNumber = volumeSerialNumber;
-                this.fileIndexHigh = fileIndexHigh;
-                this.fileIndexLow = fileIndexLow;
-            }
+                fileEnumerator?.Dispose();
 
-            public unsafe DirectoryIdentifier(NativeStructs.FILE_ID_INFO info)
-            {
-                volumeSerialNumber = info.VolumeSerialNumber;
-                // The FileId field stores the low index first.
-                fileIndexLow = *(ulong*)info.FileID;
-                fileIndexHigh = *(ulong*)(info.FileID + 8);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (obj is DirectoryIdentifier identifier)
+                if (shellLink is not null)
                 {
-                    return Equals(identifier);
+                    shellLink.Dispose();
+                    shellLink = null;
                 }
 
-                return false;
-            }
-
-            public bool Equals(DirectoryIdentifier other)
-            {
-                return volumeSerialNumber == other.volumeSerialNumber &&
-                       fileIndexHigh == other.fileIndexHigh &&
-                       fileIndexLow == other.fileIndexLow;
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = -1532359432;
-
-                unchecked
-                {
-                    hashCode = (hashCode * -1521134295) + volumeSerialNumber.GetHashCode();
-                    hashCode = (hashCode * -1521134295) + fileIndexHigh.GetHashCode();
-                    hashCode = (hashCode * -1521134295) + fileIndexLow.GetHashCode();
-                }
-
-                return hashCode;
-            }
-
-            public static bool operator ==(DirectoryIdentifier file1, DirectoryIdentifier file2)
-            {
-                return file1.Equals(file2);
-            }
-
-            public static bool operator !=(DirectoryIdentifier file1, DirectoryIdentifier file2)
-            {
-                return !file1.Equals(file2);
+                current = null;
+                state = -1;
             }
         }
 
-        private sealed class SearchData
-        {
-            public readonly string path;
+        private FileExtensionEnumerator CreateFileEnumerator(string path)
+            => new(path, enumerationOptions, fileExtension, dereferenceLinks);
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="SearchData"/> class.
-            /// </summary>
-            /// <param name="path">The path.</param>
-            /// <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
-            public SearchData(string path)
+        private string CreateFilePath(string path) => shellLinkTarget ?? path;
+
+        private unsafe bool IsFileIncluded(string path)
+        {
+            bool result = false;
+
+            if (path.EndsWith(fileExtension, StringComparison.OrdinalIgnoreCase))
             {
-                if (path == null)
+                shellLinkTarget = null;
+                result = true;
+            }
+            else if (path.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase) && dereferenceLinks)
+            {
+                if (shellLink!.TryGetTargetPath(path, out string target))
                 {
-                    throw new ArgumentNullException(nameof(path));
+                    if (!string.IsNullOrEmpty(target))
+                    {
+                        uint fileAttributes = UnsafeNativeMethods.GetFileAttributesW(target);
+
+                        if (fileAttributes != NativeConstants.INVALID_FILE_ATTRIBUTES)
+                        {
+                            if ((fileAttributes & NativeConstants.FILE_ATTRIBUTE_DIRECTORY) != 0)
+                            {
+                                // If the shortcut target is a directory, add it to the search list.
+                                searchDirectories.Enqueue(target);
+                            }
+                            else if (target.EndsWith(fileExtension, StringComparison.OrdinalIgnoreCase))
+                            {
+                                shellLinkTarget = target;
+                                result = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private sealed class FileExtensionEnumerator : FileSystemEnumerator<string>
+        {
+            private readonly bool dereferenceLinks;
+            private readonly string fileExtension;
+
+            public FileExtensionEnumerator(string directory,
+                                           EnumerationOptions options,
+                                           string fileExtension,
+                                           bool dereferenceLinks)
+                : base(directory, options)
+            {
+                ArgumentNullException.ThrowIfNull(fileExtension, nameof(fileExtension));
+
+                this.dereferenceLinks = dereferenceLinks;
+                this.fileExtension = fileExtension;
+            }
+
+            // The previous code always silently ignored errors when enumerating the directories.
+            protected override bool ContinueOnError(int error) => true;
+
+            protected override bool ShouldIncludeEntry(ref FileSystemEntry entry)
+            {
+                bool result = false;
+
+                if (!entry.IsDirectory)
+                {
+                    result = entry.FileName.EndsWith(fileExtension, StringComparison.OrdinalIgnoreCase)
+                             || (dereferenceLinks && entry.FileName.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase));
                 }
 
-                this.path = path;
+                return result;
             }
+
+            protected override string TransformEntry(ref FileSystemEntry entry)
+                => entry.ToFullPath();
         }
     }
 }
