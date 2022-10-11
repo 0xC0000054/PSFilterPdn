@@ -32,5 +32,12 @@ namespace PSFilterLoad.PSApi
 
         public const uint MEM_COMMIT = 0x1000;
         public const uint MEM_RELEASE = 0x8000;
+
+        internal const uint CC_RGBINIT = 0x00000001;
+        internal const uint CC_FULLOPEN = 0x00000002;
+        internal const uint CC_ENABLEHOOK = 0x00000010;
+        internal const uint CC_SOLIDCOLOR = 0x00000080;
+
+        internal const int WM_INITDIALOG = 0x0110;
     }
 }

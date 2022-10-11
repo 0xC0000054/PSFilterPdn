@@ -19,6 +19,7 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
+using System;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
@@ -82,6 +83,20 @@ namespace PSFilterLoad.PSApi
             internal int top;
             internal int right;
             internal int bottom;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal unsafe struct CHOOSECOLORW
+        {
+            public uint lStructSize;
+            public IntPtr hwndOwner;
+            public IntPtr hInstance;
+            public int rgbResult;
+            public int* lpCustColors;
+            public uint Flags;
+            public IntPtr lCustData;
+            public void* lpfnHook;
+            public ushort* lpTemplateName;
         }
     }
 }

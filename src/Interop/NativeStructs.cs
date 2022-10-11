@@ -123,5 +123,19 @@ namespace PSFilterPdn.Interop
             public ushort wProcessorLevel;
             public ushort wProcessorRevision;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal unsafe struct CHOOSECOLORW
+        {
+            public uint lStructSize;
+            public IntPtr hwndOwner;
+            public IntPtr hInstance;
+            public int rgbResult;
+            public int* lpCustColors;
+            public uint Flags;
+            public IntPtr lCustData;
+            public void* lpfnHook;
+            public ushort* lpTemplateName;
+        }
     }
 }

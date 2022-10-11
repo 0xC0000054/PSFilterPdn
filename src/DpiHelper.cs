@@ -17,6 +17,8 @@ namespace PSFilterPdn
 {
     internal static class DpiHelper
     {
+        public const int LogicalDpi = 96;
+
         private static readonly int SystemDpi = InitializeSystemDpi();
 
         public static int GetSystemDpi()
@@ -26,7 +28,7 @@ namespace PSFilterPdn
 
         private static int InitializeSystemDpi()
         {
-            int systemDpi = 96;
+            int systemDpi = LogicalDpi;
 
             using (SafeDCHandle hdc = SafeNativeMethods.GetDC(IntPtr.Zero))
             {

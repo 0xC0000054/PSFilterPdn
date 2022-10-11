@@ -66,6 +66,12 @@ namespace PSFilterPdn.Interop
 
         internal const int STGM_READ = 0;
 
+        internal const uint CC_RGBINIT = 0x00000001;
+        internal const uint CC_FULLOPEN = 0x00000002;
+        internal const uint CC_ENABLEHOOK = 0x00000010;
+        internal const uint CC_SOLIDCOLOR = 0x00000080;
+
+        internal const int WM_INITDIALOG = 0x0110;
         internal const int WM_PRINTCLIENT = 0x0318;
         internal const int WM_THEMECHANGED = 0x031A;
 

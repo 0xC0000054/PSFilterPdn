@@ -115,8 +115,7 @@ namespace PSFilterPdn
             fileNameLbl.Text = string.Empty;
             folderNameLbl.Text = string.Empty;
             searchDirectories = new List<string>();
-            PSFilterLoad.ColorPicker.UI.InitScaling(this);
-            highDpiMode = PSFilterLoad.ColorPicker.UI.GetXScaleFactor() > 1.0f;
+            highDpiMode = DeviceDpi > DpiHelper.LogicalDpi;
 
             // set the useDEPProxy flag when on a 32-bit OS.
             useDEPProxy = false;
@@ -694,7 +693,7 @@ namespace PSFilterPdn
                 ParameterDataPath = parameterDataFileName,
                 PseudoResourcePath = resourceDataFileName,
                 DescriptorRegistryPath = descriptorRegistryFileName,
-                PluginUISettings = new PluginUISettings(highDpiMode, BackColor, ForeColor)
+                PluginUISettings = new PluginUISettings(highDpiMode)
             };
 
             if (server != null)
@@ -854,7 +853,7 @@ namespace PSFilterPdn
 
                         try
                         {
-                            PluginUISettings pluginUISettings = new PluginUISettings(highDpiMode, BackColor, ForeColor);
+                            PluginUISettings pluginUISettings = new(highDpiMode);
                             using (LoadPsFilter lps = new LoadPsFilter(Effect.EnvironmentParameters, Handle, pluginUISettings))
                             {
                                 lps.SetAbortCallback(AbortCallback);

@@ -384,14 +384,14 @@ namespace PSFilterLoad.PSApi.PICA
             string prompt;
             if (zstringSuite.ConvertToString(promptZString, out prompt))
             {
-                PaintDotNet.ColorBgra? chosenColor = ColorPickerService.ShowColorPickerDialog(prompt);
+                ColorRgb24? chosenColor = ColorPickerService.ShowColorPickerDialog(prompt);
 
                 if (chosenColor.HasValue)
                 {
                     error = Make(colorID);
                     if (error == PSError.kSPNoError)
                     {
-                        PaintDotNet.ColorBgra color = chosenColor.Value;
+                        ColorRgb24 color = chosenColor.Value;
                         colors[*colorID] = new Color(ColorSpace.RGBSpace, color.R, color.G, color.B, 0);
                     }
                 }

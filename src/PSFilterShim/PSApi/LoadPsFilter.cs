@@ -239,8 +239,6 @@ namespace PSFilterLoad.PSApi
             progressProc = new ProgressProc(ProgressProc);
             abortProc = new TestAbortProc(AbortProc);
 
-            ColorPickerService.SetDialogColors(settings.PluginUISettings);
-
             channelPortsSuite = new ChannelPortsSuite(this);
             imageServicesSuite = new ImageServicesSuite();
             propertySuite = new PropertySuite(source.Width, source.Height, settings.PluginUISettings);
@@ -2081,15 +2079,15 @@ namespace PSFilterLoad.PSApi
 
                     if (err == PSError.noErr)
                     {
-                        short red = info->colorComponents[0];
-                        short green = info->colorComponents[1];
-                        short blue = info->colorComponents[2];
+                        byte red = (byte)info->colorComponents[0];
+                        byte green = (byte)info->colorComponents[1];
+                        byte blue = (byte)info->colorComponents[2];
 
-                        ColorBgra? chosenColor = ColorPickerService.ShowColorPickerDialog(name, red, green, blue);
+                        ColorRgb24? chosenColor = ColorPickerService.ShowColorPickerDialog(name, red, green, blue);
 
                         if (chosenColor.HasValue)
                         {
-                            ColorBgra color = chosenColor.Value;
+                            ColorRgb24 color = chosenColor.Value;
                             info->colorComponents[0] = color.R;
                             info->colorComponents[1] = color.G;
                             info->colorComponents[2] = color.B;

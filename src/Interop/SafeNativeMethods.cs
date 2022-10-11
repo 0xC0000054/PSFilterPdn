@@ -12,6 +12,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using static PSFilterPdn.Interop.NativeStructs;
 
 namespace PSFilterPdn.Interop
 {
@@ -118,5 +119,13 @@ namespace PSFilterPdn.Interop
 
         [DllImport("kernel32.dll", ExactSpelling = true)]
         internal static extern void GetSystemInfo(ref NativeStructs.SYSTEM_INFO lpSystemInfo);
+
+        [DllImport("user32.dll", ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern unsafe bool SetWindowTextW(IntPtr hWnd, ushort* lpString);
+
+        [DllImport("comdlg32.dll", ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern unsafe bool ChooseColorW(ref CHOOSECOLORW lppsd);
     }
 }
