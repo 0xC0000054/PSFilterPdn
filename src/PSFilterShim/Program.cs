@@ -16,6 +16,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using PSFilterLoad.PSApi;
 using PSFilterPdn;
 
@@ -72,6 +73,7 @@ namespace PSFilterShim
             pipeClient = new PSFilterShimPipeClient(pipeName);
 
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             RunFilter();
         }
