@@ -17,7 +17,7 @@ namespace PSFilterLoad.PSApi
 {
     [DataContract]
     [Serializable]
-    public sealed class PseudoResource
+    internal sealed class PseudoResource
     {
 #pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]

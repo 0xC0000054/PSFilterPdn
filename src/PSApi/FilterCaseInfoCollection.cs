@@ -17,7 +17,7 @@ using System.Collections.ObjectModel;
 namespace PSFilterLoad.PSApi
 {
     [Serializable]
-    public sealed class FilterCaseInfoCollection : ReadOnlyCollection<FilterCaseInfo>
+    internal sealed class FilterCaseInfoCollection : ReadOnlyCollection<FilterCaseInfo>
     {
         public FilterCaseInfoCollection(IList<FilterCaseInfo> list) : base(list)
         {

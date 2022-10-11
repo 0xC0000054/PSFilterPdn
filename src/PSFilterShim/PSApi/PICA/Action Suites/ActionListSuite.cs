@@ -439,7 +439,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                ReadOnlyDictionary<uint, AETEValue> descriptorValues;
+                Dictionary<uint, AETEValue> descriptorValues;
                 if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out descriptorValues))
                 {
                     ActionListDescriptor item = new ActionListDescriptor(type, descriptorValues);

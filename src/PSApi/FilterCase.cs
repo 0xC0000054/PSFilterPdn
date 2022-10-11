@@ -18,7 +18,7 @@
 
 namespace PSFilterLoad.PSApi
 {
-    public enum FilterCase : short
+    internal enum FilterCase : short
     {
         FlatImageNoSelection = 1,
         FlatImageWithSelection = 2,

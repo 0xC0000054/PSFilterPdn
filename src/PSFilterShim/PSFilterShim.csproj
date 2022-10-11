@@ -39,6 +39,28 @@
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\DataContractSerializerUtil.cs" Link="DataContractSerializerUtil.cs" />
+    <Compile Include="..\PSApi\AETEData.cs" Link="PSApi\AETEData.cs" />
+    <Compile Include="..\PSApi\AETEValue.cs" Link="PSApi\AETEValue.cs" />
+    <Compile Include="..\PSApi\DescriptorRegistryItem.cs" Link="PSApi\DescriptorRegistryItem.cs" />
+    <Compile Include="..\PSApi\DescriptorRegistryValues.cs" Link="PSApi\DescriptorRegistryValues.cs" />
+    <Compile Include="..\PSApi\DictionaryExtensions.cs" Link="PSApi\DictionaryExtensions.cs" />
+    <Compile Include="..\PSApi\FilterCase.cs" Link="PSApi\FilterCase.cs" />
+    <Compile Include="..\PSApi\FilterCaseInfo.cs" Link="PSApi\FilterCaseInfo.cs" />
+    <Compile Include="..\PSApi\FilterCaseInfoCollection.cs" Link="PSApi\FilterCaseInfoCollection.cs" />
+    <Compile Include="..\PSApi\GlobalParameters.cs" Link="PSApi\GlobalParameters.cs" />
+    <Compile Include="..\PSApi\ImageMode.cs" Link="ImageMode.cs" />
+    <Compile Include="..\PSApi\ParameterData.cs" Link="PSApi\ParameterData.cs" />
+    <Compile Include="..\PSApi\PICA\Action Suites\ActionListDescriptor.cs" Link="PSApi\PICA\Action Suites\ActionListDescriptor.cs" />
+    <Compile Include="..\PSApi\PICA\Action Suites\ActionListItem.cs" Link="PSApi\PICA\Action Suites\ActionListItem.cs" />
+    <Compile Include="..\PSApi\PICA\Action Suites\ActionReferenceItem.cs" Link="PSApi\PICA\Action Suites\ActionReferenceItem.cs" />
+    <Compile Include="..\PSApi\PluginUISettings.cs" Link="PSApi\PluginUISettings.cs" />
+    <Compile Include="..\PSApi\PseudoResource.cs" Link="PSApi\PseudoResource.cs" />
+    <Compile Include="..\PSApi\PseudoResourceCollection.cs" Link="PSApi\PseudoResourceCollection.cs" />
+    <Compile Include="..\PSFilterShimImageFormat.cs" Link="PSFilterShimImageFormat.cs" />
+    <Compile Include="..\PSFilterShimImageHeader.cs" Link="PSFilterShimImageHeader.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="PaintDotNet\ColorPicker\ColorGradientControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -58,10 +80,4 @@
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PSFilterPdn.csproj" />
-  </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="call &quot;$(DevEnvDir)..\tools\VsDevCmd.bat&quot;&#xD;&#xA;editbin.exe /NXCOMPAT:NO &quot;$(TargetDir)$(TargetName).exe&quot; &#xD;&#xA;&#xD;&#xA;copy &quot;$(TargetPath)&quot; &quot;D:\src\paint.net\PaintDotNet\bin\Debug\Effects&quot; /y&#xD;&#xA;copy &quot;$(TargetDir)$(TargetName).exe&quot; &quot;D:\src\paint.net\PaintDotNet\bin\Debug\Effects&quot; /y" />
-  </Target>
 </Project>

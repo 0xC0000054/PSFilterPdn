@@ -20,7 +20,7 @@ namespace PSFilterLoad.PSApi
     /// </summary>
     [DataContract]
     [KnownType(typeof(GlobalParameters))]
-    public sealed class ParameterData
+    internal sealed class ParameterData
     {
 #pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]

@@ -15,7 +15,7 @@ using System.IO;
 
 namespace PSFilterPdn
 {
-    public sealed class PSFilterShimImageHeader
+    internal sealed class PSFilterShimImageHeader
     {
         private const uint FileSignature = 0x49465350; // PSFI in little endian
 

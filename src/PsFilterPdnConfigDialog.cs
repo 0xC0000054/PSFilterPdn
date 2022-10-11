@@ -1711,7 +1711,7 @@ namespace PSFilterPdn
 
                 try
                 {
-                    descriptorRegistry = new DescriptorRegistryValues(path);
+                    descriptorRegistry = DescriptorRegistryFile.Losd(path);
                 }
                 catch (DirectoryNotFoundException)
                 {
@@ -1733,7 +1733,7 @@ namespace PSFilterPdn
 
                 try
                 {
-                    descriptorRegistry.SavePersistedValues(path);
+                    DescriptorRegistryFile.Save(path, descriptorRegistry);
                 }
                 catch (IOException ex)
                 {

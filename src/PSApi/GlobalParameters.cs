@@ -18,7 +18,7 @@ namespace PSFilterLoad.PSApi
     /// The class that holds the saved filter global parameter data.
     /// </summary>
     [DataContract]
-    public sealed class GlobalParameters
+    internal sealed class GlobalParameters
     {
         public enum DataStorageMethod
         {

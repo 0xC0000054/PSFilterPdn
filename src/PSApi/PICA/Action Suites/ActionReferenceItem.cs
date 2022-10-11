@@ -15,7 +15,7 @@ using System;
 namespace PSFilterLoad.PSApi.PICA
 {
     [Serializable]
-    public enum ActionReferenceForm : uint
+    internal enum ActionReferenceForm : uint
     {
         Class = 0x436C7373,
         Enumerated = 0x456E6D72,
@@ -27,7 +27,7 @@ namespace PSFilterLoad.PSApi.PICA
     }
 
     [Serializable]
-    public sealed class ActionReferenceItem
+    internal sealed class ActionReferenceItem
     {
         private readonly ActionReferenceForm form;
         private readonly uint desiredClass;

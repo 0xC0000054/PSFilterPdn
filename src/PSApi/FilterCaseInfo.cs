@@ -24,7 +24,7 @@ namespace PSFilterLoad.PSApi
     /// <summary>
     /// The inputHandling and outputHandling Flags for the FilterCaseInfo structure
     /// </summary>
-    public enum FilterDataHandling : byte
+    internal enum FilterDataHandling : byte
     {
         CantFilter = 0,
         None = 1,
@@ -41,7 +41,7 @@ namespace PSFilterLoad.PSApi
     }
 
     [Flags]
-    public enum FilterCaseInfoFlags : byte
+    internal enum FilterCaseInfoFlags : byte
     {
         None = 0,
         DontCopyToDestination = 1 << 0,
@@ -51,7 +51,7 @@ namespace PSFilterLoad.PSApi
     }
 
     [DataContract()]
-    public sealed class FilterCaseInfo
+    internal sealed class FilterCaseInfo
     {
         public FilterDataHandling InputHandling
         {

@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PSFilterPdn.EnableInfo;
 using System;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
@@ -23,6 +22,7 @@ namespace PSFilterLoad.PSApi
     [DataContract()]
     internal sealed class PluginData : IEquatable<PluginData>
     {
+#pragma warning disable 649
         [DataMember(Name = nameof(FileName))]
         private string fileName;
         [DataMember(Name = nameof(EntryPoint))]
@@ -33,15 +33,11 @@ namespace PSFilterLoad.PSApi
         private string title;
         [DataMember(Name = nameof(FilterInfo))]
         private FilterCaseInfoCollection filterInfo;
-#pragma warning disable IDE0032 // Use auto property
-        private bool runWith32BitShim;
-#pragma warning restore IDE0032 // Use auto property
         [DataMember(Name = nameof(Aete))]
         private AETEData aete;
         [DataMember(Name = nameof(ModuleEntryPoints))]
         private ReadOnlyCollection<string> moduleEntryPoints;
-        [NonSerialized]
-        private readonly string enableInfo;
+#pragma warning restore 0649
 
         /// <summary>
         /// Gets the file path of the filter.
@@ -84,14 +80,6 @@ namespace PSFilterLoad.PSApi
         public FilterCaseInfoCollection FilterInfo => filterInfo;
 
         /// <summary>
-        /// Gets a value indicating whether the filter should be run with the 32-bit surrogate process.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if the filter should be run with the 32-bit surrogate process; otherwise, <c>false</c>.
-        /// </value>
-        internal bool RunWith32BitShim => runWith32BitShim;
-
-        /// <summary>
         /// Gets the AETE scripting information.
         /// </summary>
         /// <value>
@@ -109,42 +97,6 @@ namespace PSFilterLoad.PSApi
         {
             get => moduleEntryPoints;
             internal set => moduleEntryPoints = value;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PluginData"/> class.
-        /// </summary>
-        /// <param name="fileName">The file path of the filter.</param>
-        /// <param name="entryPoint">The filter entry point.</param>
-        /// <param name="category">The filter category.</param>
-        /// <param name="title">The filter title.</param>
-        internal PluginData(string fileName, string entryPoint, string category, string title) : this(fileName, entryPoint, category, title,
-            null, true, null, null)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PluginData" /> class.
-        /// </summary>
-        /// <param name="fileName">The file path of the filter.</param>
-        /// <param name="entryPoint">The filter entry point.</param>
-        /// <param name="category">The filter category.</param>
-        /// <param name="title">The filter title.</param>
-        /// <param name="filterInfo">The filter information used to determine how transparency is processed..</param>
-        /// <param name="runWith32BitShim"><c>true</c> if the filter should be run with the 32-bit surrogate process; otherwise, <c>false</c>.</param>
-        /// <param name="aete">The AETE scripting information.</param>
-        internal PluginData(string fileName, string entryPoint, string category, string title, FilterCaseInfoCollection filterInfo,
-            bool runWith32BitShim, AETEData aete, string enableInfo)
-        {
-            this.fileName = fileName;
-            this.entryPoint = entryPoint;
-            this.category = category;
-            this.title = title;
-            this.filterInfo = filterInfo;
-            this.runWith32BitShim = runWith32BitShim;
-            this.aete = aete;
-            this.enableInfo = enableInfo;
-            moduleEntryPoints = null;
         }
 
         public override bool Equals(object obj)
@@ -280,74 +232,6 @@ namespace PSFilterLoad.PSApi
             }
 
             return hash;
-        }
-
-        /// <summary>
-        /// Determines whether the filter can process the specified image and host application state.
-        /// </summary>
-        /// <param name="imageWidth">The width of the image.</param>
-        /// <param name="imageHeight">The height of the image.</param>
-        /// <param name="hasTransparency">Indicates if the image has transparency.</param>
-        /// <param name="hostState">The current state of the host application.</param>
-        /// <returns>
-        /// <c>true</c> if the filter can process the image and host application state; otherwise, <c>false</c>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="hostState"/> is null.
-        /// </exception>
-        internal bool SupportsHostState(int imageWidth, int imageHeight, bool hasTransparency, HostState hostState)
-        {
-            if (hostState == null)
-            {
-                throw new ArgumentNullException(nameof(hostState));
-            }
-
-            bool result = true;
-
-            const ImageMode imageMode = ImageMode.RGB;
-
-            FilterCase filterCase = GetFilterTransparencyMode(hostState.HasSelection, () => hasTransparency);
-
-            if (!string.IsNullOrEmpty(enableInfo))
-            {
-                int targetChannelCount = 3;
-                int trueChannelCount;
-                bool hasTransparencyMask;
-
-                switch (filterCase)
-                {
-                    case FilterCase.EditableTransparencyNoSelection:
-                    case FilterCase.EditableTransparencyWithSelection:
-                    case FilterCase.ProtectedTransparencyNoSelection:
-                    case FilterCase.ProtectedTransparencyWithSelection:
-                        trueChannelCount = 4;
-                        hasTransparencyMask = true;
-                        break;
-                    case FilterCase.FlatImageNoSelection:
-                    case FilterCase.FlatImageWithSelection:
-                    case FilterCase.FloatingSelection:
-                    default:
-                        trueChannelCount = 3;
-                        hasTransparencyMask = false;
-                        break;
-                }
-
-                EnableInfoVariables variables = new EnableInfoVariables(imageWidth, imageHeight, imageMode, hasTransparencyMask,
-                                                                        targetChannelCount, trueChannelCount, hostState);
-
-                bool? enableInfoResult = EnableInfoResultCache.Instance.TryGetValue(enableInfo, variables);
-                if (enableInfoResult.HasValue)
-                {
-                    result = enableInfoResult.Value;
-                }
-            }
-
-            if (filterInfo != null)
-            {
-                result &= filterInfo[filterCase].IsSupported;
-            }
-
-            return result;
         }
 
         public static bool operator ==(PluginData pluginData1, PluginData pluginData2)

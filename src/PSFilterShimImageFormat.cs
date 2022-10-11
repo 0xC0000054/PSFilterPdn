@@ -12,7 +12,7 @@
 
 namespace PSFilterPdn
 {
-    public enum PSFilterShimImageFormat : int
+    internal enum PSFilterShimImageFormat : int
     {
         Bgra32,
         Alpha8

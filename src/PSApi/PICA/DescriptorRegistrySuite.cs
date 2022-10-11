@@ -91,24 +91,7 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new ArgumentNullException(nameof(values));
             }
 
-            ReadOnlyDictionary<string, DescriptorRegistryItem> persistedValues = values.PersistedValues;
-            ReadOnlyDictionary<string, DescriptorRegistryItem> sessionValues = values.SessionValues;
-
-            if (persistedValues != null)
-            {
-                foreach (KeyValuePair<string, DescriptorRegistryItem> item in persistedValues)
-                {
-                    registry.Add(item.Key, item.Value);
-                }
-            }
-
-            if (sessionValues != null)
-            {
-                foreach (KeyValuePair<string, DescriptorRegistryItem> item in sessionValues)
-                {
-                    registry.Add(item.Key, item.Value);
-                }
-            }
+            values.AddToRegistry(registry);
         }
 
         private int Register(IntPtr key, PIActionDescriptor descriptor, bool isPersistent)
@@ -121,7 +104,7 @@ namespace PSFilterLoad.PSApi.PICA
                     return PSError.kSPBadParameterError;
                 }
 
-                ReadOnlyDictionary<uint, AETEValue> values;
+                Dictionary<uint, AETEValue> values;
 
                 if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out values))
                 {

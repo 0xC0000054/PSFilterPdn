@@ -19,7 +19,7 @@ namespace PSFilterPdn
 {
     public sealed class PSFilterPdnConfigToken : PaintDotNet.Effects.EffectConfigToken
     {
-        public PSFilterPdnConfigToken(Surface dest, PluginData filterData, bool useShim, Dictionary<PluginData, ParameterData> paramData,
+        internal PSFilterPdnConfigToken(Surface dest, PluginData filterData, bool useShim, Dictionary<PluginData, ParameterData> paramData,
             PseudoResourceCollection resources, DescriptorRegistryValues registryValues, ConfigDialogState configDialog)
             : base()
         {
@@ -44,19 +44,19 @@ namespace PSFilterPdn
             DialogState = copyMe.DialogState;
         }
 
-        public Surface Dest { get; internal set; }
+        internal Surface Dest { get; set; }
 
-        public PluginData FilterData { get; internal set; }
+        internal PluginData FilterData { get; set; }
 
-        public bool RunWith32BitShim { get; internal set; }
+        internal bool RunWith32BitShim { get; set; }
 
-        public Dictionary<PluginData, ParameterData> FilterParameters { get; internal set; }
+        internal Dictionary<PluginData, ParameterData> FilterParameters { get; set; }
 
-        public PseudoResourceCollection PseudoResources { get; internal set; }
+        internal PseudoResourceCollection PseudoResources { get; set; }
 
-        public DescriptorRegistryValues DescriptorRegistry { get; internal set; }
+        internal DescriptorRegistryValues DescriptorRegistry { get; set; }
 
-        public ConfigDialogState DialogState { get; internal set; }
+        internal ConfigDialogState DialogState { get; set; }
 
         public override object Clone()
         {

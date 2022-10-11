@@ -19,9 +19,9 @@ namespace PSFilterLoad.PSApi
     /// <summary>
     /// Represents a collection of Pseudo-Resources
     /// </summary>
-    /// <seealso cref="System.Collections.ObjectModel.Collection{PSResource}" />
+    /// <seealso cref="Collection{PSResource}" />
     [Serializable]
-    public sealed class PseudoResourceCollection : Collection<PseudoResource>
+    internal sealed class PseudoResourceCollection : Collection<PseudoResource>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PseudoResourceCollection"/> class.

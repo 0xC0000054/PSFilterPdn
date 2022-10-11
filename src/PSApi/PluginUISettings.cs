@@ -19,7 +19,7 @@ namespace PSFilterLoad.PSApi
     /// Encapsulates the user interfaces settings for plug-in created dialogs.
     /// </summary>
     [DataContract]
-    public sealed class PluginUISettings
+    internal sealed class PluginUISettings
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginUISettings"/> class.

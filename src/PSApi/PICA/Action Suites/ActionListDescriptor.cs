@@ -11,20 +11,21 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Collections.Generic;
 
 namespace PSFilterLoad.PSApi.PICA
 {
     [Serializable]
-    public sealed class ActionListDescriptor
+    internal sealed class ActionListDescriptor
     {
         private readonly uint type;
-        private readonly ReadOnlyDictionary<uint, AETEValue> descriptorValues;
+        private readonly Dictionary<uint, AETEValue> descriptorValues;
 
         public uint Type => type;
 
-        public ReadOnlyDictionary<uint, AETEValue> DescriptorValues => descriptorValues;
+        public Dictionary<uint, AETEValue> DescriptorValues => descriptorValues;
 
-        public ActionListDescriptor(uint type, ReadOnlyDictionary<uint, AETEValue> descriptorValues)
+        public ActionListDescriptor(uint type, Dictionary<uint, AETEValue> descriptorValues)
         {
             this.type = type;
             this.descriptorValues = descriptorValues;

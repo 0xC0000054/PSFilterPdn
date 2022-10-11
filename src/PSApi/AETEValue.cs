@@ -20,7 +20,7 @@ namespace PSFilterLoad.PSApi
     [KnownType(typeof(EnumeratedValue))]
     [KnownType(typeof(ActionDescriptorZString))]
     [Serializable]
-    public sealed class AETEValue
+    internal sealed class AETEValue
     {
 #pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]
@@ -52,7 +52,7 @@ namespace PSFilterLoad.PSApi
 
     [DataContract]
     [Serializable]
-    public sealed class UnitFloat
+    internal sealed class UnitFloat
     {
 #pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]
@@ -74,7 +74,7 @@ namespace PSFilterLoad.PSApi
 
     [DataContract]
     [Serializable]
-    public sealed class EnumeratedValue
+    internal sealed class EnumeratedValue
     {
 #pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]
@@ -96,7 +96,7 @@ namespace PSFilterLoad.PSApi
 
     [DataContract]
     [Serializable]
-    public sealed class ActionDescriptorZString
+    internal sealed class ActionDescriptorZString
     {
 #pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]

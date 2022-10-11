@@ -15,7 +15,7 @@ using System.Collections.Generic;
 namespace PSFilterLoad.PSApi
 {
     [System.Serializable()]
-    public sealed class AETEData
+    internal sealed class AETEData
     {
         private Dictionary<uint, short> flagList;
 

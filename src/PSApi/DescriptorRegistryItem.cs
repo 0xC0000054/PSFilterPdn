@@ -11,17 +11,18 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
 {
     [DataContract]
     [Serializable]
-    public sealed class DescriptorRegistryItem
+    internal sealed class DescriptorRegistryItem
     {
 #pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]
-        private ReadOnlyDictionary<uint, AETEValue> values;
+        private Dictionary<uint, AETEValue> values;
         [DataMember]
         private bool isPersistent;
 #pragma warning restore IDE0044 // Add readonly modifier
@@ -32,7 +33,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="values">The values.</param>
         /// <param name="isPersistent"><c>true</c> if the item is persisted across host sessions; otherwise, <c>false</c>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="values"/> is null.</exception>
-        public DescriptorRegistryItem(ReadOnlyDictionary<uint, AETEValue> values, bool isPersistent)
+        public DescriptorRegistryItem(Dictionary<uint, AETEValue> values, bool isPersistent)
         {
             if (values == null)
             {
@@ -49,7 +50,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The values.
         /// </value>
-        public ReadOnlyDictionary<uint, AETEValue> Values => values;
+        public Dictionary<uint, AETEValue> Values => values;
 
         /// <summary>
         /// Gets a value indicating whether this <see cref="DescriptorRegistryItem"/> is persisted across host sessions.

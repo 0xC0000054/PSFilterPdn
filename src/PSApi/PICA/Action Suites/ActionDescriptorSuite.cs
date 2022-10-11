@@ -245,20 +245,20 @@ namespace PSFilterLoad.PSApi.PICA
             disposed = false;
         }
 
-        bool IActionDescriptorSuite.TryGetDescriptorValues(PIActionDescriptor descriptor, out ReadOnlyDictionary<uint, AETEValue> values)
+        bool IActionDescriptorSuite.TryGetDescriptorValues(PIActionDescriptor descriptor, out Dictionary<uint, AETEValue> values)
         {
             values = null;
             ScriptingParameters scriptingData;
             if (actionDescriptors.TryGetValue(descriptor, out scriptingData))
             {
-                values = new ReadOnlyDictionary<uint, AETEValue>(scriptingData.ToDictionary());
+                values = scriptingData.ToDictionary();
                 return true;
             }
 
             return false;
         }
 
-        PIActionDescriptor IActionDescriptorSuite.CreateDescriptor(ReadOnlyDictionary<uint, AETEValue> values)
+        PIActionDescriptor IActionDescriptorSuite.CreateDescriptor(Dictionary<uint, AETEValue> values)
         {
             if (values == null)
             {

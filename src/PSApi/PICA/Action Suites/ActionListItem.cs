@@ -15,7 +15,7 @@ using System;
 namespace PSFilterLoad.PSApi.PICA
 {
     [Serializable]
-    public sealed class ActionListItem
+    internal sealed class ActionListItem
     {
         private readonly uint type;
         private readonly object value;
