@@ -10,41 +10,41 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PaintDotNet;
 using PaintDotNet.Effects;
+using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
-using System.Collections.Generic;
+
+#nullable enable
 
 namespace PSFilterLoad.PSApi
 {
     internal static class SelectionMaskRenderer
     {
-        public static unsafe MaskSurface FromPdnSelection(SizeInt32 canvasSize, IEffectSelectionInfo selection)
+        public static MaskSurface? FromPdnSelection(IEffectEnvironment environment)
         {
-            return FromPdnSelection(canvasSize.Width, canvasSize.Height, selection);
+            SizeInt32 canvasSize = environment.CanvasSize;
+            RectInt32 canvasBounds = new(Point2Int32.Zero, canvasSize);
+
+            IEffectSelectionInfo selectionInfo = environment.Selection;
+
+            MaskSurface? selectionMask = null;
+
+            if (selectionInfo.RenderBounds != canvasBounds)
+            {
+                selectionMask = FromPdnSelection(canvasSize, selectionInfo);
+            }
+
+            return selectionMask;
         }
 
-        public static unsafe MaskSurface FromPdnSelection(int width, int height, IEffectSelectionInfo selection)
+        private static unsafe MaskSurface FromPdnSelection(SizeInt32 canvasSize, IEffectSelectionInfo selection)
         {
-            MaskSurface mask = new MaskSurface(width, height);
+            MaskSurface mask = new(canvasSize.Width, canvasSize.Height);
 
-            IReadOnlyList<RectInt32> scans = selection.RenderScans;
+            RegionPtr<ColorAlpha8> dst = new((ColorAlpha8*)mask.Scan0.VoidStar, mask.Width, mask.Height, mask.Stride);
 
-            for (int i = 0; i < scans.Count; i++)
-            {
-                RectInt32 rect = scans[i];
-
-                for (int y = rect.Top; y < rect.Bottom; y++)
-                {
-                    byte* ptr = mask.GetPointAddressUnchecked(rect.Left, y);
-                    byte* ptrEnd = ptr + rect.Width;
-
-                    while (ptr < ptrEnd)
-                    {
-                        *ptr = 255;
-                        ptr++;
-                    }
-                }
-            }
+            selection.MaskBitmap.CopyPixels(dst);
 
             return mask;
         }

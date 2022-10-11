@@ -55,14 +55,14 @@ namespace PSFilterPdn
         }
 
         [DataMember]
-        public Color PrimaryColor
+        public int PrimaryColor
         {
             get;
             internal set;
         }
 
         [DataMember]
-        public Color SecondaryColor
+        public int SecondaryColor
         {
             get;
             internal set;

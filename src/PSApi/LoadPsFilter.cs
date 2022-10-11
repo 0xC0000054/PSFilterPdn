@@ -18,7 +18,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using PaintDotNet;
-using PaintDotNet.Effects;
+using PaintDotNet.Imaging;
 using PSFilterPdn.Interop;
 using PSFilterPdn.Properties;
 
@@ -94,8 +94,8 @@ namespace PSFilterLoad.PSApi
         private Func<bool> abortFunc;
         private string errorMessage;
         private FilterCase filterCase;
-        private float dpiX;
-        private float dpiY;
+        private double dpiX;
+        private double dpiY;
         private bool hasSelectionMask;
         private byte[] backgroundColor;
         private byte[] foregroundColor;
@@ -206,17 +206,29 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Loads and runs Photoshop Filters
         /// </summary>
-        /// <param name="eep">The EffectEnvironmentParameters of the plugin</param>
-        /// <param name="owner">The handle of the parent window</param>
+        /// <param name="sourceBitmap">The source bitmap.</param>
+        /// <param name="selectionMask">The selection mask.</param>
+        /// <param name="takeOwnershipOfSelectionMask">
+        /// <see langword="true"/> if the class takes ownership of the selection mask; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <param name="primaryColor">The primary color.</param>
+        /// <param name="secondaryColor">The secondary color.</param>
+        /// <param name="dpiX">The horizontal document resolution in pixels-per-inch.</param>
+        /// <param name="dpiY">The vertical document resolution in pixels-per-inch.</param>
+        /// <param name="owner">The handle of the parent window.</param>
         /// <param name="pluginUISettings">The user interface settings for plug-in created dialogs.</param>
-        /// <exception cref="System.ArgumentNullException">The EffectEnvironmentParameters are null.</exception>
-        /// <exception cref="PSFilterLoad.PSApi.ImageSizeTooLargeException">The source image is larger than 32000 pixels in width and/or height.</exception>
-        internal unsafe LoadPsFilter(PaintDotNet.Effects.EffectEnvironmentParameters eep, IntPtr owner, PluginUISettings pluginUISettings)
+        /// <exception cref="System.ArgumentNullException"><paramref name="sourceBitmap"/> is null.</exception>
+        internal unsafe LoadPsFilter(IBitmapSource<ColorBgra32> sourceBitmap,
+                                     MaskSurface selectionMask,
+                                     bool takeOwnershipOfSelectionMask,
+                                     ColorBgra32 primaryColor,
+                                     ColorBgra32 secondaryColor,
+                                     double dpiX,
+                                     double dpiY,
+                                     IntPtr owner,
+                                     PluginUISettings pluginUISettings)
         {
-            if (eep == null)
-            {
-                throw new ArgumentNullException(nameof(eep));
-            }
+            ArgumentNullException.ThrowIfNull(sourceBitmap);
 
             inputHandling = FilterDataHandling.None;
             outputHandling = FilterDataHandling.None;
@@ -253,7 +265,7 @@ namespace PSFilterLoad.PSApi
             lastOutLoPlane = -1;
             lastInLoPlane = -1;
 
-            source = eep.SourceSurface.Clone();
+            source = SurfaceUtil.FromBitmapBgra32(sourceBitmap);
 
             dest = new Surface(source.Width, source.Height);
 
@@ -270,18 +282,24 @@ namespace PSFilterLoad.PSApi
             propertySuite = new PropertySuite(source.Width, source.Height, pluginUISettings);
             basicSuiteProvider = new SPBasicSuiteProvider(this, propertySuite, resourceSuite);
 
-            backgroundColor = new byte[4] { eep.SecondaryColor.R, eep.SecondaryColor.G, eep.SecondaryColor.B, 0 };
-            foregroundColor = new byte[4] { eep.PrimaryColor.R, eep.PrimaryColor.G, eep.PrimaryColor.B, 0 };
+            backgroundColor = new byte[4] { secondaryColor.R, secondaryColor.G, secondaryColor.B, 0 };
+            foregroundColor = new byte[4] { primaryColor.R, primaryColor.G, primaryColor.B, 0 };
 
-            dpiX = dpiY = 96f; // Paint.NET does not expose the DPI info to Effects, assume standard monitor resolution of 96.
+            this.dpiX = dpiX;
+            this.dpiY = dpiY;
 
             readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
 
-            IEffectSelectionInfo selection = eep.Selection;
-
-            if (selection.RenderBounds != eep.SourceSurface.Bounds)
+            if (selectionMask != null)
             {
-                mask = SelectionMaskRenderer.FromPdnSelection(source.Width, source.Height, selection);
+                if (takeOwnershipOfSelectionMask)
+                {
+                    mask = selectionMask;
+                }
+                else
+                {
+                    mask = selectionMask.Clone();
+                }
                 hasSelectionMask = true;
             }
             else
@@ -2509,7 +2527,7 @@ namespace PSFilterLoad.PSApi
                     }
 
                     // Use a temporary bitmap to prevent flickering when the image is rendered over the checker board.
-                    using (Bitmap temp = new Bitmap(width, height, PixelFormat.Format32bppArgb))
+                    using (Bitmap temp = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                     {
                         Rectangle rect = new Rectangle(0, 0, width, height);
 
@@ -2668,9 +2686,11 @@ namespace PSFilterLoad.PSApi
         private unsafe void DrawCheckerBoardBitmap(int width, int height)
         {
             checkerBoardBitmap?.Dispose();
-            checkerBoardBitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            checkerBoardBitmap = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-            BitmapData bd = checkerBoardBitmap.LockBits(new Rectangle(0, 0, checkerBoardBitmap.Width, checkerBoardBitmap.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+            BitmapData bd = checkerBoardBitmap.LockBits(new Rectangle(0, 0, checkerBoardBitmap.Width, checkerBoardBitmap.Height),
+                                                        ImageLockMode.WriteOnly,
+                                                        System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             try
             {
                 void* scan0 = bd.Scan0.ToPointer();

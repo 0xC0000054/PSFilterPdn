@@ -10,8 +10,9 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PaintDotNet;
+using PaintDotNet.Imaging;
 using PaintDotNet.IO;
+using PaintDotNet.Rendering;
 using PSFilterLoad.PSApi;
 using System;
 using System.IO;
@@ -27,9 +28,9 @@ namespace PSFilterPdn
     {
         private const int BufferSize = 4096;
 
-        public static Surface Load(string path)
+        public static IBitmap<ColorBgra32> Load(string path, IImagingFactory imagingFactory)
         {
-            Surface surface = null;
+            IBitmap<ColorBgra32> bitmap = null;
 
             using (FileStream stream = new FileStream(path,
                                                       FileMode.Open,
@@ -45,31 +46,41 @@ namespace PSFilterPdn
                     throw new InvalidOperationException("This method requires an image that uses the Bgra32 format.");
                 }
 
-                surface = new Surface(header.Width, header.Height);
+                bitmap = imagingFactory.CreateBitmap<ColorBgra32>(header.Width, header.Height);
 
                 byte[] buffer = new byte[header.Stride];
 
                 unsafe
                 {
-                    for (int y = 0; y < header.Height; y++)
+                    fixed (byte* src = buffer)
                     {
-                        stream.ProperRead(buffer, 0, buffer.Length);
+                        using (IBitmapLock<ColorBgra32> dstLock = bitmap.Lock(BitmapLockOptions.Write))
+                        {
+                            byte* dstScan0 = (byte*)dstLock.Buffer;
+                            nuint dstStride = (nuint)dstLock.BufferStride;
+                            ulong bytesToCopy = (ulong)buffer.Length;
 
-                        ColorBgra* dst = surface.GetRowPointerUnchecked(y);
+                            for (int y = 0; y < header.Height; y++)
+                            {
+                                stream.ProperRead(buffer, 0, buffer.Length);
 
-                        Marshal.Copy(buffer, 0, new IntPtr(dst), buffer.Length);
+                                byte* dstRow = dstScan0 + ((nuint)y * dstStride);
+
+                                Buffer.MemoryCopy(src, dstRow, bytesToCopy, bytesToCopy);
+                            }
+                        }
                     }
                 }
             }
 
-            return surface;
+            return bitmap;
         }
 
-        public static void Save(string path, Surface surface, float dpiX, float dpiY)
+        public static void Save(string path, IBitmapSource<ColorBgra32> bitmap, DocumentDpi documentDpi)
         {
-            if (surface is null)
+            if (bitmap is null)
             {
-                throw new ArgumentNullException(nameof(surface));
+                throw new ArgumentNullException(nameof(bitmap));
             }
 
             using (FileStream stream = new FileStream(path,
@@ -79,11 +90,13 @@ namespace PSFilterPdn
                                                       BufferSize,
                                                       FileOptions.SequentialScan))
             {
-                PSFilterShimImageHeader header = new PSFilterShimImageHeader(surface.Width,
-                                                                             surface.Height,
+                SizeInt32 bitmapSize = bitmap.Size;
+
+                PSFilterShimImageHeader header = new PSFilterShimImageHeader(bitmapSize.Width,
+                                                                             bitmapSize.Height,
                                                                              PSFilterShimImageFormat.Bgra32,
-                                                                             dpiX,
-                                                                             dpiY);
+                                                                             documentDpi.X,
+                                                                             documentDpi.Y);
                 stream.SetLength(header.GetTotalFileSize());
 
                 header.Save(stream);
@@ -92,13 +105,19 @@ namespace PSFilterPdn
 
                 unsafe
                 {
-                    for (int y = 0; y < header.Height; y++)
+                    fixed (byte* ptr = buffer)
                     {
-                        ColorBgra* src = surface.GetRowPointerUnchecked(y);
+                        int bufferStride = header.Stride;
+                        uint bufferSize = (uint)buffer.Length;
 
-                        Marshal.Copy(new IntPtr(src), buffer, 0, buffer.Length);
+                        for (int y = 0; y < header.Height; y++)
+                        {
+                            RectInt32 copyRect = new(0, y, header.Width, 1);
 
-                        stream.Write(buffer, 0, buffer.Length);
+                            bitmap.CopyPixels(ptr, bufferStride, bufferSize, copyRect);
+
+                            stream.Write(buffer, 0, buffer.Length);
+                        }
                     }
                 }
             }
@@ -121,8 +140,8 @@ namespace PSFilterPdn
                 PSFilterShimImageHeader header = new PSFilterShimImageHeader(surface.Width,
                                                                              surface.Height,
                                                                              PSFilterShimImageFormat.Alpha8,
-                                                                             96.0f,
-                                                                             96.0f);
+                                                                             96.0,
+                                                                             96.0);
                 stream.SetLength(header.GetTotalFileSize());
 
                 header.Save(stream);

@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Drawing;
 using System.Runtime.Serialization;
 
 namespace PSFilterPdn
@@ -19,6 +18,10 @@ namespace PSFilterPdn
     [DataContract]
     internal sealed class PSFilterShimSettings
     {
+        internal PSFilterShimSettings()
+        {
+        }
+
         [DataMember]
         public bool RepeatEffect
         {
@@ -55,14 +58,14 @@ namespace PSFilterPdn
         }
 
         [DataMember]
-        public Color PrimaryColor
+        public int PrimaryColor
         {
             get;
             internal set;
         }
 
         [DataMember]
-        public Color SecondaryColor
+        public int SecondaryColor
         {
             get;
             internal set;
@@ -101,10 +104,6 @@ namespace PSFilterPdn
         {
             get;
             internal set;
-        }
-
-        internal PSFilterShimSettings()
-        {
         }
     }
 }

@@ -12,6 +12,7 @@
 
 using PaintDotNet;
 using PaintDotNet.Effects;
+using PaintDotNet.Imaging;
 using PSFilterLoad.PSApi;
 using PSFilterPdn.Properties;
 using System;
@@ -25,18 +26,20 @@ using System.Windows.Forms;
 namespace PSFilterPdn
 {
     [PluginSupportInfo(typeof(PluginSupportInfo))]
-    public sealed class PSFilterPdnEffect : Effect
+    public sealed class PSFilterPdnEffect : BitmapEffect<PSFilterPdnConfigToken>
     {
         public static string StaticName => "8bf Filter";
 
         public static Bitmap StaticIcon => new Bitmap(typeof(PSFilterPdnEffect), PluginIconUtil.GetIconResourceForCurrentDpi());
 
         private bool repeatEffect;
+        private IBitmap<ColorBgra32> filterOutput;
+        private IBitmapSource<ColorBgra32> sourceBitmap;
         private Thread filterThread;
         private static ManualResetEvent filterDone;
 
         public PSFilterPdnEffect()
-            : base(StaticName, StaticIcon, null, new EffectOptions { Flags = EffectFlags.Configurable })
+            : base(StaticName, StaticIcon, null, new BitmapEffectOptions { IsConfigurable = true })
         {
             repeatEffect = true;
             filterThread = null;
@@ -52,10 +55,10 @@ namespace PSFilterPdn
             return IsCancelRequested;
         }
 
-        public override EffectConfigDialog CreateConfigDialog()
+        protected override IEffectConfigForm OnCreateConfigForm()
         {
             repeatEffect = false;
-            return new PsFilterPdnConfigDialog();
+            return new PsFilterPdnConfigDialog(Environment);
         }
 
         private static DialogResult ShowErrorMessage(IWin32Window window, string message)
@@ -63,7 +66,7 @@ namespace PSFilterPdn
             return MessageBox.Show(window, message, StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
         }
 
-        private void Run32BitFilterProxy(ref PSFilterPdnConfigToken token, IWin32Window window)
+        private void Run32BitFilterProxy(PSFilterPdnConfigToken token, IWin32Window window)
         {
             // Check that PSFilterShim exists first thing and abort if it does not.
             string shimPath = Path.Combine(Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location), "PSFilterShim.exe");
@@ -85,20 +88,22 @@ namespace PSFilterPdn
                     string descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
                     string selectionMaskFileName = string.Empty;
 
-                    Rectangle sourceBounds = EnvironmentParameters.SourceSurface.Bounds;
+                    MaskSurface selectionMask = null;
 
-                    IEffectSelectionInfo selection = EnvironmentParameters.Selection;
-                    Rectangle selectionBounds = selection.RenderBounds;
-
-                    if (selectionBounds != sourceBounds)
+                    try
                     {
-                        selectionMaskFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+                        selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment);
 
-                        using (MaskSurface mask = SelectionMaskRenderer.FromPdnSelection(EnvironmentParameters.SourceSurface.Size,
-                                                                                         selection))
+                        if (selectionMask != null)
                         {
-                            PSFilterShimImage.SaveSelectionMask(selectionMaskFileName, mask);
+                            selectionMaskFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+
+                            PSFilterShimImage.SaveSelectionMask(selectionMaskFileName, selectionMask);
                         }
+                    }
+                    finally
+                    {
+                        selectionMask?.Dispose();
                     }
 
                     bool proxyResult = true;
@@ -111,8 +116,8 @@ namespace PSFilterPdn
                         SourceImagePath = srcFileName,
                         DestinationImagePath = destFileName,
                         ParentWindowHandle = window.Handle,
-                        PrimaryColor = EnvironmentParameters.PrimaryColor.ToColor(),
-                        SecondaryColor = EnvironmentParameters.SecondaryColor.ToColor(),
+                        PrimaryColor = new ColorRgb24(Environment.PrimaryColor).ToWin32Color(),
+                        SecondaryColor = new ColorRgb24(Environment.SecondaryColor).ToWin32Color(),
                         SelectionMaskPath = selectionMaskFileName,
                         ParameterDataPath = parameterDataFileName,
                         PseudoResourcePath = resourceDataFileName,
@@ -130,8 +135,8 @@ namespace PSFilterPdn
                                                                                       },
                                                                                       null))
                     {
-
-                        PSFilterShimImage.Save(srcFileName, EnvironmentParameters.SourceSurface, 96.0f, 96.0f);
+                        DocumentDpi documentDpi = new(Environment.Document.Resolution);
+                        PSFilterShimImage.Save(srcFileName, Environment.GetSourceBitmapBgra32(), documentDpi);
 
                         ParameterData parameterData;
                         if (token.FilterParameters.TryGetValue(token.FilterData, out parameterData))
@@ -159,7 +164,7 @@ namespace PSFilterPdn
 
                     if (proxyResult && File.Exists(destFileName))
                     {
-                        token.Dest = PSFilterShimImage.Load(destFileName);
+                        filterOutput = PSFilterShimImage.Load(destFileName, Environment.ImagingFactory);
                     }
                     else if (!string.IsNullOrEmpty(proxyErrorMessage))
                     {
@@ -189,11 +194,21 @@ namespace PSFilterPdn
             }
         }
 
-        private void RunRepeatFilter(ref PSFilterPdnConfigToken token, IWin32Window window)
+        private void RunRepeatFilter(PSFilterPdnConfigToken token, IWin32Window window)
         {
             try
             {
-                using (LoadPsFilter lps = new LoadPsFilter(EnvironmentParameters, window.Handle, null))
+                DocumentDpi documentDpi = new(Environment.Document.Resolution);
+
+                using (LoadPsFilter lps = new(Environment.GetSourceBitmapBgra32(),
+                                              SelectionMaskRenderer.FromPdnSelection(Environment),
+                                              takeOwnershipOfSelectionMask: true,
+                                              Environment.PrimaryColor,
+                                              Environment.SecondaryColor,
+                                              documentDpi.X,
+                                              documentDpi.Y,
+                                              window.Handle,
+                                              null))
                 {
                     lps.SetAbortCallback(AbortCallback);
                     if (token.DescriptorRegistry != null)
@@ -213,7 +228,7 @@ namespace PSFilterPdn
 
                     if (result)
                     {
-                        token.Dest = lps.Dest.Clone();
+                        filterOutput = SurfaceUtil.ToBitmapBgra32(lps.Dest, Environment.ImagingFactory);
                     }
                     else if (!string.IsNullOrEmpty(lps.ErrorMessage))
                     {
@@ -246,8 +261,8 @@ namespace PSFilterPdn
 
         private bool CheckSourceSurfaceSize(IWin32Window window)
         {
-            int width = EnvironmentParameters.SourceSurface.Width;
-            int height = EnvironmentParameters.SourceSurface.Height;
+            int width = Environment.CanvasSize.Width;
+            int height = Environment.CanvasSize.Height;
 
             if (width > 32000 || height > 32000)
             {
@@ -278,12 +293,10 @@ namespace PSFilterPdn
             }
         }
 
-        protected override void OnSetRenderInfo(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs)
+        protected override void OnSetToken(PSFilterPdnConfigToken token)
         {
             if (repeatEffect)
             {
-                PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)parameters;
-
                 if (token.Dest != null)
                 {
                     token.Dest.Dispose();
@@ -298,13 +311,13 @@ namespace PSFilterPdn
                     {
                         if (token.RunWith32BitShim)
                         {
-                            Run32BitFilterProxy(ref token, win32Window);
+                            Run32BitFilterProxy(token, win32Window);
                         }
                         else
                         {
                             filterDone = new ManualResetEvent(false);
 
-                            filterThread = new Thread(() => RunRepeatFilter(ref token, win32Window))
+                            filterThread = new Thread(() => RunRepeatFilter(token, win32Window))
                             {
                                 IsBackground = true,
                                 Priority = ThreadPriority.AboveNormal
@@ -323,20 +336,43 @@ namespace PSFilterPdn
                     }
                 }
             }
+            else
+            {
+                if (token.Dest != null)
+                {
+                    filterOutput ??= Environment.ImagingFactory.CreateBitmap<ColorBgra32>(Environment.CanvasSize);
 
-            base.OnSetRenderInfo(parameters, dstArgs, srcArgs);
+                    using (IBitmapLock<ColorBgra32> src = token.Dest.Lock(BitmapLockOptions.Read))
+                    using (IBitmapLock<ColorBgra32> dst = filterOutput.Lock(BitmapLockOptions.Write))
+                    {
+                        src.AsRegionPtr().CopyTo(dst.AsRegionPtr());
+                    }
+                }
+                else
+                {
+                    sourceBitmap ??= Environment.GetSourceBitmapBgra32();
+                }
+            }
+
+            base.OnSetToken(token);
         }
 
-        public override void Render(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs, Rectangle[] rois, int startIndex, int length)
+        protected override unsafe void OnRender(IBitmapEffectOutput output)
         {
-            PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)parameters;
-            if (token.Dest != null)
+            if (filterOutput != null)
             {
-                dstArgs.Surface.CopySurface(token.Dest, rois, startIndex, length);
+                using (IBitmapLock<ColorBgra32> src = filterOutput.Lock(output.Bounds, BitmapLockOptions.Read))
+                using (IBitmapLock<ColorBgra32> dst = output.LockBgra32())
+                {
+                    src.AsRegionPtr().CopyTo(dst.AsRegionPtr());
+                }
             }
             else
             {
-                dstArgs.Surface.CopySurface(srcArgs.Surface, rois, startIndex, length);
+                using (IBitmapLock<ColorBgra32> dst = output.LockBgra32())
+                {
+                    sourceBitmap.CopyPixels(dst.Buffer, dst.BufferStride, dst.BufferSize, output.Bounds);
+                }
             }
         }
 

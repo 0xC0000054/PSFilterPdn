@@ -11,7 +11,9 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Buffers.Binary;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace PSFilterPdn
 {
@@ -25,10 +27,9 @@ namespace PSFilterPdn
         private readonly int height;
         private readonly PSFilterShimImageFormat format;
         private readonly int stride;
-        private readonly float dpiX;
-        private readonly float dpiY;
+        private readonly double dpiX;
+        private readonly double dpiY;
 #pragma warning restore IDE0032 // Use auto property
-        private static readonly byte[] integerBuffer = new byte[sizeof(uint)];
 
         public PSFilterShimImageHeader(Stream stream)
         {
@@ -55,15 +56,15 @@ namespace PSFilterPdn
             height = ReadInt32LittleEndian(stream);
             format = (PSFilterShimImageFormat)ReadInt32LittleEndian(stream);
             stride = ReadInt32LittleEndian(stream);
-            dpiX = ReadSingleLittleEndian(stream);
-            dpiY = ReadSingleLittleEndian(stream);
+            dpiX = ReadDoubleLittleEndian(stream);
+            dpiY = ReadDoubleLittleEndian(stream);
         }
 
         public PSFilterShimImageHeader(int width,
                                        int height,
                                        PSFilterShimImageFormat format,
-                                       float dpiX,
-                                       float dpiY)
+                                       double dpiX,
+                                       double dpiY)
         {
             fileVersion = 2;
             this.width = width;
@@ -94,9 +95,9 @@ namespace PSFilterPdn
 
         public int Stride => stride;
 
-        public float DpiX => dpiX;
+        public double DpiX => dpiX;
 
-        public float DpiY => dpiY;
+        public double DpiY => dpiY;
 
         public long GetTotalFileSize()
         {
@@ -118,8 +119,8 @@ namespace PSFilterPdn
             WriteInt32LittleEndian(stream, height);
             WriteInt32LittleEndian(stream, (int)format);
             WriteInt32LittleEndian(stream, stride);
-            WriteSingleLittleEndian(stream, dpiX);
-            WriteSingleLittleEndian(stream, dpiY);
+            WriteDoubleLittleEndian(stream, dpiX);
+            WriteDoubleLittleEndian(stream, dpiY);
         }
 
         private static long GetHeaderSize()
@@ -130,8 +131,8 @@ namespace PSFilterPdn
             headerSize += sizeof(int); // height
             headerSize += sizeof(int); // format
             headerSize += sizeof(int); // stride
-            headerSize += sizeof(float); // dpiX
-            headerSize += sizeof(float); // dpiY
+            headerSize += sizeof(double); // dpiX
+            headerSize += sizeof(double); // dpiY
 
             return headerSize;
         }
@@ -141,29 +142,24 @@ namespace PSFilterPdn
             return (int)ReadUInt32LittleEndian(stream);
         }
 
-        private static unsafe float ReadSingleLittleEndian(Stream stream)
+        [SkipLocalsInit]
+        private static unsafe double ReadDoubleLittleEndian(Stream stream)
         {
-            uint temp = ReadUInt32LittleEndian(stream);
-            return *(float*)&temp;
+            Span<byte> bytes = stackalloc byte[sizeof(double)];
+
+            ReadBytesFromStream(stream, bytes);
+
+            return BinaryPrimitives.ReadDoubleLittleEndian(bytes);
         }
 
+        [SkipLocalsInit]
         private static uint ReadUInt32LittleEndian(Stream stream)
         {
-            int totalBytesRead = 0;
+            Span<byte> bytes = stackalloc byte[sizeof(uint)];
 
-            while (totalBytesRead < sizeof(uint))
-            {
-                int bytesRead = stream.Read(integerBuffer, totalBytesRead, sizeof(uint) - totalBytesRead);
+            ReadBytesFromStream(stream, bytes);
 
-                if (bytesRead == 0)
-                {
-                    throw new EndOfStreamException();
-                }
-
-                totalBytesRead += bytesRead;
-            }
-
-            return (uint)(integerBuffer[0] | (integerBuffer[1] << 8) | (integerBuffer[2] << 16) | (integerBuffer[3] << 24));
+            return BinaryPrimitives.ReadUInt32LittleEndian(bytes);
         }
 
         private static void WriteInt32LittleEndian(Stream stream, int value)
@@ -171,20 +167,41 @@ namespace PSFilterPdn
             WriteUInt32LittleEndian(stream, (uint)value);
         }
 
-        private static unsafe void WriteSingleLittleEndian(Stream stream, float value)
+        [SkipLocalsInit]
+        private static unsafe void WriteDoubleLittleEndian(Stream stream, double value)
         {
-            uint temp = *(uint*)&value;
-            WriteUInt32LittleEndian(stream, temp);
+            Span<byte> bytes = stackalloc byte[sizeof(double)];
+
+            BinaryPrimitives.WriteDoubleLittleEndian(bytes, value);
+
+            stream.Write(bytes);
         }
 
+        [SkipLocalsInit]
         private static void WriteUInt32LittleEndian(Stream stream, uint value)
         {
-            integerBuffer[0] = (byte)value;
-            integerBuffer[1] = (byte)(value >> 8);
-            integerBuffer[2] = (byte)(value >> 16);
-            integerBuffer[3] = (byte)(value >> 24);
+            Span<byte> bytes = stackalloc byte[sizeof(uint)];
 
-            stream.Write(integerBuffer, 0, sizeof(uint));
+            BinaryPrimitives.WriteUInt32LittleEndian(bytes, value);
+
+            stream.Write(bytes);
+        }
+
+        private static void ReadBytesFromStream(Stream stream, Span<byte> bytes)
+        {
+            Span<byte> span = bytes;
+
+            while (span.Length > 0)
+            {
+                int bytesRead = stream.Read(span);
+
+                if (bytesRead == 0)
+                {
+                    throw new EndOfStreamException();
+                }
+
+                span = span.Slice(bytesRead);
+            }
         }
     }
 }

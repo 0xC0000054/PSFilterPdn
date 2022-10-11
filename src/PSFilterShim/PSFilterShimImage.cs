@@ -26,7 +26,7 @@ namespace PSFilterShim
     {
         private const int BufferSize = 4096;
 
-        public static Surface Load(string path, out float dpiX, out float dpiY)
+        public static Surface Load(string path, out double dpiX, out double dpiY)
         {
             Surface surface = null;
 
@@ -123,8 +123,8 @@ namespace PSFilterShim
                 PSFilterShimImageHeader header = new PSFilterShimImageHeader(surface.Width,
                                                                              surface.Height,
                                                                              PSFilterShimImageFormat.Bgra32,
-                                                                             96.0f,
-                                                                             96.0f);
+                                                                             96.0,
+                                                                             96.0);
                 stream.SetLength(header.GetTotalFileSize());
 
                 header.Save(stream);

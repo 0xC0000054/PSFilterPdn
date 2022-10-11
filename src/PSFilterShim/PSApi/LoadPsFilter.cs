@@ -93,8 +93,8 @@ namespace PSFilterLoad.PSApi
         private Func<bool> abortFunc;
         private string errorMessage;
         private FilterCase filterCase;
-        private float dpiX;
-        private float dpiY;
+        private double dpiX;
+        private double dpiY;
         private bool hasSelectionMask;
         private byte[] backgroundColor;
         private byte[] foregroundColor;
@@ -269,8 +269,8 @@ namespace PSFilterLoad.PSApi
             lastOutLoPlane = -1;
             lastInLoPlane = -1;
 
-            Color primary = settings.PrimaryColor;
-            Color secondary = settings.SecondaryColor;
+            ColorRgb24 primary = ColorRgb24.FromWin32Color(settings.PrimaryColor);
+            ColorRgb24 secondary = ColorRgb24.FromWin32Color(settings.SecondaryColor);
 
             backgroundColor = new byte[4] { secondary.R, secondary.G, secondary.B, 0 };
             foregroundColor = new byte[4] { primary.R, primary.G, primary.B, 0 };

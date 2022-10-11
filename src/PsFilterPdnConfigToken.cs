@@ -12,14 +12,14 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System.Collections.Generic;
-using PaintDotNet;
+using PaintDotNet.Imaging;
 using PSFilterLoad.PSApi;
 
 namespace PSFilterPdn
 {
     public sealed class PSFilterPdnConfigToken : PaintDotNet.Effects.EffectConfigToken
     {
-        internal PSFilterPdnConfigToken(Surface dest, PluginData filterData, bool useShim, Dictionary<PluginData, ParameterData> paramData,
+        internal PSFilterPdnConfigToken(IBitmap<ColorBgra32> dest, PluginData filterData, bool useShim, Dictionary<PluginData, ParameterData> paramData,
             PseudoResourceCollection resources, DescriptorRegistryValues registryValues, ConfigDialogState configDialog)
             : base()
         {
@@ -44,7 +44,7 @@ namespace PSFilterPdn
             DialogState = copyMe.DialogState;
         }
 
-        internal Surface Dest { get; set; }
+        internal IBitmap<ColorBgra32> Dest { get; set; }
 
         internal PluginData FilterData { get; set; }
 

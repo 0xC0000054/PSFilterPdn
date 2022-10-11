@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet;
+using PaintDotNet.Imaging;
 using System;
 
 namespace PSFilterLoad.PSApi
@@ -49,6 +50,42 @@ namespace PSFilterLoad.PSApi
             }
 
             return false;
+        }
+
+        internal static unsafe Surface FromBitmapBgra32(IBitmapSource<ColorBgra32> bitmap)
+        {
+            ArgumentNullException.ThrowIfNull(bitmap);
+
+            Surface surface = new(bitmap.Size);
+
+            RegionPtr<ColorBgra32> dst = new((ColorBgra32*)surface.Scan0.VoidStar,
+                                             surface.Width,
+                                             surface.Height,
+                                             surface.Stride);
+
+            bitmap.CopyPixels(dst);
+
+            return surface;
+        }
+
+        internal static unsafe IBitmap<ColorBgra32> ToBitmapBgra32(Surface surface, IImagingFactory imagingFactory)
+        {
+            ArgumentNullException.ThrowIfNull(surface);
+            ArgumentNullException.ThrowIfNull(imagingFactory);
+
+            IBitmap<ColorBgra32> bitmap = imagingFactory.CreateBitmap<ColorBgra32>(surface.Width, surface.Height);
+
+            using (IBitmapLock<ColorBgra32> dstLock = bitmap.Lock(BitmapLockOptions.Write))
+            {
+                RegionPtr<ColorBgra32> src = new((ColorBgra32*)surface.Scan0.VoidStar,
+                                                 surface.Width,
+                                                 surface.Height,
+                                                 surface.Stride);
+
+                src.CopyTo(dstLock.AsRegionPtr());
+            }
+
+            return bitmap;
         }
     }
 }

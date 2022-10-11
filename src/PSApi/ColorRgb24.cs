@@ -26,6 +26,11 @@ namespace PSFilterLoad.PSApi
             B = blue;
         }
 
+        internal ColorRgb24(PaintDotNet.Imaging.ColorBgra32 color)
+            : this(color.R, color.G, color.B)
+        {
+        }
+
         public byte R { readonly get; set; }
 
         public byte G { readonly get; set; }

@@ -12,7 +12,8 @@
 
 using PaintDotNet;
 using PaintDotNet.Effects;
-using PaintDotNet.IO;
+using PaintDotNet.Imaging;
+using PaintDotNet.Rendering;
 using PSFilterLoad.PSApi;
 using PSFilterPdn.Controls;
 using PSFilterPdn.EnableInfo;
@@ -27,14 +28,12 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
 namespace PSFilterPdn
 {
-    internal sealed class PsFilterPdnConfigDialog : EffectConfigDialog
+    internal sealed class PsFilterPdnConfigDialog : EffectConfigForm<PSFilterPdnEffect, PSFilterPdnConfigToken>
     {
         private Button buttonOK;
         private TabControlEx tabControl1;
@@ -60,7 +59,15 @@ namespace PSFilterPdn
         private LinkLabel donateLink;
         private Button buttonCancel;
 
-        private Surface destSurface;
+        private readonly IImagingFactory imagingFactory;
+        private readonly DocumentDpi documentDpi;
+        private IBitmap<ColorBgra32> sourceBitmap;
+        private MaskSurface selectionMask;
+        private ColorBgra32 primaryColor;
+        private ColorBgra32 secondaryColor;
+        private bool environmentInitialized;
+
+        private IBitmap<ColorBgra32> destSurface;
         private PluginData filterData;
         private Dictionary<PluginData, ParameterData> filterParameters;
         private PseudoResourceCollection pseudoResources;
@@ -104,7 +111,7 @@ namespace PSFilterPdn
         private static readonly string EffectsFolderPath = Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location);
         private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location), "PSFilterShim.exe");
 
-        public PsFilterPdnConfigDialog()
+        public PsFilterPdnConfigDialog(IBitmapEffectEnvironment bitmapEffectEnvironment)
         {
             InitializeComponent();
             proxyProcess = null;
@@ -116,6 +123,13 @@ namespace PSFilterPdn
             folderNameLbl.Text = string.Empty;
             searchDirectories = new List<string>();
             highDpiMode = DeviceDpi > DpiHelper.LogicalDpi;
+            imagingFactory = bitmapEffectEnvironment.ImagingFactory;
+            documentDpi = new DocumentDpi(bitmapEffectEnvironment.Document.Resolution);
+
+            UseAppThemeColors = true;
+            PluginThemingUtil.UpdateControlBackColor(this);
+            PluginThemingUtil.UpdateControlForeColor(this);
+            filterSearchBox.ForeColor = SystemColors.GrayText;
 
             // set the useDEPProxy flag when on a 32-bit OS.
             useDEPProxy = false;
@@ -137,7 +151,7 @@ namespace PSFilterPdn
             }
         }
 
-        protected override void Dispose(bool disposing)
+        protected override void OnDispose(bool disposing)
         {
             if (disposing)
             {
@@ -154,7 +168,7 @@ namespace PSFilterPdn
                 }
             }
 
-            base.Dispose(disposing);
+            base.OnDispose(disposing);
         }
 
         private DialogResult ShowErrorMessage(string message)
@@ -172,15 +186,13 @@ namespace PSFilterPdn
             }
         }
 
-        protected override void InitialInitToken()
+        protected override EffectConfigToken OnCreateInitialToken()
         {
-            theEffectToken = new PSFilterPdnConfigToken(null, null, false, null, null, null, null);
+            return new PSFilterPdnConfigToken(null, null, false, null, null, null, null);
         }
 
-        protected override void InitTokenFromDialog()
+        protected override void OnUpdateTokenFromDialog(PSFilterPdnConfigToken token)
         {
-            PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)theEffectToken;
-
             token.Dest = destSurface;
             token.FilterData = filterData;
             token.RunWith32BitShim = runWith32BitShim;
@@ -190,10 +202,8 @@ namespace PSFilterPdn
             token.DialogState = new ConfigDialogState(expandedNodes.AsReadOnly(), filterTreeNodes, searchDirectories.AsReadOnly());
         }
 
-        protected override void InitDialogFromToken(EffectConfigToken effectTokenCopy)
+        protected override void OnUpdateDialogFromToken(PSFilterPdnConfigToken token)
         {
-            PSFilterPdnConfigToken token = (PSFilterPdnConfigToken)effectTokenCopy;
-
             if (token.FilterData != null)
             {
                 lastSelectedFilterTitle = token.FilterData.Title;
@@ -553,7 +563,7 @@ namespace PSFilterPdn
 
         private void buttonOK_Click(object sender, EventArgs e)
         {
-            FinishTokenUpdate();
+            UpdateTokenFromDialog();
             DialogResult = DialogResult.OK;
             Close();
         }
@@ -643,7 +653,7 @@ namespace PSFilterPdn
             return false;
         }
 
-        private void Run32BitFilterProxy(EffectEnvironmentParameters eep, PluginData data)
+        private void Run32BitFilterProxy(IEffectEnvironment environment, PluginData data)
         {
             // Check that PSFilterShim exists first thing and abort if it does not.
             if (!File.Exists(PSFilterShimPath))
@@ -664,20 +674,22 @@ namespace PSFilterPdn
             descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
             selectionMaskFileName = string.Empty;
 
-            Rectangle sourceBounds = eep.SourceSurface.Bounds;
+            MaskSurface selectionMask = null;
 
-            IEffectSelectionInfo selection = eep.Selection;
-            Rectangle selectionBounds = selection.RenderBounds;
-
-            if (selectionBounds != sourceBounds)
+            try
             {
-                selectionMaskFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+                selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment);
 
-                using (MaskSurface mask = SelectionMaskRenderer.FromPdnSelection(eep.SourceSurface.Size,
-                                                                                 selection))
+                if (selectionMask != null)
                 {
-                    PSFilterShimImage.SaveSelectionMask(selectionMaskFileName, mask);
+                    selectionMaskFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+
+                    PSFilterShimImage.SaveSelectionMask(selectionMaskFileName, selectionMask);
                 }
+            }
+            finally
+            {
+                selectionMask?.Dispose();
             }
 
             PSFilterShimSettings settings = new PSFilterShimSettings
@@ -687,8 +699,8 @@ namespace PSFilterPdn
                 SourceImagePath = srcFileName,
                 DestinationImagePath = destFileName,
                 ParentWindowHandle = Handle,
-                PrimaryColor = eep.PrimaryColor.ToColor(),
-                SecondaryColor = eep.SecondaryColor.ToColor(),
+                PrimaryColor = new ColorRgb24(environment.PrimaryColor).ToWin32Color(),
+                SecondaryColor = new ColorRgb24(environment.SecondaryColor).ToWin32Color(),
                 SelectionMaskPath = selectionMaskFileName,
                 ParameterDataPath = parameterDataFileName,
                 PseudoResourcePath = resourceDataFileName,
@@ -707,7 +719,7 @@ namespace PSFilterPdn
             proxyData = data;
             try
             {
-                PSFilterShimImage.Save(srcFileName, Effect.EnvironmentParameters.SourceSurface, 96.0f, 96.0f);
+                PSFilterShimImage.Save(srcFileName, sourceBitmap, documentDpi);
 
                 ParameterData parameterData;
                 if ((filterParameters != null) && filterParameters.TryGetValue(data, out parameterData))
@@ -775,7 +787,8 @@ namespace PSFilterPdn
             {
                 filterData = proxyData;
 
-                destSurface = PSFilterShimImage.Load(destFileName);
+                destSurface?.Dispose();
+                destSurface = PSFilterShimImage.Load(destFileName, imagingFactory);
 
                 try
                 {
@@ -829,7 +842,15 @@ namespace PSFilterPdn
                 filterProgressBar.Value = 0;
             }
 
-            FinishTokenUpdate();
+            UpdateTokenFromDialog();
+        }
+
+        private void InitializeEnvironment()
+        {
+            sourceBitmap = Environment.GetSourceBitmapBgra32().ToBitmap();
+            primaryColor = Environment.PrimaryColor;
+            secondaryColor = Environment.SecondaryColor;
+            selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment);
         }
 
         private void runFilterBtn_Click(object sender, EventArgs e)
@@ -840,10 +861,16 @@ namespace PSFilterPdn
 
                 if (proxyProcess is null && !filterRunning)
                 {
+                    if (!environmentInitialized)
+                    {
+                        InitializeEnvironment();
+                        environmentInitialized = true;
+                    }
+
                     if (data.RunWith32BitShim || useDEPProxy)
                     {
                         runWith32BitShim = true;
-                        Run32BitFilterProxy(Effect.EnvironmentParameters, data);
+                        Run32BitFilterProxy(Environment, data);
                     }
                     else
                     {
@@ -853,8 +880,16 @@ namespace PSFilterPdn
 
                         try
                         {
-                            PluginUISettings pluginUISettings = new(highDpiMode);
-                            using (LoadPsFilter lps = new LoadPsFilter(Effect.EnvironmentParameters, Handle, pluginUISettings))
+                            PluginUISettings pluginUISettings = new PluginUISettings(highDpiMode);
+                            using (LoadPsFilter lps = new LoadPsFilter(sourceBitmap,
+                                                                       selectionMask,
+                                                                       takeOwnershipOfSelectionMask: false,
+                                                                       primaryColor,
+                                                                       secondaryColor,
+                                                                       documentDpi.X,
+                                                                       documentDpi.Y,
+                                                                       Handle,
+                                                                       pluginUISettings))
                             {
                                 lps.SetAbortCallback(AbortCallback);
                                 lps.SetProgressCallback(UpdateProgress);
@@ -877,7 +912,8 @@ namespace PSFilterPdn
 
                                 if (!showAboutDialog && result)
                                 {
-                                    destSurface = lps.Dest.Clone();
+                                    destSurface?.Dispose();
+                                    destSurface = SurfaceUtil.ToBitmapBgra32(lps.Dest, imagingFactory);
                                     filterData = data;
                                     filterParameters.AddOrUpdate(data, lps.FilterParameters);
                                     pseudoResources = lps.PseudoResources;
@@ -901,7 +937,7 @@ namespace PSFilterPdn
                         }
                         catch (BadImageFormatException bifex)
                         {
-                            ShowErrorMessage(bifex.Message + Environment.NewLine + bifex.FileName);
+                            ShowErrorMessage(bifex.Message + System.Environment.NewLine + bifex.FileName);
                         }
                         catch (FileNotFoundException fnfex)
                         {
@@ -926,7 +962,7 @@ namespace PSFilterPdn
                         {
                             if (!formClosePending)
                             {
-                                FinishTokenUpdate();
+                                UpdateTokenFromDialog();
                             }
                             filterRunning = false;
                         }
@@ -944,7 +980,7 @@ namespace PSFilterPdn
         {
             using (PlatformFolderBrowserDialog fbd = new PlatformFolderBrowserDialog())
             {
-                fbd.RootFolder = Environment.SpecialFolder.Desktop;
+                fbd.RootFolder = System.Environment.SpecialFolder.Desktop;
                 if (fbd.ShowDialog(this) == DialogResult.OK)
                 {
                     if (Directory.Exists(fbd.SelectedPath))
@@ -1026,8 +1062,7 @@ namespace PSFilterPdn
         /// </returns>
         private static bool Is64BitFilterIncompatible(PluginData plugin)
         {
-            // Many Topaz filters crash with a NullReferenceException when run under .NET 3.5, so we use the 32-bit versions unless we are running on .NET 4.0 or later.
-            if (plugin.Category.Equals("Topaz Labs", StringComparison.Ordinal) && Environment.Version.Major < 4)
+            if (plugin.Category.Equals("Topaz Labs", StringComparison.Ordinal))
             {
                 return true;
             }
@@ -1290,8 +1325,8 @@ namespace PSFilterPdn
 
         private void CheckSourceSurfaceSize()
         {
-            int width = Effect.EnvironmentParameters.SourceSurface.Width;
-            int height = Effect.EnvironmentParameters.SourceSurface.Height;
+            int width = Environment.CanvasSize.Width;
+            int height = Environment.CanvasSize.Height;
 
             if (width > 32000 || height > 32000)
             {
@@ -1320,13 +1355,6 @@ namespace PSFilterPdn
             }
         }
 
-        protected override void OnLoad(EventArgs e)
-        {
-            base.OnLoad(e);
-
-            PluginThemingUtil.EnableEffectDialogTheme(this);
-        }
-
         protected override void OnBackColorChanged(EventArgs e)
         {
             base.OnBackColorChanged(e);
@@ -1339,7 +1367,10 @@ namespace PSFilterPdn
             base.OnForeColorChanged(e);
 
             PluginThemingUtil.UpdateControlForeColor(this);
-            filterSearchBox.ForeColor = SystemColors.GrayText;
+            if (filterSearchBox != null)
+            {
+                filterSearchBox.ForeColor = SystemColors.GrayText;
+            }
         }
 
         protected override void OnShown(EventArgs e)
@@ -1749,16 +1780,19 @@ namespace PSFilterPdn
         {
             if (filterTreeNodes != null)
             {
-                EffectEnvironmentParameters eep = Effect.EnvironmentParameters;
+                if (!environmentInitialized)
+                {
+                    InitializeEnvironment();
+                    environmentInitialized = true;
+                }
 
-                int imageWidth = eep.SourceSurface.Width;
-                int imageHeight = eep.SourceSurface.Height;
-                bool hasTransparency = SurfaceUtil.HasTransparentPixels(eep.SourceSurface);
+                SizeInt32 canvasSize = sourceBitmap.Size;
+                bool hasTransparency = HasTransparentPixels(sourceBitmap);
 
                 HostState hostState = new HostState
                 {
                     HasMultipleLayers = false,
-                    HasSelection = eep.Selection.RenderBounds != eep.SourceSurface.Bounds
+                    HasSelection = selectionMask != null
                 };
 
                 foreach (KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>> item in filterTreeNodes)
@@ -1770,9 +1804,41 @@ namespace PSFilterPdn
                         TreeNodeEx node = filterCollection[i];
                         PluginData plugin = (PluginData)node.Tag;
 
-                        node.Enabled = plugin.SupportsHostState(imageWidth, imageHeight, hasTransparency, hostState);
+                        node.Enabled = plugin.SupportsHostState(canvasSize.Width,
+                                                                canvasSize.Height,
+                                                                hasTransparency,
+                                                                hostState);
                     }
                 }
+            }
+
+            static unsafe bool HasTransparentPixels(IBitmap<ColorBgra32> bitmap)
+            {
+                using (IBitmapLock<ColorBgra32> bitmapLock = bitmap.Lock(BitmapLockOptions.Read))
+                {
+                    SizeInt32 size = bitmapLock.Size;
+                    byte* scan0 = (byte*)bitmapLock.Buffer;
+                    int stride = bitmapLock.BufferStride;
+
+                    for (int y = 0; y < size.Height; y++)
+                    {
+                        ColorBgra32* ptr = (ColorBgra32*)(scan0 + (y * stride));
+                        ColorBgra32* ptrEnd = ptr + size.Width;
+
+                        while (ptr < ptrEnd)
+                        {
+                            if (ptr->A < 255)
+                            {
+                                return true;
+                            }
+
+                            ptr++;
+                        }
+                    }
+
+                }
+
+                return false;
             }
         }
     }

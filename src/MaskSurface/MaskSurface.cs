@@ -32,7 +32,7 @@ namespace PSFilterLoad.PSApi
     {
         private int width;
         private int height;
-        private long stride;
+        private int stride;
         private MemoryBlock scan0;
         private bool disposed;
 
@@ -68,7 +68,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Gets the stride of the Surface.
         /// </summary>
-        public long Stride => stride;
+        public int Stride => stride;
 
         public MemoryBlock Scan0 => scan0;
 

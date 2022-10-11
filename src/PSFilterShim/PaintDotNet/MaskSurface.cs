@@ -33,7 +33,7 @@ namespace PaintDotNet
     {
         private int width;
         private int height;
-        private long stride;
+        private int stride;
         private MemoryBlock scan0;
         private bool disposed;
 
@@ -76,7 +76,7 @@ namespace PaintDotNet
         /// <summary>
         /// Gets the stride of the Surface.
         /// </summary>
-        public long Stride
+        public int Stride
         {
             get
             {
