@@ -293,6 +293,12 @@ namespace PSFilterPdn
             }
         }
 
+        protected override void OnInitializeRenderInfo(BitmapEffectRenderInfo renderInfo)
+        {
+            renderInfo.Flags |= BitmapEffectRenderingFlags.DisableSelectionClipping;
+            base.OnInitializeRenderInfo(renderInfo);
+        }
+
         protected override void OnSetToken(PSFilterPdnConfigToken token)
         {
             if (repeatEffect)

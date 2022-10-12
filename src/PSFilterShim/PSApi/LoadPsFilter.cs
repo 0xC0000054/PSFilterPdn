@@ -101,6 +101,7 @@ namespace PSFilterLoad.PSApi
 
         private FilterDataHandling inputHandling;
         private FilterDataHandling outputHandling;
+        private bool writesOutsideSelection;
 
         private Rect16 lastInRect;
         private Rect16 lastOutRect;
@@ -247,6 +248,7 @@ namespace PSFilterLoad.PSApi
 
             inputHandling = FilterDataHandling.None;
             outputHandling = FilterDataHandling.None;
+            writesOutsideSelection = false;
 
             abortFunc = null;
             progressFunc = null;
@@ -1118,6 +1120,7 @@ namespace PSFilterLoad.PSApi
                 FilterCaseInfoFlags filterCaseFlags = info.Flags1;
 
                 copyToDest = (filterCaseFlags & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None;
+                writesOutsideSelection = (filterCaseFlags & FilterCaseInfoFlags.WritesOutsideSelection) != FilterCaseInfoFlags.None;
 
                 bool worksWithBlankData = (filterCaseFlags & FilterCaseInfoFlags.WorksWithBlankData) != FilterCaseInfoFlags.None;
 
@@ -2035,6 +2038,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         private unsafe void PostProcessOutputData()
         {
+            // Set the alpha value to opaque in the areas affected by the filter.
             if (outputHandling == FilterDataHandling.FillMask &&
                 (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection))
             {
@@ -2050,6 +2054,53 @@ namespace PSFilterLoad.PSApi
                     {
                         ptr->A = 255;
                         ptr++;
+                    }
+                }
+            }
+
+            if (hasSelectionMask)
+            {
+                FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr;
+
+                // Clip the destination image to the selection mask when the filter does not
+                // perform its own masking or write outside of the selection.
+                if (filterRecord->autoMask && !writesOutsideSelection)
+                {
+                    int width = source.Width;
+                    int height = source.Height;
+
+                    for (int y = 0; y < height; y++)
+                    {
+                        ColorBgra* originalPixel = source.GetRowAddressUnchecked(y);
+                        ColorBgra* dstPixel = dest.GetRowAddressUnchecked(y);
+                        byte* maskPixel = mask.GetRowAddressUnchecked(y);
+
+                        for (int x = 0; x < width; x++)
+                        {
+                            // We do the following operations based on the value of the mask pixel:
+                            //
+                            // 0: overwrite the destination pixel with the original pixel from the source image
+                            // 255: nothing -- the mask is fully opaque so blending is not required.
+                            // 1-254: blend the original and new colors based on the mask pixel value.
+                            byte maskValue = *maskPixel;
+
+                            switch (maskValue)
+                            {
+                                case 0:
+                                    dstPixel->Bgra = originalPixel->Bgra;
+                                    break;
+                                case 255:
+                                    // The mask is fully opaque -- nothing to do.
+                                    break;
+                                default:
+                                    *dstPixel = ColorBgra.Blend(*originalPixel, *dstPixel, maskValue);
+                                    break;
+                            }
+
+                            originalPixel++;
+                            dstPixel++;
+                            maskPixel++;
+                        }
                     }
                 }
             }
