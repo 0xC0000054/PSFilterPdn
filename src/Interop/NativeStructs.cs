@@ -109,22 +109,6 @@ namespace PSFilterPdn.Interop
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct SYSTEM_INFO
-        {
-            public ushort wProcessorArchitecture;
-            public ushort wReserved;
-            public uint dwPageSize;
-            public IntPtr lpMinimumApplicationAddress;
-            public IntPtr lpMaximumApplicationAddress;
-            public UIntPtr dwActiveProcessorMask;
-            public uint dwNumberOfProcessors;
-            public uint dwProcessorType;
-            public uint dwAllocationGranularity;
-            public ushort wProcessorLevel;
-            public ushort wProcessorRevision;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct CHOOSECOLORW
         {
             public uint lStructSize;

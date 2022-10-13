@@ -35,15 +35,15 @@ namespace PSFilterLoad.PSApi
                 throw new ArgumentNullException(nameof(fileName));
             }
 
-            ProcessorArchitecture platform = PEFile.GetProcessorArchitecture(fileName);
+            Architecture? platform = PEFile.GetProcessorArchitecture(fileName);
 
-            if (!DllProcessorArchtectureIsSupported(platform))
+            if (!platform.HasValue || !DllProcessorArchtectureIsSupported(platform.Value))
             {
                 // Ignore any DLLs that cannot be used on the current platform.
                 return System.Linq.Enumerable.Empty<PluginData>();
             }
 
-            QueryFilter queryFilter = new QueryFilter(fileName, platform);
+            QueryFilter queryFilter = new QueryFilter(fileName, platform.Value);
 
             // Use LOAD_LIBRARY_AS_DATAFILE to prevent a BadImageFormatException from being thrown if the file is a different processor architecture than the parent process.
             using (SafeLibraryHandle dll = UnsafeNativeMethods.LoadLibraryExW(fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE))
@@ -111,28 +111,27 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// <see langword="true"/> if the DLL processor architecture is supported; otherwise, <see langword="false"/>.
         /// </returns>
-        private static bool DllProcessorArchtectureIsSupported(ProcessorArchitecture platform)
+        private static bool DllProcessorArchtectureIsSupported(Architecture platform)
         {
             bool result;
 
-            switch (ProcessInformation.Architecture)
+            switch (RuntimeInformation.ProcessArchitecture)
             {
-                case ProcessorArchitecture.X86:
-                    result = platform == ProcessorArchitecture.X86;
+                case Architecture.X86:
+                    result = platform == Architecture.X86;
                     break;
-                case ProcessorArchitecture.X64:
+                case Architecture.X64:
                     // A x86_64 OS can use both x64 and x86 plugins, the x86 plugins will be run using the PSFilterShim process.
-                    result = platform == ProcessorArchitecture.X64 || platform == ProcessorArchitecture.X86;
+                    result = platform == Architecture.X64 || platform == Architecture.X86;
                     break;
-                case ProcessorArchitecture.Arm:
-                    result = platform == ProcessorArchitecture.Arm;
+                case Architecture.Arm:
+                    result = platform == Architecture.Arm;
                     break;
-                case ProcessorArchitecture.Arm64:
+                case Architecture.Arm64:
                     // An ARM64 OS should be able to run ARM64 and x86 plugins, the x86 plugins will be run using the PSFilterShim process.
                     // The ARM64 version of Windows has emulation support for running x86 processes.
-                    result = platform == ProcessorArchitecture.Arm64 || platform == ProcessorArchitecture.X86;
+                    result = platform == Architecture.Arm64 || platform == Architecture.X86;
                     break;
-                case ProcessorArchitecture.Unknown:
                 default:
                     result = false;
                     break;

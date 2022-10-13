@@ -13,6 +13,7 @@
 using PSFilterLoad.PSApi.Loader;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
@@ -31,26 +32,25 @@ namespace PSFilterLoad.PSApi
             /// <param name="fileName">The file name of the plug-in.</param>
             /// <param name="platform">The processor architecture that the plug-in was built for.</param>
             /// <exception cref="System.PlatformNotSupportedException">The processor architecture specified by <paramref name="platform"/> is not supported.</exception>
-            public QueryFilter(string fileName, ProcessorArchitecture platform)
+            public QueryFilter(string fileName, Architecture platform)
             {
                 this.fileName = fileName;
                 switch (platform)
                 {
-                    case ProcessorArchitecture.X86:
+                    case Architecture.X86:
                         platformEntryPoint = PIPropertyID.PIWin32X86CodeProperty;
                         break;
-                    case ProcessorArchitecture.X64:
+                    case Architecture.X64:
                         platformEntryPoint = PIPropertyID.PIWin64X86CodeProperty;
                         break;
-                    case ProcessorArchitecture.Arm64:
+                    case Architecture.Arm64:
                         platformEntryPoint = PIPropertyID.PIWin64ARMCodeProperty;
                         break;
-                    case ProcessorArchitecture.Unknown:
                     default:
-                        throw new PlatformNotSupportedException($"No platform entry point was defined for { nameof(ProcessorArchitecture) }.{ platform }.");
+                        throw new PlatformNotSupportedException($"No platform entry point was defined for { nameof(Architecture) }.{ platform }.");
                 }
                 plugins = new List<PluginData>();
-                runWith32BitShim = platform == ProcessorArchitecture.X86 && ProcessInformation.Architecture != ProcessorArchitecture.X86;
+                runWith32BitShim = platform == Architecture.X86 && RuntimeInformation.ProcessArchitecture != Architecture.X86;
             }
         }
     }

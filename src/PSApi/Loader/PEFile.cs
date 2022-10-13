@@ -12,6 +12,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security;
 
 namespace PSFilterLoad.PSApi.Loader
@@ -31,9 +32,9 @@ namespace PSFilterLoad.PSApi.Loader
         /// </summary>
         /// <param name="fileName">The file name to check.</param>
         /// <returns>The processor architecture of the module.</returns>
-        internal static ProcessorArchitecture GetProcessorArchitecture(string fileName)
+        internal static Architecture? GetProcessorArchitecture(string fileName)
         {
-            ProcessorArchitecture architecture = ProcessorArchitecture.Unknown;
+            Architecture? architecture = null;
 
             FileStream stream = null;
 
@@ -71,9 +72,9 @@ namespace PSFilterLoad.PSApi.Loader
             return architecture;
         }
 
-        private static ProcessorArchitecture GetProcessorArchitectureImpl(EndianBinaryReader reader)
+        private static Architecture? GetProcessorArchitectureImpl(EndianBinaryReader reader)
         {
-            ProcessorArchitecture architecture = ProcessorArchitecture.Unknown;
+            Architecture? architecture = null;
 
             ushort dosSignature = reader.ReadUInt16();
             if (dosSignature == IMAGE_DOS_SIGNATURE)
@@ -92,16 +93,16 @@ namespace PSFilterLoad.PSApi.Loader
                     switch (machine)
                     {
                         case IMAGE_FILE_MACHINE_I386:
-                            architecture = ProcessorArchitecture.X86;
+                            architecture = Architecture.X86;
                             break;
                         case IMAGE_FILE_MACHINE_AMD64:
-                            architecture = ProcessorArchitecture.X64;
+                            architecture = Architecture.X64;
                             break;
                         case IMAGE_FILE_MACHINE_ARM:
-                            architecture = ProcessorArchitecture.Arm;
+                            architecture = Architecture.Arm;
                             break;
                         case IMAGE_FILE_MACHINE_ARM64:
-                            architecture = ProcessorArchitecture.Arm64;
+                            architecture = Architecture.Arm64;
                             break;
                     }
                 }
