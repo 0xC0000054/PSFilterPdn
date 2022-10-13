@@ -1787,13 +1787,17 @@ namespace PSFilterPdn
                 }
 
                 SizeInt32 canvasSize = sourceBitmap.Size;
-                bool hasTransparency = HasTransparentPixels(sourceBitmap);
+                Lazy<bool> lazyHasTransparency = new(() => HasTransparentPixels(sourceBitmap));
 
                 HostState hostState = new HostState
                 {
                     HasMultipleLayers = false,
                     HasSelection = selectionMask != null
                 };
+
+#pragma warning disable IDE0039 // Use local function
+                Func<bool> hasTransparency = () => lazyHasTransparency.Value;
+#pragma warning restore IDE0039 // Use local function
 
                 foreach (KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>> item in filterTreeNodes)
                 {

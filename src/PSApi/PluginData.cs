@@ -295,7 +295,7 @@ namespace PSFilterLoad.PSApi
         /// <exception cref="ArgumentNullException">
         /// <paramref name="hostState"/> is null.
         /// </exception>
-        internal bool SupportsHostState(int imageWidth, int imageHeight, bool hasTransparency, HostState hostState)
+        internal bool SupportsHostState(int imageWidth, int imageHeight, Func<bool> hasTransparency, HostState hostState)
         {
             if (hostState == null)
             {
@@ -306,7 +306,7 @@ namespace PSFilterLoad.PSApi
 
             const ImageMode imageMode = ImageMode.RGB;
 
-            FilterCase filterCase = GetFilterTransparencyMode(hostState.HasSelection, () => hasTransparency);
+            FilterCase filterCase = GetFilterTransparencyMode(hostState.HasSelection, hasTransparency);
 
             if (!string.IsNullOrEmpty(enableInfo))
             {
