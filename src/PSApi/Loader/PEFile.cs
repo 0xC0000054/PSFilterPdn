@@ -40,7 +40,7 @@ namespace PSFilterLoad.PSApi.Loader
 
             try
             {
-                stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read, 1);
 
                 using (EndianBinaryReader reader = new EndianBinaryReader(stream, Endianess.Little))
                 {
