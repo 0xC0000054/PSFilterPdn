@@ -50,7 +50,7 @@ namespace PSFilterLoad.PSApi
 
         public unsafe IntPtr CreateChannelPortsPointer()
         {
-            IntPtr channelPortsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ChannelPortProcs)), true);
+            IntPtr channelPortsPtr = Memory.Allocate(Marshal.SizeOf<ChannelPortProcs>(), true);
 
             ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
             channelPorts->channelPortProcsVersion = PSConstants.kCurrentChannelPortProcsVersion;

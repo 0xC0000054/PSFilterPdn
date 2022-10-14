@@ -159,7 +159,7 @@ namespace PSFilterLoad.PSApi
 
         public IntPtr CreateReadDescriptorPointer()
         {
-            IntPtr readDescriptorPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadDescriptorProcs)), true);
+            IntPtr readDescriptorPtr = Memory.Allocate(Marshal.SizeOf<ReadDescriptorProcs>(), true);
 
             unsafe
             {
@@ -191,7 +191,7 @@ namespace PSFilterLoad.PSApi
 
         public IntPtr CreateWriteDescriptorPointer()
         {
-            IntPtr writeDescriptorPtr = Memory.Allocate(Marshal.SizeOf(typeof(WriteDescriptorProcs)), true);
+            IntPtr writeDescriptorPtr = Memory.Allocate(Marshal.SizeOf<WriteDescriptorProcs>(), true);
 
             unsafe
             {

@@ -87,7 +87,7 @@ namespace PSFilterLoad.PSApi
 
         public unsafe IntPtr CreateReadImageDocumentPointer(FilterCase filterCase, bool hasSelection)
         {
-            IntPtr readDocumentPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadImageDocumentDesc)), true);
+            IntPtr readDocumentPtr = Memory.Allocate(Marshal.SizeOf<ReadImageDocumentDesc>(), true);
 
             try
             {
@@ -170,7 +170,7 @@ namespace PSFilterLoad.PSApi
 
         private unsafe IntPtr CreateReadChannelDesc(int channel, string name, int depth, VRect bounds)
         {
-            IntPtr addressPtr = Memory.Allocate(Marshal.SizeOf(typeof(ReadChannelDesc)), true);
+            IntPtr addressPtr = Memory.Allocate(Marshal.SizeOf<ReadChannelDesc>(), true);
             IntPtr namePtr = IntPtr.Zero;
             try
             {

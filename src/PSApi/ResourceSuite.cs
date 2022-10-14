@@ -61,7 +61,7 @@ namespace PSFilterLoad.PSApi
 
         public IntPtr CreateResourceProcsPointer()
         {
-            IntPtr resourceProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(ResourceProcs)), true);
+            IntPtr resourceProcsPtr = Memory.Allocate(Marshal.SizeOf<ResourceProcs>(), true);
 
             unsafe
             {

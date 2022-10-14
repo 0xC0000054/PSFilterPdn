@@ -171,7 +171,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             NativeStructs.MEMORYSTATUSEX buffer = new NativeStructs.MEMORYSTATUSEX()
             {
-                dwLength = (uint)Marshal.SizeOf(typeof(NativeStructs.MEMORYSTATUSEX))
+                dwLength = (uint)Marshal.SizeOf<NativeStructs.MEMORYSTATUSEX>()
             };
             if (SafeNativeMethods.GlobalMemoryStatusEx(ref buffer))
             {

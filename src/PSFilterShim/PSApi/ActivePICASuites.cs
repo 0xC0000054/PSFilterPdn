@@ -201,7 +201,7 @@ namespace PSFilterLoad.PSApi
             {
                 throw new ObjectDisposedException("ActivePICASuites");
             }
-            IntPtr suitePointer = Memory.Allocate(Marshal.SizeOf(typeof(TSuite)), false);
+            IntPtr suitePointer = Memory.Allocate(Marshal.SizeOf<TSuite>(), false);
             try
             {
                 Marshal.StructureToPtr(suite, suitePointer, false);

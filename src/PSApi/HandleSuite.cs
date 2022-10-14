@@ -27,7 +27,7 @@ namespace PSFilterLoad.PSApi
         {
             public IntPtr pointer;
 
-            public static readonly int SizeOf = Marshal.SizeOf(typeof(PSHandle));
+            public static readonly int SizeOf = Marshal.SizeOf<PSHandle>();
         }
 
         private sealed class HandleEntry
@@ -121,7 +121,7 @@ namespace PSFilterLoad.PSApi
 
         public IntPtr CreateHandleProcsPointer()
         {
-            IntPtr handleProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(HandleProcs)), true);
+            IntPtr handleProcsPtr = Memory.Allocate(Marshal.SizeOf<HandleProcs>(), true);
 
             unsafe
             {
@@ -184,7 +184,7 @@ namespace PSFilterLoad.PSApi
         private static bool IsValidReadPtr(IntPtr ptr)
         {
             NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
-            int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
+            int mbiSize = Marshal.SizeOf<NativeStructs.MEMORY_BASIC_INFORMATION>();
 
             if (SafeNativeMethods.VirtualQuery(ptr, out mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
             {
@@ -218,7 +218,7 @@ namespace PSFilterLoad.PSApi
         private static bool IsValidWritePtr(IntPtr ptr)
         {
             NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
-            int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
+            int mbiSize = Marshal.SizeOf<NativeStructs.MEMORY_BASIC_INFORMATION>();
 
             if (SafeNativeMethods.VirtualQuery(ptr, out mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
             {

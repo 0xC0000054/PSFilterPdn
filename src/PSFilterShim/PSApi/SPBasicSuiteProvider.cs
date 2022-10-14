@@ -122,7 +122,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>An unmanaged pointer containing the SPBasic suite structure.</returns>
         public unsafe IntPtr CreateSPBasicSuitePointer()
         {
-            IntPtr basicSuitePtr = Memory.Allocate(Marshal.SizeOf(typeof(SPBasicSuite)), true);
+            IntPtr basicSuitePtr = Memory.Allocate(Marshal.SizeOf<SPBasicSuite>(), true);
 
             SPBasicSuite* basicSuite = (SPBasicSuite*)basicSuitePtr.ToPointer();
             basicSuite->acquireSuite = Marshal.GetFunctionPointerForDelegate(spAcquireSuite);

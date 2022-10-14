@@ -50,7 +50,7 @@ namespace PSFilterLoad.PSApi
 
         public IntPtr CreateBufferProcsPointer()
         {
-            IntPtr bufferProcsPtr = Memory.Allocate(Marshal.SizeOf(typeof(BufferProcs)), true);
+            IntPtr bufferProcsPtr = Memory.Allocate(Marshal.SizeOf<BufferProcs>(), true);
 
             unsafe
             {
@@ -167,7 +167,7 @@ namespace PSFilterLoad.PSApi
 
             NativeStructs.MEMORYSTATUSEX buffer = new NativeStructs.MEMORYSTATUSEX()
             {
-                dwLength = (uint)Marshal.SizeOf(typeof(NativeStructs.MEMORYSTATUSEX))
+                dwLength = (uint)Marshal.SizeOf<NativeStructs.MEMORYSTATUSEX>()
             };
             if (SafeNativeMethods.GlobalMemoryStatusEx(ref buffer))
             {

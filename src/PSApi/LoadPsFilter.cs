@@ -252,7 +252,7 @@ namespace PSFilterLoad.PSApi
             resourceSuite = new ResourceSuite();
             parentWindowHandle = owner;
 
-            platFormDataPtr = Memory.Allocate(Marshal.SizeOf(typeof(PlatformData)), true);
+            platFormDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), true);
             ((PlatformData*)platFormDataPtr.ToPointer())->hwnd = owner;
 
             lastOutRect = Rect16.Empty;
@@ -362,7 +362,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         private static bool IsMemoryExecutable(IntPtr ptr)
         {
-            int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
+            int mbiSize = Marshal.SizeOf<NativeStructs.MEMORY_BASIC_INFORMATION>();
 
             if (SafeNativeMethods.VirtualQuery(ptr, out NativeStructs.MEMORY_BASIC_INFORMATION mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
             {
@@ -690,7 +690,7 @@ namespace PSFilterLoad.PSApi
 
             basicSuitePtr = basicSuiteProvider.CreateSPBasicSuitePointer();
 
-            IntPtr aboutRecordPtr = Memory.Allocate(Marshal.SizeOf(typeof(AboutRecord)), true);
+            IntPtr aboutRecordPtr = Memory.Allocate(Marshal.SizeOf<AboutRecord>(), true);
             try
             {
                 unsafe
@@ -2897,7 +2897,7 @@ namespace PSFilterLoad.PSApi
             readDescriptorPtr = descriptorSuite.CreateReadDescriptorPointer();
             writeDescriptorPtr = descriptorSuite.CreateWriteDescriptorPointer();
 
-            descriptorParametersPtr = Memory.Allocate(Marshal.SizeOf(typeof(PIDescriptorParameters)), true);
+            descriptorParametersPtr = Memory.Allocate(Marshal.SizeOf<PIDescriptorParameters>(), true);
             PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
             descriptorParameters->descriptorParametersVersion = PSConstants.kCurrentDescriptorParametersVersion;
             descriptorParameters->readDescriptorProcs = readDescriptorPtr;
@@ -2950,7 +2950,7 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void SetupFilterRecord()
         {
-            filterRecordPtr = Memory.Allocate(Marshal.SizeOf(typeof(FilterRecord)), true);
+            filterRecordPtr = Memory.Allocate(Marshal.SizeOf<FilterRecord>(), true);
             FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
             filterRecord->serial = 0;
