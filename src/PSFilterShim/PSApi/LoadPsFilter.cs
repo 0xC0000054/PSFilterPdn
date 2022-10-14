@@ -363,10 +363,9 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         private static bool IsMemoryExecutable(IntPtr ptr)
         {
-            NativeStructs.MEMORY_BASIC_INFORMATION mbi;
             int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
 
-            if (SafeNativeMethods.VirtualQuery(ptr, out mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
+            if (SafeNativeMethods.VirtualQuery(ptr, out NativeStructs.MEMORY_BASIC_INFORMATION mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
             {
                 return false;
             }
@@ -424,8 +423,7 @@ namespace PSFilterLoad.PSApi
             PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
             if (descriptorParameters->descriptor != Handle.Null)
             {
-                Dictionary<uint, AETEValue> data;
-                if (basicSuiteProvider.TryGetScriptingData(descriptorParameters->descriptor, out data))
+                if (basicSuiteProvider.TryGetScriptingData(descriptorParameters->descriptor, out Dictionary<uint, AETEValue> data))
                 {
                     scriptingData = data;
                 }

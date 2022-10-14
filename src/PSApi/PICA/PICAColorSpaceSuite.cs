@@ -381,8 +381,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             int error;
 
-            string prompt;
-            if (zstringSuite.ConvertToString(promptZString, out prompt))
+            if (zstringSuite.ConvertToString(promptZString, out string prompt))
             {
                 ColorRgb24? chosenColor = ColorPickerService.ShowColorPickerDialog(prompt);
 

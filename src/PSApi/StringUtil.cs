@@ -136,8 +136,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         internal static unsafe string FromCString(IntPtr ptr, StringTrimOption option)
         {
-            int length;
-            if (!TryGetCStringLength(ptr, out length))
+            if (!TryGetCStringLength(ptr, out int length))
             {
                 return null;
             }
@@ -167,8 +166,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         internal static unsafe string FromCString(byte* ptr, StringTrimOption option)
         {
-            int length;
-            if (!TryGetCStringLength(ptr, out length))
+            if (!TryGetCStringLength(ptr, out int length))
             {
                 return null;
             }

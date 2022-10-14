@@ -138,8 +138,7 @@ namespace PSFilterPdn
                         DocumentDpi documentDpi = new(Environment.Document.Resolution);
                         PSFilterShimImage.Save(srcFileName, Environment.GetSourceBitmapBgra32(), documentDpi);
 
-                        ParameterData parameterData;
-                        if (token.FilterParameters.TryGetValue(token.FilterData, out parameterData))
+                        if (token.FilterParameters.TryGetValue(token.FilterData, out ParameterData parameterData))
                         {
                             DataContractSerializerUtil.Serialize(parameterDataFileName, parameterData);
                         }
@@ -216,8 +215,7 @@ namespace PSFilterPdn
                         lps.SetRegistryValues(token.DescriptorRegistry);
                     }
 
-                    ParameterData parameterData;
-                    if (token.FilterParameters.TryGetValue(token.FilterData, out parameterData))
+                    if (token.FilterParameters.TryGetValue(token.FilterData, out ParameterData parameterData))
                     {
                         lps.FilterParameters = parameterData;
                     }

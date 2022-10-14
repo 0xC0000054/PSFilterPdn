@@ -248,8 +248,7 @@ namespace PSFilterLoad.PSApi.PICA
         bool IActionDescriptorSuite.TryGetDescriptorValues(PIActionDescriptor descriptor, out Dictionary<uint, AETEValue> values)
         {
             values = null;
-            ScriptingParameters scriptingData;
-            if (actionDescriptors.TryGetValue(descriptor, out scriptingData))
+            if (actionDescriptors.TryGetValue(descriptor, out ScriptingParameters scriptingData))
             {
                 values = scriptingData.ToDictionary();
                 return true;
@@ -341,8 +340,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             scriptingData = null;
 
-            ScriptingParameters parameters;
-            if (descriptorHandles.TryGetValue(descriptorHandle, out parameters))
+            if (descriptorHandles.TryGetValue(descriptorHandle, out ScriptingParameters parameters))
             {
                 scriptingData = parameters.ToDictionary();
 
@@ -419,8 +417,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ScriptingParameters parameters;
-            if (descriptorHandles.TryGetValue(handle, out parameters))
+            if (descriptorHandles.TryGetValue(handle, out ScriptingParameters parameters))
             {
                 try
                 {
@@ -476,8 +473,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item = null;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 // If the value is a sub-descriptor it must be retrieved with GetObject.
                 if (item.Value is Dictionary<uint, AETEValue>)
@@ -619,8 +615,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (aete != null)
             {
-                short value;
-                if (aete.TryGetParameterFlags(key, out value))
+                if (aete.TryGetParameterFlags(key, out short value))
                 {
                     return value;
                 }
@@ -735,8 +730,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             try
             {
-                ReadOnlyCollection<ActionListItem> values;
-                if (actionListSuite.TryGetListValues(list, out values))
+                if (actionListSuite.TryGetListValues(list, out ReadOnlyCollection<ActionListItem> values))
                 {
                     actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.ValueList, GetAETEParamFlags(key), 0, values));
                 }
@@ -759,8 +753,7 @@ namespace PSFilterLoad.PSApi.PICA
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
             // Attach the sub key to the parent descriptor.
-            ScriptingParameters subKeys;
-            if (actionDescriptors.TryGetValue(descriptorHandle, out subKeys))
+            if (actionDescriptors.TryGetValue(descriptorHandle, out ScriptingParameters subKeys))
             {
                 try
                 {
@@ -808,8 +801,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             try
             {
-                ReadOnlyCollection<ActionReferenceItem> values;
-                if (actionReferenceSuite.TryGetReferenceValues(reference, out values))
+                if (actionReferenceSuite.TryGetReferenceValues(reference, out ReadOnlyCollection<ActionReferenceItem> values))
                 {
                     actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.ObjectReference, GetAETEParamFlags(key), 0, values));
                 }
@@ -931,8 +923,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             try
             {
-                ActionDescriptorZString value;
-                if (zstringSuite.ConvertToActionDescriptor(zstring, out value))
+                if (zstringSuite.ConvertToActionDescriptor(zstring, out ActionDescriptorZString value))
                 {
                     actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), 0, value));
 
@@ -985,8 +976,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 *data = (int)item.Value;
 
@@ -1006,8 +996,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 *data = (double)item.Value;
 
@@ -1027,8 +1016,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 UnitFloat unitFloat = (UnitFloat)item.Value;
 
@@ -1055,8 +1043,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 byte[] bytes = (byte[])item.Value;
 
@@ -1078,8 +1065,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 if (maxLength > 0)
                 {
@@ -1107,8 +1093,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 *data = (byte)item.Value;
 
@@ -1128,8 +1113,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 ReadOnlyCollection<ActionListItem> values = (ReadOnlyCollection<ActionListItem>)item.Value;
 
@@ -1158,8 +1142,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 uint type = item.Type;
 
@@ -1196,8 +1179,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 EnumeratedValue enumerated = (EnumeratedValue)item.Value;
                 if (type != null)
@@ -1223,8 +1205,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 ReadOnlyCollection<ActionReferenceItem> values = (ReadOnlyCollection<ActionReferenceItem>)item.Value;
 
@@ -1253,8 +1234,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 *data = (uint)item.Value;
 
@@ -1279,8 +1259,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 int size = item.Size;
                 *data = HandleSuite.Instance.NewHandle(size);
@@ -1309,8 +1288,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 int[] values = (int[])item.Value;
                 if (count > values.Length)
@@ -1336,8 +1314,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 ActionDescriptorZString value = (ActionDescriptorZString)item.Value;
 
@@ -1366,8 +1343,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 byte[] bytes = (byte[])item.Value;
 
@@ -1389,8 +1365,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            AETEValue item;
-            if (actionDescriptors[descriptor].TryGetValue(key, out item))
+            if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 byte[] data = (byte[])item.Value;
 

@@ -39,12 +39,11 @@ namespace PSFilterLoad.PSApi
 
                 FilterCaseInfo[] info = new FilterCaseInfo[7];
                 int offset = 0;
-                int bytesRead;
                 bool filterInfoValid = true;
 
                 for (int i = 0; i < info.Length; i++)
                 {
-                    byte? inputHandling = ParseField(ptr, offset, out bytesRead);
+                    byte? inputHandling = ParseField(ptr, offset, out int bytesRead);
                     offset += bytesRead;
 
                     byte? outputHandling = ParseField(ptr, offset, out bytesRead);

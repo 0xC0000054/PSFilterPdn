@@ -721,8 +721,7 @@ namespace PSFilterPdn
             {
                 PSFilterShimImage.Save(srcFileName, sourceBitmap, documentDpi);
 
-                ParameterData parameterData;
-                if ((filterParameters != null) && filterParameters.TryGetValue(data, out parameterData))
+                if ((filterParameters != null) && filterParameters.TryGetValue(data, out ParameterData parameterData))
                 {
                     DataContractSerializerUtil.Serialize(parameterDataFileName, parameterData);
                 }
@@ -899,8 +898,7 @@ namespace PSFilterPdn
                                     lps.SetRegistryValues(descriptorRegistry);
                                 }
 
-                                ParameterData parameterData;
-                                if ((filterParameters != null) && filterParameters.TryGetValue(data, out parameterData))
+                                if ((filterParameters != null) && filterParameters.TryGetValue(data, out ParameterData parameterData))
                                 {
                                     lps.FilterParameters = parameterData;
                                 }
@@ -1177,8 +1175,7 @@ namespace PSFilterPdn
                                     Tag = plugin
                                 };
 
-                                List<TreeNodeEx> childNodes;
-                                if (nodes.TryGetValue(plugin.Category, out childNodes))
+                                if (nodes.TryGetValue(plugin.Category, out List<TreeNodeEx> childNodes))
                                 {
                                     if (IsNotDuplicateNode(ref childNodes, plugin))
                                     {

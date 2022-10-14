@@ -127,8 +127,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             values = null;
 
-            ActionReferenceContainer container;
-            if (actionReferences.TryGetValue(reference, out container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 values = container.GetReferencesAsReadOnly();
 
@@ -223,8 +222,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ActionReferenceContainer container;
-            if (actionReferences.TryGetValue(reference, out container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
@@ -245,8 +243,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ActionReferenceContainer container;
-            if (actionReferences.TryGetValue(reference, out container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
@@ -381,8 +378,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ActionReferenceContainer container;
-            if (actionReferences.TryGetValue(reference, out container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
@@ -401,8 +397,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (cstrValue != IntPtr.Zero)
             {
-                ActionReferenceContainer container;
-                if (actionReferences.TryGetValue(reference, out container))
+                if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
                 {
                     ActionReferenceItem item = container.GetReference();
                     if (item != null)
@@ -433,8 +428,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ActionReferenceContainer container;
-            if (actionReferences.TryGetValue(reference, out container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
@@ -455,8 +449,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ActionReferenceContainer container;
-            if (actionReferences.TryGetValue(reference, out container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
@@ -477,8 +470,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ActionReferenceContainer container;
-            if (actionReferences.TryGetValue(reference, out container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
@@ -499,8 +491,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ActionReferenceContainer container;
-            if (actionReferences.TryGetValue(reference, out container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
@@ -526,8 +517,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ActionReferenceContainer container;
-            if (actionReferences.TryGetValue(reference, out container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
@@ -548,8 +538,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            ActionReferenceContainer container;
-            if (actionReferences.TryGetValue(reference, out container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 try
                 {

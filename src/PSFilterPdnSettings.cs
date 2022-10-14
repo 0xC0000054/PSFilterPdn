@@ -172,8 +172,7 @@ namespace PSFilterPdn
                             XmlNode searchSubDirNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchSubdirectoriesPath);
                             if (searchSubDirNode != null)
                             {
-                                bool result;
-                                if (bool.TryParse(searchSubDirNode.InnerText.Trim(), out result))
+                                if (bool.TryParse(searchSubDirNode.InnerText.Trim(), out bool result))
                                 {
                                     searchSubdirectories = result;
                                 }

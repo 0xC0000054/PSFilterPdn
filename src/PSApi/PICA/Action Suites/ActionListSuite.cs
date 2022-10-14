@@ -155,8 +155,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             values = null;
 
-            ActionListItemCollection items;
-            if (actionLists.TryGetValue(list, out items))
+            if (actionLists.TryGetValue(list, out ActionListItemCollection items))
             {
                 values = items.GetListAsReadOnly();
 
@@ -411,8 +410,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                ActionListItemCollection items;
-                if (actionLists.TryGetValue(data, out items))
+                if (actionLists.TryGetValue(data, out ActionListItemCollection items))
                 {
                     actionLists[list].Add(new ActionListItem(DescriptorTypes.ValueList, items.GetListAsReadOnly()));
                 }
@@ -439,8 +437,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                Dictionary<uint, AETEValue> descriptorValues;
-                if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out descriptorValues))
+                if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out Dictionary<uint, AETEValue> descriptorValues))
                 {
                     ActionListDescriptor item = new ActionListDescriptor(type, descriptorValues);
                     actionLists[list].Add(new ActionListItem(DescriptorTypes.Object, item));
@@ -482,8 +479,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                ReadOnlyCollection<ActionReferenceItem> value;
-                if (actionReferenceSuite.TryGetReferenceValues(reference, out value))
+                if (actionReferenceSuite.TryGetReferenceValues(reference, out ReadOnlyCollection<ActionReferenceItem> value))
                 {
                     actionLists[list].Add(new ActionListItem(DescriptorTypes.ObjectReference, value));
                 }
@@ -611,8 +607,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                ActionDescriptorZString value;
-                if (zstringSuite.ConvertToActionDescriptor(zstring, out value))
+                if (zstringSuite.ConvertToActionDescriptor(zstring, out ActionDescriptorZString value))
                 {
                     actionLists[list].Add(new ActionListItem(DescriptorTypes.Char, value));
                 }

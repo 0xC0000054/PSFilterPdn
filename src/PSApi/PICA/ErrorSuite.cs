@@ -82,8 +82,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int SetErrorFromZString(ASZString str)
         {
-            string value;
-            if (zstringSuite.ConvertToString(str, out value))
+            if (zstringSuite.ConvertToString(str, out string value))
             {
                 errorMessage = value;
 

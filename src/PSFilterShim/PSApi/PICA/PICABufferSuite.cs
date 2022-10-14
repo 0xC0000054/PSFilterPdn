@@ -155,8 +155,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private uint PSBufferGetSize(IntPtr buffer)
         {
-            BufferEntry entry;
-            if (buffer != IntPtr.Zero && buffers.TryGetValue(buffer, out entry))
+            if (buffer != IntPtr.Zero && buffers.TryGetValue(buffer, out BufferEntry entry))
             {
                 return entry.Size;
             }

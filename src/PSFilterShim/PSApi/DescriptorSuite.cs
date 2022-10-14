@@ -233,8 +233,7 @@ namespace PSFilterLoad.PSApi
         {
             scriptingData = null;
 
-            Dictionary<uint, AETEValue> data;
-            if (descriptorHandles.TryGetValue(descriptorHandle, out data))
+            if (descriptorHandles.TryGetValue(descriptorHandle, out Dictionary<uint, AETEValue> data))
             {
                 scriptingData = data;
 
@@ -327,8 +326,7 @@ namespace PSFilterLoad.PSApi
                 // The plug-in can use this information to determine if any required keys are missing.
                 if (state.expectedKeys != IntPtr.Zero)
                 {
-                    int offset;
-                    if (state.expectedKeyOffsets.TryGetValue(state.currentKey, out offset))
+                    if (state.expectedKeyOffsets.TryGetValue(state.currentKey, out int offset))
                     {
                         Marshal.WriteInt32(state.expectedKeys, offset, unchecked((int)DescriptorTypes.Null));
                     }
@@ -817,8 +815,7 @@ namespace PSFilterLoad.PSApi
         {
             if (aete != null)
             {
-                short flags;
-                if (aete.TryGetParameterFlags(key, out flags))
+                if (aete.TryGetParameterFlags(key, out short flags))
                 {
                     return flags;
                 }
@@ -1035,8 +1032,7 @@ namespace PSFilterLoad.PSApi
             try
             {
                 // If the handle is a sub key add it to the parent descriptor.
-                Dictionary<uint, AETEValue> subKeys;
-                if (descriptorHandles.TryGetValue(descriptorHandle, out subKeys))
+                if (descriptorHandles.TryGetValue(descriptorHandle, out Dictionary<uint, AETEValue> subKeys))
                 {
                     writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
                     descriptorHandles.Remove(descriptorHandle);

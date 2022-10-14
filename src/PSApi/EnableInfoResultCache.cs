@@ -33,9 +33,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                EnableInfoData data;
-
-                if (values.TryGetValue(enableInfo, out data))
+                if (values.TryGetValue(enableInfo, out EnableInfoData data))
                 {
                     result = data.TryGetResult(variables);
                 }
@@ -76,9 +74,7 @@ namespace PSFilterLoad.PSApi
 
             internal bool? TryGetResult(EnableInfoVariables variables)
             {
-                bool result;
-
-                if (!resultCache.TryGetValue(variables, out result))
+                if (!resultCache.TryGetValue(variables, out bool result))
                 {
                     if (expression != null)
                     {

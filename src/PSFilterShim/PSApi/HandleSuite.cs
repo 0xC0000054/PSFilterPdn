@@ -182,10 +182,9 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         private static bool IsValidReadPtr(IntPtr ptr)
         {
-            NativeStructs.MEMORY_BASIC_INFORMATION mbi;
             int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
 
-            if (SafeNativeMethods.VirtualQuery(ptr, out mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
+            if (SafeNativeMethods.VirtualQuery(ptr, out NativeStructs.MEMORY_BASIC_INFORMATION mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
             {
                 return false;
             }
@@ -216,10 +215,9 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         private static bool IsValidWritePtr(IntPtr ptr)
         {
-            NativeStructs.MEMORY_BASIC_INFORMATION mbi;
             int mbiSize = Marshal.SizeOf(typeof(NativeStructs.MEMORY_BASIC_INFORMATION));
 
-            if (SafeNativeMethods.VirtualQuery(ptr, out mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
+            if (SafeNativeMethods.VirtualQuery(ptr, out NativeStructs.MEMORY_BASIC_INFORMATION mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
             {
                 return false;
             }
@@ -306,8 +304,7 @@ namespace PSFilterLoad.PSApi
         {
             if (handle != Handle.Null && IsValidReadPtr(handle.Value))
             {
-                HandleEntry item;
-                if (handles.TryGetValue(handle, out item))
+                if (handles.TryGetValue(handle, out HandleEntry item))
                 {
                     item.Dispose();
                     handles.Remove(handle);
@@ -335,8 +332,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}, moveHigh: {1}", h.ToHexString(), moveHigh));
 #endif
-            HandleEntry item;
-            if (handles.TryGetValue(h, out item))
+            if (handles.TryGetValue(h, out HandleEntry item))
             {
                 return item.Pointer;
             }
@@ -366,8 +362,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
 #endif
-            HandleEntry item;
-            if (handles.TryGetValue(h, out item))
+            if (handles.TryGetValue(h, out HandleEntry item))
             {
                 return item.Size;
             }

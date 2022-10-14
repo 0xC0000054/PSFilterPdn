@@ -259,8 +259,7 @@ namespace PSFilterPdn.EnableInfo
 
             if (token.Type == TokenType.IntegerConstant)
             {
-                int value;
-                if (!int.TryParse(token.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out value))
+                if (!int.TryParse(token.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
                 {
                     throw new EnableInfoException("Integer constant must be in the range of [-2147483648, 2147483647], actual value: " + token.Value);
                 }
@@ -269,8 +268,7 @@ namespace PSFilterPdn.EnableInfo
             }
             else if (token.Type == TokenType.BooleanConstant)
             {
-                bool value;
-                if (!bool.TryParse(token.Value, out value))
+                if (!bool.TryParse(token.Value, out bool value))
                 {
                     throw new EnableInfoException("Boolean constant must be 'true' or 'false', actual value: " + token.Value);
                 }

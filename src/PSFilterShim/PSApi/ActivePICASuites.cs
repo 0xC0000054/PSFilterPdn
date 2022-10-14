@@ -257,8 +257,8 @@ namespace PSFilterLoad.PSApi
             {
                 throw new ObjectDisposedException("ActivePICASuites");
             }
-            PICASuite suite;
-            if (activeSuites.TryGetValue(key, out suite))
+
+            if (activeSuites.TryGetValue(key, out PICASuite suite))
             {
                 suite.RefCount -= 1;
 

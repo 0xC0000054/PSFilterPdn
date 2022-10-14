@@ -162,8 +162,7 @@ namespace PSFilterPdn
 
         private void SetDialogOptions(NativeInterfaces.IFileOpenDialog dialog)
         {
-            NativeEnums.FOS options;
-            dialog.GetOptions(out options);
+            dialog.GetOptions(out NativeEnums.FOS options);
 
             // The FOS_FORCEFILESYSTEM flag restricts the dialog to selecting folders that are located on the file system.
             // This matches the behavior of the classic folder browser dialog which does not allow virtual folders to be selected.
@@ -235,8 +234,7 @@ namespace PSFilterPdn
                 OnBeforeShow(dialog);
 
                 FolderBrowserDialogEvents dialogEvents = new FolderBrowserDialogEvents(this);
-                uint eventCookie;
-                dialog.Advise(dialogEvents, out eventCookie);
+                dialog.Advise(dialogEvents, out uint eventCookie);
                 try
                 {
                     result = dialog.Show(hwndOwner) == NativeConstants.S_OK;
@@ -268,8 +266,7 @@ namespace PSFilterPdn
             {
                 pfd.GetResult(out resultShellItem);
 
-                string path;
-                resultShellItem.GetDisplayName(NativeEnums.SIGDN.SIGDN_FILESYSPATH, out path);
+                resultShellItem.GetDisplayName(NativeEnums.SIGDN.SIGDN_FILESYSPATH, out string path);
 
                 selectedPath = path;
                 result = true;

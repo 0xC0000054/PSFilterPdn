@@ -104,9 +104,7 @@ namespace PSFilterLoad.PSApi.PICA
                     return PSError.kSPBadParameterError;
                 }
 
-                Dictionary<uint, AETEValue> values;
-
-                if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out values))
+                if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out Dictionary<uint, AETEValue> values))
                 {
                     registry.AddOrUpdate(registryKey, new DescriptorRegistryItem(values, isPersistent));
                     if (isPersistent)
@@ -162,9 +160,7 @@ namespace PSFilterLoad.PSApi.PICA
                     return PSError.kSPBadParameterError;
                 }
 
-                DescriptorRegistryItem item;
-
-                if (registry.TryGetValue(registryKey, out item))
+                if (registry.TryGetValue(registryKey, out DescriptorRegistryItem item))
                 {
                     *descriptor = actionDescriptorSuite.CreateDescriptor(item.Values);
                 }
