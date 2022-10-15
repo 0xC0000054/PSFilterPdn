@@ -52,39 +52,6 @@ namespace PSFilterLoad.PSApi
             public ulong ullAvailExtendedVirtual;
         }
 
-#pragma warning disable 0649
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct RGNDATAHEADER
-        {
-            internal uint dwSize;
-            internal uint iType;
-            internal uint nCount;
-            internal uint nRgnSize;
-            internal RECT rcBound;
-        };
-
-#pragma warning restore 0649
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct RGNDATA
-        {
-            internal RGNDATAHEADER rdh;
-
-            internal unsafe static RECT* GetRectsPointer(RGNDATA* me)
-            {
-                return (RECT*)((byte*)me + sizeof(RGNDATAHEADER));
-            }
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct RECT
-        {
-            internal int left;
-            internal int top;
-            internal int right;
-            internal int bottom;
-        }
-
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct CHOOSECOLORW
         {

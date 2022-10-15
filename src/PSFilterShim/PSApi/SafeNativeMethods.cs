@@ -66,20 +66,6 @@ namespace PSFilterLoad.PSApi
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool GlobalUnlock(IntPtr hMem);
 
-        [DllImport("gdi32.dll", ExactSpelling = true, SetLastError = true)]
-        internal unsafe static extern uint GetRegionData(IntPtr hrgn, uint nCount, NativeStructs.RGNDATA* lpRgnData);
-
-        [DllImport("gdi32.dll", ExactSpelling = true, SetLastError = true)]
-        internal static extern IntPtr CreateCompatibleDC(IntPtr hdc);
-
-        [DllImport("gdi32.dll", ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool DeleteObject(IntPtr hdc);
-
-        [DllImport("gdi32.dll", ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool DeleteDC(IntPtr hdc);
-
         [DllImport("kernel32.dll", ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool GlobalMemoryStatusEx(ref NativeStructs.MEMORYSTATUSEX lpBuffer);
