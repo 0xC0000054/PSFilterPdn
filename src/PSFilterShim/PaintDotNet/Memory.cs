@@ -181,7 +181,7 @@ namespace PaintDotNet.SystemLayer
         /// <param name="length">The number of bytes to copy</param>
         public static void Copy(void* dst, void* src, ulong length)
         {
-            SafeNativeMethods.memcpy(dst, src, new UIntPtr(length));
+            Buffer.MemoryCopy(src, dst, length, length);
         }
     }
 }

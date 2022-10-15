@@ -30,9 +30,6 @@ namespace PaintDotNet.SystemLayer
             UIntPtr HeapInformationLength
             );
 
-        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-        internal static extern unsafe void memcpy(void* dst, void* src, UIntPtr length);
-
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern IntPtr VirtualAlloc(
             IntPtr lpAddress,

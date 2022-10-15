@@ -73,16 +73,6 @@ namespace PSFilterPdn.Interop
         [DllImport("kernel32.dll", ExactSpelling = true)]
         internal static extern unsafe UIntPtr VirtualQuery(IntPtr address, out NativeStructs.MEMORY_BASIC_INFORMATION buffer, UIntPtr sizeOfBuffer);
 
-        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-#pragma warning disable IDE1006 // Naming Styles
-        internal static extern IntPtr memset(IntPtr dest, int c, UIntPtr count);
-#pragma warning restore IDE1006 // Naming Styles
-
-        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-#pragma warning disable IDE1006 // Naming Styles
-        internal static extern unsafe void memcpy(void* dst, void* src, UIntPtr length);
-#pragma warning restore IDE1006 // Naming Styles
-
         [DllImport("kernel32.dll", ExactSpelling = true)]
         internal static extern IntPtr VirtualAlloc(
             IntPtr lpAddress,

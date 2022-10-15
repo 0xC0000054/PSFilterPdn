@@ -23,6 +23,7 @@
 using PSFilterShim;
 using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
@@ -238,22 +239,33 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Fills the memory block with the specified value.
         /// </summary>
-        /// <param name="ptr">The starting address of the memory block to fill.</param>
+        /// <param name="address">The starting address of the memory block to fill.</param>
         /// <param name="value">The value to place in the memory block.</param>
         /// <param name="length">The length of the memory block.</param>
-        public static void FillMemory(IntPtr ptr, byte value, ulong length)
+        public static unsafe void FillMemory(IntPtr address, byte value, ulong length)
         {
-            SafeNativeMethods.memset(ptr, value, new UIntPtr(length));
+            byte* ptr = (byte*)address;
+            ulong remaining = length;
+
+            while (remaining > 0)
+            {
+                ulong count = remaining < uint.MaxValue ? remaining : uint.MaxValue;
+
+                Unsafe.InitBlockUnaligned(ptr, value, (uint)count);
+
+                ptr += count;
+                remaining -= count;
+            }
         }
 
         /// <summary>
         /// Fills the memory block with the zeros.
         /// </summary>
-        /// <param name="ptr">The starting address of the memory block to fill.</param>
+        /// <param name="address">The starting address of the memory block to fill.</param>
         /// <param name="length">The length of the memory block.</param>
-        public static void SetToZero(IntPtr ptr, ulong length)
+        public static void SetToZero(IntPtr address, ulong length)
         {
-            SafeNativeMethods.memset(ptr, 0, new UIntPtr(length));
+            FillMemory(address, 0, length);
         }
     }
 }

@@ -23,6 +23,7 @@
 using PSFilterPdn.Interop;
 using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
@@ -286,7 +287,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="length">The number of bytes to copy</param>
         public static unsafe void Copy(void* dst, void* src, ulong length)
         {
-            SafeNativeMethods.memcpy(dst, src, new UIntPtr(length));
+            Buffer.MemoryCopy(src, dst, length, length);
         }
 
         /// <summary>
@@ -295,9 +296,20 @@ namespace PSFilterLoad.PSApi
         /// <param name="ptr">The starting address of the memory block to fill.</param>
         /// <param name="value">The value to place in the memory block.</param>
         /// <param name="length">The length of the memory block.</param>
-        public static void FillMemory(IntPtr ptr, byte value, ulong length)
+        public static unsafe void FillMemory(IntPtr address, byte value, ulong length)
         {
-            SafeNativeMethods.memset(ptr, value, new UIntPtr(length));
+            byte* ptr = (byte*)address;
+            ulong remaining = length;
+
+            while (remaining > 0)
+            {
+                ulong count = remaining < uint.MaxValue ? remaining : uint.MaxValue;
+
+                Unsafe.InitBlockUnaligned(ptr, value, (uint)count);
+
+                ptr += count;
+                remaining -= count;
+            }
         }
 
         /// <summary>
@@ -305,9 +317,9 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="ptr">The starting address of the memory block to fill.</param>
         /// <param name="length">The length of the memory block.</param>
-        public static void SetToZero(IntPtr ptr, ulong length)
+        public static void SetToZero(IntPtr address, ulong length)
         {
-            SafeNativeMethods.memset(ptr, 0, new UIntPtr(length));
+            FillMemory(address, 0, length);
         }
 
         // Adapted from: http://joeduffyblog.com/2005/04/08/dg-update-dispose-finalization-and-resource-management/
