@@ -1299,7 +1299,21 @@ namespace PSFilterPdn
 
             if (!e.Cancel)
             {
-                settings?.Flush();
+                if (settings != null && settings.Dirty)
+                {
+                    try
+                    {
+                        PSFilterPdnSettingsFile.Save(Services, settings);
+                    }
+                    catch (IOException ex)
+                    {
+                        ShowErrorMessage(ex.Message);
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        ShowErrorMessage(ex.Message);
+                    }
+                }
                 SaveDescriptorRegistry();
             }
 
@@ -1378,15 +1392,7 @@ namespace PSFilterPdn
 
             try
             {
-                string userDataPath = Services.GetService<PaintDotNet.AppModel.IUserFilesService>().UserFilesPath;
-
-                string path = Path.Combine(userDataPath, "PSFilterPdn.xml");
-
-                settings = new PSFilterPdnSettings(path);
-
-                // Loading the settings is split into a separate method to allow the defaults
-                // to be used if an error occurs when reading the saved settings.
-                settings.LoadSavedSettings();
+                settings = PSFilterPdnSettingsFile.Load(Services);
             }
             catch (ArgumentException ex)
             {
