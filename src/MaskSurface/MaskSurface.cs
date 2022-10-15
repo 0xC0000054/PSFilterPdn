@@ -72,11 +72,11 @@ namespace PSFilterLoad.PSApi
 
         public MemoryBlock Scan0 => scan0;
 
-        public Rectangle Bounds => new Rectangle(0, 0, width, height);
+        public Rectangle Bounds => new(0, 0, width, height);
 
         public MaskSurface Clone()
         {
-            MaskSurface surface = new MaskSurface(width, height, zeroFill: false);
+            MaskSurface surface = new(width, height, zeroFill: false);
             surface.CopySurface(this);
             return surface;
         }

@@ -22,7 +22,7 @@ namespace PSFilterPdn.EnableInfo
         private readonly ReadOnlyCollection<Token> tokens;
         private int index;
 
-        private static readonly Token EndOfFile = new Token(TokenType.EndOfFile);
+        private static readonly Token EndOfFile = new(TokenType.EndOfFile);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EnableInfoParser"/> class.
@@ -322,7 +322,7 @@ namespace PSFilterPdn.EnableInfo
         {
             Consume(TokenType.LeftParentheses, "Missing '(' in a function call expression.");
 
-            List<Expression> args = new List<Expression>();
+            List<Expression> args = new();
 
             if (Peek().Type != TokenType.RightParentheses)
             {

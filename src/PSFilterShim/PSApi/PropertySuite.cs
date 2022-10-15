@@ -40,7 +40,7 @@ namespace PSFilterLoad.PSApi
 
         PropertyProcs IPropertySuite.CreatePropertySuite()
         {
-            PropertyProcs suite = new PropertyProcs
+            PropertyProcs suite = new()
             {
                 propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion,
                 numPropertyProcs = PSConstants.kCurrentPropertyProcsCount,

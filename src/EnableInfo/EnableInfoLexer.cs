@@ -113,7 +113,7 @@ namespace PSFilterPdn.EnableInfo
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private IList<Token> ScanTokens()
         {
-            List<Token> tokens = new List<Token>();
+            List<Token> tokens = new();
             index = 0;
 
             while (!IsAtEnd)
@@ -249,7 +249,7 @@ namespace PSFilterPdn.EnableInfo
 
         private static class EnableInfoSyntax
         {
-            private static readonly HashSet<string> stringConstants = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            private static readonly HashSet<string> stringConstants = new(StringComparer.OrdinalIgnoreCase)
             {
                 "BitmapMode",
                 "GrayScaleMode",
@@ -271,7 +271,7 @@ namespace PSFilterPdn.EnableInfo
                 "Gray32Mode"
             };
 
-            private static readonly HashSet<string> functions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            private static readonly HashSet<string> functions = new(StringComparer.OrdinalIgnoreCase)
             {
                 "in",
                 "min",

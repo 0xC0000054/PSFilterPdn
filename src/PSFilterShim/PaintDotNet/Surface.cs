@@ -91,7 +91,7 @@ namespace PaintDotNet
 
         public Surface Clone()
         {
-            Surface surf = new Surface(width, height);
+            Surface surf = new(width, height);
             surf.CopySurface(this);
             return surf;
         }
@@ -103,7 +103,7 @@ namespace PaintDotNet
         /// <returns>A new Surface that is the same size as the given Bitmap and that has the same pixel values.</returns>
         public static Surface CopyFromBitmap(Bitmap bitmap)
         {
-            Surface surface = new Surface(bitmap.Width, bitmap.Height);
+            Surface surface = new(bitmap.Width, bitmap.Height);
             BitmapData bd = bitmap.LockBits(surface.Bounds, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
             unsafe

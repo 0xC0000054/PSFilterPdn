@@ -102,7 +102,7 @@ namespace PaintDotNet
 
         public MaskSurface Clone()
         {
-            MaskSurface surface = new MaskSurface(width, height, zeroFill: false);
+            MaskSurface surface = new(width, height, zeroFill: false);
             surface.CopySurface(this);
             return surface;
         }

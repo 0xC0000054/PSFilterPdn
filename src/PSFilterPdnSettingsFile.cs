@@ -79,7 +79,7 @@ namespace PSFilterPdn
         {
             string userDataPath = serviceProvider.GetService<PaintDotNet.AppModel.IUserFilesService>().UserFilesPath;
 
-            DirectoryInfo info = new DirectoryInfo(userDataPath);
+            DirectoryInfo info = new(userDataPath);
 
             if (!info.Exists)
             {
@@ -88,14 +88,14 @@ namespace PSFilterPdn
 
             string path = Path.Combine(userDataPath, SettingsFileName);
 
-            XmlWriterSettings writerSettings = new XmlWriterSettings
+            XmlWriterSettings writerSettings = new()
             {
                 Indent = true
             };
 
             using (XmlWriter writer = XmlWriter.Create(path, writerSettings))
             {
-                DataContractSerializer serializer = new DataContractSerializer(typeof(PSFilterPdnSettings));
+                DataContractSerializer serializer = new(typeof(PSFilterPdnSettings));
                 serializer.WriteObject(writer, settings);
             }
         }

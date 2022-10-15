@@ -27,7 +27,7 @@ namespace PSFilterLoad.PSApi
         private readonly BufferSpaceProc spaceProc;
         private readonly Dictionary<IntPtr, int> bufferIDs;
 
-        private static readonly BufferSuite instance = new BufferSuite();
+        private static readonly BufferSuite instance = new();
 
         private unsafe BufferSuite()
         {
@@ -165,7 +165,7 @@ namespace PSFilterLoad.PSApi
             // Assume that we have 1 GB of available space.
             int space = 1024 * 1024 * 1024;
 
-            NativeStructs.MEMORYSTATUSEX buffer = new NativeStructs.MEMORYSTATUSEX()
+            NativeStructs.MEMORYSTATUSEX buffer = new()
             {
                 dwLength = (uint)Marshal.SizeOf<NativeStructs.MEMORYSTATUSEX>()
             };

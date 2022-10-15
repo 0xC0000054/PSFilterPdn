@@ -107,9 +107,9 @@ namespace PSFilterShim
 
             byte[] reply = SendMessageToServer(command);
 
-            using (MemoryStream stream = new MemoryStream(reply))
+            using (MemoryStream stream = new(reply))
             {
-                DataContractSerializer serializer = new DataContractSerializer(typeof(T));
+                DataContractSerializer serializer = new(typeof(T));
 
                 deserialized = (T)serializer.ReadObject(stream);
             }
@@ -121,7 +121,7 @@ namespace PSFilterShim
         {
             byte[] reply = null;
 
-            using (NamedPipeClientStream stream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
+            using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
             {
                 stream.Connect();
 
@@ -150,7 +150,7 @@ namespace PSFilterShim
         {
             byte[] reply = null;
 
-            using (NamedPipeClientStream stream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
+            using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
             {
                 stream.Connect();
 
@@ -180,7 +180,7 @@ namespace PSFilterShim
         {
             byte[] reply = null;
 
-            using (NamedPipeClientStream stream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
+            using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
             {
                 stream.Connect();
 

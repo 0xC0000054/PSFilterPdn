@@ -38,7 +38,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
         public override unsafe string ToString()
         {
-            System.Text.StringBuilder builder = new System.Text.StringBuilder(256);
+            System.Text.StringBuilder builder = new(256);
 
             builder.Append("{ [");
             builder.Append(GetFormattedString());

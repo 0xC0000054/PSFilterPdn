@@ -503,7 +503,7 @@ namespace PSFilterPdn.Controls
                     rotateAngle = 270;
                 }
 
-                PointF cp = new PointF(bounds.Left + (bounds.Width / 2), bounds.Top + (bounds.Height / 2));
+                PointF cp = new(bounds.Left + (bounds.Width / 2), bounds.Top + (bounds.Height / 2));
                 graphics.TranslateTransform(cp.X, cp.Y);
                 graphics.RotateTransform(rotateAngle);
 
@@ -525,7 +525,7 @@ namespace PSFilterPdn.Controls
         {
             Point cursor = PointToClient(MousePosition);
 
-            NativeStructs.TCHITTESTINFO hti = new NativeStructs.TCHITTESTINFO
+            NativeStructs.TCHITTESTINFO hti = new()
             {
                 pt = new NativeStructs.POINT(cursor.X, cursor.Y),
                 flags = 0

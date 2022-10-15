@@ -17,7 +17,7 @@ namespace PSFilterLoad.PSApi
 {
     internal sealed class IntPtrEqualityComparer : IEqualityComparer<IntPtr>
     {
-        private static readonly IntPtrEqualityComparer instance = new IntPtrEqualityComparer();
+        private static readonly IntPtrEqualityComparer instance = new();
 
         private IntPtrEqualityComparer()
         {

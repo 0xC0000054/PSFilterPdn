@@ -32,7 +32,7 @@ namespace PSFilterLoad.PSApi
         public static Rectangle[] GetRegionScansReadOnlyInt(this Region region)
         {
             Rectangle[] scans = new Rectangle[0];
-            using (NullGraphics nullGraphics = new NullGraphics())
+            using (NullGraphics nullGraphics = new())
             {
                 IntPtr hRgn = IntPtr.Zero;
 

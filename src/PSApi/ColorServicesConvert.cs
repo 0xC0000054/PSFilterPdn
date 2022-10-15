@@ -133,7 +133,7 @@ namespace PSFilterLoad.PSApi
                         return PSError.paramErr;
                 }
 
-                ColorSource source = new ColorSource(component0, component1, component2, component3, BitsPerChannel.Eight);
+                ColorSource source = new(component0, component1, component2, component3, BitsPerChannel.Eight);
                 ColorResult result;
                 switch (sourceSpace)
                 {
@@ -264,7 +264,7 @@ namespace PSFilterLoad.PSApi
                         return PSError.kSPBadParameterError;
                 }
 
-                ColorSource source = new ColorSource(component0, component1, component2, component3, BitsPerChannel.Eight);
+                ColorSource source = new(component0, component1, component2, component3, BitsPerChannel.Eight);
                 ColorResult result;
                 switch (sourceSpace)
                 {

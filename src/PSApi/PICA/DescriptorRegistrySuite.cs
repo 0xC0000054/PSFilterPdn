@@ -52,7 +52,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <returns>A <see cref="PSDescriptorRegistryProcs"/> structure containing the Descriptor Registry suite callbacks.</returns>
         public PSDescriptorRegistryProcs CreateDescriptorRegistrySuite1()
         {
-            PSDescriptorRegistryProcs suite = new PSDescriptorRegistryProcs
+            PSDescriptorRegistryProcs suite = new()
             {
                 Register = Marshal.GetFunctionPointerForDelegate(register),
                 Erase = Marshal.GetFunctionPointerForDelegate(erase),

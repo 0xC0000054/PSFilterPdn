@@ -78,7 +78,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         public PSUIHooksSuite1 CreateUIHooksSuite1(IPICASuiteDataProvider suiteDataProvider)
         {
-            PSUIHooksSuite1 suite = new PSUIHooksSuite1
+            PSUIHooksSuite1 suite = new()
             {
                 processEvent = Marshal.GetFunctionPointerForDelegate(suiteDataProvider.ProcessEvent),
                 displayPixels = Marshal.GetFunctionPointerForDelegate(suiteDataProvider.DisplayPixels),

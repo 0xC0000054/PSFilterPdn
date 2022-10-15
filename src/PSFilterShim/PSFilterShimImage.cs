@@ -30,14 +30,14 @@ namespace PSFilterShim
         {
             Surface surface = null;
 
-            using (FileStream stream = new FileStream(path,
-                                                      FileMode.Open,
-                                                      FileAccess.Read,
-                                                      FileShare.Read,
-                                                      BufferSize,
-                                                      FileOptions.SequentialScan))
+            using (FileStream stream = new(path,
+                                           FileMode.Open,
+                                           FileAccess.Read,
+                                           FileShare.Read,
+                                           BufferSize,
+                                           FileOptions.SequentialScan))
             {
-                PSFilterShimImageHeader header = new PSFilterShimImageHeader(stream);
+                PSFilterShimImageHeader header = new(stream);
 
                 if (header.Format != PSFilterShimImageFormat.Bgra32)
                 {
@@ -71,14 +71,14 @@ namespace PSFilterShim
         {
             MaskSurface surface = null;
 
-            using (FileStream stream = new FileStream(path,
-                                                      FileMode.Open,
-                                                      FileAccess.Read,
-                                                      FileShare.Read,
-                                                      BufferSize,
-                                                      FileOptions.SequentialScan))
+            using (FileStream stream = new(path,
+                                           FileMode.Open,
+                                           FileAccess.Read,
+                                           FileShare.Read,
+                                           BufferSize,
+                                           FileOptions.SequentialScan))
             {
-                PSFilterShimImageHeader header = new PSFilterShimImageHeader(stream);
+                PSFilterShimImageHeader header = new(stream);
 
                 if (header.Format != PSFilterShimImageFormat.Alpha8)
                 {
@@ -113,18 +113,18 @@ namespace PSFilterShim
                 throw new ArgumentNullException(nameof(surface));
             }
 
-            using (FileStream stream = new FileStream(path,
-                                                      FileMode.Create,
-                                                      FileAccess.Write,
-                                                      FileShare.None,
-                                                      BufferSize,
-                                                      FileOptions.SequentialScan))
+            using (FileStream stream = new(path,
+                                           FileMode.Create,
+                                           FileAccess.Write,
+                                           FileShare.None,
+                                           BufferSize,
+                                           FileOptions.SequentialScan))
             {
-                PSFilterShimImageHeader header = new PSFilterShimImageHeader(surface.Width,
-                                                                             surface.Height,
-                                                                             PSFilterShimImageFormat.Bgra32,
-                                                                             96.0,
-                                                                             96.0);
+                PSFilterShimImageHeader header = new(surface.Width,
+                                                     surface.Height,
+                                                     PSFilterShimImageFormat.Bgra32,
+                                                     96.0,
+                                                     96.0);
                 stream.SetLength(header.GetTotalFileSize());
 
                 header.Save(stream);

@@ -43,7 +43,7 @@ namespace PSFilterLoad.PSApi
                 return System.Linq.Enumerable.Empty<PluginData>();
             }
 
-            QueryFilter queryFilter = new QueryFilter(fileName, platform.Value);
+            QueryFilter queryFilter = new(fileName, platform.Value);
 
             // Use LOAD_LIBRARY_AS_DATAFILE to prevent a BadImageFormatException from being thrown if the file is a different processor architecture than the parent process.
             using (SafeLibraryHandle dll = UnsafeNativeMethods.LoadLibraryExW(fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE))
@@ -190,7 +190,7 @@ namespace PSFilterLoad.PSApi
             // The entry point number is the same as the resource number.
             string entryPoint = "ENTRYPOINT" + lpszName.ToInt32().ToString(CultureInfo.InvariantCulture);
 
-            PluginData enumData = new PluginData(query.fileName, entryPoint, category, title);
+            PluginData enumData = new(query.fileName, entryPoint, category, title);
 
             if (enumData.IsValid())
             {
@@ -371,7 +371,7 @@ namespace PSFilterLoad.PSApi
                 propPtr = pipp->propertyData + propertyDataPaddedLength;
             }
 
-            PluginData enumData = new PluginData(query.fileName, entryPoint, category, title, filterInfo, query.runWith32BitShim, aete, enableInfo);
+            PluginData enumData = new(query.fileName, entryPoint, category, title, filterInfo, query.runWith32BitShim, aete, enableInfo);
 
             if (enumData.IsValid())
             {

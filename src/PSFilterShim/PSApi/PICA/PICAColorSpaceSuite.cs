@@ -480,7 +480,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         public PSColorSpaceSuite1 CreateColorSpaceSuite1()
         {
-            PSColorSpaceSuite1 suite = new PSColorSpaceSuite1
+            PSColorSpaceSuite1 suite = new()
             {
                 Make = Marshal.GetFunctionPointerForDelegate(csMake),
                 Delete = Marshal.GetFunctionPointerForDelegate(csDelete),

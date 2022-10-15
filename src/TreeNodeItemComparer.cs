@@ -17,7 +17,7 @@ namespace PSFilterPdn
 {
     internal sealed class TreeNodeItemComparer : IComparer
     {
-        private static readonly TreeNodeItemComparer instance = new TreeNodeItemComparer();
+        private static readonly TreeNodeItemComparer instance = new();
 
         private TreeNodeItemComparer()
         {

@@ -21,7 +21,7 @@ namespace PSFilterPdn
         {
             T obj = default;
 
-            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+            using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
             {
                 obj = Deserialize<T>(fs);
             }
@@ -36,7 +36,7 @@ namespace PSFilterPdn
 
         public static void Serialize<T>(string path, T obj)
         {
-            using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (FileStream fs = new(path, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 Serialize(fs, obj);
             }

@@ -138,7 +138,7 @@ namespace PSFilterPdn
 
         private static bool CreateShellItemFromPath(string path, out NativeInterfaces.IShellItem item)
         {
-            Guid riid = new Guid(NativeConstants.IID_IShellItem);
+            Guid riid = new(NativeConstants.IID_IShellItem);
             if (SafeNativeMethods.SHCreateItemFromParsingName(path, IntPtr.Zero, ref riid, out item) != NativeConstants.S_OK)
             {
                 item = null;
@@ -154,7 +154,7 @@ namespace PSFilterPdn
 
             // Set a client GUID to allow this dialog to persist its state independently
             // of the standard OpenFileDialog when the AutoUpgradeEnabled property is true.
-            Guid folderBrowserGuid = new Guid("9706CA6A-0802-4F35-8CE0-006DA888B661");
+            Guid folderBrowserGuid = new("9706CA6A-0802-4F35-8CE0-006DA888B661");
             dialog.SetClientGuid(ref folderBrowserGuid);
 
             return dialog;
@@ -233,7 +233,7 @@ namespace PSFilterPdn
 
                 OnBeforeShow(dialog);
 
-                FolderBrowserDialogEvents dialogEvents = new FolderBrowserDialogEvents(this);
+                FolderBrowserDialogEvents dialogEvents = new(this);
                 dialog.Advise(dialogEvents, out uint eventCookie);
                 try
                 {

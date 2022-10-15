@@ -66,7 +66,7 @@ namespace PaintDotNet
         /// </summary>
         public static ColorBgra FromBgra(byte b, byte g, byte r, byte a)
         {
-            ColorBgra color = new ColorBgra();
+            ColorBgra color = new();
             color.Bgra = BgraToUInt32(b, g, r, a);
             return color;
         }
@@ -84,7 +84,7 @@ namespace PaintDotNet
         /// </summary>
         public static ColorBgra FromUInt32(UInt32 bgra)
         {
-            ColorBgra color = new ColorBgra();
+            ColorBgra color = new();
             color.Bgra = bgra;
             return color;
         }

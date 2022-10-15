@@ -16,7 +16,7 @@ namespace PSFilterLoad.PSApi
 {
     internal readonly struct Handle : IEquatable<Handle>
     {
-        public static readonly Handle Null = new Handle(IntPtr.Zero);
+        public static readonly Handle Null = new(IntPtr.Zero);
 
         public Handle(IntPtr value)
         {

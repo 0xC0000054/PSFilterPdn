@@ -37,8 +37,8 @@ namespace PSFilterPdn.EnableInfo
     [DebuggerDisplay("{Value, nq}")]
     internal sealed class BooleanConstantExpression : ConstantExpression
     {
-        internal static readonly BooleanConstantExpression True = new BooleanConstantExpression(true);
-        internal static readonly BooleanConstantExpression False = new BooleanConstantExpression(false);
+        internal static readonly BooleanConstantExpression True = new(true);
+        internal static readonly BooleanConstantExpression False = new(false);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BooleanConstantExpression"/> class.

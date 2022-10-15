@@ -116,7 +116,7 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly ASZStringLengthAsPascalString lengthAsPascalString;
         private readonly ASZStringAsPascalString asPascalString;
 
-        private static readonly ASZString Empty = new ASZString(0);
+        private static readonly ASZString Empty = new(0);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ASZStringSuite"/> class.
@@ -153,7 +153,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         public ASZStringSuite1 CreateASZStringSuite1()
         {
-            ASZStringSuite1 suite = new ASZStringSuite1
+            ASZStringSuite1 suite = new()
             {
                 MakeFromUnicode = Marshal.GetFunctionPointerForDelegate(makeFromUnicode),
                 MakeFromCString = Marshal.GetFunctionPointerForDelegate(makeFromCString),
@@ -212,7 +212,7 @@ namespace PSFilterLoad.PSApi.PICA
             if (descriptor != null)
             {
                 newZString = GenerateDictionaryKey();
-                ZString zstring = new ZString(descriptor.Value);
+                ZString zstring = new(descriptor.Value);
                 strings.Add(newZString, zstring);
             }
 
@@ -256,7 +256,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             else
             {
-                ZString zstring = new ZString(value);
+                ZString zstring = new(value);
                 newZString = GenerateDictionaryKey();
                 strings.Add(newZString, zstring);
             }
@@ -294,7 +294,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 try
                 {
-                    ZString zstring = new ZString(src, (int)stringLength, format);
+                    ZString zstring = new(src, (int)stringLength, format);
                     *newZString = GenerateDictionaryKey();
                     strings.Add(*newZString, zstring);
                 }
@@ -331,7 +331,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                ZString zstring = new ZString(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                ZString zstring = new(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
                 *newZString = GenerateDictionaryKey();
                 strings.Add(*newZString, zstring);
             }
@@ -357,7 +357,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                ZString zstring = new ZString(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                ZString zstring = new(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
                 *newZString = GenerateDictionaryKey();
                 strings.Add(*newZString, zstring);
             }
@@ -391,7 +391,7 @@ namespace PSFilterLoad.PSApi.PICA
                 {
                     try
                     {
-                        ZString zstring = new ZString(existing.Data);
+                        ZString zstring = new(existing.Data);
                         *copy = GenerateDictionaryKey();
                         strings.Add(*copy, zstring);
                     }
@@ -507,7 +507,7 @@ namespace PSFilterLoad.PSApi.PICA
                     {
                         try
                         {
-                            StringBuilder sb = new StringBuilder(value.Length);
+                            StringBuilder sb = new(value.Length);
                             bool escapedAmpersand = false;
 
                             for (int i = 0; i < value.Length; i++)

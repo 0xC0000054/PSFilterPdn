@@ -273,7 +273,7 @@ namespace PSFilterLoad.PSApi.PICA
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public PSActionDescriptorProc CreateActionDescriptorSuite2()
         {
-            PSActionDescriptorProc suite = new PSActionDescriptorProc
+            PSActionDescriptorProc suite = new()
             {
                 Make = Marshal.GetFunctionPointerForDelegate(make),
                 Free = Marshal.GetFunctionPointerForDelegate(free),
@@ -663,7 +663,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             try
             {
-                UnitFloat item = new UnitFloat(unit, data);
+                UnitFloat item = new(unit, data);
 
                 actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.UintFloat, GetAETEParamFlags(key), 0, item));
             }
@@ -784,7 +784,7 @@ namespace PSFilterLoad.PSApi.PICA
 #endif
             try
             {
-                EnumeratedValue item = new EnumeratedValue(type, data);
+                EnumeratedValue item = new(type, data);
                 actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Enumerated, GetAETEParamFlags(key), 0, item));
             }
             catch (OutOfMemoryException)

@@ -43,7 +43,7 @@ namespace PSFilterLoad.PSApi.Loader
                 // Prevent the FileStream from creating a buffer because the EndianBinaryReader will perform its own buffering.
                 stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1);
 
-                using (EndianBinaryReader reader = new EndianBinaryReader(stream, Endianess.Little))
+                using (EndianBinaryReader reader = new(stream, Endianess.Little))
                 {
                     stream = null;
 

@@ -32,7 +32,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             public ReadOnlyCollection<ActionListItem> GetListAsReadOnly()
             {
-                List<ActionListItem> clone = new List<ActionListItem>(Items);
+                List<ActionListItem> clone = new(Items);
                 return clone.AsReadOnly();
             }
         }
@@ -202,7 +202,7 @@ namespace PSFilterLoad.PSApi.PICA
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public PSActionListProcs CreateActionListSuite1()
         {
-            PSActionListProcs suite = new PSActionListProcs()
+            PSActionListProcs suite = new()
             {
                 Make = Marshal.GetFunctionPointerForDelegate(make),
                 Free = Marshal.GetFunctionPointerForDelegate(free),
@@ -350,7 +350,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                UnitFloat item = new UnitFloat(unit, data);
+                UnitFloat item = new(unit, data);
 
                 actionLists[list].Add(new ActionListItem(DescriptorTypes.UintFloat, item));
             }
@@ -439,7 +439,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out Dictionary<uint, AETEValue> descriptorValues))
                 {
-                    ActionListDescriptor item = new ActionListDescriptor(type, descriptorValues);
+                    ActionListDescriptor item = new(type, descriptorValues);
                     actionLists[list].Add(new ActionListItem(DescriptorTypes.Object, item));
                 }
                 else
@@ -464,7 +464,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                EnumeratedValue item = new EnumeratedValue(type, data);
+                EnumeratedValue item = new(type, data);
                 actionLists[list].Add(new ActionListItem(DescriptorTypes.Enumerated, item));
             }
             catch (OutOfMemoryException)

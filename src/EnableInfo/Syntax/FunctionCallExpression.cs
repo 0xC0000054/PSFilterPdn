@@ -50,7 +50,7 @@ namespace PSFilterPdn.EnableInfo
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder(Name, 256);
+            StringBuilder sb = new(Name, 256);
 
             sb.Append("(");
 

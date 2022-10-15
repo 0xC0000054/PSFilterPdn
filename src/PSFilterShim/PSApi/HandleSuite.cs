@@ -77,7 +77,7 @@ namespace PSFilterLoad.PSApi
         private readonly DisposeRegularPIHandleProc handleDisposeRegularProc;
         private readonly Dictionary<Handle, HandleEntry> handles;
 
-        private static readonly HandleSuite instance = new HandleSuite();
+        private static readonly HandleSuite instance = new();
 
         private HandleSuite()
         {
@@ -101,7 +101,7 @@ namespace PSFilterLoad.PSApi
 
         public HandleProcs CreateHandleProcs()
         {
-            HandleProcs suite = new HandleProcs
+            HandleProcs suite = new()
             {
                 handleProcsVersion = PSConstants.kCurrentHandleProcsVersion,
                 numHandleProcs = PSConstants.kCurrentHandleProcsCount,

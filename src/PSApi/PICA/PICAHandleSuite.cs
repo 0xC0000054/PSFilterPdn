@@ -46,7 +46,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         public PSHandleSuite1 CreateHandleSuite1()
         {
-            PSHandleSuite1 suite = new PSHandleSuite1
+            PSHandleSuite1 suite = new()
             {
                 New = handleProcs.newProc,
                 Dispose = handleProcs.disposeProc,
@@ -61,7 +61,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         public PSHandleSuite2 CreateHandleSuite2()
         {
-            PSHandleSuite2 suite = new PSHandleSuite2
+            PSHandleSuite2 suite = new()
             {
                 New = handleProcs.newProc,
                 Dispose = handleProcs.disposeProc,

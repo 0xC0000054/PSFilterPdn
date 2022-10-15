@@ -17,7 +17,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <summary>
         /// The D50 reference white point.
         /// </summary>
-        public static readonly XYZ D50 = new XYZ(0.9642, 1.0, 0.8252);
+        public static readonly XYZ D50 = new(0.9642, 1.0, 0.8252);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XYZ"/> class.

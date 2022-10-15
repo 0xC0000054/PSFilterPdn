@@ -193,7 +193,7 @@ namespace PSFilterPdn.Controls
                     imageY++;
                 }
 
-                Rectangle cropRect = new Rectangle(imageX, imageY, maxDimension, maxDimension);
+                Rectangle cropRect = new(imageX, imageY, maxDimension, maxDimension);
 
                 if (enabled)
                 {
@@ -223,7 +223,7 @@ namespace PSFilterPdn.Controls
 
             Font nodeFont = e.Node.NodeFont ?? e.Node.TreeView.Font;
             Size textSize = TextRenderer.MeasureText(e.Graphics, e.Node.Text, nodeFont);
-            Rectangle textBounds = new Rectangle(textLeft, bounds.Top, textSize.Width, textSize.Height);
+            Rectangle textBounds = new(textLeft, bounds.Top, textSize.Width, textSize.Height);
 
             if (enabled)
             {
@@ -271,7 +271,7 @@ namespace PSFilterPdn.Controls
 
                 try
                 {
-                    Message m = new Message
+                    Message m = new()
                     {
                         HWnd = Handle,
                         Msg = NativeConstants.WM_PRINTCLIENT,

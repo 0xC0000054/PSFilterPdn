@@ -66,7 +66,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             public ReadOnlyCollection<ActionReferenceItem> GetReferencesAsReadOnly()
             {
-                List<ActionReferenceItem> clone = new List<ActionReferenceItem>(references);
+                List<ActionReferenceItem> clone = new(references);
                 return clone.AsReadOnly();
             }
         }
@@ -156,7 +156,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <returns>A <see cref="PSActionReferenceProcs"/> containing the action reference suite callbacks.</returns>
         public PSActionReferenceProcs CreateActionReferenceSuite2()
         {
-            PSActionReferenceProcs suite = new PSActionReferenceProcs
+            PSActionReferenceProcs suite = new()
             {
                 Make = Marshal.GetFunctionPointerForDelegate(make),
                 Free = Marshal.GetFunctionPointerForDelegate(free),

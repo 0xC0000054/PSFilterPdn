@@ -24,7 +24,7 @@ namespace PSFilterLoad.PSApi.PICA
     {
         private readonly IntPtr value;
 
-        public static readonly PIActionDescriptor Null = new PIActionDescriptor(0);
+        public static readonly PIActionDescriptor Null = new(0);
 
         public PIActionDescriptor(int index)
         {

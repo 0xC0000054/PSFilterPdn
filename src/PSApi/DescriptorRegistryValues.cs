@@ -35,8 +35,8 @@ namespace PSFilterLoad.PSApi
                 throw new ArgumentNullException(nameof(values));
             }
 
-            Dictionary<string, DescriptorRegistryItem> persistentItems = new Dictionary<string, DescriptorRegistryItem>(StringComparer.Ordinal);
-            Dictionary<string, DescriptorRegistryItem> sessionItems = new Dictionary<string, DescriptorRegistryItem>(StringComparer.Ordinal);
+            Dictionary<string, DescriptorRegistryItem> persistentItems = new(StringComparer.Ordinal);
+            Dictionary<string, DescriptorRegistryItem> sessionItems = new(StringComparer.Ordinal);
 
             foreach (KeyValuePair<string, DescriptorRegistryItem> item in values)
             {

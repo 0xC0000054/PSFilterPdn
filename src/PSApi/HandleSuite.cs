@@ -78,7 +78,7 @@ namespace PSFilterLoad.PSApi
         private readonly DisposeRegularPIHandleProc handleDisposeRegularProc;
         private readonly Dictionary<Handle, HandleEntry> handles;
 
-        private static readonly HandleSuite instance = new HandleSuite();
+        private static readonly HandleSuite instance = new();
 
         private HandleSuite()
         {
@@ -102,7 +102,7 @@ namespace PSFilterLoad.PSApi
 
         public HandleProcs CreateHandleProcs()
         {
-            HandleProcs suite = new HandleProcs
+            HandleProcs suite = new()
             {
                 handleProcsVersion = PSConstants.kCurrentHandleProcsVersion,
                 numHandleProcs = PSConstants.kCurrentHandleProcsCount,
@@ -183,7 +183,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         private static bool IsValidReadPtr(IntPtr ptr)
         {
-            NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
+            NativeStructs.MEMORY_BASIC_INFORMATION mbi = new();
             int mbiSize = Marshal.SizeOf<NativeStructs.MEMORY_BASIC_INFORMATION>();
 
             if (SafeNativeMethods.VirtualQuery(ptr, out mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
@@ -217,7 +217,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         private static bool IsValidWritePtr(IntPtr ptr)
         {
-            NativeStructs.MEMORY_BASIC_INFORMATION mbi = new NativeStructs.MEMORY_BASIC_INFORMATION();
+            NativeStructs.MEMORY_BASIC_INFORMATION mbi = new();
             int mbiSize = Marshal.SizeOf<NativeStructs.MEMORY_BASIC_INFORMATION>();
 
             if (SafeNativeMethods.VirtualQuery(ptr, out mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)

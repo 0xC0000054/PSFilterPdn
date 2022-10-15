@@ -112,7 +112,7 @@ namespace PSFilterShim
                 {
                 }
 
-                using (LoadPsFilter lps = new LoadPsFilter(settings))
+                using (LoadPsFilter lps = new(settings))
                 {
                     lps.SetAbortCallback(pipeClient.AbortFilter);
 

@@ -27,7 +27,7 @@ namespace PSFilterLoad.PSApi
         {
             if ((debugFlags & flag) == flag)
             {
-                System.Diagnostics.StackFrame sf = new System.Diagnostics.StackFrame(1);
+                System.Diagnostics.StackFrame sf = new(1);
                 string name = sf.GetMethod().Name;
                 System.Diagnostics.Debug.WriteLine(string.Format("Function: {0}, {1}\r\n", name, message));
             }

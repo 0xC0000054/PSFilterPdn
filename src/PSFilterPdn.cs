@@ -30,7 +30,7 @@ namespace PSFilterPdn
     {
         public static string StaticName => "8bf Filter";
 
-        public static Bitmap StaticIcon => new Bitmap(typeof(PSFilterPdnEffect), PluginIconUtil.GetIconResourceForCurrentDpi());
+        public static Bitmap StaticIcon => new(typeof(PSFilterPdnEffect), PluginIconUtil.GetIconResourceForCurrentDpi());
 
         private bool repeatEffect;
         private IBitmap<ColorBgra32> filterOutput;
@@ -79,7 +79,7 @@ namespace PSFilterPdn
 
             try
             {
-                using (PSFilterShimDataFolder proxyTempDir = new PSFilterShimDataFolder())
+                using (PSFilterShimDataFolder proxyTempDir = new())
                 {
                     string srcFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
                     string destFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
@@ -109,7 +109,7 @@ namespace PSFilterPdn
                     bool proxyResult = true;
                     string proxyErrorMessage = string.Empty;
 
-                    PSFilterShimSettings settings = new PSFilterShimSettings
+                    PSFilterShimSettings settings = new()
                     {
                         RepeatEffect = true,
                         ShowAboutDialog = false,
@@ -125,7 +125,7 @@ namespace PSFilterPdn
                         PluginUISettings = null
                     };
 
-                    using (PSFilterShimPipeServer server = new PSFilterShimPipeServer(AbortCallback,
+                    using (PSFilterShimPipeServer server = new(AbortCallback,
                                                                                       token.FilterData,
                                                                                       settings,
                                                                                       delegate (string data)
@@ -153,7 +153,7 @@ namespace PSFilterPdn
                             DataContractSerializerUtil.Serialize(descriptorRegistryFileName, token.DescriptorRegistry);
                         }
 
-                        ProcessStartInfo psi = new ProcessStartInfo(shimPath, server.PipeName);
+                        ProcessStartInfo psi = new(shimPath, server.PipeName);
 
                         using (Process proxy = Process.Start(psi))
                         {
@@ -309,7 +309,7 @@ namespace PSFilterPdn
 
                 if (token.FilterData != null)
                 {
-                    Win32Window win32Window = new Win32Window(Process.GetCurrentProcess().MainWindowHandle);
+                    Win32Window win32Window = new(Process.GetCurrentProcess().MainWindowHandle);
 
                     if (CheckSourceSurfaceSize(win32Window))
                     {

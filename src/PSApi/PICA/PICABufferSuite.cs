@@ -169,7 +169,7 @@ namespace PSFilterLoad.PSApi.PICA
             // Assume that we have 1 GB of available space.
             uint space = 1024 * 1024 * 1024;
 
-            NativeStructs.MEMORYSTATUSEX buffer = new NativeStructs.MEMORYSTATUSEX()
+            NativeStructs.MEMORYSTATUSEX buffer = new()
             {
                 dwLength = (uint)Marshal.SizeOf<NativeStructs.MEMORYSTATUSEX>()
             };
@@ -191,7 +191,7 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new ObjectDisposedException("PICABufferSuite");
             }
 
-            PSBufferSuite1 suite = new PSBufferSuite1
+            PSBufferSuite1 suite = new()
             {
                 New = Marshal.GetFunctionPointerForDelegate(bufferSuiteNew),
                 Dispose = Marshal.GetFunctionPointerForDelegate(bufferSuiteDispose),

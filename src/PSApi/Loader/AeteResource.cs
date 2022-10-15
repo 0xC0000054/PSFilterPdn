@@ -63,9 +63,9 @@ namespace PSFilterLoad.PSApi.Loader
             byte* propPtr = ptr;
             if (suiteCount == 1) // There should only be one vendor suite
             {
-                AeteResourcePascalString suiteVendor = new AeteResourcePascalString(propPtr);
+                AeteResourcePascalString suiteVendor = new(propPtr);
                 propPtr += suiteVendor.LengthWithPrefix;
-                AeteResourcePascalString suiteDescription = new AeteResourcePascalString(propPtr);
+                AeteResourcePascalString suiteDescription = new(propPtr);
                 propPtr += suiteDescription.LengthWithPrefix;
                 uint suiteID = *(uint*)propPtr;
                 propPtr += 4;
@@ -78,22 +78,22 @@ namespace PSFilterLoad.PSApi.Loader
 
                 if (eventCount == 1) // There should only be one scripting event
                 {
-                    AeteResourcePascalString eventVendor = new AeteResourcePascalString(propPtr);
+                    AeteResourcePascalString eventVendor = new(propPtr);
                     propPtr += eventVendor.LengthWithPrefix;
-                    AeteResourcePascalString eventDescription = new AeteResourcePascalString(propPtr);
+                    AeteResourcePascalString eventDescription = new(propPtr);
                     propPtr += eventDescription.LengthWithPrefix;
                     int eventClass = *(int*)propPtr;
                     propPtr += 4;
                     int eventType = *(int*)propPtr;
                     propPtr += 4;
 
-                    AeteResourceCString replyType = new AeteResourceCString(propPtr);
+                    AeteResourceCString replyType = new(propPtr);
                     propPtr += replyType.LengthWithTerminator;
 
                     ushort eventFlags = *(ushort*)propPtr;
                     propPtr += 2;
 
-                    AeteResourceCString paramType = new AeteResourceCString(propPtr);
+                    AeteResourceCString paramType = new(propPtr);
                     propPtr += paramType.LengthWithTerminator;
 
                     ushort paramTypeFlags = *(ushort*)propPtr;
@@ -101,11 +101,11 @@ namespace PSFilterLoad.PSApi.Loader
                     short paramCount = *(short*)propPtr;
                     propPtr += 2;
 
-                    Dictionary<uint, short> aeteParameterFlags = new Dictionary<uint, short>(paramCount);
+                    Dictionary<uint, short> aeteParameterFlags = new(paramCount);
 
                     for (int p = 0; p < paramCount; p++)
                     {
-                        AeteResourcePascalString name = new AeteResourcePascalString(propPtr);
+                        AeteResourcePascalString name = new(propPtr);
                         propPtr += name.LengthWithPrefix;
 
                         uint key = *(uint*)propPtr;
@@ -114,7 +114,7 @@ namespace PSFilterLoad.PSApi.Loader
                         uint type = *(uint*)propPtr;
                         propPtr += 4;
 
-                        AeteResourcePascalString description = new AeteResourcePascalString(propPtr);
+                        AeteResourcePascalString description = new(propPtr);
                         propPtr += description.LengthWithPrefix;
 
                         short parameterFlags = *(short*)propPtr;
@@ -146,13 +146,13 @@ namespace PSFilterLoad.PSApi.Loader
 
                                 for (int e = 0; e < count; e++)
                                 {
-                                    AeteResourcePascalString name = new AeteResourcePascalString(propPtr);
+                                    AeteResourcePascalString name = new(propPtr);
                                     propPtr += name.LengthWithPrefix;
 
                                     uint key = *(uint*)propPtr;
                                     propPtr += 4;
 
-                                    AeteResourcePascalString description = new AeteResourcePascalString(propPtr);
+                                    AeteResourcePascalString description = new(propPtr);
                                     propPtr += description.LengthWithPrefix;
                                 }
                             }

@@ -692,7 +692,7 @@ namespace PSFilterPdn
                 selectionMask?.Dispose();
             }
 
-            PSFilterShimSettings settings = new PSFilterShimSettings
+            PSFilterShimSettings settings = new()
             {
                 RepeatEffect = false,
                 ShowAboutDialog = showAboutBoxCb.Checked,
@@ -736,7 +736,7 @@ namespace PSFilterPdn
                     DataContractSerializerUtil.Serialize(descriptorRegistryFileName, descriptorRegistry);
                 }
 
-                ProcessStartInfo psi = new ProcessStartInfo(PSFilterShimPath, server.PipeName);
+                ProcessStartInfo psi = new(PSFilterShimPath, server.PipeName);
 
                 proxyResult = true; // assume the filter succeeded this will be set to false if it failed
                 proxyErrorMessage = string.Empty;
@@ -879,16 +879,16 @@ namespace PSFilterPdn
 
                         try
                         {
-                            PluginUISettings pluginUISettings = new PluginUISettings(highDpiMode);
-                            using (LoadPsFilter lps = new LoadPsFilter(sourceBitmap,
-                                                                       selectionMask,
-                                                                       takeOwnershipOfSelectionMask: false,
-                                                                       primaryColor,
-                                                                       secondaryColor,
-                                                                       documentDpi.X,
-                                                                       documentDpi.Y,
-                                                                       Handle,
-                                                                       pluginUISettings))
+                            PluginUISettings pluginUISettings = new(highDpiMode);
+                            using (LoadPsFilter lps = new(sourceBitmap,
+                                                          selectionMask,
+                                                          takeOwnershipOfSelectionMask: false,
+                                                          primaryColor,
+                                                          secondaryColor,
+                                                          documentDpi.X,
+                                                          documentDpi.Y,
+                                                          Handle,
+                                                          pluginUISettings))
                             {
                                 lps.SetAbortCallback(AbortCallback);
                                 lps.SetProgressCallback(UpdateProgress);
@@ -976,7 +976,7 @@ namespace PSFilterPdn
 
         private void addDirBtn_Click(object sender, EventArgs e)
         {
-            using (PlatformFolderBrowserDialog fbd = new PlatformFolderBrowserDialog())
+            using (PlatformFolderBrowserDialog fbd = new())
             {
                 fbd.RootFolder = System.Environment.SpecialFolder.Desktop;
                 if (fbd.ShowDialog(this) == DialogResult.OK)
@@ -1034,7 +1034,7 @@ namespace PSFilterPdn
             {
                 if (!updateFilterListBw.IsBusy)
                 {
-                    UpdateFilterListParam uflp = new UpdateFilterListParam(searchDirectories, subDirSearchCb.Checked);
+                    UpdateFilterListParam uflp = new(searchDirectories, subDirSearchCb.Checked);
                     int count = searchDirectories.Count;
 
                     filterTree.Nodes.Clear();
@@ -1135,7 +1135,7 @@ namespace PSFilterPdn
             BackgroundWorker worker = (BackgroundWorker)sender;
             UpdateFilterListParam args = (UpdateFilterListParam)e.Argument;
 
-            Dictionary<string, List<TreeNodeEx>> nodes = new Dictionary<string, List<TreeNodeEx>>(StringComparer.Ordinal);
+            Dictionary<string, List<TreeNodeEx>> nodes = new(StringComparer.Ordinal);
 
             for (int i = 0; i < args.directories.Length; i++)
             {
@@ -1149,7 +1149,7 @@ namespace PSFilterPdn
 
                 worker.ReportProgress(i, Path.GetFileName(directory));
 
-                using (FileEnumerator enumerator = new FileEnumerator(directory, ".8bf", recurseSubDirectories, true))
+                using (FileEnumerator enumerator = new(directory, ".8bf", recurseSubDirectories, true))
                 {
                     while (enumerator.MoveNext())
                     {
@@ -1169,7 +1169,7 @@ namespace PSFilterPdn
                             // the Google Nik Collection uses for its additional helper filters.
                             if (!plugin.Category.StartsWith("**Hidden*", StringComparison.Ordinal))
                             {
-                                TreeNodeEx child = new TreeNodeEx(plugin.Title)
+                                TreeNodeEx child = new(plugin.Title)
                                 {
                                     Name = plugin.Title,
                                     Tag = plugin
@@ -1185,7 +1185,7 @@ namespace PSFilterPdn
                                 }
                                 else
                                 {
-                                    List<TreeNodeEx> items = new List<TreeNodeEx>
+                                    List<TreeNodeEx> items = new()
                                     {
                                         child
                                     };
@@ -1247,9 +1247,9 @@ namespace PSFilterPdn
 
             foreach (KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>> item in filterTreeNodes)
             {
-                TreeNode dummy = new TreeNode() { Name = DummyTreeNodeName };
+                TreeNode dummy = new() { Name = DummyTreeNodeName };
 
-                TreeNodeEx categoryNode = new TreeNodeEx(item.Key, new TreeNode[] { dummy })
+                TreeNodeEx categoryNode = new(item.Key, new TreeNode[] { dummy })
                 {
                     Enabled = item.Value.Any(x => x.Enabled == true),
                     Name = item.Key
@@ -1424,7 +1424,7 @@ namespace PSFilterPdn
                 ShowErrorMessage(ex.Message);
             }
 
-            List<string> directories = new List<string>
+            List<string> directories = new()
             {
                 EffectsFolderPath
             };
@@ -1475,7 +1475,7 @@ namespace PSFilterPdn
                     startIndex = 1;
                 }
 
-                HashSet<string> dirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                HashSet<string> dirs = new(StringComparer.OrdinalIgnoreCase);
 
                 for (int i = startIndex; i < searchDirectories.Count; i++)
                 {
@@ -1535,7 +1535,7 @@ namespace PSFilterPdn
                 }
                 else
                 {
-                    Dictionary<string, TreeNodeEx> nodes = new Dictionary<string, TreeNodeEx>(StringComparer.Ordinal);
+                    Dictionary<string, TreeNodeEx> nodes = new(StringComparer.Ordinal);
                     foreach (KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>> item in filterTreeNodes)
                     {
                         string category = item.Key;
@@ -1553,7 +1553,7 @@ namespace PSFilterPdn
                                 }
                                 else
                                 {
-                                    TreeNodeEx node = new TreeNodeEx(category);
+                                    TreeNodeEx node = new(category);
                                     node.Nodes.Add(child.CloneT());
 
                                     nodes.Add(category, node);
@@ -1792,7 +1792,7 @@ namespace PSFilterPdn
                 SizeInt32 canvasSize = sourceBitmap.Size;
                 Lazy<bool> lazyHasTransparency = new(() => HasTransparentPixels(sourceBitmap));
 
-                HostState hostState = new HostState
+                HostState hostState = new()
                 {
                     HasMultipleLayers = false,
                     HasSelection = selectionMask != null

@@ -22,7 +22,7 @@ namespace PSFilterShim
         private static long pressure;
         private static long committedPressure;
 
-        private static readonly object sync = new object();
+        private static readonly object sync = new();
 
         internal static void AddMemoryPressure(long amount)
         {

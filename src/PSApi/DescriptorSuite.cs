@@ -32,7 +32,7 @@ namespace PSFilterLoad.PSApi
 
             private static unsafe ReadOnlyDictionary<uint, int> GetKeyArrayOffsets(IntPtr keyArray)
             {
-                Dictionary<uint, int> offsets = new Dictionary<uint, int>();
+                Dictionary<uint, int> offsets = new();
 
                 if (keyArray != IntPtr.Zero)
                 {
@@ -264,7 +264,7 @@ namespace PSFilterLoad.PSApi
                 Dictionary<uint, AETEValue> dictionary = descriptorHandles[descriptorHandle];
 
                 readDescriptorsIndex++;
-                PIReadDescriptor handle = new PIReadDescriptor(readDescriptorsIndex);
+                PIReadDescriptor handle = new(readDescriptorsIndex);
                 try
                 {
                     readDescriptors.Add(handle, new ReadDescriptorState(dictionary, keyArray));
@@ -763,7 +763,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
 #endif
             writeDescriptorsIndex++;
-            PIWriteDescriptor handle = new PIWriteDescriptor(writeDescriptorsIndex);
+            PIWriteDescriptor handle = new(writeDescriptorsIndex);
             try
             {
                 writeDescriptors.Add(handle, new Dictionary<uint, AETEValue>());
@@ -875,7 +875,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                UnitFloat item = new UnitFloat(unit, *data);
+                UnitFloat item = new(unit, *data);
 
                 writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.UintFloat, GetAETEParamFlags(key), 0, item));
             }

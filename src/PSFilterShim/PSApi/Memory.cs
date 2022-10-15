@@ -193,7 +193,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                UIntPtr bytes = new UIntPtr((ulong)newSize);
+                UIntPtr bytes = new((ulong)newSize);
                 block = SafeNativeMethods.HeapReAlloc(hHeap, 0U, pv, bytes);
             }
             catch (OverflowException ex)

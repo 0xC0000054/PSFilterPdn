@@ -182,7 +182,7 @@ namespace PSFilterLoad.PSApi
 
         internal ParameterData FilterParameters
         {
-            get => new ParameterData(globalParameters, scriptingData);
+            get => new(globalParameters, scriptingData);
             set
             {
                 globalParameters = value.GlobalParameters;
@@ -392,7 +392,7 @@ namespace PSFilterLoad.PSApi
             bool result = false;
 
             // Some plug-ins may use an indirect pointer to the same memory block.
-            IntPtr fakeIndirectAddress = new IntPtr(baseAddress.ToInt64() + IntPtr.Size);
+            IntPtr fakeIndirectAddress = new(baseAddress.ToInt64() + IntPtr.Size);
 
             if (address == fakeIndirectAddress)
             {
@@ -513,7 +513,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (HandleSuite.Instance.AllocatedBySuite(filterGlobalData))
                 {
-                    Handle dataHandle = new Handle(filterGlobalData);
+                    Handle dataHandle = new(filterGlobalData);
 
                     int ps = HandleSuite.Instance.GetHandleSize(dataHandle);
                     byte[] dataBuf = new byte[ps];
@@ -2576,9 +2576,9 @@ namespace PSFilterLoad.PSApi
                     }
 
                     // Use a temporary bitmap to prevent flickering when the image is rendered over the checker board.
-                    using (Bitmap temp = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                    using (Bitmap temp = new(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                     {
-                        Rectangle rect = new Rectangle(0, 0, width, height);
+                        Rectangle rect = new(0, 0, width, height);
 
                         using (Graphics tempGr = Graphics.FromImage(temp))
                         {
@@ -3296,7 +3296,7 @@ namespace PSFilterLoad.PSApi
                     }
                     else
                     {
-                        Handle dataHandle = new Handle(filterGlobalData);
+                        Handle dataHandle = new(filterGlobalData);
 
                         HandleSuite.Instance.UnlockHandle(dataHandle);
                         HandleSuite.Instance.DisposeHandle(dataHandle);

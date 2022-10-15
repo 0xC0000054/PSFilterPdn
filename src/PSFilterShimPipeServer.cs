@@ -133,14 +133,14 @@ namespace PSFilterPdn
                     SendEmptyReplyToClient();
                     break;
                 case Command.GetPluginData:
-                    using (MemoryStream stream = new MemoryStream())
+                    using (MemoryStream stream = new())
                     {
                         DataContractSerializerUtil.Serialize(stream, pluginData);
                         SendReplyToClient(stream.GetBuffer(), 0, (int)stream.Length);
                     }
                     break;
                 case Command.GetSettings:
-                    using (MemoryStream stream = new MemoryStream())
+                    using (MemoryStream stream = new())
                     {
                         DataContractSerializerUtil.Serialize(stream, settings);
                         SendReplyToClient(stream.GetBuffer(), 0, (int)stream.Length);

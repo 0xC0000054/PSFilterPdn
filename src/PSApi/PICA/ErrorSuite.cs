@@ -46,7 +46,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         public PSErrorSuite1 CreateErrorSuite1()
         {
-            PSErrorSuite1 suite = new PSErrorSuite1
+            PSErrorSuite1 suite = new()
             {
                 SetErrorFromPString = Marshal.GetFunctionPointerForDelegate(setErrorFromPString),
                 SetErrorFromCString = Marshal.GetFunctionPointerForDelegate(setErrorFromCString),

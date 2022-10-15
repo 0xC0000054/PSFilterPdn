@@ -249,7 +249,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("name: {0}, version: {1}", suiteName, version));
 #endif
             int error = PSError.kSPNoError;
-            ActivePICASuites.PICASuiteKey suiteKey = new ActivePICASuites.PICASuiteKey(suiteName, version);
+            ActivePICASuites.PICASuiteKey suiteKey = new(suiteName, version);
 
             if (activePICASuites.IsLoaded(suiteKey))
             {
@@ -482,7 +482,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("name: {0}, version: {1}", suiteName, version.ToString()));
 #endif
 
-            ActivePICASuites.PICASuiteKey suiteKey = new ActivePICASuites.PICASuiteKey(suiteName, version);
+            ActivePICASuites.PICASuiteKey suiteKey = new(suiteName, version);
 
             activePICASuites.Release(suiteKey);
 

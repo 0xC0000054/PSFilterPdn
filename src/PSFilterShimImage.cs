@@ -32,14 +32,14 @@ namespace PSFilterPdn
         {
             IBitmap<ColorBgra32> bitmap = null;
 
-            using (FileStream stream = new FileStream(path,
-                                                      FileMode.Open,
-                                                      FileAccess.Read,
-                                                      FileShare.Read,
-                                                      BufferSize,
-                                                      FileOptions.SequentialScan))
+            using (FileStream stream = new(path,
+                                           FileMode.Open,
+                                           FileAccess.Read,
+                                           FileShare.Read,
+                                           BufferSize,
+                                           FileOptions.SequentialScan))
             {
-                PSFilterShimImageHeader header = new PSFilterShimImageHeader(stream);
+                PSFilterShimImageHeader header = new(stream);
 
                 if (header.Format != PSFilterShimImageFormat.Bgra32)
                 {
@@ -83,20 +83,20 @@ namespace PSFilterPdn
                 throw new ArgumentNullException(nameof(bitmap));
             }
 
-            using (FileStream stream = new FileStream(path,
-                                                      FileMode.Create,
-                                                      FileAccess.Write,
-                                                      FileShare.None,
-                                                      BufferSize,
-                                                      FileOptions.SequentialScan))
+            using (FileStream stream = new(path,
+                                           FileMode.Create,
+                                           FileAccess.Write,
+                                           FileShare.None,
+                                           BufferSize,
+                                           FileOptions.SequentialScan))
             {
                 SizeInt32 bitmapSize = bitmap.Size;
 
-                PSFilterShimImageHeader header = new PSFilterShimImageHeader(bitmapSize.Width,
-                                                                             bitmapSize.Height,
-                                                                             PSFilterShimImageFormat.Bgra32,
-                                                                             documentDpi.X,
-                                                                             documentDpi.Y);
+                PSFilterShimImageHeader header = new(bitmapSize.Width,
+                                                     bitmapSize.Height,
+                                                     PSFilterShimImageFormat.Bgra32,
+                                                     documentDpi.X,
+                                                     documentDpi.Y);
                 stream.SetLength(header.GetTotalFileSize());
 
                 header.Save(stream);
@@ -130,18 +130,18 @@ namespace PSFilterPdn
                 throw new ArgumentNullException(nameof(surface));
             }
 
-            using (FileStream stream = new FileStream(path,
-                                                      FileMode.Create,
-                                                      FileAccess.Write,
-                                                      FileShare.None,
-                                                      BufferSize,
-                                                      FileOptions.SequentialScan))
+            using (FileStream stream = new(path,
+                                           FileMode.Create,
+                                           FileAccess.Write,
+                                           FileShare.None,
+                                           BufferSize,
+                                           FileOptions.SequentialScan))
             {
-                PSFilterShimImageHeader header = new PSFilterShimImageHeader(surface.Width,
-                                                                             surface.Height,
-                                                                             PSFilterShimImageFormat.Alpha8,
-                                                                             96.0,
-                                                                             96.0);
+                PSFilterShimImageHeader header = new(surface.Width,
+                                                     surface.Height,
+                                                     PSFilterShimImageFormat.Alpha8,
+                                                     96.0,
+                                                     96.0);
                 stream.SetLength(header.GetTotalFileSize());
 
                 header.Save(stream);

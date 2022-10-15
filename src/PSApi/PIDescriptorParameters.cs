@@ -24,7 +24,7 @@ namespace PSFilterLoad.PSApi
     {
         private readonly IntPtr value;
 
-        public static readonly PIReadDescriptor Null = new PIReadDescriptor(0);
+        public static readonly PIReadDescriptor Null = new(0);
 
         public PIReadDescriptor(int index)
         {
@@ -63,7 +63,7 @@ namespace PSFilterLoad.PSApi
     {
         private readonly IntPtr value;
 
-        public static readonly PIWriteDescriptor Null = new PIWriteDescriptor(0);
+        public static readonly PIWriteDescriptor Null = new(0);
 
         public PIWriteDescriptor(int index)
         {
