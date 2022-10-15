@@ -2321,8 +2321,7 @@ namespace PSFilterLoad.PSApi
                             return PSError.paramErr;
                         }
 
-                        long dataLength = mask.Width * mask.Height;
-                        Memory.FillMemory(maskData, (byte)maskPadding, (ulong)dataLength);
+                        Memory.FillMemory(maskData, (byte)maskPadding, (ulong)Memory.Size(maskData));
                         break;
                 }
             }
