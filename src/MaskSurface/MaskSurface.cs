@@ -74,6 +74,8 @@ namespace PSFilterLoad.PSApi
 
         public Rectangle Bounds => new(0, 0, width, height);
 
+        public Size Size => new(width, height);
+
         public MaskSurface Clone()
         {
             MaskSurface surface = new(width, height, zeroFill: false);

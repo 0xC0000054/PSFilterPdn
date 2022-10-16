@@ -43,6 +43,7 @@
     <Compile Include="..\PSApi\FilterCase.cs" Link="PSApi\FilterCase.cs" />
     <Compile Include="..\PSApi\FilterCaseInfo.cs" Link="PSApi\FilterCaseInfo.cs" />
     <Compile Include="..\PSApi\FilterCaseInfoCollection.cs" Link="PSApi\FilterCaseInfoCollection.cs" />
+    <Compile Include="..\PSApi\FilterPadding.cs" Link="PSApi\FilterPadding.cs" />
     <Compile Include="..\PSApi\GlobalParameters.cs" Link="PSApi\GlobalParameters.cs" />
     <Compile Include="..\PSApi\ImageMode.cs" Link="ImageMode.cs" />
     <Compile Include="..\PSApi\ParameterData.cs" Link="PSApi\ParameterData.cs" />

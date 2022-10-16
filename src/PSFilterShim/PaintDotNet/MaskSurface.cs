@@ -100,6 +100,8 @@ namespace PaintDotNet
             }
         }
 
+        public Size Size => new(width, height);
+
         public MaskSurface Clone()
         {
             MaskSurface surface = new(width, height, zeroFill: false);

@@ -1435,27 +1435,28 @@ namespace PSFilterLoad.PSApi
         /// <param name="maskRowBytes">The mask stride.</param>
         /// <param name="rect">The mask rect.</param>
         /// <param name="maskPadding">The mask padding mode.</param>
-        /// <param name="lockRect">The lock rect.</param>
+        /// <param name="padding">The padding extents.</param>
         /// <param name="mask">The mask.</param>
-        private static unsafe short SetMaskPadding(IntPtr maskData, int maskRowBytes, Rect16 rect, short maskPadding, Rectangle lockRect, MaskSurface mask)
+        private static unsafe short SetMaskPadding(IntPtr maskData, int maskRowBytes, Rect16 rect, short maskPadding, FilterPadding padding, MaskSurface mask)
         {
-            if (lockRect.Right > mask.Width || lockRect.Bottom > mask.Height || rect.top < 0 || rect.left < 0)
+            if (!padding.IsEmpty)
             {
                 switch (maskPadding)
                 {
                     case PSConstants.Padding.plugInWantsEdgeReplication:
+                        int top = padding.top;
+                        int left = padding.left;
 
-                        int top = rect.top < 0 ? -rect.top : 0;
-                        int left = rect.left < 0 ? -rect.left : 0;
+                        int right = padding.right;
+                        int bottom = padding.bottom;
 
-                        int right = lockRect.Right - mask.Width;
-                        int bottom = lockRect.Bottom - mask.Height;
+                        int surfaceHeight = mask.Height;
+                        int surfaceWidth = mask.Width;
 
-                        int row, col;
-                        int width = rect.right - rect.left;
-                        int height = rect.bottom - rect.top;
+                        int lastSurfaceRow = surfaceHeight - 1;
+                        int lastSurfaceColumn = surfaceWidth - 1;
 
-                        byte* ptr = (byte*)maskData.ToPointer();
+                        byte* ptr = (byte*)maskData;
 
                         if (top > 0)
                         {
@@ -1464,7 +1465,7 @@ namespace PSFilterLoad.PSApi
                                 byte* src = mask.GetRowAddressUnchecked(0);
                                 byte* dst = ptr + (y * maskRowBytes);
 
-                                for (int x = 0; x < width; x++)
+                                for (int x = 0; x < surfaceWidth; x++)
                                 {
                                     *dst = *src;
 
@@ -1476,7 +1477,7 @@ namespace PSFilterLoad.PSApi
 
                         if (left > 0)
                         {
-                            for (int y = 0; y < height; y++)
+                            for (int y = 0; y < surfaceHeight; y++)
                             {
                                 byte src = mask.GetPointUnchecked(0, y);
                                 byte* dst = ptr + (y * maskRowBytes);
@@ -1492,14 +1493,13 @@ namespace PSFilterLoad.PSApi
 
                         if (bottom > 0)
                         {
-                            col = mask.Height - 1;
-                            int lockBottom = height - 1;
+                            int lockBottom = rect.bottom - rect.top - 1;
                             for (int y = 0; y < bottom; y++)
                             {
-                                byte* src = mask.GetRowAddressUnchecked(col);
+                                byte* src = mask.GetRowAddressUnchecked(lastSurfaceRow);
                                 byte* dst = ptr + ((lockBottom - y) * maskRowBytes);
 
-                                for (int x = 0; x < width; x++)
+                                for (int x = 0; x < surfaceWidth; x++)
                                 {
                                     *dst = *src;
 
@@ -1511,11 +1511,10 @@ namespace PSFilterLoad.PSApi
 
                         if (right > 0)
                         {
-                            row = mask.Width - 1;
-                            int rowEnd = width - right;
-                            for (int y = 0; y < height; y++)
+                            int rowEnd = rect.right - rect.left - right;
+                            for (int y = 0; y < surfaceHeight; y++)
                             {
-                                byte src = mask.GetPointUnchecked(row, y);
+                                byte src = mask.GetPointUnchecked(lastSurfaceColumn, y);
                                 byte* dst = ptr + (y * maskRowBytes) + rowEnd;
 
                                 for (int x = 0; x < right; x++)
@@ -1526,7 +1525,6 @@ namespace PSFilterLoad.PSApi
                                 }
                             }
                         }
-
                         break;
                     case PSConstants.Padding.plugInDoesNotWantPadding:
                         break;
@@ -1556,28 +1554,28 @@ namespace PSFilterLoad.PSApi
         /// <param name="nplanes">The number of channels in the image.</param>
         /// <param name="ofs">The single channel offset to map to BGRA color space.</param>
         /// <param name="inputPadding">The input padding mode.</param>
-        /// <param name="lockRect">The lock rect.</param>
+        /// <param name="padding">The padding extents.</param>
         /// <param name="surface">The surface.</param>
-        private static unsafe short SetFilterPadding(IntPtr inData, int inRowBytes, Rect16 rect, int nplanes, short ofs, short inputPadding, Rectangle lockRect, Surface surface)
+        private static unsafe short SetFilterPadding(IntPtr inData, int inRowBytes, Rect16 rect, int nplanes, short ofs, short inputPadding, FilterPadding padding, Surface surface)
         {
-            if (lockRect.Right > surface.Width || lockRect.Bottom > surface.Height || rect.top < 0 || rect.left < 0)
+            if (!padding.IsEmpty)
             {
                 switch (inputPadding)
                 {
                     case PSConstants.Padding.plugInWantsEdgeReplication:
+                        int top = padding.top;
+                        int left = padding.left;
 
-                        int top = rect.top < 0 ? -rect.top : 0;
-                        int left = rect.left < 0 ? -rect.left : 0;
+                        int right = padding.right;
+                        int bottom = padding.bottom;
 
-                        int right = lockRect.Right - surface.Width;
-                        int bottom = lockRect.Bottom - surface.Height;
+                        int surfaceHeight = surface.Height;
+                        int surfaceWidth = surface.Width;
 
-                        int height = rect.bottom - rect.top;
-                        int width = rect.right - rect.left;
+                        int lastSurfaceRow = surfaceWidth - 1;
+                        int lastSurfaceColumn = surfaceHeight - 1;
 
-                        int row, col;
-
-                        byte* inDataPtr = (byte*)inData.ToPointer();
+                        byte* inDataPtr = (byte*)inData;
 
                         if (top > 0)
                         {
@@ -1586,7 +1584,7 @@ namespace PSFilterLoad.PSApi
                                 ColorBgra* p = surface.GetRowPointerUnchecked(0);
                                 byte* q = inDataPtr + (y * inRowBytes);
 
-                                for (int x = 0; x < width; x++)
+                                for (int x = 0; x < surfaceWidth; x++)
                                 {
                                     switch (nplanes)
                                     {
@@ -1618,7 +1616,7 @@ namespace PSFilterLoad.PSApi
 
                         if (left > 0)
                         {
-                            for (int y = 0; y < height; y++)
+                            for (int y = 0; y < surfaceHeight; y++)
                             {
                                 byte* q = inDataPtr + (y * inRowBytes);
 
@@ -1654,14 +1652,13 @@ namespace PSFilterLoad.PSApi
 
                         if (bottom > 0)
                         {
-                            col = surface.Height - 1;
-                            int lockBottom = height - 1;
+                            int lockBottom = rect.bottom - rect.top - 1;
                             for (int y = 0; y < bottom; y++)
                             {
-                                ColorBgra* p = surface.GetRowPointerUnchecked(col);
+                                ColorBgra* p = surface.GetRowPointerUnchecked(lastSurfaceColumn);
                                 byte* q = inDataPtr + ((lockBottom - y) * inRowBytes);
 
-                                for (int x = 0; x < width; x++)
+                                for (int x = 0; x < surfaceWidth; x++)
                                 {
                                     switch (nplanes)
                                     {
@@ -1693,13 +1690,12 @@ namespace PSFilterLoad.PSApi
 
                         if (right > 0)
                         {
-                            row = surface.Width - 1;
-                            int rowEnd = width - right;
-                            for (int y = 0; y < height; y++)
+                            int rowEnd = rect.right - rect.left - right;
+                            for (int y = 0; y < surfaceHeight; y++)
                             {
                                 byte* q = inDataPtr + (y * inRowBytes) + rowEnd;
 
-                                ColorBgra p = surface.GetPointUnchecked(row, y);
+                                ColorBgra p = surface.GetPointUnchecked(lastSurfaceRow, y);
 
                                 for (int x = 0; x < right; x++)
                                 {
@@ -1728,7 +1724,6 @@ namespace PSFilterLoad.PSApi
                                 }
                             }
                         }
-
                         break;
                     case PSConstants.Padding.plugInDoesNotWantPadding:
                         break;
@@ -1826,7 +1821,9 @@ namespace PSFilterLoad.PSApi
             int width = rect.right - rect.left;
             int height = rect.bottom - rect.top;
 
-            Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
+            FilterPadding padding = new(rect, width, height, source.Size, filterRecord->inputRate);
+
+            Rectangle lockRect = new(rect.left + padding.left, rect.top + padding.top, width - padding.Horizontal, height - padding.Vertical);
 
             int stride = width * nplanes;
             if (inDataPtr == IntPtr.Zero)
@@ -1845,21 +1842,6 @@ namespace PSFilterLoad.PSApi
             filterRecord->inData = inDataPtr;
             filterRecord->inRowBytes = stride;
             filterRecord->inColumnBytes = nplanes;
-
-            if (lockRect.Left < 0 || lockRect.Top < 0)
-            {
-                if (lockRect.Left < 0)
-                {
-                    lockRect.X = 0;
-                    lockRect.Width -= -rect.left;
-                }
-
-                if (lockRect.Top < 0)
-                {
-                    lockRect.Y = 0;
-                    lockRect.Height -= -rect.top;
-                }
-            }
 
             try
             {
@@ -1883,7 +1865,7 @@ namespace PSFilterLoad.PSApi
             }
 
             bool validImageBounds = rect.left < source.Width && rect.top < source.Height;
-            short padErr = SetFilterPadding(inDataPtr, stride, rect, nplanes, channelOffset, filterRecord->inputPadding, lockRect, tempSurface);
+            short padErr = SetFilterPadding(inDataPtr, stride, rect, nplanes, channelOffset, filterRecord->inputPadding, padding, tempSurface);
             if (padErr != PSError.noErr || !validImageBounds)
             {
                 return padErr;
@@ -1892,13 +1874,13 @@ namespace PSFilterLoad.PSApi
             void* ptr = inDataPtr.ToPointer();
             int top = lockRect.Top;
             int left = lockRect.Left;
-            int bottom = Math.Min(lockRect.Bottom, tempSurface.Height);
-            int right = Math.Min(lockRect.Right, tempSurface.Width);
+            int bottom = lockRect.Bottom;
+            int right = lockRect.Right;
 
             for (int y = top; y < bottom; y++)
             {
                 byte* src = (byte*)tempSurface.GetPointPointerUnchecked(left, y);
-                byte* dst = (byte*)ptr + ((y - top) * stride);
+                byte* dst = (byte*)ptr + ((y - top + padding.top) * stride) + padding.left;
 
                 for (int x = left; x < right; x++)
                 {
@@ -1951,7 +1933,9 @@ namespace PSFilterLoad.PSApi
             int width = rect.right - rect.left;
             int height = rect.bottom - rect.top;
 
-            Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
+            FilterPadding padding = new(rect, width, height, dest.Size, null);
+
+            Rectangle lockRect = new(rect.left + padding.left, rect.top + padding.top, width - padding.Horizontal, height - padding.Vertical);
 
             int stride = width * nplanes;
 
@@ -1973,21 +1957,6 @@ namespace PSFilterLoad.PSApi
             filterRecord->outRowBytes = stride;
             filterRecord->outColumnBytes = nplanes;
 
-            if (lockRect.Left < 0 || lockRect.Top < 0)
-            {
-                if (lockRect.Left < 0)
-                {
-                    lockRect.X = 0;
-                    lockRect.Width -= -rect.left;
-                }
-
-                if (lockRect.Top < 0)
-                {
-                    lockRect.Y = 0;
-                    lockRect.Height -= -rect.top;
-                }
-            }
-
             short channelOffset = filterRecord->outLoPlane;
 
             switch (filterRecord->outLoPlane) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
@@ -2001,7 +1970,7 @@ namespace PSFilterLoad.PSApi
             }
 
             bool validImageBounds = rect.left < dest.Width && rect.top < dest.Height;
-            short padErr = SetFilterPadding(outDataPtr, stride, rect, nplanes, channelOffset, filterRecord->outputPadding, lockRect, dest);
+            short padErr = SetFilterPadding(outDataPtr, stride, rect, nplanes, channelOffset, filterRecord->outputPadding, padding, dest);
             if (padErr != PSError.noErr || !validImageBounds)
             {
                 return padErr;
@@ -2010,13 +1979,13 @@ namespace PSFilterLoad.PSApi
             void* ptr = outDataPtr.ToPointer();
             int top = lockRect.Top;
             int left = lockRect.Left;
-            int bottom = Math.Min(lockRect.Bottom, dest.Height);
-            int right = Math.Min(lockRect.Right, dest.Width);
+            int bottom = lockRect.Bottom;
+            int right = lockRect.Right;
 
             for (int y = top; y < bottom; y++)
             {
                 byte* src = (byte*)dest.GetPointPointerUnchecked(left, y);
-                byte* dst = (byte*)ptr + ((y - top) * stride);
+                byte* dst = (byte*)ptr + ((y - top + padding.top) * stride) + padding.left;
 
                 for (int x = left; x < right; x++)
                 {
@@ -2121,22 +2090,9 @@ namespace PSFilterLoad.PSApi
             int width = rect.right - rect.left;
             int height = rect.bottom - rect.top;
 
-            Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
+            FilterPadding padding = new(rect, width, height, mask.Size, filterRecord->maskRate);
 
-            if (lockRect.Left < 0 || lockRect.Top < 0)
-            {
-                if (lockRect.Left < 0)
-                {
-                    lockRect.X = 0;
-                    lockRect.Width -= -rect.left;
-                }
-
-                if (lockRect.Top < 0)
-                {
-                    lockRect.Y = 0;
-                    lockRect.Height -= -rect.top;
-                }
-            }
+            Rectangle lockRect = new(rect.left + padding.left, rect.top + padding.top, width - padding.Horizontal, height - padding.Vertical);
 
             try
             {
@@ -2164,7 +2120,7 @@ namespace PSFilterLoad.PSApi
             filterRecord->maskRowBytes = width;
 
             bool validImageBounds = rect.left < mask.Width && rect.top < mask.Height;
-            short err = SetMaskPadding(maskDataPtr, width, rect, filterRecord->maskPadding, lockRect, tempMask);
+            short err = SetMaskPadding(maskDataPtr, width, rect, filterRecord->maskPadding, padding, tempMask);
             if (err != PSError.noErr || !validImageBounds)
             {
                 return err;
@@ -2173,13 +2129,13 @@ namespace PSFilterLoad.PSApi
             byte* ptr = (byte*)maskDataPtr.ToPointer();
             int top = lockRect.Top;
             int left = lockRect.Left;
-            int bottom = Math.Min(lockRect.Bottom, tempMask.Height);
-            int right = Math.Min(lockRect.Right, tempMask.Width);
+            int bottom = lockRect.Bottom;
+            int right = lockRect.Right;
 
             for (int y = top; y < bottom; y++)
             {
                 byte* srcRow = tempMask.GetPointAddressUnchecked(left, y);
-                byte* dstRow = ptr + ((y - top) * width);
+                byte* dstRow = ptr + ((y - top + padding.top) * width) + padding.left;
 
                 for (int x = left; x < right; x++)
                 {
@@ -2211,8 +2167,6 @@ namespace PSFilterLoad.PSApi
                 return;
             }
 
-            int nplanes = hiplane - loplane + 1;
-
             if (RectNonEmpty(rect))
             {
                 if (rect.left >= source.Width || rect.top >= source.Height)
@@ -2230,32 +2184,24 @@ namespace PSFilterLoad.PSApi
                         ofs = 0;
                         break;
                 }
-                Rectangle lockRect = Rectangle.FromLTRB(rect.left, rect.top, rect.right, rect.bottom);
 
-                if (lockRect.Left < 0 || lockRect.Top < 0)
-                {
-                    if (lockRect.Left < 0)
-                    {
-                        lockRect.X = 0;
-                        lockRect.Width -= -rect.left;
-                    }
+                int nplanes = hiplane - loplane + 1;
+                int width = rect.right - rect.left;
+                int height = rect.bottom - rect.top;
 
-                    if (lockRect.Top < 0)
-                    {
-                        lockRect.Y = 0;
-                        lockRect.Height -= -rect.top;
-                    }
-                }
+                FilterPadding padding = new(rect, width, height, dest.Size, null);
+
+                Rectangle lockRect = new(rect.left + padding.left, rect.top + padding.top, width - padding.Horizontal, height - padding.Vertical);
 
                 void* outDataPtr = outData.ToPointer();
                 int top = lockRect.Top;
                 int left = lockRect.Left;
-                int bottom = Math.Min(lockRect.Bottom, dest.Height);
-                int right = Math.Min(lockRect.Right, dest.Width);
+                int bottom = lockRect.Bottom;
+                int right = lockRect.Right;
 
                 for (int y = top; y < bottom; y++)
                 {
-                    byte* src = (byte*)outDataPtr + ((y - top) * outRowBytes);
+                    byte* src = (byte*)outDataPtr + ((y - top + padding.top) * outRowBytes) + padding.left;
                     byte* dst = (byte*)dest.GetPointPointerUnchecked(left, y);
 
                     for (int x = left; x < right; x++)

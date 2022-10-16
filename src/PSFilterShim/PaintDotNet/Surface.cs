@@ -71,6 +71,8 @@ namespace PaintDotNet
             }
         }
 
+        public Size Size => new(width, height);
+
         public Surface(int width, int height)
         {
             this.width = width;
