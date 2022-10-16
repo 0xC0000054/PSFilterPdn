@@ -1444,87 +1444,7 @@ namespace PSFilterLoad.PSApi
                 switch (maskPadding)
                 {
                     case PSConstants.Padding.plugInWantsEdgeReplication:
-                        int top = padding.top;
-                        int left = padding.left;
-
-                        int right = padding.right;
-                        int bottom = padding.bottom;
-
-                        int surfaceHeight = mask.Height;
-                        int surfaceWidth = mask.Width;
-
-                        int lastSurfaceRow = surfaceHeight - 1;
-                        int lastSurfaceColumn = surfaceWidth - 1;
-
-                        byte* ptr = (byte*)maskData;
-
-                        if (top > 0)
-                        {
-                            for (int y = 0; y < top; y++)
-                            {
-                                byte* src = mask.GetRowAddressUnchecked(0);
-                                byte* dst = ptr + (y * maskRowBytes);
-
-                                for (int x = 0; x < surfaceWidth; x++)
-                                {
-                                    *dst = *src;
-
-                                    src++;
-                                    dst++;
-                                }
-                            }
-                        }
-
-                        if (left > 0)
-                        {
-                            for (int y = 0; y < surfaceHeight; y++)
-                            {
-                                byte src = mask.GetPointUnchecked(0, y);
-                                byte* dst = ptr + (y * maskRowBytes);
-
-                                for (int x = 0; x < left; x++)
-                                {
-                                    *dst = src;
-
-                                    dst++;
-                                }
-                            }
-                        }
-
-                        if (bottom > 0)
-                        {
-                            int lockBottom = rect.bottom - rect.top - 1;
-                            for (int y = 0; y < bottom; y++)
-                            {
-                                byte* src = mask.GetRowAddressUnchecked(lastSurfaceRow);
-                                byte* dst = ptr + ((lockBottom - y) * maskRowBytes);
-
-                                for (int x = 0; x < surfaceWidth; x++)
-                                {
-                                    *dst = *src;
-
-                                    src++;
-                                    dst++;
-                                }
-                            }
-                        }
-
-                        if (right > 0)
-                        {
-                            int rowEnd = rect.right - rect.left - right;
-                            for (int y = 0; y < surfaceHeight; y++)
-                            {
-                                byte src = mask.GetPointUnchecked(lastSurfaceColumn, y);
-                                byte* dst = ptr + (y * maskRowBytes) + rowEnd;
-
-                                for (int x = 0; x < right; x++)
-                                {
-                                    *dst = src;
-
-                                    dst++;
-                                }
-                            }
-                        }
+                        SetMaskEdgePadding(maskData, maskRowBytes, rect, padding, mask);
                         break;
                     case PSConstants.Padding.plugInDoesNotWantPadding:
                         break;
@@ -1545,6 +1465,91 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
+        private static unsafe void SetMaskEdgePadding(IntPtr maskData, int maskRowBytes, Rect16 rect, FilterPadding padding, MaskSurface mask)
+        {
+            int top = padding.top;
+            int left = padding.left;
+
+            int right = padding.right;
+            int bottom = padding.bottom;
+
+            int surfaceHeight = mask.Height;
+            int surfaceWidth = mask.Width;
+
+            int lastSurfaceRow = surfaceHeight - 1;
+            int lastSurfaceColumn = surfaceWidth - 1;
+
+            byte* ptr = (byte*)maskData;
+
+            if (top > 0)
+            {
+                for (int y = 0; y < top; y++)
+                {
+                    byte* src = mask.GetRowAddressUnchecked(0);
+                    byte* dst = ptr + (y * maskRowBytes);
+
+                    for (int x = 0; x < surfaceWidth; x++)
+                    {
+                        *dst = *src;
+
+                        src++;
+                        dst++;
+                    }
+                }
+            }
+
+            if (left > 0)
+            {
+                for (int y = 0; y < surfaceHeight; y++)
+                {
+                    byte src = mask.GetPointUnchecked(0, y);
+                    byte* dst = ptr + (y * maskRowBytes);
+
+                    for (int x = 0; x < left; x++)
+                    {
+                        *dst = src;
+
+                        dst++;
+                    }
+                }
+            }
+
+            if (bottom > 0)
+            {
+                int lockBottom = rect.bottom - rect.top - 1;
+                for (int y = 0; y < bottom; y++)
+                {
+                    byte* src = mask.GetRowAddressUnchecked(lastSurfaceRow);
+                    byte* dst = ptr + ((lockBottom - y) * maskRowBytes);
+
+                    for (int x = 0; x < surfaceWidth; x++)
+                    {
+                        *dst = *src;
+
+                        src++;
+                        dst++;
+                    }
+                }
+            }
+
+            if (right > 0)
+            {
+                int rowEnd = rect.right - rect.left - right;
+                for (int y = 0; y < surfaceHeight; y++)
+                {
+                    byte src = mask.GetPointUnchecked(lastSurfaceColumn, y);
+                    byte* dst = ptr + (y * maskRowBytes) + rowEnd;
+
+                    for (int x = 0; x < right; x++)
+                    {
+                        *dst = src;
+
+                        dst++;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Sets the filter padding.
         /// </summary>
@@ -1563,167 +1568,7 @@ namespace PSFilterLoad.PSApi
                 switch (inputPadding)
                 {
                     case PSConstants.Padding.plugInWantsEdgeReplication:
-                        int top = padding.top;
-                        int left = padding.left;
-
-                        int right = padding.right;
-                        int bottom = padding.bottom;
-
-                        int surfaceHeight = surface.Height;
-                        int surfaceWidth = surface.Width;
-
-                        int lastSurfaceRow = surfaceWidth - 1;
-                        int lastSurfaceColumn = surfaceHeight - 1;
-
-                        byte* inDataPtr = (byte*)inData;
-
-                        if (top > 0)
-                        {
-                            for (int y = 0; y < top; y++)
-                            {
-                                ColorBgra* p = surface.GetRowPointerUnchecked(0);
-                                byte* q = inDataPtr + (y * inRowBytes);
-
-                                for (int x = 0; x < surfaceWidth; x++)
-                                {
-                                    switch (nplanes)
-                                    {
-                                        case 1:
-                                            *q = (*p)[ofs];
-                                            break;
-                                        case 2:
-                                            q[0] = (*p)[ofs];
-                                            q[1] = (*p)[ofs + 1];
-                                            break;
-                                        case 3:
-                                            q[0] = p->R;
-                                            q[1] = p->G;
-                                            q[2] = p->B;
-                                            break;
-                                        case 4:
-                                            q[0] = p->R;
-                                            q[1] = p->G;
-                                            q[2] = p->B;
-                                            q[3] = p->A;
-                                            break;
-                                    }
-
-                                    p++;
-                                    q += nplanes;
-                                }
-                            }
-                        }
-
-                        if (left > 0)
-                        {
-                            for (int y = 0; y < surfaceHeight; y++)
-                            {
-                                byte* q = inDataPtr + (y * inRowBytes);
-
-                                ColorBgra p = surface.GetPointUnchecked(0, y);
-
-                                for (int x = 0; x < left; x++)
-                                {
-                                    switch (nplanes)
-                                    {
-                                        case 1:
-                                            *q = p[ofs];
-                                            break;
-                                        case 2:
-                                            q[0] = p[ofs];
-                                            q[1] = p[ofs + 1];
-                                            break;
-                                        case 3:
-                                            q[0] = p.R;
-                                            q[1] = p.G;
-                                            q[2] = p.B;
-                                            break;
-                                        case 4:
-                                            q[0] = p.R;
-                                            q[1] = p.G;
-                                            q[2] = p.B;
-                                            q[3] = p.A;
-                                            break;
-                                    }
-                                    q += nplanes;
-                                }
-                            }
-                        }
-
-                        if (bottom > 0)
-                        {
-                            int lockBottom = rect.bottom - rect.top - 1;
-                            for (int y = 0; y < bottom; y++)
-                            {
-                                ColorBgra* p = surface.GetRowPointerUnchecked(lastSurfaceColumn);
-                                byte* q = inDataPtr + ((lockBottom - y) * inRowBytes);
-
-                                for (int x = 0; x < surfaceWidth; x++)
-                                {
-                                    switch (nplanes)
-                                    {
-                                        case 1:
-                                            *q = (*p)[ofs];
-                                            break;
-                                        case 2:
-                                            q[0] = (*p)[ofs];
-                                            q[1] = (*p)[ofs + 1];
-                                            break;
-                                        case 3:
-                                            q[0] = p->R;
-                                            q[1] = p->G;
-                                            q[2] = p->B;
-                                            break;
-                                        case 4:
-                                            q[0] = p->R;
-                                            q[1] = p->G;
-                                            q[2] = p->B;
-                                            q[3] = p->A;
-                                            break;
-                                    }
-
-                                    p++;
-                                    q += nplanes;
-                                }
-                            }
-                        }
-
-                        if (right > 0)
-                        {
-                            int rowEnd = rect.right - rect.left - right;
-                            for (int y = 0; y < surfaceHeight; y++)
-                            {
-                                byte* q = inDataPtr + (y * inRowBytes) + rowEnd;
-
-                                ColorBgra p = surface.GetPointUnchecked(lastSurfaceRow, y);
-
-                                for (int x = 0; x < right; x++)
-                                {
-                                    switch (nplanes)
-                                    {
-                                        case 1:
-                                            *q = p[ofs];
-                                            break;
-                                        case 2:
-                                            q[0] = p[ofs];
-                                            q[1] = p[ofs + 1];
-                                            break;
-                                        case 3:
-                                            q[0] = p.R;
-                                            q[1] = p.G;
-                                            q[2] = p.B;
-                                            break;
-                                        case 4:
-                                            q[0] = p.R;
-                                            q[1] = p.G;
-                                            q[2] = p.B;
-                                            q[3] = p.A;
-                                            break;
-                                    }
-                                    q += nplanes;
-                                }
-                            }
-                        }
+                        SetFilterEdgePadding(inData, inRowBytes, rect, nplanes, ofs, padding, surface);
                         break;
                     case PSConstants.Padding.plugInDoesNotWantPadding:
                         break;
@@ -1741,6 +1586,169 @@ namespace PSFilterLoad.PSApi
                 }
             }
             return PSError.noErr;
+        }
+
+        private static unsafe void SetFilterEdgePadding(IntPtr inData, int inRowBytes, Rect16 rect, int nplanes, short ofs, FilterPadding padding, Surface surface)
+        {
+            int top = padding.top;
+            int left = padding.left;
+
+            int right = padding.right;
+            int bottom = padding.bottom;
+
+            int surfaceHeight = surface.Height;
+            int surfaceWidth = surface.Width;
+
+            int lastSurfaceRow = surfaceWidth - 1;
+            int lastSurfaceColumn = surfaceHeight - 1;
+
+            byte* inDataPtr = (byte*)inData;
+
+            if (top > 0)
+            {
+                for (int y = 0; y < top; y++)
+                {
+                    ColorBgra* src = surface.GetRowPointerUnchecked(0);
+                    byte* dst = inDataPtr + (y * inRowBytes);
+
+                    for (int x = 0; x < surfaceWidth; x++)
+                    {
+                        switch (nplanes)
+                        {
+                            case 1:
+                                *dst = (*src)[ofs];
+                                break;
+                            case 2:
+                                dst[0] = (*src)[ofs];
+                                dst[1] = (*src)[ofs + 1];
+                                break;
+                            case 3:
+                                dst[0] = src->R;
+                                dst[1] = src->G;
+                                dst[2] = src->B;
+                                break;
+                            case 4:
+                                dst[0] = src->R;
+                                dst[1] = src->G;
+                                dst[2] = src->B;
+                                dst[3] = src->A;
+                                break;
+                        }
+
+                        src++;
+                        dst += nplanes;
+                    }
+                }
+            }
+
+            if (left > 0)
+            {
+                for (int y = 0; y < surfaceHeight; y++)
+                {
+                    ColorBgra src = surface.GetPointUnchecked(0, y);
+                    byte* dst = inDataPtr + (y * inRowBytes);
+
+                    for (int x = 0; x < left; x++)
+                    {
+                        switch (nplanes)
+                        {
+                            case 1:
+                                *dst = src[ofs];
+                                break;
+                            case 2:
+                                dst[0] = src[ofs];
+                                dst[1] = src[ofs + 1];
+                                break;
+                            case 3:
+                                dst[0] = src.R;
+                                dst[1] = src.G;
+                                dst[2] = src.B;
+                                break;
+                            case 4:
+                                dst[0] = src.R;
+                                dst[1] = src.G;
+                                dst[2] = src.B;
+                                dst[3] = src.A;
+                                break;
+                        }
+                        dst += nplanes;
+                    }
+                }
+            }
+
+            if (bottom > 0)
+            {
+                int lockBottom = rect.bottom - rect.top - 1;
+                for (int y = 0; y < bottom; y++)
+                {
+                    ColorBgra* src = surface.GetRowPointerUnchecked(lastSurfaceColumn);
+                    byte* dst = inDataPtr + ((lockBottom - y) * inRowBytes);
+
+                    for (int x = 0; x < surfaceWidth; x++)
+                    {
+                        switch (nplanes)
+                        {
+                            case 1:
+                                *dst = (*src)[ofs];
+                                break;
+                            case 2:
+                                dst[0] = (*src)[ofs];
+                                dst[1] = (*src)[ofs + 1];
+                                break;
+                            case 3:
+                                dst[0] = src->R;
+                                dst[1] = src->G;
+                                dst[2] = src->B;
+                                break;
+                            case 4:
+                                dst[0] = src->R;
+                                dst[1] = src->G;
+                                dst[2] = src->B;
+                                dst[3] = src->A;
+                                break;
+                        }
+
+                        src++;
+                        dst += nplanes;
+                    }
+                }
+            }
+
+            if (right > 0)
+            {
+                int rowEnd = rect.right - rect.left - right;
+                for (int y = 0; y < surfaceHeight; y++)
+                {
+                    ColorBgra src = surface.GetPointUnchecked(lastSurfaceRow, y);
+                    byte* dst = inDataPtr + (y * inRowBytes) + rowEnd;
+
+                    for (int x = 0; x < right; x++)
+                    {
+                        switch (nplanes)
+                        {
+                            case 1:
+                                *dst = src[ofs];
+                                break;
+                            case 2:
+                                dst[0] = src[ofs];
+                                dst[1] = src[ofs + 1];
+                                break;
+                            case 3:
+                                dst[0] = src.R;
+                                dst[1] = src.G;
+                                dst[2] = src.B;
+                                break;
+                            case 4:
+                                dst[0] = src.R;
+                                dst[1] = src.G;
+                                dst[2] = src.B;
+                                dst[3] = src.A;
+                                break;
+                        }
+                        dst += nplanes;
+                    }
+                }
+            }
         }
 
         /// <summary>
