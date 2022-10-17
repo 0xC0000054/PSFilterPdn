@@ -17,14 +17,18 @@ namespace PSFilterLoad.PSApi
 {
     internal sealed class ResourceSuite : IResourceSuite
     {
+        private readonly IHandleSuite handleSuite;
         private CountPIResourcesProc countResourceProc;
         private GetPIResourceProc getResourceProc;
         private DeletePIResourceProc deleteResourceProc;
         private AddPIResourceProc addResourceProc;
         private PseudoResourceCollection pseudoResources;
 
-        public ResourceSuite()
+        public ResourceSuite(IHandleSuite handleSuite)
         {
+            ArgumentNullException.ThrowIfNull(handleSuite);
+
+            this.handleSuite = handleSuite;
             countResourceProc = new CountPIResourcesProc(CountResource);
             addResourceProc = new AddPIResourceProc(AddResource);
             deleteResourceProc = new DeletePIResourceProc(DeleteResource);
@@ -82,15 +86,15 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.ResourceSuite, DebugUtils.PropToString(ofType));
 #endif
-            int size = HandleSuite.Instance.GetHandleSize(data);
+            int size = handleSuite.GetHandleSize(data);
             try
             {
                 byte[] bytes = new byte[size];
 
                 if (size > 0)
                 {
-                    Marshal.Copy(HandleSuite.Instance.LockHandle(data, 0), bytes, 0, size);
-                    HandleSuite.Instance.UnlockHandle(data);
+                    Marshal.Copy(handleSuite.LockHandle(data), bytes, 0, size);
+                    handleSuite.UnlockHandle(data);
                 }
 
                 int index = CountResource(ofType) + 1;
@@ -163,11 +167,11 @@ namespace PSFilterLoad.PSApi
             {
                 byte[] data = res.GetData();
 
-                Handle h = HandleSuite.Instance.NewHandle(data.Length);
+                Handle h = handleSuite.NewHandle(data.Length);
                 if (h != Handle.Null)
                 {
-                    Marshal.Copy(data, 0, HandleSuite.Instance.LockHandle(h, 0), data.Length);
-                    HandleSuite.Instance.UnlockHandle(h);
+                    Marshal.Copy(data, 0, handleSuite.LockHandle(h), data.Length);
+                    handleSuite.UnlockHandle(h);
                 }
 
                 return h;

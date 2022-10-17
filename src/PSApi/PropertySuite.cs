@@ -21,6 +21,7 @@ namespace PSFilterLoad.PSApi
     {
         private readonly GetPropertyProc getPropertyProc;
         private readonly SetPropertyProc setPropertyProc;
+        private readonly IHandleSuite handleSuite;
         private readonly int documentWidth;
         private readonly int documentHeight;
         private readonly bool highDpi;
@@ -28,10 +29,13 @@ namespace PSFilterLoad.PSApi
 
         private const string HostSerial = "0";
 
-        public unsafe PropertySuite(int documentWidth, int documentHeight, PluginUISettings pluginUISettings)
+        public unsafe PropertySuite(IHandleSuite handleSuite, int documentWidth, int documentHeight, PluginUISettings pluginUISettings)
         {
+            ArgumentNullException.ThrowIfNull(handleSuite);
+
             getPropertyProc = new GetPropertyProc(PropertyGetProc);
             setPropertyProc = new SetPropertyProc(PropertySetProc);
+            this.handleSuite = handleSuite;
             this.documentWidth = documentWidth;
             this.documentHeight = documentHeight;
             highDpi = pluginUISettings?.HighDpi ?? false;
@@ -92,22 +96,22 @@ namespace PSFilterLoad.PSApi
             return propertyProcsPtr;
         }
 
-        private static unsafe short CreateComplexPropertyHandle(Handle* complexProperty, byte[] bytes)
+        private unsafe short CreateComplexPropertyHandle(Handle* complexProperty, byte[] bytes)
         {
             if (complexProperty == null)
             {
                 return PSError.paramErr;
             }
 
-            *complexProperty = HandleSuite.Instance.NewHandle(bytes.Length);
+            *complexProperty = handleSuite.NewHandle(bytes.Length);
 
             if (*complexProperty == Handle.Null)
             {
                 return PSError.memFullErr;
             }
 
-            Marshal.Copy(bytes, 0, HandleSuite.Instance.LockHandle(*complexProperty, 0), bytes.Length);
-            HandleSuite.Instance.UnlockHandle(*complexProperty);
+            Marshal.Copy(bytes, 0, handleSuite.LockHandle(*complexProperty), bytes.Length);
+            handleSuite.UnlockHandle(*complexProperty);
 
             return PSError.noErr;
         }
@@ -149,7 +153,7 @@ namespace PSFilterLoad.PSApi
                 case PSProperties.Caption:
                     if (complexProperty != null)
                     {
-                        *complexProperty = HandleSuite.Instance.NewHandle(0);
+                        *complexProperty = handleSuite.NewHandle(0);
                     }
                     break;
                 case PSProperties.ChannelName:
@@ -185,7 +189,7 @@ namespace PSFilterLoad.PSApi
                     if (complexProperty != null)
                     {
                         // If the complexProperty is not IntPtr.Zero we return a valid zero byte handle, otherwise some filters will crash with an access violation.
-                        *complexProperty = HandleSuite.Instance.NewHandle(0);
+                        *complexProperty = handleSuite.NewHandle(0);
                     }
                     break;
                 case PSProperties.GridMajor:
@@ -226,7 +230,7 @@ namespace PSFilterLoad.PSApi
                 case PSProperties.URL:
                     if (complexProperty != null)
                     {
-                        *complexProperty = HandleSuite.Instance.NewHandle(0);
+                        *complexProperty = handleSuite.NewHandle(0);
                     }
                     break;
                 case PSProperties.Title:

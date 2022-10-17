@@ -96,6 +96,7 @@ namespace PSFilterLoad.PSApi.PICA
         }
 
         private readonly AETEData aete;
+        private readonly IHandleSuite handleSuite;
         private readonly IActionListSuite actionListSuite;
         private readonly IActionReferenceSuite actionReferenceSuite;
         private readonly IASZStringSuite zstringSuite;
@@ -170,23 +171,16 @@ namespace PSFilterLoad.PSApi.PICA
         /// </exception>
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public unsafe ActionDescriptorSuite(AETEData aete,
+                                            IHandleSuite handleSuite,
                                             IActionListSuite actionListSuite,
                                             IActionReferenceSuite actionReferenceSuite,
                                             IASZStringSuite zstringSuite)
         {
-            if (actionListSuite == null)
-            {
-                throw new ArgumentNullException(nameof(actionListSuite));
-            }
-            if (actionReferenceSuite == null)
-            {
-                throw new ArgumentNullException(nameof(actionReferenceSuite));
-            }
-            if (zstringSuite == null)
-            {
-                throw new ArgumentNullException(nameof(zstringSuite));
-            }
-
+            ArgumentNullException.ThrowIfNull(handleSuite);
+            ArgumentNullException.ThrowIfNull(actionListSuite);
+            ArgumentNullException.ThrowIfNull(actionReferenceSuite);
+            ArgumentNullException.ThrowIfNull(zstringSuite);
+ 
             make = new ActionDescriptorMake(Make);
             free = new ActionDescriptorFree(Free);
             handleToDescriptor = new ActionDescriptorHandleToDescriptor(HandleToDescriptor);
@@ -235,13 +229,14 @@ namespace PSFilterLoad.PSApi.PICA
             getData = new ActionDescriptorGetData(GetData);
 
             this.aete = aete;
+            this.handleSuite = handleSuite;
             this.actionListSuite = actionListSuite;
             this.actionReferenceSuite = actionReferenceSuite;
             this.zstringSuite = zstringSuite;
             actionDescriptors = new Dictionary<PIActionDescriptor, ScriptingParameters>();
             descriptorHandles = new Dictionary<Handle, ScriptingParameters>();
             actionDescriptorsIndex = 0;
-            HandleSuite.Instance.SuiteHandleDisposed += SuiteHandleDisposed;
+            this.handleSuite.SuiteHandleDisposed += SuiteHandleDisposed;
             disposed = false;
         }
 
@@ -332,7 +327,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 disposed = true;
 
-                HandleSuite.Instance.SuiteHandleDisposed -= SuiteHandleDisposed;
+                handleSuite.SuiteHandleDisposed -= SuiteHandleDisposed;
             }
         }
 
@@ -445,7 +440,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            *handle = HandleSuite.Instance.NewHandle(1);
+            *handle = handleSuite.NewHandle(1);
             if (*handle == Handle.Null)
             {
                 return PSError.kSPOutOfMemoryError;
@@ -857,13 +852,13 @@ namespace PSFilterLoad.PSApi.PICA
 #if DEBUG
             DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
 #endif
-            IntPtr hPtr = HandleSuite.Instance.LockHandle(aliasHandle, 0);
+            IntPtr hPtr = handleSuite.LockHandle(aliasHandle);
 
             try
             {
                 try
                 {
-                    int size = HandleSuite.Instance.GetHandleSize(aliasHandle);
+                    int size = handleSuite.GetHandleSize(aliasHandle);
                     byte[] data = new byte[size];
                     Marshal.Copy(hPtr, data, 0, size);
 
@@ -871,7 +866,7 @@ namespace PSFilterLoad.PSApi.PICA
                 }
                 finally
                 {
-                    HandleSuite.Instance.UnlockHandle(aliasHandle);
+                    handleSuite.UnlockHandle(aliasHandle);
                 }
             }
             catch (OutOfMemoryException)
@@ -1262,15 +1257,15 @@ namespace PSFilterLoad.PSApi.PICA
             if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
                 int size = item.Size;
-                *data = HandleSuite.Instance.NewHandle(size);
+                *data = handleSuite.NewHandle(size);
 
                 if (*data == Handle.Null)
                 {
                     return PSError.kSPOutOfMemoryError;
                 }
 
-                Marshal.Copy((byte[])item.Value, 0, HandleSuite.Instance.LockHandle(*data, 0), size);
-                HandleSuite.Instance.UnlockHandle(*data);
+                Marshal.Copy((byte[])item.Value, 0, handleSuite.LockHandle(*data), size);
+                handleSuite.UnlockHandle(*data);
 
                 return PSError.kSPNoError;
             }

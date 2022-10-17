@@ -20,6 +20,7 @@ namespace PSFilterLoad.PSApi
     internal sealed class SPBasicSuiteProvider : IDisposable
     {
         private readonly IPICASuiteDataProvider picaSuiteData;
+        private readonly IHandleSuiteCallbacks handleSuiteCallbacks;
         private readonly IPropertySuite propertySuite;
         private readonly IResourceSuite resourceSuite;
         private readonly SPBasicAcquireSuite spAcquireSuite;
@@ -35,7 +36,7 @@ namespace PSFilterLoad.PSApi
         private PICAColorSpaceSuite colorSpaceSuite;
         private DescriptorRegistrySuite descriptorRegistrySuite;
         private ErrorSuite errorSuite;
-        private PICAHandleSuite handleSuite;
+        private PICAHandleSuite picaHandleSuite;
         private PICAUIHooksSuite uiHooksSuite;
         private ASZStringSuite zstringSuite;
 
@@ -61,10 +62,13 @@ namespace PSFilterLoad.PSApi
         /// <paramref name="resourceSuite"/> is null.
         /// </exception>
         public unsafe SPBasicSuiteProvider(IPICASuiteDataProvider picaSuiteData,
+                                           IHandleSuite handleSuite,
+                                           IHandleSuiteCallbacks handleSuiteCallbacks,
                                            IPropertySuite propertySuite,
                                            IResourceSuite resourceSuite)
         {
             this.picaSuiteData = picaSuiteData ?? throw new ArgumentNullException(nameof(picaSuiteData));
+            this.handleSuiteCallbacks = handleSuiteCallbacks ?? throw new ArgumentNullException(nameof(handleSuiteCallbacks));
             this.propertySuite = propertySuite ?? throw new ArgumentNullException(nameof(propertySuite));
             this.resourceSuite = resourceSuite ?? throw new ArgumentNullException(nameof(resourceSuite));
             spAcquireSuite = new SPBasicAcquireSuite(SPBasicAcquireSuite);
@@ -74,13 +78,13 @@ namespace PSFilterLoad.PSApi
             spFreeBlock = new SPBasicFreeBlock(SPBasicFreeBlock);
             spReallocateBlock = new SPBasicReallocateBlock(SPBasicReallocateBlock);
             spUndefined = new SPBasicUndefined(SPBasicUndefined);
-            actionSuites = new ActionSuiteProvider();
+            actionSuites = new ActionSuiteProvider(handleSuite);
             activePICASuites = new ActivePICASuites();
             descriptorRegistrySuite = null;
             bufferSuite = null;
             colorSpaceSuite = null;
             errorSuite = null;
-            handleSuite = null;
+            picaHandleSuite = null;
             disposed = false;
         }
 
@@ -304,19 +308,19 @@ namespace PSFilterLoad.PSApi
                         return PSError.kSPSuiteNotFoundError;
                     }
 
-                    if (handleSuite == null)
+                    if (picaHandleSuite == null)
                     {
-                        handleSuite = new PICAHandleSuite();
+                        picaHandleSuite = new PICAHandleSuite(handleSuiteCallbacks);
                     }
 
                     if (version == 1)
                     {
-                        PSHandleSuite1 suite = handleSuite.CreateHandleSuite1();
+                        PSHandleSuite1 suite = picaHandleSuite.CreateHandleSuite1();
                         suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
                     }
                     else if (version == 2)
                     {
-                        PSHandleSuite2 suite = handleSuite.CreateHandleSuite2();
+                        PSHandleSuite2 suite = picaHandleSuite.CreateHandleSuite2();
                         suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
                     }
                 }

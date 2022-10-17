@@ -120,6 +120,7 @@ namespace PSFilterLoad.PSApi
         private bool useChannelPorts;
 
         private readonly BufferSuite bufferSuite;
+        private readonly HandleSuite handleSuite;
         private ChannelPortsSuite channelPortsSuite;
         private DescriptorSuite descriptorSuite;
         private ImageServicesSuite imageServicesSuite;
@@ -226,8 +227,6 @@ namespace PSFilterLoad.PSApi
             globalParameters = new GlobalParameters();
             scriptingData = null;
             useChannelPorts = false;
-            descriptorSuite = new DescriptorSuite();
-            resourceSuite = new ResourceSuite();
             parentWindowHandle = settings.ParentWindowHandle;
 
             source = PSFilterShimImage.Load(settings.SourceImagePath, out dpiX, out dpiY);
@@ -242,11 +241,18 @@ namespace PSFilterLoad.PSApi
             abortProc = new TestAbortProc(AbortProc);
 
             bufferSuite = new BufferSuite();
+            handleSuite = new HandleSuite();
             channelPortsSuite = new ChannelPortsSuite(this);
             imageServicesSuite = new ImageServicesSuite();
-            propertySuite = new PropertySuite(source.Width, source.Height, settings.PluginUISettings);
+            descriptorSuite = new DescriptorSuite(handleSuite);
+            propertySuite = new PropertySuite(handleSuite, source.Width, source.Height, settings.PluginUISettings);
             readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
-            basicSuiteProvider = new SPBasicSuiteProvider(this, propertySuite, resourceSuite);
+            resourceSuite = new ResourceSuite(handleSuite);
+            basicSuiteProvider = new SPBasicSuiteProvider(this,
+                                                          handleSuite,
+                                                          handleSuite,
+                                                          propertySuite,
+                                                          resourceSuite);
 
             inputHandling = FilterDataHandling.None;
             outputHandling = FilterDataHandling.None;
@@ -433,8 +439,8 @@ namespace PSFilterLoad.PSApi
                 {
                     scriptingData = data;
                 }
-                HandleSuite.Instance.UnlockHandle(descriptorParameters->descriptor);
-                HandleSuite.Instance.DisposeHandle(descriptorParameters->descriptor);
+                handleSuite.UnlockHandle(descriptorParameters->descriptor);
+                handleSuite.DisposeHandle(descriptorParameters->descriptor);
                 descriptorParameters->descriptor = Handle.Null;
             }
         }
@@ -446,13 +452,13 @@ namespace PSFilterLoad.PSApi
         {
             if (filterRecord->parameters != Handle.Null)
             {
-                if (HandleSuite.Instance.AllocatedBySuite(filterRecord->parameters))
+                if (handleSuite.AllocatedBySuite(filterRecord->parameters))
                 {
-                    int handleSize = HandleSuite.Instance.GetHandleSize(filterRecord->parameters);
+                    int handleSize = handleSuite.GetHandleSize(filterRecord->parameters);
 
                     byte[] buf = new byte[handleSize];
-                    Marshal.Copy(HandleSuite.Instance.LockHandle(filterRecord->parameters, 0), buf, 0, buf.Length);
-                    HandleSuite.Instance.UnlockHandle(filterRecord->parameters);
+                    Marshal.Copy(handleSuite.LockHandle(filterRecord->parameters), buf, 0, buf.Length);
+                    handleSuite.UnlockHandle(filterRecord->parameters);
 
                     globalParameters.SetParameterDataBytes(buf);
                     globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
@@ -511,15 +517,15 @@ namespace PSFilterLoad.PSApi
             }
             if (filterRecord->parameters != Handle.Null && filterGlobalData != IntPtr.Zero)
             {
-                if (HandleSuite.Instance.AllocatedBySuite(filterGlobalData))
+                if (handleSuite.AllocatedBySuite(filterGlobalData))
                 {
                     Handle dataHandle = new(filterGlobalData);
 
-                    int ps = HandleSuite.Instance.GetHandleSize(dataHandle);
+                    int ps = handleSuite.GetHandleSize(dataHandle);
                     byte[] dataBuf = new byte[ps];
 
-                    Marshal.Copy(HandleSuite.Instance.LockHandle(dataHandle, 0), dataBuf, 0, dataBuf.Length);
-                    HandleSuite.Instance.UnlockHandle(dataHandle);
+                    Marshal.Copy(handleSuite.LockHandle(dataHandle), dataBuf, 0, dataBuf.Length);
+                    handleSuite.UnlockHandle(dataHandle);
 
                     globalParameters.SetPluginDataBytes(dataBuf);
                     globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
@@ -599,14 +605,14 @@ namespace PSFilterLoad.PSApi
                 switch (globalParameters.ParameterDataStorageMethod)
                 {
                     case GlobalParameters.DataStorageMethod.HandleSuite:
-                        filterRecord->parameters = HandleSuite.Instance.NewHandle(parameterDataBytes.Length);
+                        filterRecord->parameters = handleSuite.NewHandle(parameterDataBytes.Length);
                         if (filterRecord->parameters == Handle.Null)
                         {
                             throw new OutOfMemoryException(Resources.OutOfMemoryError);
                         }
 
-                        Marshal.Copy(parameterDataBytes, 0, HandleSuite.Instance.LockHandle(filterRecord->parameters, 0), parameterDataBytes.Length);
-                        HandleSuite.Instance.UnlockHandle(filterRecord->parameters);
+                        Marshal.Copy(parameterDataBytes, 0, handleSuite.LockHandle(filterRecord->parameters), parameterDataBytes.Length);
+                        handleSuite.UnlockHandle(filterRecord->parameters);
                         break;
                     case GlobalParameters.DataStorageMethod.OTOFHandle:
                         filterRecord->parameters = new Handle(Memory.Allocate(OTOFHandleSize, false));
@@ -640,14 +646,14 @@ namespace PSFilterLoad.PSApi
                 switch (globalParameters.PluginDataStorageMethod)
                 {
                     case GlobalParameters.DataStorageMethod.HandleSuite:
-                        Handle dataHandle = HandleSuite.Instance.NewHandle(pluginDataBytes.Length);
+                        Handle dataHandle = handleSuite.NewHandle(pluginDataBytes.Length);
                         if (dataHandle == Handle.Null)
                         {
                             throw new OutOfMemoryException(Resources.OutOfMemoryError);
                         }
 
-                        Marshal.Copy(pluginDataBytes, 0, HandleSuite.Instance.LockHandle(dataHandle, 0), pluginDataBytes.Length);
-                        HandleSuite.Instance.UnlockHandle(dataHandle);
+                        Marshal.Copy(pluginDataBytes, 0, handleSuite.LockHandle(dataHandle), pluginDataBytes.Length);
+                        handleSuite.UnlockHandle(dataHandle);
                         filterGlobalData = dataHandle.Value;
                         break;
                     case GlobalParameters.DataStorageMethod.OTOFHandle:
@@ -2842,7 +2848,7 @@ namespace PSFilterLoad.PSApi
         {
             bufferProcsPtr = bufferSuite.CreateBufferProcsPointer();
 
-            handleProcsPtr = HandleSuite.Instance.CreateHandleProcsPointer();
+            handleProcsPtr = handleSuite.CreateHandleProcsPointer();
 
             imageServicesProcsPtr = imageServicesSuite.CreateImageServicesSuitePointer();
 
@@ -2870,7 +2876,7 @@ namespace PSFilterLoad.PSApi
 
             if (scriptingData != null)
             {
-                descriptorParameters->descriptor = HandleSuite.Instance.NewHandle(0);
+                descriptorParameters->descriptor = handleSuite.NewHandle(0);
                 if (descriptorParameters->descriptor == Handle.Null)
                 {
                     throw new OutOfMemoryException(Resources.OutOfMemoryError);
@@ -3135,8 +3141,8 @@ namespace PSFilterLoad.PSApi
 
                     if (descParam->descriptor != Handle.Null)
                     {
-                        HandleSuite.Instance.UnlockHandle(descParam->descriptor);
-                        HandleSuite.Instance.DisposeHandle(descParam->descriptor);
+                        handleSuite.UnlockHandle(descParam->descriptor);
+                        handleSuite.DisposeHandle(descParam->descriptor);
                     }
 
                     Memory.Free(descriptorParametersPtr);
@@ -3180,7 +3186,7 @@ namespace PSFilterLoad.PSApi
                 {
                     if (filterRecord->parameters != Handle.Null)
                     {
-                        if (parameterDataRestored && !HandleSuite.Instance.AllocatedBySuite(filterRecord->parameters))
+                        if (parameterDataRestored && !handleSuite.AllocatedBySuite(filterRecord->parameters))
                         {
                             if (filterParametersHandle != IntPtr.Zero)
                             {
@@ -3198,8 +3204,8 @@ namespace PSFilterLoad.PSApi
                         }
                         else
                         {
-                            HandleSuite.Instance.UnlockHandle(filterRecord->parameters);
-                            HandleSuite.Instance.DisposeHandle(filterRecord->parameters);
+                            handleSuite.UnlockHandle(filterRecord->parameters);
+                            handleSuite.DisposeHandle(filterRecord->parameters);
                         }
                         filterRecord->parameters = Handle.Null;
                     }
@@ -3230,7 +3236,7 @@ namespace PSFilterLoad.PSApi
 
                 if (filterGlobalData != IntPtr.Zero)
                 {
-                    if (pluginDataRestored && !HandleSuite.Instance.AllocatedBySuite(filterGlobalData))
+                    if (pluginDataRestored && !handleSuite.AllocatedBySuite(filterGlobalData))
                     {
                         if (pluginDataHandle != IntPtr.Zero)
                         {
@@ -3254,14 +3260,14 @@ namespace PSFilterLoad.PSApi
                     {
                         Handle dataHandle = new(filterGlobalData);
 
-                        HandleSuite.Instance.UnlockHandle(dataHandle);
-                        HandleSuite.Instance.DisposeHandle(dataHandle);
+                        handleSuite.UnlockHandle(dataHandle);
+                        handleSuite.DisposeHandle(dataHandle);
                     }
                     filterGlobalData = IntPtr.Zero;
                 }
 
                 bufferSuite.FreeRemainingBuffers();
-                HandleSuite.Instance.FreeRemainingHandles();
+                handleSuite.FreeRemainingHandles();
             }
         }
 

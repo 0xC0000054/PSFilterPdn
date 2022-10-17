@@ -18,9 +18,7 @@ namespace PSFilterLoad.PSApi
 {
     internal delegate void HandleDisposedEventHandler(Handle handle);
 
-    // This class is a singleton because plug-ins can use it to allocate memory for pointers embedded
-    // in the API structures that will be freed when the LoadPsFilter class is finalized.
-    internal sealed class HandleSuite
+    internal sealed class HandleSuite : IHandleSuite, IHandleSuiteCallbacks
     {
         private struct PSHandle
         {
@@ -77,9 +75,7 @@ namespace PSFilterLoad.PSApi
         private readonly DisposeRegularPIHandleProc handleDisposeRegularProc;
         private readonly Dictionary<Handle, HandleEntry> handles;
 
-        private static readonly HandleSuite instance = new();
-
-        private HandleSuite()
+        public HandleSuite()
         {
             handleNewProc = new NewPIHandleProc(NewHandle);
             handleDisposeProc = new DisposePIHandleProc(DisposeHandle);
@@ -97,7 +93,21 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public event HandleDisposedEventHandler SuiteHandleDisposed;
 
-        public static HandleSuite Instance => instance;
+        NewPIHandleProc IHandleSuiteCallbacks.HandleNewProc => handleNewProc;
+
+        DisposePIHandleProc IHandleSuiteCallbacks.HandleDisposeProc => handleDisposeProc;
+
+        GetPIHandleSizeProc IHandleSuiteCallbacks.HandleGetSizeProc => handleGetSizeProc;
+
+        SetPIHandleSizeProc IHandleSuiteCallbacks.HandleSetSizeProc => handleSetSizeProc;
+
+        LockPIHandleProc IHandleSuiteCallbacks.HandleLockProc => handleLockProc;
+
+        UnlockPIHandleProc IHandleSuiteCallbacks.HandleUnlockProc => handleUnlockProc;
+
+        RecoverSpaceProc IHandleSuiteCallbacks.HandleRecoverSpaceProc => handleRecoverSpaceProc;
+
+        DisposeRegularPIHandleProc IHandleSuiteCallbacks.HandleDisposeRegularProc => handleDisposeRegularProc;
 
         public HandleProcs CreateHandleProcs()
         {
@@ -237,7 +247,7 @@ namespace PSFilterLoad.PSApi
             return (mbi.Protect & WriteProtect) != 0;
         }
 
-        internal unsafe Handle NewHandle(int size)
+        public unsafe Handle NewHandle(int size)
         {
             if (size < 0)
             {
@@ -284,7 +294,7 @@ namespace PSFilterLoad.PSApi
             return handle;
         }
 
-        internal unsafe void DisposeHandle(Handle h)
+        public unsafe void DisposeHandle(Handle h)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
@@ -327,7 +337,9 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        internal IntPtr LockHandle(Handle h, byte moveHigh)
+        public IntPtr LockHandle(Handle h) => LockHandle(h, 0);
+
+        private IntPtr LockHandle(Handle h, byte moveHigh)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}, moveHigh: {1}", h.ToHexString(), moveHigh));
@@ -357,7 +369,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        internal int GetHandleSize(Handle h)
+        public int GetHandleSize(Handle h)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
@@ -450,7 +462,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        internal void UnlockHandle(Handle h)
+        public void UnlockHandle(Handle h)
         {
 #if DEBUG
             DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));

@@ -21,6 +21,7 @@ namespace PSFilterLoad.PSApi.PICA
     /// </summary>
     internal sealed class ActionSuiteProvider : IDisposable
     {
+        private readonly IHandleSuite handleSuite;
         private ActionDescriptorSuite actionDescriptorSuite;
         private ActionListSuite actionListSuite;
         private ActionReferenceSuite actionReferenceSuite;
@@ -29,8 +30,11 @@ namespace PSFilterLoad.PSApi.PICA
         /// <summary>
         /// Initializes a new instance of the <see cref="ActionSuiteProvider"/> class.
         /// </summary>
-        public ActionSuiteProvider()
+        public ActionSuiteProvider(IHandleSuite handleSuite)
         {
+            ArgumentNullException.ThrowIfNull(handleSuite);
+
+            this.handleSuite = handleSuite;
             actionDescriptorSuite = null;
             actionListSuite = null;
             actionReferenceSuite = null;
@@ -169,7 +173,7 @@ namespace PSFilterLoad.PSApi.PICA
                 {
                     CreateListSuite(zstringSuite);
                 }
-                actionDescriptorSuite = new ActionDescriptorSuite(aete, actionListSuite, actionReferenceSuite, zstringSuite);
+                actionDescriptorSuite = new ActionDescriptorSuite(aete, handleSuite, actionListSuite, actionReferenceSuite, zstringSuite);
                 actionListSuite.ActionDescriptorSuite = actionDescriptorSuite;
                 if (scriptingData != null)
                 {
@@ -202,7 +206,7 @@ namespace PSFilterLoad.PSApi.PICA
                     CreateReferenceSuite();
                 }
 
-                actionListSuite = new ActionListSuite(actionReferenceSuite, zstringSuite);
+                actionListSuite = new ActionListSuite(handleSuite, actionReferenceSuite, zstringSuite);
             }
         }
 

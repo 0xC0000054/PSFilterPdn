@@ -17,12 +17,26 @@ namespace PSFilterLoad.PSApi.PICA
 {
     internal sealed class PICAHandleSuite
     {
-        private readonly HandleProcs handleProcs;
+        private readonly NewPIHandleProc handleNewProc;
+        private readonly DisposePIHandleProc handleDisposeProc;
+        private readonly GetPIHandleSizeProc handleGetSizeProc;
+        private readonly SetPIHandleSizeProc handleSetSizeProc;
+        private readonly LockPIHandleProc handleLockProc;
+        private readonly UnlockPIHandleProc handleUnlockProc;
+        private readonly RecoverSpaceProc handleRecoverSpaceProc;
+        private readonly DisposeRegularPIHandleProc handleDisposeRegularProc;
         private readonly SetPIHandleLockDelegate setHandleLock;
 
-        public unsafe PICAHandleSuite()
+        public unsafe PICAHandleSuite(IHandleSuiteCallbacks handleSuite)
         {
-            handleProcs = HandleSuite.Instance.CreateHandleProcs();
+            handleNewProc = handleSuite.HandleNewProc;
+            handleDisposeProc = handleSuite.HandleDisposeProc;
+            handleGetSizeProc = handleSuite.HandleGetSizeProc;
+            handleSetSizeProc = handleSuite.HandleSetSizeProc;
+            handleLockProc = handleSuite.HandleLockProc;
+            handleUnlockProc = handleSuite.HandleUnlockProc;
+            handleRecoverSpaceProc = handleSuite.HandleRecoverSpaceProc;
+            handleDisposeRegularProc = handleSuite.HandleDisposeRegularProc;
             setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
         }
 
@@ -35,11 +49,11 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (lockHandle != 0)
             {
-                *address = HandleSuite.Instance.LockHandle(handle, 0);
+                *address = handleLockProc(handle, 0);
             }
             else
             {
-                HandleSuite.Instance.UnlockHandle(handle);
+                handleUnlockProc(handle);
                 *address = IntPtr.Zero;
             }
         }
@@ -48,12 +62,12 @@ namespace PSFilterLoad.PSApi.PICA
         {
             PSHandleSuite1 suite = new()
             {
-                New = handleProcs.newProc,
-                Dispose = handleProcs.disposeProc,
+                New = Marshal.GetFunctionPointerForDelegate(handleNewProc),
+                Dispose = Marshal.GetFunctionPointerForDelegate(handleDisposeProc),
                 SetLock = Marshal.GetFunctionPointerForDelegate(setHandleLock),
-                GetSize = handleProcs.getSizeProc,
-                SetSize = handleProcs.setSizeProc,
-                RecoverSpace = handleProcs.recoverSpaceProc
+                GetSize = Marshal.GetFunctionPointerForDelegate(handleGetSizeProc),
+                SetSize = Marshal.GetFunctionPointerForDelegate(handleSetSizeProc),
+                RecoverSpace = Marshal.GetFunctionPointerForDelegate(handleRecoverSpaceProc),
             };
 
             return suite;
@@ -63,13 +77,13 @@ namespace PSFilterLoad.PSApi.PICA
         {
             PSHandleSuite2 suite = new()
             {
-                New = handleProcs.newProc,
-                Dispose = handleProcs.disposeProc,
-                DisposeRegularHandle = handleProcs.disposeRegularHandleProc,
+                New = Marshal.GetFunctionPointerForDelegate(handleNewProc),
+                Dispose = Marshal.GetFunctionPointerForDelegate(handleDisposeProc),
+                DisposeRegularHandle = Marshal.GetFunctionPointerForDelegate(handleDisposeRegularProc),
                 SetLock = Marshal.GetFunctionPointerForDelegate(setHandleLock),
-                GetSize = handleProcs.getSizeProc,
-                SetSize = handleProcs.setSizeProc,
-                RecoverSpace = handleProcs.recoverSpaceProc
+                GetSize = Marshal.GetFunctionPointerForDelegate(handleGetSizeProc),
+                SetSize = Marshal.GetFunctionPointerForDelegate(handleSetSizeProc),
+                RecoverSpace = Marshal.GetFunctionPointerForDelegate(handleRecoverSpaceProc),
             };
 
             return suite;

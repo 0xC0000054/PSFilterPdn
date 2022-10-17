@@ -101,6 +101,7 @@ namespace PSFilterLoad.PSApi
         private Dictionary<PIReadDescriptor, ReadDescriptorState> readDescriptors;
         private Dictionary<Handle, Dictionary<uint, AETEValue>> descriptorHandles;
         private Dictionary<PIWriteDescriptor, Dictionary<uint, AETEValue>> writeDescriptors;
+        private readonly IHandleSuite handleSuite;
         private AETEData aete;
         private int readDescriptorsIndex;
         private int writeDescriptorsIndex;
@@ -111,8 +112,10 @@ namespace PSFilterLoad.PSApi
             set => aete = value;
         }
 
-        public unsafe DescriptorSuite()
+        public unsafe DescriptorSuite(IHandleSuite handleSuite)
         {
+            ArgumentNullException.ThrowIfNull(handleSuite);
+
             openReadDescriptorProc = new OpenReadDescriptorProc(OpenReadDescriptorProc);
             closeReadDescriptorProc = new CloseReadDescriptorProc(CloseReadDescriptorProc);
             getKeyProc = new GetKeyProc(GetKeyProc);
@@ -151,9 +154,10 @@ namespace PSFilterLoad.PSApi
             readDescriptors = new Dictionary<PIReadDescriptor, ReadDescriptorState>();
             descriptorHandles = new Dictionary<Handle, Dictionary<uint, AETEValue>>();
             writeDescriptors = new Dictionary<PIWriteDescriptor, Dictionary<uint, AETEValue>>();
+            this.handleSuite = handleSuite;
             readDescriptorsIndex = 0;
             writeDescriptorsIndex = 0;
-            HandleSuite.Instance.SuiteHandleDisposed += SuiteHandleDisposed;
+            this.handleSuite.SuiteHandleDisposed += SuiteHandleDisposed;
             disposed = false;
         }
 
@@ -225,7 +229,7 @@ namespace PSFilterLoad.PSApi
             {
                 disposed = true;
 
-                HandleSuite.Instance.SuiteHandleDisposed -= SuiteHandleDisposed;
+                handleSuite.SuiteHandleDisposed -= SuiteHandleDisposed;
             }
         }
 
@@ -460,7 +464,7 @@ namespace PSFilterLoad.PSApi
             AETEValue item = state.items[state.currentKey];
 
             int size = item.Size;
-            *data = HandleSuite.Instance.NewHandle(size);
+            *data = handleSuite.NewHandle(size);
 
             if (*data == Handle.Null)
             {
@@ -468,8 +472,8 @@ namespace PSFilterLoad.PSApi
                 return PSError.memFullErr;
             }
 
-            Marshal.Copy((byte[])item.Value, 0, HandleSuite.Instance.LockHandle(*data, 0), size);
-            HandleSuite.Instance.UnlockHandle(*data);
+            Marshal.Copy((byte[])item.Value, 0, handleSuite.LockHandle(*data), size);
+            handleSuite.UnlockHandle(*data);
 
             return PSError.noErr;
         }
@@ -490,7 +494,7 @@ namespace PSFilterLoad.PSApi
             AETEValue item = state.items[state.currentKey];
 
             int size = item.Size;
-            *data = HandleSuite.Instance.NewHandle(size);
+            *data = handleSuite.NewHandle(size);
 
             if (*data == Handle.Null)
             {
@@ -498,8 +502,8 @@ namespace PSFilterLoad.PSApi
                 return PSError.memFullErr;
             }
 
-            Marshal.Copy((byte[])item.Value, 0, HandleSuite.Instance.LockHandle(*data, 0), size);
-            HandleSuite.Instance.UnlockHandle(*data);
+            Marshal.Copy((byte[])item.Value, 0, handleSuite.LockHandle(*data), size);
+            handleSuite.UnlockHandle(*data);
 
             return PSError.noErr;
         }
@@ -589,7 +593,7 @@ namespace PSFilterLoad.PSApi
             Dictionary<uint, AETEValue> value = item.Value as Dictionary<uint, AETEValue>;
             if (value != null)
             {
-                *descriptorHandle = HandleSuite.Instance.NewHandle(0); // assign a zero byte handle to allow it to work correctly in the OpenReadDescriptorProc().
+                *descriptorHandle = handleSuite.NewHandle(0); // assign a zero byte handle to allow it to work correctly in the OpenReadDescriptorProc().
                 if (*descriptorHandle == Handle.Null)
                 {
                     state.lastReadError = PSError.memFullErr;
@@ -786,7 +790,7 @@ namespace PSFilterLoad.PSApi
                 return PSError.paramErr;
             }
 
-            *descriptorHandle = HandleSuite.Instance.NewHandle(0);
+            *descriptorHandle = handleSuite.NewHandle(0);
             if (*descriptorHandle == Handle.Null)
             {
                 return PSError.memFullErr;
@@ -914,11 +918,11 @@ namespace PSFilterLoad.PSApi
             {
                 try
                 {
-                    IntPtr hPtr = HandleSuite.Instance.LockHandle(textHandle, 0);
+                    IntPtr hPtr = handleSuite.LockHandle(textHandle);
 
                     try
                     {
-                        int size = HandleSuite.Instance.GetHandleSize(textHandle);
+                        int size = handleSuite.GetHandleSize(textHandle);
                         byte[] data = new byte[size];
                         Marshal.Copy(hPtr, data, 0, size);
 
@@ -926,7 +930,7 @@ namespace PSFilterLoad.PSApi
                     }
                     finally
                     {
-                        HandleSuite.Instance.UnlockHandle(textHandle);
+                        handleSuite.UnlockHandle(textHandle);
                     }
                 }
                 catch (OutOfMemoryException)
@@ -945,11 +949,11 @@ namespace PSFilterLoad.PSApi
 #endif
             try
             {
-                IntPtr hPtr = HandleSuite.Instance.LockHandle(aliasHandle, 0);
+                IntPtr hPtr = handleSuite.LockHandle(aliasHandle);
 
                 try
                 {
-                    int size = HandleSuite.Instance.GetHandleSize(aliasHandle);
+                    int size = handleSuite.GetHandleSize(aliasHandle);
                     byte[] data = new byte[size];
                     Marshal.Copy(hPtr, data, 0, size);
 
@@ -957,7 +961,7 @@ namespace PSFilterLoad.PSApi
                 }
                 finally
                 {
-                    HandleSuite.Instance.UnlockHandle(aliasHandle);
+                    handleSuite.UnlockHandle(aliasHandle);
                 }
             }
             catch (OutOfMemoryException)
