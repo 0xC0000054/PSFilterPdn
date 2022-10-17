@@ -16,8 +16,6 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    // This class is a singleton because plug-ins can use it to allocate memory for pointers embedded
-    // in the API structures that will be freed when the LoadPsFilter class is finalized.
     internal sealed class BufferSuite
     {
         private readonly AllocateBufferProc allocProc;
@@ -27,9 +25,7 @@ namespace PSFilterLoad.PSApi
         private readonly BufferSpaceProc spaceProc;
         private readonly Dictionary<IntPtr, int> bufferIDs;
 
-        private static readonly BufferSuite instance = new();
-
-        private unsafe BufferSuite()
+        public unsafe BufferSuite()
         {
             allocProc = new AllocateBufferProc(AllocateBufferProc);
             freeProc = new FreeBufferProc(BufferFreeProc);
@@ -38,8 +34,6 @@ namespace PSFilterLoad.PSApi
             spaceProc = new BufferSpaceProc(BufferSpaceProc);
             bufferIDs = new Dictionary<IntPtr, int>(IntPtrEqualityComparer.Instance);
         }
-
-        public static BufferSuite Instance => instance;
 
         public int AvailableSpace => BufferSpaceProc();
 

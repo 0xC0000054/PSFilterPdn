@@ -119,6 +119,7 @@ namespace PSFilterLoad.PSApi
         private bool frValuesSetup;
         private bool useChannelPorts;
 
+        private readonly BufferSuite bufferSuite;
         private ChannelPortsSuite channelPortsSuite;
         private DescriptorSuite descriptorSuite;
         private ImageServicesSuite imageServicesSuite;
@@ -240,6 +241,7 @@ namespace PSFilterLoad.PSApi
             progressProc = new ProgressProc(ProgressProc);
             abortProc = new TestAbortProc(AbortProc);
 
+            bufferSuite = new BufferSuite();
             channelPortsSuite = new ChannelPortsSuite(this);
             imageServicesSuite = new ImageServicesSuite();
             propertySuite = new PropertySuite(source.Width, source.Height, settings.PluginUISettings);
@@ -528,11 +530,11 @@ namespace PSFilterLoad.PSApi
                     bool allocatedByBufferSuite;
                     IntPtr ptr;
 
-                    if (BufferSuite.Instance.AllocatedBySuite(filterGlobalData))
+                    if (bufferSuite.AllocatedBySuite(filterGlobalData))
                     {
-                        pluginDataSize = BufferSuite.Instance.GetBufferSize(filterGlobalData);
+                        pluginDataSize = bufferSuite.GetBufferSize(filterGlobalData);
                         allocatedByBufferSuite = true;
-                        ptr = BufferSuite.Instance.LockBuffer(filterGlobalData);
+                        ptr = bufferSuite.LockBuffer(filterGlobalData);
                     }
                     else
                     {
@@ -568,7 +570,7 @@ namespace PSFilterLoad.PSApi
                     {
                         if (allocatedByBufferSuite)
                         {
-                            BufferSuite.Instance.UnlockBuffer(filterGlobalData);
+                            bufferSuite.UnlockBuffer(filterGlobalData);
                         }
                         else
                         {
@@ -2838,7 +2840,7 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void SetupSuites()
         {
-            bufferProcsPtr = BufferSuite.Instance.CreateBufferProcsPointer();
+            bufferProcsPtr = bufferSuite.CreateBufferProcsPointer();
 
             handleProcsPtr = HandleSuite.Instance.CreateHandleProcsPointer();
 
@@ -2931,7 +2933,7 @@ namespace PSFilterLoad.PSApi
                 filterRecord->foreColor[i] = foregroundColor[i];
             }
 
-            filterRecord->bufferSpace = BufferSuite.Instance.AvailableSpace;
+            filterRecord->bufferSpace = bufferSuite.AvailableSpace;
             filterRecord->maxSpace = filterRecord->bufferSpace;
             filterRecord->hostSig = HostSignature;
             filterRecord->hostProcs = Marshal.GetFunctionPointerForDelegate(hostProc);
@@ -3244,9 +3246,9 @@ namespace PSFilterLoad.PSApi
                         }
                         Memory.Free(filterGlobalData);
                     }
-                    else if (BufferSuite.Instance.AllocatedBySuite(filterGlobalData))
+                    else if (bufferSuite.AllocatedBySuite(filterGlobalData))
                     {
-                        BufferSuite.Instance.FreeBuffer(filterGlobalData);
+                        bufferSuite.FreeBuffer(filterGlobalData);
                     }
                     else
                     {
@@ -3258,7 +3260,7 @@ namespace PSFilterLoad.PSApi
                     filterGlobalData = IntPtr.Zero;
                 }
 
-                BufferSuite.Instance.FreeRemainingBuffers();
+                bufferSuite.FreeRemainingBuffers();
                 HandleSuite.Instance.FreeRemainingHandles();
             }
         }
