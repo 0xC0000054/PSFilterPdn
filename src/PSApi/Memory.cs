@@ -79,6 +79,17 @@ namespace PSFilterLoad.PSApi
         /// Allocates a block of memory from the default process heap.
         /// </summary>
         /// <param name="size">The size of the memory to allocate.</param>
+        /// <param name="zeroFill">if <c>true</c> the allocated memory will be set to zero.</param>
+        /// <returns>A pointer to the allocated block of memory.</returns>
+        public static unsafe T* Allocate<T>(MemoryAllocationFlags allocationFlags) where T : unmanaged
+        {
+            return (T*)Allocate((ulong)Marshal.SizeOf<T>(), allocationFlags);
+        }
+
+        /// <summary>
+        /// Allocates a block of memory from the default process heap.
+        /// </summary>
+        /// <param name="size">The size of the memory to allocate.</param>
         /// <param name="allocationFlags">The memory allocation flags.</param>
         /// <returns>A pointer to the allocated block of memory.</returns>
         public static IntPtr Allocate(ulong size, MemoryAllocationFlags allocationFlags)
@@ -177,6 +188,19 @@ namespace PSFilterLoad.PSApi
                 {
                     MemoryPressureManager.RemoveMemoryPressure(size);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Frees the block of memory allocated by Allocate&lt;T&gt;() and sets the pointer to null.
+        /// </summary>
+        /// <param name="mem">The block to free.</param>
+        public static unsafe void Free<T>(ref T* mem) where T : unmanaged
+        {
+            if (mem != null)
+            {
+                Free(new IntPtr(mem));
+                mem = null;
             }
         }
 

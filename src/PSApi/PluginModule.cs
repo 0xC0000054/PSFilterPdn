@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
-    internal delegate void PluginEntryPoint(FilterSelector selector, IntPtr pluginParamBlock, ref IntPtr pluginData, ref short result);
+    internal unsafe delegate void PluginEntryPoint(FilterSelector selector, void* pluginParamBlock, ref IntPtr pluginData, ref short result);
 
     internal sealed class PluginModule : IDisposable
     {

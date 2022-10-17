@@ -23,7 +23,7 @@ using PSFilterShim.Properties;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class LoadPsFilter : IDisposable, IFilterImageProvider, IPICASuiteDataProvider
+    internal sealed unsafe class LoadPsFilter : IDisposable, IFilterImageProvider, IPICASuiteDataProvider
     {
         private static bool RectNonEmpty(Rect16 rect)
         {
@@ -45,7 +45,7 @@ namespace PSFilterLoad.PSApi
         #endregion
         private readonly IntPtr parentWindowHandle;
 
-        private IntPtr filterRecordPtr;
+        private FilterRecord* filterRecord;
 
         private IntPtr platFormDataPtr;
 
@@ -442,8 +442,6 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         private unsafe void SaveParameterHandles()
         {
-            FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-
             if (filterRecord->parameters != Handle.Null)
             {
                 if (HandleSuite.Instance.AllocatedBySuite(filterRecord->parameters))
@@ -595,7 +593,6 @@ namespace PSFilterLoad.PSApi
             if (parameterDataBytes != null)
             {
                 parameterDataRestored = true;
-                FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
                 switch (globalParameters.ParameterDataStorageMethod)
                 {
@@ -684,45 +681,32 @@ namespace PSFilterLoad.PSApi
 
             basicSuitePtr = basicSuiteProvider.CreateSPBasicSuitePointer();
 
-            IntPtr aboutRecordPtr = Memory.Allocate(Marshal.SizeOf<AboutRecord>(), true);
-            try
+            AboutRecord aboutRecord = new()
             {
-                unsafe
-                {
-                    AboutRecord* aboutRecord = (AboutRecord*)aboutRecordPtr.ToPointer();
-                    aboutRecord->platformData = platFormDataPtr;
-                    aboutRecord->sSPBasic = basicSuitePtr;
-                    aboutRecord->plugInRef = IntPtr.Zero;
-                }
+                platformData = platFormDataPtr,
+                sSPBasic = basicSuitePtr,
+                plugInRef = IntPtr.Zero
+            };
 
-                if (pdata.ModuleEntryPoints == null)
-                {
-                    module.entryPoint(FilterSelector.About, aboutRecordPtr, ref filterGlobalData, ref result);
-                }
-                else
-                {
-                    // call all the entry points in the module only one should show the about box.
-                    foreach (string entryPoint in pdata.ModuleEntryPoints)
-                    {
-                        PluginEntryPoint ep = module.GetEntryPoint(entryPoint);
-
-                        ep(FilterSelector.About, aboutRecordPtr, ref filterGlobalData, ref result);
-
-                        if (result != PSError.noErr)
-                        {
-                            break;
-                        }
-
-                        GC.KeepAlive(ep);
-                    }
-                }
+            if (pdata.ModuleEntryPoints == null)
+            {
+                module.entryPoint(FilterSelector.About, &aboutRecord, ref filterGlobalData, ref result);
             }
-            finally
+            else
             {
-                if (aboutRecordPtr != IntPtr.Zero)
+                // call all the entry points in the module only one should show the about box.
+                foreach (string entryPoint in pdata.ModuleEntryPoints)
                 {
-                    Memory.Free(aboutRecordPtr);
-                    aboutRecordPtr = IntPtr.Zero;
+                    PluginEntryPoint ep = module.GetEntryPoint(entryPoint);
+
+                    ep(FilterSelector.About, &aboutRecord, ref filterGlobalData, ref result);
+
+                    if (result != PSError.noErr)
+                    {
+                        break;
+                    }
+
+                    GC.KeepAlive(ep);
                 }
             }
 
@@ -749,7 +733,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.Call, "Before FilterSelectorStart");
 #endif
 
-            module.entryPoint(FilterSelector.Start, filterRecordPtr, ref filterGlobalData, ref result);
+            module.entryPoint(FilterSelector.Start, filterRecord, ref filterGlobalData, ref result);
 
 #if DEBUG
             DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorStart");
@@ -765,8 +749,6 @@ namespace PSFilterLoad.PSApi
                 return false;
             }
 
-            FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-
             while (RectNonEmpty(filterRecord->inRect) || RectNonEmpty(filterRecord->outRect) || RectNonEmpty(filterRecord->maskRect))
             {
                 AdvanceStateProc();
@@ -776,13 +758,11 @@ namespace PSFilterLoad.PSApi
                 DebugUtils.Ping(DebugFlags.Call, "Before FilterSelectorContinue");
 #endif
 
-                module.entryPoint(FilterSelector.Continue, filterRecordPtr, ref filterGlobalData, ref result);
+                module.entryPoint(FilterSelector.Continue, filterRecord, ref filterGlobalData, ref result);
 
 #if DEBUG
                 DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorContinue");
 #endif
-
-                filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
                 if (result != PSError.noErr)
                 {
@@ -793,7 +773,7 @@ namespace PSFilterLoad.PSApi
                     DebugUtils.Ping(DebugFlags.Call, "Before FilterSelectorFinish");
 #endif
 
-                    module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref filterGlobalData, ref result);
+                    module.entryPoint(FilterSelector.Finish, filterRecord, ref filterGlobalData, ref result);
 
 #if DEBUG
                     DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorFinish");
@@ -811,7 +791,7 @@ namespace PSFilterLoad.PSApi
 
                 if (AbortProc())
                 {
-                    module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref filterGlobalData, ref result);
+                    module.entryPoint(FilterSelector.Finish, filterRecord, ref filterGlobalData, ref result);
 
                     if (result != PSError.noErr)
                     {
@@ -829,7 +809,7 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.Call, "Before FilterSelectorFinish");
 #endif
 
-            module.entryPoint(FilterSelector.Finish, filterRecordPtr, ref filterGlobalData, ref result);
+            module.entryPoint(FilterSelector.Finish, this.filterRecord, ref filterGlobalData, ref result);
 
 #if DEBUG
             DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorFinish");
@@ -856,14 +836,9 @@ namespace PSFilterLoad.PSApi
             DebugUtils.Ping(DebugFlags.Call, "Before filterSelectorParameters");
 #endif
 
-            module.entryPoint(FilterSelector.Parameters, filterRecordPtr, ref filterGlobalData, ref result);
+            module.entryPoint(FilterSelector.Parameters, filterRecord, ref filterGlobalData, ref result);
 #if DEBUG
-            unsafe
-            {
-                FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-                DebugUtils.Ping(DebugFlags.Call, string.Format("data: {0},  parameters: {1}", filterGlobalData.ToHexString(), filterRecord->parameters.ToHexString()));
-            }
-
+            DebugUtils.Ping(DebugFlags.Call, string.Format("data: {0},  parameters: {1}", filterGlobalData.ToHexString(), filterRecord->parameters.ToHexString()));
             DebugUtils.Ping(DebugFlags.Call, "After filterSelectorParameters");
 #endif
 
@@ -890,8 +865,6 @@ namespace PSFilterLoad.PSApi
             }
 
             frValuesSetup = true;
-
-            FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
 
             filterRecord->inRect = Rect16.Empty;
             filterRecord->inData = IntPtr.Zero;
@@ -1002,7 +975,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.Call, "Before filterSelectorPrepare");
 #endif
-            module.entryPoint(FilterSelector.Prepare, filterRecordPtr, ref filterGlobalData, ref result);
+            module.entryPoint(FilterSelector.Prepare, filterRecord, ref filterGlobalData, ref result);
 
 #if DEBUG
             DebugUtils.Ping(DebugFlags.Call, "After filterSelectorPrepare");
@@ -1308,8 +1281,6 @@ namespace PSFilterLoad.PSApi
 
         private unsafe short AdvanceStateProc()
         {
-            FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-
             if (outDataPtr != IntPtr.Zero && RectNonEmpty(lastOutRect))
             {
                 StoreOutputBuffer(outDataPtr, lastOutRowBytes, lastOutRect, lastOutLoPlane, lastOutHiPlane);
@@ -2038,8 +2009,6 @@ namespace PSFilterLoad.PSApi
 
             if (hasSelectionMask)
             {
-                FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr;
-
                 // Clip the destination image to the selection mask when the filter does not
                 // perform its own masking or write outside of the selection.
                 if (filterRecord->autoMask && !writesOutsideSelection)
@@ -2832,8 +2801,6 @@ namespace PSFilterLoad.PSApi
 
             sizesSetup = true;
 
-            FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-
             filterRecord->imageSize.h = (short)source.Width;
             filterRecord->imageSize.v = (short)source.Height;
 
@@ -2939,8 +2906,7 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void SetupFilterRecord()
         {
-            filterRecordPtr = Memory.Allocate(Marshal.SizeOf<FilterRecord>(), true);
-            FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
+            filterRecord = Memory.Allocate<FilterRecord>(MemoryAllocationFlags.ZeroFill);
 
             filterRecord->serial = 0;
             filterRecord->abortProc = Marshal.GetFunctionPointerForDelegate(abortProc);
@@ -3208,10 +3174,8 @@ namespace PSFilterLoad.PSApi
                     basicSuitePtr = IntPtr.Zero;
                 }
 
-                if (filterRecordPtr != IntPtr.Zero)
+                if (filterRecord != null)
                 {
-                    FilterRecord* filterRecord = (FilterRecord*)filterRecordPtr.ToPointer();
-
                     if (filterRecord->parameters != Handle.Null)
                     {
                         if (parameterDataRestored && !HandleSuite.Instance.AllocatedBySuite(filterRecord->parameters))
@@ -3259,8 +3223,7 @@ namespace PSFilterLoad.PSApi
                         filterRecord->maskData = IntPtr.Zero;
                     }
 
-                    Memory.Free(filterRecordPtr);
-                    filterRecordPtr = IntPtr.Zero;
+                    Memory.Free(ref filterRecord);
                 }
 
                 if (filterGlobalData != IntPtr.Zero)
