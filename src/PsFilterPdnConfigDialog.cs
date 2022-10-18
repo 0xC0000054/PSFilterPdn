@@ -61,7 +61,7 @@ namespace PSFilterPdn
 
         private readonly IImagingFactory imagingFactory;
         private readonly DocumentDpi documentDpi;
-        private IBitmap<ColorBgra32> sourceBitmap;
+        private IEffectInputBitmap<ColorBgra32> sourceBitmap;
         private MaskSurface selectionMask;
         private ColorBgra32 primaryColor;
         private ColorBgra32 secondaryColor;
@@ -860,7 +860,7 @@ namespace PSFilterPdn
 
         private void InitializeEnvironment()
         {
-            sourceBitmap = Environment.GetSourceBitmapBgra32().ToBitmap();
+            sourceBitmap = Environment.GetSourceBitmapBgra32();
             primaryColor = Environment.PrimaryColor;
             secondaryColor = Environment.SecondaryColor;
             selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment);
@@ -1836,9 +1836,9 @@ namespace PSFilterPdn
                 }
             }
 
-            static unsafe bool HasTransparentPixels(IBitmap<ColorBgra32> bitmap)
+            static unsafe bool HasTransparentPixels(IEffectInputBitmap<ColorBgra32> bitmap)
             {
-                using (IBitmapLock<ColorBgra32> bitmapLock = bitmap.Lock(BitmapLockOptions.Read))
+                using (IBitmapLock<ColorBgra32> bitmapLock = bitmap.Lock(bitmap.Bounds()))
                 {
                     SizeInt32 size = bitmapLock.Size;
                     byte* scan0 = (byte*)bitmapLock.Buffer;
