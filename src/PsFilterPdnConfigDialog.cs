@@ -1840,14 +1840,12 @@ namespace PSFilterPdn
             {
                 using (IBitmapLock<ColorBgra32> bitmapLock = bitmap.Lock(bitmap.Bounds()))
                 {
-                    SizeInt32 size = bitmapLock.Size;
-                    byte* scan0 = (byte*)bitmapLock.Buffer;
-                    int stride = bitmapLock.BufferStride;
+                    RegionPtr<ColorBgra32> region = bitmapLock.AsRegionPtr();
 
-                    for (int y = 0; y < size.Height; y++)
+                    foreach (RegionRowPtr<ColorBgra32> row in region.Rows)
                     {
-                        ColorBgra32* ptr = (ColorBgra32*)(scan0 + (y * stride));
-                        ColorBgra32* ptrEnd = ptr + size.Width;
+                        ColorBgra32* ptr = row.Ptr;
+                        ColorBgra32* ptrEnd = row.EndPtr;
 
                         while (ptr < ptrEnd)
                         {
