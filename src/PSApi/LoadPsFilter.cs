@@ -2894,8 +2894,8 @@ namespace PSFilterLoad.PSApi
 
             filterRecord->imageServicesProcs = imageServicesProcsPtr;
             filterRecord->propertyProcs = propertyProcsPtr;
-            filterRecord->inTileHeight = (short)source.Width;
-            filterRecord->inTileWidth = (short)source.Height;
+            filterRecord->inTileHeight = (short)Math.Min(source.Width, 1024);
+            filterRecord->inTileWidth = (short)Math.Min(source.Height, 1024);
             filterRecord->inTileOrigin.h = 0;
             filterRecord->inTileOrigin.v = 0;
             filterRecord->absTileHeight = filterRecord->inTileHeight;

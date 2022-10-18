@@ -199,8 +199,8 @@ namespace PSFilterLoad.PSApi
 
             desc->tileOrigin.h = 0;
             desc->tileOrigin.v = 0;
-            desc->tileSize.h = bounds.right - bounds.left;
-            desc->tileSize.v = bounds.bottom - bounds.top;
+            desc->tileSize.h = Math.Min(bounds.right - bounds.left, 1024);
+            desc->tileSize.v = Math.Min(bounds.bottom - bounds.top, 1024);
 
             desc->port = new IntPtr(channel);
             switch (channel)
