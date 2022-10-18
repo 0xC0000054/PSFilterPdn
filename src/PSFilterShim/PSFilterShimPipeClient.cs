@@ -13,8 +13,10 @@
 using PSFilterLoad.PSApi;
 using PSFilterPdn;
 using System;
+using System.Buffers.Binary;
 using System.IO;
 using System.IO.Pipes;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -43,7 +45,8 @@ namespace PSFilterShim
             ReportProgress,
             GetPluginData,
             GetSettings,
-            SetErrorMessage
+            SetErrorMessage,
+            SetPostProcessingOptions
         }
 
         public bool AbortFilter()
@@ -66,6 +69,15 @@ namespace PSFilterShim
         public void SetProxyErrorMessage(string errorMessage)
         {
             SendMessageToServer(Command.SetErrorMessage, errorMessage);
+        }
+
+        public void SetPostProcessingOptions(FilterPostProcessingOptions options)
+        {
+            // None is the default, most filters do not require any post processing.
+            if (options != FilterPostProcessingOptions.None)
+            {
+                SendMessageToServer(Command.SetPostProcessingOptions, (int)options);
+            }
         }
 
         public void UpdateFilterProgress(byte progressPercentage)
@@ -171,6 +183,40 @@ namespace PSFilterShim
                 }
 
                 stream.WaitForPipeDrain();
+            }
+
+            return reply;
+        }
+
+        [SkipLocalsInit]
+        private byte[] SendMessageToServer(Command command, int value)
+        {
+            byte[] reply = null;
+
+            using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
+            {
+                stream.Connect();
+
+                const int dataLength = sizeof(byte) + sizeof(int);
+
+                Span<byte> messageBuffer = stackalloc byte[sizeof(int) + dataLength];
+
+                BinaryPrimitives.WriteInt32LittleEndian(messageBuffer, dataLength);
+                messageBuffer[4] = (byte)command;
+                BinaryPrimitives.WriteInt32LittleEndian(messageBuffer.Slice(5), value);
+
+                stream.Write(messageBuffer);
+
+                stream.ProperRead(replyLengthBuffer, 0, replyLengthBuffer.Length);
+
+                int replyLength = BitConverter.ToInt32(replyLengthBuffer, 0);
+
+                if (replyLength > 0)
+                {
+                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
+
+                    stream.ProperRead(reply, 0, replyLength);
+                }
             }
 
             return reply;

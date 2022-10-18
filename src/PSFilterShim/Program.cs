@@ -151,6 +151,7 @@ namespace PSFilterShim
                         if (!settings.ShowAboutDialog)
                         {
                             PSFilterShimImage.Save(settings.DestinationImagePath, lps.Dest);
+                            pipeClient.SetPostProcessingOptions(lps.PostProcessingOptions);
 
                             if (!lps.IsRepeatEffect)
                             {

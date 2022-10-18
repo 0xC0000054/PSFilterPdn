@@ -206,6 +206,8 @@ namespace PSFilterLoad.PSApi
             set => resourceSuite.PseudoResources = value;
         }
 
+        internal FilterPostProcessingOptions PostProcessingOptions { get; private set; }
+
         /// <summary>
         /// Loads and runs Photoshop Filters
         /// </summary>
@@ -251,6 +253,7 @@ namespace PSFilterLoad.PSApi
             scriptingData = null;
             useChannelPorts = false;
             parentWindowHandle = owner;
+            PostProcessingOptions = FilterPostProcessingOptions.None;
 
             platFormDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), true);
             ((PlatformData*)platFormDataPtr.ToPointer())->hwnd = owner;
@@ -827,7 +830,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
             DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorFinish");
 #endif
-            PostProcessOutputData();
+            SetFilterPostProcessOptions();
 
             if (!isRepeatEffect && result == PSError.noErr)
             {
@@ -2282,74 +2285,20 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        /// <summary>
-        /// Applies any post processing to the output data that the filter may require.
-        /// </summary>
-        private unsafe void PostProcessOutputData()
+        private unsafe void SetFilterPostProcessOptions()
         {
-            // Set the alpha value to opaque in the areas affected by the filter.
             if (outputHandling == FilterDataHandling.FillMask &&
                 (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection))
             {
-                int width = dest.Width;
-                int height = dest.Height;
-
-                for (int y = 0; y < height; y++)
-                {
-                    ColorBgra* ptr = dest.GetRowPointerUnchecked(y);
-                    ColorBgra* endPtr = ptr + width;
-
-                    while (ptr < endPtr)
-                    {
-                        ptr->A = 255;
-                        ptr++;
-                    }
-                }
+                // Set the alpha value to opaque in the areas affected by the filter.
+                PostProcessingOptions |= FilterPostProcessingOptions.SetAlphaTo255;
             }
 
-            if (hasSelectionMask)
+            if (hasSelectionMask && filterRecord->autoMask && !writesOutsideSelection)
             {
                 // Clip the destination image to the selection mask when the filter does not
                 // perform its own masking or write outside of the selection.
-                if (filterRecord->autoMask && !writesOutsideSelection)
-                {
-                    int width = source.Width;
-                    int height = source.Height;
-
-                    for (int y = 0; y < height; y++)
-                    {
-                        ColorBgra* originalPixel = source.GetRowPointerUnchecked(y);
-                        ColorBgra* dstPixel = dest.GetRowPointerUnchecked(y);
-                        byte* maskPixel = mask.GetRowAddressUnchecked(y);
-
-                        for (int x = 0; x < width; x++)
-                        {
-                            // We do the following operations based on the value of the mask pixel:
-                            //
-                            // 0: overwrite the destination pixel with the original pixel from the source image
-                            // 255: nothing -- the mask is fully opaque so blending is not required.
-                            // 1-254: blend the original and new colors based on the mask pixel value.
-                            byte maskValue = *maskPixel;
-
-                            switch (maskValue)
-                            {
-                                case 0:
-                                    dstPixel->Bgra = originalPixel->Bgra;
-                                    break;
-                                case 255:
-                                    // The mask is fully opaque -- nothing to do.
-                                    break;
-                                default:
-                                    *dstPixel = ColorBgra.Blend(*originalPixel, *dstPixel, maskValue);
-                                    break;
-                            }
-
-                            originalPixel++;
-                            dstPixel++;
-                            maskPixel++;
-                        }
-                    }
-                }
+                PostProcessingOptions |= FilterPostProcessingOptions.ClipToSelectionMask;
             }
         }
 

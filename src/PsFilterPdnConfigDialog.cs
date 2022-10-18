@@ -76,6 +76,7 @@ namespace PSFilterPdn
 
         private bool proxyResult;
         private string proxyErrorMessage;
+        private FilterPostProcessingOptions proxyPostProcessingOptions;
         private Process proxyProcess;
         private PSFilterShimPipeServer server;
         private string srcFileName;
@@ -596,6 +597,11 @@ namespace PSFilterPdn
             proxyErrorMessage = data;
         }
 
+        private void SetProxyPostProcessingOptions(FilterPostProcessingOptions options)
+        {
+            proxyPostProcessingOptions = options;
+        }
+
         private void proxyProcess_Exited(object sender, EventArgs e)
         {
             if (!formClosePending)
@@ -714,7 +720,12 @@ namespace PSFilterPdn
                 server = null;
             }
 
-            server = new PSFilterShimPipeServer(AbortCallback, data, settings, SetProxyErrorResult, UpdateProgress);
+            server = new PSFilterShimPipeServer(AbortCallback,
+                                                data,
+                                                settings,
+                                                SetProxyErrorResult,
+                                                SetProxyPostProcessingOptions,
+                                                UpdateProgress);
 
             proxyData = data;
             try
@@ -740,6 +751,7 @@ namespace PSFilterPdn
 
                 proxyResult = true; // assume the filter succeeded this will be set to false if it failed
                 proxyErrorMessage = string.Empty;
+                proxyPostProcessingOptions = FilterPostProcessingOptions.None;
 
                 if (proxyProcess is null)
                 {
@@ -788,6 +800,8 @@ namespace PSFilterPdn
 
                 destSurface?.Dispose();
                 destSurface = PSFilterShimImage.Load(destFileName, imagingFactory);
+
+                FilterPostProcessing.Apply(Environment, destSurface, proxyPostProcessingOptions);
 
                 try
                 {
@@ -912,6 +926,9 @@ namespace PSFilterPdn
                                 {
                                     destSurface?.Dispose();
                                     destSurface = SurfaceUtil.ToBitmapBgra32(lps.Dest, imagingFactory);
+
+                                    FilterPostProcessing.Apply(Environment, destSurface, lps.PostProcessingOptions);
+
                                     filterData = data;
                                     filterParameters.AddOrUpdate(data, lps.FilterParameters);
                                     pseudoResources = lps.PseudoResources;

@@ -125,15 +125,21 @@ namespace PSFilterPdn
                         PluginUISettings = null
                     };
 
+                    FilterPostProcessingOptions postProcessingOptions = FilterPostProcessingOptions.None;
+
                     using (PSFilterShimPipeServer server = new(AbortCallback,
-                                                                                      token.FilterData,
-                                                                                      settings,
-                                                                                      delegate (string data)
-                                                                                      {
-                                                                                          proxyResult = false;
-                                                                                          proxyErrorMessage = data;
-                                                                                      },
-                                                                                      null))
+                                                               token.FilterData,
+                                                               settings,
+                                                               delegate (string data)
+                                                               {
+                                                                   proxyResult = false;
+                                                                   proxyErrorMessage = data;
+                                                               },
+                                                               delegate (FilterPostProcessingOptions options)
+                                                               {
+                                                                   postProcessingOptions = options;
+                                                               },
+                                                               null))
                     {
                         DocumentDpi documentDpi = new(Environment.Document.Resolution);
                         PSFilterShimImage.Save(srcFileName, Environment.GetSourceBitmapBgra32(), documentDpi);
@@ -164,6 +170,8 @@ namespace PSFilterPdn
                     if (proxyResult && File.Exists(destFileName))
                     {
                         filterOutput = PSFilterShimImage.Load(destFileName, Environment.ImagingFactory);
+
+                        FilterPostProcessing.Apply(Environment, filterOutput, postProcessingOptions);
                     }
                     else if (!string.IsNullOrEmpty(proxyErrorMessage))
                     {

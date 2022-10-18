@@ -13,6 +13,7 @@
 using PaintDotNet.IO;
 using PSFilterLoad.PSApi;
 using System;
+using System.Buffers.Binary;
 using System.IO;
 using System.IO.Pipes;
 using System.Text;
@@ -30,6 +31,7 @@ namespace PSFilterPdn
         private readonly PluginData pluginData;
         private readonly PSFilterShimSettings settings;
         private readonly Action<string> errorCallback;
+        private readonly Action<FilterPostProcessingOptions> postProcessingOptionsCallback;
         private readonly Action<byte> progressCallback;
 
         /// <summary>
@@ -44,18 +46,24 @@ namespace PSFilterPdn
         /// <paramref name="plugin"/> is null.
         /// or
         /// <paramref name="settings"/> is null.
+        /// or
+        /// <paramref name="error"/> is null.
+        /// or
+        /// <paramref name="postProcessingOptions"/> is null.
         /// </exception>
         public PSFilterShimPipeServer(Func<bool> abort,
                                       PluginData plugin,
                                       PSFilterShimSettings settings,
                                       Action<string> error,
+                                      Action<FilterPostProcessingOptions> postProcessingOptions,
                                       Action<byte> progress)
         {
             PipeName = "PSFilterShim_" + Guid.NewGuid().ToString();
             abortFunc = abort;
             pluginData = plugin ?? throw new ArgumentNullException(nameof(plugin));
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            errorCallback = error;
+            errorCallback = error ?? throw new ArgumentNullException(nameof(error));
+            postProcessingOptionsCallback = postProcessingOptions ?? throw new ArgumentNullException(nameof(postProcessingOptions));
             progressCallback = progress;
             // One byte for the command index and one byte for the payload.
             oneByteParameterMessageBuffer = new byte[2];
@@ -74,7 +82,8 @@ namespace PSFilterPdn
             ReportProgress,
             GetPluginData,
             GetSettings,
-            SetErrorMessage
+            SetErrorMessage,
+            SetPostProcessingOptions
         }
 
         public string PipeName { get; }
@@ -150,6 +159,10 @@ namespace PSFilterPdn
                     errorCallback(Encoding.UTF8.GetString(messageBytes, 1, messageLength - 1));
                     SendEmptyReplyToClient();
                     break;
+                case Command.SetPostProcessingOptions:
+                    postProcessingOptionsCallback(GetPostProcessingOptions(messageBytes, 1, messageLength - 1));
+                    SendEmptyReplyToClient();
+                    break;
                 default:
                     throw new InvalidOperationException($"Unknown command value: { command }.");
             }
@@ -161,6 +174,13 @@ namespace PSFilterPdn
             server = new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
+        }
+
+        private static FilterPostProcessingOptions GetPostProcessingOptions(byte[] buffer, int startIndex, int length)
+        {
+            int options = BinaryPrimitives.ReadInt32LittleEndian(buffer.AsSpan(startIndex, length));
+
+            return (FilterPostProcessingOptions)options;
         }
 
         private void SendEmptyReplyToClient()
