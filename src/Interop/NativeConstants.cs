@@ -21,6 +21,13 @@ namespace PSFilterPdn.Interop
 
         internal const int LOGPIXELSX = 88;
 
+        internal const int ERROR_SUCCESS = 0;
+        internal const int ERROR_RESOURCE_ENUM_USER_STOP = 0x00003B02;
+        internal const int ERROR_RESOURCE_DATA_NOT_FOUND = 0x00000714;
+        internal const int ERROR_RESOURCE_TYPE_NOT_FOUND = 0x00000715;
+        internal const int ERROR_RESOURCE_NAME_NOT_FOUND = 0x00000716;
+        internal const int ERROR_RESOURCE_LANG_NOT_FOUND = 0x00000717;
+
         internal const uint FILE_ATTRIBUTE_DIRECTORY = 16U;
         internal const uint FILE_ATTRIBUTE_REPARSE_POINT = 1024U;
 

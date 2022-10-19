@@ -58,7 +58,7 @@ namespace PSFilterPdn.Interop
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
         internal static extern SafeLibraryHandle LoadLibraryExW(string lpFileName, IntPtr hFile, uint dwFlags);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern unsafe bool EnumResourceNamesW(SafeLibraryHandle hModule,
                                                               string lpszType,
