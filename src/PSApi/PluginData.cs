@@ -369,10 +369,5 @@ namespace PSFilterLoad.PSApi
         {
             return !(pluginData1 == pluginData2);
         }
-
-        internal bool IsValid()
-        {
-            return !string.IsNullOrEmpty(category) && !string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(entryPoint);
-        }
     }
 }

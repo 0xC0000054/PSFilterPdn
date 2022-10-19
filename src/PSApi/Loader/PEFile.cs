@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -32,9 +33,9 @@ namespace PSFilterLoad.PSApi.Loader
         /// </summary>
         /// <param name="fileName">The file name to check.</param>
         /// <returns>The processor architecture of the module.</returns>
-        internal static Architecture? GetProcessorArchitecture(string fileName)
+        internal static Architecture GetProcessorArchitecture(string fileName)
         {
-            Architecture? architecture = null;
+            Architecture architecture;
 
             FileStream stream = null;
 
@@ -50,21 +51,6 @@ namespace PSFilterLoad.PSApi.Loader
                     architecture = GetProcessorArchitectureImpl(reader);
                 }
             }
-            catch (ArgumentException)
-            {
-            }
-            catch (IOException)
-            {
-            }
-            catch (NotSupportedException)
-            {
-            }
-            catch (SecurityException)
-            {
-            }
-            catch (UnauthorizedAccessException)
-            {
-            }
             finally
             {
                 stream?.Dispose();
@@ -73,43 +59,44 @@ namespace PSFilterLoad.PSApi.Loader
             return architecture;
         }
 
-        private static Architecture? GetProcessorArchitectureImpl(EndianBinaryReader reader)
+        private static Architecture GetProcessorArchitectureImpl(EndianBinaryReader reader)
         {
-            Architecture? architecture = null;
-
             ushort dosSignature = reader.ReadUInt16();
-            if (dosSignature == IMAGE_DOS_SIGNATURE)
+            if (dosSignature != IMAGE_DOS_SIGNATURE)
             {
-                reader.Position = NTSignatureOffsetLocation;
-
-                uint ntSignatureOffset = reader.ReadUInt32();
-
-                reader.Position = ntSignatureOffset;
-
-                uint ntSignature = reader.ReadUInt32();
-                if (ntSignature == IMAGE_NT_SIGNATURE)
-                {
-                    ushort machine = reader.ReadUInt16();
-
-                    switch (machine)
-                    {
-                        case IMAGE_FILE_MACHINE_I386:
-                            architecture = Architecture.X86;
-                            break;
-                        case IMAGE_FILE_MACHINE_AMD64:
-                            architecture = Architecture.X64;
-                            break;
-                        case IMAGE_FILE_MACHINE_ARM:
-                            architecture = Architecture.Arm;
-                            break;
-                        case IMAGE_FILE_MACHINE_ARM64:
-                            architecture = Architecture.Arm64;
-                            break;
-                    }
-                }
+                throw new BadImageFormatException("Unknown file format.");
             }
 
-            return architecture;
+            reader.Position = NTSignatureOffsetLocation;
+
+            uint ntSignatureOffset = reader.ReadUInt32();
+
+            reader.Position = ntSignatureOffset;
+
+            uint ntSignature = reader.ReadUInt32();
+            if (ntSignature != IMAGE_NT_SIGNATURE)
+            {
+                throw new BadImageFormatException("Invalid PE header.");
+
+            }
+
+            ushort machine = reader.ReadUInt16();
+
+            switch (machine)
+            {
+                case IMAGE_FILE_MACHINE_I386:
+                    return Architecture.X86;
+                case IMAGE_FILE_MACHINE_AMD64:
+                    return Architecture.X64;
+                case IMAGE_FILE_MACHINE_ARM:
+                    return Architecture.Arm;
+                case IMAGE_FILE_MACHINE_ARM64:
+                    return Architecture.Arm64;
+                default:
+                    throw new PlatformNotSupportedException(string.Format(CultureInfo.InvariantCulture,
+                                                                          "Unsupported machine type: 0x{0:X4}",
+                                                                          machine));
+            }
         }
     }
 }

@@ -73,11 +73,18 @@ namespace PSFilterPdn
                     // Update the BackColor for all child controls as some controls
                     // do not change the BackColor when the parent control does.
 
-                    control.BackColor = backColor;
-
-                    if (control.HasChildren)
+                    if (control is Button)
                     {
-                        stack.Push(control);
+                        control.BackColor = Control.DefaultBackColor;
+                    }
+                    else
+                    {
+                        control.BackColor = backColor;
+
+                        if (control.HasChildren)
+                        {
+                            stack.Push(control);
+                        }
                     }
                 }
             }
@@ -112,6 +119,10 @@ namespace PSFilterPdn
                             // to Color.Empty so the LinkLabel will use its default colors.
                             link.LinkColor = Color.Empty;
                         }
+                    }
+                    else if (control is Button)
+                    {
+                        control.ForeColor = Control.DefaultForeColor;
                     }
                     else
                     {

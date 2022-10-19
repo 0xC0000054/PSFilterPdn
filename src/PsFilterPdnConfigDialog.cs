@@ -11,16 +11,20 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet;
+using PaintDotNet.AppModel;
+using PaintDotNet.Clipboard;
 using PaintDotNet.Effects;
 using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
 using PSFilterLoad.PSApi;
+using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterPdn.Controls;
 using PSFilterPdn.EnableInfo;
 using PSFilterPdn.Interop;
 using PSFilterPdn.Properties;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -58,6 +62,13 @@ namespace PSFilterPdn
         private ProgressBar filterProgressBar;
         private LinkLabel donateLink;
         private Button buttonCancel;
+
+        private TabPage diagnosticsTab;
+        private GroupBox loadErrorsGroupBox;
+        private TextBox pluginLoadErrorDetailsTextBox;
+        private ListView pluginLoadErrorListView;
+        private ColumnHeader plugInLoadErrorListViewColumnHeader;
+        private Button copyLoadErrorDetailsButton;
 
         private readonly IImagingFactory imagingFactory;
         private readonly DocumentDpi documentDpi;
@@ -100,6 +111,7 @@ namespace PSFilterPdn
         private string lastSelectedFilterTitle;
         private bool foundEffectsDir;
         private bool searchBoxIgnoreTextChanged;
+
 
         /// <summary>
         /// If DEP is enabled on a 32-bit OS use the shim process.
@@ -267,25 +279,33 @@ namespace PSFilterPdn
             fldrLoadProgLbl = new System.Windows.Forms.Label();
             folderLoadProgress = new System.Windows.Forms.ProgressBar();
             runFilterBtn = new System.Windows.Forms.Button();
-            filterTree = new DoubleBufferedTreeView();
+            filterTree = new PSFilterPdn.Controls.DoubleBufferedTreeView();
             dirTab = new System.Windows.Forms.TabPage();
             subDirSearchCb = new System.Windows.Forms.CheckBox();
             remDirBtn = new System.Windows.Forms.Button();
             addDirBtn = new System.Windows.Forms.Button();
-            searchDirListView = new DoubleBufferedListView();
-            dirHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            searchDirListView = new PSFilterPdn.Controls.DoubleBufferedListView();
+            dirHeader = new System.Windows.Forms.ColumnHeader();
+            diagnosticsTab = new System.Windows.Forms.TabPage();
+            loadErrorsGroupBox = new System.Windows.Forms.GroupBox();
+            copyLoadErrorDetailsButton = new System.Windows.Forms.Button();
+            pluginLoadErrorDetailsTextBox = new System.Windows.Forms.TextBox();
+            pluginLoadErrorListView = new System.Windows.Forms.ListView();
+            plugInLoadErrorListViewColumnHeader = new System.Windows.Forms.ColumnHeader();
             updateFilterListBw = new System.ComponentModel.BackgroundWorker();
             donateLink = new System.Windows.Forms.LinkLabel();
             tabControl1.SuspendLayout();
             filterTab.SuspendLayout();
             folderLoadPanel.SuspendLayout();
             dirTab.SuspendLayout();
+            diagnosticsTab.SuspendLayout();
+            loadErrorsGroupBox.SuspendLayout();
             SuspendLayout();
             //
             // buttonCancel
             //
-            buttonCancel.FlatStyle = FlatStyle.System;
-            buttonCancel.Location = new System.Drawing.Point(397, 368);
+            buttonCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            buttonCancel.Location = new System.Drawing.Point(474, 476);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new System.Drawing.Size(75, 23);
             buttonCancel.TabIndex = 1;
@@ -295,8 +315,8 @@ namespace PSFilterPdn
             //
             // buttonOK
             //
-            buttonOK.FlatStyle = FlatStyle.System;
-            buttonOK.Location = new System.Drawing.Point(316, 368);
+            buttonOK.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            buttonOK.Location = new System.Drawing.Point(393, 476);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new System.Drawing.Size(75, 23);
             buttonOK.TabIndex = 2;
@@ -308,10 +328,11 @@ namespace PSFilterPdn
             //
             tabControl1.Controls.Add(filterTab);
             tabControl1.Controls.Add(dirTab);
+            tabControl1.Controls.Add(diagnosticsTab);
             tabControl1.Location = new System.Drawing.Point(12, 12);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new System.Drawing.Size(460, 350);
+            tabControl1.Size = new System.Drawing.Size(537, 458);
             tabControl1.TabIndex = 3;
             //
             // filterTab
@@ -324,10 +345,10 @@ namespace PSFilterPdn
             filterTab.Controls.Add(folderLoadPanel);
             filterTab.Controls.Add(runFilterBtn);
             filterTab.Controls.Add(filterTree);
-            filterTab.Location = new System.Drawing.Point(4, 22);
+            filterTab.Location = new System.Drawing.Point(4, 24);
             filterTab.Name = "filterTab";
             filterTab.Padding = new System.Windows.Forms.Padding(3);
-            filterTab.Size = new System.Drawing.Size(452, 324);
+            filterTab.Size = new System.Drawing.Size(529, 430);
             filterTab.TabIndex = 0;
             filterTab.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_filterTab_Text;
             filterTab.UseVisualStyleBackColor = true;
@@ -335,7 +356,7 @@ namespace PSFilterPdn
             // filterProgressBar
             //
             filterProgressBar.Enabled = false;
-            filterProgressBar.Location = new System.Drawing.Point(6, 298);
+            filterProgressBar.Location = new System.Drawing.Point(6, 401);
             filterProgressBar.Name = "filterProgressBar";
             filterProgressBar.Size = new System.Drawing.Size(230, 23);
             filterProgressBar.Step = 1;
@@ -346,13 +367,13 @@ namespace PSFilterPdn
             fileNameLbl.AutoSize = true;
             fileNameLbl.Location = new System.Drawing.Point(249, 51);
             fileNameLbl.Name = "fileNameLbl";
-            fileNameLbl.Size = new System.Drawing.Size(67, 13);
+            fileNameLbl.Size = new System.Drawing.Size(75, 15);
             fileNameLbl.TabIndex = 16;
             fileNameLbl.Text = "Filename.8bf";
             //
             // filterSearchBox
             //
-            filterSearchBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic);
+            filterSearchBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
             filterSearchBox.ForeColor = System.Drawing.SystemColors.GrayText;
             filterSearchBox.Location = new System.Drawing.Point(6, 6);
             filterSearchBox.Name = "filterSearchBox";
@@ -366,9 +387,9 @@ namespace PSFilterPdn
             // showAboutBoxCb
             //
             showAboutBoxCb.AutoSize = true;
-            showAboutBoxCb.Location = new System.Drawing.Point(243, 243);
+            showAboutBoxCb.Location = new System.Drawing.Point(242, 347);
             showAboutBoxCb.Name = "showAboutBoxCb";
-            showAboutBoxCb.Size = new System.Drawing.Size(104, 17);
+            showAboutBoxCb.Size = new System.Drawing.Size(114, 19);
             showAboutBoxCb.TabIndex = 3;
             showAboutBoxCb.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_showAboutBoxcb_Text;
             showAboutBoxCb.UseVisualStyleBackColor = true;
@@ -379,9 +400,9 @@ namespace PSFilterPdn
             folderLoadPanel.Controls.Add(folderCountLbl);
             folderLoadPanel.Controls.Add(fldrLoadProgLbl);
             folderLoadPanel.Controls.Add(folderLoadProgress);
-            folderLoadPanel.Location = new System.Drawing.Point(243, 157);
+            folderLoadPanel.Location = new System.Drawing.Point(242, 187);
             folderLoadPanel.Name = "folderLoadPanel";
-            folderLoadPanel.Size = new System.Drawing.Size(209, 76);
+            folderLoadPanel.Size = new System.Drawing.Size(281, 76);
             folderLoadPanel.TabIndex = 2;
             folderLoadPanel.Visible = false;
             //
@@ -390,25 +411,25 @@ namespace PSFilterPdn
             folderNameLbl.AutoSize = true;
             folderNameLbl.Location = new System.Drawing.Point(3, 45);
             folderNameLbl.Name = "folderNameLbl";
-            folderNameLbl.Size = new System.Drawing.Size(65, 13);
+            folderNameLbl.Size = new System.Drawing.Size(76, 15);
             folderNameLbl.TabIndex = 3;
             folderNameLbl.Text = "(foldername)";
             //
             // folderCountLbl
             //
             folderCountLbl.AutoSize = true;
-            folderCountLbl.Location = new System.Drawing.Point(160, 29);
+            folderCountLbl.Location = new System.Drawing.Point(216, 27);
             folderCountLbl.Name = "folderCountLbl";
-            folderCountLbl.Size = new System.Drawing.Size(40, 13);
+            folderCountLbl.Size = new System.Drawing.Size(44, 15);
             folderCountLbl.TabIndex = 2;
             folderCountLbl.Text = "(2 of 3)";
             //
             // fldrLoadProgLbl
             //
             fldrLoadProgLbl.AutoSize = true;
-            fldrLoadProgLbl.Location = new System.Drawing.Point(3, 3);
+            fldrLoadProgLbl.Location = new System.Drawing.Point(0, 1);
             fldrLoadProgLbl.Name = "fldrLoadProgLbl";
-            fldrLoadProgLbl.Size = new System.Drawing.Size(105, 13);
+            fldrLoadProgLbl.Size = new System.Drawing.Size(117, 15);
             fldrLoadProgLbl.TabIndex = 1;
             fldrLoadProgLbl.Text = "Folder load progress:";
             //
@@ -416,14 +437,14 @@ namespace PSFilterPdn
             //
             folderLoadProgress.Location = new System.Drawing.Point(3, 19);
             folderLoadProgress.Name = "folderLoadProgress";
-            folderLoadProgress.Size = new System.Drawing.Size(151, 23);
+            folderLoadProgress.Size = new System.Drawing.Size(207, 23);
             folderLoadProgress.TabIndex = 0;
             //
             // runFilterBtn
             //
-            runFilterBtn.FlatStyle = FlatStyle.System;
             runFilterBtn.Enabled = false;
-            runFilterBtn.Location = new System.Drawing.Point(243, 266);
+            runFilterBtn.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            runFilterBtn.Location = new System.Drawing.Point(242, 370);
             runFilterBtn.Name = "runFilterBtn";
             runFilterBtn.Size = new System.Drawing.Size(75, 23);
             runFilterBtn.TabIndex = 1;
@@ -436,7 +457,7 @@ namespace PSFilterPdn
             filterTree.HideSelection = false;
             filterTree.Location = new System.Drawing.Point(6, 32);
             filterTree.Name = "filterTree";
-            filterTree.Size = new System.Drawing.Size(230, 260);
+            filterTree.Size = new System.Drawing.Size(230, 363);
             filterTree.TabIndex = 0;
             filterTree.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(filterTree_AfterCollapse);
             filterTree.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(filterTree_BeforeExpand);
@@ -452,10 +473,10 @@ namespace PSFilterPdn
             dirTab.Controls.Add(remDirBtn);
             dirTab.Controls.Add(addDirBtn);
             dirTab.Controls.Add(searchDirListView);
-            dirTab.Location = new System.Drawing.Point(4, 22);
+            dirTab.Location = new System.Drawing.Point(4, 24);
             dirTab.Name = "dirTab";
             dirTab.Padding = new System.Windows.Forms.Padding(3);
-            dirTab.Size = new System.Drawing.Size(452, 324);
+            dirTab.Size = new System.Drawing.Size(529, 430);
             dirTab.TabIndex = 1;
             dirTab.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_dirTab_Text;
             dirTab.UseVisualStyleBackColor = true;
@@ -467,7 +488,7 @@ namespace PSFilterPdn
             subDirSearchCb.CheckState = System.Windows.Forms.CheckState.Checked;
             subDirSearchCb.Location = new System.Drawing.Point(6, 255);
             subDirSearchCb.Name = "subDirSearchCb";
-            subDirSearchCb.Size = new System.Drawing.Size(130, 17);
+            subDirSearchCb.Size = new System.Drawing.Size(139, 19);
             subDirSearchCb.TabIndex = 3;
             subDirSearchCb.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_subDirSearchCb_Text;
             subDirSearchCb.UseVisualStyleBackColor = true;
@@ -475,8 +496,8 @@ namespace PSFilterPdn
             //
             // remDirBtn
             //
-            remDirBtn.FlatStyle = FlatStyle.System;
-            remDirBtn.Location = new System.Drawing.Point(371, 251);
+            remDirBtn.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            remDirBtn.Location = new System.Drawing.Point(448, 251);
             remDirBtn.Name = "remDirBtn";
             remDirBtn.Size = new System.Drawing.Size(75, 23);
             remDirBtn.TabIndex = 2;
@@ -486,8 +507,8 @@ namespace PSFilterPdn
             //
             // addDirBtn
             //
-            addDirBtn.FlatStyle = FlatStyle.System;
-            addDirBtn.Location = new System.Drawing.Point(290, 251);
+            addDirBtn.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            addDirBtn.Location = new System.Drawing.Point(367, 251);
             addDirBtn.Name = "addDirBtn";
             addDirBtn.Size = new System.Drawing.Size(75, 23);
             addDirBtn.TabIndex = 1;
@@ -502,7 +523,7 @@ namespace PSFilterPdn
             searchDirListView.Location = new System.Drawing.Point(6, 6);
             searchDirListView.MultiSelect = false;
             searchDirListView.Name = "searchDirListView";
-            searchDirListView.Size = new System.Drawing.Size(440, 243);
+            searchDirListView.Size = new System.Drawing.Size(517, 243);
             searchDirListView.TabIndex = 0;
             searchDirListView.UseCompatibleStateImageBehavior = false;
             searchDirListView.View = System.Windows.Forms.View.Details;
@@ -514,7 +535,69 @@ namespace PSFilterPdn
             // dirHeader
             //
             dirHeader.Text = global::PSFilterPdn.Properties.Resources.ConfigDialog_dirHeader_Text;
-            dirHeader.Width = 417;
+            dirHeader.Width = 510;
+            //
+            // diagnosticsTab
+            //
+            diagnosticsTab.Controls.Add(loadErrorsGroupBox);
+            diagnosticsTab.Location = new System.Drawing.Point(4, 24);
+            diagnosticsTab.Name = "diagnosticsTab";
+            diagnosticsTab.Padding = new System.Windows.Forms.Padding(3);
+            diagnosticsTab.Size = new System.Drawing.Size(529, 430);
+            diagnosticsTab.TabIndex = 2;
+            diagnosticsTab.Text = "Diagnostics";
+            diagnosticsTab.UseVisualStyleBackColor = true;
+            //
+            // loadErrorsGroupBox
+            //
+            loadErrorsGroupBox.Controls.Add(copyLoadErrorDetailsButton);
+            loadErrorsGroupBox.Controls.Add(pluginLoadErrorDetailsTextBox);
+            loadErrorsGroupBox.Controls.Add(pluginLoadErrorListView);
+            loadErrorsGroupBox.Location = new System.Drawing.Point(4, 107);
+            loadErrorsGroupBox.Name = "loadErrorsGroupBox";
+            loadErrorsGroupBox.Size = new System.Drawing.Size(519, 317);
+            loadErrorsGroupBox.TabIndex = 0;
+            loadErrorsGroupBox.TabStop = false;
+            loadErrorsGroupBox.Text = "Plug-In load errors";
+            //
+            // copyLoadErrorDetailsButton
+            //
+            copyLoadErrorDetailsButton.Enabled = false;
+            copyLoadErrorDetailsButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            copyLoadErrorDetailsButton.Location = new System.Drawing.Point(398, 288);
+            copyLoadErrorDetailsButton.Name = "copyLoadErrorDetailsButton";
+            copyLoadErrorDetailsButton.Size = new System.Drawing.Size(115, 23);
+            copyLoadErrorDetailsButton.TabIndex = 2;
+            copyLoadErrorDetailsButton.Text = "Copy to Clipboard";
+            copyLoadErrorDetailsButton.UseVisualStyleBackColor = true;
+            copyLoadErrorDetailsButton.Click += new System.EventHandler(copyLoadErrorDetailsButton_Click);
+            //
+            // pluginLoadErrorDetailsTextBox
+            //
+            pluginLoadErrorDetailsTextBox.Location = new System.Drawing.Point(6, 160);
+            pluginLoadErrorDetailsTextBox.Multiline = true;
+            pluginLoadErrorDetailsTextBox.Name = "pluginLoadErrorDetailsTextBox";
+            pluginLoadErrorDetailsTextBox.ReadOnly = true;
+            pluginLoadErrorDetailsTextBox.Size = new System.Drawing.Size(503, 122);
+            pluginLoadErrorDetailsTextBox.TabIndex = 1;
+            //
+            // pluginLoadErrorListView
+            //
+            pluginLoadErrorListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            plugInLoadErrorListViewColumnHeader});
+            pluginLoadErrorListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+            pluginLoadErrorListView.Location = new System.Drawing.Point(9, 24);
+            pluginLoadErrorListView.Name = "pluginLoadErrorListView";
+            pluginLoadErrorListView.Size = new System.Drawing.Size(504, 130);
+            pluginLoadErrorListView.TabIndex = 0;
+            pluginLoadErrorListView.UseCompatibleStateImageBehavior = false;
+            pluginLoadErrorListView.View = System.Windows.Forms.View.Details;
+            pluginLoadErrorListView.SelectedIndexChanged += new System.EventHandler(pluginLoadErrorListView_SelectedIndexChanged);
+            //
+            // plugInLoadErrorListViewColumnHeader
+            //
+            plugInLoadErrorListViewColumnHeader.Text = "File Name";
+            plugInLoadErrorListViewColumnHeader.Width = 600;
             //
             // updateFilterListBw
             //
@@ -528,9 +611,9 @@ namespace PSFilterPdn
             //
             donateLink.AutoSize = true;
             donateLink.BackColor = System.Drawing.Color.Transparent;
-            donateLink.Location = new System.Drawing.Point(9, 373);
+            donateLink.Location = new System.Drawing.Point(16, 484);
             donateLink.Name = "donateLink";
-            donateLink.Size = new System.Drawing.Size(45, 13);
+            donateLink.Size = new System.Drawing.Size(48, 15);
             donateLink.TabIndex = 4;
             donateLink.TabStop = true;
             donateLink.Text = "Donate!";
@@ -538,19 +621,13 @@ namespace PSFilterPdn
             //
             // PsFilterPdnConfigDialog
             //
-            AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            ClientSize = new System.Drawing.Size(484, 403);
+            ClientSize = new System.Drawing.Size(561, 511);
             Controls.Add(donateLink);
             Controls.Add(tabControl1);
             Controls.Add(buttonOK);
             Controls.Add(buttonCancel);
-            Location = new System.Drawing.Point(0, 0);
             Name = "PsFilterPdnConfigDialog";
             Text = "8bf Filter";
-            Controls.SetChildIndex(buttonCancel, 0);
-            Controls.SetChildIndex(buttonOK, 0);
-            Controls.SetChildIndex(tabControl1, 0);
-            Controls.SetChildIndex(donateLink, 0);
             tabControl1.ResumeLayout(false);
             filterTab.ResumeLayout(false);
             filterTab.PerformLayout();
@@ -558,6 +635,9 @@ namespace PSFilterPdn
             folderLoadPanel.PerformLayout();
             dirTab.ResumeLayout(false);
             dirTab.PerformLayout();
+            diagnosticsTab.ResumeLayout(false);
+            loadErrorsGroupBox.ResumeLayout(false);
+            loadErrorsGroupBox.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -1027,18 +1107,29 @@ namespace PSFilterPdn
             }
         }
 
-        private sealed class UpdateFilterListParam
+        private sealed class WorkerArgs
         {
-            public Dictionary<string, List<TreeNodeEx>> items;
             public string[] directories;
             public bool recurseSubDirectories;
 
-            public UpdateFilterListParam(ICollection<string> searchDirectories, bool searchSubDirectories)
+            public WorkerArgs(ICollection<string> searchDirectories, bool searchSubDirectories)
             {
-                items = null;
                 directories = new string[searchDirectories.Count];
                 searchDirectories.CopyTo(directories, 0);
                 recurseSubDirectories = searchSubDirectories;
+            }
+        }
+
+        private sealed class WorkerResult
+        {
+            public readonly IReadOnlyDictionary<string, List<TreeNodeEx>> nodes;
+            public readonly IReadOnlyDictionary<string, List<string>> errors;
+
+            public WorkerResult(IReadOnlyDictionary<string, List<TreeNodeEx>> nodes,
+                                IReadOnlyDictionary<string, List<string>> errors)
+            {
+                this.nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
+                this.errors = errors;
             }
         }
 
@@ -1051,7 +1142,7 @@ namespace PSFilterPdn
             {
                 if (!updateFilterListBw.IsBusy)
                 {
-                    UpdateFilterListParam uflp = new(searchDirectories, subDirSearchCb.Checked);
+                    WorkerArgs args = new(searchDirectories, subDirSearchCb.Checked);
                     int count = searchDirectories.Count;
 
                     filterTree.Nodes.Clear();
@@ -1063,7 +1154,7 @@ namespace PSFilterPdn
 
                     Cursor = Cursors.WaitCursor;
 
-                    updateFilterListBw.RunWorkerAsync(uflp);
+                    updateFilterListBw.RunWorkerAsync(args);
                 }
             }
         }
@@ -1150,9 +1241,24 @@ namespace PSFilterPdn
         private void updateFilterListBw_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = (BackgroundWorker)sender;
-            UpdateFilterListParam args = (UpdateFilterListParam)e.Argument;
+            WorkerArgs args = (WorkerArgs)e.Argument;
 
             Dictionary<string, List<TreeNodeEx>> nodes = new(StringComparer.Ordinal);
+
+            IPluginLoadingLogWriter logWriter;
+
+            if (Debugger.IsAttached)
+            {
+                logWriter = PluginLoadingTraceListenerLogWriter.Instance;
+            }
+            else
+            {
+                logWriter = new PluginLoadingDictionaryLogWriter();
+            }
+
+            ImmutableHashSet<PluginLoadingLogCategory> categories = PluginLoadingLogCategories.Default;
+
+            PluginLoadingLogger logger = new(logWriter, categories);
 
             for (int i = 0; i < args.directories.Length; i++)
             {
@@ -1176,7 +1282,7 @@ namespace PSFilterPdn
                             return;
                         }
 
-                        foreach (PluginData plugin in PluginLoader.LoadFiltersFromFile(enumerator.Current))
+                        foreach (PluginData plugin in PluginLoader.LoadFiltersFromFile(enumerator.Current, logger))
                         {
                             // The **Hidden** category is used for filters that are not directly invoked by the user.
                             // The filters in this category are invoked by other plug-ins using the Photoshop Actions
@@ -1215,9 +1321,7 @@ namespace PSFilterPdn
                 }
             }
 
-            args.items = nodes;
-
-            e.Result = args;
+            e.Result = new WorkerResult(nodes, (logWriter as PluginLoadingDictionaryLogWriter)?.Dictionary);
         }
 
         private void updateFilterListBw_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -1237,12 +1341,13 @@ namespace PSFilterPdn
                 }
                 else
                 {
-                    UpdateFilterListParam parm = (UpdateFilterListParam)e.Result;
+                    WorkerResult result = (WorkerResult)e.Result;
 
-                    filterTreeNodes = new FilterTreeNodeCollection(parm.items);
+                    filterTreeNodes = new FilterTreeNodeCollection(result.nodes);
 
                     EnableFiltersForHostState();
                     PopulateFilterTreeCategories(true);
+                    PopulateLoadErrorList(result.errors);
 
                     folderLoadProgress.Value = 0;
                     folderLoadPanel.Visible = false;
@@ -1253,6 +1358,21 @@ namespace PSFilterPdn
             if (formClosePending)
             {
                 Close();
+            }
+        }
+
+        private void PopulateLoadErrorList(IReadOnlyDictionary<string, List<string>> errors)
+        {
+            pluginLoadErrorListView.Items.Clear();
+            pluginLoadErrorDetailsTextBox.Clear();
+            copyLoadErrorDetailsButton.Enabled = false;
+
+            if (errors != null && errors.Count > 0)
+            {
+                foreach (KeyValuePair<string, List<string>> entry in errors)
+                {
+                    pluginLoadErrorListView.Items.Add(new ListViewItem(entry.Key) { Tag = entry.Value });
+                }
             }
         }
 
@@ -1861,6 +1981,38 @@ namespace PSFilterPdn
                 }
 
                 return false;
+            }
+        }
+
+        private void pluginLoadErrorListView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (pluginLoadErrorListView.SelectedItems.Count > 0)
+            {
+                ListViewItem selectedItem = pluginLoadErrorListView.SelectedItems[0];
+
+                pluginLoadErrorDetailsTextBox.Clear();
+
+                List<string> errorMessages = (List<string>)selectedItem.Tag;
+
+                pluginLoadErrorDetailsTextBox.Text = errorMessages[0];
+
+                if (errorMessages.Count > 1)
+                {
+                    for (int i = 1; i < errorMessages.Count; i++)
+                    {
+                        pluginLoadErrorDetailsTextBox.AppendText("\r\n" + errorMessages[i]);
+                    }
+                }
+
+                copyLoadErrorDetailsButton.Enabled = true;
+            }
+        }
+
+        private void copyLoadErrorDetailsButton_Click(object sender, EventArgs e)
+        {
+            if (pluginLoadErrorDetailsTextBox.Text.Length > 0)
+            {
+                Services.GetService<IClipboardService>().SetText(pluginLoadErrorDetailsTextBox.Text);
             }
         }
     }

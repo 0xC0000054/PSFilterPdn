@@ -27,7 +27,7 @@ namespace PSFilterPdn
         /// </summary>
         /// <param name="items">The items.</param>
         /// <exception cref="ArgumentNullException"><paramref name="items"/> is null.</exception>
-        internal FilterTreeNodeCollection(IDictionary<string, List<TreeNodeEx>> items)
+        internal FilterTreeNodeCollection(IReadOnlyDictionary<string, List<TreeNodeEx>> items)
         {
             if (items == null)
             {

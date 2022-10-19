@@ -10,12 +10,14 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterLoad.PSApi.Loader;
 using PSFilterPdn.Interop;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
@@ -26,109 +28,135 @@ namespace PSFilterLoad.PSApi
         /// Loads the 8bf filters from the specified file.
         /// </summary>
         /// <param name="fileName">The plug-in file name.</param>
+        /// <param name="logger">The logger.</param>
         /// <returns>An enumerable collection containing the filters within the plug-in.</returns>
-        /// <exception cref="System.ArgumentNullException"><paramref name="fileName"/> is null.</exception>
-        internal static unsafe IEnumerable<PluginData> LoadFiltersFromFile(string fileName)
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="fileName"/> is null.
+        /// or
+        /// <paramref name="logger"/> is null.
+        /// </exception>
+        internal static unsafe IEnumerable<PluginData> LoadFiltersFromFile(string fileName, IPluginLoadingLogger logger)
         {
-            if (fileName == null)
+            ArgumentNullException.ThrowIfNull(fileName);
+            ArgumentNullException.ThrowIfNull(logger);
+
+            try
             {
-                throw new ArgumentNullException(nameof(fileName));
-            }
+                Architecture platform = PEFile.GetProcessorArchitecture(fileName);
 
-            Architecture? platform = PEFile.GetProcessorArchitecture(fileName);
-
-            if (!platform.HasValue || !DllProcessorArchtectureIsSupported(platform.Value))
-            {
-                // Ignore any DLLs that cannot be used on the current platform.
-                return System.Linq.Enumerable.Empty<PluginData>();
-            }
-
-            QueryFilter queryFilter = new(fileName, platform.Value);
-
-            // Use LOAD_LIBRARY_AS_DATAFILE to prevent a BadImageFormatException from being thrown if the file is a different processor architecture than the parent process.
-            using (SafeLibraryHandle dll = UnsafeNativeMethods.LoadLibraryExW(fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE))
-            {
-                if (!dll.IsInvalid)
+                if (!DllProcessorArchtectureIsSupported(platform))
                 {
-                    GCHandle handle = GCHandle.Alloc(queryFilter, GCHandleType.Normal);
-                    try
+                    logger.Log(fileName,
+                               PluginLoadingLogCategory.Error,
+                               "The plug-in processor architecture is not supported.");
+
+
+                    // Ignore any DLLs that cannot be used on the current platform.
+                    return Enumerable.Empty<PluginData>();
+                }
+
+                QueryFilter queryFilter = new(fileName, platform, logger);
+
+                // Use LOAD_LIBRARY_AS_DATAFILE to prevent a BadImageFormatException from being thrown if the file is a different processor architecture than the parent process.
+                using (SafeLibraryHandle dll = UnsafeNativeMethods.LoadLibraryExW(fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE))
+                {
+                    if (dll.IsInvalid)
                     {
-                        IntPtr callback = GCHandle.ToIntPtr(handle);
-                        if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "PiPl", &EnumPiPL, callback))
+                        int lastError = Marshal.GetLastWin32Error();
+
+                        logger.Log(fileName,
+                                   PluginLoadingLogCategory.Error,
+                                   "LoadLibraryExW failed with error code 0x{0}",
+                                   new Win32ErrorCodeHexStringFormatter(lastError));
+                    }
+                    else
+                    {
+                        GCHandle handle = GCHandle.Alloc(queryFilter, GCHandleType.Normal);
+                        try
                         {
-                            int lastError = Marshal.GetLastWin32Error();
-                            if (ResourceNotFound(lastError))
+                            IntPtr callback = GCHandle.ToIntPtr(handle);
+                            if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "PiPl", &EnumPiPL, callback))
                             {
-                                // If there are no PiPL resources scan for Photoshop 2.5's PiMI resources.
-                                // The PiMI resources are stored in two parts:
-                                // The first resource identifies the plug-in type and stores a plug-in identifier string.
-                                // The general plug-in data is located in a PiMI resource with the same resource number
-                                // as the type-specific resource.
-                                //
-                                // Filter plug-ins use the type-specific resource _8BFM.
-                                if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "_8BFM", &EnumPiMI, callback))
+                                int lastError = Marshal.GetLastWin32Error();
+                                if (ResourceNotFound(lastError))
                                 {
-#if DEBUG
-                                    lastError = Marshal.GetLastWin32Error();
+                                    // If there are no PiPL resources scan for Photoshop 2.5's PiMI resources.
+                                    // The PiMI resources are stored in two parts:
+                                    // The first resource identifies the plug-in type and stores a plug-in identifier string.
+                                    // The general plug-in data is located in a PiMI resource with the same resource number
+                                    // as the type-specific resource.
+                                    //
+                                    // Filter plug-ins use the type-specific resource _8BFM.
+                                    if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "_8BFM", &EnumPiMI, callback))
+                                    {
+                                        lastError = Marshal.GetLastWin32Error();
+                                        if (!EnumResourceCallbackWasCancelled(lastError))
+                                        {
+                                            if (ResourceNotFound(lastError))
+                                            {
+                                                logger.Log(fileName,
+                                                           PluginLoadingLogCategory.Error,
+                                                           "The file does not have a filter resource.");
+                                            }
+                                            else
+                                            {
+                                                logger.Log(fileName,
+                                                           PluginLoadingLogCategory.Error,
+                                                           "EnumResourceNames(PiMI) failed with error code 0x{0}.",
+                                                           new Win32ErrorCodeHexStringFormatter(lastError));
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
                                     if (!EnumResourceCallbackWasCancelled(lastError))
                                     {
-                                        if (ResourceNotFound(lastError))
-                                        {
-                                            DebugUtils.Ping(DebugFlags.PiPL, string.Format("The file is not a valid 8bf filter in {0}", fileName));
-                                        }
-                                        else
-                                        {
-                                            DebugUtils.Ping(DebugFlags.PiPL, string.Format("EnumResourceNames(PiMI) failed with error code 0x{0:X8} for {1}",
-                                                                                           lastError,
-                                                                                           fileName));
-                                        }
-#endif
+                                        logger.Log(fileName,
+                                                   PluginLoadingLogCategory.Error,
+                                                   "EnumResourceNames(PiPL) failed with error code 0x{0}",
+                                                   new Win32ErrorCodeHexStringFormatter(lastError));
                                     }
                                 }
                             }
-                            else
+                        }
+                        finally
+                        {
+                            if (handle.IsAllocated)
                             {
-#if DEBUG
-                                if (!EnumResourceCallbackWasCancelled(lastError))
-                                {
-                                    DebugUtils.Ping(DebugFlags.PiPL, string.Format("EnumResourceNames(PiPL) failed with error code 0x{0:X8} for {1}",
-                                                                                   lastError,
-                                                                                   fileName));
-                                }
-#endif
+                                handle.Free();
                             }
                         }
                     }
-                    finally
+                }
+
+                List<PluginData> pluginData = queryFilter.plugins;
+                int count = pluginData.Count;
+                if (count > 1)
+                {
+                    // If the DLL contains more than one filter, add a list of all the entry points to each individual filter.
+                    // Per the SDK only one entry point in a module will display the about box the rest are dummy calls so we must call all of them.
+
+                    string[] entryPoints = new string[count];
+                    for (int i = 0; i < count; i++)
                     {
-                        if (handle.IsAllocated)
-                        {
-                            handle.Free();
-                        }
+                        entryPoints[i] = pluginData[i].EntryPoint;
+                    }
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        pluginData[i].ModuleEntryPoints = new ReadOnlyCollection<string>(entryPoints);
                     }
                 }
-            }
 
-            List<PluginData> pluginData = queryFilter.plugins;
-            int count = pluginData.Count;
-            if (count > 1)
+                return pluginData;
+            }
+            catch (Exception ex)
             {
-                // If the DLL contains more than one filter, add a list of all the entry points to each individual filter.
-                // Per the SDK only one entry point in a module will display the about box the rest are dummy calls so we must call all of them.
+                logger.Log(fileName, PluginLoadingLogCategory.Error, ex);
 
-                string[] entryPoints = new string[count];
-                for (int i = 0; i < count; i++)
-                {
-                    entryPoints[i] = pluginData[i].EntryPoint;
-                }
-
-                for (int i = 0; i < count; i++)
-                {
-                    pluginData[i].ModuleEntryPoints = new ReadOnlyCollection<string>(entryPoints);
-                }
+                return Enumerable.Empty<PluginData>();
             }
-
-            return pluginData;
         }
 
         /// <summary>
@@ -180,9 +208,9 @@ namespace PSFilterLoad.PSApi
 
                 if (filterRes == IntPtr.Zero)
                 {
-#if DEBUG
-                    System.Diagnostics.Debug.WriteLine(string.Format("FindResource failed for _8BFM in {0}", query.fileName));
-#endif
+                    query.logger.Log(query.fileName,
+                                     PluginLoadingLogCategory.Error,
+                                     "FindResource failed for _8BFM.");
                     return BOOL.TRUE;
                 }
 
@@ -190,9 +218,9 @@ namespace PSFilterLoad.PSApi
 
                 if (filterLoad == IntPtr.Zero)
                 {
-#if DEBUG
-                    System.Diagnostics.Debug.WriteLine(string.Format("LoadResource failed for _8BFM in {0}", query.fileName));
-#endif
+                    query.logger.Log(query.fileName,
+                                     PluginLoadingLogCategory.Error,
+                                     "LoadResource failed for _8BFM.");
                     return BOOL.TRUE;
                 }
 
@@ -200,9 +228,9 @@ namespace PSFilterLoad.PSApi
 
                 if (filterLock == IntPtr.Zero)
                 {
-#if DEBUG
-                    System.Diagnostics.Debug.WriteLine(string.Format("LockResource failed for _8BFM in {0}", query.fileName));
-#endif
+                    query.logger.Log(query.fileName,
+                                     PluginLoadingLogCategory.Error,
+                                     "LockResource failed for _8BFM.");
                     return BOOL.TRUE;
                 }
 
@@ -221,21 +249,20 @@ namespace PSFilterLoad.PSApi
                 // The entry point number is the same as the resource number.
                 string entryPoint = "ENTRYPOINT" + pluginResourceNumber;
 
-                PluginData enumData = new(query.fileName, entryPoint, category, title);
-
-                if (enumData.IsValid())
+                if (!ValidatePluginResourceData(category, title, entryPoint, query, "PiMI", lpszName))
                 {
-                    query.plugins.Add(enumData);
+                    return BOOL.TRUE;
                 }
+
+                query.plugins.Add(new PluginData(query.fileName, entryPoint, category, title));
             }
             catch (Exception ex)
             {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("Exception thrown when enumerating PiMI resource '{0}' in {1}\n\n {2}",
-                                                                 pluginResourceNumber,
-                                                                 query.fileName,
-                                                                 ex));
-#endif
+                query.logger.Log(query.fileName,
+                                 PluginLoadingLogCategory.Error,
+                                 "Exception thrown when enumerating PiMI resource '{0}': \n\n {1}",
+                                 pluginResourceNumber,
+                                 ex);
                 return BOOL.FALSE;
             }
 
@@ -253,28 +280,29 @@ namespace PSFilterLoad.PSApi
                 IntPtr hRes = UnsafeNativeMethods.FindResourceW(hModule, lpszName, lpszType);
                 if (hRes == IntPtr.Zero)
                 {
-#if DEBUG
-                    System.Diagnostics.Debug.WriteLine(string.Format("FindResource failed for PiPL in {0}", query.fileName));
-#endif
+                    query.logger.Log(query.fileName,
+                                     PluginLoadingLogCategory.Error,
+                                     "FindResource failed for PiPL.");
                     return BOOL.TRUE;
                 }
 
                 IntPtr loadRes = UnsafeNativeMethods.LoadResource(hModule, hRes);
                 if (loadRes == IntPtr.Zero)
                 {
-#if DEBUG
-                    System.Diagnostics.Debug.WriteLine(string.Format("LoadResource failed for PiPL in {0}", query.fileName));
-#endif
+                    query.logger.Log(query.fileName,
+                                     PluginLoadingLogCategory.Error,
+                                     "LoadResource failed for PiPL.",
+                                     query.fileName);
                     return BOOL.TRUE;
                 }
 
                 IntPtr lockRes = UnsafeNativeMethods.LockResource(loadRes);
                 if (lockRes == IntPtr.Zero)
                 {
-#if DEBUG
-                    System.Diagnostics.Debug.WriteLine(string.Format("LockResource failed for PiPL in {0}", query.fileName));
-#endif
-
+                    query.logger.Log(query.fileName,
+                                     PluginLoadingLogCategory.Error,
+                                     "LockResource failed for PiPL.",
+                                     query.fileName);
                     return BOOL.TRUE;
                 }
 
@@ -284,9 +312,11 @@ namespace PSFilterLoad.PSApi
 
                 if (version != PSConstants.LatestPiPLVersion)
                 {
-#if DEBUG
-                    System.Diagnostics.Debug.WriteLine(string.Format("Invalid PiPL version in {0}: {1}, Expected version {2}", query.fileName, version, PSConstants.LatestPiPLVersion));
-#endif
+                    query.logger.Log(query.fileName,
+                                     PluginLoadingLogCategory.Error,
+                                     "Invalid PiPL version: {0}, expected version {1}.",
+                                     version,
+                                     PSConstants.LatestPiPLVersion);
                     return BOOL.TRUE;
                 }
                 string entryPoint = null;
@@ -317,11 +347,14 @@ namespace PSFilterLoad.PSApi
                     byte* dataPtr = pipp->propertyData;
                     if (propKey == PIPropertyID.PIKindProperty)
                     {
-                        if (*(uint*)dataPtr != PSConstants.FilterKind)
+                        uint kind = *(uint*)dataPtr;
+                        if (kind != PSConstants.FilterKind)
                         {
-#if DEBUG
-                            System.Diagnostics.Debug.WriteLine(string.Format("{0} is not a valid Photoshop Filter.", query.fileName));
-#endif
+                            query.logger.Log(query.fileName,
+                                             PluginLoadingLogCategory.Error,
+                                             "PiPL resource '{0}' is not a Photoshop Filter; expected type 8BFM, actual type: '{1}'.",
+                                             lpszName,
+                                             new FourCCAsStringFormatter(kind));
                             return BOOL.TRUE;
                         }
                     }
@@ -338,10 +371,14 @@ namespace PSFilterLoad.PSApi
                         if (major > PSConstants.latestFilterVersion ||
                             major == PSConstants.latestFilterVersion && minor > PSConstants.latestFilterSubVersion)
                         {
-#if DEBUG
-                            System.Diagnostics.Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported",
-                                new object[] { query.fileName, major, minor, PSConstants.latestFilterVersion, PSConstants.latestFilterSubVersion }));
-#endif
+                            query.logger.Log(query.fileName,
+                                             PluginLoadingLogCategory.Error,
+                                             "PiPL resource '{0}' requires newer filter interface version {1}.{2} and only version {3}.{4} is supported",
+                                             lpszName,
+                                             major,
+                                             minor,
+                                             PSConstants.latestFilterVersion,
+                                             PSConstants.latestFilterSubVersion);
                             return BOOL.TRUE;
                         }
                     }
@@ -349,9 +386,10 @@ namespace PSFilterLoad.PSApi
                     {
                         if ((dataPtr[0] & PSConstants.flagSupportsRGBColor) != PSConstants.flagSupportsRGBColor)
                         {
-#if DEBUG
-                            System.Diagnostics.Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", query.fileName));
-#endif
+                            query.logger.Log(query.fileName,
+                                             PluginLoadingLogCategory.Error,
+                                             "PiPL resource '{0}' does not support the RGBColor image mode.",
+                                             lpszName);
                             return BOOL.TRUE;
                         }
                     }
@@ -399,38 +437,48 @@ namespace PSFilterLoad.PSApi
                         uint host = *(uint*)dataPtr;
                         if (host != PSConstants.kPhotoshopSignature && host != PSConstants.AnyHostSignature)
                         {
-#if DEBUG
-                            System.Diagnostics.Debug.WriteLine(string.Format("{0} requires host '{1}'.", query.fileName, DebugUtils.PropToString(host)));
-#endif
+                            query.logger.Log(query.fileName,
+                                             PluginLoadingLogCategory.Error,
+                                             "PiPL resource '{0}' requires host '{1}'.",
+                                             lpszName,
+                                             new FourCCAsStringFormatter(host));
                             return BOOL.TRUE;
                         }
                     }
-#if DEBUG
                     else
                     {
-                        DebugUtils.Ping(DebugFlags.PiPL, string.Format("Unsupported property '{0}' in {1}", DebugUtils.PropToString(propKey), query.fileName));
+                        query.logger.Log(query.fileName,
+                                         PluginLoadingLogCategory.Warning,
+                                         "PiPL resource '{0}' has an unsupported property '{1}'.",
+                                         lpszName,
+                                         new FourCCAsStringFormatter(propKey));
                     }
-#endif
 
                     int propertyDataPaddedLength = (propertyLength + 3) & ~3;
                     propPtr = pipp->propertyData + propertyDataPaddedLength;
                 }
 
-                PluginData enumData = new(query.fileName, entryPoint, category, title, filterInfo, query.runWith32BitShim, aete, enableInfo);
-
-                if (enumData.IsValid())
+                if (!ValidatePluginResourceData(category, title, entryPoint, query, "PiPL", lpszName))
                 {
-                    query.plugins.Add(enumData);
+                    return BOOL.TRUE;
                 }
+
+                query.plugins.Add(new PluginData(query.fileName,
+                                                 entryPoint,
+                                                 category,
+                                                 title,
+                                                 filterInfo,
+                                                 query.runWith32BitShim,
+                                                 aete,
+                                                 enableInfo));
             }
             catch (Exception ex)
             {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("Exception thrown when enumerating PiMI resource '{0}' in {1}\n\n {2}",
-                                                                 lpszName,
-                                                                 query.fileName,
-                                                                 ex));
-#endif
+                query.logger.Log(query.fileName,
+                                 PluginLoadingLogCategory.Error,
+                                 "Exception thrown when enumerating PiPL resource '{0}':\n\n {1}",
+                                 lpszName,
+                                 ex);
                 return BOOL.FALSE;
             }
 
@@ -467,27 +515,27 @@ namespace PSFilterLoad.PSApi
 
             if (hRes == IntPtr.Zero)
             {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("FindResource failed for PiMI in {0}", query.fileName));
-#endif
+                query.logger.Log(query.fileName,
+                                 PluginLoadingLogCategory.Error,
+                                 "FindResource failed for PiMI.");
                 return true;
             }
 
             IntPtr loadRes = UnsafeNativeMethods.LoadResource(hModule, hRes);
             if (loadRes == IntPtr.Zero)
             {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("LoadResource failed for PiMI in {0}", query.fileName));
-#endif
+                query.logger.Log(query.fileName,
+                                 PluginLoadingLogCategory.Error,
+                                 "LoadResource failed for PiMI.");
                 return true;
             }
 
             IntPtr lockRes = UnsafeNativeMethods.LockResource(loadRes);
             if (lockRes == IntPtr.Zero)
             {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("LockResource failed for PiMI in {0}", query.fileName));
-#endif
+                query.logger.Log(query.fileName,
+                                 PluginLoadingLogCategory.Error,
+                                 "LockResource failed for PiMI.");
                 return true;
             }
 
@@ -505,11 +553,10 @@ namespace PSFilterLoad.PSApi
             else
             {
                 // The category string is longer than int.MaxValue.
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("PiMI resource {0} has an invalid category name in {1}",
-                                                   lpszName,
-                                                   query.fileName));
-#endif
+                query.logger.Log(query.fileName,
+                                 PluginLoadingLogCategory.Error,
+                                 "PiMI resource '{0}' has an invalid category name.",
+                                 lpszName);
                 return false;
             }
 
@@ -523,30 +570,91 @@ namespace PSFilterLoad.PSApi
             if (info->version > PSConstants.latestFilterVersion ||
                (info->version == PSConstants.latestFilterVersion && info->subVersion > PSConstants.latestFilterSubVersion))
             {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported",
-                    new object[] { query.fileName, info->version, info->subVersion, PSConstants.latestFilterVersion, PSConstants.latestFilterSubVersion }));
-#endif
+                query.logger.Log(query.fileName,
+                                 PluginLoadingLogCategory.Error,
+                                 "PiMI resource '{0}' requires a newer filter interface version {1}.{2} and only version {3}.{4} is supported",
+                                 lpszName,
+                                 info->version,
+                                 info->subVersion,
+                                 PSConstants.latestFilterVersion,
+                                 PSConstants.latestFilterSubVersion);
                 return false;
             }
 
             if ((info->supportsMode & PSConstants.supportsRGBColor) != PSConstants.supportsRGBColor)
             {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", query.fileName));
-#endif
+                query.logger.Log(query.fileName,
+                                 PluginLoadingLogCategory.Error,
+                                 "PiMI resource '{0}' does not support the RGBColor image mode.",
+                                 lpszName);
                 return false;
             }
 
             if (info->requireHost != PSConstants.kPhotoshopSignature && info->requireHost != PSConstants.AnyHostSignature)
             {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("{0} requires host '{1}'.", query.fileName, DebugUtils.PropToString(info->requireHost)));
-#endif
+                query.logger.Log(query.fileName,
+                                 PluginLoadingLogCategory.Error,
+                                 "PiMI resource '{0}' requires host '{1}'.",
+                                 lpszName,
+                                 new FourCCAsStringFormatter(info->requireHost));
                 return false;
             }
 
             return true;
+        }
+
+        private static bool ValidatePluginResourceData(string category,
+                                                       string title,
+                                                       string entryPoint,
+                                                       QueryFilter query,
+                                                       string pluginResourceType,
+                                                       IntPtr pluginResourceName)
+        {
+            bool result = false;
+
+            if (string.IsNullOrWhiteSpace(category))
+            {
+                query.logger.Log(query.fileName, PluginLoadingLogCategory.Error,
+                                 "{0} resource '{1}' has an invalid category name.",
+                                 pluginResourceType,
+                                 pluginResourceName);
+            }
+            else if (category.StartsWith("**Hidden*", StringComparison.Ordinal))
+            {
+                // The **Hidden** category is used for filters that are not directly invoked by the user.
+                // The filters in this category are invoked by other plug-ins using the Photoshop Actions
+                // scripting suites.
+                //
+                // We check for the category name **Hidden* because that is what the Dfine 2 filter in
+                // the Google Nik Collection uses for its additional helper filters.
+                query.logger.Log(query.fileName,
+                                 PluginLoadingLogCategory.Error,
+                                 "{0} resource '{1}' can only be executed by scripting plug-ins.",
+                                 pluginResourceType,
+                                 pluginResourceName);
+            }
+            else if (string.IsNullOrWhiteSpace(title))
+            {
+                query.logger.Log(query.fileName,
+                                 PluginLoadingLogCategory.Error,
+                                 "{0} resource '{1}' has an invalid title.",
+                                 pluginResourceType,
+                                 pluginResourceName);
+            }
+            else if (string.IsNullOrWhiteSpace(entryPoint))
+            {
+                query.logger.Log(query.fileName,
+                                 PluginLoadingLogCategory.Error,
+                                 "{0} resource '{1}' has an invalid entry point name.",
+                                 pluginResourceType,
+                                 pluginResourceName);
+            }
+            else
+            {
+                result = true;
+            }
+
+            return result;
         }
     }
 }

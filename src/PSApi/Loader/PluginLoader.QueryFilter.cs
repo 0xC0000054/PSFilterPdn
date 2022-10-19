@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterLoad.PSApi.Loader;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace PSFilterLoad.PSApi
         private sealed class QueryFilter
         {
             public readonly string fileName;
+            public readonly IPluginLoadingLogger logger;
             public readonly uint platformEntryPoint;
             public readonly bool runWith32BitShim;
             public List<PluginData> plugins;
@@ -32,9 +34,10 @@ namespace PSFilterLoad.PSApi
             /// <param name="fileName">The file name of the plug-in.</param>
             /// <param name="platform">The processor architecture that the plug-in was built for.</param>
             /// <exception cref="System.PlatformNotSupportedException">The processor architecture specified by <paramref name="platform"/> is not supported.</exception>
-            public QueryFilter(string fileName, Architecture platform)
+            public QueryFilter(string fileName, Architecture platform, IPluginLoadingLogger logger)
             {
                 this.fileName = fileName;
+                this.logger = logger;
                 switch (platform)
                 {
                     case Architecture.X86:
