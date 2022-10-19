@@ -99,18 +99,7 @@ namespace PSFilterPdn
             {
                 RegionPtr<ColorBgra32> region = bitmapLock.AsRegionPtr();
 
-                foreach (RegionRowPtr<ColorBgra32> row in region.Rows)
-                {
-                    ColorBgra32* ptr = row.Ptr;
-                    ColorBgra32* ptrEnd = row.EndPtr;
-
-                    while (ptr < ptrEnd)
-                    {
-                        ptr->A = 255;
-
-                        ptr++;
-                    }
-                }
+                PixelKernels.SetAlphaChannel(region, ColorAlpha8.Opaque);
             }
         }
     }
