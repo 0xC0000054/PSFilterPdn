@@ -28,7 +28,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="fileName">The plug-in file name.</param>
         /// <returns>An enumerable collection containing the filters within the plug-in.</returns>
         /// <exception cref="System.ArgumentNullException"><paramref name="fileName"/> is null.</exception>
-        internal static IEnumerable<PluginData> LoadFiltersFromFile(string fileName)
+        internal static unsafe IEnumerable<PluginData> LoadFiltersFromFile(string fileName)
         {
             if (fileName == null)
             {
@@ -55,7 +55,7 @@ namespace PSFilterLoad.PSApi
                     try
                     {
                         IntPtr callback = GCHandle.ToIntPtr(handle);
-                        if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "PiPl", new UnsafeNativeMethods.EnumResNameDelegate(EnumPiPL), callback))
+                        if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "PiPl", &EnumPiPL, callback))
                         {
                             // If there are no PiPL resources scan for Photoshop 2.5's PiMI resources.
                             // The PiMI resources are stored in two parts:
@@ -64,7 +64,7 @@ namespace PSFilterLoad.PSApi
                             // as the type-specific resource.
                             //
                             // Filter plug-ins use the type-specific resource _8BFM.
-                            if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "_8BFM", new UnsafeNativeMethods.EnumResNameDelegate(EnumPiMI), callback))
+                            if (!UnsafeNativeMethods.EnumResourceNamesW(dll, "_8BFM", &EnumPiMI, callback))
                             {
 #if DEBUG
                                 DebugUtils.Ping(DebugFlags.PiPL, string.Format("EnumResourceNames(PiPL, PiMI) failed for {0}", fileName));
@@ -140,7 +140,8 @@ namespace PSFilterLoad.PSApi
             return result;
         }
 
-        private static unsafe bool EnumPiMI(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
+        [UnmanagedCallersOnly]
+        private static unsafe BOOL EnumPiMI(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
         {
             GCHandle handle = GCHandle.FromIntPtr(lParam);
             QueryFilter query = (QueryFilter)handle.Target;
@@ -152,7 +153,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine(string.Format("FindResource failed for _8BFM in {0}", query.fileName));
 #endif
-                return true;
+                return BOOL.TRUE;
             }
 
             IntPtr filterLoad = UnsafeNativeMethods.LoadResource(hModule, filterRes);
@@ -162,7 +163,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine(string.Format("LoadResource failed for _8BFM in {0}", query.fileName));
 #endif
-                return true;
+                return BOOL.TRUE;
             }
 
             IntPtr filterLock = UnsafeNativeMethods.LockResource(filterLoad);
@@ -172,7 +173,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine(string.Format("LockResource failed for _8BFM in {0}", query.fileName));
 #endif
-                return true;
+                return BOOL.TRUE;
             }
 
             // The _8BFM resource format starts with a 2-byte version number, this is followed by the NUL-terminated filter
@@ -184,7 +185,7 @@ namespace PSFilterLoad.PSApi
             if (!GetPiMIResourceData(hModule, lpszName, query, out string category))
             {
                 // The filter is incompatible or some other error occurred.
-                return true;
+                return BOOL.TRUE;
             }
 
             // The entry point number is the same as the resource number.
@@ -197,10 +198,11 @@ namespace PSFilterLoad.PSApi
                 query.plugins.Add(enumData);
             }
 
-            return true;
+            return BOOL.TRUE;
         }
 
-        private static unsafe bool EnumPiPL(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
+        [UnmanagedCallersOnly]
+        private static unsafe BOOL EnumPiPL(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam)
         {
             GCHandle handle = GCHandle.FromIntPtr(lParam);
             QueryFilter query = (QueryFilter)handle.Target;
@@ -211,7 +213,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine(string.Format("FindResource failed for PiPL in {0}", query.fileName));
 #endif
-                return true;
+                return BOOL.TRUE;
             }
 
             IntPtr loadRes = UnsafeNativeMethods.LoadResource(hModule, hRes);
@@ -220,7 +222,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine(string.Format("LoadResource failed for PiPL in {0}", query.fileName));
 #endif
-                return true;
+                return BOOL.TRUE;
             }
 
             IntPtr lockRes = UnsafeNativeMethods.LockResource(loadRes);
@@ -230,7 +232,7 @@ namespace PSFilterLoad.PSApi
                 System.Diagnostics.Debug.WriteLine(string.Format("LockResource failed for PiPL in {0}", query.fileName));
 #endif
 
-                return true;
+                return BOOL.TRUE;
             }
 
             PiPLResourceHeader* resourceHeader = (PiPLResourceHeader*)lockRes;
@@ -242,7 +244,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine(string.Format("Invalid PiPL version in {0}: {1}, Expected version {2}", query.fileName, version, PSConstants.LatestPiPLVersion));
 #endif
-                return true;
+                return BOOL.TRUE;
             }
             string entryPoint = null;
             string category = null;
@@ -277,7 +279,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                         System.Diagnostics.Debug.WriteLine(string.Format("{0} is not a valid Photoshop Filter.", query.fileName));
 #endif
-                        return true;
+                        return BOOL.TRUE;
                     }
                 }
                 else if (propKey == query.platformEntryPoint)
@@ -297,7 +299,7 @@ namespace PSFilterLoad.PSApi
                         System.Diagnostics.Debug.WriteLine(string.Format("{0} requires newer filter interface version {1}.{2} and only version {3}.{4} is supported",
                             new object[] { query.fileName, major, minor, PSConstants.latestFilterVersion, PSConstants.latestFilterSubVersion }));
 #endif
-                        return true;
+                        return BOOL.TRUE;
                     }
                 }
                 else if (propKey == PIPropertyID.PIImageModesProperty)
@@ -307,7 +309,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                         System.Diagnostics.Debug.WriteLine(string.Format("{0} does not support the plugInModeRGBColor image mode.", query.fileName));
 #endif
-                        return true;
+                        return BOOL.TRUE;
                     }
                 }
                 else if (propKey == PIPropertyID.PICategoryProperty)
@@ -357,7 +359,7 @@ namespace PSFilterLoad.PSApi
 #if DEBUG
                         System.Diagnostics.Debug.WriteLine(string.Format("{0} requires host '{1}'.", query.fileName, DebugUtils.PropToString(host)));
 #endif
-                        return true;
+                        return BOOL.TRUE;
                     }
                 }
 #if DEBUG
@@ -378,7 +380,7 @@ namespace PSFilterLoad.PSApi
                 query.plugins.Add(enumData);
             }
 
-            return true;
+            return BOOL.TRUE;
         }
 
         private static unsafe bool GetPiMIResourceData(IntPtr hModule, IntPtr lpszName, QueryFilter query, out string category)
