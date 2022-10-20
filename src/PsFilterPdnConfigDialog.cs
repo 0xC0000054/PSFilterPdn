@@ -680,6 +680,8 @@ namespace PSFilterPdn
             // PsFilterPdnConfigDialog
             //
             ClientSize = new System.Drawing.Size(561, 511);
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             Controls.Add(donateLink);
             Controls.Add(tabControl1);
             Controls.Add(buttonOK);
