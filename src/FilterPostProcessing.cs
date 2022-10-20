@@ -50,46 +50,11 @@ namespace PSFilterPdn
             using (IBitmapLock<ColorBgra32> dstLock = destination.Lock(bounds, BitmapLockOptions.Write))
             using (IBitmapLock<ColorAlpha8> maskLock = environment.Selection.MaskBitmap.Lock(bounds))
             {
-                // TODO: Replace this loop with PixelKernels.UnderWrite() when Rick makes PixelKernels public.
                 RegionPtr<ColorBgra32> original = srcLock.AsRegionPtr();
                 RegionPtr<ColorBgra32> dst = dstLock.AsRegionPtr();
                 RegionPtr<ColorAlpha8> mask = maskLock.AsRegionPtr();
 
-                RegionRowPtrEnumerator<ColorBgra32, ColorBgra32, ColorAlpha8> enumerator = RegionPtr.EnumerateRowsMultiple(original, dst, mask);
-
-                while (enumerator.MoveNext())
-                {
-                    ColorBgra32* originalPixel = enumerator.CurrentPtr1;
-                    ColorBgra32* dstPixel= enumerator.CurrentPtr2;
-                    ColorAlpha8* maskPixel = enumerator.CurrentPtr3;
-
-                    for (int x = 0; x < enumerator.Width; x++)
-                    {
-                        // We do the following operations based on the value of the mask pixel:
-                        //
-                        // 0: overwrite the destination pixel with the original pixel from the source image
-                        // 255: nothing -- the mask is fully opaque so blending is not required.
-                        // 1-254: blend the original and new colors based on the mask pixel value.
-                        byte maskValue = maskPixel->A;
-
-                        switch (maskValue)
-                        {
-                            case 0:
-                                dstPixel->Bgra = originalPixel->Bgra;
-                                break;
-                            case 255:
-                                // The mask is fully opaque -- nothing to do.
-                                break;
-                            default:
-                                *dstPixel = ColorBgra.Blend(*originalPixel, *dstPixel, maskValue);
-                                break;
-                        }
-
-                        originalPixel++;
-                        dstPixel++;
-                        maskPixel++;
-                    }
-                }
+                PixelKernels.Underwrite(original, dst, mask);
             }
         }
 
