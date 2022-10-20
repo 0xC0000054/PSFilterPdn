@@ -39,6 +39,23 @@
     <Compile Include="..\PSApi\AETEValue.cs" Link="PSApi\AETEValue.cs" />
     <Compile Include="..\PSApi\DescriptorRegistryItem.cs" Link="PSApi\DescriptorRegistryItem.cs" />
     <Compile Include="..\PSApi\DescriptorRegistryValues.cs" Link="PSApi\DescriptorRegistryValues.cs" />
+    <Compile Include="..\PSApi\Diagnostics\Formatters\CStringPointerFormatter.cs" Link="PSApi\Diagnostics\Formatters\CStringPointerFormatter.cs" />
+    <Compile Include="..\PSApi\Diagnostics\Formatters\Fixed16AsIntegerStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\Fixed16AsIntegerStringFormatter.cs" />
+    <Compile Include="..\PSApi\Diagnostics\Formatters\FourCCAsStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\FourCCAsStringFormatter.cs" />
+    <Compile Include="..\PSApi\Diagnostics\Formatters\HandleAsHexStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\HandleAsHexStringFormatter.cs" />
+    <Compile Include="..\PSApi\Diagnostics\Formatters\IntPtrAsHexStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\IntPtrAsHexStringFormatter.cs" />
+    <Compile Include="..\PSApi\Diagnostics\Formatters\PointerAsHexStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\PointerAsHexStringFormatter.cs" />
+    <Compile Include="..\PSApi\Diagnostics\Formatters\PointerAsStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\PointerAsStringFormatter.cs" />
+    <Compile Include="..\PSApi\Diagnostics\Writers\IPluginApiLogWriter.cs" Link="PSApi\Diagnostics\Writers\IPluginApiLogWriter.cs" />
+    <Compile Include="..\PSApi\Diagnostics\Writers\PluginApiFileLogWriter.cs" Link="PSApi\Diagnostics\Writers\PluginApiFileLogWriter.cs" />
+    <Compile Include="..\PSApi\Diagnostics\Writers\PluginApiTraceListenerLogWriter.cs" Link="PSApi\Diagnostics\Writers\PluginApiTraceListenerLogWriter.cs" />
+    <Compile Include="..\PSApi\Diagnostics\IPluginApiLogger.cs" Link="PSApi\Diagnostics\IPluginApiLogger.cs" />
+    <Compile Include="..\PSApi\Diagnostics\PluginApiLogger.cs" Link="PSApi\Diagnostics\PluginApiLogger.cs" />
+    <Compile Include="..\PSApi\Diagnostics\PluginApiLogCategory.cs" Link="PSApi\Diagnostics\PluginApiLogCategory.cs" />
+    <Compile Include="..\PSApi\Diagnostics\PluginApiLogCategories.cs" Link="PSApi\Diagnostics\PluginApiLogCategories.cs" />
+    <Compile Include="..\PSApi\Diagnostics\PluginApiLogger.Null.cs" Link="PSApi\Diagnostics\PluginApiLogger.Null.cs" />
+    <Compile Include="..\PSApi\Diagnostics\PluginApiLogWriterFactory.cs" Link="PSApi\Diagnostics\PluginApiLogWriterFactory.cs" />
+    <Compile Include="..\PSApi\Diagnostics\OptionalParameterGuard.cs" Link="PSApi\Diagnostics\OptionalParameterGuard.cs" />
     <Compile Include="..\PSApi\DictionaryExtensions.cs" Link="PSApi\DictionaryExtensions.cs" />
     <Compile Include="..\PSApi\FilterCase.cs" Link="PSApi\FilterCase.cs" />
     <Compile Include="..\PSApi\FilterCaseInfo.cs" Link="PSApi\FilterCaseInfo.cs" />

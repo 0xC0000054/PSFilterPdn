@@ -25,6 +25,7 @@ namespace PSFilterLoad.PSApi
             public readonly string fileName;
             public readonly IPluginLoadingLogger logger;
             public readonly uint platformEntryPoint;
+            public readonly Architecture processorArchitecture;
             public readonly bool runWith32BitShim;
             public List<PluginData> plugins;
 
@@ -52,6 +53,7 @@ namespace PSFilterLoad.PSApi
                     default:
                         throw new PlatformNotSupportedException($"No platform entry point was defined for { nameof(Architecture) }.{ platform }.");
                 }
+                processorArchitecture = platform;
                 plugins = new List<PluginData>();
                 runWith32BitShim = platform == Architecture.X86 && RuntimeInformation.ProcessArchitecture != Architecture.X86;
             }

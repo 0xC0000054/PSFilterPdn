@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterLoad.PSApi.PICA;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ namespace PSFilterLoad.PSApi
         private readonly IHandleSuiteCallbacks handleSuiteCallbacks;
         private readonly IPropertySuite propertySuite;
         private readonly IResourceSuite resourceSuite;
+        private readonly IPluginApiLogger logger;
         private readonly SPBasicAcquireSuite spAcquireSuite;
         private readonly SPBasicAllocateBlock spAllocateBlock;
         private readonly SPBasicFreeBlock spFreeBlock;
@@ -65,12 +67,14 @@ namespace PSFilterLoad.PSApi
                                            IHandleSuite handleSuite,
                                            IHandleSuiteCallbacks handleSuiteCallbacks,
                                            IPropertySuite propertySuite,
-                                           IResourceSuite resourceSuite)
+                                           IResourceSuite resourceSuite,
+                                           IPluginApiLogger logger)
         {
             this.picaSuiteData = picaSuiteData ?? throw new ArgumentNullException(nameof(picaSuiteData));
             this.handleSuiteCallbacks = handleSuiteCallbacks ?? throw new ArgumentNullException(nameof(handleSuiteCallbacks));
             this.propertySuite = propertySuite ?? throw new ArgumentNullException(nameof(propertySuite));
             this.resourceSuite = resourceSuite ?? throw new ArgumentNullException(nameof(resourceSuite));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             spAcquireSuite = new SPBasicAcquireSuite(SPBasicAcquireSuite);
             spReleaseSuite = new SPBasicReleaseSuite(SPBasicReleaseSuite);
             spIsEqual = new SPBasicIsEqual(SPBasicIsEqual);
@@ -78,7 +82,7 @@ namespace PSFilterLoad.PSApi
             spFreeBlock = new SPBasicFreeBlock(SPBasicFreeBlock);
             spReallocateBlock = new SPBasicReallocateBlock(SPBasicReallocateBlock);
             spUndefined = new SPBasicUndefined(SPBasicUndefined);
-            actionSuites = new ActionSuiteProvider(handleSuite);
+            actionSuites = new ActionSuiteProvider(handleSuite, logger);
             activePICASuites = new ActivePICASuites();
             descriptorRegistrySuite = null;
             bufferSuite = null;
@@ -113,7 +117,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (zstringSuite == null)
                 {
-                    zstringSuite = new ASZStringSuite();
+                    zstringSuite = new ASZStringSuite(logger.CreateInstanceForType(nameof(ASZStringSuite)));
                 }
 
                 return zstringSuite;
@@ -249,19 +253,42 @@ namespace PSFilterLoad.PSApi
             {
                 return PSError.kSPBadParameterError;
             }
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("name: {0}, version: {1}", suiteName, version));
-#endif
+
             int error = PSError.kSPNoError;
             ActivePICASuites.PICASuiteKey suiteKey = new(suiteName, version);
 
             if (activePICASuites.IsLoaded(suiteKey))
             {
+                logger.Log(PluginApiLogCategory.SPBasicSuite, "AddRef on '{0}', version: {1}", suiteName, version);
+
                 *suite = activePICASuites.AddRef(suiteKey);
             }
             else
             {
                 error = AllocatePICASuite(suiteKey, ref *suite);
+
+                if (error == PSError.kSPNoError)
+                {
+                    logger.Log(PluginApiLogCategory.SPBasicSuite,
+                               "Loaded '{0}', version {1}",
+                               suiteName,
+                               version);
+                }
+                else if (error == PSError.kSPSuiteNotFoundError)
+                {
+                    logger.Log(PluginApiLogCategory.SPBasicSuite,
+                               "PICA suite not supported: '{0}', version {1}",
+                               suiteName,
+                               version);
+                }
+                else
+                {
+                    logger.Log(PluginApiLogCategory.SPBasicSuite,
+                               "Error code '{0}' when loading suite: '{1}', version {2}",
+                               error,
+                               suiteName,
+                               version);
+                }
             }
 
             return error;
@@ -295,7 +322,7 @@ namespace PSFilterLoad.PSApi
 
                     if (bufferSuite == null)
                     {
-                        bufferSuite = new PICABufferSuite();
+                        bufferSuite = new PICABufferSuite(logger.CreateInstanceForType(nameof(PICABufferSuite)));
                     }
 
                     PSBufferSuite1 suite = bufferSuite.CreateBufferSuite1();
@@ -353,7 +380,10 @@ namespace PSFilterLoad.PSApi
 
                     if (uiHooksSuite == null)
                     {
-                        uiHooksSuite = new PICAUIHooksSuite(picaSuiteData.ParentWindowHandle, pluginName, ASZStringSuite);
+                        uiHooksSuite = new PICAUIHooksSuite(picaSuiteData.ParentWindowHandle,
+                                                            pluginName,
+                                                            ASZStringSuite,
+                                                            logger.CreateInstanceForType(nameof(PICAUIHooksSuite)));
                     }
 
                     PSUIHooksSuite1 suite = uiHooksSuite.CreateUIHooksSuite1(picaSuiteData);
@@ -420,7 +450,8 @@ namespace PSFilterLoad.PSApi
 
                     if (colorSpaceSuite == null)
                     {
-                        colorSpaceSuite = new PICAColorSpaceSuite(ASZStringSuite);
+                        colorSpaceSuite = new PICAColorSpaceSuite(ASZStringSuite,
+                                                                  logger.CreateInstanceForType(nameof(PICAColorSpaceSuite)));
                     }
 
                     PSColorSpaceSuite1 csSuite = colorSpaceSuite.CreateColorSpaceSuite1();
@@ -440,7 +471,8 @@ namespace PSFilterLoad.PSApi
                             CreateActionDescriptorSuite();
                         }
 
-                        descriptorRegistrySuite = new DescriptorRegistrySuite(actionSuites.DescriptorSuite);
+                        descriptorRegistrySuite = new DescriptorRegistrySuite(actionSuites.DescriptorSuite,
+                                                                              logger.CreateInstanceForType(nameof(DescriptorRegistrySuite)));
                         if (registryValues != null)
                         {
                             descriptorRegistrySuite.SetRegistryValues(registryValues);
@@ -482,9 +514,7 @@ namespace PSFilterLoad.PSApi
         {
             string suiteName = StringUtil.FromCString(name);
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("name: {0}, version: {1}", suiteName, version.ToString()));
-#endif
+            logger.Log(PluginApiLogCategory.SPBasicSuite, "name: {0}, version: {1}", suiteName, version);
 
             ActivePICASuites.PICASuiteKey suiteKey = new(suiteName, version);
 
@@ -495,9 +525,11 @@ namespace PSFilterLoad.PSApi
 
         private unsafe bool SPBasicIsEqual(IntPtr token1, IntPtr token2)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("token1: {0}, token2: {1}", StringUtil.FromCString(token1), StringUtil.FromCString(token2)));
-#endif
+            logger.Log(PluginApiLogCategory.SPBasicSuite,
+                       "token1: {0}, token2: {1}",
+                       new CStringPointerFormatter(token1),
+                       new CStringPointerFormatter(token2));
+
             if (token1 == IntPtr.Zero)
             {
                 if (token2 == IntPtr.Zero)
@@ -529,9 +561,8 @@ namespace PSFilterLoad.PSApi
 
         private unsafe int SPBasicAllocateBlock(int size, IntPtr* block)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("size: {0}", size));
-#endif
+            logger.Log(PluginApiLogCategory.SPBasicSuite, "size: {0}", size);
+
             if (block == null)
             {
                 return PSError.kSPBadParameterError;
@@ -551,18 +582,19 @@ namespace PSFilterLoad.PSApi
 
         private int SPBasicFreeBlock(IntPtr block)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("block: 0x{0}", block.ToHexString()));
-#endif
+            logger.Log(PluginApiLogCategory.SPBasicSuite, "block: 0x{0}", new IntPtrAsHexStringFormatter(block));
+
             Memory.Free(block);
             return PSError.kSPNoError;
         }
 
         private unsafe int SPBasicReallocateBlock(IntPtr block, int newSize, IntPtr* newblock)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Format("block: 0x{0}, size: {1}", block.ToHexString(), newSize));
-#endif
+            logger.Log(PluginApiLogCategory.SPBasicSuite,
+                       "block: 0x{0}, size: {1}",
+                       new IntPtrAsHexStringFormatter(block),
+                       newSize);
+
             if (newblock == null)
             {
                 return PSError.kSPBadParameterError;
@@ -582,9 +614,7 @@ namespace PSFilterLoad.PSApi
 
         private int SPBasicUndefined()
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.SPBasicSuite, string.Empty);
-#endif
+            logger.LogFunctionName(PluginApiLogCategory.SPBasicSuite);
 
             return PSError.kSPNoError;
         }

@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Runtime.InteropServices;
 
@@ -24,13 +25,15 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly UISuiteHostTickCount uiTickCount;
         private readonly UISuiteGetPluginName uiPluginName;
         private readonly IASZStringSuite zstringSuite;
+        private readonly IPluginApiLogger logger;
 
-        public unsafe PICAUIHooksSuite(IntPtr parentWindowHandle, string name, IASZStringSuite zstringSuite)
+        public unsafe PICAUIHooksSuite(IntPtr parentWindowHandle,
+                                       string name,
+                                       IASZStringSuite zstringSuite,
+                                       IPluginApiLogger logger)
         {
-            if (zstringSuite == null)
-            {
-                throw new ArgumentNullException(nameof(zstringSuite));
-            }
+            ArgumentNullException.ThrowIfNull(zstringSuite);
+            ArgumentNullException.ThrowIfNull(logger);
 
             hwnd = parentWindowHandle;
             pluginName = name ?? string.Empty;
@@ -40,20 +43,27 @@ namespace PSFilterLoad.PSApi.PICA
             uiTickCount = new UISuiteHostTickCount(HostTickCount);
             uiPluginName = new UISuiteGetPluginName(GetPluginName);
             this.zstringSuite = zstringSuite;
+            this.logger = logger;
         }
 
         private IntPtr MainWindowHandle()
         {
+            logger.LogFunctionName(PluginApiLogCategory.PicaUIHooksSuite);
+
             return hwnd;
         }
 
         private int HostSetCursor(IntPtr cursor)
         {
+            logger.LogFunctionName(PluginApiLogCategory.PicaUIHooksSuite);
+
             return PSError.kSPUnimplementedError;
         }
 
         private uint HostTickCount()
         {
+            logger.LogFunctionName(PluginApiLogCategory.PicaUIHooksSuite);
+
             return 60U;
         }
 
@@ -63,6 +73,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaUIHooksSuite, "pluginRef: {0}", pluginRef);
 
             try
             {

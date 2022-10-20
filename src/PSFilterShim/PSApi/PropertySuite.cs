@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterShim.Properties;
 using System;
 using System.Runtime.InteropServices;
@@ -22,6 +23,7 @@ namespace PSFilterLoad.PSApi
         private readonly GetPropertyProc getPropertyProc;
         private readonly SetPropertyProc setPropertyProc;
         private readonly IHandleSuite handleSuite;
+        private readonly IPluginApiLogger logger;
         private readonly int documentWidth;
         private readonly int documentHeight;
         private readonly bool highDpi;
@@ -29,13 +31,19 @@ namespace PSFilterLoad.PSApi
 
         private const string HostSerial = "0";
 
-        public unsafe PropertySuite(IHandleSuite handleSuite, int documentWidth, int documentHeight, PluginUISettings pluginUISettings)
+        public unsafe PropertySuite(IHandleSuite handleSuite,
+                                    IPluginApiLogger logger,
+                                    int documentWidth,
+                                    int documentHeight,
+                                    PluginUISettings pluginUISettings)
         {
             ArgumentNullException.ThrowIfNull(handleSuite);
+            ArgumentNullException.ThrowIfNull(logger);
 
             getPropertyProc = new GetPropertyProc(PropertyGetProc);
             setPropertyProc = new SetPropertyProc(PropertySetProc);
             this.handleSuite = handleSuite;
+            this.logger = logger;
             this.documentWidth = documentWidth;
             this.documentHeight = documentHeight;
             highDpi = pluginUISettings?.HighDpi ?? false;
@@ -132,9 +140,12 @@ namespace PSFilterLoad.PSApi
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private unsafe short PropertyGetProc(uint signature, uint key, int index, IntPtr* simpleProperty, Handle* complexProperty)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.PropertySuite, string.Format("Sig: {0}, Key: {1}, Index: {2}", DebugUtils.PropToString(signature), DebugUtils.PropToString(key), index.ToString()));
-#endif
+            logger.Log(PluginApiLogCategory.PropertySuite,
+                       "Sig: {0}, Key: {1}, Index: {2}",
+                       new FourCCAsStringFormatter(signature),
+                       new FourCCAsStringFormatter(key),
+                       index);
+
             if (signature != PSConstants.kPhotoshopSignature)
             {
                 return PSError.errPlugInPropertyUndefined;
@@ -272,9 +283,12 @@ namespace PSFilterLoad.PSApi
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private short PropertySetProc(uint signature, uint key, int index, IntPtr simpleProperty, Handle complexProperty)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.PropertySuite, string.Format("Sig: {0}, Key: {1}, Index: {2}", DebugUtils.PropToString(signature), DebugUtils.PropToString(key), index.ToString()));
-#endif
+            logger.Log(PluginApiLogCategory.PropertySuite,
+                       "Sig: {0}, Key: {1}, Index: {2}",
+                       new FourCCAsStringFormatter(signature),
+                       new FourCCAsStringFormatter(key),
+                       index);
+
             if (signature != PSConstants.kPhotoshopSignature)
             {
                 return PSError.errPlugInPropertyUndefined;

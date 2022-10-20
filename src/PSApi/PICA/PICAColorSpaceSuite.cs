@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -75,8 +76,9 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly CSConvert csConvert16to8;
         private readonly CSConvertToMonitorRGB csConvertToMonitorRGB;
         private readonly IASZStringSuite zstringSuite;
+        private readonly IPluginApiLogger logger;
 
-        private Dictionary<ColorID, Color> colors;
+        private readonly Dictionary<ColorID, Color> colors;
         private int colorsIndex;
         private byte[] lookup16To8;
         private ushort[] lookup8To16;
@@ -85,12 +87,16 @@ namespace PSFilterLoad.PSApi.PICA
         /// Initializes a new instance of the <see cref="PICAColorSpaceSuite"/> class.
         /// </summary>
         /// <param name="zstringSuite">The ASZString suite.</param>
-        public unsafe PICAColorSpaceSuite(IASZStringSuite zstringSuite)
+        /// <param name="logger">The logger instance.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="zstringSuite"/> is null.
+        /// or
+        /// <paramref name="logger"/> is null.
+        /// </exception>
+        public unsafe PICAColorSpaceSuite(IASZStringSuite zstringSuite, IPluginApiLogger logger)
         {
-            if (zstringSuite == null)
-            {
-                throw new ArgumentNullException(nameof(zstringSuite));
-            }
+            ArgumentNullException.ThrowIfNull(zstringSuite);
+            ArgumentNullException.ThrowIfNull(logger);
 
             csMake = new CSMake(Make);
             csDelete = new CSDelete(Delete);
@@ -108,6 +114,7 @@ namespace PSFilterLoad.PSApi.PICA
             csConvert16to8 = new CSConvert(Convert16to8);
             csConvertToMonitorRGB = new CSConvertToMonitorRGB(ConvertToMonitorRGB);
             this.zstringSuite = zstringSuite;
+            this.logger = logger;
             colors = new Dictionary<ColorID, Color>();
             colorsIndex = 0;
             lookup16To8 = null;
@@ -125,6 +132,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.LogFunctionName(PluginApiLogCategory.PicaColorSpaceSuite);
 
             try
             {
@@ -147,8 +156,12 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            colors.Remove(*colorID);
-            if (colorsIndex == colorID->Index)
+            ColorID color = *colorID;
+
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite, "colorID: {0}", color);
+
+            colors.Remove(color);
+            if (colorsIndex == color.Index)
             {
                 colorsIndex--;
             }
@@ -163,6 +176,15 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite,
+                       "colorID: {0}, colorSpace: {1}, c0: {2}, c1: {3}, c2: {4}, c4: {5}",
+                       colorID,
+                       colorSpace,
+                       c0,
+                       c1,
+                       c2,
+                       c3);
+
             colors[colorID] = new Color(colorSpace, c0, c1, c2, c3);
 
             return PSError.kSPNoError;
@@ -174,6 +196,11 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite,
+                       "colorID: {0}, colorSpace: {1}",
+                       colorID,
+                       colorSpace);
 
             Color item = colors[colorID];
 
@@ -194,6 +221,11 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int StuffXYZ(ColorID colorID, CS_XYZ xyz)
         {
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite,
+                       "colorID: {0}, xyz: [{1}]",
+                       colorID,
+                       xyz);
+
             // Clamp the values to the range of [0, 255].
             ushort x = xyz.x;
             if (x > 255)
@@ -225,6 +257,8 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite, "colorID: {0}", colorID);
+
             Color item = colors[colorID];
 
             byte c0 = item.Component0;
@@ -254,6 +288,13 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite,
+                       "inputCSpace: {0}, outputCSpace: {1}, colorArray: 0x{2}, count: {3}",
+                       inputCSpace,
+                       outputCSpace,
+                       new IntPtrAsHexStringFormatter(colorArray),
+                       count);
 
             int error = PSError.kSPNoError;
             byte c0;
@@ -326,6 +367,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Convert16(ColorSpace inputCSpace, ColorSpace outputCSpace, IntPtr colorArray, short count)
         {
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite,
+                       "inputCSpace: {0}, outputCSpace: {1}, colorArray: 0x{2}, count: {3}",
+                       inputCSpace,
+                       outputCSpace,
+                       new IntPtrAsHexStringFormatter(colorArray),
+                       count);
+
             return PSError.kSPUnimplementedError;
         }
 
@@ -335,6 +383,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite, "colorID: {0}", colorID);
 
             *nativeSpace = colors[colorID].ColorSpace;
 
@@ -348,6 +398,8 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite, "colorID: {0}", colorID);
+
             *isBookColor = 0;
 
             return PSError.kSPNoError;
@@ -359,6 +411,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite, "colorID: {0}", colorID);
 
             try
             {
@@ -378,6 +432,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite, "promptZString: {0}", promptZString);
 
             int error;
 
@@ -414,6 +470,12 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite,
+                       "inputData: 0x{0}, outputData: 0x{1}, count: {2}",
+                       new IntPtrAsHexStringFormatter(inputData),
+                       new IntPtrAsHexStringFormatter(outputData),
+                       count);
+
             if (count > 0)
             {
                 if (lookup8To16 == null)
@@ -447,6 +509,12 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite,
+                       "inputData: 0x{0}, outputData: 0x{1}, count: {2}",
+                       new IntPtrAsHexStringFormatter(inputData),
+                       new IntPtrAsHexStringFormatter(outputData),
+                       count);
+
             if (count > 0)
             {
                 if (lookup16To8 == null)
@@ -475,6 +543,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int ConvertToMonitorRGB(ColorSpace inputCSpace, IntPtr inputData, IntPtr outputData, short count)
         {
+            logger.Log(PluginApiLogCategory.PicaColorSpaceSuite,
+                       "inputCSpace: {0}, inputData: 0x{1}, outputData: 0x{2}, count: {3}",
+                       inputCSpace,
+                       new IntPtrAsHexStringFormatter(inputData),
+                       new IntPtrAsHexStringFormatter(outputData),
+                       count);
+
             return PSError.kSPUnimplementedError;
         }
 

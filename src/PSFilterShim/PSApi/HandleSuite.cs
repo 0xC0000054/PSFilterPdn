@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -74,9 +75,12 @@ namespace PSFilterLoad.PSApi
         private readonly RecoverSpaceProc handleRecoverSpaceProc;
         private readonly DisposeRegularPIHandleProc handleDisposeRegularProc;
         private readonly Dictionary<Handle, HandleEntry> handles;
+        private readonly IPluginApiLogger logger;
 
-        public HandleSuite()
+        public HandleSuite(IPluginApiLogger logger)
         {
+            ArgumentNullException.ThrowIfNull(logger);
+
             handleNewProc = new NewPIHandleProc(NewHandle);
             handleDisposeProc = new DisposePIHandleProc(DisposeHandle);
             handleGetSizeProc = new GetPIHandleSizeProc(GetHandleSize);
@@ -86,6 +90,7 @@ namespace PSFilterLoad.PSApi
             handleRecoverSpaceProc = new RecoverSpaceProc(RecoverHandleSpace);
             handleDisposeRegularProc = new DisposeRegularPIHandleProc(DisposeRegularHandle);
             handles = new Dictionary<Handle, HandleEntry>();
+            this.logger = logger;
         }
 
         /// <summary>
@@ -266,10 +271,12 @@ namespace PSFilterLoad.PSApi
                 hand->pointer = Memory.Allocate(size, true);
 
                 handles.Add(handle, new HandleEntry(handle, hand->pointer, size));
-#if DEBUG
-                string message = string.Format("Handle: 0x{0}, pointer: 0x{1}, size: {2}", handle.ToHexString(), hand->pointer.ToHexString(), size);
-                DebugUtils.Ping(DebugFlags.HandleSuite, message);
-#endif
+
+                logger.Log(PluginApiLogCategory.HandleSuite,
+                           "Handle: 0x{0}, pointer: 0x{1}, size: {2}",
+                           new HandleAsHexStringFormatter(handle),
+                           new IntPtrAsHexStringFormatter(hand->pointer),
+                           size);
             }
             catch (OutOfMemoryException)
             {
@@ -296,17 +303,15 @@ namespace PSFilterLoad.PSApi
 
         public unsafe void DisposeHandle(Handle h)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
-#endif
+            logger.Log(PluginApiLogCategory.HandleSuite, "Handle: 0x{0}", new HandleAsHexStringFormatter(h));
+
             DisposeHandleImpl(h);
         }
 
         private unsafe void DisposeRegularHandle(Handle h)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
-#endif
+            logger.Log(PluginApiLogCategory.HandleSuite, "Handle: 0x{0}", new HandleAsHexStringFormatter(h));
+
             DisposeHandleImpl(h);
         }
 
@@ -341,9 +346,11 @@ namespace PSFilterLoad.PSApi
 
         private IntPtr LockHandle(Handle h, byte moveHigh)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}, moveHigh: {1}", h.ToHexString(), moveHigh));
-#endif
+            logger.Log(PluginApiLogCategory.HandleSuite,
+                       "Handle: 0x{0}, moveHigh: {1}",
+                       new HandleAsHexStringFormatter(h),
+                       moveHigh);
+
             if (handles.TryGetValue(h, out HandleEntry item))
             {
                 return item.Pointer;
@@ -371,9 +378,8 @@ namespace PSFilterLoad.PSApi
 
         public int GetHandleSize(Handle h)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
-#endif
+            logger.Log(PluginApiLogCategory.HandleSuite, "Handle: 0x{0}", new HandleAsHexStringFormatter(h));
+
             if (handles.TryGetValue(h, out HandleEntry item))
             {
                 return item.Size;
@@ -399,16 +405,16 @@ namespace PSFilterLoad.PSApi
 
         private void RecoverHandleSpace(int size)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("size: {0}", size));
-#endif
+            logger.Log(PluginApiLogCategory.HandleSuite, "size: {0}", size);
         }
 
         private unsafe short SetHandleSize(Handle h, int newSize)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
-#endif
+            logger.Log(PluginApiLogCategory.HandleSuite,
+                       "Handle: 0x{0}, newSize: {1}",
+                       new HandleAsHexStringFormatter(h),
+                       newSize);
+
             if (newSize < 0)
             {
                 return PSError.paramErr;
@@ -464,9 +470,8 @@ namespace PSFilterLoad.PSApi
 
         public void UnlockHandle(Handle h)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.HandleSuite, string.Format("Handle: 0x{0}", h.ToHexString()));
-#endif
+            logger.Log(PluginApiLogCategory.HandleSuite, "Handle: 0x{0}", new HandleAsHexStringFormatter(h));
+
             if (!AllocatedBySuite(h))
             {
                 if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)

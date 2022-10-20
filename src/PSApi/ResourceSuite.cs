@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Runtime.InteropServices;
 
@@ -18,17 +19,20 @@ namespace PSFilterLoad.PSApi
     internal sealed class ResourceSuite : IResourceSuite
     {
         private readonly IHandleSuite handleSuite;
+        private readonly IPluginApiLogger logger;
         private CountPIResourcesProc countResourceProc;
         private GetPIResourceProc getResourceProc;
         private DeletePIResourceProc deleteResourceProc;
         private AddPIResourceProc addResourceProc;
         private PseudoResourceCollection pseudoResources;
 
-        public ResourceSuite(IHandleSuite handleSuite)
+        public ResourceSuite(IHandleSuite handleSuite, IPluginApiLogger logger)
         {
             ArgumentNullException.ThrowIfNull(handleSuite);
+            ArgumentNullException.ThrowIfNull(logger);
 
             this.handleSuite = handleSuite;
+            this.logger = logger;
             countResourceProc = new CountPIResourcesProc(CountResource);
             addResourceProc = new AddPIResourceProc(AddResource);
             deleteResourceProc = new DeletePIResourceProc(DeleteResource);
@@ -83,9 +87,8 @@ namespace PSFilterLoad.PSApi
 
         private short AddResource(uint ofType, Handle data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.ResourceSuite, DebugUtils.PropToString(ofType));
-#endif
+            logger.Log(PluginApiLogCategory.ResourceSuite, new FourCCAsStringFormatter(ofType));
+
             int size = handleSuite.GetHandleSize(data);
             try
             {
@@ -110,9 +113,8 @@ namespace PSFilterLoad.PSApi
 
         private short CountResource(uint ofType)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.ResourceSuite, DebugUtils.PropToString(ofType));
-#endif
+            logger.Log(PluginApiLogCategory.ResourceSuite, new FourCCAsStringFormatter(ofType));
+
             short count = 0;
 
             foreach (PseudoResource item in pseudoResources)
@@ -128,9 +130,8 @@ namespace PSFilterLoad.PSApi
 
         private void DeleteResource(uint ofType, short index)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", DebugUtils.PropToString(ofType), index));
-#endif
+            logger.Log(PluginApiLogCategory.ResourceSuite, "{0}, {1}", new FourCCAsStringFormatter(ofType), index);
+
             int resourceIndex = pseudoResources.FindIndex(ofType, index);
 
             if (resourceIndex >= 0)
@@ -158,9 +159,8 @@ namespace PSFilterLoad.PSApi
 
         private Handle GetResource(uint ofType, short index)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.ResourceSuite, string.Format("{0}, {1}", DebugUtils.PropToString(ofType), index));
-#endif
+            logger.Log(PluginApiLogCategory.ResourceSuite, "{0}, {1}", new FourCCAsStringFormatter(ofType), index);
+
             PseudoResource res = pseudoResources.Find(ofType, index);
 
             if (res != null)

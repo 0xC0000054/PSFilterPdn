@@ -13,6 +13,7 @@
 using PSFilterPdn.EnableInfo;
 using System;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
@@ -40,6 +41,8 @@ namespace PSFilterLoad.PSApi
         private AETEData aete;
         [DataMember(Name = nameof(ModuleEntryPoints))]
         private ReadOnlyCollection<string> moduleEntryPoints;
+        [DataMember(Name = nameof(ProcessorArchitecture))]
+        private readonly Architecture processorArchitecture;
         [NonSerialized]
         private readonly string enableInfo;
 
@@ -112,14 +115,27 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
+        /// Gets the processor architecture that the plug-in was built for.
+        /// </summary>
+        /// <value>
+        /// The processor architecture.
+        /// </value>
+        public Architecture ProcessorArchitecture => processorArchitecture;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="PluginData"/> class.
         /// </summary>
         /// <param name="fileName">The file path of the filter.</param>
         /// <param name="entryPoint">The filter entry point.</param>
         /// <param name="category">The filter category.</param>
         /// <param name="title">The filter title.</param>
-        internal PluginData(string fileName, string entryPoint, string category, string title) : this(fileName, entryPoint, category, title,
-            null, true, null, null)
+        /// <param name="processorArchitecture">The processor architecture of the plug-in.</param>
+        internal PluginData(string fileName,
+                            string entryPoint,
+                            string category,
+                            string title,
+                            Architecture processorArchitecture) :
+            this(fileName, entryPoint, category, title, null, true, null, null, processorArchitecture)
         {
         }
 
@@ -133,8 +149,16 @@ namespace PSFilterLoad.PSApi
         /// <param name="filterInfo">The filter information used to determine how transparency is processed..</param>
         /// <param name="runWith32BitShim"><c>true</c> if the filter should be run with the 32-bit surrogate process; otherwise, <c>false</c>.</param>
         /// <param name="aete">The AETE scripting information.</param>
-        internal PluginData(string fileName, string entryPoint, string category, string title, FilterCaseInfoCollection filterInfo,
-            bool runWith32BitShim, AETEData aete, string enableInfo)
+        /// <param name="processorArchitecture">The processor architecture of the plug-in.</param>
+        internal PluginData(string fileName,
+                            string entryPoint,
+                            string category,
+                            string title,
+                            FilterCaseInfoCollection filterInfo,
+                            bool runWith32BitShim,
+                            AETEData aete,
+                            string enableInfo,
+                            Architecture processorArchitecture)
         {
             this.fileName = fileName;
             this.entryPoint = entryPoint;
@@ -144,6 +168,7 @@ namespace PSFilterLoad.PSApi
             this.runWith32BitShim = runWith32BitShim;
             this.aete = aete;
             this.enableInfo = enableInfo;
+            this.processorArchitecture = processorArchitecture;
             moduleEntryPoints = null;
         }
 

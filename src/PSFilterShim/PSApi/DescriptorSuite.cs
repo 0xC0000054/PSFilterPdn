@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -98,10 +99,11 @@ namespace PSFilterLoad.PSApi
         private readonly PutScopedClassProc putScopedClassProc;
         private readonly PutScopedObjectProc putScopedObjectProc;
 
-        private Dictionary<PIReadDescriptor, ReadDescriptorState> readDescriptors;
-        private Dictionary<Handle, Dictionary<uint, AETEValue>> descriptorHandles;
-        private Dictionary<PIWriteDescriptor, Dictionary<uint, AETEValue>> writeDescriptors;
+        private readonly Dictionary<PIReadDescriptor, ReadDescriptorState> readDescriptors;
+        private readonly Dictionary<Handle, Dictionary<uint, AETEValue>> descriptorHandles;
+        private readonly Dictionary<PIWriteDescriptor, Dictionary<uint, AETEValue>> writeDescriptors;
         private readonly IHandleSuite handleSuite;
+        private readonly IPluginApiLogger logger;
         private AETEData aete;
         private int readDescriptorsIndex;
         private int writeDescriptorsIndex;
@@ -112,9 +114,10 @@ namespace PSFilterLoad.PSApi
             set => aete = value;
         }
 
-        public unsafe DescriptorSuite(IHandleSuite handleSuite)
+        public unsafe DescriptorSuite(IHandleSuite handleSuite, IPluginApiLogger logger)
         {
             ArgumentNullException.ThrowIfNull(handleSuite);
+            ArgumentNullException.ThrowIfNull(logger);
 
             openReadDescriptorProc = new OpenReadDescriptorProc(OpenReadDescriptorProc);
             closeReadDescriptorProc = new CloseReadDescriptorProc(CloseReadDescriptorProc);
@@ -155,6 +158,7 @@ namespace PSFilterLoad.PSApi
             descriptorHandles = new Dictionary<Handle, Dictionary<uint, AETEValue>>();
             writeDescriptors = new Dictionary<PIWriteDescriptor, Dictionary<uint, AETEValue>>();
             this.handleSuite = handleSuite;
+            this.logger = logger;
             readDescriptorsIndex = 0;
             writeDescriptorsIndex = 0;
             this.handleSuite.SuiteHandleDisposed += SuiteHandleDisposed;
@@ -260,9 +264,10 @@ namespace PSFilterLoad.PSApi
         #region ReadDescriptorProcs
         private unsafe PIReadDescriptor OpenReadDescriptorProc(Handle descriptorHandle, IntPtr keyArray)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: 0x{0}", descriptorHandle.ToHexString()));
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptorHandle: 0x{0}",
+                       new HandleAsHexStringFormatter(descriptorHandle));
+
             if (descriptorHandle != Handle.Null)
             {
                 Dictionary<uint, AETEValue> dictionary = descriptorHandles[descriptorHandle];
@@ -286,9 +291,10 @@ namespace PSFilterLoad.PSApi
 
         private short CloseReadDescriptorProc(PIReadDescriptor descriptor)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                                   "descriptor: {0}",
+                                   descriptor);
+
             short error = PSError.noErr;
 
             if (readDescriptors.TryGetValue(descriptor, out ReadDescriptorState state))
@@ -306,9 +312,9 @@ namespace PSFilterLoad.PSApi
 
         private unsafe bool GetKeyProc(PIReadDescriptor descriptor, uint* key, uint* type, int* flags)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                                   "descriptor: {0}",
+                                   descriptor);
 
             if (key == null)
             {
@@ -365,14 +371,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (data == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                                   "descriptor: {0}, key: 0x{1:X4}",
+                                   descriptor,
+                                   state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
 
@@ -385,14 +393,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (data == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
 
@@ -405,14 +415,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (data == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
 
@@ -432,14 +444,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (data == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
 
@@ -452,14 +466,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (data == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
 
@@ -482,14 +498,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (data == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
 
@@ -512,14 +530,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (type == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
 
@@ -532,14 +552,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (type == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
 
@@ -552,14 +574,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (data == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
 
@@ -572,14 +596,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (descriptorHandle == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
 
@@ -614,14 +640,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (count == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             *count = (uint)state.items.Count;
 
@@ -632,9 +660,11 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                                   "descriptor: {0}, key: 0x{1:X4}",
+                                   descriptor,
+                                   state.currentKey);
+
             AETEValue item = state.items[state.currentKey];
 
             int size = item.Size;
@@ -649,14 +679,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (intNumber == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
 
@@ -685,14 +717,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (min == null || max == null || floatNumber == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             short descErr = PSError.noErr;
 
@@ -720,14 +754,16 @@ namespace PSFilterLoad.PSApi
         {
             ReadDescriptorState state = readDescriptors[descriptor];
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}", state.currentKey));
-#endif
             if (min == null || max == null || units == null || floatNumber == null)
             {
                 state.lastReadError = PSError.paramErr;
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       state.currentKey);
 
             short descErr = PSError.noErr;
 
@@ -763,9 +799,8 @@ namespace PSFilterLoad.PSApi
         #region WriteDescriptorProcs
         private PIWriteDescriptor OpenWriteDescriptorProc()
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
-#endif
+            logger.LogFunctionName(PluginApiLogCategory.DescriptorSuite);
+
             writeDescriptorsIndex++;
             PIWriteDescriptor handle = new(writeDescriptorsIndex);
             try
@@ -782,13 +817,12 @@ namespace PSFilterLoad.PSApi
 
         private unsafe short CloseWriteDescriptorProc(PIWriteDescriptor descriptor, Handle* descriptorHandle)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
-#endif
             if (descriptorHandle == null)
             {
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite, "descriptor: {0}", descriptor);
 
             *descriptorHandle = handleSuite.NewHandle(0);
             if (*descriptorHandle == Handle.Null)
@@ -830,9 +864,10 @@ namespace PSFilterLoad.PSApi
 
         private short PutIntegerProc(PIWriteDescriptor descriptor, uint key, int data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
             try
             {
                 writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), 0, data));
@@ -847,13 +882,15 @@ namespace PSFilterLoad.PSApi
 
         private unsafe short PutFloatProc(PIWriteDescriptor descriptor, uint key, double* data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
-#endif
             if (data == null)
             {
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
 
             try
             {
@@ -869,13 +906,15 @@ namespace PSFilterLoad.PSApi
 
         private unsafe short PutUnitFloatProc(PIWriteDescriptor descriptor, uint key, uint unit, double* data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
-#endif
             if (data == null)
             {
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
 
             try
             {
@@ -893,9 +932,10 @@ namespace PSFilterLoad.PSApi
 
         private short PutBooleanProc(PIWriteDescriptor descriptor, uint key, byte data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
             try
             {
                 writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Boolean, GetAETEParamFlags(key), 0, data));
@@ -910,9 +950,10 @@ namespace PSFilterLoad.PSApi
 
         private short PutTextProc(PIWriteDescriptor descriptor, uint key, Handle textHandle)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
 
             if (textHandle != Handle.Null)
             {
@@ -944,9 +985,11 @@ namespace PSFilterLoad.PSApi
 
         private short PutAliasProc(PIWriteDescriptor descriptor, uint key, Handle aliasHandle)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
+
             try
             {
                 IntPtr hPtr = handleSuite.LockHandle(aliasHandle);
@@ -974,9 +1017,11 @@ namespace PSFilterLoad.PSApi
 
         private short PutEnumeratedProc(PIWriteDescriptor descriptor, uint key, uint type, uint data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
+
             try
             {
                 writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
@@ -991,9 +1036,11 @@ namespace PSFilterLoad.PSApi
 
         private short PutClassProc(PIWriteDescriptor descriptor, uint key, uint data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
+
             try
             {
                 writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), 0, data));
@@ -1008,13 +1055,15 @@ namespace PSFilterLoad.PSApi
 
         private unsafe short PutSimpleReferenceProc(PIWriteDescriptor descriptor, uint key, PIDescriptorSimpleReference* data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
-#endif
             if (data == null)
             {
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
 
             try
             {
@@ -1030,9 +1079,11 @@ namespace PSFilterLoad.PSApi
 
         private short PutObjectProc(PIWriteDescriptor descriptor, uint key, uint type, Handle descriptorHandle)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0}, type: {1}", DebugUtils.PropToString(key), DebugUtils.PropToString(type)));
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
+
             try
             {
                 // If the handle is a sub key add it to the parent descriptor.
@@ -1056,18 +1107,21 @@ namespace PSFilterLoad.PSApi
 
         private short PutCountProc(PIWriteDescriptor descriptor, uint key, uint count)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
 
             return PSError.noErr;
         }
 
         private short PutStringProc(PIWriteDescriptor descriptor, uint key, IntPtr stringHandle)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
+
             try
             {
                 int size = Marshal.ReadByte(stringHandle);
@@ -1086,9 +1140,11 @@ namespace PSFilterLoad.PSApi
 
         private short PutScopedClassProc(PIWriteDescriptor descriptor, uint key, uint data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: {0:X4}", key));
-#endif
+            logger.Log(PluginApiLogCategory.DescriptorSuite,
+                       "descriptor: {0}, key: 0x{1:X4}",
+                       descriptor,
+                       key);
+
             try
             {
                 writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), 0, data));

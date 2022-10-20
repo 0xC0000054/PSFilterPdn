@@ -27,6 +27,11 @@ namespace PSFilterLoad.PSApi
         public Rect16 bounds;
         public int rowBytes;
         public int colBytes;
+
+        public override string ToString()
+        {
+            return $"data: 0x{data.ToHexString()}, bounds={bounds}, rowBytes={rowBytes}, colBytes={colBytes}";
+        }
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

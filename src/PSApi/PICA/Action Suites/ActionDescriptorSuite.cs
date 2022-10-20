@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -100,6 +101,7 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly IActionListSuite actionListSuite;
         private readonly IActionReferenceSuite actionReferenceSuite;
         private readonly IASZStringSuite zstringSuite;
+        private readonly IPluginApiLogger logger;
 
         private Dictionary<PIActionDescriptor, ScriptingParameters> actionDescriptors;
         private Dictionary<Handle, ScriptingParameters> descriptorHandles;
@@ -162,25 +164,30 @@ namespace PSFilterLoad.PSApi.PICA
         /// <param name="actionListSuite">The action list suite instance.</param>
         /// <param name="actionReferenceSuite">The action reference suite instance.</param>
         /// <param name="zstringSuite">The ASZString suite instance.</param>
+        /// <param name="logger">The logger instance.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="actionListSuite"/> is null.
         /// or
         /// <paramref name="actionReferenceSuite"/> is null.
         /// or
         /// <paramref name="zstringSuite"/> is null.
+        /// or
+        /// <paramref name="logger"/> is null.
         /// </exception>
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public unsafe ActionDescriptorSuite(AETEData aete,
                                             IHandleSuite handleSuite,
                                             IActionListSuite actionListSuite,
                                             IActionReferenceSuite actionReferenceSuite,
-                                            IASZStringSuite zstringSuite)
+                                            IASZStringSuite zstringSuite,
+                                            IPluginApiLogger logger)
         {
             ArgumentNullException.ThrowIfNull(handleSuite);
             ArgumentNullException.ThrowIfNull(actionListSuite);
             ArgumentNullException.ThrowIfNull(actionReferenceSuite);
             ArgumentNullException.ThrowIfNull(zstringSuite);
- 
+            ArgumentNullException.ThrowIfNull(logger);
+
             make = new ActionDescriptorMake(Make);
             free = new ActionDescriptorFree(Free);
             handleToDescriptor = new ActionDescriptorHandleToDescriptor(HandleToDescriptor);
@@ -233,6 +240,7 @@ namespace PSFilterLoad.PSApi.PICA
             this.actionListSuite = actionListSuite;
             this.actionReferenceSuite = actionReferenceSuite;
             this.zstringSuite = zstringSuite;
+            this.logger = logger;
             actionDescriptors = new Dictionary<PIActionDescriptor, ScriptingParameters>();
             descriptorHandles = new Dictionary<Handle, ScriptingParameters>();
             actionDescriptorsIndex = 0;
@@ -367,10 +375,9 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int Make(PIActionDescriptor* descriptor)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
-#endif
-            if (descriptor == null)
+            logger.LogFunctionName(PluginApiLogCategory.PicaActionSuites);
+
+            if (descriptor is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -390,9 +397,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Free(PIActionDescriptor descriptor)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: {0}", descriptor.Index));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "descriptor: {0}", descriptor);
+
             actionDescriptors.Remove(descriptor);
             if (actionDescriptorsIndex == descriptor.Index)
             {
@@ -404,10 +410,9 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int HandleToDescriptor(Handle handle, PIActionDescriptor* descriptor)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("handle: 0x{0}", handle.ToHexString()));
-#endif
-            if (descriptor == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "handle: 0x{0}", new HandleAsHexStringFormatter(handle));
+
+            if (descriptor is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -432,10 +437,9 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int AsHandle(PIActionDescriptor descriptor, Handle* handle)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("descriptor: {0}", descriptor.Index));
-#endif
-            if (handle == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "descriptor: {0}", descriptor);
+
+            if (handle is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -460,10 +464,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetType(PIActionDescriptor descriptor, uint key, uint* type)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (type == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (type is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -488,10 +495,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetKey(PIActionDescriptor descriptor, uint index, uint* key)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("index: {0}", index));
-#endif
-            if (key == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, index: {1}",
+                       descriptor,
+                       index);
+
+            if (key is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -509,10 +518,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int HasKey(PIActionDescriptor descriptor, uint key, byte* hasKey)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (hasKey == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (hasKey is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -524,10 +536,9 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetCount(PIActionDescriptor descriptor, uint* count)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
-#endif
-            if (count == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "descriptor: {0}", descriptor);
+
+            if (count is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -541,10 +552,9 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int IsEqual(PIActionDescriptor firstDescriptor, PIActionDescriptor secondDescriptor, byte* isEqual)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
-#endif
-            if (isEqual == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "first: {0}, second: {1}", firstDescriptor, secondDescriptor);
+
+            if (isEqual is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -556,9 +566,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Erase(PIActionDescriptor descriptor, uint key)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             actionDescriptors[descriptor].Remove(key);
 
             return PSError.kSPNoError;
@@ -566,9 +579,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Clear(PIActionDescriptor descriptor)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "descriptor: {0}", descriptor);
+
             actionDescriptors[descriptor].Clear();
 
             return PSError.kSPNoError;
@@ -576,10 +588,9 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int HasKeys(PIActionDescriptor descriptor, IntPtr keyArray, byte* hasKeys)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Empty);
-#endif
-            if (hasKey == null || keyArray == IntPtr.Zero)
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "descriptor: {0}", descriptor);
+
+            if (hasKeys is null || keyArray == IntPtr.Zero)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -621,9 +632,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutInteger(PIActionDescriptor descriptor, uint key, int data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             try
             {
                 actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), 0, data));
@@ -632,14 +646,18 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPOutOfMemoryError;
             }
+
             return PSError.kSPNoError;
         }
 
         private int PutFloat(PIActionDescriptor descriptor, uint key, double data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             try
             {
                 actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Float, GetAETEParamFlags(key), 0, data));
@@ -648,14 +666,18 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPOutOfMemoryError;
             }
+
             return PSError.kSPNoError;
         }
 
         private int PutUnitFloat(PIActionDescriptor descriptor, uint key, uint unit, double data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             try
             {
                 UnitFloat item = new(unit, data);
@@ -666,14 +688,18 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPOutOfMemoryError;
             }
+
             return PSError.kSPNoError;
         }
 
         private int PutString(PIActionDescriptor descriptor, uint key, IntPtr cstrValue)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             if (cstrValue == IntPtr.Zero)
             {
                 return PSError.kSPBadParameterError;
@@ -704,9 +730,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutBoolean(PIActionDescriptor descriptor, uint key, byte data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             try
             {
                 actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Boolean, GetAETEParamFlags(key), 0, data));
@@ -715,14 +744,18 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPOutOfMemoryError;
             }
+
             return PSError.kSPNoError;
         }
 
         private int PutList(PIActionDescriptor descriptor, uint key, PIActionList list)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             try
             {
                 if (actionListSuite.TryGetListValues(list, out ReadOnlyCollection<ActionListItem> values))
@@ -744,10 +777,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutObject(PIActionDescriptor descriptor, uint key, uint type, PIActionDescriptor descriptorHandle)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            // Attach the sub key to the parent descriptor.
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             if (actionDescriptors.TryGetValue(descriptorHandle, out ScriptingParameters subKeys))
             {
                 try
@@ -774,9 +809,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutEnumerated(PIActionDescriptor descriptor, uint key, uint type, uint data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             try
             {
                 EnumeratedValue item = new(type, data);
@@ -786,14 +824,18 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPOutOfMemoryError;
             }
+
             return PSError.kSPNoError;
         }
 
         private int PutReference(PIActionDescriptor descriptor, uint key, PIActionReference reference)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             try
             {
                 if (actionReferenceSuite.TryGetReferenceValues(reference, out ReadOnlyCollection<ActionReferenceItem> values))
@@ -815,9 +857,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutClass(PIActionDescriptor descriptor, uint key, uint data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             try
             {
                 actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), 0, data));
@@ -832,9 +877,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutGlobalClass(PIActionDescriptor descriptor, uint key, uint data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             try
             {
                 actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.GlobalClass, GetAETEParamFlags(key), 0, data));
@@ -849,9 +897,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutAlias(PIActionDescriptor descriptor, uint key, Handle aliasHandle)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             IntPtr hPtr = handleSuite.LockHandle(aliasHandle);
 
             try
@@ -873,14 +924,18 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPOutOfMemoryError;
             }
+
             return PSError.kSPNoError;
         }
 
         private int PutIntegers(PIActionDescriptor descriptor, uint key, uint count, IntPtr arrayPointer)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             if (arrayPointer == IntPtr.Zero)
             {
                 return PSError.kSPBadParameterError;
@@ -913,9 +968,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutZString(PIActionDescriptor descriptor, uint key, ASZString zstring)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             try
             {
                 if (zstringSuite.ConvertToActionDescriptor(zstring, out ActionDescriptorZString value))
@@ -935,9 +993,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutData(PIActionDescriptor descriptor, uint key, int length, IntPtr blob)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             if (blob == IntPtr.Zero || length < 0)
             {
                 return PSError.kSPBadParameterError;
@@ -963,10 +1024,13 @@ namespace PSFilterLoad.PSApi.PICA
         #region Descriptor read methods
         private unsafe int GetInteger(PIActionDescriptor descriptor, uint key, int* data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (data == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (data is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -983,10 +1047,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetFloat(PIActionDescriptor descriptor, uint key, double* data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (data == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (data is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -1003,10 +1070,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetUnitFloat(PIActionDescriptor descriptor, uint key, uint* unit, double* data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (data == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (data is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -1030,10 +1100,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetStringLength(PIActionDescriptor descriptor, uint key, uint* length)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (length == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (length is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -1052,9 +1125,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetString(PIActionDescriptor descriptor, uint key, IntPtr cstrValue, uint maxLength)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             if (cstrValue == IntPtr.Zero)
             {
                 return PSError.kSPBadParameterError;
@@ -1072,6 +1148,7 @@ namespace PSFilterLoad.PSApi.PICA
                     Marshal.Copy(bytes, 0, cstrValue, length);
                     Marshal.WriteByte(cstrValue, length, 0);
                 }
+
                 return PSError.kSPNoError;
             }
 
@@ -1080,10 +1157,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetBoolean(PIActionDescriptor descriptor, uint key, byte* data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (data == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (data is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -1100,10 +1180,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetList(PIActionDescriptor descriptor, uint key, PIActionList* list)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (list == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (list is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -1129,10 +1212,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetObject(PIActionDescriptor descriptor, uint key, uint* retType, PIActionDescriptor* descriptorHandle)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (descriptorHandle == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (descriptorHandle is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -1166,10 +1252,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetEnumerated(PIActionDescriptor descriptor, uint key, uint* type, uint* data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (data == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (data is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -1192,10 +1281,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetReference(PIActionDescriptor descriptor, uint key, PIActionReference* reference)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (reference == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (reference is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -1221,10 +1313,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetClass(PIActionDescriptor descriptor, uint key, uint* data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (data == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (data is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -1246,10 +1341,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetAlias(PIActionDescriptor descriptor, uint key, Handle* data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (data == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (data is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -1275,9 +1373,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetIntegers(PIActionDescriptor descriptor, uint key, uint count, IntPtr data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             if (data == IntPtr.Zero)
             {
                 return PSError.kSPBadParameterError;
@@ -1301,10 +1402,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetZString(PIActionDescriptor descriptor, uint key, ASZString* zstring)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (zstring == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (zstring is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -1330,10 +1434,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int GetDataLength(PIActionDescriptor descriptor, uint key, int* length)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
-            if (length == null)
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
+            if (length is null)
             {
                 return PSError.kSPBadParameterError;
             }
@@ -1352,9 +1459,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int GetData(PIActionDescriptor descriptor, uint key, IntPtr blob)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DescriptorParameters, string.Format("key: 0x{0:X4}({1})", key, DebugUtils.PropToString(key)));
-#endif
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "descriptor: {0}, key: 0x{0:X4}({1})",
+                       descriptor,
+                       key,
+                       new FourCCAsStringFormatter(key));
+
             if (blob == IntPtr.Zero)
             {
                 return PSError.kSPBadParameterError;

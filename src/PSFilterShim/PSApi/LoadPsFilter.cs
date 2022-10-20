@@ -18,6 +18,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using PaintDotNet;
+using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterShim;
 using PSFilterShim.Properties;
 
@@ -44,6 +45,7 @@ namespace PSFilterLoad.PSApi
         private readonly TestAbortProc abortProc;
         #endregion
         private readonly IntPtr parentWindowHandle;
+        private readonly IPluginApiLogger logger;
 
         private FilterRecord* filterRecord;
 
@@ -207,15 +209,19 @@ namespace PSFilterLoad.PSApi
         /// Loads and runs Photoshop Filters
         /// </summary>
         /// <param name="settings">The execution parameters for the filter.</param>
-        /// <exception cref="System.ArgumentNullException"><paramref name="settings"/> is null.</exception>
-        public unsafe LoadPsFilter(PSFilterPdn.PSFilterShimSettings settings)
+        /// <param name="logger">The logger instance.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="settings"/> is null.
+        /// or
+        /// <paramref name="logger"/> is null.
+        /// </exception>
+        public unsafe LoadPsFilter(PSFilterPdn.PSFilterShimSettings settings, IPluginApiLogger logger)
         {
-            if (settings == null)
-            {
-                throw new ArgumentNullException(nameof(settings));
-            }
+            ArgumentNullException.ThrowIfNull(settings);
+            ArgumentNullException.ThrowIfNull(logger);
 
             filterGlobalData = IntPtr.Zero;
+            this.logger = logger;
 
             previousPhase = PluginPhase.None;
             errorMessage = string.Empty;
@@ -243,19 +249,23 @@ namespace PSFilterLoad.PSApi
             progressProc = new ProgressProc(ProgressProc);
             abortProc = new TestAbortProc(AbortProc);
 
-            bufferSuite = new BufferSuite();
-            handleSuite = new HandleSuite();
-            channelPortsSuite = new ChannelPortsSuite(this);
-            imageServicesSuite = new ImageServicesSuite();
-            descriptorSuite = new DescriptorSuite(handleSuite);
-            propertySuite = new PropertySuite(handleSuite, source.Width, source.Height, settings.PluginUISettings);
-            readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
-            resourceSuite = new ResourceSuite(handleSuite);
+            bufferSuite = new BufferSuite(logger.CreateInstanceForType(nameof(BufferSuite)));
+            handleSuite = new HandleSuite(logger.CreateInstanceForType(nameof(HandleSuite)));
+            channelPortsSuite = new ChannelPortsSuite(this, logger.CreateInstanceForType(nameof(ChannelPortsSuite)));
+            descriptorSuite = new DescriptorSuite(handleSuite, logger.CreateInstanceForType(nameof(DescriptorSuite)));
+            imageServicesSuite = new ImageServicesSuite(logger.CreateInstanceForType(nameof(ImageServicesSuite)));
+            propertySuite = new PropertySuite(handleSuite,
+                                              logger.CreateInstanceForType(nameof(PropertySuite)),
+                                              source.Width,
+                                              source.Height,
+                                              settings.PluginUISettings);
+            resourceSuite = new ResourceSuite(handleSuite, logger.CreateInstanceForType(nameof(ResourceSuite)));
             basicSuiteProvider = new SPBasicSuiteProvider(this,
                                                           handleSuite,
                                                           handleSuite,
                                                           propertySuite,
-                                                          resourceSuite);
+                                                          resourceSuite,
+                                                          logger.CreateInstanceForType(nameof(SPBasicSuiteProvider)));
 
             inputHandling = FilterDataHandling.None;
             outputHandling = FilterDataHandling.None;
@@ -298,25 +308,6 @@ namespace PSFilterLoad.PSApi
                 mask = null;
                 hasSelectionMask = false;
             }
-
-#if DEBUG
-            DebugFlags debugFlags = DebugFlags.None;
-            debugFlags |= DebugFlags.AdvanceState;
-            debugFlags |= DebugFlags.BufferSuite;
-            debugFlags |= DebugFlags.Call;
-            debugFlags |= DebugFlags.ColorServices;
-            debugFlags |= DebugFlags.ChannelPorts;
-            debugFlags |= DebugFlags.DescriptorParameters;
-            debugFlags |= DebugFlags.DisplayPixels;
-            debugFlags |= DebugFlags.Error;
-            debugFlags |= DebugFlags.HandleSuite;
-            debugFlags |= DebugFlags.MiscCallbacks;
-            debugFlags |= DebugFlags.PiPL;
-            debugFlags |= DebugFlags.PropertySuite;
-            debugFlags |= DebugFlags.ResourceSuite;
-            debugFlags |= DebugFlags.SPBasicSuite;
-            DebugUtils.GlobalDebugFlags = debugFlags;
-#endif
         }
 
         Surface IFilterImageProvider.Source => source;
@@ -723,9 +714,8 @@ namespace PSFilterLoad.PSApi
 
             if (result != PSError.noErr)
             {
-#if DEBUG
-                DebugUtils.Ping(DebugFlags.Error, string.Format("filterSelectorAbout returned result code {0}", result.ToString()));
-#endif
+                logger.Log(PluginApiLogCategory.Error, "FilterSelectorAbout returned result code {0}", result);
+
                 errorMessage = GetErrorMessage(result);
                 return false;
             }
@@ -740,23 +730,18 @@ namespace PSFilterLoad.PSApi
 #endif
             result = PSError.noErr;
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.Call, "Before FilterSelectorStart");
-#endif
+            logger.Log(PluginApiLogCategory.Selector, "Before FilterSelectorStart");
 
             module.entryPoint(FilterSelector.Start, filterRecord, ref filterGlobalData, ref result);
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorStart");
-#endif
+            logger.Log(PluginApiLogCategory.Selector, "After FilterSelectorStart");
+
             if (result != PSError.noErr)
             {
                 errorMessage = GetErrorMessage(result);
 
-#if DEBUG
-                string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
-                DebugUtils.Ping(DebugFlags.Error, string.Format("filterSelectorStart returned result code: {0}({1})", message, result));
-#endif
+                logger.Log(PluginApiLogCategory.Error, "FilterSelectorStart returned result code: {0}({1})", errorMessage, result);
+
                 return false;
             }
 
@@ -765,37 +750,26 @@ namespace PSFilterLoad.PSApi
                 AdvanceStateProc();
                 result = PSError.noErr;
 
-#if DEBUG
-                DebugUtils.Ping(DebugFlags.Call, "Before FilterSelectorContinue");
-#endif
+                logger.Log(PluginApiLogCategory.Selector, "Before FilterSelectorContinue");
 
                 module.entryPoint(FilterSelector.Continue, filterRecord, ref filterGlobalData, ref result);
 
-#if DEBUG
-                DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorContinue");
-#endif
+                logger.Log(PluginApiLogCategory.Selector, "After FilterSelectorContinue");
 
                 if (result != PSError.noErr)
                 {
                     short savedResult = result;
                     result = PSError.noErr;
 
-#if DEBUG
-                    DebugUtils.Ping(DebugFlags.Call, "Before FilterSelectorFinish");
-#endif
+                    logger.Log(PluginApiLogCategory.Selector, "Before FilterSelectorFinish");
 
                     module.entryPoint(FilterSelector.Finish, filterRecord, ref filterGlobalData, ref result);
 
-#if DEBUG
-                    DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorFinish");
-#endif
+                    logger.Log(PluginApiLogCategory.Selector, "After FilterSelectorFinish");
 
                     errorMessage = GetErrorMessage(savedResult);
 
-#if DEBUG
-                    string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
-                    DebugUtils.Ping(DebugFlags.Error, string.Format("filterSelectorContinue returned result code: {0}({1})", message, savedResult));
-#endif
+                    logger.Log(PluginApiLogCategory.Error, "FilterSelectorContinue returned result code: {0}({1})", errorMessage, savedResult);
 
                     return false;
                 }
@@ -816,15 +790,12 @@ namespace PSFilterLoad.PSApi
 
             result = PSError.noErr;
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.Call, "Before FilterSelectorFinish");
-#endif
+            logger.Log(PluginApiLogCategory.Selector, "Before FilterSelectorFinish");
 
-            module.entryPoint(FilterSelector.Finish, this.filterRecord, ref filterGlobalData, ref result);
+            module.entryPoint(FilterSelector.Finish, filterRecord, ref filterGlobalData, ref result);
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.Call, "After FilterSelectorFinish");
-#endif
+            logger.Log(PluginApiLogCategory.Selector, "After FilterSelectorFinish");
+
             if (!isRepeatEffect && result == PSError.noErr)
             {
                 SaveParameterHandles();
@@ -839,27 +810,29 @@ namespace PSFilterLoad.PSApi
         {
             result = PSError.noErr;
 
-            /* Photoshop sets the size info before the filterSelectorParameters call even though the documentation says it does not.*/
+            /* Photoshop sets the size info before the FilterSelectorParameters call even though the documentation says it does not.*/
             SetupSizes();
             SetFilterRecordValues();
             RestoreParameterHandles();
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.Call, "Before filterSelectorParameters");
-#endif
+
+            logger.Log(PluginApiLogCategory.Selector, "Before FilterSelectorParameters");
 
             module.entryPoint(FilterSelector.Parameters, filterRecord, ref filterGlobalData, ref result);
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.Call, string.Format("data: {0},  parameters: {1}", filterGlobalData.ToHexString(), filterRecord->parameters.ToHexString()));
-            DebugUtils.Ping(DebugFlags.Call, "After filterSelectorParameters");
-#endif
+
+            logger.Log(PluginApiLogCategory.Selector,
+                       "After FilterSelectorParameters: data = 0x{0}, parameters = 0x{1}",
+                       new IntPtrAsHexStringFormatter(filterGlobalData),
+                       new HandleAsHexStringFormatter(filterRecord->parameters));
 
             if (result != PSError.noErr)
             {
                 errorMessage = GetErrorMessage(result);
-#if DEBUG
-                string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
-                DebugUtils.Ping(DebugFlags.Error, string.Format("filterSelectorParameters failed result code: {0}({1})", message, result));
-#endif
+
+                logger.Log(PluginApiLogCategory.Error,
+                           "FilterSelectorParameters failed result code: {0}({1})",
+                           errorMessage,
+                           result);
+
                 return false;
             }
 
@@ -983,22 +956,19 @@ namespace PSFilterLoad.PSApi
 
             result = PSError.noErr;
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.Call, "Before filterSelectorPrepare");
-#endif
+            logger.Log(PluginApiLogCategory.Selector, "Before FilterSelectorPrepare");
+
             module.entryPoint(FilterSelector.Prepare, filterRecord, ref filterGlobalData, ref result);
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.Call, "After filterSelectorPrepare");
-#endif
+            logger.Log(PluginApiLogCategory.Selector, "After FilterSelectorPrepare");
+
 
             if (result != PSError.noErr)
             {
                 errorMessage = GetErrorMessage(result);
-#if DEBUG
-                string message = string.IsNullOrEmpty(errorMessage) ? "User Canceled" : errorMessage;
-                DebugUtils.Ping(DebugFlags.Error, string.Format("filterSelectorParameters failed result code: {0}({1})", message, result));
-#endif
+
+                logger.Log(PluginApiLogCategory.Error, "FilterSelectorParameters failed result code: {0}({1})", errorMessage, result);
+
                 return false;
             }
 
@@ -1143,26 +1113,17 @@ namespace PSFilterLoad.PSApi
             {
                 if (!PluginParameters())
                 {
-#if DEBUG
-                    DebugUtils.Ping(DebugFlags.Error, "PluginParameters failed");
-#endif
                     return false;
                 }
             }
 
             if (!PluginPrepare())
             {
-#if DEBUG
-                DebugUtils.Ping(DebugFlags.Error, "PluginPrepare failed");
-#endif
                 return false;
             }
 
             if (!PluginApply())
             {
-#if DEBUG
-                DebugUtils.Ping(DebugFlags.Error, "PluginApply failed");
-#endif
                 return false;
             }
 
@@ -1245,9 +1206,8 @@ namespace PSFilterLoad.PSApi
 
         private bool AbortProc()
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.MiscCallbacks, string.Empty);
-#endif
+            logger.LogFunctionName(PluginApiLogCategory.AbortCallback);
+
             if (abortFunc != null)
             {
                 return abortFunc();
@@ -1299,9 +1259,12 @@ namespace PSFilterLoad.PSApi
 
             short error;
 
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("inRect: {0}, outRect: {1}, maskRect: {2}", filterRecord->inRect, filterRecord->outRect, filterRecord->maskRect));
-#endif
+            logger.Log(PluginApiLogCategory.AdvanceStateCallback,
+                       "Inrect = {0}, Outrect = {1}, maskRect = {2}",
+                       filterRecord->inRect,
+                       filterRecord->outRect,
+                       filterRecord->maskRect);
+
             if (filterRecord->haveMask && RectNonEmpty(filterRecord->maskRect))
             {
                 if (!lastMaskRect.Equals(filterRecord->maskRect))
@@ -1479,10 +1442,14 @@ namespace PSFilterLoad.PSApi
         /// <param name="filterRecord">The filter record.</param>
         private unsafe short FillInputBuffer(FilterRecord* filterRecord)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("inRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}, inputRate: {4}", new object[] { filterRecord->inRowBytes, filterRecord->inRect,
-            filterRecord->inLoPlane, filterRecord->inHiPlane, filterRecord->inputRate.ToInt32() }));
-#endif
+            logger.Log(PluginApiLogCategory.AdvanceStateCallback,
+                       "inRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}, inputRate: {4}",
+                       filterRecord->inRowBytes,
+                       filterRecord->inRect,
+                       filterRecord->inLoPlane,
+                       filterRecord->inHiPlane,
+                       new Fixed16AsIntegerStringFormatter(filterRecord->inputRate));
+
             Rect16 rect = filterRecord->inRect;
 
             int nplanes = filterRecord->inHiPlane - filterRecord->inLoPlane + 1;
@@ -1603,10 +1570,14 @@ namespace PSFilterLoad.PSApi
         /// <param name="filterRecord">The filter record.</param>
         private unsafe short FillOutputBuffer(FilterRecord* filterRecord)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("outRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}", new object[] { filterRecord->outRowBytes, filterRecord->outRect, filterRecord->outLoPlane,
-                filterRecord->outHiPlane }));
+            logger.Log(PluginApiLogCategory.AdvanceStateCallback,
+                       "outRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}",
+                       filterRecord->outRowBytes,
+                       filterRecord->outRect,
+                       filterRecord->outLoPlane,
+                       filterRecord->outHiPlane);
 
+#if DEBUG
             using (Bitmap dst = dest.CreateAliasedBitmap())
             {
             }
@@ -1781,9 +1752,12 @@ namespace PSFilterLoad.PSApi
         /// <param name="filterRecord">The filter record.</param>
         private unsafe short FillMaskBuffer(FilterRecord* filterRecord)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("maskRowBytes: {0}, Rect: {1}, maskRate: {2}", new object[] { filterRecord->maskRowBytes, filterRecord->maskRect, filterRecord->maskRate.ToInt32() }));
-#endif
+            logger.Log(PluginApiLogCategory.AdvanceStateCallback,
+                       "maskRowBytes: {0}, Rect: {1}, maskRate: {2}",
+                       filterRecord->maskRowBytes,
+                       filterRecord->maskRect,
+                       new Fixed16AsIntegerStringFormatter(filterRecord->maskRate));
+
             Rect16 rect = filterRecord->maskRect;
             int width = rect.right - rect.left;
             int height = rect.bottom - rect.top;
@@ -1857,9 +1831,13 @@ namespace PSFilterLoad.PSApi
         /// <param name="hiplane">The output hiPlane.</param>
         private unsafe void StoreOutputBuffer(IntPtr outData, int outRowBytes, Rect16 rect, int loplane, int hiplane)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.AdvanceState, string.Format("inRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}", new object[] { outRowBytes.ToString(), rect.ToString(), loplane.ToString(), hiplane.ToString() }));
-#endif
+            logger.Log(PluginApiLogCategory.AdvanceStateCallback,
+                       "inRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}",
+                       outRowBytes,
+                       rect,
+                       loplane,
+                       hiplane);
+
             if (outData == IntPtr.Zero)
             {
                 return;
@@ -2012,13 +1990,12 @@ namespace PSFilterLoad.PSApi
 
         private unsafe short ColorServicesProc(ColorServicesInfo* info)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.ColorServices, info != null ? $"selector: { info->selector }" : "info is null");
-#endif
             if (info == null)
             {
                 return PSError.paramErr;
             }
+
+            logger.Log(PluginApiLogCategory.ColorServicesCallback, "selector: {0}", info->selector);
 
             short err = PSError.noErr;
             switch (info->selector)
@@ -2521,12 +2498,13 @@ namespace PSFilterLoad.PSApi
 
         private unsafe short DisplayPixelsProc(PSPixelMap* srcPixelMap, VRect* srcRect, int dstRow, int dstCol, IntPtr platformContext)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.DisplayPixels, string.Format(
-                "srcPixelMap=[{0}], srcRect={1}, dstCol={2}, dstRow={3}, platformContext=0x{4}",
-                new object[] { DebugUtils.PointerToString(srcPixelMap), DebugUtils.PointerToString(srcRect), dstCol, dstRow,
-                    platformContext.ToHexString() }));
-#endif
+            logger.Log(PluginApiLogCategory.DisplayPixelsCallback,
+                       "srcPixelMap=[{0}], srcRect={1}, dstCol={2}, dstRow={3}, platformContext=0x{4}",
+                       new PointerAsStringFormatter<PSPixelMap>(srcPixelMap),
+                       new PointerAsStringFormatter<VRect>(srcRect),
+                       dstCol,
+                       dstRow,
+                       new IntPtrAsHexStringFormatter(platformContext));
 
             if (srcPixelMap == null ||
                 srcRect == null ||
@@ -2706,9 +2684,7 @@ namespace PSFilterLoad.PSApi
 
         private void HostProc(short selector, IntPtr data)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.MiscCallbacks, string.Format("{0} : {1}", selector, data));
-#endif
+            logger.Log(PluginApiLogCategory.HostCallback, "{0} : {1}", selector, data);
         }
 
         private void ProcessEventProc(IntPtr @event)
@@ -2723,9 +2699,9 @@ namespace PSFilterLoad.PSApi
             }
 
             double progress = ((double)done / total) * 100.0;
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.MiscCallbacks, string.Format("Done: {0}, Total: {1}, Progress: {2}%", done, total, progress));
-#endif
+
+            logger.Log(PluginApiLogCategory.ProgressCallback, "Done: {0}, Total: {1}, Progress: {2}%", done, total, progress);
+
             Action<byte> callback = progressFunc;
 
             if (callback != null)

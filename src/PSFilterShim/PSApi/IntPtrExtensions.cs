@@ -12,7 +12,6 @@
 
 namespace PSFilterLoad.PSApi
 {
-#if DEBUG
     internal static class IntPtrExtensions
     {
         /// <summary>
@@ -30,5 +29,4 @@ namespace PSFilterLoad.PSApi
             return pointer.ToString("X8");
         }
     }
-#endif
 }

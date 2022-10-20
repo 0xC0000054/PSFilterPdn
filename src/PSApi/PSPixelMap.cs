@@ -35,7 +35,6 @@ namespace PSFilterLoad.PSApi
         public int colBytes;
         public MaskDescription maskDescription;
 
-#if DEBUG
         public override unsafe string ToString()
         {
             System.Text.StringBuilder builder = new(256);
@@ -63,7 +62,6 @@ namespace PSFilterLoad.PSApi
         private string GetFormattedString()
             => string.Format("maskData=0x{0}, rowBytes={1}, colBytes{2}, maskDescription={3}",
                              new object[] { maskData.ToHexString(), rowBytes, colBytes, maskDescription });
-#endif
     }
 
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -81,7 +79,6 @@ namespace PSFilterLoad.PSApi
         public int maskPhaseRow;
         public int maskPhaseCol;
 
-#if DEBUG
         public override string ToString() => string.Format(
                 "version={0}, bounds={1}, imageMode={2}, rowBytes={3}, colBytes={4}, planeBytes={5}, baseAddress=0x{6}, mat={7}, masks={8}",
                 new object[]{ version, bounds, ((ImageMode)imageMode).ToString("G"), rowBytes, colBytes, planeBytes, baseAddr.ToHexString(),
@@ -89,6 +86,5 @@ namespace PSFilterLoad.PSApi
 
         private static unsafe string FormatPSPixelMask(PSPixelMask* mask)
             => mask != null ? (*mask).ToString() : "null";
-#endif
     }
 }

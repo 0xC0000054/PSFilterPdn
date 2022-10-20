@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -91,14 +92,19 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly ActionReferenceGetProperty getProperty;
         private readonly ActionReferenceGetContainer getContainer;
 
-        private Dictionary<PIActionReference, ActionReferenceContainer> actionReferences;
+        private readonly Dictionary<PIActionReference, ActionReferenceContainer> actionReferences;
+        private readonly IPluginApiLogger logger;
         private int actionReferencesIndex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ActionReferenceSuite"/> class.
         /// </summary>
-        public unsafe ActionReferenceSuite()
+        /// <param name="logger">The logger instance.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="logger"/> is null.</exception>
+        public unsafe ActionReferenceSuite(IPluginApiLogger logger)
         {
+            ArgumentNullException.ThrowIfNull(logger);
+
             make = new ActionReferenceMake(Make);
             free = new ActionReferenceFree(Free);
             getForm = new ActionReferenceGetForm(GetForm);
@@ -119,6 +125,7 @@ namespace PSFilterLoad.PSApi.PICA
             getProperty = new ActionReferenceGetProperty(GetProperty);
             getContainer = new ActionReferenceGetContainer(GetContainer);
 
+            this.logger = logger;
             actionReferences = new Dictionary<PIActionReference, ActionReferenceContainer>();
             actionReferencesIndex = 0;
         }
@@ -191,6 +198,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int Make(PIActionReference* reference)
         {
+            logger.LogFunctionName(PluginApiLogCategory.PicaActionSuites);
+
             try
             {
                 *reference = GenerateDictionaryKey();
@@ -206,6 +215,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Free(PIActionReference reference)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
+
             actionReferences.Remove(reference);
             if (actionReferencesIndex == reference.Index)
             {
@@ -221,6 +232,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
             if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
@@ -243,6 +256,8 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
+
             if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 ActionReferenceItem item = container.GetReference();
@@ -261,6 +276,11 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (cstrValue != IntPtr.Zero)
             {
+                logger.Log(PluginApiLogCategory.PicaActionSuites,
+                           "reference: {0}, desiredClass: 0x{1:X8}",
+                           reference,
+                           desiredClass);
+
                 try
                 {
                     if (StringUtil.TryGetCStringLength(cstrValue, out int length))
@@ -289,6 +309,11 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutIndex(PIActionReference reference, uint desiredClass, uint value)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "reference: {0}, desiredClass: 0x{1:X8}",
+                       reference,
+                       desiredClass);
+
             try
             {
                 actionReferences[reference].Add(new ActionReferenceItem(ActionReferenceForm.Index, desiredClass, value));
@@ -303,6 +328,11 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutIdentifier(PIActionReference reference, uint desiredClass, uint value)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "reference: {0}, desiredClass: 0x{1:X8}",
+                       reference,
+                       desiredClass);
+
             try
             {
                 actionReferences[reference].Add(new ActionReferenceItem(ActionReferenceForm.Identifier, desiredClass, value));
@@ -317,6 +347,11 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutOffset(PIActionReference reference, uint desiredClass, int value)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "reference: {0}, desiredClass: 0x{1:X8}",
+                       reference,
+                       desiredClass);
+
             try
             {
                 actionReferences[reference].Add(new ActionReferenceItem(ActionReferenceForm.Offset, desiredClass, value));
@@ -331,6 +366,11 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutEnumerated(PIActionReference reference, uint desiredClass, uint type, uint value)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "reference: {0}, desiredClass: 0x{1:X8}",
+                       reference,
+                       desiredClass);
+
             try
             {
                 actionReferences[reference].Add(new ActionReferenceItem(ActionReferenceForm.Enumerated, desiredClass, new EnumeratedValue(type, value)));
@@ -345,6 +385,11 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutProperty(PIActionReference reference, uint desiredClass, uint value)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "reference: {0}, desiredClass: 0x{1:X8}",
+                       reference,
+                       desiredClass);
+
             try
             {
                 actionReferences[reference].Add(new ActionReferenceItem(ActionReferenceForm.Property, desiredClass, value));
@@ -359,6 +404,11 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutClass(PIActionReference reference, uint desiredClass)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "reference: {0}, desiredClass: 0x{1:X8}",
+                       reference,
+                       desiredClass);
+
             try
             {
                 actionReferences[reference].Add(new ActionReferenceItem(ActionReferenceForm.Class, desiredClass, null));
@@ -377,6 +427,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
             if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
@@ -397,6 +449,8 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (cstrValue != IntPtr.Zero)
             {
+                logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
+
                 if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
                 {
                     ActionReferenceItem item = container.GetReference();
@@ -428,6 +482,8 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
+
             if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 ActionReferenceItem item = container.GetReference();
@@ -448,6 +504,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
             if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
@@ -470,6 +528,8 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
+
             if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 ActionReferenceItem item = container.GetReference();
@@ -490,6 +550,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
             if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
@@ -517,6 +579,8 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
+
             if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {
                 ActionReferenceItem item = container.GetReference();
@@ -537,6 +601,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
             if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
             {

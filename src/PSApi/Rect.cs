@@ -70,12 +70,11 @@ namespace PSFilterLoad.PSApi
             return !left.Equals(right);
         }
 
-#if DEBUG
         public override string ToString()
         {
             return "Top=" + top.ToString() + ",Bottom=" + bottom.ToString() + ",Left=" + left.ToString() + ",Right=" + right.ToString();
         }
-#endif
+
         public static readonly Rect16 Empty = new();
     }
 #pragma warning restore 0659

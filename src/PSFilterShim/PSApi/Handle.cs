@@ -40,13 +40,6 @@ namespace PSFilterLoad.PSApi
             return -1937169414 + Value.GetHashCode();
         }
 
-#if DEBUG
-        public string ToHexString()
-        {
-            return Value.ToHexString();
-        }
-#endif
-
         public static bool operator ==(Handle left, Handle right)
         {
             return left.Equals(right);

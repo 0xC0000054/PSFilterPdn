@@ -33,6 +33,11 @@ namespace PSFilterLoad.PSApi.PICA
         public ushort x; // all clamped to between 0 and 255, why is a ushort used instead of a byte?
         public ushort y;
         public ushort z;
+
+        public override string ToString()
+        {
+            return string.Format("X: {0}, Y: {1}, Z: {2}", x, y, z);
+        }
     }
 
     internal struct CS_Color8
@@ -76,6 +81,11 @@ namespace PSFilterLoad.PSApi.PICA
         public override int GetHashCode()
         {
             return -1584136870 + value.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return Index.ToString();
         }
 
         public static bool operator ==(ColorID left, ColorID right)
@@ -164,6 +174,11 @@ namespace PSFilterLoad.PSApi.PICA
         public override int GetHashCode()
         {
             return -1584136870 + value.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return Index.ToString();
         }
 
         public static bool operator ==(ASZString left, ASZString right)

@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet;
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Runtime.InteropServices;
 
@@ -22,6 +23,7 @@ namespace PSFilterLoad.PSApi
         private readonly ReadPixelsProc readPixelsProc;
         private readonly WriteBasePixelsProc writeBasePixelsProc;
         private readonly ReadPortForWritePortProc readPortForWritePortProc;
+        private readonly IPluginApiLogger logger;
 
         private Surface scaledChannelSurface;
         private MaskSurface scaledSelectionMask;
@@ -31,15 +33,19 @@ namespace PSFilterLoad.PSApi
         /// Initializes a new instance of the <see cref="ChannelPortsSuite"/> class.
         /// </summary>
         /// <param name="filterImageProvider">The filter image provider.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="filterImageProvider"/> is null.</exception>
-        public unsafe ChannelPortsSuite(IFilterImageProvider filterImageProvider)
+        /// <param name="logger">The logger instance.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="filterImageProvider"/> is null.
+        /// or
+        /// <paramref name="logger"/> is null.
+        /// </exception>
+        public unsafe ChannelPortsSuite(IFilterImageProvider filterImageProvider, IPluginApiLogger logger)
         {
-            if (filterImageProvider == null)
-            {
-                throw new ArgumentNullException(nameof(filterImageProvider));
-            }
+            ArgumentNullException.ThrowIfNull(filterImageProvider);
+            ArgumentNullException.ThrowIfNull(logger);
 
             this.filterImageProvider = filterImageProvider;
+            this.logger = logger;
             readPixelsProc = new ReadPixelsProc(ReadPixelsProc);
             writeBasePixelsProc = new WriteBasePixelsProc(WriteBasePixels);
             readPortForWritePortProc = new ReadPortForWritePortProc(ReadPortForWritePort);
@@ -139,9 +145,11 @@ namespace PSFilterLoad.PSApi
 
         private unsafe short ReadPixelsProc(IntPtr port, PSScaling* scaling, VRect* writeRect, PixelMemoryDesc* destination, VRect* wroteRect)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), DebugUtils.PointerToString(writeRect)));
-#endif
+            logger.Log(PluginApiLogCategory.ChannelPortsSuite,
+                       "port: {0}, rect: {1}",
+                       port,
+                       new PointerAsStringFormatter<VRect>(writeRect));
+
             if (scaling == null || writeRect == null || destination == null)
             {
                 return PSError.paramErr;
@@ -271,17 +279,21 @@ namespace PSFilterLoad.PSApi
 
         private unsafe short WriteBasePixels(IntPtr port, VRect* writeRect, PixelMemoryDesc srcDesc)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.ChannelPorts, string.Format("port: {0}, rect: {1}", port.ToString(), DebugUtils.PointerToString(writeRect)));
-#endif
+            logger.Log(PluginApiLogCategory.ChannelPortsSuite,
+                       "port: {0}, rect: {1}",
+                       port,
+                       new PointerAsStringFormatter<VRect>(writeRect));
+
             return PSError.memFullErr;
         }
 
         private unsafe short ReadPortForWritePort(IntPtr* readPort, IntPtr writePort)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.ChannelPorts, string.Format("readPort: {0}, writePort: {1}", DebugUtils.PointerToString(readPort), writePort.ToString()));
-#endif
+            logger.Log(PluginApiLogCategory.ChannelPortsSuite,
+                       "readPort: {0}, writePort: {1}",
+                       new PointerAsStringFormatter<IntPtr>(readPort),
+                       writePort);
+
             return PSError.memFullErr;
         }
     }

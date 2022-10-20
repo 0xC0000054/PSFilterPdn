@@ -10,9 +10,11 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -89,7 +91,8 @@ namespace PSFilterLoad.PSApi.PICA
             }
         }
 
-        private Dictionary<ASZString, ZString> strings;
+        private readonly Dictionary<ASZString, ZString> strings;
+        private readonly IPluginApiLogger logger;
         private int stringsIndex;
 
         private readonly ASZStringMakeFromUnicode makeFromUnicode;
@@ -121,8 +124,13 @@ namespace PSFilterLoad.PSApi.PICA
         /// <summary>
         /// Initializes a new instance of the <see cref="ASZStringSuite"/> class.
         /// </summary>
-        public unsafe ASZStringSuite()
+        /// <param name="logger">The logger instance.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="logger"/> is null.</exception>
+        public unsafe ASZStringSuite(IPluginApiLogger logger)
         {
+            ArgumentNullException.ThrowIfNull(logger);
+
+            this.logger = logger;
             makeFromUnicode = new ASZStringMakeFromUnicode(MakeFromUnicode);
             makeFromCString = new ASZStringMakeFromCString(MakeFromCString);
             makeFromPascalString = new ASZStringMakeFromPascalString(MakeFromPascalString);
@@ -271,7 +279,11 @@ namespace PSFilterLoad.PSApi.PICA
             return new ASZString(stringsIndex);
         }
 
-        private unsafe int MakeString(IntPtr src, UIntPtr byteCount, ASZString* newZString, ZStringFormat format)
+        private unsafe int MakeString(IntPtr src,
+                                      UIntPtr byteCount,
+                                      ASZString* newZString,
+                                      ZStringFormat format,
+                                      [CallerMemberName] string memberName = "")
         {
             if (src == IntPtr.Zero || newZString == null)
             {
@@ -279,6 +291,13 @@ namespace PSFilterLoad.PSApi.PICA
             }
 
             ulong stringLength = byteCount.ToUInt64();
+
+            logger.Log(PluginApiLogCategory.PicaZStringSuite,
+                       "src: 0x{0}, byteCount: {1}",
+                       new IntPtrAsHexStringFormatter(src),
+                       stringLength,
+                       default,
+                       memberName);
 
             if (stringLength == 0)
             {
@@ -329,6 +348,8 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kASBadParameter;
             }
 
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "value: {0}", value);
+
             try
             {
                 ZString zstring = new(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
@@ -345,6 +366,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int MakeRomanizationOfFixed(int value, short places, bool trim, bool isSigned, ASZString* newZString)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite,
+                       "value: {0}, places: {1}, trim: {2}, isSigned: {3}",
+                       value,
+                       places,
+                       trim,
+                       isSigned);
+
             return PSError.kASNotImplmented;
         }
 
@@ -354,6 +382,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kASBadParameter;
             }
+
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "value: {0}", value);
 
             try
             {
@@ -371,6 +401,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private ASZString GetEmpty()
         {
+            logger.LogFunctionName(PluginApiLogCategory.PicaZStringSuite);
+
             return Empty;
         }
 
@@ -380,6 +412,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kASBadParameter;
             }
+
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "source: {0}", source);
 
             if (source == Empty)
             {
@@ -411,6 +445,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Replace(ASZString zstr, uint index, ASZString replacement)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite,
+                       "zstr: {0}, index: {1}, replacement: {2}",
+                       zstr,
+                       index,
+                       replacement);
+
+
             // Inserting an empty string is a no-op.
             if (replacement != Empty)
             {
@@ -451,6 +492,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int TrimEllipsis(ASZString zstr)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "zstr: {0}", zstr);
+
             if (zstr != Empty)
             {
                 if (strings.TryGetValue(zstr, out ZString item))
@@ -474,6 +517,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int TrimSpaces(ASZString zstr)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "zstr: {0}", zstr);
+
             if (zstr != Empty)
             {
                 if (strings.TryGetValue(zstr, out ZString item))
@@ -497,6 +542,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int RemoveAccelerators(ASZString zstr)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "zstr: {0}", zstr);
+
             if (zstr != Empty)
             {
                 if (strings.TryGetValue(zstr, out ZString item))
@@ -556,6 +603,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int AddRef(ASZString zstr)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "zstr: {0}", zstr);
+
             if (zstr != Empty)
             {
                 if (strings.TryGetValue(zstr, out ZString item))
@@ -574,6 +623,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Release(ASZString zstr)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "zstr: {0}", zstr);
+
             if (zstr != Empty)
             {
                 if (strings.TryGetValue(zstr, out ZString item))
@@ -604,6 +655,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private bool IsAllWhiteSpace(ASZString zstr)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "zstr: {0}", zstr);
+
             if (zstr != Empty)
             {
                 if (strings.TryGetValue(zstr, out ZString item))
@@ -628,11 +681,18 @@ namespace PSFilterLoad.PSApi.PICA
 
         private bool IsEmpty(ASZString zstr)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "zstr: {0}", zstr);
+
             return zstr == Empty;
         }
 
         private bool WillReplace(ASZString zstr, uint index)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite,
+                       "zstr: {0}, index: {1}",
+                       zstr,
+                       index);
+
             if (zstr != Empty)
             {
                 if (strings.TryGetValue(zstr, out ZString item))
@@ -650,6 +710,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private uint LengthAsUnicodeCString(ASZString zstr)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "zstr: {0}", zstr);
+
             if (zstr == Empty)
             {
                 // If the string is empty return only the length of the null terminator.
@@ -677,6 +739,13 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (str != IntPtr.Zero)
             {
+                logger.Log(PluginApiLogCategory.PicaZStringSuite,
+                           "zstr: {0}, str: 0x{1}, strSize: {2}, checkStrSize: {3}",
+                           zstr,
+                           new IntPtrAsHexStringFormatter(str),
+                           strSize,
+                           checkStrSize);
+
                 string value = string.Empty;
                 if (zstr != Empty)
                 {
@@ -714,6 +783,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private uint LengthAsCString(ASZString zstr)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "zstr: {0}", zstr);
+
             if (zstr == Empty)
             {
                 // If the string is empty return only the length of the null terminator.
@@ -740,6 +811,13 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (str != IntPtr.Zero)
             {
+                logger.Log(PluginApiLogCategory.PicaZStringSuite,
+                           "zstr: {0}, str: 0x{1}, strSize: {2}, checkStrSize: {3}",
+                           zstr,
+                           new IntPtrAsHexStringFormatter(str),
+                           strSize,
+                           checkStrSize);
+
                 string value = string.Empty;
                 if (zstr != Empty)
                 {
@@ -776,6 +854,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private uint LengthAsPascalString(ASZString zstr)
         {
+            logger.Log(PluginApiLogCategory.PicaZStringSuite, "zstr: {0}", zstr);
+
             if (zstr == Empty)
             {
                 // If the string is empty return only the length of the prefix byte.
@@ -802,6 +882,13 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (str != IntPtr.Zero)
             {
+                logger.Log(PluginApiLogCategory.PicaZStringSuite,
+                           "zstr: {0}, str: 0x{1}, strSize: {2}, checkStrSize: {3}",
+                           zstr,
+                           new IntPtrAsHexStringFormatter(str),
+                           strSize,
+                           checkStrSize);
+
                 string value = string.Empty;
                 if (zstr != Empty)
                 {

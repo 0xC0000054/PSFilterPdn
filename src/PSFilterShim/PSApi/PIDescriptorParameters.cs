@@ -48,6 +48,11 @@ namespace PSFilterLoad.PSApi
             return -1584136870 + value.GetHashCode();
         }
 
+        public override string ToString()
+        {
+            return Index.ToString();
+        }
+
         public static bool operator ==(PIReadDescriptor left, PIReadDescriptor right)
         {
             return left.Equals(right);
@@ -85,6 +90,11 @@ namespace PSFilterLoad.PSApi
         public override int GetHashCode()
         {
             return -1584136870 + value.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return Index.ToString();
         }
 
         public static bool operator ==(PIWriteDescriptor left, PIWriteDescriptor right)

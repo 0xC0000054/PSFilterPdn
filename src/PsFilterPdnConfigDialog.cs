@@ -39,6 +39,12 @@ namespace PSFilterPdn
 {
     internal sealed class PsFilterPdnConfigDialog : EffectConfigForm<PSFilterPdnEffect, PSFilterPdnConfigToken>
     {
+        private const string DummyTreeNodeName = "dummyTreeNode";
+
+        private static readonly string EffectsFolderPath = Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location);
+        private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location), "PSFilterShim.exe");
+        private static readonly Guid FilterExecutionLogSaveDialogClientGuid = new("3CD2A43A-C6DD-407D-89FE-C542B2594B35");
+
         private Button buttonOK;
         private TabControlEx tabControl1;
         private TabPage filterTab;
@@ -64,6 +70,11 @@ namespace PSFilterPdn
         private Button buttonCancel;
 
         private TabPage diagnosticsTab;
+        private GroupBox filterExecutionLogGroupBox;
+        private Label filterExecutionLogDescription;
+        private Button filterExecutionLogBrowseButton;
+        private TextBox filterExecutionLogTextBox;
+        private SaveFileDialog filterExecutionLogSaveDialog;
         private GroupBox loadErrorsGroupBox;
         private TextBox pluginLoadErrorDetailsTextBox;
         private ListView pluginLoadErrorListView;
@@ -119,14 +130,10 @@ namespace PSFilterPdn
         private readonly bool useDEPProxy;
         private readonly bool highDpiMode;
 
-        private const string DummyTreeNodeName = "dummyTreeNode";
-
-        private static readonly string EffectsFolderPath = Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location);
-        private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location), "PSFilterShim.exe");
-
         public PsFilterPdnConfigDialog(IBitmapEffectEnvironment bitmapEffectEnvironment)
         {
             InitializeComponent();
+            filterExecutionLogSaveDialog.ClientGuid = FilterExecutionLogSaveDialogClientGuid;
             proxyProcess = null;
             destSurface = null;
             expandedNodes = new List<string>();
@@ -287,6 +294,10 @@ namespace PSFilterPdn
             searchDirListView = new PSFilterPdn.Controls.DoubleBufferedListView();
             dirHeader = new System.Windows.Forms.ColumnHeader();
             diagnosticsTab = new System.Windows.Forms.TabPage();
+            filterExecutionLogGroupBox = new System.Windows.Forms.GroupBox();
+            filterExecutionLogDescription = new System.Windows.Forms.Label();
+            filterExecutionLogBrowseButton = new System.Windows.Forms.Button();
+            filterExecutionLogTextBox = new System.Windows.Forms.TextBox();
             loadErrorsGroupBox = new System.Windows.Forms.GroupBox();
             copyLoadErrorDetailsButton = new System.Windows.Forms.Button();
             pluginLoadErrorDetailsTextBox = new System.Windows.Forms.TextBox();
@@ -294,11 +305,13 @@ namespace PSFilterPdn
             plugInLoadErrorListViewColumnHeader = new System.Windows.Forms.ColumnHeader();
             updateFilterListBw = new System.ComponentModel.BackgroundWorker();
             donateLink = new System.Windows.Forms.LinkLabel();
+            filterExecutionLogSaveDialog = new System.Windows.Forms.SaveFileDialog();
             tabControl1.SuspendLayout();
             filterTab.SuspendLayout();
             folderLoadPanel.SuspendLayout();
             dirTab.SuspendLayout();
             diagnosticsTab.SuspendLayout();
+            filterExecutionLogGroupBox.SuspendLayout();
             loadErrorsGroupBox.SuspendLayout();
             SuspendLayout();
             //
@@ -539,6 +552,7 @@ namespace PSFilterPdn
             //
             // diagnosticsTab
             //
+            diagnosticsTab.Controls.Add(filterExecutionLogGroupBox);
             diagnosticsTab.Controls.Add(loadErrorsGroupBox);
             diagnosticsTab.Location = new System.Drawing.Point(4, 24);
             diagnosticsTab.Name = "diagnosticsTab";
@@ -547,6 +561,44 @@ namespace PSFilterPdn
             diagnosticsTab.TabIndex = 2;
             diagnosticsTab.Text = "Diagnostics";
             diagnosticsTab.UseVisualStyleBackColor = true;
+            //
+            // filterExecutionLogGroupBox
+            //
+            filterExecutionLogGroupBox.Controls.Add(filterExecutionLogDescription);
+            filterExecutionLogGroupBox.Controls.Add(filterExecutionLogBrowseButton);
+            filterExecutionLogGroupBox.Controls.Add(filterExecutionLogTextBox);
+            filterExecutionLogGroupBox.Location = new System.Drawing.Point(11, 7);
+            filterExecutionLogGroupBox.Name = "filterExecutionLogGroupBox";
+            filterExecutionLogGroupBox.Size = new System.Drawing.Size(512, 94);
+            filterExecutionLogGroupBox.TabIndex = 1;
+            filterExecutionLogGroupBox.TabStop = false;
+            filterExecutionLogGroupBox.Text = "Filter execution logging";
+            //
+            // filterExecutionLogDescription
+            //
+            filterExecutionLogDescription.Location = new System.Drawing.Point(6, 19);
+            filterExecutionLogDescription.Name = "filterExecutionLogDescription";
+            filterExecutionLogDescription.Size = new System.Drawing.Size(496, 33);
+            filterExecutionLogDescription.TabIndex = 3;
+            filterExecutionLogDescription.Text = "This option produces a log file that can be used to help debug why a filter does " +
+    "not run in PSFilterPdn.";
+            //
+            // filterExecutionLogBrowseButton
+            //
+            filterExecutionLogBrowseButton.Location = new System.Drawing.Point(431, 64);
+            filterExecutionLogBrowseButton.Name = "filterExecutionLogBrowseButton";
+            filterExecutionLogBrowseButton.Size = new System.Drawing.Size(75, 23);
+            filterExecutionLogBrowseButton.TabIndex = 2;
+            filterExecutionLogBrowseButton.Text = "Browse...";
+            filterExecutionLogBrowseButton.UseVisualStyleBackColor = true;
+            filterExecutionLogBrowseButton.Click += new System.EventHandler(filterExecutionLogBrowseButton_Click);
+            //
+            // filterExecutionLogTextBox
+            //
+            filterExecutionLogTextBox.Location = new System.Drawing.Point(6, 64);
+            filterExecutionLogTextBox.Name = "filterExecutionLogTextBox";
+            filterExecutionLogTextBox.Size = new System.Drawing.Size(417, 23);
+            filterExecutionLogTextBox.TabIndex = 1;
             //
             // loadErrorsGroupBox
             //
@@ -578,7 +630,7 @@ namespace PSFilterPdn
             pluginLoadErrorDetailsTextBox.Multiline = true;
             pluginLoadErrorDetailsTextBox.Name = "pluginLoadErrorDetailsTextBox";
             pluginLoadErrorDetailsTextBox.ReadOnly = true;
-            pluginLoadErrorDetailsTextBox.Size = new System.Drawing.Size(503, 122);
+            pluginLoadErrorDetailsTextBox.Size = new System.Drawing.Size(507, 122);
             pluginLoadErrorDetailsTextBox.TabIndex = 1;
             //
             // pluginLoadErrorListView
@@ -619,6 +671,12 @@ namespace PSFilterPdn
             donateLink.Text = "Donate!";
             donateLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(donateLink_LinkClicked);
             //
+            // filterExecutionLogSaveDialog
+            //
+            filterExecutionLogSaveDialog.DefaultExt = "log";
+            filterExecutionLogSaveDialog.Filter = "Log files (*.log)|*.log";
+            filterExecutionLogSaveDialog.Title = "Select the Location of the Filter Execution Log";
+            //
             // PsFilterPdnConfigDialog
             //
             ClientSize = new System.Drawing.Size(561, 511);
@@ -636,6 +694,8 @@ namespace PSFilterPdn
             dirTab.ResumeLayout(false);
             dirTab.PerformLayout();
             diagnosticsTab.ResumeLayout(false);
+            filterExecutionLogGroupBox.ResumeLayout(false);
+            filterExecutionLogGroupBox.PerformLayout();
             loadErrorsGroupBox.ResumeLayout(false);
             loadErrorsGroupBox.PerformLayout();
             ResumeLayout(false);
@@ -791,6 +851,7 @@ namespace PSFilterPdn
                 ParameterDataPath = parameterDataFileName,
                 PseudoResourcePath = resourceDataFileName,
                 DescriptorRegistryPath = descriptorRegistryFileName,
+                LogFilePath = filterExecutionLogTextBox.Text,
                 PluginUISettings = new PluginUISettings(highDpiMode)
             };
 
@@ -971,8 +1032,14 @@ namespace PSFilterPdn
 
                         filterRunning = true;
 
+                        IPluginApiLogWriter logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(data,
+                                                                                                              filterExecutionLogTextBox.Text);
                         try
                         {
+                            IPluginApiLogger logger = PluginApiLogger.Create(logWriter,
+                                                                         () => PluginApiLogCategories.Default,
+                                                                         nameof(LoadPsFilter));
+
                             PluginUISettings pluginUISettings = new(highDpiMode);
                             using (LoadPsFilter lps = new(sourceBitmap,
                                                           selectionMask,
@@ -982,6 +1049,7 @@ namespace PSFilterPdn
                                                           documentDpi.X,
                                                           documentDpi.Y,
                                                           Handle,
+                                                          logger,
                                                           pluginUISettings))
                             {
                                 lps.SetAbortCallback(AbortCallback);
@@ -1055,6 +1123,11 @@ namespace PSFilterPdn
                         }
                         finally
                         {
+                            if (logWriter is IDisposable disposable)
+                            {
+                                disposable.Dispose();
+                            }
+
                             if (!formClosePending)
                             {
                                 UpdateTokenFromDialog();
@@ -2013,6 +2086,20 @@ namespace PSFilterPdn
             if (pluginLoadErrorDetailsTextBox.Text.Length > 0)
             {
                 Services.GetService<IClipboardService>().SetText(pluginLoadErrorDetailsTextBox.Text);
+            }
+        }
+
+        private void filterExecutionLogBrowseButton_Click(object sender, EventArgs e)
+        {
+            filterExecutionLogSaveDialog.FileName = "FilterLog-" + DateTime.Now.ToString("yyyyMMdd-THHmmss") + ".log";
+
+            if (filterExecutionLogSaveDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                filterExecutionLogTextBox.Text = filterExecutionLogSaveDialog.FileName;
+            }
+            else
+            {
+                filterExecutionLogTextBox.Text = string.Empty;
             }
         }
     }

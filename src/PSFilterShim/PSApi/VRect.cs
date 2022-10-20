@@ -65,11 +65,9 @@ namespace PSFilterLoad.PSApi
             return !left.Equals(right);
         }
 
-#if DEBUG
         public override string ToString()
         {
             return "Top=" + top.ToString() + ",Bottom=" + bottom.ToString() + ",Left=" + left.ToString() + ",Right=" + right.ToString();
         }
-#endif
     }
 }

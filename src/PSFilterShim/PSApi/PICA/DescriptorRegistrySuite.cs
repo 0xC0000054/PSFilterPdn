@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -23,22 +24,27 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly DescriptorRegistryGet get;
 
         private readonly IActionDescriptorSuite actionDescriptorSuite;
-        private Dictionary<string, DescriptorRegistryItem> registry;
+        private readonly IPluginApiLogger logger;
+        private readonly Dictionary<string, DescriptorRegistryItem> registry;
         private bool persistentValuesChanged;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DescriptorRegistrySuite"/> class.
         /// </summary>
         /// <param name="actionDescriptorSuite">The action descriptor suite instance.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="actionDescriptorSuite"/> is null.</exception>
-        public unsafe DescriptorRegistrySuite(IActionDescriptorSuite actionDescriptorSuite)
+        /// <param name="logger">The logger instance.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="actionDescriptorSuite"/> is null.
+        /// or
+        /// <paramref name="logger"/> is null.
+        /// </exception>
+        public unsafe DescriptorRegistrySuite(IActionDescriptorSuite actionDescriptorSuite, IPluginApiLogger logger)
         {
-            if (actionDescriptorSuite == null)
-            {
-                throw new ArgumentNullException(nameof(actionDescriptorSuite));
-            }
+            ArgumentNullException.ThrowIfNull(actionDescriptorSuite);
+            ArgumentNullException.ThrowIfNull(logger);
 
             this.actionDescriptorSuite = actionDescriptorSuite;
+            this.logger = logger;
             register = new DescriptorRegistryRegister(Register);
             erase = new DescriptorRegistryErase(Erase);
             get = new DescriptorRegistryGet(Get);
@@ -104,6 +110,12 @@ namespace PSFilterLoad.PSApi.PICA
                     return PSError.kSPBadParameterError;
                 }
 
+                logger.Log(PluginApiLogCategory.PicaDescriptorRegistrySuite,
+                           "key: {0}, descriptor: {1}, isPersistent: {2}",
+                           key,
+                           descriptor,
+                           isPersistent);
+
                 if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out Dictionary<uint, AETEValue> values))
                 {
                     registry.AddOrUpdate(registryKey, new DescriptorRegistryItem(values, isPersistent));
@@ -135,6 +147,10 @@ namespace PSFilterLoad.PSApi.PICA
                     return PSError.kSPBadParameterError;
                 }
 
+                logger.Log(PluginApiLogCategory.PicaDescriptorRegistrySuite,
+                           "key: {0}",
+                           key);
+
                 registry.Remove(registryKey);
             }
             catch (OutOfMemoryException)
@@ -159,6 +175,10 @@ namespace PSFilterLoad.PSApi.PICA
                 {
                     return PSError.kSPBadParameterError;
                 }
+
+                logger.Log(PluginApiLogCategory.PicaDescriptorRegistrySuite,
+                           "key: {0}",
+                           key);
 
                 if (registry.TryGetValue(registryKey, out DescriptorRegistryItem item))
                 {

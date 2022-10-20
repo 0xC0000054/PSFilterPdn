@@ -14,6 +14,7 @@ using PaintDotNet;
 using PaintDotNet.Effects;
 using PaintDotNet.Imaging;
 using PSFilterLoad.PSApi;
+using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterPdn.Properties;
 using System;
 using System.ComponentModel;
@@ -207,6 +208,17 @@ namespace PSFilterPdn
             {
                 DocumentDpi documentDpi = new(Environment.Document.Resolution);
 
+                IPluginApiLogWriter logWriter = null;
+
+                if (Debugger.IsAttached)
+                {
+                    logWriter = PluginApiTraceListenerLogWriter.Instance;
+                }
+
+                IPluginApiLogger logger = PluginApiLogger.Create(logWriter,
+                                                                 () => PluginApiLogCategories.Default,
+                                                                 nameof(LoadPsFilter));
+
                 using (LoadPsFilter lps = new(Environment.GetSourceBitmapBgra32(),
                                               SelectionMaskRenderer.FromPdnSelection(Environment),
                                               takeOwnershipOfSelectionMask: true,
@@ -215,6 +227,7 @@ namespace PSFilterPdn
                                               documentDpi.X,
                                               documentDpi.Y,
                                               window.Handle,
+                                              logger,
                                               null))
                 {
                     lps.SetAbortCallback(AbortCallback);

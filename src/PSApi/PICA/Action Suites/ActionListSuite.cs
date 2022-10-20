@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -79,8 +80,9 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly IHandleSuite handleSuite;
         private readonly IActionReferenceSuite actionReferenceSuite;
         private readonly IASZStringSuite zstringSuite;
+        private readonly IPluginApiLogger logger;
 
-        private Dictionary<PIActionList, ActionListItemCollection> actionLists;
+        private readonly Dictionary<PIActionList, ActionListItemCollection> actionLists;
         private int actionListsIndex;
         private IActionDescriptorSuite actionDescriptorSuite;
 
@@ -93,15 +95,19 @@ namespace PSFilterLoad.PSApi.PICA
         /// <paramref name="actionReferenceSuite"/> is null.
         /// or
         /// <paramref name="zstringSuite"/> is null.
+        /// or
+        /// <paramref name="logger"/> is null.
         /// </exception>
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public unsafe ActionListSuite(IHandleSuite handleSuite,
                                       IActionReferenceSuite actionReferenceSuite,
-                                      IASZStringSuite zstringSuite)
+                                      IASZStringSuite zstringSuite,
+                                      IPluginApiLogger logger)
         {
             ArgumentNullException.ThrowIfNull(handleSuite);
             ArgumentNullException.ThrowIfNull(actionReferenceSuite);
             ArgumentNullException.ThrowIfNull(zstringSuite);
+            ArgumentNullException.ThrowIfNull(logger);
 
             make = new ActionListMake(Make);
             free = new ActionListFree(Free);
@@ -146,6 +152,7 @@ namespace PSFilterLoad.PSApi.PICA
             this.handleSuite = handleSuite;
             this.actionReferenceSuite = actionReferenceSuite;
             this.zstringSuite = zstringSuite;
+            this.logger = logger;
             actionLists = new Dictionary<PIActionList, ActionListItemCollection>();
             actionListsIndex = 0;
         }
@@ -260,6 +267,8 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.LogFunctionName(PluginApiLogCategory.PicaActionSuites);
+
             try
             {
                 *list = GenerateDictionaryKey();
@@ -275,6 +284,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int Free(PIActionList list)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
+
             actionLists.Remove(list);
             if (actionListsIndex == list.Index)
             {
@@ -309,6 +320,8 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
+
             ActionListItemCollection items = actionLists[list];
 
             *count = (uint)items.Count;
@@ -319,6 +332,8 @@ namespace PSFilterLoad.PSApi.PICA
         #region List write methods
         private int PutInteger(PIActionList list, int data)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
+
             try
             {
                 actionLists[list].Add(new ActionListItem(DescriptorTypes.Integer, data));
@@ -333,6 +348,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutFloat(PIActionList list, double data)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
+
             try
             {
                 actionLists[list].Add(new ActionListItem(DescriptorTypes.Float, data));
@@ -347,6 +364,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutUnitFloat(PIActionList list, uint unit, double data)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
+
             try
             {
                 UnitFloat item = new(unit, data);
@@ -367,6 +386,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
 
             try
             {
@@ -393,6 +414,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutBoolean(PIActionList list, byte data)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
+
             try
             {
                 actionLists[list].Add(new ActionListItem(DescriptorTypes.Boolean, data));
@@ -407,6 +430,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutList(PIActionList list, PIActionList data)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}, data: {1}", list, data);
+
             try
             {
                 if (actionLists.TryGetValue(data, out ActionListItemCollection items))
@@ -433,6 +458,13 @@ namespace PSFilterLoad.PSApi.PICA
                 // The plug-in called this method before acquiring the Action Descriptor suite.
                 return PSError.kSPLogicError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, type: 0x{1:X8}, descriptor: {2}",
+                       list,
+                       type,
+                       descriptor);
+
 
             try
             {
@@ -461,6 +493,10 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutEnumerated(PIActionList list, uint type, uint data)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, type: 0x{1:X8}",
+                       list,
+                       type);
             try
             {
                 EnumeratedValue item = new(type, data);
@@ -476,6 +512,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutReference(PIActionList list, PIActionReference reference)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}, reference: {1}", list, reference);
+
             try
             {
                 if (actionReferenceSuite.TryGetReferenceValues(reference, out ReadOnlyCollection<ActionReferenceItem> value))
@@ -497,6 +535,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutClass(PIActionList list, uint data)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
+
             try
             {
                 actionLists[list].Add(new ActionListItem(DescriptorTypes.Class, data));
@@ -511,6 +551,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutGlobalClass(PIActionList list, uint data)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
+
             try
             {
                 actionLists[list].Add(new ActionListItem(DescriptorTypes.GlobalClass, data));
@@ -525,6 +567,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutAlias(PIActionList list, Handle aliasHandle)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
+
             try
             {
                 IntPtr hPtr = handleSuite.LockHandle(aliasHandle);
@@ -557,6 +601,8 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
+
             try
             {
                 unsafe
@@ -586,6 +632,8 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
+
             try
             {
                 byte[] data = new byte[length];
@@ -604,6 +652,11 @@ namespace PSFilterLoad.PSApi.PICA
 
         private int PutZString(PIActionList list, ASZString zstring)
         {
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, zstring: {1}",
+                       list,
+                       zstring);
+
             try
             {
                 if (zstringSuite.ConvertToActionDescriptor(zstring, out ActionDescriptorZString value))
@@ -632,6 +685,11 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
+
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
@@ -650,6 +708,11 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
+
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
@@ -667,6 +730,11 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
 
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
@@ -693,6 +761,11 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
+
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
@@ -712,6 +785,11 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
 
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
@@ -740,6 +818,11 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
+
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
@@ -757,6 +840,11 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
 
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
@@ -791,6 +879,11 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
 
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
@@ -829,6 +922,11 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
+
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
@@ -852,6 +950,11 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
 
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
@@ -880,6 +983,11 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
+
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
@@ -902,6 +1010,11 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
 
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
@@ -929,6 +1042,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", list);
 
             ActionListItemCollection items = actionLists[list];
             if (count <= items.Count)
@@ -966,6 +1081,11 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
+
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
@@ -986,6 +1106,11 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
+
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)
             {
@@ -1005,6 +1130,11 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 return PSError.kSPBadParameterError;
             }
+
+            logger.Log(PluginApiLogCategory.PicaActionSuites,
+                       "list: {0}, index: {1}",
+                       list,
+                       index);
 
             ActionListItemCollection items = actionLists[list];
             if (index < items.Count)

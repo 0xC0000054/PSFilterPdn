@@ -97,6 +97,13 @@ namespace PSFilterPdn
         }
 
         [DataMember]
+        public string LogFilePath
+        {
+            get;
+            internal set;
+        }
+
+        [DataMember]
         public PSFilterLoad.PSApi.PluginUISettings PluginUISettings
         {
             get;

@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterPdn.Interop;
 using System;
 using System.Collections.Generic;
@@ -25,8 +26,9 @@ namespace PSFilterLoad.PSApi
         private readonly UnlockBufferProc unlockProc;
         private readonly BufferSpaceProc spaceProc;
         private readonly Dictionary<IntPtr, int> bufferIDs;
+        private readonly IPluginApiLogger logger;
 
-        public unsafe BufferSuite()
+        public unsafe BufferSuite(IPluginApiLogger logger)
         {
             allocProc = new AllocateBufferProc(AllocateBufferProc);
             freeProc = new FreeBufferProc(BufferFreeProc);
@@ -34,6 +36,7 @@ namespace PSFilterLoad.PSApi
             unlockProc = new UnlockBufferProc(BufferUnlockProc);
             spaceProc = new BufferSpaceProc(BufferSpaceProc);
             bufferIDs = new Dictionary<IntPtr, int>(IntPtrEqualityComparer.Instance);
+            this.logger = logger.CreateInstanceForType(nameof(BufferSuite));
         }
 
         public int AvailableSpace => BufferSpaceProc();
@@ -99,9 +102,8 @@ namespace PSFilterLoad.PSApi
 
         private unsafe short AllocateBufferProc(int size, IntPtr* bufferID)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.BufferSuite, string.Format("Size: {0}", size));
-#endif
+            logger.Log(PluginApiLogCategory.BufferSuite, "Size: {0}", size);
+
             if (size < 0 || bufferID == null)
             {
                 return PSError.paramErr;
@@ -131,9 +133,14 @@ namespace PSFilterLoad.PSApi
 
         private void BufferFreeProc(IntPtr bufferID)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.BufferSuite, string.Format("Buffer: 0x{0}, Size: {1}", bufferID.ToHexString(), Memory.Size(bufferID)));
-#endif
+            if (logger.IsEnabled(PluginApiLogCategory.BufferSuite))
+            {
+                logger.Log(PluginApiLogCategory.BufferSuite,
+                           "Buffer: 0x{0}, Size: {1}",
+                           new IntPtrAsHexStringFormatter(bufferID),
+                           GetBufferSize(bufferID));
+            }
+
             Memory.Free(bufferID);
 
             bufferIDs.Remove(bufferID);
@@ -141,18 +148,19 @@ namespace PSFilterLoad.PSApi
 
         private IntPtr BufferLockProc(IntPtr bufferID, byte moveHigh)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.BufferSuite, string.Format("Buffer: 0x{0}", bufferID.ToHexString()));
-#endif
+            logger.Log(PluginApiLogCategory.BufferSuite,
+                       "Buffer: 0x{0}, moveHigh: {1}",
+                       new IntPtrAsHexStringFormatter(bufferID),
+                       moveHigh);
 
             return bufferID;
         }
 
         private void BufferUnlockProc(IntPtr bufferID)
         {
-#if DEBUG
-            DebugUtils.Ping(DebugFlags.BufferSuite, string.Format("Buffer: 0x{0}", bufferID.ToHexString()));
-#endif
+            logger.Log(PluginApiLogCategory.BufferSuite,
+                                  "Buffer: 0x{0}",
+                                  new IntPtrAsHexStringFormatter(bufferID));
         }
 
         private int BufferSpaceProc()
@@ -171,6 +179,8 @@ namespace PSFilterLoad.PSApi
                     space = (int)buffer.ullAvailVirtual;
                 }
             }
+
+            logger.Log(PluginApiLogCategory.BufferSuite, "space: {0}", space);
 
             return space;
         }

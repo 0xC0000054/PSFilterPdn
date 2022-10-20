@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Runtime.InteropServices;
 
@@ -19,11 +20,15 @@ namespace PSFilterLoad.PSApi
     {
         private readonly PIResampleProc interpolate1DProc;
         private readonly PIResampleProc interpolate2DProc;
+        private readonly IPluginApiLogger logger;
 
-        public unsafe ImageServicesSuite()
+        public unsafe ImageServicesSuite(IPluginApiLogger logger)
         {
+            ArgumentNullException.ThrowIfNull(logger);
+
             interpolate1DProc = new PIResampleProc(Interpolate1DProc);
             interpolate2DProc = new PIResampleProc(Interpolate2DProc);
+            this.logger = logger;
         }
 
         public unsafe IntPtr CreateImageServicesSuitePointer()
@@ -42,11 +47,27 @@ namespace PSFilterLoad.PSApi
 
         private unsafe short Interpolate1DProc(PSImagePlane* source, PSImagePlane* destination, Rect16* area, IntPtr coords, short method)
         {
+            logger.Log(PluginApiLogCategory.ImageServicesSuite,
+                       "source: [{0}], destination: [{1}], area: {2}, coords: {3}, method: {4}",
+                       new PointerAsStringFormatter<PSImagePlane>(source),
+                       new PointerAsStringFormatter<PSImagePlane>(destination),
+                       new PointerAsStringFormatter<Rect16>(area),
+                       coords,
+                       method);
+
             return PSError.memFullErr;
         }
 
         private unsafe short Interpolate2DProc(PSImagePlane* source, PSImagePlane* destination, Rect16* area, IntPtr coords, short method)
         {
+            logger.Log(PluginApiLogCategory.ImageServicesSuite,
+                       "source: [{0}], destination: [{1}], area: {2}, coords: {3}, method: {4}",
+                       new PointerAsStringFormatter<PSImagePlane>(source),
+                       new PointerAsStringFormatter<PSImagePlane>(destination),
+                       new PointerAsStringFormatter<Rect16>(area),
+                       coords,
+                       method);
+
             return PSError.memFullErr;
         }
     }

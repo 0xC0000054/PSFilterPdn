@@ -48,6 +48,11 @@ namespace PSFilterLoad.PSApi.PICA
             return -1584136870 + value.GetHashCode();
         }
 
+        public override string ToString()
+        {
+            return Index.ToString();
+        }
+
         public static bool operator ==(PIActionReference left, PIActionReference right)
         {
             return left.Equals(right);

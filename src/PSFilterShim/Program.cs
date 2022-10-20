@@ -12,12 +12,11 @@
 
 using System;
 using System.ComponentModel;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using PSFilterLoad.PSApi;
+using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterPdn;
 
 namespace PSFilterShim
@@ -112,63 +111,78 @@ namespace PSFilterShim
                 {
                 }
 
-                using (LoadPsFilter lps = new(settings))
+                IPluginApiLogWriter logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(pdata, settings.LogFilePath);
+
+                try
                 {
-                    lps.SetAbortCallback(pipeClient.AbortFilter);
-
-                    if (!settings.RepeatEffect)
+                    IPluginApiLogger logger = PluginApiLogger.Create(logWriter,
+                                                                     () => PluginApiLogCategories.Default,
+                                                                     nameof(LoadPsFilter));
+                    using (LoadPsFilter lps = new(settings, logger))
                     {
-                        // As Paint.NET does not currently allow custom progress reporting only set this callback for the effect dialog.
-                        lps.SetProgressCallback(pipeClient.UpdateFilterProgress);
-                    }
+                        lps.SetAbortCallback(pipeClient.AbortFilter);
 
-                    if (filterParameters != null)
-                    {
-                        // Ignore the filters that only use the data handle, e.g. Filter Factory.
-                        byte[] parameterData = filterParameters.GlobalParameters.GetParameterDataBytes();
-
-                        if (parameterData != null || filterParameters.AETEDictionary != null)
+                        if (!settings.RepeatEffect)
                         {
-                            lps.FilterParameters = filterParameters;
-                            lps.IsRepeatEffect = settings.RepeatEffect;
+                            // As Paint.NET does not currently allow custom progress reporting only set this callback for the effect dialog.
+                            lps.SetProgressCallback(pipeClient.UpdateFilterProgress);
                         }
-                    }
 
-                    if (pseudoResources != null)
-                    {
-                        lps.PseudoResources = pseudoResources;
-                    }
-
-                    if (registryValues != null)
-                    {
-                        lps.SetRegistryValues(registryValues);
-                    }
-
-                    bool result = lps.RunPlugin(pdata, settings.ShowAboutDialog);
-
-                    if (result)
-                    {
-                        if (!settings.ShowAboutDialog)
+                        if (filterParameters != null)
                         {
-                            PSFilterShimImage.Save(settings.DestinationImagePath, lps.Dest);
-                            pipeClient.SetPostProcessingOptions(lps.PostProcessingOptions);
+                            // Ignore the filters that only use the data handle, e.g. Filter Factory.
+                            byte[] parameterData = filterParameters.GlobalParameters.GetParameterDataBytes();
 
-                            if (!lps.IsRepeatEffect)
+                            if (parameterData != null || filterParameters.AETEDictionary != null)
                             {
-                                DataContractSerializerUtil.Serialize(settings.ParameterDataPath, lps.FilterParameters);
-                                DataContractSerializerUtil.Serialize(settings.PseudoResourcePath, lps.PseudoResources);
+                                lps.FilterParameters = filterParameters;
+                                lps.IsRepeatEffect = settings.RepeatEffect;
+                            }
+                        }
 
-                                registryValues = lps.GetRegistryValues();
-                                if (registryValues != null)
+                        if (pseudoResources != null)
+                        {
+                            lps.PseudoResources = pseudoResources;
+                        }
+
+                        if (registryValues != null)
+                        {
+                            lps.SetRegistryValues(registryValues);
+                        }
+
+                        bool result = lps.RunPlugin(pdata, settings.ShowAboutDialog);
+
+                        if (result)
+                        {
+                            if (!settings.ShowAboutDialog)
+                            {
+                                PSFilterShimImage.Save(settings.DestinationImagePath, lps.Dest);
+                                pipeClient.SetPostProcessingOptions(lps.PostProcessingOptions);
+
+                                if (!lps.IsRepeatEffect)
                                 {
-                                    DataContractSerializerUtil.Serialize(settings.DescriptorRegistryPath, registryValues);
+                                    DataContractSerializerUtil.Serialize(settings.ParameterDataPath, lps.FilterParameters);
+                                    DataContractSerializerUtil.Serialize(settings.PseudoResourcePath, lps.PseudoResources);
+
+                                    registryValues = lps.GetRegistryValues();
+                                    if (registryValues != null)
+                                    {
+                                        DataContractSerializerUtil.Serialize(settings.DescriptorRegistryPath, registryValues);
+                                    }
                                 }
                             }
                         }
+                        else
+                        {
+                            pipeClient.SetProxyErrorMessage(lps.ErrorMessage);
+                        }
                     }
-                    else
+                }
+                finally
+                {
+                    if (logWriter is IDisposable disposable)
                     {
-                        pipeClient.SetProxyErrorMessage(lps.ErrorMessage);
+                        disposable.Dispose();
                     }
                 }
             }

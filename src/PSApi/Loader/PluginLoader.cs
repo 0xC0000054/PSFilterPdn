@@ -254,7 +254,7 @@ namespace PSFilterLoad.PSApi
                     return BOOL.TRUE;
                 }
 
-                query.plugins.Add(new PluginData(query.fileName, entryPoint, category, title));
+                query.plugins.Add(new PluginData(query.fileName, entryPoint, category, title, query.processorArchitecture));
             }
             catch (Exception ex)
             {
@@ -470,7 +470,8 @@ namespace PSFilterLoad.PSApi
                                                  filterInfo,
                                                  query.runWith32BitShim,
                                                  aete,
-                                                 enableInfo));
+                                                 enableInfo,
+                                                 query.processorArchitecture));
             }
             catch (Exception ex)
             {

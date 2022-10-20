@@ -12,6 +12,7 @@
 
 using System;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
@@ -37,6 +38,8 @@ namespace PSFilterLoad.PSApi
         private AETEData aete;
         [DataMember(Name = nameof(ModuleEntryPoints))]
         private ReadOnlyCollection<string> moduleEntryPoints;
+        [DataMember(Name = nameof(ProcessorArchitecture))]
+        private readonly Architecture processorArchitecture;
 #pragma warning restore 0649
 
         /// <summary>
@@ -98,6 +101,14 @@ namespace PSFilterLoad.PSApi
             get => moduleEntryPoints;
             internal set => moduleEntryPoints = value;
         }
+
+        /// <summary>
+        /// Gets the processor architecture that the plug-in was built for.
+        /// </summary>
+        /// <value>
+        /// The processor architecture.
+        /// </value>
+        public Architecture ProcessorArchitecture => processorArchitecture;
 
         public override bool Equals(object obj)
         {

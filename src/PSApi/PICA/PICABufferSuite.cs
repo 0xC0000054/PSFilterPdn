@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterPdn.Interop;
 using System;
 using System.Collections.Generic;
@@ -68,11 +69,15 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly PSBufferSuiteDispose bufferSuiteDispose;
         private readonly PSBufferSuiteGetSize bufferSuiteGetSize;
         private readonly PSBufferSuiteGetSpace bufferSuiteGetSpace;
-        private Dictionary<IntPtr, BufferEntry> buffers;
+        private readonly Dictionary<IntPtr, BufferEntry> buffers;
+        private readonly IPluginApiLogger logger;
         private bool disposed;
 
-        public unsafe PICABufferSuite()
+        public unsafe PICABufferSuite(IPluginApiLogger logger)
         {
+            ArgumentNullException.ThrowIfNull(logger);
+
+            this.logger = logger;
             bufferSuiteNew = new PSBufferSuiteNew(PSBufferNew);
             bufferSuiteDispose = new PSBufferSuiteDispose(PSBufferDispose);
             bufferSuiteGetSize = new PSBufferSuiteGetSize(PSBufferGetSize);
@@ -83,6 +88,11 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe IntPtr PSBufferNew(uint* requestedSize, uint minimumSize)
         {
+            logger.Log(PluginApiLogCategory.BufferSuite,
+                       "requestedSize: {0}, minimumSize: {1}",
+                       new PointerAsStringFormatter<uint>(requestedSize),
+                       minimumSize);
+
             IntPtr ptr = IntPtr.Zero;
 
             try
@@ -145,6 +155,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe void PSBufferDispose(IntPtr* buffer)
         {
+            logger.Log(PluginApiLogCategory.BufferSuite, "buffer: 0x{0}", new PointerAsHexStringFormatter(buffer));
+
             if (buffer != null && buffers.TryGetValue(*buffer, out BufferEntry entry))
             {
                 entry.Dispose();
@@ -156,6 +168,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private uint PSBufferGetSize(IntPtr buffer)
         {
+            logger.Log(PluginApiLogCategory.BufferSuite, "buffer: 0x{0}", new IntPtrAsHexStringFormatter(buffer));
+
             if (buffer != IntPtr.Zero && buffers.TryGetValue(buffer, out BufferEntry entry))
             {
                 return entry.Size;
@@ -180,6 +194,8 @@ namespace PSFilterLoad.PSApi.PICA
                     space = (uint)buffer.ullAvailVirtual;
                 }
             }
+
+            logger.Log(PluginApiLogCategory.BufferSuite, "space: {0}", space);
 
             return space;
         }

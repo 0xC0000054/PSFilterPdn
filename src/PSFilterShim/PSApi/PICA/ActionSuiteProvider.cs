@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -22,6 +23,7 @@ namespace PSFilterLoad.PSApi.PICA
     internal sealed class ActionSuiteProvider : IDisposable
     {
         private readonly IHandleSuite handleSuite;
+        private readonly IPluginApiLogger logger;
         private ActionDescriptorSuite actionDescriptorSuite;
         private ActionListSuite actionListSuite;
         private ActionReferenceSuite actionReferenceSuite;
@@ -30,11 +32,13 @@ namespace PSFilterLoad.PSApi.PICA
         /// <summary>
         /// Initializes a new instance of the <see cref="ActionSuiteProvider"/> class.
         /// </summary>
-        public ActionSuiteProvider(IHandleSuite handleSuite)
+        public ActionSuiteProvider(IHandleSuite handleSuite, IPluginApiLogger logger)
         {
             ArgumentNullException.ThrowIfNull(handleSuite);
+            ArgumentNullException.ThrowIfNull(logger);
 
             this.handleSuite = handleSuite;
+            this.logger = logger;
             actionDescriptorSuite = null;
             actionListSuite = null;
             actionReferenceSuite = null;
@@ -173,7 +177,12 @@ namespace PSFilterLoad.PSApi.PICA
                 {
                     CreateListSuite(zstringSuite);
                 }
-                actionDescriptorSuite = new ActionDescriptorSuite(aete, handleSuite, actionListSuite, actionReferenceSuite, zstringSuite);
+                actionDescriptorSuite = new ActionDescriptorSuite(aete,
+                                                                  handleSuite,
+                                                                  actionListSuite,
+                                                                  actionReferenceSuite,
+                                                                  zstringSuite,
+                                                                  logger.CreateInstanceForType(nameof(ActionDescriptorSuite)));
                 actionListSuite.ActionDescriptorSuite = actionDescriptorSuite;
                 if (scriptingData != null)
                 {
@@ -206,7 +215,10 @@ namespace PSFilterLoad.PSApi.PICA
                     CreateReferenceSuite();
                 }
 
-                actionListSuite = new ActionListSuite(handleSuite, actionReferenceSuite, zstringSuite);
+                actionListSuite = new ActionListSuite(handleSuite,
+                                                      actionReferenceSuite,
+                                                      zstringSuite,
+                                                      logger.CreateInstanceForType(nameof(ActionListSuite)));
             }
         }
 
@@ -223,7 +235,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (!ReferenceSuiteCreated)
             {
-                actionReferenceSuite = new ActionReferenceSuite();
+                actionReferenceSuite = new ActionReferenceSuite(logger.CreateInstanceForType(nameof(ActionReferenceSuite)));
             }
         }
 
