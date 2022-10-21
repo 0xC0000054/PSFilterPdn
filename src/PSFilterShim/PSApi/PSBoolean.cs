@@ -60,12 +60,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public override bool Equals(object obj)
         {
-            if (obj is PSBoolean)
-            {
-                return Equals((PSBoolean)obj);
-            }
-
-            return false;
+            return obj is PSBoolean boolean && Equals(boolean);
         }
 
         /// <summary>
