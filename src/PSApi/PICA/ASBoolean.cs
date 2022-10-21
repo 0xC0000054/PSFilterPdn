@@ -14,25 +14,28 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace PSFilterLoad.PSApi
+namespace PSFilterLoad.PSApi.PICA
 {
     /// <summary>
-    /// Represents a 1-byte Boolean value
+    /// Represents an ASBollean value.
     /// </summary>
-    /// <seealso cref="IEquatable{PSBoolean}"/>
+    /// <remarks>
+    /// The underlying type is a 4-byte integer on Windows and a 1-byte integer on macOS.
+    /// </remarks>
+    /// <seealso cref="IEquatable&lt;ASBoolean&gt;" />
     [DebuggerDisplay("{DebuggerDisplay, nq}")]
     [StructLayout(LayoutKind.Sequential)]
-    internal struct PSBoolean : IEquatable<PSBoolean>
+    internal readonly struct ASBoolean : IEquatable<ASBoolean>
     {
-        private const byte FalseLiteral = 0;
-        private const byte TrueLiteral = 1;
+        private const int TrueLiteral = 1;
+        private const int FalseLiteral = 0;
 
-        public static readonly PSBoolean True = new(true);
-        public static readonly PSBoolean False = new(false);
+        public static readonly ASBoolean True = new(true);
+        public static readonly ASBoolean False = new(false);
 
-        private readonly byte value;
+        private readonly int value;
 
-        private PSBoolean(bool value)
+        private ASBoolean(bool value)
         {
             this.value = value ? TrueLiteral : FalseLiteral;
         }
@@ -63,7 +66,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public override bool Equals(object obj)
         {
-            return obj is PSBoolean boolean && Equals(boolean);
+            return obj is ASBoolean boolean && Equals(boolean);
         }
 
         /// <summary>
@@ -73,7 +76,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         ///   <see langword="true"/> if the current object is equal to the <paramref name="other"/> parameter; otherwise, <see langword="false"/>.
         /// </returns>
-        public bool Equals(PSBoolean other)
+        public bool Equals(ASBoolean other)
         {
             // Use a comparison where any non zero value is true.
             if (value != 0)
@@ -108,24 +111,24 @@ namespace PSFilterLoad.PSApi
             return value != 0 ? bool.TrueString : bool.FalseString;
         }
 
-        public static bool operator ==(PSBoolean left, PSBoolean right)
+        public static bool operator ==(ASBoolean left, ASBoolean right)
         {
             return left.Equals(right);
         }
 
-        public static bool operator !=(PSBoolean left, PSBoolean right)
+        public static bool operator !=(ASBoolean left, ASBoolean right)
         {
             return !left.Equals(right);
         }
 
-        public static implicit operator bool(PSBoolean value)
+        public static implicit operator bool(ASBoolean value)
         {
             return value.value != 0;
         }
 
-        public static implicit operator PSBoolean(bool value)
+        public static implicit operator ASBoolean(bool value)
         {
-            return new PSBoolean(value);
+            return new ASBoolean(value);
         }
     }
 }

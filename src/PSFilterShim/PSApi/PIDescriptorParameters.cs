@@ -180,8 +180,7 @@ namespace PSFilterLoad.PSApi
     internal delegate short CloseReadDescriptorProc([In()] PIReadDescriptor descriptor);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    [return: MarshalAs(UnmanagedType.U1)]
-    internal unsafe delegate bool GetKeyProc([In()] PIReadDescriptor descriptor, [In(), Out()] uint* key, [In(), Out()] uint* type, [In(), Out()] int* flags);
+    internal unsafe delegate PSBoolean GetKeyProc([In()] PIReadDescriptor descriptor, [In(), Out()] uint* key, [In(), Out()] uint* type, [In(), Out()] int* flags);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal unsafe delegate short GetIntegerProc([In()] PIReadDescriptor descriptor, [In(), Out()] int* data);

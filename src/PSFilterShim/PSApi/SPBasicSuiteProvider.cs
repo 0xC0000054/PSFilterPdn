@@ -523,7 +523,7 @@ namespace PSFilterLoad.PSApi
             return PSError.kSPNoError;
         }
 
-        private unsafe bool SPBasicIsEqual(IntPtr token1, IntPtr token2)
+        private unsafe ASBoolean SPBasicIsEqual(IntPtr token1, IntPtr token2)
         {
             logger.Log(PluginApiLogCategory.SPBasicSuite,
                        "token1: {0}, token2: {1}",
@@ -532,16 +532,11 @@ namespace PSFilterLoad.PSApi
 
             if (token1 == IntPtr.Zero)
             {
-                if (token2 == IntPtr.Zero)
-                {
-                    return true;
-                }
-
-                return false;
+                return token2 == IntPtr.Zero;
             }
             else if (token2 == IntPtr.Zero)
             {
-                return false;
+                return ASBoolean.False;
             }
 
             // Compare two null-terminated ASCII strings for equality.

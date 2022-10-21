@@ -20,6 +20,5 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    [return: MarshalAs(UnmanagedType.U1)]
-    internal delegate bool TestAbortProc();
+    internal delegate PSBoolean TestAbortProc();
 }

@@ -100,7 +100,7 @@ namespace PSFilterLoad.PSApi.PICA
             values.AddToRegistry(registry);
         }
 
-        private int Register(IntPtr key, PIActionDescriptor descriptor, bool isPersistent)
+        private int Register(IntPtr key, PIActionDescriptor descriptor, PSBoolean isPersistent)
         {
             try
             {

@@ -36,7 +36,7 @@ namespace PSFilterLoad.PSApi
     internal delegate short SetPIHandleSizeProc(Handle h, int newSize);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate IntPtr LockPIHandleProc(Handle h, byte moveHigh);
+    internal delegate IntPtr LockPIHandleProc(Handle h, PSBoolean moveHigh);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void UnlockPIHandleProc(Handle h);

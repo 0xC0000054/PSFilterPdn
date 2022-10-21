@@ -70,6 +70,7 @@
     <Compile Include="..\PSApi\PICA\Action Suites\ActionListDescriptor.cs" Link="PSApi\PICA\Action Suites\ActionListDescriptor.cs" />
     <Compile Include="..\PSApi\PICA\Action Suites\ActionListItem.cs" Link="PSApi\PICA\Action Suites\ActionListItem.cs" />
     <Compile Include="..\PSApi\PICA\Action Suites\ActionReferenceItem.cs" Link="PSApi\PICA\Action Suites\ActionReferenceItem.cs" />
+    <Compile Include="..\PSApi\PICA\ASBoolean.cs" Link="PSApi\PICA\ASBoolean.cs" />
     <Compile Include="..\PSApi\PluginUISettings.cs" Link="PSApi\PluginUISettings.cs" />
     <Compile Include="..\PSApi\PseudoResource.cs" Link="PSApi\PseudoResource.cs" />
     <Compile Include="..\PSApi\PseudoResourceCollection.cs" Link="PSApi\PseudoResourceCollection.cs" />

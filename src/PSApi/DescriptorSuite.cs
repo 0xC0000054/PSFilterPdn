@@ -310,7 +310,7 @@ namespace PSFilterLoad.PSApi
             return error;
         }
 
-        private unsafe bool GetKeyProc(PIReadDescriptor descriptor, uint* key, uint* type, int* flags)
+        private unsafe PSBoolean GetKeyProc(PIReadDescriptor descriptor, uint* key, uint* type, int* flags)
         {
             logger.Log(PluginApiLogCategory.DescriptorSuite,
                                    "descriptor: {0}",
@@ -318,14 +318,14 @@ namespace PSFilterLoad.PSApi
 
             if (key == null)
             {
-                return false;
+                return PSBoolean.False;
             }
 
             if (readDescriptors.TryGetValue(descriptor, out ReadDescriptorState state))
             {
                 if (state.keyIndex >= state.keyCount)
                 {
-                    return false;
+                    return PSBoolean.False;
                 }
 
                 state.currentKey = *key = state.keys[state.keyIndex];
@@ -361,10 +361,10 @@ namespace PSFilterLoad.PSApi
                     *flags = item.Flags;
                 }
 
-                return true;
+                return PSBoolean.True;
             }
 
-            return false;
+            return PSBoolean.False;
         }
 
         private unsafe short GetIntegerProc(PIReadDescriptor descriptor, int* data)

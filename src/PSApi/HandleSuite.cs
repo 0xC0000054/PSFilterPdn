@@ -345,9 +345,9 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public IntPtr LockHandle(Handle h) => LockHandle(h, 0);
+        public IntPtr LockHandle(Handle h) => LockHandle(h, PSBoolean.False);
 
-        private IntPtr LockHandle(Handle h, byte moveHigh)
+        private IntPtr LockHandle(Handle h, PSBoolean moveHigh)
         {
             logger.Log(PluginApiLogCategory.HandleSuite,
                        "Handle: 0x{0}, moveHigh: {1}",

@@ -190,7 +190,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private unsafe int ExtractComponents(ColorID colorID, ColorSpace colorSpace, byte* c0, byte* c1, byte* c2, byte* c3, byte* gamutFlag)
+        private unsafe int ExtractComponents(ColorID colorID, ColorSpace colorSpace, byte* c0, byte* c1, byte* c2, byte* c3, PSBoolean* gamutFlag)
         {
             if (!IsValidColorSpace(colorSpace) || c0 == null || c1 == null || c2 == null || c3 == null)
             {
@@ -391,7 +391,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private unsafe int IsBookColor(ColorID colorID, byte* isBookColor)
+        private unsafe int IsBookColor(ColorID colorID, PSBoolean* isBookColor)
         {
             if (isBookColor == null)
             {
@@ -400,7 +400,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             logger.Log(PluginApiLogCategory.PicaColorSpaceSuite, "colorID: {0}", colorID);
 
-            *isBookColor = 0;
+            *isBookColor = PSBoolean.False;
 
             return PSError.kSPNoError;
         }

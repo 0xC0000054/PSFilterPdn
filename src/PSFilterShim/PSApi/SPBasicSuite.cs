@@ -15,6 +15,7 @@
  * All Rights Reserved.
  */
 
+using PSFilterLoad.PSApi.PICA;
 using System;
 using System.Runtime.InteropServices;
 
@@ -27,8 +28,7 @@ namespace PSFilterLoad.PSApi
     internal delegate int SPBasicReleaseSuite(IntPtr name, int version);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal delegate bool SPBasicIsEqual(IntPtr token1, IntPtr token2);
+    internal delegate ASBoolean SPBasicIsEqual(IntPtr token1, IntPtr token2);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
     internal unsafe delegate int SPBasicAllocateBlock(int size, IntPtr* block);

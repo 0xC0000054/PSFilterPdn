@@ -516,7 +516,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.errMissingParameter;
         }
 
-        private unsafe int HasKey(PIActionDescriptor descriptor, uint key, byte* hasKey)
+        private unsafe int HasKey(PIActionDescriptor descriptor, uint key, PSBoolean* hasKey)
         {
             logger.Log(PluginApiLogCategory.PicaActionSuites,
                        "descriptor: {0}, key: 0x{0:X4}({1})",
@@ -529,7 +529,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            *hasKey = actionDescriptors[descriptor].ContainsKey(key) ? (byte)1 : (byte)0;
+            *hasKey = actionDescriptors[descriptor].ContainsKey(key);
 
             return PSError.kSPNoError;
         }
@@ -550,7 +550,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private unsafe int IsEqual(PIActionDescriptor firstDescriptor, PIActionDescriptor secondDescriptor, byte* isEqual)
+        private unsafe int IsEqual(PIActionDescriptor firstDescriptor, PIActionDescriptor secondDescriptor, PSBoolean* isEqual)
         {
             logger.Log(PluginApiLogCategory.PicaActionSuites, "first: {0}, second: {1}", firstDescriptor, secondDescriptor);
 
@@ -559,7 +559,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            *isEqual = 0;
+            *isEqual = PSBoolean.False;
 
             return PSError.kSPUnimplementedError;
         }
@@ -586,7 +586,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        private unsafe int HasKeys(PIActionDescriptor descriptor, IntPtr keyArray, byte* hasKeys)
+        private unsafe int HasKeys(PIActionDescriptor descriptor, IntPtr keyArray, PSBoolean* hasKeys)
         {
             logger.Log(PluginApiLogCategory.PicaActionSuites, "descriptor: {0}", descriptor);
 
@@ -611,7 +611,7 @@ namespace PSFilterLoad.PSApi.PICA
                 key++;
             }
 
-            *hasKeys = result ? (byte)1 : (byte)0;
+            *hasKeys = result;
 
             return PSError.kSPNoError;
         }

@@ -364,7 +364,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kASNoErr;
         }
 
-        private unsafe int MakeRomanizationOfFixed(int value, short places, bool trim, bool isSigned, ASZString* newZString)
+        private unsafe int MakeRomanizationOfFixed(int value, short places, ASBoolean trim, ASBoolean isSigned, ASZString* newZString)
         {
             logger.Log(PluginApiLogCategory.PicaZStringSuite,
                        "value: {0}, places: {1}, trim: {2}, isSigned: {3}",
@@ -652,7 +652,7 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kASNoErr;
         }
 
-        private bool IsAllWhiteSpace(ASZString zstr)
+        private ASBoolean IsAllWhiteSpace(ASZString zstr)
         {
             logger.Log(PluginApiLogCategory.PicaZStringSuite, "zstr: {0}", zstr);
 
@@ -668,24 +668,24 @@ namespace PSFilterLoad.PSApi.PICA
                         {
                             if (!char.IsWhiteSpace(value[i]))
                             {
-                                return false;
+                                return ASBoolean.False;
                             }
                         }
                     }
                 }
             }
 
-            return true;
+            return ASBoolean.True;
         }
 
-        private bool IsEmpty(ASZString zstr)
+        private ASBoolean IsEmpty(ASZString zstr)
         {
             logger.Log(PluginApiLogCategory.PicaZStringSuite, "zstr: {0}", zstr);
 
             return zstr == Empty;
         }
 
-        private bool WillReplace(ASZString zstr, uint index)
+        private ASBoolean WillReplace(ASZString zstr, uint index)
         {
             logger.Log(PluginApiLogCategory.PicaZStringSuite,
                        "zstr: {0}, index: {1}",
@@ -704,7 +704,7 @@ namespace PSFilterLoad.PSApi.PICA
                 }
             }
 
-            return false;
+            return ASBoolean.False;
         }
 
         private uint LengthAsUnicodeCString(ASZString zstr)
@@ -734,7 +734,7 @@ namespace PSFilterLoad.PSApi.PICA
             return 0;
         }
 
-        private unsafe int AsUnicodeCString(ASZString zstr, IntPtr str, uint strSize, bool checkStrSize)
+        private unsafe int AsUnicodeCString(ASZString zstr, IntPtr str, uint strSize, ASBoolean checkStrSize)
         {
             if (str != IntPtr.Zero)
             {
@@ -806,7 +806,7 @@ namespace PSFilterLoad.PSApi.PICA
             return 0;
         }
 
-        private unsafe int AsCString(ASZString zstr, IntPtr str, uint strSize, bool checkStrSize)
+        private unsafe int AsCString(ASZString zstr, IntPtr str, uint strSize, ASBoolean checkStrSize)
         {
             if (str != IntPtr.Zero)
             {
@@ -877,7 +877,7 @@ namespace PSFilterLoad.PSApi.PICA
             return 0;
         }
 
-        private unsafe int AsPascalString(ASZString zstr, IntPtr str, uint strSize, bool checkStrSize)
+        private unsafe int AsPascalString(ASZString zstr, IntPtr str, uint strSize, ASBoolean checkStrSize)
         {
             if (str != IntPtr.Zero)
             {

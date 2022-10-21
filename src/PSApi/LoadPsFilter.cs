@@ -1215,7 +1215,7 @@ namespace PSFilterLoad.PSApi
             return message;
         }
 
-        private bool AbortProc()
+        private PSBoolean AbortProc()
         {
             logger.LogFunctionName(PluginApiLogCategory.AbortCallback);
 
@@ -1224,7 +1224,7 @@ namespace PSFilterLoad.PSApi
                 return abortFunc();
             }
 
-            return false;
+            return PSBoolean.False;
         }
 
         /// <summary>

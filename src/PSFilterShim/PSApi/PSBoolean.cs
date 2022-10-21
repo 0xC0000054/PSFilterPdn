@@ -24,14 +24,17 @@ namespace PSFilterLoad.PSApi
     [StructLayout(LayoutKind.Sequential)]
     internal struct PSBoolean : IEquatable<PSBoolean>
     {
+        private const byte FalseLiteral = 0;
+        private const byte TrueLiteral = 1;
+
+        public static readonly PSBoolean True = new(true);
+        public static readonly PSBoolean False = new(false);
+
         private readonly byte value;
 
-        private const byte False = 0;
-        private const byte True = 1;
-
-        private PSBoolean(byte value)
+        private PSBoolean(bool value)
         {
-            this.value = value;
+            this.value = value ? TrueLiteral : FalseLiteral;
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -91,7 +94,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public override int GetHashCode()
         {
-            return value != 0 ? True : False;
+            return value != 0 ? TrueLiteral : FalseLiteral;
         }
 
         /// <summary>
@@ -122,7 +125,7 @@ namespace PSFilterLoad.PSApi
 
         public static implicit operator PSBoolean(bool value)
         {
-            return new PSBoolean(value ? True : False);
+            return new PSBoolean(value);
         }
     }
 }

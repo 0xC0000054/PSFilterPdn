@@ -40,16 +40,16 @@ namespace PSFilterLoad.PSApi.PICA
             setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
         }
 
-        private unsafe void SetHandleLock(Handle handle, byte lockHandle, IntPtr* address, byte* oldLock)
+        private unsafe void SetHandleLock(Handle handle, PSBoolean lockHandle, IntPtr* address, PSBoolean* oldLock)
         {
             if (oldLock != null)
             {
-                *oldLock = lockHandle == 0 ? (byte)1 : (byte)0;
+                *oldLock = !lockHandle;
             }
 
-            if (lockHandle != 0)
+            if (lockHandle)
             {
-                *address = handleLockProc(handle, 0);
+                *address = handleLockProc(handle, PSBoolean.False);
             }
             else
             {

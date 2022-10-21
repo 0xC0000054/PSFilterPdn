@@ -39,7 +39,7 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSStuffComponents(ColorID colorID, ColorSpace colorSpace, byte c0, byte c1, byte c2, byte c3);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal unsafe delegate int CSExtractComponents(ColorID colorID, ColorSpace colorSpace, byte* c0, byte* c1, byte* c2, byte* c3, byte* gamutFlag);
+    internal unsafe delegate int CSExtractComponents(ColorID colorID, ColorSpace colorSpace, byte* c0, byte* c1, byte* c2, byte* c3, PSBoolean* gamutFlag);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int CSStuffXYZ(ColorID colorID, CS_XYZ xyz);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -51,7 +51,7 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal unsafe delegate int CSGetNativeSpace(ColorID colorID, ColorSpace* nativeSpace);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal unsafe delegate int CSIsBookColor(ColorID colorID, byte* isBookColor);
+    internal unsafe delegate int CSIsBookColor(ColorID colorID, PSBoolean* isBookColor);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal unsafe delegate int CSExtractColorName(ColorID colorID, ASZString* colorName);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -64,7 +64,7 @@ namespace PSFilterLoad.PSApi.PICA
 
     #region HandleSuite Delegates
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal unsafe delegate void SetPIHandleLockDelegate(Handle handle, byte lockHandle, IntPtr* address, byte* oldLock);
+    internal unsafe delegate void SetPIHandleLockDelegate(Handle handle, PSBoolean lockHandle, IntPtr* address, PSBoolean* oldLock);
     #endregion
 
     #region UIHooks Delegates
@@ -90,8 +90,8 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal unsafe delegate int ASZStringMakeRomanizationOfFixed(int value,
                                                                   short places,
-                                                                  [MarshalAs(UnmanagedType.Bool)] bool trim,
-                                                                  [MarshalAs(UnmanagedType.Bool)] bool isSigned,
+                                                                  ASBoolean trim,
+                                                                  ASBoolean isSigned,
                                                                   ASZString* newZString);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal unsafe delegate int ASZStringMakeRomanizationOfDouble(double value, ASZString* newZString);
@@ -112,25 +112,22 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ASZStringRelease(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal delegate bool ASZStringIsAllWhiteSpace(ASZString zstr);
+    internal delegate ASBoolean ASZStringIsAllWhiteSpace(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal delegate bool ASZStringIsEmpty(ASZString zstr);
+    internal delegate ASBoolean ASZStringIsEmpty(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal delegate bool ASZStringWillReplace(ASZString zstr, uint index);
+    internal delegate ASBoolean ASZStringWillReplace(ASZString zstr, uint index);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate uint ASZStringLengthAsUnicodeCString(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringAsUnicodeCString(ASZString zstr, IntPtr str, uint strSize, [MarshalAs(UnmanagedType.Bool)] bool checkStrSize);
+    internal delegate int ASZStringAsUnicodeCString(ASZString zstr, IntPtr str, uint strSize, ASBoolean checkStrSize);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate uint ASZStringLengthAsCString(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringAsCString(ASZString zstr, IntPtr str, uint strSize, [MarshalAs(UnmanagedType.Bool)] bool checkStrSize);
+    internal delegate int ASZStringAsCString(ASZString zstr, IntPtr str, uint strSize, ASBoolean checkStrSize);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate uint ASZStringLengthAsPascalString(ASZString zstr);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate int ASZStringAsPascalString(ASZString zstr, IntPtr str, uint strBufferSize, [MarshalAs(UnmanagedType.Bool)] bool checkBufferSize);
+    internal delegate int ASZStringAsPascalString(ASZString zstr, IntPtr str, uint strBufferSize, ASBoolean checkBufferSize);
     #endregion
 }

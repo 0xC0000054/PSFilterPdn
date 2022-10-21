@@ -77,13 +77,13 @@ namespace PSFilterLoad.PSApi.PICA
     internal unsafe delegate int ActionDescriptorGetKey(PIActionDescriptor descriptor, uint index, uint* key);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal unsafe delegate int ActionDescriptorHasKey(PIActionDescriptor descriptor, uint key, byte* hasKey);
+    internal unsafe delegate int ActionDescriptorHasKey(PIActionDescriptor descriptor, uint key, PSBoolean* hasKey);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal unsafe delegate int ActionDescriptorGetCount(PIActionDescriptor descriptor, uint* count);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal unsafe delegate int ActionDescriptorIsEqual(PIActionDescriptor descriptor, PIActionDescriptor other, byte* isEqual);
+    internal unsafe delegate int ActionDescriptorIsEqual(PIActionDescriptor descriptor, PIActionDescriptor other, PSBoolean* isEqual);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionDescriptorErase(PIActionDescriptor descriptor, uint key);
@@ -173,7 +173,7 @@ namespace PSFilterLoad.PSApi.PICA
     internal unsafe delegate int ActionDescriptorGetAlias(PIActionDescriptor descriptor, uint key, Handle* value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal unsafe delegate int ActionDescriptorHasKeys(PIActionDescriptor descriptor, IntPtr requiredKeys, byte* hasKeys);
+    internal unsafe delegate int ActionDescriptorHasKeys(PIActionDescriptor descriptor, IntPtr requiredKeys, PSBoolean* hasKeys);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int ActionDescriptorPutIntegers(PIActionDescriptor descriptor, uint key, uint count, IntPtr value);
