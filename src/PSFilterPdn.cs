@@ -248,6 +248,8 @@ namespace PSFilterPdn
                     if (result)
                     {
                         filterOutput = SurfaceUtil.ToBitmapBgra32(lps.Dest, Environment.ImagingFactory);
+
+                        FilterPostProcessing.Apply(Environment, filterOutput, lps.PostProcessingOptions);
                     }
                     else if (!string.IsNullOrEmpty(lps.ErrorMessage))
                     {
