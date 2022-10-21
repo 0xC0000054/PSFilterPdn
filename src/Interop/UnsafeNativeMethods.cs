@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using Microsoft.Win32.SafeHandles;
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -22,38 +21,6 @@ namespace PSFilterPdn.Interop
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
         internal static extern uint GetFileAttributesW(string lpFileName);
-
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern uint SetErrorMode(uint uMode);
-
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool SetThreadErrorMode(uint dwNewMode, out uint lpOldMode);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-        internal static extern SafeFileHandle CreateFileW(
-               [In(), MarshalAs(UnmanagedType.LPWStr)] string lpFileName,
-               [In()] uint dwDesiredAccess,
-               [In()] uint dwShareMode,
-               [In()] IntPtr lpSecurityAttributes,
-               [In()] uint dwCreationDisposition,
-               [In()] uint dwFlagsAndAttributes,
-               [In()] IntPtr hTemplateFile);
-
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool GetFileInformationByHandle([In()] SafeFileHandle hFile, [Out()] out NativeStructs.BY_HANDLE_FILE_INFORMATION lpFileInformation);
-
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern unsafe bool GetFileInformationByHandleEx(
-            [In()] SafeFileHandle hFile,
-            [In()] NativeEnums.FILE_INFO_BY_HANDLE_CLASS infoClass,
-            [Out()] void* lpFileInformation,
-            [In()] uint dwBufferSize);
-
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal delegate bool EnumResNameDelegate(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
         internal static extern SafeLibraryHandle LoadLibraryExW(string lpFileName, IntPtr hFile, uint dwFlags);
