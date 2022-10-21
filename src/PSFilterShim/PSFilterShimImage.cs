@@ -113,20 +113,22 @@ namespace PSFilterShim
                 throw new ArgumentNullException(nameof(surface));
             }
 
-            using (FileStream stream = new(path,
-                                           FileMode.Create,
-                                           FileAccess.Write,
-                                           FileShare.None,
-                                           BufferSize,
-                                           FileOptions.SequentialScan))
+            PSFilterShimImageHeader header = new(surface.Width,
+                                                 surface.Height,
+                                                 PSFilterShimImageFormat.Bgra32,
+                                                 96.0,
+                                                 96.0);
+            FileStreamOptions options = new()
             {
-                PSFilterShimImageHeader header = new(surface.Width,
-                                                     surface.Height,
-                                                     PSFilterShimImageFormat.Bgra32,
-                                                     96.0,
-                                                     96.0);
-                stream.SetLength(header.GetTotalFileSize());
+                Mode = FileMode.Create,
+                Access = FileAccess.Write,
+                Share = FileShare.None,
+                Options = FileOptions.SequentialScan,
+                PreallocationSize = header.GetTotalFileSize(),
+            };
 
+            using (FileStream stream = new(path, options))
+            {
                 header.Save(stream);
 
                 byte[] buffer = new byte[header.Stride];
