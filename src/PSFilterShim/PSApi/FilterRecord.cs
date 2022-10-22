@@ -25,8 +25,8 @@ namespace PSFilterLoad.PSApi
     internal unsafe struct FilterRecord
     {
         public int serial;
-        public IntPtr abortProc;
-        public IntPtr progressProc;
+        public UnmanagedFunctionPointer<TestAbortProc> abortProc;
+        public UnmanagedFunctionPointer<ProgressProc> progressProc;
         public Handle parameters;
         public Point16 imageSize;
         public short planes;
@@ -60,7 +60,7 @@ namespace PSFilterLoad.PSApi
         public fixed byte backColor[4];
         public fixed byte foreColor[4];
         public uint hostSig;
-        public IntPtr hostProcs;
+        public UnmanagedFunctionPointer<HostProcs> hostProcs;
 
         public short imageMode;
         public Fixed16 imageHRes;
@@ -72,8 +72,8 @@ namespace PSFilterLoad.PSApi
         public IntPtr platformData;
         public IntPtr bufferProcs;
         public IntPtr resourceProcs;
-        public IntPtr processEvent;
-        public IntPtr displayPixels;
+        public UnmanagedFunctionPointer<ProcessEventProc> processEvent;
+        public UnmanagedFunctionPointer<DisplayPixelsProc> displayPixels;
         public IntPtr handleProcs;
 
         /* New in 3.0 */
@@ -84,11 +84,11 @@ namespace PSFilterLoad.PSApi
         public FilterCase filterCase;
         public short dummyPlaneValue;
         public IntPtr premiereHook;
-        public IntPtr advanceState;
+        public UnmanagedFunctionPointer<AdvanceStateProc> advanceState;
 
         public PSBoolean supportsAbsolute;
         public PSBoolean wantsAbsolute;
-        public IntPtr getPropertyObsolete;
+        public UnmanagedFunctionPointer<GetPropertyProc> getPropertyObsolete;
         public PSBoolean cannotUndo;
 
         public PSBoolean supportsPadding;
@@ -102,7 +102,7 @@ namespace PSFilterLoad.PSApi
         public Fixed16 inputRate;
         public Fixed16 maskRate;
 
-        public IntPtr colorServices;
+        public UnmanagedFunctionPointer<ColorServicesProc> colorServices;
 
         public short inLayerPlanes;
         public short inTransparencyMask;

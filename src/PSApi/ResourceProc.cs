@@ -36,9 +36,9 @@ namespace PSFilterLoad.PSApi
     {
         public short resourceProcsVersion;
         public short numResourceProcs;
-        public IntPtr countProc;
-        public IntPtr getProc;
-        public IntPtr deleteProc;
-        public IntPtr addProc;
+        public UnmanagedFunctionPointer<CountPIResourcesProc> countProc;
+        public UnmanagedFunctionPointer<GetPIResourceProc> getProc;
+        public UnmanagedFunctionPointer<DeletePIResourceProc> deleteProc;
+        public UnmanagedFunctionPointer<AddPIResourceProc> addProc;
     }
 }

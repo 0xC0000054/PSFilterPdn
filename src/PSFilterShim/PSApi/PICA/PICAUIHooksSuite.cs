@@ -92,14 +92,14 @@ namespace PSFilterLoad.PSApi.PICA
         {
             PSUIHooksSuite1 suite = new()
             {
-                processEvent = Marshal.GetFunctionPointerForDelegate(suiteDataProvider.ProcessEvent),
-                displayPixels = Marshal.GetFunctionPointerForDelegate(suiteDataProvider.DisplayPixels),
-                progressBar = Marshal.GetFunctionPointerForDelegate(suiteDataProvider.Progress),
-                testAbort = Marshal.GetFunctionPointerForDelegate(suiteDataProvider.TestAbort),
-                MainAppWindow = Marshal.GetFunctionPointerForDelegate(uiWindowHandle),
-                SetCursor = Marshal.GetFunctionPointerForDelegate(uiSetCursor),
-                TickCount = Marshal.GetFunctionPointerForDelegate(uiTickCount),
-                GetPluginName = Marshal.GetFunctionPointerForDelegate(uiPluginName)
+                processEvent = new UnmanagedFunctionPointer<ProcessEventProc>(suiteDataProvider.ProcessEvent),
+                displayPixels = new UnmanagedFunctionPointer<DisplayPixelsProc>(suiteDataProvider.DisplayPixels),
+                progressBar = new UnmanagedFunctionPointer<ProgressProc>(suiteDataProvider.Progress),
+                testAbort = new UnmanagedFunctionPointer<TestAbortProc>(suiteDataProvider.TestAbort),
+                MainAppWindow = new UnmanagedFunctionPointer<UISuiteMainWindowHandle>(uiWindowHandle),
+                SetCursor = new UnmanagedFunctionPointer<UISuiteHostSetCursor>(uiSetCursor),
+                TickCount = new UnmanagedFunctionPointer<UISuiteHostTickCount>(uiTickCount),
+                GetPluginName = new UnmanagedFunctionPointer<UISuiteGetPluginName>(uiPluginName)
             };
 
             return suite;

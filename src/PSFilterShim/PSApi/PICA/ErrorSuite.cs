@@ -48,9 +48,9 @@ namespace PSFilterLoad.PSApi.PICA
         {
             PSErrorSuite1 suite = new()
             {
-                SetErrorFromPString = Marshal.GetFunctionPointerForDelegate(setErrorFromPString),
-                SetErrorFromCString = Marshal.GetFunctionPointerForDelegate(setErrorFromCString),
-                SetErrorFromZString = Marshal.GetFunctionPointerForDelegate(setErrorFromZString)
+                SetErrorFromPString = new UnmanagedFunctionPointer<ErrorSuiteSetErrorFromPString>(setErrorFromPString),
+                SetErrorFromCString = new UnmanagedFunctionPointer<ErrorSuiteSetErrorFromCString>(setErrorFromCString),
+                SetErrorFromZString = new UnmanagedFunctionPointer<ErrorSuiteSetErrorFromZString>(setErrorFromZString)
             };
 
             return suite;

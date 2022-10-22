@@ -43,7 +43,7 @@ namespace PSFilterLoad.PSApi
     {
         public short imageServicesProcsVersion;
         public short numImageServicesProcs;
-        public IntPtr interpolate1DProc;
-        public IntPtr interpolate2DProc;
+        public UnmanagedFunctionPointer<PIResampleProc> interpolate1DProc;
+        public UnmanagedFunctionPointer<PIResampleProc> interpolate2DProc;
     }
 }

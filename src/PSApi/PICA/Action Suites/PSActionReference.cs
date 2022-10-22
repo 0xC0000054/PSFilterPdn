@@ -107,24 +107,24 @@ namespace PSFilterLoad.PSApi.PICA
     [StructLayout(LayoutKind.Sequential)]
     internal struct PSActionReferenceProcs
     {
-        public IntPtr Make;
-        public IntPtr Free;
-        public IntPtr GetForm;
-        public IntPtr GetDesiredClass;
-        public IntPtr PutName;
-        public IntPtr PutIndex;
-        public IntPtr PutIdentifier;
-        public IntPtr PutOffset;
-        public IntPtr PutEnumerated;
-        public IntPtr PutProperty;
-        public IntPtr PutClass;
-        public IntPtr GetNameLength;
-        public IntPtr GetName;
-        public IntPtr GetIndex;
-        public IntPtr GetIdentifier;
-        public IntPtr GetOffset;
-        public IntPtr GetEnumerated;
-        public IntPtr GetProperty;
-        public IntPtr GetContainer;
+        public UnmanagedFunctionPointer<ActionReferenceMake> Make;
+        public UnmanagedFunctionPointer<ActionReferenceFree> Free;
+        public UnmanagedFunctionPointer<ActionReferenceGetForm> GetForm;
+        public UnmanagedFunctionPointer<ActionReferenceGetDesiredClass> GetDesiredClass;
+        public UnmanagedFunctionPointer<ActionReferencePutName> PutName;
+        public UnmanagedFunctionPointer<ActionReferencePutIndex> PutIndex;
+        public UnmanagedFunctionPointer<ActionReferencePutIdentifier> PutIdentifier;
+        public UnmanagedFunctionPointer<ActionReferencePutOffset> PutOffset;
+        public UnmanagedFunctionPointer<ActionReferencePutEnumerated> PutEnumerated;
+        public UnmanagedFunctionPointer<ActionReferencePutProperty> PutProperty;
+        public UnmanagedFunctionPointer<ActionReferencePutClass> PutClass;
+        public UnmanagedFunctionPointer<ActionReferenceGetNameLength> GetNameLength;
+        public UnmanagedFunctionPointer<ActionReferenceGetName> GetName;
+        public UnmanagedFunctionPointer<ActionReferenceGetIndex> GetIndex;
+        public UnmanagedFunctionPointer<ActionReferenceGetIdentifier> GetIdentifier;
+        public UnmanagedFunctionPointer<ActionReferenceGetOffset> GetOffset;
+        public UnmanagedFunctionPointer<ActionReferenceGetEnumerated> GetEnumerated;
+        public UnmanagedFunctionPointer<ActionReferenceGetProperty> GetProperty;
+        public UnmanagedFunctionPointer<ActionReferenceGetContainer> GetContainer;
     }
 }

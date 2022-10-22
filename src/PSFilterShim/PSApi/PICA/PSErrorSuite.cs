@@ -30,8 +30,8 @@ namespace PSFilterLoad.PSApi.PICA
     [StructLayout(LayoutKind.Sequential)]
     internal struct PSErrorSuite1
     {
-        public IntPtr SetErrorFromPString;
-        public IntPtr SetErrorFromCString;
-        public IntPtr SetErrorFromZString;
+        public UnmanagedFunctionPointer<ErrorSuiteSetErrorFromPString> SetErrorFromPString;
+        public UnmanagedFunctionPointer<ErrorSuiteSetErrorFromCString> SetErrorFromCString;
+        public UnmanagedFunctionPointer<ErrorSuiteSetErrorFromZString> SetErrorFromZString;
     }
 }

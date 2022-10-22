@@ -209,10 +209,10 @@ namespace PSFilterLoad.PSApi.PICA
 
             PSBufferSuite1 suite = new()
             {
-                New = Marshal.GetFunctionPointerForDelegate(bufferSuiteNew),
-                Dispose = Marshal.GetFunctionPointerForDelegate(bufferSuiteDispose),
-                GetSize = Marshal.GetFunctionPointerForDelegate(bufferSuiteGetSize),
-                GetSpace = Marshal.GetFunctionPointerForDelegate(bufferSuiteGetSpace)
+                New = new UnmanagedFunctionPointer<PSBufferSuiteNew>(bufferSuiteNew),
+                Dispose = new UnmanagedFunctionPointer<PSBufferSuiteDispose>(bufferSuiteDispose),
+                GetSize = new UnmanagedFunctionPointer<PSBufferSuiteGetSize>(bufferSuiteGetSize),
+                GetSpace = new UnmanagedFunctionPointer<PSBufferSuiteGetSpace>(bufferSuiteGetSpace)
             };
 
             return suite;

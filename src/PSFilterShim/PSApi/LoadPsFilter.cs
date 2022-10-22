@@ -2842,8 +2842,8 @@ namespace PSFilterLoad.PSApi
             filterRecord = Memory.Allocate<FilterRecord>(MemoryAllocationFlags.ZeroFill);
 
             filterRecord->serial = 0;
-            filterRecord->abortProc = Marshal.GetFunctionPointerForDelegate(abortProc);
-            filterRecord->progressProc = Marshal.GetFunctionPointerForDelegate(progressProc);
+            filterRecord->abortProc = new UnmanagedFunctionPointer<TestAbortProc>(abortProc);
+            filterRecord->progressProc = new UnmanagedFunctionPointer<ProgressProc>(progressProc);
             filterRecord->parameters = Handle.Null;
 
             // The RGBColor structure uses the range of [0, 65535] instead of [0, 255].
@@ -2867,12 +2867,12 @@ namespace PSFilterLoad.PSApi
             filterRecord->bufferSpace = bufferSuite.AvailableSpace;
             filterRecord->maxSpace = filterRecord->bufferSpace;
             filterRecord->hostSig = HostSignature;
-            filterRecord->hostProcs = Marshal.GetFunctionPointerForDelegate(hostProc);
+            filterRecord->hostProcs = new UnmanagedFunctionPointer<HostProcs>(hostProc);
             filterRecord->platformData = platFormDataPtr;
             filterRecord->bufferProcs = bufferProcsPtr;
             filterRecord->resourceProcs = resourceProcsPtr;
-            filterRecord->processEvent = Marshal.GetFunctionPointerForDelegate(processEventProc);
-            filterRecord->displayPixels = Marshal.GetFunctionPointerForDelegate(displayPixelsProc);
+            filterRecord->processEvent = new UnmanagedFunctionPointer<ProcessEventProc>(processEventProc);
+            filterRecord->displayPixels = new UnmanagedFunctionPointer<DisplayPixelsProc>(displayPixelsProc);
 
             filterRecord->handleProcs = handleProcsPtr;
 
@@ -2882,11 +2882,11 @@ namespace PSFilterLoad.PSApi
             filterRecord->filterCase = filterCase;
             filterRecord->dummyPlaneValue = -1;
             filterRecord->premiereHook = IntPtr.Zero;
-            filterRecord->advanceState = Marshal.GetFunctionPointerForDelegate(advanceProc);
+            filterRecord->advanceState = new UnmanagedFunctionPointer<AdvanceStateProc>(advanceProc);
 
             filterRecord->supportsAbsolute = true;
             filterRecord->wantsAbsolute = false;
-            filterRecord->getPropertyObsolete = propertySuite.GetPropertyCallback;
+            filterRecord->getPropertyObsolete = new UnmanagedFunctionPointer<GetPropertyProc>(propertySuite.GetPropertyCallback);
             filterRecord->cannotUndo = false;
             filterRecord->supportsPadding = true;
             filterRecord->inputPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
@@ -2896,7 +2896,7 @@ namespace PSFilterLoad.PSApi
             filterRecord->reservedByte = 0;
             filterRecord->inputRate = new Fixed16(1);
             filterRecord->maskRate = new Fixed16(1);
-            filterRecord->colorServices = Marshal.GetFunctionPointerForDelegate(colorProc);
+            filterRecord->colorServices = new UnmanagedFunctionPointer<ColorServicesProc>(colorProc);
 
             filterRecord->imageServicesProcs = imageServicesProcsPtr;
             filterRecord->propertyProcs = propertyProcsPtr;

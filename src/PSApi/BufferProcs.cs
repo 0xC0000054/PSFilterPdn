@@ -40,10 +40,10 @@ namespace PSFilterLoad.PSApi
     {
         public short bufferProcsVersion;
         public short numBufferProcs;
-        public IntPtr allocateProc;
-        public IntPtr lockProc;
-        public IntPtr unlockProc;
-        public IntPtr freeProc;
-        public IntPtr spaceProc;
+        public UnmanagedFunctionPointer<AllocateBufferProc> allocateProc;
+        public UnmanagedFunctionPointer<LockBufferProc> lockProc;
+        public UnmanagedFunctionPointer<UnlockBufferProc> unlockProc;
+        public UnmanagedFunctionPointer<FreeBufferProc> freeProc;
+        public UnmanagedFunctionPointer<BufferSpaceProc> spaceProc;
     }
 }

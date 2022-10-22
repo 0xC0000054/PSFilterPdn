@@ -557,21 +557,21 @@ namespace PSFilterLoad.PSApi.PICA
         {
             PSColorSpaceSuite1 suite = new()
             {
-                Make = Marshal.GetFunctionPointerForDelegate(csMake),
-                Delete = Marshal.GetFunctionPointerForDelegate(csDelete),
-                StuffComponents = Marshal.GetFunctionPointerForDelegate(csStuffComponent),
-                ExtractComponents = Marshal.GetFunctionPointerForDelegate(csExtractComponent),
-                StuffXYZ = Marshal.GetFunctionPointerForDelegate(csStuffXYZ),
-                ExtractXYZ = Marshal.GetFunctionPointerForDelegate(csExtractXYZ),
-                Convert8 = Marshal.GetFunctionPointerForDelegate(csConvert8),
-                Convert16 = Marshal.GetFunctionPointerForDelegate(csConvert16),
-                GetNativeSpace = Marshal.GetFunctionPointerForDelegate(csGetNativeSpace),
-                IsBookColor = Marshal.GetFunctionPointerForDelegate(csIsBookColor),
-                ExtractColorName = Marshal.GetFunctionPointerForDelegate(csExtractColorName),
-                PickColor = Marshal.GetFunctionPointerForDelegate(csPickColor),
-                Convert8to16 = Marshal.GetFunctionPointerForDelegate(csConvert8to16),
-                Convert16to8 = Marshal.GetFunctionPointerForDelegate(csConvert16to8),
-                ConvertToMonitorRGB = Marshal.GetFunctionPointerForDelegate(csConvertToMonitorRGB)
+                Make = new UnmanagedFunctionPointer<CSMake>(csMake),
+                Delete = new UnmanagedFunctionPointer<CSDelete>(csDelete),
+                StuffComponents = new UnmanagedFunctionPointer<CSStuffComponents>(csStuffComponent),
+                ExtractComponents = new UnmanagedFunctionPointer<CSExtractComponents>(csExtractComponent),
+                StuffXYZ = new UnmanagedFunctionPointer<CSStuffXYZ>(csStuffXYZ),
+                ExtractXYZ = new UnmanagedFunctionPointer<CSExtractXYZ>(csExtractXYZ),
+                Convert8 = new UnmanagedFunctionPointer<CSConvert8>(csConvert8),
+                Convert16 = new UnmanagedFunctionPointer<CSConvert16>(csConvert16),
+                GetNativeSpace = new UnmanagedFunctionPointer<CSGetNativeSpace>(csGetNativeSpace),
+                IsBookColor = new UnmanagedFunctionPointer<CSIsBookColor>(csIsBookColor),
+                ExtractColorName = new UnmanagedFunctionPointer<CSExtractColorName>(csExtractColorName),
+                PickColor = new UnmanagedFunctionPointer<CSPickColor>(csPickColor),
+                Convert8to16 = new UnmanagedFunctionPointer<CSConvert>(csConvert8to16),
+                Convert16to8 = new UnmanagedFunctionPointer<CSConvert>(csConvert16to8),
+                ConvertToMonitorRGB = new UnmanagedFunctionPointer<CSConvertToMonitorRGB>(csConvertToMonitorRGB),
             };
 
             return suite;

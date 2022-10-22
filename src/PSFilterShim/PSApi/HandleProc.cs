@@ -49,13 +49,13 @@ namespace PSFilterLoad.PSApi
     {
         public short handleProcsVersion;
         public short numHandleProcs;
-        public IntPtr newProc;
-        public IntPtr disposeProc;
-        public IntPtr getSizeProc;
-        public IntPtr setSizeProc;
-        public IntPtr lockProc;
-        public IntPtr unlockProc;
-        public IntPtr recoverSpaceProc;
-        public IntPtr disposeRegularHandleProc;
+        public UnmanagedFunctionPointer<NewPIHandleProc> newProc;
+        public UnmanagedFunctionPointer<DisposePIHandleProc> disposeProc;
+        public UnmanagedFunctionPointer<GetPIHandleSizeProc> getSizeProc;
+        public UnmanagedFunctionPointer<SetPIHandleSizeProc> setSizeProc;
+        public UnmanagedFunctionPointer<LockPIHandleProc> lockProc;
+        public UnmanagedFunctionPointer<UnlockPIHandleProc> unlockProc;
+        public UnmanagedFunctionPointer<RecoverSpaceProc> recoverSpaceProc;
+        public UnmanagedFunctionPointer<DisposeRegularPIHandleProc> disposeRegularHandleProc;
     }
 }

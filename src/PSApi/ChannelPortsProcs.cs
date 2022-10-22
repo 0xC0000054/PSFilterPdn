@@ -55,9 +55,9 @@ namespace PSFilterLoad.PSApi
     {
         public short channelPortProcsVersion;
         public short numChannelPortProcs;
-        public IntPtr readPixelsProc;
-        public IntPtr writeBasePixelsProc;
-        public IntPtr readPortForWritePortProc;
+        public UnmanagedFunctionPointer<ReadPixelsProc> readPixelsProc;
+        public UnmanagedFunctionPointer<WriteBasePixelsProc> writeBasePixelsProc;
+        public UnmanagedFunctionPointer<ReadPortForWritePortProc> readPortForWritePortProc;
     }
 
     [StructLayout(LayoutKind.Sequential)]

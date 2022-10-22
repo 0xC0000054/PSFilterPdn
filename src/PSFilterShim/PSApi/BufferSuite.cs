@@ -54,11 +54,11 @@ namespace PSFilterLoad.PSApi
                 BufferProcs* bufferProcs = (BufferProcs*)bufferProcsPtr.ToPointer();
                 bufferProcs->bufferProcsVersion = PSConstants.kCurrentBufferProcsVersion;
                 bufferProcs->numBufferProcs = PSConstants.kCurrentBufferProcsCount;
-                bufferProcs->allocateProc = Marshal.GetFunctionPointerForDelegate(allocProc);
-                bufferProcs->freeProc = Marshal.GetFunctionPointerForDelegate(freeProc);
-                bufferProcs->lockProc = Marshal.GetFunctionPointerForDelegate(lockProc);
-                bufferProcs->unlockProc = Marshal.GetFunctionPointerForDelegate(unlockProc);
-                bufferProcs->spaceProc = Marshal.GetFunctionPointerForDelegate(spaceProc);
+                bufferProcs->allocateProc = new UnmanagedFunctionPointer<AllocateBufferProc>(allocProc);
+                bufferProcs->freeProc = new UnmanagedFunctionPointer<FreeBufferProc>(freeProc);
+                bufferProcs->lockProc = new UnmanagedFunctionPointer<LockBufferProc>(lockProc);
+                bufferProcs->unlockProc = new UnmanagedFunctionPointer<UnlockBufferProc>(unlockProc);
+                bufferProcs->spaceProc = new UnmanagedFunctionPointer<BufferSpaceProc>(spaceProc);
             }
 
             return bufferProcsPtr;

@@ -60,10 +60,10 @@ namespace PSFilterLoad.PSApi
             {
                 resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion,
                 numResourceProcs = PSConstants.kCurrentResourceProcsCount,
-                addProc = Marshal.GetFunctionPointerForDelegate(addResourceProc),
-                countProc = Marshal.GetFunctionPointerForDelegate(countResourceProc),
-                deleteProc = Marshal.GetFunctionPointerForDelegate(deleteResourceProc),
-                getProc = Marshal.GetFunctionPointerForDelegate(getResourceProc)
+                addProc = new UnmanagedFunctionPointer<AddPIResourceProc>(addResourceProc),
+                countProc = new UnmanagedFunctionPointer<CountPIResourcesProc>(countResourceProc),
+                deleteProc = new UnmanagedFunctionPointer<DeletePIResourceProc>(deleteResourceProc),
+                getProc = new UnmanagedFunctionPointer<GetPIResourceProc>(getResourceProc)
             };
         }
 
@@ -76,10 +76,10 @@ namespace PSFilterLoad.PSApi
                 ResourceProcs* resourceProcs = (ResourceProcs*)resourceProcsPtr.ToPointer();
                 resourceProcs->resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion;
                 resourceProcs->numResourceProcs = PSConstants.kCurrentResourceProcsCount;
-                resourceProcs->addProc = Marshal.GetFunctionPointerForDelegate(addResourceProc);
-                resourceProcs->countProc = Marshal.GetFunctionPointerForDelegate(countResourceProc);
-                resourceProcs->deleteProc = Marshal.GetFunctionPointerForDelegate(deleteResourceProc);
-                resourceProcs->getProc = Marshal.GetFunctionPointerForDelegate(getResourceProc);
+                resourceProcs->addProc = new UnmanagedFunctionPointer<AddPIResourceProc>(addResourceProc);
+                resourceProcs->countProc = new UnmanagedFunctionPointer<CountPIResourcesProc>(countResourceProc);
+                resourceProcs->deleteProc = new UnmanagedFunctionPointer<DeletePIResourceProc>(deleteResourceProc);
+                resourceProcs->getProc = new UnmanagedFunctionPointer<GetPIResourceProc>(getResourceProc);
             }
 
             return resourceProcsPtr;

@@ -123,14 +123,14 @@ namespace PSFilterLoad.PSApi
                 HandleProcs* handleProcs = (HandleProcs*)handleProcsPtr.ToPointer();
                 handleProcs->handleProcsVersion = PSConstants.kCurrentHandleProcsVersion;
                 handleProcs->numHandleProcs = PSConstants.kCurrentHandleProcsCount;
-                handleProcs->newProc = Marshal.GetFunctionPointerForDelegate(handleNewProc);
-                handleProcs->disposeProc = Marshal.GetFunctionPointerForDelegate(handleDisposeProc);
-                handleProcs->getSizeProc = Marshal.GetFunctionPointerForDelegate(handleGetSizeProc);
-                handleProcs->setSizeProc = Marshal.GetFunctionPointerForDelegate(handleSetSizeProc);
-                handleProcs->lockProc = Marshal.GetFunctionPointerForDelegate(handleLockProc);
-                handleProcs->unlockProc = Marshal.GetFunctionPointerForDelegate(handleUnlockProc);
-                handleProcs->recoverSpaceProc = Marshal.GetFunctionPointerForDelegate(handleRecoverSpaceProc);
-                handleProcs->disposeRegularHandleProc = Marshal.GetFunctionPointerForDelegate(handleDisposeRegularProc);
+                handleProcs->newProc = new UnmanagedFunctionPointer<NewPIHandleProc>(handleNewProc);
+                handleProcs->disposeProc = new UnmanagedFunctionPointer<DisposePIHandleProc>(handleDisposeProc);
+                handleProcs->getSizeProc = new UnmanagedFunctionPointer<GetPIHandleSizeProc>(handleGetSizeProc);
+                handleProcs->setSizeProc = new UnmanagedFunctionPointer<SetPIHandleSizeProc>(handleSetSizeProc);
+                handleProcs->lockProc = new UnmanagedFunctionPointer<LockPIHandleProc>(handleLockProc);
+                handleProcs->unlockProc = new UnmanagedFunctionPointer<UnlockPIHandleProc>(handleUnlockProc);
+                handleProcs->recoverSpaceProc = new UnmanagedFunctionPointer<RecoverSpaceProc>(handleRecoverSpaceProc);
+                handleProcs->disposeRegularHandleProc = new UnmanagedFunctionPointer<DisposeRegularPIHandleProc>(handleDisposeRegularProc);
             }
 
             return handleProcsPtr;
@@ -178,9 +178,10 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         private static bool IsValidReadPtr(IntPtr ptr)
         {
+            NativeStructs.MEMORY_BASIC_INFORMATION mbi = new();
             int mbiSize = Marshal.SizeOf<NativeStructs.MEMORY_BASIC_INFORMATION>();
 
-            if (SafeNativeMethods.VirtualQuery(ptr, out NativeStructs.MEMORY_BASIC_INFORMATION mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
+            if (SafeNativeMethods.VirtualQuery(ptr, out mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
             {
                 return false;
             }
@@ -211,9 +212,10 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         private static bool IsValidWritePtr(IntPtr ptr)
         {
+            NativeStructs.MEMORY_BASIC_INFORMATION mbi = new();
             int mbiSize = Marshal.SizeOf<NativeStructs.MEMORY_BASIC_INFORMATION>();
 
-            if (SafeNativeMethods.VirtualQuery(ptr, out NativeStructs.MEMORY_BASIC_INFORMATION mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
+            if (SafeNativeMethods.VirtualQuery(ptr, out mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
             {
                 return false;
             }

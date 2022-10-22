@@ -62,12 +62,12 @@ namespace PSFilterLoad.PSApi.PICA
         {
             PSHandleSuite1 suite = new()
             {
-                New = Marshal.GetFunctionPointerForDelegate(handleNewProc),
-                Dispose = Marshal.GetFunctionPointerForDelegate(handleDisposeProc),
-                SetLock = Marshal.GetFunctionPointerForDelegate(setHandleLock),
-                GetSize = Marshal.GetFunctionPointerForDelegate(handleGetSizeProc),
-                SetSize = Marshal.GetFunctionPointerForDelegate(handleSetSizeProc),
-                RecoverSpace = Marshal.GetFunctionPointerForDelegate(handleRecoverSpaceProc),
+                New = new UnmanagedFunctionPointer<NewPIHandleProc>(handleNewProc),
+                Dispose = new UnmanagedFunctionPointer<DisposePIHandleProc>(handleDisposeProc),
+                SetLock = new UnmanagedFunctionPointer<SetPIHandleLockDelegate>(setHandleLock),
+                GetSize = new UnmanagedFunctionPointer<GetPIHandleSizeProc>(handleGetSizeProc),
+                SetSize = new UnmanagedFunctionPointer<SetPIHandleSizeProc>(handleSetSizeProc),
+                RecoverSpace = new UnmanagedFunctionPointer<RecoverSpaceProc>(handleRecoverSpaceProc)
             };
 
             return suite;
@@ -77,13 +77,13 @@ namespace PSFilterLoad.PSApi.PICA
         {
             PSHandleSuite2 suite = new()
             {
-                New = Marshal.GetFunctionPointerForDelegate(handleNewProc),
-                Dispose = Marshal.GetFunctionPointerForDelegate(handleDisposeProc),
-                DisposeRegularHandle = Marshal.GetFunctionPointerForDelegate(handleDisposeRegularProc),
-                SetLock = Marshal.GetFunctionPointerForDelegate(setHandleLock),
-                GetSize = Marshal.GetFunctionPointerForDelegate(handleGetSizeProc),
-                SetSize = Marshal.GetFunctionPointerForDelegate(handleSetSizeProc),
-                RecoverSpace = Marshal.GetFunctionPointerForDelegate(handleRecoverSpaceProc),
+                New = new UnmanagedFunctionPointer<NewPIHandleProc>(handleNewProc),
+                Dispose = new UnmanagedFunctionPointer<DisposePIHandleProc>(handleDisposeProc),
+                DisposeRegularHandle = new UnmanagedFunctionPointer<DisposeRegularPIHandleProc>(handleDisposeRegularProc),
+                SetLock = new UnmanagedFunctionPointer<SetPIHandleLockDelegate>(setHandleLock),
+                GetSize = new UnmanagedFunctionPointer<GetPIHandleSizeProc>(handleGetSizeProc),
+                SetSize = new UnmanagedFunctionPointer<SetPIHandleSizeProc>(handleSetSizeProc),
+                RecoverSpace = new UnmanagedFunctionPointer<RecoverSpaceProc>(handleRecoverSpaceProc)
             };
 
             return suite;

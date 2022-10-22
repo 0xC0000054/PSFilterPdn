@@ -233,22 +233,22 @@ namespace PSFilterLoad.PSApi
         public short writeDescriptorProcsVersion;
         public short numWriteDescriptorProcs;
 
-        public IntPtr openWriteDescriptorProc;
-        public IntPtr closeWriteDescriptorProc;
-        public IntPtr putIntegerProc;
-        public IntPtr putFloatProc;
-        public IntPtr putUnitFloatProc;
-        public IntPtr putBooleanProc;
-        public IntPtr putTextProc;
-        public IntPtr putAliasProc;
-        public IntPtr putEnumeratedProc;
-        public IntPtr putClassProc;
-        public IntPtr putSimpleReferenceProc;
-        public IntPtr putObjectProc;
-        public IntPtr putCountProc;
-        public IntPtr putStringProc;
-        public IntPtr putScopedClassProc;
-        public IntPtr putScopedObjectProc;
+        public UnmanagedFunctionPointer<OpenWriteDescriptorProc> openWriteDescriptorProc;
+        public UnmanagedFunctionPointer<CloseWriteDescriptorProc> closeWriteDescriptorProc;
+        public UnmanagedFunctionPointer<PutIntegerProc> putIntegerProc;
+        public UnmanagedFunctionPointer<PutFloatProc> putFloatProc;
+        public UnmanagedFunctionPointer<PutUnitFloatProc> putUnitFloatProc;
+        public UnmanagedFunctionPointer<PutBooleanProc> putBooleanProc;
+        public UnmanagedFunctionPointer<PutTextProc> putTextProc;
+        public UnmanagedFunctionPointer<PutAliasProc> putAliasProc;
+        public UnmanagedFunctionPointer<PutEnumeratedProc> putEnumeratedProc;
+        public UnmanagedFunctionPointer<PutClassProc> putClassProc;
+        public UnmanagedFunctionPointer<PutSimpleReferenceProc> putSimpleReferenceProc;
+        public UnmanagedFunctionPointer<PutObjectProc> putObjectProc;
+        public UnmanagedFunctionPointer<PutCountProc> putCountProc;
+        public UnmanagedFunctionPointer<PutStringProc> putStringProc;
+        public UnmanagedFunctionPointer<PutScopedClassProc> putScopedClassProc;
+        public UnmanagedFunctionPointer<PutScopedObjectProc> putScopedObjectProc;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -257,24 +257,24 @@ namespace PSFilterLoad.PSApi
         public short readDescriptorProcsVersion;
         public short numReadDescriptorProcs;
 
-        public IntPtr openReadDescriptorProc;
-        public IntPtr closeReadDescriptorProc;
-        public IntPtr getKeyProc;
-        public IntPtr getIntegerProc;
-        public IntPtr getFloatProc;
-        public IntPtr getUnitFloatProc;
-        public IntPtr getBooleanProc;
-        public IntPtr getTextProc;
-        public IntPtr getAliasProc;
-        public IntPtr getEnumeratedProc;
-        public IntPtr getClassProc;
-        public IntPtr getSimpleReferenceProc;
-        public IntPtr getObjectProc;
-        public IntPtr getCountProc;
-        public IntPtr getStringProc;
-        public IntPtr getPinnedIntegerProc;
-        public IntPtr getPinnedFloatProc;
-        public IntPtr getPinnedUnitFloatProc;
+        public UnmanagedFunctionPointer<OpenReadDescriptorProc> openReadDescriptorProc;
+        public UnmanagedFunctionPointer<CloseReadDescriptorProc> closeReadDescriptorProc;
+        public UnmanagedFunctionPointer<GetKeyProc> getKeyProc;
+        public UnmanagedFunctionPointer<GetIntegerProc> getIntegerProc;
+        public UnmanagedFunctionPointer<GetFloatProc> getFloatProc;
+        public UnmanagedFunctionPointer<GetUnitFloatProc> getUnitFloatProc;
+        public UnmanagedFunctionPointer<GetBooleanProc> getBooleanProc;
+        public UnmanagedFunctionPointer<GetTextProc> getTextProc;
+        public UnmanagedFunctionPointer<GetAliasProc> getAliasProc;
+        public UnmanagedFunctionPointer<GetEnumeratedProc> getEnumeratedProc;
+        public UnmanagedFunctionPointer<GetClassProc> getClassProc;
+        public UnmanagedFunctionPointer<GetSimpleReferenceProc> getSimpleReferenceProc;
+        public UnmanagedFunctionPointer<GetObjectProc> getObjectProc;
+        public UnmanagedFunctionPointer<GetCountProc> getCountProc;
+        public UnmanagedFunctionPointer<GetStringProc> getStringProc;
+        public UnmanagedFunctionPointer<GetPinnedIntegerProc> getPinnedIntegerProc;
+        public UnmanagedFunctionPointer<GetPinnedFloatProc> getPinnedFloatProc;
+        public UnmanagedFunctionPointer<GetPinnedUnitFloatProc> getPinnedUnitFloatProc;
     }
 
     [StructLayout(LayoutKind.Sequential)]

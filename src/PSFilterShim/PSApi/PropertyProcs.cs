@@ -31,7 +31,7 @@ namespace PSFilterLoad.PSApi
     {
         public short propertyProcsVersion;
         public short numPropertyProcs;
-        public IntPtr getPropertyProc;
-        public IntPtr setPropertyProc;
+        public UnmanagedFunctionPointer<GetPropertyProc> getPropertyProc;
+        public UnmanagedFunctionPointer<SetPropertyProc> setPropertyProc;
     }
 }

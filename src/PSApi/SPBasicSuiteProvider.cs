@@ -133,13 +133,13 @@ namespace PSFilterLoad.PSApi
             IntPtr basicSuitePtr = Memory.Allocate(Marshal.SizeOf<SPBasicSuite>(), true);
 
             SPBasicSuite* basicSuite = (SPBasicSuite*)basicSuitePtr.ToPointer();
-            basicSuite->acquireSuite = Marshal.GetFunctionPointerForDelegate(spAcquireSuite);
-            basicSuite->releaseSuite = Marshal.GetFunctionPointerForDelegate(spReleaseSuite);
-            basicSuite->isEqual = Marshal.GetFunctionPointerForDelegate(spIsEqual);
-            basicSuite->allocateBlock = Marshal.GetFunctionPointerForDelegate(spAllocateBlock);
-            basicSuite->freeBlock = Marshal.GetFunctionPointerForDelegate(spFreeBlock);
-            basicSuite->reallocateBlock = Marshal.GetFunctionPointerForDelegate(spReallocateBlock);
-            basicSuite->undefined = Marshal.GetFunctionPointerForDelegate(spUndefined);
+            basicSuite->acquireSuite = new UnmanagedFunctionPointer<SPBasicAcquireSuite>(spAcquireSuite);
+            basicSuite->releaseSuite = new UnmanagedFunctionPointer<SPBasicReleaseSuite>(spReleaseSuite);
+            basicSuite->isEqual = new UnmanagedFunctionPointer<SPBasicIsEqual>(spIsEqual);
+            basicSuite->allocateBlock = new UnmanagedFunctionPointer<SPBasicAllocateBlock>(spAllocateBlock);
+            basicSuite->freeBlock = new UnmanagedFunctionPointer<SPBasicFreeBlock>(spFreeBlock);
+            basicSuite->reallocateBlock = new UnmanagedFunctionPointer<SPBasicReallocateBlock>(spReallocateBlock);
+            basicSuite->undefined = new UnmanagedFunctionPointer<SPBasicUndefined>(spUndefined);
 
             return basicSuitePtr;
         }

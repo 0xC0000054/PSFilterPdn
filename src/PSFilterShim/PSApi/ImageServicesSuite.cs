@@ -39,8 +39,8 @@ namespace PSFilterLoad.PSApi
 
             imageServicesProcs->imageServicesProcsVersion = PSConstants.kCurrentImageServicesProcsVersion;
             imageServicesProcs->numImageServicesProcs = PSConstants.kCurrentImageServicesProcsCount;
-            imageServicesProcs->interpolate1DProc = Marshal.GetFunctionPointerForDelegate(interpolate1DProc);
-            imageServicesProcs->interpolate2DProc = Marshal.GetFunctionPointerForDelegate(interpolate2DProc);
+            imageServicesProcs->interpolate1DProc = new UnmanagedFunctionPointer<PIResampleProc>(interpolate1DProc);
+            imageServicesProcs->interpolate2DProc = new UnmanagedFunctionPointer<PIResampleProc>(interpolate2DProc);
 
             return imageServicesProcsPtr;
         }

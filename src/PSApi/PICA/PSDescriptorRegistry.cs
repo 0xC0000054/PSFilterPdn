@@ -30,8 +30,8 @@ namespace PSFilterLoad.PSApi.PICA
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable")]
     internal struct PSDescriptorRegistryProcs
     {
-        public IntPtr Register;
-        public IntPtr Erase;
-        public IntPtr Get;
+        public UnmanagedFunctionPointer<DescriptorRegistryRegister> Register;
+        public UnmanagedFunctionPointer<DescriptorRegistryErase> Erase;
+        public UnmanagedFunctionPointer<DescriptorRegistryGet> Get;
     }
 }

@@ -42,15 +42,15 @@ namespace PSFilterLoad.PSApi
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
     internal delegate int SPBasicUndefined();
 
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential)]
     internal struct SPBasicSuite
     {
-        public IntPtr acquireSuite;
-        public IntPtr releaseSuite;
-        public IntPtr isEqual;
-        public IntPtr allocateBlock;
-        public IntPtr freeBlock;
-        public IntPtr reallocateBlock;
-        public IntPtr undefined;
+        public UnmanagedFunctionPointer<SPBasicAcquireSuite> acquireSuite;
+        public UnmanagedFunctionPointer<SPBasicReleaseSuite> releaseSuite;
+        public UnmanagedFunctionPointer<SPBasicIsEqual> isEqual;
+        public UnmanagedFunctionPointer<SPBasicAllocateBlock> allocateBlock;
+        public UnmanagedFunctionPointer<SPBasicFreeBlock> freeBlock;
+        public UnmanagedFunctionPointer<SPBasicReallocateBlock> reallocateBlock;
+        public UnmanagedFunctionPointer<SPBasicUndefined> undefined;
     }
 }

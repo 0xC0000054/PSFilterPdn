@@ -32,6 +32,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelPortsSuite"/> class.
         /// </summary>
+        /// <param name="filterImageProvider">The filter image provider.</param>
         /// <param name="logger">The logger instance.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="filterImageProvider"/> is null.
@@ -60,9 +61,9 @@ namespace PSFilterLoad.PSApi
             ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
             channelPorts->channelPortProcsVersion = PSConstants.kCurrentChannelPortProcsVersion;
             channelPorts->numChannelPortProcs = PSConstants.kCurrentChannelPortProcsCount;
-            channelPorts->readPixelsProc = Marshal.GetFunctionPointerForDelegate(readPixelsProc);
-            channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
-            channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);
+            channelPorts->readPixelsProc = new UnmanagedFunctionPointer<ReadPixelsProc>(readPixelsProc);
+            channelPorts->writeBasePixelsProc = new UnmanagedFunctionPointer<WriteBasePixelsProc>(writeBasePixelsProc);
+            channelPorts->readPortForWritePortProc = new UnmanagedFunctionPointer<ReadPortForWritePortProc>(readPortForWritePortProc);
 
             return channelPortsPtr;
         }

@@ -21,10 +21,10 @@ namespace PSFilterLoad.PSApi.PICA
 {
     internal struct PSBufferSuite1
     {
-        public IntPtr New;
-        public IntPtr Dispose;
-        public IntPtr GetSize;
-        public IntPtr GetSpace;
+        public UnmanagedFunctionPointer<PSBufferSuiteNew> New;
+        public UnmanagedFunctionPointer<PSBufferSuiteDispose> Dispose;
+        public UnmanagedFunctionPointer<PSBufferSuiteGetSize> GetSize;
+        public UnmanagedFunctionPointer<PSBufferSuiteGetSpace> GetSpace;
     }
 
 #pragma warning disable 0649
@@ -101,53 +101,54 @@ namespace PSFilterLoad.PSApi.PICA
 
     internal struct PSColorSpaceSuite1
     {
-        public IntPtr Make;
-        public IntPtr Delete;
-        public IntPtr StuffComponents;
-        public IntPtr ExtractComponents;
-        public IntPtr StuffXYZ;
-        public IntPtr ExtractXYZ;
-        public IntPtr Convert8;
-        public IntPtr Convert16;
-        public IntPtr GetNativeSpace;
-        public IntPtr IsBookColor;
-        public IntPtr ExtractColorName;
-        public IntPtr PickColor;
-        public IntPtr Convert8to16;
-        public IntPtr Convert16to8;
-        public IntPtr ConvertToMonitorRGB;
+        public UnmanagedFunctionPointer<CSMake> Make;
+        public UnmanagedFunctionPointer<CSDelete> Delete;
+        public UnmanagedFunctionPointer<CSStuffComponents> StuffComponents;
+        public UnmanagedFunctionPointer<CSExtractComponents> ExtractComponents;
+        public UnmanagedFunctionPointer<CSStuffXYZ> StuffXYZ;
+        public UnmanagedFunctionPointer<CSExtractXYZ> ExtractXYZ;
+        public UnmanagedFunctionPointer<CSConvert8> Convert8;
+        public UnmanagedFunctionPointer<CSConvert16> Convert16;
+        public UnmanagedFunctionPointer<CSGetNativeSpace> GetNativeSpace;
+        public UnmanagedFunctionPointer<CSIsBookColor> IsBookColor;
+        public UnmanagedFunctionPointer<CSExtractColorName> ExtractColorName;
+        public UnmanagedFunctionPointer<CSPickColor> PickColor;
+        public UnmanagedFunctionPointer<CSConvert> Convert8to16;
+        public UnmanagedFunctionPointer<CSConvert> Convert16to8;
+        public UnmanagedFunctionPointer<CSConvertToMonitorRGB> ConvertToMonitorRGB;
     }
 
     internal struct PSHandleSuite1
     {
-        public IntPtr New;
-        public IntPtr Dispose;
-        public IntPtr SetLock;
-        public IntPtr GetSize;
-        public IntPtr SetSize;
-        public IntPtr RecoverSpace;
+        public UnmanagedFunctionPointer<NewPIHandleProc> New;
+        public UnmanagedFunctionPointer<DisposePIHandleProc> Dispose;
+        public UnmanagedFunctionPointer<SetPIHandleLockDelegate> SetLock;
+        public UnmanagedFunctionPointer<GetPIHandleSizeProc> GetSize;
+        public UnmanagedFunctionPointer<SetPIHandleSizeProc> SetSize;
+        public UnmanagedFunctionPointer<RecoverSpaceProc> RecoverSpace;
     }
+
     internal struct PSHandleSuite2
     {
-        public IntPtr New;
-        public IntPtr Dispose;
-        public IntPtr DisposeRegularHandle;
-        public IntPtr SetLock;
-        public IntPtr GetSize;
-        public IntPtr SetSize;
-        public IntPtr RecoverSpace;
+        public UnmanagedFunctionPointer<NewPIHandleProc> New;
+        public UnmanagedFunctionPointer<DisposePIHandleProc> Dispose;
+        public UnmanagedFunctionPointer<DisposeRegularPIHandleProc> DisposeRegularHandle;
+        public UnmanagedFunctionPointer<SetPIHandleLockDelegate> SetLock;
+        public UnmanagedFunctionPointer<GetPIHandleSizeProc> GetSize;
+        public UnmanagedFunctionPointer<SetPIHandleSizeProc> SetSize;
+        public UnmanagedFunctionPointer<RecoverSpaceProc> RecoverSpace;
     }
 
     internal struct PSUIHooksSuite1
     {
-        public IntPtr processEvent;
-        public IntPtr displayPixels;
-        public IntPtr progressBar;
-        public IntPtr testAbort;
-        public IntPtr MainAppWindow;
-        public IntPtr SetCursor;
-        public IntPtr TickCount;
-        public IntPtr GetPluginName;
+        public UnmanagedFunctionPointer<ProcessEventProc> processEvent;
+        public UnmanagedFunctionPointer<DisplayPixelsProc> displayPixels;
+        public UnmanagedFunctionPointer<ProgressProc> progressBar;
+        public UnmanagedFunctionPointer<TestAbortProc> testAbort;
+        public UnmanagedFunctionPointer<UISuiteMainWindowHandle> MainAppWindow;
+        public UnmanagedFunctionPointer<UISuiteHostSetCursor> SetCursor;
+        public UnmanagedFunctionPointer<UISuiteHostTickCount> TickCount;
+        public UnmanagedFunctionPointer<UISuiteGetPluginName> GetPluginName;
     }
 
     internal struct ASZString : IEquatable<ASZString>
@@ -194,28 +195,28 @@ namespace PSFilterLoad.PSApi.PICA
 
     internal struct ASZStringSuite1
     {
-        public IntPtr MakeFromUnicode;
-        public IntPtr MakeFromCString;
-        public IntPtr MakeFromPascalString;
-        public IntPtr MakeRomanizationOfInteger;
-        public IntPtr MakeRomanizationOfFixed;
-        public IntPtr MakeRomanizationOfDouble;
-        public IntPtr GetEmpty;
-        public IntPtr Copy;
-        public IntPtr Replace;
-        public IntPtr TrimEllipsis;
-        public IntPtr TrimSpaces;
-        public IntPtr RemoveAccelerators;
-        public IntPtr AddRef;
-        public IntPtr Release;
-        public IntPtr IsAllWhiteSpace;
-        public IntPtr IsEmpty;
-        public IntPtr WillReplace;
-        public IntPtr LengthAsUnicodeCString;
-        public IntPtr AsUnicodeCString;
-        public IntPtr LengthAsCString;
-        public IntPtr AsCString;
-        public IntPtr LengthAsPascalString;
-        public IntPtr AsPascalString;
+        public UnmanagedFunctionPointer<ASZStringMakeFromUnicode> MakeFromUnicode;
+        public UnmanagedFunctionPointer<ASZStringMakeFromCString> MakeFromCString;
+        public UnmanagedFunctionPointer<ASZStringMakeFromPascalString> MakeFromPascalString;
+        public UnmanagedFunctionPointer<ASZStringMakeRomanizationOfInteger> MakeRomanizationOfInteger;
+        public UnmanagedFunctionPointer<ASZStringMakeRomanizationOfFixed> MakeRomanizationOfFixed;
+        public UnmanagedFunctionPointer<ASZStringMakeRomanizationOfDouble> MakeRomanizationOfDouble;
+        public UnmanagedFunctionPointer<ASZStringGetEmpty> GetEmpty;
+        public UnmanagedFunctionPointer<ASZStringCopy> Copy;
+        public UnmanagedFunctionPointer<ASZStringReplace> Replace;
+        public UnmanagedFunctionPointer<ASZStringTrimEllipsis> TrimEllipsis;
+        public UnmanagedFunctionPointer<ASZStringTrimSpaces> TrimSpaces;
+        public UnmanagedFunctionPointer<ASZStringRemoveAccelerators> RemoveAccelerators;
+        public UnmanagedFunctionPointer<ASZStringAddRef> AddRef;
+        public UnmanagedFunctionPointer<ASZStringRelease> Release;
+        public UnmanagedFunctionPointer<ASZStringIsAllWhiteSpace> IsAllWhiteSpace;
+        public UnmanagedFunctionPointer<ASZStringIsEmpty> IsEmpty;
+        public UnmanagedFunctionPointer<ASZStringWillReplace> WillReplace;
+        public UnmanagedFunctionPointer<ASZStringLengthAsUnicodeCString> LengthAsUnicodeCString;
+        public UnmanagedFunctionPointer<ASZStringAsUnicodeCString> AsUnicodeCString;
+        public UnmanagedFunctionPointer<ASZStringLengthAsCString> LengthAsCString;
+        public UnmanagedFunctionPointer<ASZStringAsCString> AsCString;
+        public UnmanagedFunctionPointer<ASZStringLengthAsPascalString> LengthAsPascalString;
+        public UnmanagedFunctionPointer<ASZStringAsPascalString> AsPascalString;
     }
 }

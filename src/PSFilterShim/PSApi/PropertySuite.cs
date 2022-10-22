@@ -56,20 +56,20 @@ namespace PSFilterLoad.PSApi
             {
                 propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion,
                 numPropertyProcs = PSConstants.kCurrentPropertyProcsCount,
-                getPropertyProc = Marshal.GetFunctionPointerForDelegate(getPropertyProc),
-                setPropertyProc = Marshal.GetFunctionPointerForDelegate(setPropertyProc)
+                getPropertyProc = new UnmanagedFunctionPointer<GetPropertyProc>(getPropertyProc),
+                setPropertyProc = new UnmanagedFunctionPointer<SetPropertyProc>(setPropertyProc)
             };
 
             return suite;
         }
 
         /// <summary>
-        /// Gets the get property callback pointer.
+        /// Gets the get property callback delegate.
         /// </summary>
         /// <value>
-        /// The get property callback pointer.
+        /// The get property callback delegate.
         /// </value>
-        public IntPtr GetPropertyCallback => Marshal.GetFunctionPointerForDelegate(getPropertyProc);
+        public GetPropertyProc GetPropertyCallback => getPropertyProc;
 
         /// <summary>
         /// Sets the number of channels.
@@ -98,8 +98,8 @@ namespace PSFilterLoad.PSApi
             PropertyProcs* propertyProcs = (PropertyProcs*)propertyProcsPtr.ToPointer();
             propertyProcs->propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion;
             propertyProcs->numPropertyProcs = PSConstants.kCurrentPropertyProcsCount;
-            propertyProcs->getPropertyProc = Marshal.GetFunctionPointerForDelegate(getPropertyProc);
-            propertyProcs->setPropertyProc = Marshal.GetFunctionPointerForDelegate(setPropertyProc);
+            propertyProcs->getPropertyProc = new UnmanagedFunctionPointer<GetPropertyProc>(getPropertyProc);
+            propertyProcs->setPropertyProc = new UnmanagedFunctionPointer<SetPropertyProc>(setPropertyProc);
 
             return propertyProcsPtr;
         }

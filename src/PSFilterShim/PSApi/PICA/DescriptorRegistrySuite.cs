@@ -60,9 +60,9 @@ namespace PSFilterLoad.PSApi.PICA
         {
             PSDescriptorRegistryProcs suite = new()
             {
-                Register = Marshal.GetFunctionPointerForDelegate(register),
-                Erase = Marshal.GetFunctionPointerForDelegate(erase),
-                Get = Marshal.GetFunctionPointerForDelegate(get)
+                Register = new UnmanagedFunctionPointer<DescriptorRegistryRegister>(register),
+                Erase = new UnmanagedFunctionPointer<DescriptorRegistryErase>(erase),
+                Get = new UnmanagedFunctionPointer<DescriptorRegistryGet>(get)
             };
 
             return suite;

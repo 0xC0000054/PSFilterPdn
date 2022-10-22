@@ -61,9 +61,9 @@ namespace PSFilterLoad.PSApi
             ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
             channelPorts->channelPortProcsVersion = PSConstants.kCurrentChannelPortProcsVersion;
             channelPorts->numChannelPortProcs = PSConstants.kCurrentChannelPortProcsCount;
-            channelPorts->readPixelsProc = Marshal.GetFunctionPointerForDelegate(readPixelsProc);
-            channelPorts->writeBasePixelsProc = Marshal.GetFunctionPointerForDelegate(writeBasePixelsProc);
-            channelPorts->readPortForWritePortProc = Marshal.GetFunctionPointerForDelegate(readPortForWritePortProc);
+            channelPorts->readPixelsProc = new UnmanagedFunctionPointer<ReadPixelsProc>(readPixelsProc);
+            channelPorts->writeBasePixelsProc = new UnmanagedFunctionPointer<WriteBasePixelsProc>(writeBasePixelsProc);
+            channelPorts->readPortForWritePortProc = new UnmanagedFunctionPointer<ReadPortForWritePortProc>(readPortForWritePortProc);
 
             return channelPortsPtr;
         }
