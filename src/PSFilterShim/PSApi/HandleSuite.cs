@@ -114,25 +114,6 @@ namespace PSFilterLoad.PSApi
 
         DisposeRegularPIHandleProc IHandleSuiteCallbacks.HandleDisposeRegularProc => handleDisposeRegularProc;
 
-        public HandleProcs CreateHandleProcs()
-        {
-            HandleProcs suite = new()
-            {
-                handleProcsVersion = PSConstants.kCurrentHandleProcsVersion,
-                numHandleProcs = PSConstants.kCurrentHandleProcsCount,
-                newProc = Marshal.GetFunctionPointerForDelegate(handleNewProc),
-                disposeProc = Marshal.GetFunctionPointerForDelegate(handleDisposeProc),
-                getSizeProc = Marshal.GetFunctionPointerForDelegate(handleGetSizeProc),
-                setSizeProc = Marshal.GetFunctionPointerForDelegate(handleSetSizeProc),
-                lockProc = Marshal.GetFunctionPointerForDelegate(handleLockProc),
-                unlockProc = Marshal.GetFunctionPointerForDelegate(handleUnlockProc),
-                recoverSpaceProc = Marshal.GetFunctionPointerForDelegate(handleRecoverSpaceProc),
-                disposeRegularHandleProc = Marshal.GetFunctionPointerForDelegate(handleDisposeRegularProc)
-            };
-
-            return suite;
-        }
-
         public IntPtr CreateHandleProcsPointer()
         {
             IntPtr handleProcsPtr = Memory.Allocate(Marshal.SizeOf<HandleProcs>(), true);
