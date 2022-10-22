@@ -29,7 +29,7 @@ namespace PSFilterLoad.PSApi
         private readonly bool highDpi;
         private int numberOfChannels;
 
-        private const string HostSerial = "0";
+        private static ReadOnlySpan<byte> HostSerial => new byte[] { (byte)'0' };
 
         public unsafe PropertySuite(IHandleSuite handleSuite,
                                     IPluginApiLogger logger,
@@ -104,7 +104,7 @@ namespace PSFilterLoad.PSApi
             return propertyProcsPtr;
         }
 
-        private unsafe short CreateComplexPropertyHandle(Handle* complexProperty, byte[] bytes)
+        private unsafe short CreateComplexPropertyHandle(Handle* complexProperty, ReadOnlySpan<byte> bytes)
         {
             if (complexProperty == null)
             {
@@ -118,7 +118,7 @@ namespace PSFilterLoad.PSApi
                 return PSError.memFullErr;
             }
 
-            Marshal.Copy(bytes, 0, handleSuite.LockHandle(*complexProperty), bytes.Length);
+            bytes.CopyTo(new Span<byte>((void*)handleSuite.LockHandle(*complexProperty), bytes.Length));
             handleSuite.UnlockHandle(*complexProperty);
 
             return PSError.noErr;
@@ -234,9 +234,7 @@ namespace PSFilterLoad.PSApi
                     error = GetSimpleProperty(simpleProperty, new Fixed16(0).Value);
                     break;
                 case PSProperties.SerialString:
-                    bytes = Encoding.ASCII.GetBytes(HostSerial);
-
-                    error = CreateComplexPropertyHandle(complexProperty, bytes);
+                    error = CreateComplexPropertyHandle(complexProperty, HostSerial);
                     break;
                 case PSProperties.URL:
                     if (complexProperty != null)
