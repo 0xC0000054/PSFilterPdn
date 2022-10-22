@@ -163,6 +163,11 @@ namespace PSFilterLoad.PSApi
         public IntPtr plugInRef;
         public int depth;
 
-        public fixed byte reserved[66];
+        /* New in 6.0 */
+        public Handle iCCprofileData;
+        public int iCCprofileSize;
+        public int canUseICCProfiles;
+
+        public fixed byte reserved[54];
     }
 }
