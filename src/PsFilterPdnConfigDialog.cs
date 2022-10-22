@@ -1039,8 +1039,8 @@ namespace PSFilterPdn
                         try
                         {
                             IPluginApiLogger logger = PluginApiLogger.Create(logWriter,
-                                                                         () => PluginApiLogCategories.Default,
-                                                                         nameof(LoadPsFilter));
+                                                                             () => PluginApiLogCategories.Default,
+                                                                             nameof(LoadPsFilter));
 
                             PluginUISettings pluginUISettings = new(highDpiMode);
                             using (LoadPsFilter lps = new(sourceBitmap,
