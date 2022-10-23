@@ -17,7 +17,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace PSFilterLoad.PSApi
 {
-    internal struct ColorRgb24 : IEquatable<ColorRgb24>
+    internal readonly struct ColorRgb24 : IEquatable<ColorRgb24>
     {
         public ColorRgb24(byte red, byte green, byte blue)
         {
@@ -31,11 +31,11 @@ namespace PSFilterLoad.PSApi
         {
         }
 
-        public byte R { readonly get; set; }
+        public byte R { get; init; }
 
-        public byte G { readonly get; set; }
+        public byte G { get; init; }
 
-        public byte B { readonly get; set; }
+        public byte B { get; init; }
 
         public static ColorRgb24 FromWin32Color(int win32Color)
         {
@@ -51,17 +51,17 @@ namespace PSFilterLoad.PSApi
             return obj is ColorRgb24 other && Equals(other);
         }
 
-        public readonly bool Equals(ColorRgb24 other)
+        public bool Equals(ColorRgb24 other)
         {
             return R == other.R && G == other.G && B == other.B;
         }
 
-        public readonly override int GetHashCode()
+        public override int GetHashCode()
         {
             return HashCode.Combine(R, G, B);
         }
 
-        public readonly int ToWin32Color()
+        public int ToWin32Color()
         {
             return R | (G << 8) | (B << 16);
         }
