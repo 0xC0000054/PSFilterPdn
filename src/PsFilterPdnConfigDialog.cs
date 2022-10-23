@@ -567,9 +567,9 @@ namespace PSFilterPdn
             filterExecutionLogGroupBox.Controls.Add(filterExecutionLogDescription);
             filterExecutionLogGroupBox.Controls.Add(filterExecutionLogBrowseButton);
             filterExecutionLogGroupBox.Controls.Add(filterExecutionLogTextBox);
-            filterExecutionLogGroupBox.Location = new System.Drawing.Point(11, 7);
+            filterExecutionLogGroupBox.Location = new System.Drawing.Point(4, 7);
             filterExecutionLogGroupBox.Name = "filterExecutionLogGroupBox";
-            filterExecutionLogGroupBox.Size = new System.Drawing.Size(512, 94);
+            filterExecutionLogGroupBox.Size = new System.Drawing.Size(519, 94);
             filterExecutionLogGroupBox.TabIndex = 1;
             filterExecutionLogGroupBox.TabStop = false;
             filterExecutionLogGroupBox.Text = "Filter execution logging";
@@ -638,9 +638,9 @@ namespace PSFilterPdn
             pluginLoadErrorListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             plugInLoadErrorListViewColumnHeader});
             pluginLoadErrorListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            pluginLoadErrorListView.Location = new System.Drawing.Point(9, 24);
+            pluginLoadErrorListView.Location = new System.Drawing.Point(6, 24);
             pluginLoadErrorListView.Name = "pluginLoadErrorListView";
-            pluginLoadErrorListView.Size = new System.Drawing.Size(504, 130);
+            pluginLoadErrorListView.Size = new System.Drawing.Size(507, 130);
             pluginLoadErrorListView.TabIndex = 0;
             pluginLoadErrorListView.UseCompatibleStateImageBehavior = false;
             pluginLoadErrorListView.View = System.Windows.Forms.View.Details;
@@ -679,9 +679,9 @@ namespace PSFilterPdn
             //
             // PsFilterPdnConfigDialog
             //
-            ClientSize = new System.Drawing.Size(561, 511);
-            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            ClientSize = new System.Drawing.Size(561, 511);
             Controls.Add(donateLink);
             Controls.Add(tabControl1);
             Controls.Add(buttonOK);
@@ -702,6 +702,7 @@ namespace PSFilterPdn
             loadErrorsGroupBox.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
+
         }
 
         private void buttonOK_Click(object sender, EventArgs e)
