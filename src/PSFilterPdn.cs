@@ -314,7 +314,7 @@ namespace PSFilterPdn
             }
         }
 
-        protected override void OnInitializeRenderInfo(BitmapEffectRenderInfo renderInfo)
+        protected override void OnInitializeRenderInfo(IBitmapEffectRenderInfo renderInfo)
         {
             renderInfo.Flags |= BitmapEffectRenderingFlags.DisableSelectionClipping;
             base.OnInitializeRenderInfo(renderInfo);
