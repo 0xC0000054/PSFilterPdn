@@ -139,13 +139,6 @@ namespace PSFilterLoad.PSApi
             /// </summary>
             public const int NoPathIndex = -1;
 
-            internal static class InterpolationMethod
-            {
-                public const int NearestNeghbor = 1;
-                public const int Bilinear = 2;
-                public const int Bicubic = 3;
-            }
-
             internal static class RulerUnits
             {
                 public const int Pixels = 0;

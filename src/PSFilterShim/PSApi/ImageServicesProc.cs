@@ -35,7 +35,11 @@ namespace PSFilterLoad.PSApi
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal unsafe delegate short PIResampleProc(PSImagePlane* source, PSImagePlane* destination, Rect16* area, IntPtr coords, short method);
+    internal unsafe delegate short PIResampleProc(PSImagePlane* source,
+                                                  PSImagePlane* destination,
+                                                  Rect16* area,
+                                                  IntPtr coords,
+                                                  InterpolationMethod method);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable")]
     [StructLayoutAttribute(LayoutKind.Sequential)]
@@ -45,5 +49,12 @@ namespace PSFilterLoad.PSApi
         public short numImageServicesProcs;
         public UnmanagedFunctionPointer<PIResampleProc> interpolate1DProc;
         public UnmanagedFunctionPointer<PIResampleProc> interpolate2DProc;
+    }
+
+    internal enum InterpolationMethod : short
+    {
+        PointSampling = 0,
+        Bilinear = 1,
+        Bicubic = 2,
     }
 }

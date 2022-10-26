@@ -45,7 +45,11 @@ namespace PSFilterLoad.PSApi
             return imageServicesProcsPtr;
         }
 
-        private unsafe short Interpolate1DProc(PSImagePlane* source, PSImagePlane* destination, Rect16* area, IntPtr coords, short method)
+        private unsafe short Interpolate1DProc(PSImagePlane* source,
+                                               PSImagePlane* destination,
+                                               Rect16* area,
+                                               IntPtr coords,
+                                               InterpolationMethod method)
         {
             logger.Log(PluginApiLogCategory.ImageServicesSuite,
                        "source: [{0}], destination: [{1}], area: {2}, coords: {3}, method: {4}",
@@ -58,7 +62,11 @@ namespace PSFilterLoad.PSApi
             return PSError.memFullErr;
         }
 
-        private unsafe short Interpolate2DProc(PSImagePlane* source, PSImagePlane* destination, Rect16* area, IntPtr coords, short method)
+        private unsafe short Interpolate2DProc(PSImagePlane* source,
+                                               PSImagePlane* destination,
+                                               Rect16* area,
+                                               IntPtr coords,
+                                               InterpolationMethod method)
         {
             logger.Log(PluginApiLogCategory.ImageServicesSuite,
                        "source: [{0}], destination: [{1}], area: {2}, coords: {3}, method: {4}",
