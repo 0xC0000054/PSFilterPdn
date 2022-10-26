@@ -169,19 +169,32 @@ namespace PSFilterPdn
             base.OnDispose(disposing);
         }
 
+        private void ShowErrorMessage(Exception exception)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<Exception>((Exception ex) => Services.GetService<IExceptionDialogService>().ShowErrorDialog(this, ex.Message, ex)),
+                       exception);
+            }
+            else
+            {
+                Services.GetService<IExceptionDialogService>().ShowErrorDialog(this, exception.Message, exception);
+            }
+        }
+
         private DialogResult ShowErrorMessage(string message)
         {
             if (InvokeRequired)
             {
-                return (DialogResult)Invoke(new Func<string, DialogResult>(delegate (string error)
-                    {
-                        return MessageBox.Show(this, error, Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
-                    }), message);
+                Invoke(new Action<string>((string error) => Services.GetService<IExceptionDialogService>().ShowErrorDialog(this, error, string.Empty)),
+                       message);
             }
             else
             {
-                return MessageBox.Show(this, message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
+                Services.GetService<IExceptionDialogService>().ShowErrorDialog(this, message, string.Empty);
             }
+
+            return DialogResult.OK;
         }
 
         protected override EffectConfigToken OnCreateInitialToken()
@@ -766,15 +779,15 @@ namespace PSFilterPdn
             }
             catch (ArgumentException ex)
             {
-                ShowErrorMessage(ex.Message);
+                ShowErrorMessage(ex);
             }
             catch (IOException ex)
             {
-                ShowErrorMessage(ex.Message);
+                ShowErrorMessage(ex);
             }
             catch (System.Security.SecurityException ex)
             {
-                ShowErrorMessage(ex.Message);
+                ShowErrorMessage(ex);
             }
 
             return false;
@@ -889,15 +902,15 @@ namespace PSFilterPdn
             }
             catch (ArgumentException ax)
             {
-                ShowErrorMessage(ax.ToString());
+                ShowErrorMessage(ax);
             }
             catch (UnauthorizedAccessException ex)
             {
-                ShowErrorMessage(ex.Message);
+                ShowErrorMessage(ex);
             }
             catch (Win32Exception wx)
             {
-                ShowErrorMessage(wx.Message);
+                ShowErrorMessage(wx);
             }
         }
 
@@ -1083,26 +1096,26 @@ namespace PSFilterPdn
                         }
                         catch (BadImageFormatException bifex)
                         {
-                            ShowErrorMessage(bifex.Message + System.Environment.NewLine + bifex.FileName);
+                            ShowErrorMessage(bifex);
                         }
                         catch (FileNotFoundException fnfex)
                         {
-                            ShowErrorMessage(fnfex.Message);
+                            ShowErrorMessage(fnfex);
                         }
                         catch (NullReferenceException nrex)
                         {
                             /* the filter probably tried to access an unimplemented callback function
                              * without checking if it is valid.
                             */
-                            ShowErrorMessage(nrex.Message);
+                            ShowErrorMessage(nrex);
                         }
                         catch (Win32Exception w32ex)
                         {
-                            ShowErrorMessage(w32ex.Message);
+                            ShowErrorMessage(w32ex);
                         }
                         catch (System.Runtime.InteropServices.ExternalException eex)
                         {
-                            ShowErrorMessage(eex.Message);
+                            ShowErrorMessage(eex);
                         }
                         finally
                         {
@@ -1393,7 +1406,7 @@ namespace PSFilterPdn
             {
                 if (e.Error != null)
                 {
-                    ShowErrorMessage(e.Error.Message);
+                    ShowErrorMessage(e.Error);
                 }
                 else
                 {
@@ -1500,11 +1513,11 @@ namespace PSFilterPdn
                     }
                     catch (IOException ex)
                     {
-                        ShowErrorMessage(ex.Message);
+                        ShowErrorMessage(ex);
                     }
                     catch (UnauthorizedAccessException ex)
                     {
-                        ShowErrorMessage(ex.Message);
+                        ShowErrorMessage(ex);
                     }
                 }
                 SaveDescriptorRegistry();
@@ -1589,19 +1602,19 @@ namespace PSFilterPdn
             }
             catch (ArgumentException ex)
             {
-                ShowErrorMessage(ex.Message);
+                ShowErrorMessage(ex);
             }
             catch (IOException ex)
             {
-                ShowErrorMessage(ex.Message);
+                ShowErrorMessage(ex);
             }
             catch (UnauthorizedAccessException ex)
             {
-                ShowErrorMessage(ex.Message);
+                ShowErrorMessage(ex);
             }
             catch (XmlException ex)
             {
-                ShowErrorMessage(ex.Message);
+                ShowErrorMessage(ex);
             }
 
             try
@@ -1610,11 +1623,11 @@ namespace PSFilterPdn
             }
             catch (IOException ex)
             {
-                ShowErrorMessage(ex.Message);
+                ShowErrorMessage(ex);
             }
             catch (UnauthorizedAccessException ex)
             {
-                ShowErrorMessage(ex.Message);
+                ShowErrorMessage(ex);
             }
 
             List<string> directories = new()
@@ -1963,11 +1976,11 @@ namespace PSFilterPdn
                 }
                 catch (IOException ex)
                 {
-                    ShowErrorMessage(ex.Message);
+                    ShowErrorMessage(ex);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    ShowErrorMessage(ex.Message);
+                    ShowErrorMessage(ex);
                 }
             }
         }

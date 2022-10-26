@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet;
+using PaintDotNet.AppModel;
 using PaintDotNet.Effects;
 using PaintDotNet.Imaging;
 using PSFilterLoad.PSApi;
@@ -63,9 +64,14 @@ namespace PSFilterPdn
             return new PsFilterPdnConfigDialog(Environment);
         }
 
-        private static DialogResult ShowErrorMessage(IWin32Window window, string message)
+        private void ShowErrorMessage(IWin32Window window, Exception exception)
         {
-            return MessageBox.Show(window, message, StaticName, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, 0);
+            Services.GetService<IExceptionDialogService>().ShowErrorDialog(window, exception.Message, exception);
+        }
+
+        private void ShowErrorMessage(IWin32Window window, string message)
+        {
+            Services.GetService<IExceptionDialogService>().ShowErrorDialog(window, message, string.Empty);
         }
 
         private void Run32BitFilterProxy(PSFilterPdnConfigToken token, IWin32Window window)
@@ -186,23 +192,23 @@ namespace PSFilterPdn
             }
             catch (ArgumentException ax)
             {
-                ShowErrorMessage(window, ax.Message);
+                ShowErrorMessage(window, ax);
             }
             catch (IOException ex)
             {
-                ShowErrorMessage(window, ex.Message);
+                ShowErrorMessage(window, ex);
             }
             catch (NotSupportedException ex)
             {
-                ShowErrorMessage(window, ex.Message);
+                ShowErrorMessage(window, ex);
             }
             catch (UnauthorizedAccessException ex)
             {
-                ShowErrorMessage(window, ex.Message);
+                ShowErrorMessage(window, ex);
             }
             catch (Win32Exception wx)
             {
-                ShowErrorMessage(window, wx.Message);
+                ShowErrorMessage(window, wx);
             }
         }
 
@@ -266,20 +272,20 @@ namespace PSFilterPdn
             }
             catch (FileNotFoundException fnfex)
             {
-                ShowErrorMessage(window, fnfex.Message);
+                ShowErrorMessage(window, fnfex);
             }
             catch (NullReferenceException nrex)
             {
                 // The filter probably tried to access an unimplemented callback function without checking if it is valid.
-                ShowErrorMessage(window, nrex.Message);
+                ShowErrorMessage(window, nrex);
             }
             catch (Win32Exception w32ex)
             {
-                ShowErrorMessage(window, w32ex.Message);
+                ShowErrorMessage(window, w32ex);
             }
             catch (System.Runtime.InteropServices.ExternalException eex)
             {
-                ShowErrorMessage(window, eex.Message);
+                ShowErrorMessage(window, eex);
             }
             finally
             {
