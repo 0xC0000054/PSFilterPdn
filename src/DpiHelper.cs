@@ -10,35 +10,10 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PSFilterPdn.Interop;
-using System;
-
 namespace PSFilterPdn
 {
     internal static class DpiHelper
     {
         public const int LogicalDpi = 96;
-
-        private static readonly int SystemDpi = InitializeSystemDpi();
-
-        public static int GetSystemDpi()
-        {
-            return SystemDpi;
-        }
-
-        private static int InitializeSystemDpi()
-        {
-            int systemDpi = LogicalDpi;
-
-            using (SafeDCHandle hdc = SafeNativeMethods.GetDC(IntPtr.Zero))
-            {
-                if (!hdc.IsInvalid)
-                {
-                    systemDpi = SafeNativeMethods.GetDeviceCaps(hdc, NativeConstants.LOGPIXELSX);
-                }
-            }
-
-            return systemDpi;
-        }
     }
 }

@@ -31,7 +31,8 @@ namespace PSFilterPdn
     {
         public static string StaticName => "8bf Filter";
 
-        public static Bitmap StaticIcon => new(typeof(PSFilterPdnEffect), PluginIconUtil.GetIconResourceForCurrentDpi());
+        public static Bitmap StaticIcon => new(typeof(PSFilterPdnEffect),
+                                               PluginIconUtil.GetIconResourceNameForDpi(UIScaleFactor.Current.Dpi));
 
         private bool repeatEffect;
         private IBitmap<ColorBgra32> filterOutput;

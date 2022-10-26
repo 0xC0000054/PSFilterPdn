@@ -10,16 +10,12 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PaintDotNet;
 using System;
 
 namespace PSFilterPdn
 {
     internal static class PluginIconUtil
     {
-        // Support for high-DPI Effect icons was added in Paint.NET version 4.1.6.
-        private static readonly bool HighDpiIconsSupported = typeof(ColorBgra).Assembly.GetName().Version >= new Version(4, 106);
-
         private static readonly ValueTuple<int, string>[] AvailableIcons = new ValueTuple<int, string>[]
         {
             (96, "Resources.Icons.feather-96.png"),
@@ -28,28 +24,19 @@ namespace PSFilterPdn
             (384, "Resources.Icons.feather-384.png"),
         };
 
-        public static string GetIconResourceForCurrentDpi()
+        internal static string GetIconResourceNameForDpi(int dpi)
         {
-            if (HighDpiIconsSupported)
+            for (int i = 0; i < AvailableIcons.Length; i++)
             {
-                int currentDpi = DpiHelper.GetSystemDpi();
+                ValueTuple<int, string> icon = AvailableIcons[i];
 
-                for (int i = 0; i < AvailableIcons.Length; i++)
+                if (icon.Item1 >= dpi)
                 {
-                    ValueTuple<int, string> icon = AvailableIcons[i];
-
-                    if (icon.Item1 >= currentDpi)
-                    {
-                        return icon.Item2;
-                    }
+                    return icon.Item2;
                 }
+            }
 
-                return "Resources.Icons.feather-384.png";
-            }
-            else
-            {
-                return "Resources.Icons.feather-96.png";
-            }
+            return "Resources.Icons.feather-384.png";
         }
     }
 }
