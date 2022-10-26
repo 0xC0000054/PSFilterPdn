@@ -903,21 +903,14 @@ namespace PSFilterLoad.PSApi.PICA
                        key,
                        new FourCCAsStringFormatter(key));
 
-            IntPtr hPtr = handleSuite.LockHandle(aliasHandle);
-
             try
             {
-                try
+                using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(aliasHandle))
                 {
-                    int size = handleSuite.GetHandleSize(aliasHandle);
-                    byte[] data = new byte[size];
-                    Marshal.Copy(hPtr, data, 0, size);
+                    byte[] data = handleSuiteLock.Data.ToArray();
+                    int size = data.Length;
 
                     actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Alias, GetAETEParamFlags(key), size, data));
-                }
-                finally
-                {
-                    handleSuite.UnlockHandle(aliasHandle);
                 }
             }
             catch (OutOfMemoryException)
@@ -1362,8 +1355,10 @@ namespace PSFilterLoad.PSApi.PICA
                     return PSError.kSPOutOfMemoryError;
                 }
 
-                Marshal.Copy((byte[])item.Value, 0, handleSuite.LockHandle(*data), size);
-                handleSuite.UnlockHandle(*data);
+                using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(*data))
+                {
+                    ((byte[])item.Value).CopyTo(handleSuiteLock.Data);
+                }
 
                 return PSError.kSPNoError;
             }

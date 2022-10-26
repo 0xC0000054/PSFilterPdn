@@ -122,8 +122,10 @@ namespace PSFilterLoad.PSApi
                 return PSError.memFullErr;
             }
 
-            bytes.CopyTo(new Span<byte>((void*)handleSuite.LockHandle(*complexProperty), bytes.Length));
-            handleSuite.UnlockHandle(*complexProperty);
+            using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(*complexProperty))
+            {
+                bytes.CopyTo(handleSuiteLock.Data);
+            }
 
             return PSError.noErr;
         }

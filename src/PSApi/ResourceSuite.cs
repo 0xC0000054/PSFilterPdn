@@ -96,8 +96,10 @@ namespace PSFilterLoad.PSApi
 
                 if (size > 0)
                 {
-                    Marshal.Copy(handleSuite.LockHandle(data), bytes, 0, size);
-                    handleSuite.UnlockHandle(data);
+                    using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(data))
+                    {
+                        handleSuiteLock.Data.CopyTo(bytes);
+                    }
                 }
 
                 int index = CountResource(ofType) + 1;
@@ -170,8 +172,10 @@ namespace PSFilterLoad.PSApi
                 Handle h = handleSuite.NewHandle(data.Length);
                 if (h != Handle.Null)
                 {
-                    Marshal.Copy(data, 0, handleSuite.LockHandle(h), data.Length);
-                    handleSuite.UnlockHandle(h);
+                    using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(h))
+                    {
+                        data.CopyTo(handleSuiteLock.Data);
+                    }
                 }
 
                 return h;

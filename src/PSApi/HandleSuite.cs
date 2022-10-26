@@ -326,7 +326,21 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public IntPtr LockHandle(Handle h) => LockHandle(h, PSBoolean.False);
+        public unsafe HandleSuiteLock LockHandle(Handle handle)
+        {
+            Span<byte> data;
+
+            if (handles.TryGetValue(handle, out HandleEntry entry))
+            {
+                data = new Span<byte>(entry.Pointer.ToPointer(), entry.Size);
+            }
+            else
+            {
+                data = new Span<byte>(LockNonSuiteHandle(handle).ToPointer(), GetNonSuiteHandleSize(handle));
+            }
+
+            return new(this, handle, data);
+        }
 
         private IntPtr LockHandle(Handle h, PSBoolean moveHigh)
         {
@@ -341,23 +355,30 @@ namespace PSFilterLoad.PSApi
             }
             else
             {
-                if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)
-                {
-                    IntPtr hPtr = Marshal.ReadIntPtr(h.Value);
-
-                    if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
-                    {
-                        return SafeNativeMethods.GlobalLock(hPtr);
-                    }
-
-                    return SafeNativeMethods.GlobalLock(h.Value);
-                }
-                if (IsValidReadPtr(h.Value) && IsValidWritePtr(h.Value)) // Pointer to a pointer?
-                {
-                    return h.Value;
-                }
-                return IntPtr.Zero;
+                return LockNonSuiteHandle(h);
             }
+        }
+
+        private static unsafe IntPtr LockNonSuiteHandle(Handle h)
+        {
+            if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)
+            {
+                IntPtr hPtr = Marshal.ReadIntPtr(h.Value);
+
+                if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+                {
+                    return SafeNativeMethods.GlobalLock(hPtr);
+                }
+
+                return SafeNativeMethods.GlobalLock(h.Value);
+            }
+
+            if (IsValidReadPtr(h.Value) && IsValidWritePtr(h.Value)) // Pointer to a pointer?
+            {
+                return h.Value;
+            }
+
+            return IntPtr.Zero;
         }
 
         public int GetHandleSize(Handle h)
@@ -370,21 +391,27 @@ namespace PSFilterLoad.PSApi
             }
             else
             {
-                if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)
-                {
-                    IntPtr hPtr = Marshal.ReadIntPtr(h.Value);
-
-                    if (IsValidReadPtr(hPtr))
-                    {
-                        return SafeNativeMethods.GlobalSize(hPtr).ToInt32();
-                    }
-                    else
-                    {
-                        return SafeNativeMethods.GlobalSize(h.Value).ToInt32();
-                    }
-                }
-                return 0;
+                return GetNonSuiteHandleSize(h);
             }
+        }
+
+        private static int GetNonSuiteHandleSize(Handle h)
+        {
+            if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)
+            {
+                IntPtr hPtr = Marshal.ReadIntPtr(h.Value);
+
+                if (IsValidReadPtr(hPtr))
+                {
+                    return SafeNativeMethods.GlobalSize(hPtr).ToInt32();
+                }
+                else
+                {
+                    return SafeNativeMethods.GlobalSize(h.Value).ToInt32();
+                }
+            }
+
+            return 0;
         }
 
         private void RecoverHandleSpace(int size)

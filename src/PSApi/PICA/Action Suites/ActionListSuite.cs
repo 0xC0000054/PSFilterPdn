@@ -571,19 +571,9 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                IntPtr hPtr = handleSuite.LockHandle(aliasHandle);
-
-                try
+                using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(aliasHandle))
                 {
-                    int size = handleSuite.GetHandleSize(aliasHandle);
-                    byte[] data = new byte[size];
-                    Marshal.Copy(hPtr, data, 0, size);
-
-                    actionLists[list].Add(new ActionListItem(DescriptorTypes.Alias, data));
-                }
-                finally
-                {
-                    handleSuite.UnlockHandle(aliasHandle);
+                    actionLists[list].Add(new ActionListItem(DescriptorTypes.Alias, handleSuiteLock.Data.ToArray()));
                 }
             }
             catch (OutOfMemoryException)
@@ -1027,8 +1017,10 @@ namespace PSFilterLoad.PSApi.PICA
                     return PSError.kSPOutOfMemoryError;
                 }
 
-                Marshal.Copy(bytes, 0, handleSuite.LockHandle(*data), bytes.Length);
-                handleSuite.UnlockHandle(*data);
+                using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(*data))
+                {
+                    bytes.CopyTo(handleSuiteLock.Data);
+                }
 
                 return PSError.kSPNoError;
             }

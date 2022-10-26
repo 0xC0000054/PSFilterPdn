@@ -461,14 +461,11 @@ namespace PSFilterLoad.PSApi
             {
                 if (handleSuite.AllocatedBySuite(filterRecord->parameters))
                 {
-                    int handleSize = handleSuite.GetHandleSize(filterRecord->parameters);
-
-                    byte[] buf = new byte[handleSize];
-                    Marshal.Copy(handleSuite.LockHandle(filterRecord->parameters), buf, 0, buf.Length);
-                    handleSuite.UnlockHandle(filterRecord->parameters);
-
-                    globalParameters.SetParameterDataBytes(buf);
-                    globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
+                    using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(filterRecord->parameters))
+                    {
+                        globalParameters.SetParameterDataBytes(handleSuiteLock.Data.ToArray());
+                        globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
+                    }
                 }
                 else
                 {
@@ -529,14 +526,11 @@ namespace PSFilterLoad.PSApi
                 {
                     Handle dataHandle = new(filterGlobalData);
 
-                    int ps = handleSuite.GetHandleSize(dataHandle);
-                    byte[] dataBuf = new byte[ps];
-
-                    Marshal.Copy(handleSuite.LockHandle(dataHandle), dataBuf, 0, dataBuf.Length);
-                    handleSuite.UnlockHandle(dataHandle);
-
-                    globalParameters.SetPluginDataBytes(dataBuf);
-                    globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
+                    using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(dataHandle))
+                    {
+                        globalParameters.SetPluginDataBytes(handleSuiteLock.Data.ToArray());
+                        globalParameters.PluginDataStorageMethod = GlobalParameters.DataStorageMethod.HandleSuite;
+                    }
                 }
                 else
                 {
@@ -619,10 +613,10 @@ namespace PSFilterLoad.PSApi
                             throw new OutOfMemoryException(Resources.OutOfMemoryError);
                         }
 
-                        Marshal.Copy(parameterDataBytes, 0, handleSuite.LockHandle(filterRecord->parameters), parameterDataBytes.Length);
-
-                        handleSuite.UnlockHandle(filterRecord->parameters);
-
+                        using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(filterRecord->parameters))
+                        {
+                            parameterDataBytes.CopyTo(handleSuiteLock.Data);
+                        }
                         break;
                     case GlobalParameters.DataStorageMethod.OTOFHandle:
                         filterRecord->parameters = new Handle(Memory.Allocate(OTOFHandleSize, false));
@@ -664,8 +658,11 @@ namespace PSFilterLoad.PSApi
                             throw new OutOfMemoryException(Resources.OutOfMemoryError);
                         }
 
-                        Marshal.Copy(pluginDataBytes, 0, handleSuite.LockHandle(dataHandle), pluginDataBytes.Length);
-                        handleSuite.UnlockHandle(dataHandle);
+                        using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(dataHandle))
+                        {
+                            pluginDataBytes.CopyTo(handleSuiteLock.Data);
+                        }
+
                         filterGlobalData = dataHandle.Value;
                         break;
                     case GlobalParameters.DataStorageMethod.OTOFHandle:
@@ -2928,17 +2925,10 @@ namespace PSFilterLoad.PSApi
 
                 if (filterRecord->iCCprofileData != Handle.Null)
                 {
-                    IntPtr ptr = IntPtr.Zero;
-                    try
+                    using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(filterRecord->iCCprofileData))
                     {
-                        ptr = handleSuite.LockHandle(filterRecord->iCCprofileData);
-
-                        iccProfile.CopyTo(new Span<byte>((byte*)ptr, iccProfile.Length));
+                        iccProfile.CopyTo(handleSuiteLock.Data);
                         filterRecord->iCCprofileSize = iccProfile.Length;
-                    }
-                    finally
-                    {
-                        handleSuite.UnlockHandle(filterRecord->iCCprofileData);
                     }
                 }
             }

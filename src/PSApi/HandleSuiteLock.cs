@@ -10,20 +10,24 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using System;
+
 namespace PSFilterLoad.PSApi
 {
-    internal interface IHandleSuite
+    internal readonly ref struct HandleSuiteLock
     {
-        event HandleDisposedEventHandler SuiteHandleDisposed;
+        private readonly IHandleSuite handleSuite;
+        private readonly Handle handle;
 
-        void DisposeHandle(Handle h);
+        public HandleSuiteLock(IHandleSuite handleSuite, Handle handle, Span<byte> data)
+        {
+            this.handleSuite = handleSuite;
+            this.handle = handle;
+            Data = data;
+        }
 
-        int GetHandleSize(Handle h);
+        public Span<byte> Data { get; }
 
-        HandleSuiteLock LockHandle(Handle handle);
-
-        Handle NewHandle(int size);
-
-        void UnlockHandle(Handle h);
+        public void Dispose() => handleSuite.UnlockHandle(handle);
     }
 }
