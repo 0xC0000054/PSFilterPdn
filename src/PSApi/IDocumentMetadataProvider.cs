@@ -18,6 +18,8 @@ namespace PSFilterLoad.PSApi
     {
         ReadOnlySpan<byte> GetExifData();
 
+        ReadOnlySpan<byte> GetIccProfileData();
+
         ReadOnlySpan<byte> GetXmpData();
     }
 }

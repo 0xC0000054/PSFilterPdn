@@ -46,6 +46,7 @@ namespace PSFilterLoad.PSApi
         #endregion
         private readonly IntPtr parentWindowHandle;
         private readonly IPluginApiLogger logger;
+        private readonly IDocumentMetadataProvider documentMetadataProvider;
 
         private FilterRecord* filterRecord;
 
@@ -227,6 +228,7 @@ namespace PSFilterLoad.PSApi
 
             filterGlobalData = IntPtr.Zero;
             this.logger = logger;
+            this.documentMetadataProvider = documentMetadataProvider;
 
             previousPhase = PluginPhase.None;
             errorMessage = string.Empty;
@@ -2932,6 +2934,35 @@ namespace PSFilterLoad.PSApi
             filterRecord->sSPBasic = basicSuitePtr;
             filterRecord->plugInRef = IntPtr.Zero;
             filterRecord->depth = 8;
+
+            ReadOnlySpan<byte> iccProfile = documentMetadataProvider.GetIccProfileData();
+
+            if (iccProfile.Length > 0)
+            {
+                filterRecord->iCCprofileData = handleSuite.NewHandle(iccProfile.Length);
+
+                if (filterRecord->iCCprofileData != Handle.Null)
+                {
+                    IntPtr ptr = IntPtr.Zero;
+                    try
+                    {
+                        ptr = handleSuite.LockHandle(filterRecord->iCCprofileData);
+
+                        iccProfile.CopyTo(new Span<byte>((byte*)ptr, iccProfile.Length));
+                        filterRecord->iCCprofileSize = iccProfile.Length;
+                    }
+                    finally
+                    {
+                        handleSuite.UnlockHandle(filterRecord->iCCprofileData);
+                    }
+                }
+            }
+            else
+            {
+                filterRecord->iCCprofileData = Handle.Null;
+                filterRecord->iCCprofileSize = 0;
+            }
+            filterRecord->canUseICCProfiles = 1;
         }
 
         #region IDisposable Members

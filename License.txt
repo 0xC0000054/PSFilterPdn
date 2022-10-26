@@ -1,4 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Photoshop-compatible filter host Effect plugin for Paint.NET
 https://github.com/0xC0000054/PSFilterPdn
 
@@ -25,12 +24,17 @@ A "contributor" is any person that distributes its contribution under this licen
 (D) If you distribute any portion of the software in source code form, you may do so only under this license by including a complete copy of this license with your distribution. If you distribute any portion of the software in compiled or object code form, you may only do so under a license that complies with this license.
 (E) The software is licensed "as-is." You bear the risk of using it. The contributors give no express warranties, guarantees or conditions. You may have additional consumer rights under your local laws which this license cannot change. To the extent permitted under your local laws, the contributors exclude the implied warranties of merchantability, fitness for a particular purpose and non-infringement.
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------------------
+Licenses for included third party software and resources:
+-----------------------------------------------------------------------------------
 
-Portions of this software has been adapted from Paint.NET 3.36
+-----------------------------------------------------------------------------------
+License notice for Paint.NET 3.36
+-----------------------------------------------------------------------------------
+
 http://www.getpaint.net
 
-These portions are provided under the following license:
+This software does not use any of the items mentioned in the exceptions listed below:
 
 Paint.NET
 Copyright (C) dotPDN LLC, Rick Brewster, Chris Crosetto, Tom Jackson, Michael Kelsey, Brandon Ortiz, Craig Taylor, Chris Trevino, and Luke Walker.
@@ -52,6 +56,11 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------------------
+License notice for Elle Stone's Well-Behaved ICC Profiles
+-----------------------------------------------------------------------------------
 
-This software does not use any of the items mentioned in the above exceptions.
+https://github.com/ellelstone/elles_icc_profiles
+
+Licensed under Creative Commons Attribution-Share-Alike Unported, version 3.0.
+https://creativecommons.org/licenses/by-sa/3.0/legalcode

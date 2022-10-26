@@ -125,6 +125,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\ClayRGB-elle-V2-g22.icc" />
     <EmbeddedResource Include="Resources\Icons\feather-96.png" />
     <EmbeddedResource Include="Resources\Icons\feather-144.png" />
     <EmbeddedResource Include="Resources\Icons\feather-192.png" />
@@ -151,6 +152,7 @@
     <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-384.png" />
     <EmbeddedResource Include="Resources\Icons\XPThemedCollapse.png" />
     <EmbeddedResource Include="Resources\Icons\XPThemedExpand.png" />
+    <EmbeddedResource Include="Resources\sRGB.icc" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\paint.net 5.0\Effects&quot; /y" />

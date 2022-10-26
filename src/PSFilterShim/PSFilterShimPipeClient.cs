@@ -48,7 +48,8 @@ namespace PSFilterShim
             SetErrorMessage,
             SetPostProcessingOptions,
             GetExifMetadata,
-            GetXmpMetadata
+            GetXmpMetadata,
+            GetIccProfile
         }
 
         public bool AbortFilter()
@@ -90,6 +91,11 @@ namespace PSFilterShim
         public byte[] GetExifData()
         {
             return SendMessageToServer(Command.GetExifMetadata);
+        }
+
+        public byte[] GetIccProfileData()
+        {
+            return SendMessageToServer(Command.GetIccProfile);
         }
 
         public byte[] GetXmpData()

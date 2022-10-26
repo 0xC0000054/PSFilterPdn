@@ -97,7 +97,8 @@ namespace PSFilterPdn
             SetErrorMessage,
             SetPostProcessingOptions,
             GetExifMetadata,
-            GetXmpMetadata
+            GetXmpMetadata,
+            GetIccProfile
         }
 
         public string PipeName { get; }
@@ -182,6 +183,9 @@ namespace PSFilterPdn
                     break;
                 case Command.GetXmpMetadata:
                     SendReplyToClient(documentMetadataProvider.GetXmpData());
+                    break;
+                case Command.GetIccProfile:
+                    SendReplyToClient(documentMetadataProvider.GetIccProfileData());
                     break;
                 default:
                     throw new InvalidOperationException($"Unknown command value: { command }.");
