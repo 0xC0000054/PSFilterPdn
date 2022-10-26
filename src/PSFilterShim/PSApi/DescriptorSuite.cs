@@ -799,20 +799,20 @@ namespace PSFilterLoad.PSApi
         #region WriteDescriptorProcs
         private PIWriteDescriptor OpenWriteDescriptorProc()
         {
-            logger.LogFunctionName(PluginApiLogCategory.DescriptorSuite);
-
             writeDescriptorsIndex++;
-            PIWriteDescriptor handle = new(writeDescriptorsIndex);
+            PIWriteDescriptor descriptor = new(writeDescriptorsIndex);
             try
             {
-                writeDescriptors.Add(handle, new Dictionary<uint, AETEValue>());
+                writeDescriptors.Add(descriptor, new Dictionary<uint, AETEValue>());
+
+                logger.Log(PluginApiLogCategory.DescriptorSuite, "descriptor: {0}", descriptor);
             }
             catch (OutOfMemoryException)
             {
                 return PIWriteDescriptor.Null;
             }
 
-            return handle;
+            return descriptor;
         }
 
         private unsafe short CloseWriteDescriptorProc(PIWriteDescriptor descriptor, Handle* descriptorHandle)

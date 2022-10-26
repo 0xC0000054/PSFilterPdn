@@ -133,13 +133,13 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            logger.LogFunctionName(PluginApiLogCategory.PicaColorSpaceSuite);
-
             try
             {
                 colorsIndex++;
                 *colorID = new ColorID(colorsIndex);
                 colors.Add(*colorID, new Color());
+
+                logger.Log(PluginApiLogCategory.PicaColorSpaceSuite, "colorID: {0}", *colorID);
             }
             catch (OutOfMemoryException)
             {

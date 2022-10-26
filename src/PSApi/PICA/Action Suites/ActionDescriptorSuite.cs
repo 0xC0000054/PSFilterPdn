@@ -375,8 +375,6 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int Make(PIActionDescriptor* descriptor)
         {
-            logger.LogFunctionName(PluginApiLogCategory.PicaActionSuites);
-
             if (descriptor is null)
             {
                 return PSError.kSPBadParameterError;
@@ -386,6 +384,8 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 *descriptor = GenerateDictionaryKey();
                 actionDescriptors.Add(*descriptor, new ScriptingParameters());
+
+                logger.Log(PluginApiLogCategory.PicaActionSuites, "descriptor: {0}", *descriptor);
             }
             catch (OutOfMemoryException)
             {

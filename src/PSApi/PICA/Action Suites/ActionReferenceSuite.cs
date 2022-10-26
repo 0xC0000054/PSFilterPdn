@@ -198,12 +198,12 @@ namespace PSFilterLoad.PSApi.PICA
 
         private unsafe int Make(PIActionReference* reference)
         {
-            logger.LogFunctionName(PluginApiLogCategory.PicaActionSuites);
-
             try
             {
                 *reference = GenerateDictionaryKey();
                 actionReferences.Add(*reference, new ActionReferenceContainer());
+
+                logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", *reference);
             }
             catch (OutOfMemoryException)
             {

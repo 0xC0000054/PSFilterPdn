@@ -267,12 +267,12 @@ namespace PSFilterLoad.PSApi.PICA
                 return PSError.kSPBadParameterError;
             }
 
-            logger.LogFunctionName(PluginApiLogCategory.PicaActionSuites);
-
             try
             {
                 *list = GenerateDictionaryKey();
                 actionLists.Add(*list, new ActionListItemCollection());
+
+                logger.Log(PluginApiLogCategory.PicaActionSuites, "list: {0}", *list);
             }
             catch (OutOfMemoryException)
             {
