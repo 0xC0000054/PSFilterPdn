@@ -920,7 +920,7 @@ namespace PSFilterPdn
 
             if (InvokeRequired)
             {
-                showAbout = (bool)Invoke(new Func<bool>(delegate ()
+                showAbout = Invoke(new Func<bool>(delegate ()
                 {
                     return showAboutBoxCb.Checked;
                 }));

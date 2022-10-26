@@ -2763,10 +2763,10 @@ namespace PSFilterLoad.PSApi
             }
 
             propertySuite.NumberOfChannels = filterRecord->planes;
-            filterRecord->floatCoord.h = (short)0;
-            filterRecord->floatCoord.v = (short)0;
-            filterRecord->filterRect.left = (short)0;
-            filterRecord->filterRect.top = (short)0;
+            filterRecord->floatCoord.h = 0;
+            filterRecord->floatCoord.v = 0;
+            filterRecord->filterRect.left = 0;
+            filterRecord->filterRect.top = 0;
             filterRecord->filterRect.right = (short)source.Width;
             filterRecord->filterRect.bottom = (short)source.Height;
 
