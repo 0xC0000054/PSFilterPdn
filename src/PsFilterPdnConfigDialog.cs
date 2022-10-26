@@ -124,11 +124,6 @@ namespace PSFilterPdn
         private bool foundEffectsDir;
         private bool searchBoxIgnoreTextChanged;
 
-
-        /// <summary>
-        /// If DEP is enabled on a 32-bit OS use the shim process.
-        /// </summary>
-        private readonly bool useDEPProxy;
         private readonly bool highDpiMode;
 
         public PsFilterPdnConfigDialog(IBitmapEffectEnvironment bitmapEffectEnvironment)
@@ -152,25 +147,6 @@ namespace PSFilterPdn
             PluginThemingUtil.UpdateControlBackColor(this);
             PluginThemingUtil.UpdateControlForeColor(this);
             filterSearchBox.ForeColor = SystemColors.GrayText;
-
-            // set the useDEPProxy flag when on a 32-bit OS.
-            useDEPProxy = false;
-            if (IntPtr.Size == 4)
-            {
-                try
-                {
-                    if (SafeNativeMethods.GetProcessDEPPolicy(SafeNativeMethods.GetCurrentProcess(),
-                                                              out NativeEnums.ProcessDEPPolicy depFlags,
-                                                              out int permanent))
-                    {
-                        useDEPProxy = depFlags != NativeEnums.ProcessDEPPolicy.PROCESS_DEP_DISABLED;
-                    }
-                }
-                catch (EntryPointNotFoundException)
-                {
-                    // This method is only present on Vista SP1 or XP SP3 and later.
-                }
-            }
         }
 
         protected override void OnDispose(bool disposing)
@@ -1027,7 +1003,7 @@ namespace PSFilterPdn
                         environmentInitialized = true;
                     }
 
-                    if (data.RunWith32BitShim || useDEPProxy)
+                    if (data.RunWith32BitShim)
                     {
                         runWith32BitShim = true;
                         Run32BitFilterProxy(Environment, data);
