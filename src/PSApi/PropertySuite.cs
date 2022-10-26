@@ -130,6 +130,30 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
+        private unsafe short CreateComplexPropertyHandle(Handle* complexProperty, string text, Encoding encoding)
+        {
+            if (complexProperty == null)
+            {
+                return PSError.paramErr;
+            }
+
+            int textLengthInBytes = encoding.GetByteCount(text);
+
+            *complexProperty = handleSuite.NewHandle(textLengthInBytes);
+
+            if (*complexProperty == Handle.Null)
+            {
+                return PSError.memFullErr;
+            }
+
+            using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(*complexProperty))
+            {
+                encoding.GetBytes(text, handleSuiteLock.Data);
+            }
+
+            return PSError.noErr;
+        }
+
         private static unsafe short GetSimpleProperty(IntPtr* simpleProperty, bool value) => GetSimpleProperty(simpleProperty, value ? 1 : 0);
 
         private static unsafe short GetSimpleProperty(IntPtr* simpleProperty, int value)
@@ -193,9 +217,7 @@ namespace PSFilterLoad.PSApi
                             return PSError.errPlugInPropertyUndefined;
                     }
 
-                    bytes = Encoding.ASCII.GetBytes(name);
-
-                    error = CreateComplexPropertyHandle(complexProperty, bytes);
+                    error = CreateComplexPropertyHandle(complexProperty, name, Encoding.ASCII);
                     break;
                 case PSProperties.Copyright:
                 case PSProperties.Copyright2:
@@ -276,17 +298,9 @@ namespace PSFilterLoad.PSApi
                     break;
                 case PSProperties.Title:
                 case PSProperties.UnicodeTitle:
-                    string title = "temp.pdn"; // some filters just want a non empty string
-                    if (key == PSProperties.UnicodeTitle)
-                    {
-                        bytes = Encoding.Unicode.GetBytes(title);
-                    }
-                    else
-                    {
-                        bytes = Encoding.ASCII.GetBytes(title);
-                    }
-
-                    error = CreateComplexPropertyHandle(complexProperty, bytes);
+                    error = CreateComplexPropertyHandle(complexProperty,
+                                                        "temp.pdn", // some filters just want a non empty string
+                                                        key == PSProperties.UnicodeTitle ? Encoding.Unicode : Encoding.ASCII);
                     break;
                 case PSProperties.WatchSuspension:
                     error = GetSimpleProperty(simpleProperty, false);
