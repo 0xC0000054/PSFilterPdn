@@ -118,7 +118,10 @@ namespace PSFilterShim
                     IPluginApiLogger logger = PluginApiLogger.Create(logWriter,
                                                                      () => PluginApiLogCategories.Default,
                                                                      nameof(LoadPsFilter));
-                    using (LoadPsFilter lps = new(settings, logger))
+
+                    DocumentMetadataProvider documentMetadataProvider = new(pipeClient);
+
+                    using (LoadPsFilter lps = new(settings, logger, documentMetadataProvider))
                     {
                         lps.SetAbortCallback(pipeClient.AbortFilter);
 

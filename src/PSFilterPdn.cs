@@ -126,6 +126,8 @@ namespace PSFilterPdn
                         PluginUISettings = null
                     };
 
+                    DocumentMetadataProvider documentMetadataProvider = new(Environment);
+
                     FilterPostProcessingOptions postProcessingOptions = FilterPostProcessingOptions.None;
 
                     using (PSFilterShimPipeServer server = new(AbortCallback,
@@ -140,7 +142,8 @@ namespace PSFilterPdn
                                                                {
                                                                    postProcessingOptions = options;
                                                                },
-                                                               null))
+                                                               null,
+                                                               documentMetadataProvider))
                     {
                         DocumentDpi documentDpi = new(Environment.Document.Resolution);
                         PSFilterShimImage.Save(srcFileName, Environment.GetSourceBitmapBgra32(), documentDpi);
@@ -219,6 +222,8 @@ namespace PSFilterPdn
                                                                  () => PluginApiLogCategories.Default,
                                                                  nameof(LoadPsFilter));
 
+                DocumentMetadataProvider documentMetadataProvider = new(Environment);
+
                 using (LoadPsFilter lps = new(Environment.GetSourceBitmapBgra32(),
                                               SelectionMaskRenderer.FromPdnSelection(Environment),
                                               takeOwnershipOfSelectionMask: true,
@@ -227,6 +232,7 @@ namespace PSFilterPdn
                                               documentDpi.X,
                                               documentDpi.Y,
                                               window.Handle,
+                                              documentMetadataProvider,
                                               logger,
                                               null))
                 {

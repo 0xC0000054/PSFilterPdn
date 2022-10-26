@@ -83,6 +83,7 @@ namespace PSFilterPdn
 
         private readonly IImagingFactory imagingFactory;
         private readonly DocumentDpi documentDpi;
+        private readonly DocumentMetadataProvider documentMetadataProvider;
         private IEffectInputBitmap<ColorBgra32> sourceBitmap;
         private MaskSurface selectionMask;
         private ColorBgra32 primaryColor;
@@ -145,6 +146,7 @@ namespace PSFilterPdn
             highDpiMode = DeviceDpi > DpiHelper.LogicalDpi;
             imagingFactory = bitmapEffectEnvironment.ImagingFactory;
             documentDpi = new DocumentDpi(bitmapEffectEnvironment.Document.Resolution);
+            documentMetadataProvider = new DocumentMetadataProvider(bitmapEffectEnvironment);
 
             UseAppThemeColors = true;
             PluginThemingUtil.UpdateControlBackColor(this);
@@ -869,7 +871,8 @@ namespace PSFilterPdn
                                                 settings,
                                                 SetProxyErrorResult,
                                                 SetProxyPostProcessingOptions,
-                                                UpdateProgress);
+                                                UpdateProgress,
+                                                documentMetadataProvider);
 
             proxyData = data;
             try
@@ -1052,6 +1055,7 @@ namespace PSFilterPdn
                                                           documentDpi.X,
                                                           documentDpi.Y,
                                                           Handle,
+                                                          documentMetadataProvider,
                                                           logger,
                                                           pluginUISettings))
                             {

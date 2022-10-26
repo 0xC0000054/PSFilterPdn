@@ -23,6 +23,7 @@ namespace PSFilterLoad.PSApi
         private readonly GetPropertyProc getPropertyProc;
         private readonly SetPropertyProc setPropertyProc;
         private readonly IHandleSuite handleSuite;
+        private readonly IDocumentMetadataProvider documentMetadataProvider;
         private readonly IPluginApiLogger logger;
         private readonly int documentWidth;
         private readonly int documentHeight;
@@ -32,17 +33,20 @@ namespace PSFilterLoad.PSApi
         private static ReadOnlySpan<byte> HostSerial => new byte[] { (byte)'0' };
 
         public unsafe PropertySuite(IHandleSuite handleSuite,
+                                    IDocumentMetadataProvider documentMetadataProvider,
                                     IPluginApiLogger logger,
                                     int documentWidth,
                                     int documentHeight,
                                     PluginUISettings pluginUISettings)
         {
             ArgumentNullException.ThrowIfNull(handleSuite);
+            ArgumentNullException.ThrowIfNull(documentMetadataProvider);
             ArgumentNullException.ThrowIfNull(logger);
 
             getPropertyProc = new GetPropertyProc(PropertyGetProc);
             setPropertyProc = new SetPropertyProc(PropertySetProc);
             this.handleSuite = handleSuite;
+            this.documentMetadataProvider = documentMetadataProvider;
             this.logger = logger;
             this.documentWidth = documentWidth;
             this.documentHeight = documentHeight;
@@ -153,7 +157,7 @@ namespace PSFilterLoad.PSApi
 
             short error = PSError.noErr;
 
-            byte[] bytes = null;
+            ReadOnlySpan<byte> bytes;
 
             switch (key)
             {
@@ -196,11 +200,37 @@ namespace PSFilterLoad.PSApi
                     error = GetSimpleProperty(simpleProperty, false);
                     break;
                 case PSProperties.EXIFData:
-                case PSProperties.XMPData:
-                    if (complexProperty != null)
+                    bytes = documentMetadataProvider.GetExifData();
+
+                    if (bytes.Length > 0)
                     {
-                        // If the complexProperty is not IntPtr.Zero we return a valid zero byte handle, otherwise some filters will crash with an access violation.
-                        *complexProperty = handleSuite.NewHandle(0);
+                        error = CreateComplexPropertyHandle(complexProperty, bytes);
+                    }
+                    else
+                    {
+                        if (complexProperty != null)
+                        {
+                            // If the complexProperty is not null we return a valid zero byte handle,
+                            // otherwise some filters will crash with an access violation.
+                            *complexProperty = handleSuite.NewHandle(0);
+                        }
+                    }
+                    break;
+                case PSProperties.XMPData:
+                    bytes = documentMetadataProvider.GetXmpData();
+
+                    if (bytes.Length > 0)
+                    {
+                        error = CreateComplexPropertyHandle(complexProperty, bytes);
+                    }
+                    else
+                    {
+                        if (complexProperty != null)
+                        {
+                            // If the complexProperty is not null we return a valid zero byte handle,
+                            // otherwise some filters will crash with an access violation.
+                            *complexProperty = handleSuite.NewHandle(0);
+                        }
                     }
                     break;
                 case PSProperties.GridMajor:

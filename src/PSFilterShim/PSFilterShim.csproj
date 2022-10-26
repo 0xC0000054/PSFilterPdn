@@ -63,6 +63,7 @@
     <Compile Include="..\PSApi\FilterPadding.cs" Link="PSApi\FilterPadding.cs" />
     <Compile Include="..\PSApi\FilterPostProcessingOptions.cs" Link="PSApi\FilterPostProcessingOptions.cs" />
     <Compile Include="..\PSApi\GlobalParameters.cs" Link="PSApi\GlobalParameters.cs" />
+    <Compile Include="..\PSApi\IDocumentMetadataProvider.cs" Link="PSApi\IDocumentMetadataProvider.cs" />
     <Compile Include="..\PSApi\IHandleSuite.cs" Link="PSApi\IHandleSuite.cs" />
     <Compile Include="..\PSApi\IHandleSuiteCallbacks.cs" Link="PSApi\IHandleSuiteCallbacks.cs" />
     <Compile Include="..\PSApi\ImageMode.cs" Link="ImageMode.cs" />

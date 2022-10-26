@@ -16,6 +16,7 @@ using System;
 using System.Buffers.Binary;
 using System.IO;
 using System.IO.Pipes;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace PSFilterPdn
@@ -26,6 +27,7 @@ namespace PSFilterPdn
         private readonly byte[] oneByteParameterMessageBuffer;
         private readonly byte[] oneByteParameterReplyBuffer;
         private readonly byte[] replySizeBuffer;
+        private readonly IDocumentMetadataProvider documentMetadataProvider;
 
         private readonly Func<bool> abortFunc;
         private readonly PluginData pluginData;
@@ -50,20 +52,30 @@ namespace PSFilterPdn
         /// <paramref name="error"/> is null.
         /// or
         /// <paramref name="postProcessingOptions"/> is null.
+        /// or
+        /// <paramref name="effectEnvironment"/> is null.
         /// </exception>
         public PSFilterShimPipeServer(Func<bool> abort,
                                       PluginData plugin,
                                       PSFilterShimSettings settings,
                                       Action<string> error,
                                       Action<FilterPostProcessingOptions> postProcessingOptions,
-                                      Action<byte> progress)
+                                      Action<byte> progress,
+                                      IDocumentMetadataProvider documentMetadataProvider)
         {
+            ArgumentNullException.ThrowIfNull(nameof(plugin));
+            ArgumentNullException.ThrowIfNull(nameof(settings));
+            ArgumentNullException.ThrowIfNull(nameof(error));
+            ArgumentNullException.ThrowIfNull(nameof(postProcessingOptions));
+            ArgumentNullException.ThrowIfNull(nameof(documentMetadataProvider));
+
             PipeName = "PSFilterShim_" + Guid.NewGuid().ToString();
             abortFunc = abort;
-            pluginData = plugin ?? throw new ArgumentNullException(nameof(plugin));
-            this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            errorCallback = error ?? throw new ArgumentNullException(nameof(error));
-            postProcessingOptionsCallback = postProcessingOptions ?? throw new ArgumentNullException(nameof(postProcessingOptions));
+            pluginData = plugin;
+            this.settings = settings;
+            errorCallback = error;
+            postProcessingOptionsCallback = postProcessingOptions;
+            this.documentMetadataProvider = documentMetadataProvider;
             progressCallback = progress;
             // One byte for the command index and one byte for the payload.
             oneByteParameterMessageBuffer = new byte[2];
@@ -83,7 +95,9 @@ namespace PSFilterPdn
             GetPluginData,
             GetSettings,
             SetErrorMessage,
-            SetPostProcessingOptions
+            SetPostProcessingOptions,
+            GetExifMetadata,
+            GetXmpMetadata
         }
 
         public string PipeName { get; }
@@ -145,14 +159,14 @@ namespace PSFilterPdn
                     using (MemoryStream stream = new())
                     {
                         DataContractSerializerUtil.Serialize(stream, pluginData);
-                        SendReplyToClient(stream.GetBuffer(), 0, (int)stream.Length);
+                        SendReplyToClient(new ReadOnlySpan<byte>(stream.GetBuffer(), 0, (int)stream.Length));
                     }
                     break;
                 case Command.GetSettings:
                     using (MemoryStream stream = new())
                     {
                         DataContractSerializerUtil.Serialize(stream, settings);
-                        SendReplyToClient(stream.GetBuffer(), 0, (int)stream.Length);
+                        SendReplyToClient(new ReadOnlySpan<byte>(stream.GetBuffer(), 0, (int)stream.Length));
                     }
                     break;
                 case Command.SetErrorMessage:
@@ -162,6 +176,12 @@ namespace PSFilterPdn
                 case Command.SetPostProcessingOptions:
                     postProcessingOptionsCallback(GetPostProcessingOptions(messageBytes, 1, messageLength - 1));
                     SendEmptyReplyToClient();
+                    break;
+               case Command.GetExifMetadata:
+                    SendReplyToClient(documentMetadataProvider.GetExifData());
+                    break;
+                case Command.GetXmpMetadata:
+                    SendReplyToClient(documentMetadataProvider.GetXmpData());
                     break;
                 default:
                     throw new InvalidOperationException($"Unknown command value: { command }.");
@@ -199,12 +219,10 @@ namespace PSFilterPdn
             server.Write(oneByteParameterReplyBuffer, 0, oneByteParameterReplyBuffer.Length);
         }
 
-        private void SendReplyToClient(byte[] data, int offset, int count)
+        [SkipLocalsInit]
+        private void SendReplyToClient(ReadOnlySpan<byte> data)
         {
-            if (data is null)
-            {
-                throw new ArgumentNullException(nameof(data));
-            }
+            int count = data.Length;
 
             if (count == 0)
             {
@@ -212,15 +230,21 @@ namespace PSFilterPdn
             }
             else
             {
-                byte[] messageBytes = new byte[sizeof(int) + count];
+                const int MaxStackAllocBufferSize = 256;
 
-                messageBytes[0] = (byte)(count & 0xff);
-                messageBytes[1] = (byte)((count >> 8) & 0xff);
-                messageBytes[2] = (byte)((count >> 16) & 0xff);
-                messageBytes[3] = (byte)((count >> 24) & 0xff);
-                Array.Copy(data, offset, messageBytes, 4, count);
+                int totalMessageLength = sizeof(int) + count;
 
-                server.Write(messageBytes, 0, messageBytes.Length);
+                Span<byte> messageBytes = stackalloc byte[MaxStackAllocBufferSize];
+
+                if (totalMessageLength > MaxStackAllocBufferSize)
+                {
+                    messageBytes = new byte[totalMessageLength];
+                }
+
+                BinaryPrimitives.WriteInt32LittleEndian(messageBytes, count);
+                data.CopyTo(messageBytes.Slice(sizeof(int)));
+
+                server.Write(messageBytes.Slice(0, totalMessageLength));
             }
         }
     }

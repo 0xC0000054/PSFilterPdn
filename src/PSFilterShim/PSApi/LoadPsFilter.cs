@@ -214,11 +214,16 @@ namespace PSFilterLoad.PSApi
         /// <paramref name="settings"/> is null.
         /// or
         /// <paramref name="logger"/> is null.
+        /// or
+        /// <paramref name="documentMetadataProvider"/> is null.
         /// </exception>
-        public unsafe LoadPsFilter(PSFilterPdn.PSFilterShimSettings settings, IPluginApiLogger logger)
+        public unsafe LoadPsFilter(PSFilterPdn.PSFilterShimSettings settings,
+                                   IPluginApiLogger logger,
+                                   IDocumentMetadataProvider documentMetadataProvider)
         {
             ArgumentNullException.ThrowIfNull(settings);
             ArgumentNullException.ThrowIfNull(logger);
+            ArgumentNullException.ThrowIfNull(documentMetadataProvider);
 
             filterGlobalData = IntPtr.Zero;
             this.logger = logger;
@@ -255,6 +260,7 @@ namespace PSFilterLoad.PSApi
             descriptorSuite = new DescriptorSuite(handleSuite, logger.CreateInstanceForType(nameof(DescriptorSuite)));
             imageServicesSuite = new ImageServicesSuite(logger.CreateInstanceForType(nameof(ImageServicesSuite)));
             propertySuite = new PropertySuite(handleSuite,
+                                              documentMetadataProvider,
                                               logger.CreateInstanceForType(nameof(PropertySuite)),
                                               source.Width,
                                               source.Height,

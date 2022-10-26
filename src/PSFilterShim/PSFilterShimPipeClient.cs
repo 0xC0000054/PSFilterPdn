@@ -46,7 +46,9 @@ namespace PSFilterShim
             GetPluginData,
             GetSettings,
             SetErrorMessage,
-            SetPostProcessingOptions
+            SetPostProcessingOptions,
+            GetExifMetadata,
+            GetXmpMetadata
         }
 
         public bool AbortFilter()
@@ -83,6 +85,16 @@ namespace PSFilterShim
         public void UpdateFilterProgress(byte progressPercentage)
         {
             SendMessageToServer(Command.ReportProgress, progressPercentage);
+        }
+
+        public byte[] GetExifData()
+        {
+            return SendMessageToServer(Command.GetExifMetadata);
+        }
+
+        public byte[] GetXmpData()
+        {
+            return SendMessageToServer(Command.GetXmpMetadata);
         }
 
         private static byte[] CreateNoParameterMessageBuffer()

@@ -223,8 +223,15 @@ namespace PSFilterLoad.PSApi
         /// <param name="dpiX">The horizontal document resolution in pixels-per-inch.</param>
         /// <param name="dpiY">The vertical document resolution in pixels-per-inch.</param>
         /// <param name="owner">The handle of the parent window.</param>
+        /// <param name="documentMetadataProvider">The document meta data provider.</param>
         /// <param name="pluginUISettings">The user interface settings for plug-in created dialogs.</param>
-        /// <exception cref="System.ArgumentNullException"><paramref name="sourceBitmap"/> is null.</exception>
+        /// <exception cref="System.ArgumentNullException">
+        /// <paramref name="sourceBitmap"/> is null.
+        /// or
+        /// <paramref name="documentMetadataProvider"/> is null.
+        /// or
+        /// <paramref name="logger"/> is null.
+        /// </exception>
         internal unsafe LoadPsFilter(IBitmapSource<ColorBgra32> sourceBitmap,
                                      MaskSurface selectionMask,
                                      bool takeOwnershipOfSelectionMask,
@@ -233,10 +240,12 @@ namespace PSFilterLoad.PSApi
                                      double dpiX,
                                      double dpiY,
                                      IntPtr owner,
+                                     IDocumentMetadataProvider documentMetadataProvider,
                                      IPluginApiLogger logger,
                                      PluginUISettings pluginUISettings)
         {
             ArgumentNullException.ThrowIfNull(sourceBitmap);
+            ArgumentNullException.ThrowIfNull(documentMetadataProvider);
             ArgumentNullException.ThrowIfNull(logger);
 
             inputHandling = FilterDataHandling.None;
@@ -292,6 +301,7 @@ namespace PSFilterLoad.PSApi
             descriptorSuite = new DescriptorSuite(handleSuite, logger.CreateInstanceForType(nameof(DescriptorSuite)));
             imageServicesSuite = new ImageServicesSuite(logger.CreateInstanceForType(nameof(ImageServicesSuite)));
             propertySuite = new PropertySuite(handleSuite,
+                                              documentMetadataProvider,
                                               logger.CreateInstanceForType(nameof(PropertySuite)),
                                               source.Width,
                                               source.Height,
