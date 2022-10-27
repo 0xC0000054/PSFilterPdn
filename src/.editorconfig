@@ -41,6 +41,8 @@ dotnet_style_qualification_for_event                  = false : suggestion
 csharp_prefer_simple_using_statement                  = false : suggestion
 # IDE0066: Convert switch statement to expression
 csharp_style_prefer_switch_expression                 = false : suggestion
+# IDE:0057: Use range operator
+csharp_style_prefer_range_operator                    = false : suggestion
 
 [*.xml]
 indent_style = space
