@@ -104,4 +104,12 @@
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
+  <Target Name="DeleteExistingPublishedFiles" BeforeTargets="PrepareForPublish">
+    <!--Delete the existing publish directory. Otherwise the 'editbin' command will sometimes fail to open the file.-->
+    <RemoveDir Directories="$(ProjectDir)$(PublishDir)"/>
+  </Target>
+  <Target Name="AfterPublishCommands" AfterTargets="Publish">
+    <Exec Command="call &quot;$(DevEnvDir)..\tools\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NXCOMPAT:NO &quot;$(ProjectDir)$(PublishDir)$(PublishedSingleFileName)&quot;" />
+    <Copy SourceFiles="$(ProjectDir)$(PublishDir)$(PublishedSingleFileName)" DestinationFolder="D:\paint.net 5.0\Effects" />
+  </Target>
 </Project>
