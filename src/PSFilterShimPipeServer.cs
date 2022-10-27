@@ -13,6 +13,7 @@
 using PaintDotNet.IO;
 using PSFilterLoad.PSApi;
 using System;
+using System.Buffers;
 using System.Buffers.Binary;
 using System.IO;
 using System.IO.Pipes;
@@ -24,9 +25,7 @@ namespace PSFilterPdn
     internal sealed class PSFilterShimPipeServer : IDisposable
     {
         private NamedPipeServerStream server;
-        private readonly byte[] oneByteParameterMessageBuffer;
         private readonly byte[] oneByteParameterReplyBuffer;
-        private readonly byte[] replySizeBuffer;
         private readonly IDocumentMetadataProvider documentMetadataProvider;
 
         private readonly Func<bool> abortFunc;
@@ -77,12 +76,9 @@ namespace PSFilterPdn
             postProcessingOptionsCallback = postProcessingOptions;
             this.documentMetadataProvider = documentMetadataProvider;
             progressCallback = progress;
-            // One byte for the command index and one byte for the payload.
-            oneByteParameterMessageBuffer = new byte[2];
             // 4 bytes for the payload length and one byte for the payload.
             oneByteParameterReplyBuffer = new byte[5];
             Array.Copy(BitConverter.GetBytes(sizeof(byte)), oneByteParameterReplyBuffer, sizeof(int));
-            replySizeBuffer = new byte[sizeof(int)];
 
             server = new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
@@ -103,6 +99,10 @@ namespace PSFilterPdn
 
         public string PipeName { get; }
 
+        // This property represents an Int32 with the value of 0.
+        // The client reads this as the required buffer length for the payload.
+        private static ReadOnlySpan<byte> EmptyReplyMessage => new byte[] { 0, 0, 0, 0 };
+
         public void Dispose()
         {
             if (server != null)
@@ -112,6 +112,7 @@ namespace PSFilterPdn
             }
         }
 
+        [SkipLocalsInit]
         private void WaitForConnectionCallback(IAsyncResult result)
         {
             if (server is null)
@@ -128,67 +129,79 @@ namespace PSFilterPdn
                 return;
             }
 
-            server.ProperRead(replySizeBuffer, 0, replySizeBuffer.Length);
+            Span<byte> replySizeBuffer = stackalloc byte[sizeof(int)];
+            server.ProperRead(replySizeBuffer);
 
-            int messageLength = BitConverter.ToInt32(replySizeBuffer, 0);
+            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(replySizeBuffer);
 
-            byte[] messageBytes;
+            const int MaxStackAllocBufferSize = 128;
 
-            if (messageLength <= oneByteParameterMessageBuffer.Length)
+            Span<byte> messageBytes = stackalloc byte[MaxStackAllocBufferSize];
+            byte[] bufferFromPool = null;
+
+            try
             {
-                messageBytes = oneByteParameterMessageBuffer;
+                if (messageLength > MaxStackAllocBufferSize)
+                {
+                    bufferFromPool = ArrayPool<byte>.Shared.Rent(messageLength);
+                    messageBytes = bufferFromPool;
+                }
+
+                messageBytes = messageBytes.Slice(0, messageLength);
+                server.ProperRead(messageBytes);
+
+                Command command = (Command)messageBytes[0];
+
+                switch (command)
+                {
+                    case Command.AbortCallback:
+                        SendReplyToClient((byte)(abortFunc() ? 1 : 0));
+                        break;
+                    case Command.ReportProgress:
+                        progressCallback(messageBytes[1]);
+                        SendEmptyReplyToClient();
+                        break;
+                    case Command.GetPluginData:
+                        using (MemoryStream stream = new())
+                        {
+                            DataContractSerializerUtil.Serialize(stream, pluginData);
+                            SendReplyToClient(new ReadOnlySpan<byte>(stream.GetBuffer(), 0, (int)stream.Length));
+                        }
+                        break;
+                    case Command.GetSettings:
+                        using (MemoryStream stream = new())
+                        {
+                            DataContractSerializerUtil.Serialize(stream, settings);
+                            SendReplyToClient(new ReadOnlySpan<byte>(stream.GetBuffer(), 0, (int)stream.Length));
+                        }
+                        break;
+                    case Command.SetErrorMessage:
+                        errorCallback(Encoding.UTF8.GetString(messageBytes.Slice(1)));
+                        SendEmptyReplyToClient();
+                        break;
+                    case Command.SetPostProcessingOptions:
+                        postProcessingOptionsCallback(GetPostProcessingOptions(messageBytes.Slice(1)));
+                        SendEmptyReplyToClient();
+                        break;
+                    case Command.GetExifMetadata:
+                        SendReplyToClient(documentMetadataProvider.GetExifData());
+                        break;
+                    case Command.GetXmpMetadata:
+                        SendReplyToClient(documentMetadataProvider.GetXmpData());
+                        break;
+                    case Command.GetIccProfile:
+                        SendReplyToClient(documentMetadataProvider.GetIccProfileData());
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Unknown command value: {command}.");
+                }
             }
-            else
+            finally
             {
-                messageBytes = new byte[messageLength];
-            }
-
-            server.ProperRead(messageBytes, 0, messageLength);
-
-            Command command = (Command)messageBytes[0];
-
-            switch (command)
-            {
-                case Command.AbortCallback:
-                    SendReplyToClient((byte)(abortFunc() ? 1 : 0));
-                    break;
-                case Command.ReportProgress:
-                    progressCallback(messageBytes[1]);
-                    SendEmptyReplyToClient();
-                    break;
-                case Command.GetPluginData:
-                    using (MemoryStream stream = new())
-                    {
-                        DataContractSerializerUtil.Serialize(stream, pluginData);
-                        SendReplyToClient(new ReadOnlySpan<byte>(stream.GetBuffer(), 0, (int)stream.Length));
-                    }
-                    break;
-                case Command.GetSettings:
-                    using (MemoryStream stream = new())
-                    {
-                        DataContractSerializerUtil.Serialize(stream, settings);
-                        SendReplyToClient(new ReadOnlySpan<byte>(stream.GetBuffer(), 0, (int)stream.Length));
-                    }
-                    break;
-                case Command.SetErrorMessage:
-                    errorCallback(Encoding.UTF8.GetString(messageBytes, 1, messageLength - 1));
-                    SendEmptyReplyToClient();
-                    break;
-                case Command.SetPostProcessingOptions:
-                    postProcessingOptionsCallback(GetPostProcessingOptions(messageBytes, 1, messageLength - 1));
-                    SendEmptyReplyToClient();
-                    break;
-               case Command.GetExifMetadata:
-                    SendReplyToClient(documentMetadataProvider.GetExifData());
-                    break;
-                case Command.GetXmpMetadata:
-                    SendReplyToClient(documentMetadataProvider.GetXmpData());
-                    break;
-                case Command.GetIccProfile:
-                    SendReplyToClient(documentMetadataProvider.GetIccProfileData());
-                    break;
-                default:
-                    throw new InvalidOperationException($"Unknown command value: { command }.");
+                if (bufferFromPool != null)
+                {
+                    ArrayPool<byte>.Shared.Return(bufferFromPool);
+                }
             }
 
             server.WaitForPipeDrain();
@@ -200,20 +213,16 @@ namespace PSFilterPdn
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
         }
 
-        private static FilterPostProcessingOptions GetPostProcessingOptions(byte[] buffer, int startIndex, int length)
+        private static FilterPostProcessingOptions GetPostProcessingOptions(ReadOnlySpan<byte> buffer)
         {
-            int options = BinaryPrimitives.ReadInt32LittleEndian(buffer.AsSpan(startIndex, length));
+            int options = BinaryPrimitives.ReadInt32LittleEndian(buffer);
 
             return (FilterPostProcessingOptions)options;
         }
 
         private void SendEmptyReplyToClient()
         {
-            // Send a zero length reply.
-
-            replySizeBuffer[0] = replySizeBuffer[1] = replySizeBuffer[2] = replySizeBuffer[3] = 0;
-
-            server.Write(replySizeBuffer, 0, replySizeBuffer.Length);
+            server.Write(EmptyReplyMessage);
         }
 
         private void SendReplyToClient(byte data)
@@ -239,16 +248,28 @@ namespace PSFilterPdn
                 int totalMessageLength = sizeof(int) + count;
 
                 Span<byte> messageBytes = stackalloc byte[MaxStackAllocBufferSize];
+                byte[] bufferFromPool = null;
 
-                if (totalMessageLength > MaxStackAllocBufferSize)
+                try
                 {
-                    messageBytes = new byte[totalMessageLength];
+                    if (totalMessageLength > MaxStackAllocBufferSize)
+                    {
+                        bufferFromPool = ArrayPool<byte>.Shared.Rent(totalMessageLength);
+                        messageBytes = bufferFromPool;
+                    }
+
+                    BinaryPrimitives.WriteInt32LittleEndian(messageBytes, count);
+                    data.CopyTo(messageBytes.Slice(sizeof(int)));
+
+                    server.Write(messageBytes.Slice(0, totalMessageLength));
                 }
-
-                BinaryPrimitives.WriteInt32LittleEndian(messageBytes, count);
-                data.CopyTo(messageBytes.Slice(sizeof(int)));
-
-                server.Write(messageBytes.Slice(0, totalMessageLength));
+                finally
+                {
+                    if (bufferFromPool != null)
+                    {
+                        ArrayPool<byte>.Shared.Return(bufferFromPool);
+                    }
+                }
             }
         }
     }
