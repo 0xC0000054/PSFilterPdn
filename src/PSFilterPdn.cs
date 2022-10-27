@@ -133,7 +133,7 @@ namespace PSFilterPdn
                         PluginUISettings = null
                     };
 
-                    DocumentMetadataProvider documentMetadataProvider = new(Environment);
+                    DocumentMetadataProvider documentMetadataProvider = new(Environment.Document);
 
                     FilterPostProcessingOptions postProcessingOptions = FilterPostProcessingOptions.None;
 
@@ -229,7 +229,7 @@ namespace PSFilterPdn
                                                                  () => PluginApiLogCategories.Default,
                                                                  nameof(LoadPsFilter));
 
-                DocumentMetadataProvider documentMetadataProvider = new(Environment);
+                DocumentMetadataProvider documentMetadataProvider = new(Environment.Document);
 
                 using (LoadPsFilter lps = new(Environment.GetSourceBitmapBgra32(),
                                               SelectionMaskRenderer.FromPdnSelection(Environment),
@@ -295,8 +295,8 @@ namespace PSFilterPdn
 
         private bool CheckSourceSurfaceSize(IWin32Window window)
         {
-            int width = Environment.CanvasSize.Width;
-            int height = Environment.CanvasSize.Height;
+            int width = Environment.Document.Size.Width;
+            int height = Environment.Document.Size.Height;
 
             if (width > 32000 || height > 32000)
             {
@@ -380,7 +380,7 @@ namespace PSFilterPdn
             {
                 if (token.Dest != null)
                 {
-                    filterOutput ??= Environment.ImagingFactory.CreateBitmap<ColorBgra32>(Environment.CanvasSize);
+                    filterOutput ??= Environment.ImagingFactory.CreateBitmap<ColorBgra32>(Environment.Document.Size);
 
                     using (IBitmapLock<ColorBgra32> src = token.Dest.Lock(BitmapLockOptions.Read))
                     using (IBitmapLock<ColorBgra32> dst = filterOutput.Lock(BitmapLockOptions.Write))

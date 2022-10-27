@@ -30,16 +30,16 @@ namespace PSFilterPdn
 {
     internal sealed class DocumentMetadataProvider : IDocumentMetadataProvider
     {
-        private readonly IEffectEnvironment effectEnvironment;
+        private readonly IEffectDocumentInfo documentInfo;
         private readonly Lazy<byte[]> exifBytes;
         private readonly Lazy<byte[]> iccProfileBytes;
         private readonly Lazy<byte[]> xmpBytes;
 
-        public DocumentMetadataProvider(IEffectEnvironment effectEnvironment)
+        public DocumentMetadataProvider(IEffectDocumentInfo documentInfo)
         {
-            ArgumentNullException.ThrowIfNull(effectEnvironment);
+            ArgumentNullException.ThrowIfNull(documentInfo);
 
-            this.effectEnvironment = effectEnvironment;
+            this.documentInfo = documentInfo;
             exifBytes = new Lazy<byte[]>(CacheExifBytes);
             iccProfileBytes = new Lazy<byte[]>(CacheIccProfileBytes);
             xmpBytes = new Lazy<byte[]>(CacheXmpBytes);
@@ -53,8 +53,8 @@ namespace PSFilterPdn
 
         private byte[] CacheExifBytes()
         {
-            ExifWriterInfo exifWriterInfo = GetExifWriterInfo(effectEnvironment.Document.Metadata.ExifPropertyItems);
-            SizeInt32 documentSize = effectEnvironment.CanvasSize;
+            ExifWriterInfo exifWriterInfo = GetExifWriterInfo(documentInfo.Metadata.ExifPropertyItems);
+            SizeInt32 documentSize = documentInfo.Size;
 
             ExifWriter writer = new(exifWriterInfo, documentSize);
 
@@ -66,7 +66,7 @@ namespace PSFilterPdn
             ExifPropertyPath colorSpacePath = ExifPropertyKeys.Photo.ColorSpace.Path;
             ExifPropertyPath iccProfilePath = ExifPropertyKeys.Image.InterColorProfile.Path;
 
-            IReadOnlyList<ExifPropertyItem> exifPropertyItems = effectEnvironment.Document.Metadata.ExifPropertyItems;
+            IReadOnlyList<ExifPropertyItem> exifPropertyItems = documentInfo.Metadata.ExifPropertyItems;
 
             ExifPropertyItem? iccProfilePropertyItem = exifPropertyItems.FirstOrDefault(p => p.Path == iccProfilePath);
 
@@ -133,7 +133,7 @@ namespace PSFilterPdn
         {
             byte[] xmpPacketBytes = Array.Empty<byte>();
 
-            XmpPacket? xmpPacket = effectEnvironment.Document.Metadata.XmpPacket;
+            XmpPacket? xmpPacket = documentInfo.Metadata.XmpPacket;
 
             if (xmpPacket != null)
             {

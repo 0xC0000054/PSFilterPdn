@@ -43,8 +43,7 @@ namespace PSFilterPdn
         private static unsafe void ClipToSelectionMask(IEffectEnvironment environment,
                                                        IBitmap<ColorBgra32> destination)
         {
-            SizeInt32 canvasSize = environment.CanvasSize;
-            RectInt32 bounds = new(Point2Int32.Zero, canvasSize);
+            RectInt32 bounds = new(Point2Int32.Zero, environment.Document.Size);
 
             using (IBitmapLock<ColorBgra32> srcLock = environment.GetSourceBitmapBgra32().Lock(bounds))
             using (IBitmapLock<ColorBgra32> dstLock = destination.Lock(bounds, BitmapLockOptions.Write))

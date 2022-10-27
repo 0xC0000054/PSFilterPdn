@@ -23,24 +23,24 @@ namespace PSFilterLoad.PSApi
     {
         public static MaskSurface? FromPdnSelection(IEffectEnvironment environment)
         {
-            SizeInt32 canvasSize = environment.CanvasSize;
-            RectInt32 canvasBounds = new(Point2Int32.Zero, canvasSize);
+            SizeInt32 documentSize = environment.Document.Size;
+            RectInt32 documentBounds = new(Point2Int32.Zero, documentSize);
 
             IEffectSelectionInfo selectionInfo = environment.Selection;
 
             MaskSurface? selectionMask = null;
 
-            if (selectionInfo.RenderBounds != canvasBounds)
+            if (selectionInfo.RenderBounds != documentBounds)
             {
-                selectionMask = FromPdnSelection(canvasSize, selectionInfo);
+                selectionMask = FromPdnSelection(documentSize, selectionInfo);
             }
 
             return selectionMask;
         }
 
-        private static unsafe MaskSurface FromPdnSelection(SizeInt32 canvasSize, IEffectSelectionInfo selection)
+        private static unsafe MaskSurface FromPdnSelection(SizeInt32 documentSize, IEffectSelectionInfo selection)
         {
-            MaskSurface mask = new(canvasSize.Width, canvasSize.Height);
+            MaskSurface mask = new(documentSize.Width, documentSize.Height);
 
             RegionPtr<ColorAlpha8> dst = new((ColorAlpha8*)mask.Scan0.VoidStar, mask.Width, mask.Height, mask.Stride);
 

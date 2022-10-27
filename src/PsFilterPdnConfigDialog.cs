@@ -141,7 +141,7 @@ namespace PSFilterPdn
             highDpiMode = DeviceDpi > DpiHelper.LogicalDpi;
             imagingFactory = bitmapEffectEnvironment.ImagingFactory;
             documentDpi = new DocumentDpi(bitmapEffectEnvironment.Document.Resolution);
-            documentMetadataProvider = new DocumentMetadataProvider(bitmapEffectEnvironment);
+            documentMetadataProvider = new DocumentMetadataProvider(bitmapEffectEnvironment.Document);
 
             UseAppThemeColors = true;
             PluginThemingUtil.UpdateControlBackColor(this);
@@ -1542,8 +1542,8 @@ namespace PSFilterPdn
 
         private void CheckSourceSurfaceSize()
         {
-            int width = Environment.CanvasSize.Width;
-            int height = Environment.CanvasSize.Height;
+            int width = Environment.Document.Size.Width;
+            int height = Environment.Document.Size.Height;
 
             if (width > 32000 || height > 32000)
             {
