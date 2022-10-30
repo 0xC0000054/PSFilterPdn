@@ -30,6 +30,9 @@ namespace PSFilterPdn
 {
     internal sealed class DocumentMetadataProvider : IDocumentMetadataProvider
     {
+        private const string SrgbProfileResourceName = $"{nameof(PSFilterPdn)}.Resources.sRGB.icc";
+        private const string AdobeRGBProfileResourceName = $"{nameof(PSFilterPdn)}.Resources.ClayRGB-elle-V2-g22.icc";
+
         private readonly IEffectDocumentInfo documentInfo;
         private readonly Lazy<byte[]> exifBytes;
         private readonly Lazy<byte[]> iccProfileBytes;
@@ -100,12 +103,14 @@ namespace PSFilterPdn
                 switch (colorSpace)
                 {
                     case ExifColorSpace.Srgb:
-                        resourceName = $"{nameof(PSFilterPdn)}.Resources.sRGB.icc";
+                        resourceName = SrgbProfileResourceName;
                         break;
                     case ExifColorSpace.AdobeRgb:
-                        resourceName = $"{nameof(PSFilterPdn)}.Resources.ClayRGB-elle-V2-g22.icc";
+                        resourceName = AdobeRGBProfileResourceName;
                         break;
                     case ExifColorSpace.Uncalibrated:
+                        resourceName = TryGetExifColorSpaceFromInteropIndex(exifPropertyItems);
+                        break;
                     default:
                         resourceName = string.Empty;
                         break;
@@ -127,6 +132,39 @@ namespace PSFilterPdn
             }
 
             return iccProfileBytes;
+
+            static string TryGetExifColorSpaceFromInteropIndex(IReadOnlyList<ExifPropertyItem> exifPropertyItems)
+            {
+                // The ExifColorSpace.AdobeRgb value is a non-standard WIC extension, most software only supports
+                // ExifColorSpace.Uncalibrated with the InteropIndex set to R03.
+                // See https://ninedegreesbelow.com/photography/embedded-color-space-information.html
+
+                string profileResourceName = string.Empty;
+
+                ExifPropertyPath interopIndexPath = ExifPropertyKeys.Interop.InteroperabilityIndex.Path;
+
+                ExifPropertyItem? interopIndexPropertyItem = exifPropertyItems.FirstOrDefault(p => p.Path == interopIndexPath);
+
+                if (interopIndexPropertyItem != null)
+                {
+                    ExifValue exifValue = interopIndexPropertyItem.Value;
+
+                    if (exifValue.Type == ExifValueType.Ascii)
+                    {
+                        char[] interopIndexValue = ExifConverter.DecodeAscii(exifValue.Data);
+
+                        if (interopIndexValue.Length == 3
+                            && interopIndexValue[0] == 'R'
+                            && interopIndexValue[1] == '0'
+                            && interopIndexValue[2] == '3')
+                        {
+                            profileResourceName = AdobeRGBProfileResourceName;
+                        }
+                    }
+                }
+
+                return profileResourceName;
+            }
         }
 
         private byte[] CacheXmpBytes()
