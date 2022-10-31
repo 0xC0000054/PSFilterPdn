@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Buffers;
 using System.IO;
 
 namespace PSFilterLoad.PSApi
@@ -71,7 +72,7 @@ namespace PSFilterLoad.PSApi
             this.leaveOpen = leaveOpen;
 
             bufferSize = (int)Math.Min(stream.Length, MaxBufferSize);
-            buffer = new byte[bufferSize];
+            buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
 
             readOffset = 0;
             readLength = 0;
@@ -155,6 +156,7 @@ namespace PSFilterLoad.PSApi
                     stream.Dispose();
                 }
                 stream = null;
+                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
 
