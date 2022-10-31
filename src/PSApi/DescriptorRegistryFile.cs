@@ -134,17 +134,5 @@ namespace PSFilterLoad.PSApi
                 return true;
             }
         }
-
-        /// <summary>
-        /// Binds the serialization to types in the currently loaded assembly.
-        /// </summary>
-        private sealed class SelfBinder : System.Runtime.Serialization.SerializationBinder
-        {
-            public override Type BindToType(string assemblyName, string typeName)
-            {
-                return Type.GetType(string.Format(CultureInfo.InvariantCulture, "{0},{1}", typeName, assemblyName));
-            }
-        }
-
     }
 }
