@@ -13,7 +13,6 @@
 using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {

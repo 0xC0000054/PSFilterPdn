@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System.Security.Permissions;
 using Microsoft.Win32.SafeHandles;
 
 /* The following code is quoted from Mike Stall's blog

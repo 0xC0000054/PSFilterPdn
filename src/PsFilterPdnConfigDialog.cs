@@ -20,7 +20,6 @@ using PSFilterLoad.PSApi;
 using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterPdn.Controls;
 using PSFilterPdn.EnableInfo;
-using PSFilterPdn.Interop;
 using PSFilterPdn.Properties;
 using System;
 using System.Collections.Generic;

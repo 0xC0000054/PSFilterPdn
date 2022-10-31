@@ -16,7 +16,6 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace PSFilterLoad.PSApi
 {

@@ -14,7 +14,6 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Security;
 
 namespace PSFilterLoad.PSApi.Loader
 {
