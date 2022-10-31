@@ -85,7 +85,7 @@ namespace PSFilterLoad.PSApi
 
             public DescriptorRegistryFileHeader()
             {
-                FileVersion = 1;
+                FileVersion = 2;
             }
 
             private DescriptorRegistryFileHeader(int fileVersion)
