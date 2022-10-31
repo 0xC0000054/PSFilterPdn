@@ -12,8 +12,10 @@
 
 using PaintDotNet.IO;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace PSFilterLoad.PSApi
@@ -80,9 +82,6 @@ namespace PSFilterLoad.PSApi
 
         private sealed class DescriptorRegistryFileHeader
         {
-            // PFPR = PSFilterPdn registry
-            private static readonly byte[] HeaderSignature = Encoding.UTF8.GetBytes("PFPR");
-
             public DescriptorRegistryFileHeader()
             {
                 FileVersion = 2;
@@ -95,6 +94,10 @@ namespace PSFilterLoad.PSApi
 
             public int FileVersion { get; }
 
+            // PFPR = PSFilterPdn registry
+            private static ReadOnlySpan<byte> Signature => new byte[] { (byte)'P', (byte)'F', (byte)'P', (byte)'R' };
+
+            [SkipLocalsInit]
             public static bool TryCreate(Stream stream, out DescriptorRegistryFileHeader header)
             {
                 header = null;
@@ -103,13 +106,13 @@ namespace PSFilterLoad.PSApi
 
                 if (stream.Length > 8)
                 {
-                    byte[] headerBytes = new byte[8];
+                    Span<byte> headerBytes = stackalloc byte[8];
 
-                    stream.ProperRead(headerBytes, 0, headerBytes.Length);
+                    stream.ProperRead(headerBytes);
 
                     if (CheckHeaderSignature(headerBytes))
                     {
-                        header = new DescriptorRegistryFileHeader(BitConverter.ToInt32(headerBytes, 4));
+                        header = new DescriptorRegistryFileHeader(BinaryPrimitives.ReadInt32LittleEndian(headerBytes.Slice(4)));
                         result = true;
                     }
                 }
@@ -117,28 +120,20 @@ namespace PSFilterLoad.PSApi
                 return result;
             }
 
+            [SkipLocalsInit]
             public void Save(Stream stream)
             {
-                stream.Write(HeaderSignature, 0, HeaderSignature.Length);
-                stream.Write(BitConverter.GetBytes(FileVersion), 0, 4);
+                Span<byte> headerBytes = stackalloc byte[8];
+
+                Signature.CopyTo(headerBytes);
+                BinaryPrimitives.WriteInt32LittleEndian(headerBytes.Slice(4), FileVersion);
+
+                stream.Write(headerBytes);
             }
 
-            private static bool CheckHeaderSignature(byte[] bytes)
+            private static bool CheckHeaderSignature(ReadOnlySpan<byte> bytes)
             {
-                if (bytes.Length < 4)
-                {
-                    return false;
-                }
-
-                for (int i = 0; i < 4; i++)
-                {
-                    if (bytes[i] != HeaderSignature[i])
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
+                return bytes.Length >= Signature.Length && bytes.Slice(0, Signature.Length).SequenceEqual(Signature);
             }
         }
     }
