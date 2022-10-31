@@ -1,13 +1,20 @@
-﻿using PaintDotNet.IO;
+﻿/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// https://github.com/0xC0000054/PSFilterPdn
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2022 Nicholas Hayes
+//
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+using PaintDotNet.IO;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PSFilterLoad.PSApi
 {
