@@ -752,7 +752,7 @@ namespace PSFilterPdn
             {
                 if (InvokeRequired)
                 {
-                    Invoke(new MethodInvoker(delegate () { Close(); }));
+                    Invoke(new MethodInvoker(Close));
                 }
                 else
                 {
