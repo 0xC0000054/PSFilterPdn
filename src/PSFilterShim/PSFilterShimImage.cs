@@ -14,7 +14,6 @@ using PaintDotNet;
 using PSFilterPdn;
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace PSFilterShim
 {
@@ -49,17 +48,15 @@ namespace PSFilterShim
 
                 surface = new Surface(header.Width, header.Height);
 
-                byte[] buffer = new byte[header.Stride];
+                int rowLengthInBytes = header.Stride;
 
                 unsafe
                 {
                     for (int y = 0; y < header.Height; y++)
                     {
-                        stream.ProperRead(buffer, 0, buffer.Length);
-
                         ColorBgra* dst = surface.GetRowAddressUnchecked(y);
 
-                        Marshal.Copy(buffer, 0, new IntPtr(dst), buffer.Length);
+                        stream.ProperRead(new Span<byte>((byte*)dst, rowLengthInBytes));
                     }
                 }
             }
@@ -87,17 +84,15 @@ namespace PSFilterShim
 
                 surface = new MaskSurface(header.Width, header.Height);
 
-                byte[] buffer = new byte[header.Stride];
+                int rowLengthInBytes = header.Stride;
 
                 unsafe
                 {
                     for (int y = 0; y < header.Height; y++)
                     {
-                        stream.ProperRead(buffer, 0, buffer.Length);
-
                         byte* dst = surface.GetRowAddressUnchecked(y);
 
-                        Marshal.Copy(buffer, 0, new IntPtr(dst), buffer.Length);
+                        stream.ProperRead(new Span<byte>(dst, rowLengthInBytes));
                     }
                 }
             }
@@ -131,7 +126,7 @@ namespace PSFilterShim
             {
                 header.Save(stream);
 
-                byte[] buffer = new byte[header.Stride];
+                int rowLengthInBytes = header.Stride;
 
                 unsafe
                 {
@@ -139,9 +134,7 @@ namespace PSFilterShim
                     {
                         ColorBgra* src = surface.GetRowAddressUnchecked(y);
 
-                        Marshal.Copy(new IntPtr(src), buffer, 0, buffer.Length);
-
-                        stream.Write(buffer, 0, buffer.Length);
+                        stream.Write(new ReadOnlySpan<byte>((byte*)src, rowLengthInBytes));
                     }
                 }
             }

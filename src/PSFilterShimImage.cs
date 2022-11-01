@@ -15,8 +15,8 @@ using PaintDotNet.IO;
 using PaintDotNet.Rendering;
 using PSFilterLoad.PSApi;
 using System;
+using System.Buffers;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace PSFilterPdn
 {
@@ -48,26 +48,19 @@ namespace PSFilterPdn
 
                 bitmap = imagingFactory.CreateBitmap<ColorBgra32>(header.Width, header.Height);
 
-                byte[] buffer = new byte[header.Stride];
-
                 unsafe
                 {
-                    fixed (byte* src = buffer)
+                    using (IBitmapLock<ColorBgra32> dstLock = bitmap.Lock(BitmapLockOptions.Write))
                     {
-                        using (IBitmapLock<ColorBgra32> dstLock = bitmap.Lock(BitmapLockOptions.Write))
+                        byte* dstScan0 = (byte*)dstLock.Buffer;
+                        nuint dstStride = (nuint)dstLock.BufferStride;
+                        int rowLengthInBytes = header.Stride;
+
+                        for (int y = 0; y < header.Height; y++)
                         {
-                            byte* dstScan0 = (byte*)dstLock.Buffer;
-                            nuint dstStride = (nuint)dstLock.BufferStride;
-                            ulong bytesToCopy = (ulong)buffer.Length;
+                            byte* dstRow = dstScan0 + ((nuint)y * dstStride);
 
-                            for (int y = 0; y < header.Height; y++)
-                            {
-                                stream.ProperRead(buffer, 0, buffer.Length);
-
-                                byte* dstRow = dstScan0 + ((nuint)y * dstStride);
-
-                                Buffer.MemoryCopy(src, dstRow, bytesToCopy, bytesToCopy);
-                            }
+                            stream.ProperRead(new Span<byte>(dstRow, rowLengthInBytes));
                         }
                     }
                 }
@@ -103,24 +96,31 @@ namespace PSFilterPdn
             {
                 header.Save(stream);
 
-                byte[] buffer = new byte[header.Stride];
+                byte[] buffer = ArrayPool<byte>.Shared.Rent(header.Stride);
 
-                unsafe
+                try
                 {
-                    fixed (byte* ptr = buffer)
+                    unsafe
                     {
-                        int bufferStride = header.Stride;
-                        uint bufferSize = (uint)buffer.Length;
-
-                        for (int y = 0; y < header.Height; y++)
+                        fixed (byte* ptr = buffer)
                         {
-                            RectInt32 copyRect = new(0, y, header.Width, 1);
+                            int bufferStride = header.Stride;
+                            uint bufferSize = (uint)bufferStride;
 
-                            bitmap.CopyPixels(ptr, bufferStride, bufferSize, copyRect);
+                            for (int y = 0; y < header.Height; y++)
+                            {
+                                RectInt32 copyRect = new(0, y, header.Width, 1);
 
-                            stream.Write(buffer, 0, buffer.Length);
+                                bitmap.CopyPixels(ptr, bufferStride, bufferSize, copyRect);
+
+                                stream.Write(buffer, 0, bufferStride);
+                            }
                         }
                     }
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
                 }
             }
         }
@@ -151,7 +151,7 @@ namespace PSFilterPdn
             {
                 header.Save(stream);
 
-                byte[] buffer = new byte[header.Stride];
+                int rowLengthInBytes = header.Stride;
 
                 unsafe
                 {
@@ -159,9 +159,7 @@ namespace PSFilterPdn
                     {
                         byte* src = surface.GetRowAddressUnchecked(y);
 
-                        Marshal.Copy(new IntPtr(src), buffer, 0, buffer.Length);
-
-                        stream.Write(buffer, 0, buffer.Length);
+                        stream.Write(new ReadOnlySpan<byte>(src, rowLengthInBytes));
                     }
                 }
             }

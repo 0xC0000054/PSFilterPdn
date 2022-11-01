@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using System;
 using System.IO;
 
 namespace PSFilterShim
@@ -32,6 +33,23 @@ namespace PSFilterShim
                 totalBytesRead += bytesRead;
 
             } while (totalBytesRead < count);
+        }
+
+        public static void ProperRead(this Stream stream, Span<byte> buffer)
+        {
+            Span<byte> span = buffer;
+
+            while (span.Length > 0)
+            {
+                int bytesRead = stream.Read(span);
+
+                if (bytesRead == 0)
+                {
+                    throw new EndOfStreamException();
+                }
+
+                span = span.Slice(bytesRead);
+            }
         }
     }
 }
