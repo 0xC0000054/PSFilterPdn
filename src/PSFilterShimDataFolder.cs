@@ -54,9 +54,7 @@ namespace PSFilterPdn
             VerifyNotDisposed();
 
             // Remove all the existing files in the directory.
-            FileInfo[] existingFiles = directoryInfo.GetFiles();
-
-            foreach (FileInfo file in existingFiles)
+            foreach (FileInfo file in directoryInfo.EnumerateFiles())
             {
                 file.Delete();
             }
