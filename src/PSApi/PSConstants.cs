@@ -148,7 +148,7 @@ namespace PSFilterLoad.PSApi
 
             internal static class InterpolationMethod
             {
-                public const int NearestNeghbor = 1;
+                public const int PointSampling = 1;
                 public const int Bilinear = 2;
                 public const int Bicubic = 3;
             }
