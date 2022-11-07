@@ -76,7 +76,7 @@ namespace PSFilterPdn
         private SaveFileDialog filterExecutionLogSaveDialog;
         private GroupBox loadErrorsGroupBox;
         private TextBox pluginLoadErrorDetailsTextBox;
-        private ListView pluginLoadErrorListView;
+        private DoubleBufferedListView pluginLoadErrorListView;
         private ColumnHeader plugInLoadErrorListViewColumnHeader;
         private Button copyLoadErrorDetailsButton;
 
@@ -291,7 +291,7 @@ namespace PSFilterPdn
             loadErrorsGroupBox = new System.Windows.Forms.GroupBox();
             copyLoadErrorDetailsButton = new System.Windows.Forms.Button();
             pluginLoadErrorDetailsTextBox = new System.Windows.Forms.TextBox();
-            pluginLoadErrorListView = new System.Windows.Forms.ListView();
+            pluginLoadErrorListView = new PSFilterPdn.Controls.DoubleBufferedListView();
             plugInLoadErrorListViewColumnHeader = new System.Windows.Forms.ColumnHeader();
             updateFilterListBw = new System.ComponentModel.BackgroundWorker();
             donateLink = new System.Windows.Forms.LinkLabel();
