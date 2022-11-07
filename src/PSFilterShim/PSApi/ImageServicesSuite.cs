@@ -52,11 +52,11 @@ namespace PSFilterLoad.PSApi
                                                InterpolationMethod method)
         {
             logger.Log(PluginApiLogCategory.ImageServicesSuite,
-                       "source: [{0}], destination: [{1}], area: {2}, coords: {3}, method: {4}",
+                       "source: [{0}], destination: [{1}], area: {2}, coords: 0x{3}, method: {4}",
                        new PointerAsStringFormatter<PSImagePlane>(source),
                        new PointerAsStringFormatter<PSImagePlane>(destination),
                        new PointerAsStringFormatter<Rect16>(area),
-                       coords,
+                       new IntPtrAsHexStringFormatter(coords),
                        method);
 
             return PSError.memFullErr;
@@ -69,11 +69,11 @@ namespace PSFilterLoad.PSApi
                                                InterpolationMethod method)
         {
             logger.Log(PluginApiLogCategory.ImageServicesSuite,
-                       "source: [{0}], destination: [{1}], area: {2}, coords: {3}, method: {4}",
+                       "source: [{0}], destination: [{1}], area: {2}, coords: 0x{3}, method: {4}",
                        new PointerAsStringFormatter<PSImagePlane>(source),
                        new PointerAsStringFormatter<PSImagePlane>(destination),
                        new PointerAsStringFormatter<Rect16>(area),
-                       coords,
+                       new IntPtrAsHexStringFormatter(coords),
                        method);
 
             return PSError.memFullErr;
