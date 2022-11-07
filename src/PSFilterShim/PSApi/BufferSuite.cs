@@ -35,7 +35,7 @@ namespace PSFilterLoad.PSApi
             unlockProc = new UnlockBufferProc(BufferUnlockProc);
             spaceProc = new BufferSpaceProc(BufferSpaceProc);
             bufferIDs = new Dictionary<IntPtr, int>(IntPtrEqualityComparer.Instance);
-            this.logger = logger.CreateInstanceForType(nameof(BufferSuite));
+            this.logger = logger;
         }
 
         public int AvailableSpace => BufferSpaceProc();
