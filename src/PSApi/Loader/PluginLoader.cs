@@ -544,11 +544,11 @@ namespace PSFilterLoad.PSApi
             // category string and PlugInInfo structure.
             byte* ptr = (byte*)lockRes.ToPointer() + 2;
 
-            if (StringUtil.TryGetCStringLength(ptr, out int categoryStringLength))
+            if (StringUtil.TryGetCStringData(ptr, out ReadOnlySpan<byte> categoryStringData))
             {
-                category = StringUtil.FromCString(ptr, categoryStringLength, StringUtil.StringTrimOption.WhiteSpace);
+                category = StringUtil.FromCString(categoryStringData, StringUtil.StringTrimOption.WhiteSpace);
 
-                uint lengthWithTerminator = (uint)categoryStringLength + 1;
+                uint lengthWithTerminator = (uint)categoryStringData.Length + 1;
                 ptr += lengthWithTerminator;
             }
             else

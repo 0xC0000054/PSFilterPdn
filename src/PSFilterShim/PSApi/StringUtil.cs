@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PSFilterLoad.PSApi
@@ -62,19 +63,16 @@ namespace PSFilterLoad.PSApi
                 return null;
             }
 
-            TrimmedStringOffsets trimmed = GetTrimmedStringOffsets(pascalString,
-                                                                   1,
-                                                                   pascalString[0],
-                                                                   option,
-                                                                   isPascalString: true);
+            ReadOnlySpan<byte> trimmed = GetTrimmedStringData(new ReadOnlySpan<byte>(pascalString + 1, pascalString[0]),
+                                                              option);
 
-            if (trimmed.IsEmptyString)
+            if (trimmed.Length == 0)
             {
                 return string.Empty;
             }
             else
             {
-                return new string((sbyte*)pascalString, trimmed.startIndex, trimmed.length, Windows1252Encoding);
+                return Windows1252Encoding.GetString(trimmed);
             }
         }
 
@@ -100,12 +98,12 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         internal static unsafe string FromCString(IntPtr ptr, StringTrimOption option)
         {
-            if (!TryGetCStringLength(ptr, out int length))
+            if (!TryGetCStringData(ptr, out ReadOnlySpan<byte> data))
             {
                 return null;
             }
 
-            return FromCString((byte*)ptr, length, option);
+            return FromCString(data, option);
         }
 
         /// <summary>
@@ -124,20 +122,7 @@ namespace PSFilterLoad.PSApi
                 return null;
             }
 
-            TrimmedStringOffsets stringOffsets = GetTrimmedStringOffsets(ptr,
-                                                                         0,
-                                                                         length,
-                                                                         option,
-                                                                         isPascalString: false);
-
-            if (stringOffsets.IsEmptyString)
-            {
-                return string.Empty;
-            }
-            else
-            {
-                return new string((sbyte*)ptr, stringOffsets.startIndex, stringOffsets.length, Windows1252Encoding);
-            }
+            return FromCString(new ReadOnlySpan<byte>(ptr, length), option);
         }
 
         /// <summary>
@@ -156,135 +141,131 @@ namespace PSFilterLoad.PSApi
                 return null;
             }
 
-            TrimmedStringOffsets stringOffsets = GetTrimmedStringOffsets(ptr, 0, length, option);
+            ReadOnlySpan<char> trimmed = GetTrimmedStringData(new ReadOnlySpan<char>(ptr, length), option);
 
-            if (stringOffsets.IsEmptyString)
+            if (trimmed.Length == 0)
             {
                 return string.Empty;
             }
             else
             {
-                return new string(ptr, stringOffsets.startIndex, stringOffsets.length);
+                return new string(trimmed);
             }
         }
 
         /// <summary>
-        /// Gets the length of a single-byte null-terminated C string.
+        /// Gets a read-only span containing the data of a single-byte null-terminated C string.
         /// </summary>
         /// <param name="ptr">The pointer to read from.</param>
-        /// <param name="length">The string length.</param>
+        /// <param name="data">The string data.</param>
         /// <returns>
         /// <c>true</c> if the pointer is not <see cref="IntPtr.Zero"/> and the string length
         /// is less than or equal to <see cref="int.MaxValue"/>; otherwise, <c>false</c>.
         /// </returns>
-        internal static unsafe bool TryGetCStringLength(IntPtr ptr, out int length)
+        internal static unsafe bool TryGetCStringData(IntPtr ptr, out ReadOnlySpan<byte> data)
         {
             if (ptr == IntPtr.Zero)
             {
-                length = 0;
+                data = default;
                 return false;
             }
 
-            const int MaxStringLength = int.MaxValue;
+            bool result;
 
-            byte* str = (byte*)ptr;
-            int maxLength = MaxStringLength;
-
-            while (*str != 0 && maxLength > 0)
+            try
             {
-                str++;
-                maxLength--;
+                data = MemoryMarshal.CreateReadOnlySpanFromNullTerminated((byte*)ptr);
+                result = true;
+            }
+            catch (ArgumentException)
+            {
+                // The string is longer than int.MaxValue.
+                data = default;
+                result = false;
             }
 
-            if (maxLength == 0)
-            {
-                // The string is longer than MaxStringLength.
-                length = 0;
-                return false;
-            }
-
-            length = MaxStringLength - maxLength;
-            return true;
+            return result;
         }
 
-        private static unsafe TrimmedStringOffsets GetTrimmedStringOffsets(byte* ptr,
-                                                                           int startIndex,
-                                                                           int length,
-                                                                           StringTrimOption option,
-                                                                           bool isPascalString)
+        /// <summary>
+        /// Creates a <see cref="string"/> from a C string.
+        /// </summary>
+        /// <param name="data">The span to read from.</param>
+        /// <param name="option">The string trim options.</param>
+        /// <returns>
+        /// A managed string that holds a copy of the C string.
+        /// </returns>
+        private static unsafe string FromCString(ReadOnlySpan<byte> data, StringTrimOption option)
         {
-            if (length == 0 || option == StringTrimOption.None)
+            ReadOnlySpan<byte> trimmed = GetTrimmedStringData(data, option);
+
+            if (trimmed.Length == 0)
             {
-                return new TrimmedStringOffsets(startIndex, length);
+                return string.Empty;
+            }
+            else
+            {
+                return Windows1252Encoding.GetString(trimmed);
+            }
+        }
+
+        private static unsafe ReadOnlySpan<byte> GetTrimmedStringData(ReadOnlySpan<byte> data,
+                                                                      StringTrimOption option)
+        {
+            if (data.Length == 0 || option == StringTrimOption.None)
+            {
+                return data;
             }
 
             bool trimNullTerminator = (option & StringTrimOption.NullTerminator) != 0;
             bool trimWhiteSpace = (option & StringTrimOption.WhiteSpace) != 0;
 
-            int start = startIndex;
-            int end = isPascalString ? length : length - 1;
+            int start = 0;
+            int end = data.Length - 1;
 
-            // The search at the start of the string can be skipped if we not trimming white space.
             if (trimWhiteSpace)
             {
-                while (start < length)
+                while (start < data.Length && IsWhiteSpaceWindows1252(data[start]))
                 {
-                    if (!IsTrimmedValue(ptr[start], trimNullTerminator, trimWhiteSpace))
-                    {
-                        break;
-                    }
                     start++;
                 }
             }
 
-            while (end >= start)
+            while (end >= start && IsTrimmedValue(data[end], trimNullTerminator, trimWhiteSpace))
             {
-                if (!IsTrimmedValue(ptr[end], trimNullTerminator, trimWhiteSpace))
-                {
-                    break;
-                }
                 end--;
             }
 
-            return new TrimmedStringOffsets(start, end - start + 1);
+            return data.Slice(start, end - start + 1);
         }
 
-        private static unsafe TrimmedStringOffsets GetTrimmedStringOffsets(char* ptr, int startIndex, int length, StringTrimOption option)
+        private static unsafe ReadOnlySpan<char> GetTrimmedStringData(ReadOnlySpan<char> data, StringTrimOption option)
         {
-            if (length == 0 || option == StringTrimOption.None)
+            if (data.Length == 0 || option == StringTrimOption.None)
             {
-                return new TrimmedStringOffsets(startIndex, length);
+                return data;
             }
 
             bool trimNullTerminator = (option & StringTrimOption.NullTerminator) != 0;
             bool trimWhiteSpace = (option & StringTrimOption.WhiteSpace) != 0;
 
-            int start = startIndex;
-            int end = length - 1;
+            int start = 0;
+            int end = data.Length - 1;
 
-            // The search at the start of the string can be skipped if we not trimming white space.
             if (trimWhiteSpace)
             {
-                while (start < length)
+                while (start < data.Length && char.IsWhiteSpace(data[start]))
                 {
-                    if (!IsTrimmedValue(ptr[start], trimNullTerminator, trimWhiteSpace))
-                    {
-                        break;
-                    }
                     start++;
                 }
             }
 
-            while (end >= start)
+            while (end >= start && IsTrimmedValue(data[end], trimNullTerminator, trimWhiteSpace))
             {
-                if (!IsTrimmedValue(ptr[end], trimNullTerminator, trimWhiteSpace))
-                {
-                    break;
-                }
                 end--;
             }
 
-            return new TrimmedStringOffsets(start, end - start + 1);
+            return data.Slice(start, end - start + 1);
         }
 
         private static bool IsTrimmedValue(byte value, bool trimNullTerminator, bool trimWhiteSpace)

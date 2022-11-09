@@ -15,6 +15,7 @@ using PSFilterPdn.Interop;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PSFilterLoad.PSApi.Loader
@@ -177,8 +178,7 @@ namespace PSFilterLoad.PSApi.Loader
         [DebuggerDisplay("{DebuggerDisplay, nq}")]
         private unsafe readonly ref struct AeteResourceCString
         {
-            private readonly byte* firstChar;
-            private readonly int length;
+            private readonly ReadOnlySpan<byte> data;
 
             public AeteResourceCString(byte* ptr)
             {
@@ -187,18 +187,10 @@ namespace PSFilterLoad.PSApi.Loader
                     ExceptionUtil.ThrowArgumentNullException(nameof(ptr));
                 }
 
-                firstChar = ptr;
-                if (StringUtil.TryGetCStringLength(ptr, out int stringLength))
-                {
-                    length = stringLength;
-                }
-                else
-                {
-                    throw new ArgumentException("The string must be null-terminated.");
-                }
+                data = MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr);
             }
 
-            public uint LengthWithTerminator => (uint)length + 1;
+            public uint LengthWithTerminator => (uint)data.Length + 1;
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             private string DebuggerDisplay
@@ -207,7 +199,7 @@ namespace PSFilterLoad.PSApi.Loader
                 {
                     string result;
 
-                    switch (length)
+                    switch (data.Length)
                     {
                         case 0:
                             // Use a string with escaped quotes to represent an empty string as
@@ -215,7 +207,7 @@ namespace PSFilterLoad.PSApi.Loader
                             result = "\"\"";
                             break;
                         default:
-                            result = new string((sbyte*)firstChar, 0, length, Encoding.ASCII);
+                            result = Encoding.ASCII.GetString(data);
                             break;
                     }
 
@@ -227,8 +219,7 @@ namespace PSFilterLoad.PSApi.Loader
         [DebuggerDisplay("{DebuggerDisplay, nq}")]
         private unsafe readonly ref struct AeteResourcePascalString
         {
-            private readonly byte* firstChar;
-            private readonly int length;
+            private readonly ReadOnlySpan<byte> data;
 
             public AeteResourcePascalString(byte* ptr)
             {
@@ -237,11 +228,10 @@ namespace PSFilterLoad.PSApi.Loader
                     ExceptionUtil.ThrowArgumentNullException(nameof(ptr));
                 }
 
-                firstChar = ptr + 1;
-                length = ptr[0];
+                data = new ReadOnlySpan<byte>(ptr + 1, ptr[0]);
             }
 
-            public uint LengthWithPrefix => (uint)length + 1;
+            public uint LengthWithPrefix => (uint)data.Length + 1;
 
             private string DebuggerDisplay
             {
@@ -249,7 +239,7 @@ namespace PSFilterLoad.PSApi.Loader
                 {
                     string result;
 
-                    switch (length)
+                    switch (data.Length)
                     {
                         case 0:
                             // Use a string with escaped quotes to represent an empty string as
@@ -257,7 +247,7 @@ namespace PSFilterLoad.PSApi.Loader
                             result = "\"\"";
                             break;
                         default:
-                            result = new string((sbyte*)firstChar, 0, length, Encoding.ASCII);
+                            result = Encoding.ASCII.GetString(data);
                             break;
                     }
 

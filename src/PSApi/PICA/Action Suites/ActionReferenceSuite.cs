@@ -283,12 +283,9 @@ namespace PSFilterLoad.PSApi.PICA
 
                 try
                 {
-                    if (StringUtil.TryGetCStringLength(cstrValue, out int length))
+                    if (StringUtil.TryGetCStringData(cstrValue, out ReadOnlySpan<byte> data))
                     {
-                        byte[] bytes = new byte[length];
-                        Marshal.Copy(cstrValue, bytes, 0, length);
-
-                        actionReferences[reference].Add(new ActionReferenceItem(ActionReferenceForm.Name, desiredClass, bytes));
+                        actionReferences[reference].Add(new ActionReferenceItem(ActionReferenceForm.Name, desiredClass, data.ToArray()));
                     }
                     else
                     {

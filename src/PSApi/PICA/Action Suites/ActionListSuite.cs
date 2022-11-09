@@ -391,12 +391,9 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                if (StringUtil.TryGetCStringLength(cstrValue, out int length))
+                if (StringUtil.TryGetCStringData(cstrValue, out ReadOnlySpan<byte> data))
                 {
-                    byte[] data = new byte[length];
-                    Marshal.Copy(cstrValue, data, 0, length);
-
-                    actionLists[list].Add(new ActionListItem(DescriptorTypes.Char, data));
+                    actionLists[list].Add(new ActionListItem(DescriptorTypes.Char, data.ToArray()));
                 }
                 else
                 {
