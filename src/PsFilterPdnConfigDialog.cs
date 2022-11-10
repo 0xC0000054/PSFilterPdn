@@ -142,11 +142,12 @@ namespace PSFilterPdn
             documentDpi = new DocumentDpi(bitmapEffectEnvironment.Document.Resolution);
             documentMetadataProvider = new DocumentMetadataProvider(bitmapEffectEnvironment.Document);
 
-            UseAppThemeColors = true;
             PluginThemingUtil.UpdateControlBackColor(this);
             PluginThemingUtil.UpdateControlForeColor(this);
             filterSearchBox.ForeColor = SystemColors.GrayText;
         }
+
+        protected override bool UseAppThemeColorsDefault => true;
 
         protected override void OnDispose(bool disposing)
         {
