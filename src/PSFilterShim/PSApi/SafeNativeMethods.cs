@@ -12,7 +12,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using static PSFilterLoad.PSApi.NativeStructs;
 
 namespace PSFilterLoad.PSApi
 {
@@ -71,6 +70,6 @@ namespace PSFilterLoad.PSApi
 
         [DllImport("comdlg32.dll", ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern unsafe bool ChooseColorW(ref CHOOSECOLORW lppsd);
+        internal static extern unsafe bool ChooseColorW(ref NativeStructs.CHOOSECOLORW lppsd);
     }
 }
