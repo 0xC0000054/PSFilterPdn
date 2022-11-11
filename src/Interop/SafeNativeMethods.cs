@@ -18,14 +18,6 @@ namespace PSFilterPdn.Interop
     [System.Security.SuppressUnmanagedCodeSecurity]
     internal static class SafeNativeMethods
     {
-        [DllImport("shell32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-        internal static extern int SHCreateItemFromParsingName(
-            [MarshalAs(UnmanagedType.LPWStr)] string pszPath,
-            IntPtr pbc,
-            [In()] ref Guid riid,
-            [MarshalAs(UnmanagedType.Interface, IidParameterIndex = 2)] out NativeInterfaces.IShellItem ppv
-            );
-
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = false, ExactSpelling = true)]
         internal static extern IntPtr GetCurrentProcess();
 

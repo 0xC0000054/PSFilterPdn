@@ -1142,8 +1142,10 @@ namespace PSFilterPdn
 
         private void addDirBtn_Click(object sender, EventArgs e)
         {
-            using (PlatformFolderBrowserDialog fbd = new())
+            using (FolderBrowserDialog fbd = new())
             {
+                fbd.AddToRecent = false;
+                fbd.ClientGuid = new Guid("9706CA6A-0802-4F35-8CE0-006DA888B661");
                 fbd.RootFolder = System.Environment.SpecialFolder.Desktop;
                 if (fbd.ShowDialog(this) == DialogResult.OK)
                 {
