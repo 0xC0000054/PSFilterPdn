@@ -38,35 +38,6 @@ namespace PSFilterPdn.Interop
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct FILETIME
-        {
-            public uint dwLowDateTime;
-            public uint dwHighDateTime;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct BY_HANDLE_FILE_INFORMATION
-        {
-            public uint dwFileAttributes;
-            public FILETIME ftCreationTime;
-            public FILETIME ftLastAccessTime;
-            public FILETIME ftLastWriteTime;
-            public uint dwVolumeSerialNumber;
-            public uint nFileSizeHigh;
-            public uint nFileSizeLow;
-            public uint nNumberOfLinks;
-            public uint nFileIndexHigh;
-            public uint nFileIndexLow;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal unsafe struct FILE_ID_INFO
-        {
-            public ulong VolumeSerialNumber;
-            public fixed byte FileID[16];
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
         internal struct MEMORY_BASIC_INFORMATION
         {
             public IntPtr BaseAddress;
