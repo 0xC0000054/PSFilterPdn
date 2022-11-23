@@ -45,6 +45,6 @@ using System.Runtime.Versioning;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.8.3")]
-[assembly: AssemblyFileVersion("1.0.8.3")]
+[assembly: AssemblyVersion("1.0.8.4")]
+[assembly: AssemblyFileVersion("1.0.8.4")]
 [assembly: NeutralResourcesLanguage("en-US")]
