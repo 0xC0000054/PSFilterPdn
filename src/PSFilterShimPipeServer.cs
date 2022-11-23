@@ -130,7 +130,7 @@ namespace PSFilterPdn
             }
 
             Span<byte> replySizeBuffer = stackalloc byte[sizeof(int)];
-            server.ProperRead(replySizeBuffer);
+            server.ReadExactly(replySizeBuffer);
 
             int messageLength = BinaryPrimitives.ReadInt32LittleEndian(replySizeBuffer);
 
@@ -148,7 +148,7 @@ namespace PSFilterPdn
                 }
 
                 messageBytes = messageBytes.Slice(0, messageLength);
-                server.ProperRead(messageBytes);
+                server.ReadExactly(messageBytes);
 
                 Command command = (Command)messageBytes[0];
 

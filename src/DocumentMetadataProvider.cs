@@ -125,7 +125,7 @@ namespace PSFilterPdn
                         if (stream != null)
                         {
                             iccProfileBytes = new byte[stream.Length];
-                            stream.ProperRead(iccProfileBytes, 0, iccProfileBytes.Length);
+                            stream.ReadExactly(iccProfileBytes, 0, iccProfileBytes.Length);
                         }
                     }
                 }

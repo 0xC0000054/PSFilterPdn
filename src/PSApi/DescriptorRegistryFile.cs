@@ -38,7 +38,7 @@ namespace PSFilterLoad.PSApi
 
                         byte[] data = new byte[dataLength];
 
-                        fs.ProperRead(data, 0, data.Length);
+                        fs.ReadExactly(data, 0, data.Length);
 
                         using (MemoryStream ms = new(data))
                         {
@@ -107,7 +107,7 @@ namespace PSFilterLoad.PSApi
                 {
                     Span<byte> headerBytes = stackalloc byte[8];
 
-                    stream.ProperRead(headerBytes);
+                    stream.ReadExactly(headerBytes);
 
                     if (CheckHeaderSignature(headerBytes))
                     {

@@ -60,7 +60,7 @@ namespace PSFilterPdn
                         {
                             byte* dstRow = dstScan0 + ((nuint)y * dstStride);
 
-                            stream.ProperRead(new Span<byte>(dstRow, rowLengthInBytes));
+                            stream.ReadExactly(new Span<byte>(dstRow, rowLengthInBytes));
                         }
                     }
                 }

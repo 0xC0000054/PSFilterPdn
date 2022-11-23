@@ -56,7 +56,7 @@ namespace PSFilterShim
                     {
                         ColorBgra* dst = surface.GetRowAddressUnchecked(y);
 
-                        stream.ProperRead(new Span<byte>((byte*)dst, rowLengthInBytes));
+                        stream.ReadExactly(new Span<byte>((byte*)dst, rowLengthInBytes));
                     }
                 }
             }
@@ -92,7 +92,7 @@ namespace PSFilterShim
                     {
                         byte* dst = surface.GetRowAddressUnchecked(y);
 
-                        stream.ProperRead(new Span<byte>(dst, rowLengthInBytes));
+                        stream.ReadExactly(new Span<byte>(dst, rowLengthInBytes));
                     }
                 }
             }

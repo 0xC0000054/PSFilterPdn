@@ -159,7 +159,7 @@ namespace PSFilterShim
 
                 stream.Write(noParameterMessageBuffer, 0, noParameterMessageBuffer.Length);
 
-                stream.ProperRead(replyLengthBuffer, 0, replyLengthBuffer.Length);
+                stream.ReadExactly(replyLengthBuffer, 0, replyLengthBuffer.Length);
 
                 int replyLength = BitConverter.ToInt32(replyLengthBuffer, 0);
 
@@ -167,7 +167,7 @@ namespace PSFilterShim
                 {
                     reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
 
-                    stream.ProperRead(reply, 0, replyLength);
+                    stream.ReadExactly(reply, 0, replyLength);
                 }
 
                 stream.WaitForPipeDrain();
@@ -189,7 +189,7 @@ namespace PSFilterShim
 
                 stream.Write(oneByteParameterMessageBuffer, 0, oneByteParameterMessageBuffer.Length);
 
-                stream.ProperRead(replyLengthBuffer, 0, replyLengthBuffer.Length);
+                stream.ReadExactly(replyLengthBuffer, 0, replyLengthBuffer.Length);
 
                 int replyLength = BitConverter.ToInt32(replyLengthBuffer, 0);
 
@@ -197,7 +197,7 @@ namespace PSFilterShim
                 {
                     reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
 
-                    stream.ProperRead(reply, 0, replyLength);
+                    stream.ReadExactly(reply, 0, replyLength);
                 }
 
                 stream.WaitForPipeDrain();
@@ -225,7 +225,7 @@ namespace PSFilterShim
 
                 stream.Write(messageBuffer);
 
-                stream.ProperRead(replyLengthBuffer, 0, replyLengthBuffer.Length);
+                stream.ReadExactly(replyLengthBuffer, 0, replyLengthBuffer.Length);
 
                 int replyLength = BitConverter.ToInt32(replyLengthBuffer, 0);
 
@@ -233,7 +233,7 @@ namespace PSFilterShim
                 {
                     reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
 
-                    stream.ProperRead(reply, 0, replyLength);
+                    stream.Read(reply, 0, replyLength);
                 }
             }
 
@@ -261,7 +261,7 @@ namespace PSFilterShim
 
                 stream.Write(messageBuffer, 0, messageBuffer.Length);
 
-                stream.ProperRead(replyLengthBuffer, 0, replyLengthBuffer.Length);
+                stream.ReadExactly(replyLengthBuffer, 0, replyLengthBuffer.Length);
 
                 int replyLength = BitConverter.ToInt32(replyLengthBuffer, 0);
 
@@ -269,7 +269,7 @@ namespace PSFilterShim
                 {
                     reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
 
-                    stream.ProperRead(reply, 0, replyLength);
+                    stream.ReadExactly(reply, 0, replyLength);
                 }
 
                 stream.WaitForPipeDrain();
