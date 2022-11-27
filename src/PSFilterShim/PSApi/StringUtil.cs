@@ -10,25 +10,26 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using CommunityToolkit.HighPerformance.Buffers;
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PSFilterLoad.PSApi
 {
+    [Flags]
+    internal enum StringCreationOptions
+    {
+        None = 0,
+        TrimNullTerminator = 1 << 0,
+        TrimWhiteSpace = 1 << 1,
+        TrimWhiteSpaceAndNullTerminator = TrimNullTerminator | TrimWhiteSpace,
+        UseStringPool = 1<< 2,
+    }
+
     internal static class StringUtil
     {
         private static readonly Encoding Windows1252Encoding = Encoding.GetEncoding(1252);
-
-        [Flags]
-        internal enum StringTrimOption
-        {
-            None = 0,
-            NullTerminator = 1 << 0,
-            WhiteSpace = 1 << 1,
-            WhiteSpaceAndNullTerminator = NullTerminator | WhiteSpace
-        }
-
         /// <summary>
         /// Creates a <see cref="string"/> from a Pascal string.
         /// </summary>
@@ -45,35 +46,26 @@ namespace PSFilterLoad.PSApi
                 return defaultValue;
             }
 
-            return FromPascalString((byte*)pascalString.ToPointer(), StringTrimOption.WhiteSpaceAndNullTerminator);
+            return FromPascalString((byte*)pascalString.ToPointer(), StringCreationOptions.TrimWhiteSpaceAndNullTerminator);
         }
 
         /// <summary>
         /// Creates a <see cref="string"/> from a Pascal string.
         /// </summary>
         /// <param name="pascalString">The pascal string to convert.</param>
+        /// <param name="options">The string creation options.</param>
         /// <returns>
         /// A managed string that holds a copy of the Pascal string.
         /// If <paramref name="pascalString"/> is null, the method returns null.
         /// </returns>
-        internal static unsafe string FromPascalString(byte* pascalString, StringTrimOption option)
+        internal static unsafe string FromPascalString(byte* pascalString, StringCreationOptions options)
         {
             if (pascalString == null)
             {
                 return null;
             }
 
-            ReadOnlySpan<byte> trimmed = GetTrimmedStringData(new ReadOnlySpan<byte>(pascalString + 1, pascalString[0]),
-                                                              option);
-
-            if (trimmed.Length == 0)
-            {
-                return string.Empty;
-            }
-            else
-            {
-                return Windows1252Encoding.GetString(trimmed);
-            }
+            return CreateString(new ReadOnlySpan<byte>(pascalString + 1, pascalString[0]), options);
         }
 
         /// <summary>
@@ -85,25 +77,25 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         internal static string FromCString(IntPtr ptr)
         {
-            return FromCString(ptr, StringTrimOption.None);
+            return FromCString(ptr, StringCreationOptions.None);
         }
 
         /// <summary>
         /// Creates a <see cref="string"/> from a C string.
         /// </summary>
         /// <param name="ptr">The pointer to read from.</param>
-        /// <param name="option">The string trim options.</param>
+        /// <param name="options">The string creation options.</param>
         /// <returns>
         /// A managed string that holds a copy of the C string.
         /// </returns>
-        internal static unsafe string FromCString(IntPtr ptr, StringTrimOption option)
+        internal static unsafe string FromCString(IntPtr ptr, StringCreationOptions options)
         {
             if (!TryGetCStringData(ptr, out ReadOnlySpan<byte> data))
             {
                 return null;
             }
 
-            return FromCString(data, option);
+            return CreateString(data, options);
         }
 
         /// <summary>
@@ -111,18 +103,18 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="ptr">The pointer to read from.</param>
         /// <param name="length">The length of the string.</param>
-        /// <param name="option">The string trim options.</param>
+        /// <param name="options">The string creation options.</param>
         /// <returns>
         /// A managed string that holds a copy of the C string.
         /// </returns>
-        internal static unsafe string FromCString(byte* ptr, int length, StringTrimOption option)
+        internal static unsafe string FromCString(byte* ptr, int length, StringCreationOptions options)
         {
             if (ptr == null)
             {
                 return null;
             }
 
-            return FromCString(new ReadOnlySpan<byte>(ptr, length), option);
+            return CreateString(new ReadOnlySpan<byte>(ptr, length), options);
         }
 
         /// <summary>
@@ -130,27 +122,18 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="ptr">The pointer to read from.</param>
         /// <param name="length">The length of the string.</param>
-        /// <param name="option">The string trim options.</param>
+        /// <param name="options">The string creation options.</param>
         /// <returns>
         /// A managed string that holds a copy of the C string.
         /// </returns>
-        internal static unsafe string FromCStringUni(char* ptr, int length, StringTrimOption option)
+        internal static unsafe string FromCStringUni(char* ptr, int length, StringCreationOptions options)
         {
             if (ptr == null)
             {
                 return null;
             }
 
-            ReadOnlySpan<char> trimmed = GetTrimmedStringData(new ReadOnlySpan<char>(ptr, length), option);
-
-            if (trimmed.Length == 0)
-            {
-                return string.Empty;
-            }
-            else
-            {
-                return new string(trimmed);
-            }
+            return CreateString(new ReadOnlySpan<char>(ptr, length), options);
         }
 
         /// <summary>
@@ -187,17 +170,9 @@ namespace PSFilterLoad.PSApi
             return result;
         }
 
-        /// <summary>
-        /// Creates a <see cref="string"/> from a C string.
-        /// </summary>
-        /// <param name="data">The span to read from.</param>
-        /// <param name="option">The string trim options.</param>
-        /// <returns>
-        /// A managed string that holds a copy of the C string.
-        /// </returns>
-        private static unsafe string FromCString(ReadOnlySpan<byte> data, StringTrimOption option)
+        private static string CreateString(ReadOnlySpan<byte> data, StringCreationOptions options)
         {
-            ReadOnlySpan<byte> trimmed = GetTrimmedStringData(data, option);
+            ReadOnlySpan<byte> trimmed = GetTrimmedStringData(data, options);
 
             if (trimmed.Length == 0)
             {
@@ -205,20 +180,48 @@ namespace PSFilterLoad.PSApi
             }
             else
             {
-                return Windows1252Encoding.GetString(trimmed);
+                if (options.HasFlag(StringCreationOptions.UseStringPool))
+                {
+                    return StringPool.Shared.GetOrAdd(trimmed, Windows1252Encoding);
+                }
+                else
+                {
+                    return Windows1252Encoding.GetString(trimmed);
+                }
+            }
+        }
+
+        private static string CreateString(ReadOnlySpan<char> data, StringCreationOptions options)
+        {
+            ReadOnlySpan<char> trimmed = GetTrimmedStringData(data, options);
+
+            if (trimmed.Length == 0)
+            {
+                return string.Empty;
+            }
+            else
+            {
+                if (options.HasFlag(StringCreationOptions.UseStringPool))
+                {
+                    return StringPool.Shared.GetOrAdd(trimmed);
+                }
+                else
+                {
+                    return new string(trimmed);
+                }
             }
         }
 
         private static unsafe ReadOnlySpan<byte> GetTrimmedStringData(ReadOnlySpan<byte> data,
-                                                                      StringTrimOption option)
+                                                                      StringCreationOptions options)
         {
-            if (data.Length == 0 || option == StringTrimOption.None)
+            bool trimNullTerminator = options.HasFlag(StringCreationOptions.TrimNullTerminator);
+            bool trimWhiteSpace = options.HasFlag(StringCreationOptions.TrimWhiteSpace);
+
+            if (data.Length == 0 || (!trimNullTerminator && !trimWhiteSpace))
             {
                 return data;
             }
-
-            bool trimNullTerminator = (option & StringTrimOption.NullTerminator) != 0;
-            bool trimWhiteSpace = (option & StringTrimOption.WhiteSpace) != 0;
 
             int start = 0;
             int end = data.Length - 1;
@@ -239,15 +242,16 @@ namespace PSFilterLoad.PSApi
             return data.Slice(start, end - start + 1);
         }
 
-        private static unsafe ReadOnlySpan<char> GetTrimmedStringData(ReadOnlySpan<char> data, StringTrimOption option)
+        private static unsafe ReadOnlySpan<char> GetTrimmedStringData(ReadOnlySpan<char> data,
+                                                                      StringCreationOptions options)
         {
-            if (data.Length == 0 || option == StringTrimOption.None)
+            bool trimNullTerminator = options.HasFlag(StringCreationOptions.TrimNullTerminator);
+            bool trimWhiteSpace = options.HasFlag(StringCreationOptions.TrimWhiteSpace);
+
+            if (data.Length == 0 || (!trimNullTerminator && !trimWhiteSpace))
             {
                 return data;
             }
-
-            bool trimNullTerminator = (option & StringTrimOption.NullTerminator) != 0;
-            bool trimWhiteSpace = (option & StringTrimOption.WhiteSpace) != 0;
 
             int start = 0;
             int end = data.Length - 1;
@@ -289,20 +293,6 @@ namespace PSFilterLoad.PSApi
             // 0xA0 Non-breaking space
 
             return value == 0x20 || (value >= 0x09 && value <= 0x0D) || value == 0xA0;
-        }
-
-        private readonly struct TrimmedStringOffsets
-        {
-            public readonly int startIndex;
-            public readonly int length;
-
-            public TrimmedStringOffsets(int startIndex, int length)
-            {
-                this.startIndex = startIndex;
-                this.length = length;
-            }
-
-            public bool IsEmptyString => length == 0;
         }
     }
 }

@@ -67,13 +67,13 @@ namespace PSFilterLoad.PSApi.PICA
                 switch (format)
                 {
                     case ZStringFormat.Ascii:
-                        data = StringUtil.FromCString((byte*)ptr, length, StringUtil.StringTrimOption.NullTerminator);
+                        data = StringUtil.FromCString((byte*)ptr, length, StringCreationOptions.TrimNullTerminator);
                         break;
                     case ZStringFormat.Unicode:
-                        data = StringUtil.FromCStringUni((char*)ptr, length, StringUtil.StringTrimOption.NullTerminator);
+                        data = StringUtil.FromCStringUni((char*)ptr, length, StringCreationOptions.TrimNullTerminator);
                         break;
                     case ZStringFormat.Pascal:
-                        data = StringUtil.FromPascalString((byte*)ptr, StringUtil.StringTrimOption.NullTerminator);
+                        data = StringUtil.FromPascalString((byte*)ptr, StringCreationOptions.TrimNullTerminator);
                         break;
                     default:
                         throw new InvalidEnumArgumentException("format", (int)format, typeof(ZStringFormat));

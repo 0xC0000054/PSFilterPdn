@@ -248,7 +248,7 @@ namespace PSFilterLoad.PSApi
                 return PSError.kSPBadParameterError;
             }
 
-            string suiteName = StringUtil.FromCString(name);
+            string suiteName = StringUtil.FromCString(name, StringCreationOptions.UseStringPool);
             if (suiteName == null)
             {
                 return PSError.kSPBadParameterError;
@@ -512,7 +512,7 @@ namespace PSFilterLoad.PSApi
 
         private int SPBasicReleaseSuite(IntPtr name, int version)
         {
-            string suiteName = StringUtil.FromCString(name);
+            string suiteName = StringUtil.FromCString(name, StringCreationOptions.UseStringPool);
 
             logger.Log(PluginApiLogCategory.SPBasicSuite, "name: {0}, version: {1}", suiteName, version);
 

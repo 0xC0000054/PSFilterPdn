@@ -238,7 +238,8 @@ namespace PSFilterLoad.PSApi
                 // title string.
                 byte* resPtr = (byte*)filterLock.ToPointer() + 2;
 
-                string title = StringUtil.FromCString(resPtr, StringUtil.StringTrimOption.WhiteSpace);
+                // The plug-ins are assumed to have a unique name, so the strings are not pooled.
+                string title = StringUtil.FromCString(resPtr, StringCreationOptions.TrimWhiteSpace);
 
                 if (!GetPiMIResourceData(hModule, lpszName, query, out string category))
                 {
@@ -360,7 +361,7 @@ namespace PSFilterLoad.PSApi
                     }
                     else if (propKey == query.platformEntryPoint)
                     {
-                        entryPoint = StringUtil.FromCString(dataPtr);
+                        entryPoint = StringUtil.FromCString(dataPtr, StringCreationOptions.UseStringPool);
                     }
                     else if (propKey == PIPropertyID.PIVersionProperty)
                     {
@@ -395,10 +396,12 @@ namespace PSFilterLoad.PSApi
                     }
                     else if (propKey == PIPropertyID.PICategoryProperty)
                     {
-                        category = StringUtil.FromPascalString(dataPtr);
+                        category = StringUtil.FromPascalString(dataPtr,
+                                                               StringCreationOptions.TrimWhiteSpaceAndNullTerminator | StringCreationOptions.UseStringPool);
                     }
                     else if (propKey == PIPropertyID.PINameProperty)
                     {
+                        // The plug-ins are assumed to have a unique name, so the strings are not pooled.
                         title = StringUtil.FromPascalString(dataPtr);
                     }
                     else if (propKey == PIPropertyID.PIFilterCaseInfoProperty)
@@ -546,7 +549,8 @@ namespace PSFilterLoad.PSApi
 
             if (StringUtil.TryGetCStringData(ptr, out ReadOnlySpan<byte> categoryStringData))
             {
-                category = StringUtil.FromCString(categoryStringData, StringUtil.StringTrimOption.WhiteSpace);
+                category = StringUtil.FromCString(categoryStringData,
+                                                  StringCreationOptions.TrimWhiteSpace | StringCreationOptions.UseStringPool);
 
                 uint lengthWithTerminator = (uint)categoryStringData.Length + 1;
                 ptr += lengthWithTerminator;

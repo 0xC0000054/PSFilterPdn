@@ -103,7 +103,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                string registryKey = StringUtil.FromCString(key);
+                string registryKey = StringUtil.FromCString(key, StringCreationOptions.UseStringPool);
                 if (registryKey == null)
                 {
                     return PSError.kSPBadParameterError;
@@ -140,7 +140,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                string registryKey = StringUtil.FromCString(key);
+                string registryKey = StringUtil.FromCString(key, StringCreationOptions.UseStringPool);
                 if (registryKey == null)
                 {
                     return PSError.kSPBadParameterError;
@@ -169,7 +169,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                string registryKey = StringUtil.FromCString(key);
+                string registryKey = StringUtil.FromCString(key, StringCreationOptions.UseStringPool);
                 if (registryKey == null)
                 {
                     return PSError.kSPBadParameterError;
