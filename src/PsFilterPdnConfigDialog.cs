@@ -1345,37 +1345,28 @@ namespace PSFilterPdn
 
                         foreach (PluginData plugin in PluginLoader.LoadFiltersFromFile(enumerator.Current, logger))
                         {
-                            // The **Hidden** category is used for filters that are not directly invoked by the user.
-                            // The filters in this category are invoked by other plug-ins using the Photoshop Actions
-                            // scripting suites.
-                            //
-                            // We check for the category name **Hidden* because that is what the Dfine 2 filter in
-                            // the Google Nik Collection uses for its additional helper filters.
-                            if (!plugin.Category.StartsWith("**Hidden*", StringComparison.Ordinal))
+                            TreeNodeEx child = new(plugin.Title)
                             {
-                                TreeNodeEx child = new(plugin.Title)
+                                Name = plugin.Title,
+                                Tag = plugin
+                            };
+
+                            if (nodes.TryGetValue(plugin.Category, out List<TreeNodeEx> childNodes))
+                            {
+                                if (IsNotDuplicateNode(ref childNodes, plugin))
                                 {
-                                    Name = plugin.Title,
-                                    Tag = plugin
+                                    childNodes.Add(child);
+                                    nodes[plugin.Category] = childNodes;
+                                }
+                            }
+                            else
+                            {
+                                List<TreeNodeEx> items = new()
+                                {
+                                    child
                                 };
 
-                                if (nodes.TryGetValue(plugin.Category, out List<TreeNodeEx> childNodes))
-                                {
-                                    if (IsNotDuplicateNode(ref childNodes, plugin))
-                                    {
-                                        childNodes.Add(child);
-                                        nodes[plugin.Category] = childNodes;
-                                    }
-                                }
-                                else
-                                {
-                                    List<TreeNodeEx> items = new()
-                                    {
-                                        child
-                                    };
-
-                                    nodes.Add(plugin.Category, items);
-                                }
+                                nodes.Add(plugin.Category, items);
                             }
                         }
                     }
