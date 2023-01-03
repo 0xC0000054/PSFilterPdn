@@ -36,6 +36,10 @@ using System.Xml;
 
 namespace PSFilterPdn
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Style",
+        "IDE1006:Naming Styles",
+        Justification = "The VS designer generates methods that start with a lowercase letter.")]
     internal sealed class PsFilterPdnConfigDialog : EffectConfigForm<PSFilterPdnEffect, PSFilterPdnConfigToken>
     {
         private const string DummyTreeNodeName = "dummyTreeNode";
