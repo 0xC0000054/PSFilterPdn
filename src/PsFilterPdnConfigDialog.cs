@@ -1316,17 +1316,7 @@ namespace PSFilterPdn
 
             Dictionary<string, List<TreeNodeEx>> nodes = new(StringComparer.Ordinal);
 
-            IPluginLoadingLogWriter logWriter;
-
-            if (Debugger.IsAttached)
-            {
-                logWriter = PluginLoadingTraceListenerLogWriter.Instance;
-            }
-            else
-            {
-                logWriter = new PluginLoadingDictionaryLogWriter();
-            }
-
+            PluginLoadingDictionaryLogWriter logWriter = new();
             ImmutableHashSet<PluginLoadingLogCategory> categories = PluginLoadingLogCategories.Default;
 
             PluginLoadingLogger logger = new(logWriter, categories);
@@ -1392,7 +1382,7 @@ namespace PSFilterPdn
                 }
             }
 
-            e.Result = new WorkerResult(nodes, (logWriter as PluginLoadingDictionaryLogWriter)?.Dictionary);
+            e.Result = new WorkerResult(nodes, logWriter.Dictionary);
         }
 
         private void updateFilterListBw_ProgressChanged(object sender, ProgressChangedEventArgs e)
