@@ -1735,14 +1735,13 @@ namespace PSFilterPdn
                             TreeNodeEx child = childNodes[i];
                             if (child.Text.Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
                             {
-                                if (nodes.ContainsKey(category))
+                                if (nodes.TryGetValue(category, out TreeNodeEx node))
                                 {
-                                    TreeNodeEx node = nodes[category];
                                     node.Nodes.Add(child.CloneT());
                                 }
                                 else
                                 {
-                                    TreeNodeEx node = new(category);
+                                    node = new(category);
                                     node.Nodes.Add(child.CloneT());
 
                                     nodes.Add(category, node);
