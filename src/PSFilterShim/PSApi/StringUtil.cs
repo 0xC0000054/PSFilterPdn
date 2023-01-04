@@ -24,7 +24,7 @@ namespace PSFilterLoad.PSApi
         TrimNullTerminator = 1 << 0,
         TrimWhiteSpace = 1 << 1,
         TrimWhiteSpaceAndNullTerminator = TrimNullTerminator | TrimWhiteSpace,
-        UseStringPool = 1<< 2,
+        UseStringPool = 1 << 2,
     }
 
     internal static class StringUtil
