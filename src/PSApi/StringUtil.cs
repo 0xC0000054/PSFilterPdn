@@ -12,6 +12,8 @@
 
 using CommunityToolkit.HighPerformance.Buffers;
 using System;
+using System.Buffers;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -25,6 +27,7 @@ namespace PSFilterLoad.PSApi
         TrimWhiteSpace = 1 << 1,
         TrimWhiteSpaceAndNullTerminator = TrimNullTerminator | TrimWhiteSpace,
         UseStringPool = 1 << 2,
+        RemoveAllWhiteSpace = 1 << 3,
     }
 
     internal static class StringUtil
@@ -247,46 +250,140 @@ namespace PSFilterLoad.PSApi
             return result;
         }
 
+        [SkipLocalsInit]
         private static string CreateString(ReadOnlySpan<byte> data, StringCreationOptions options)
         {
-            ReadOnlySpan<byte> trimmed = GetTrimmedStringData(data, options);
+            string result;
 
-            if (trimmed.Length == 0)
+            if (options.HasFlag(StringCreationOptions.RemoveAllWhiteSpace))
             {
-                return string.Empty;
+                byte[] arrayFromPool = null;
+
+                try
+                {
+                    const int StackBufferSize = 256;
+
+                    Span<byte> buffer = stackalloc byte[StackBufferSize];
+
+                    if (data.Length > StackBufferSize)
+                    {
+                        arrayFromPool = ArrayPool<byte>.Shared.Rent(data.Length);
+                        buffer = arrayFromPool;
+                    }
+
+                    int index = 0;
+
+                    for (int i = 0; i < data.Length; i++)
+                    {
+                        byte value = data[i];
+
+                        if (!IsWhiteSpaceWindows1252(value))
+                        {
+                            buffer[index] = value;
+                            index++;
+                        }
+                    }
+
+                    Span<byte> bytes = buffer.Slice(0, index);
+
+                    if (options.HasFlag(StringCreationOptions.UseStringPool))
+                    {
+                        result = StringPool.Shared.GetOrAdd(bytes, Windows1252Encoding);
+                    }
+                    else
+                    {
+                        result = Windows1252Encoding.GetString(bytes);
+                    }
+                }
+                finally
+                {
+                    if (arrayFromPool != null)
+                    {
+                        ArrayPool<byte>.Shared.Return(arrayFromPool);
+                    }
+                }
             }
             else
             {
-                if (options.HasFlag(StringCreationOptions.UseStringPool))
+                ReadOnlySpan<byte> trimmed = GetTrimmedStringData(data, options);
+
+                if (trimmed.Length == 0)
                 {
-                    return StringPool.Shared.GetOrAdd(trimmed, Windows1252Encoding);
+                    result = string.Empty;
                 }
                 else
                 {
-                    return Windows1252Encoding.GetString(trimmed);
+                    if (options.HasFlag(StringCreationOptions.UseStringPool))
+                    {
+                        result = StringPool.Shared.GetOrAdd(trimmed, Windows1252Encoding);
+                    }
+                    else
+                    {
+                        result = Windows1252Encoding.GetString(trimmed);
+                    }
                 }
             }
+
+            return result;
         }
 
         private static string CreateString(ReadOnlySpan<char> data, StringCreationOptions options)
         {
-            ReadOnlySpan<char> trimmed = GetTrimmedStringData(data, options);
+            string result;
 
-            if (trimmed.Length == 0)
+            if (options.HasFlag(StringCreationOptions.RemoveAllWhiteSpace))
             {
-                return string.Empty;
+                using (SpanOwner<char> spanOwner = SpanOwner<char>.Allocate(data.Length))
+                {
+                    Span<char> buffer = spanOwner.Span;
+
+                    int index = 0;
+
+                    for (int i = 0; i < data.Length; i++)
+                    {
+                        char value = data[i];
+
+                        if (!char.IsWhiteSpace(value))
+                        {
+                            buffer[index] = value;
+                            index++;
+                        }
+                    }
+
+                    Span<char> chars = buffer.Slice(0, index);
+
+                    if (options.HasFlag(StringCreationOptions.UseStringPool))
+                    {
+                        result = StringPool.Shared.GetOrAdd(chars);
+                    }
+                    else
+                    {
+                        result = new string(chars);
+                    }
+                }
             }
             else
             {
-                if (options.HasFlag(StringCreationOptions.UseStringPool))
+                ReadOnlySpan<char> trimmed = GetTrimmedStringData(data, options);
+
+                if (trimmed.Length == 0)
                 {
-                    return StringPool.Shared.GetOrAdd(trimmed);
+                    result = string.Empty;
                 }
                 else
                 {
-                    return new string(trimmed);
+                    if (options.HasFlag(StringCreationOptions.UseStringPool))
+                    {
+                        result = StringPool.Shared.GetOrAdd(trimmed);
+                    }
+                    else
+                    {
+                        result = new string(trimmed);
+                    }
                 }
             }
+
+            return result;
         }
 
         private static unsafe ReadOnlySpan<byte> GetTrimmedStringData(ReadOnlySpan<byte> data,

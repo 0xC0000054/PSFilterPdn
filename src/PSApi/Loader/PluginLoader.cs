@@ -433,7 +433,7 @@ namespace PSFilterLoad.PSApi
                     }
                     else if (propKey == PIPropertyID.PIEnableInfoProperty)
                     {
-                        enableInfo = StringUtil.FromCString(dataPtr, StringCreationOptions.UseStringPool);
+                        enableInfo = StringUtil.FromCString(dataPtr, StringCreationOptions.RemoveAllWhiteSpace | StringCreationOptions.UseStringPool);
                     }
                     else if (propKey == PIPropertyID.PIRequiredHostProperty)
                     {
