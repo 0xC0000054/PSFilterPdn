@@ -115,7 +115,7 @@ namespace PSFilterLoad.PSApi
                 }
             }
 
-            if (size > 0L)
+            if (size > 0 && size <= long.MaxValue)
             {
                 MemoryPressureManager.AddMemoryPressure((long)size);
             }
@@ -160,7 +160,7 @@ namespace PSFilterLoad.PSApi
                 throw new OutOfMemoryException("VirtualAlloc returned a null pointer");
             }
 
-            if (bytes > 0)
+            if (bytes > 0 && bytes <= long.MaxValue)
             {
                 MemoryPressureManager.AddMemoryPressure((long)bytes);
             }
@@ -176,7 +176,7 @@ namespace PSFilterLoad.PSApi
         {
             if (hHeap != IntPtr.Zero)
             {
-                long size = Size(hMem);
+                nuint size = Size(hMem);
                 if (!SafeNativeMethods.HeapFree(hHeap, 0, hMem))
                 {
                     int error = Marshal.GetLastWin32Error();
@@ -184,9 +184,9 @@ namespace PSFilterLoad.PSApi
                     throw new InvalidOperationException("HeapFree returned an error: 0x" + error.ToString("X8", CultureInfo.InvariantCulture));
                 }
 
-                if (size > 0L)
+                if (size > 0 && size <= long.MaxValue)
                 {
-                    MemoryPressureManager.RemoveMemoryPressure(size);
+                    MemoryPressureManager.RemoveMemoryPressure((long)size);
                 }
             }
         }
@@ -236,7 +236,7 @@ namespace PSFilterLoad.PSApi
                 throw new InvalidOperationException("VirtualFree returned an error: " + error.ToString(CultureInfo.InvariantCulture));
             }
 
-            if (bytes > 0)
+            if (bytes > 0 && bytes <= long.MaxValue)
             {
                 MemoryPressureManager.RemoveMemoryPressure((long)bytes);
             }
@@ -256,7 +256,7 @@ namespace PSFilterLoad.PSApi
             }
             IntPtr block;
 
-            long oldSize = Size(pv);
+            nuint oldSize = Size(pv);
 
             try
             {
@@ -272,9 +272,9 @@ namespace PSFilterLoad.PSApi
                 throw new OutOfMemoryException();
             }
 
-            if (oldSize > 0L)
+            if (oldSize > 0 && oldSize <= long.MaxValue)
             {
-                MemoryPressureManager.RemoveMemoryPressure(oldSize);
+                MemoryPressureManager.RemoveMemoryPressure((long)oldSize);
             }
 
             if (newSize > 0)
@@ -290,16 +290,16 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="hMem">The block pointer to retrieve the size of.</param>
         /// <returns>The size of the allocated block.</returns>
-        public static long Size(IntPtr hMem)
+        public static nuint Size(IntPtr hMem)
         {
+            nuint size = 0;
+
             if (hHeap != IntPtr.Zero)
             {
-                long size = (long)SafeNativeMethods.HeapSize(hHeap, 0, hMem).ToUInt64();
-
-                return size;
+                size = SafeNativeMethods.HeapSize(hHeap, 0, hMem);
             }
 
-            return 0L;
+            return size;
         }
 
         /// <summary>

@@ -1246,13 +1246,13 @@ namespace PSFilterLoad.PSApi
         /// <returns> <c>true</c> if a the buffer needs to be resized; otherwise, <c>false</c></returns>
         private static bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loplane, int hiplane)
         {
-            long size = Memory.Size(inData);
+            nuint size = Memory.Size(inData);
 
             int width = inRect.right - inRect.left;
             int height = inRect.bottom - inRect.top;
             int nplanes = hiplane - loplane + 1;
 
-            long bufferSize = width * nplanes * height;
+            ulong bufferSize = (ulong)width * (ulong)nplanes * (ulong)height;
 
             return bufferSize != size;
         }
