@@ -320,20 +320,9 @@ namespace PSFilterLoad.PSApi
         /// <param name="ptr">The starting address of the memory block to fill.</param>
         /// <param name="value">The value to place in the memory block.</param>
         /// <param name="length">The length of the memory block.</param>
-        public static unsafe void FillMemory(IntPtr address, byte value, ulong length)
+        public static unsafe void FillMemory(IntPtr address, byte value, nuint length)
         {
-            byte* ptr = (byte*)address;
-            ulong remaining = length;
-
-            while (remaining > 0)
-            {
-                ulong count = remaining < uint.MaxValue ? remaining : uint.MaxValue;
-
-                Unsafe.InitBlockUnaligned(ptr, value, (uint)count);
-
-                ptr += count;
-                remaining -= count;
-            }
+            NativeMemory.Fill(address.ToPointer(), length, value);
         }
 
         /// <summary>
@@ -341,9 +330,9 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="ptr">The starting address of the memory block to fill.</param>
         /// <param name="length">The length of the memory block.</param>
-        public static void SetToZero(IntPtr address, ulong length)
+        public static unsafe void SetToZero(IntPtr address, nuint length)
         {
-            FillMemory(address, 0, length);
+            NativeMemory.Clear(address.ToPointer(), length);
         }
 
         // Adapted from: http://joeduffyblog.com/2005/04/08/dg-update-dispose-finalization-and-resource-management/
