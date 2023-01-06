@@ -896,7 +896,7 @@ namespace PSFilterLoad.PSApi
                 case FilterCase.ProtectedTransparencyWithSelection:
                     filterRecord->isFloating = false;
                     filterRecord->haveMask = true;
-                    filterRecord->autoMask = true;
+                    filterRecord->autoMask = !writesOutsideSelection;
                     break;
                 case FilterCase.FlatImageNoSelection:
                 case FilterCase.EditableTransparencyNoSelection:
