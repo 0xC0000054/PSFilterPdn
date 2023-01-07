@@ -808,7 +808,7 @@ namespace PSFilterLoad.PSApi
                 SaveParameterHandles();
                 SaveScriptingParameters();
             }
-            SetPostProcessingOptions();
+            PostProcessOutputData();
 
             return true;
         }
@@ -871,7 +871,7 @@ namespace PSFilterLoad.PSApi
                     DrawFloatingSelectionMask();
                     filterRecord->isFloating = true;
                     filterRecord->haveMask = true;
-                    filterRecord->autoMask = false;
+                    filterRecord->autoMask = true;
                     break;
                 case FilterCase.FlatImageWithSelection:
                 case FilterCase.EditableTransparencyWithSelection:
@@ -1978,7 +1978,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private unsafe void SetPostProcessingOptions()
+        private unsafe void PostProcessOutputData()
         {
             if (outputHandling == FilterDataHandling.FillMask &&
                 (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection))
@@ -1987,11 +1987,52 @@ namespace PSFilterLoad.PSApi
                 PostProcessingOptions |= FilterPostProcessingOptions.SetAlphaTo255;
             }
 
-            if (hasSelectionMask && filterRecord->autoMask && !writesOutsideSelection)
+            switch (filterCase)
             {
-                // Clip the destination image to the selection mask when the filter does not
-                // perform its own masking or write outside of the selection.
-                PostProcessingOptions |= FilterPostProcessingOptions.ClipToSelectionMask;
+                case FilterCase.FloatingSelection:
+                    // We will perform the initial selection mask clipping for floating selections because the floating selections
+                    // are used to fake the display of transparency information for the filters that do not natively support it.
+                    ClipToFloatingSelectionMask();
+                    if (hasSelectionMask && !writesOutsideSelection)
+                    {
+                        PostProcessingOptions |= FilterPostProcessingOptions.ClipToSelectionMask;
+                    }
+                    break;
+                case FilterCase.FlatImageWithSelection:
+                case FilterCase.EditableTransparencyWithSelection:
+                case FilterCase.ProtectedTransparencyWithSelection:
+                    if (filterRecord->autoMask && !writesOutsideSelection)
+                    {
+                        // Clip the destination image to the selection mask when the filter does not
+                        // perform its own masking or write outside of the selection.
+                        PostProcessingOptions |= FilterPostProcessingOptions.ClipToSelectionMask;
+                    }
+                    break;
+            }
+        }
+
+        private void ClipToFloatingSelectionMask()
+        {
+            for (int y = 0; y < dest.Height; y++)
+            {
+                ColorBgra* src = source.GetRowAddressUnchecked(y);
+                ColorBgra* dst = dest.GetRowAddressUnchecked(y);
+                byte* maskPixel = mask.GetRowAddressUnchecked(y);
+
+                for (int x = 0; x < dest.Width; x++)
+                {
+                    // Copy the original pixel data to the destination image
+                    // for pixels that are completely transparent.
+                    // The filter should not modify these pixels.
+                    if (*maskPixel == 0)
+                    {
+                        *dst = *src;
+                    }
+
+                    src++;
+                    dst++;
+                    maskPixel++;
+                }
             }
         }
 
