@@ -111,6 +111,6 @@
   </Target>
   <Target Name="AfterPublishCommands" AfterTargets="Publish">
     <Exec Command="call &quot;$(DevEnvDir)..\tools\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NXCOMPAT:NO &quot;$(ProjectDir)$(PublishDir)$(PublishedSingleFileName)&quot;" />
-    <Copy SourceFiles="$(ProjectDir)$(PublishDir)$(PublishedSingleFileName)" DestinationFolder="D:\paint.net 5.0\Effects" />
+    <Copy SourceFiles="$(ProjectDir)$(PublishDir)$(PublishedSingleFileName)" DestinationFolder="D:\Program Files\paint.net\Effects" />
   </Target>
 </Project>
