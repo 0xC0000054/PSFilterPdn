@@ -81,9 +81,9 @@
     <Compile Include="..\PSFilterShimImageHeader.cs" Link="PSFilterShimImageHeader.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.0.0" />
-    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
+    <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.1.0" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="PaintDotNet\ColorPicker\ColorGradientControl.cs">
@@ -107,7 +107,7 @@
   </ItemGroup>
   <Target Name="DeleteExistingPublishedFiles" BeforeTargets="PrepareForPublish">
     <!--Delete the existing publish directory. Otherwise the 'editbin' command will sometimes fail to open the file.-->
-    <RemoveDir Directories="$(ProjectDir)$(PublishDir)"/>
+    <RemoveDir Directories="$(ProjectDir)$(PublishDir)" />
   </Target>
   <Target Name="AfterPublishCommands" AfterTargets="Publish">
     <Exec Command="call &quot;$(DevEnvDir)..\tools\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NXCOMPAT:NO &quot;$(ProjectDir)$(PublishDir)$(PublishedSingleFileName)&quot;" />

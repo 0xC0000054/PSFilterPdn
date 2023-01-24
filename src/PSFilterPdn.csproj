@@ -138,7 +138,7 @@
     <EmbeddedResource Include="Resources\sRGB.icc" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.0.0" />
+    <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.1.0" />
     <PackageReference Include="Fody" Version="6.6.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
