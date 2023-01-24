@@ -31,6 +31,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -100,18 +101,7 @@ namespace PSFilterPdn
         private bool runWith32BitShim;
         private DescriptorRegistryValues descriptorRegistry;
 
-        private bool proxyResult;
-        private string proxyErrorMessage;
-        private FilterPostProcessingOptions proxyPostProcessingOptions;
-        private Process proxyProcess;
-        private PSFilterShimPipeServer server;
-        private string srcFileName;
-        private string destFileName;
-        private string parameterDataFileName;
-        private string resourceDataFileName;
-        private string selectionMaskFileName;
-        private string descriptorRegistryFileName;
-        private PluginData proxyData;
+        private Thread filterThread;
         private PSFilterShimDataFolder proxyTempDir;
 
         private bool filterRunning;
@@ -133,7 +123,6 @@ namespace PSFilterPdn
         {
             InitializeComponent();
             filterExecutionLogSaveDialog.ClientGuid = FilterExecutionLogSaveDialogClientGuid;
-            proxyProcess = null;
             destSurface = null;
             expandedNodes = new List<string>();
             filterParameters = new Dictionary<PluginData, ParameterData>();
@@ -157,12 +146,6 @@ namespace PSFilterPdn
         {
             if (disposing)
             {
-                if (proxyProcess != null)
-                {
-                    proxyProcess.Dispose();
-                    proxyProcess = null;
-                }
-
                 if (proxyTempDir != null)
                 {
                     proxyTempDir.Dispose();
@@ -729,94 +712,37 @@ namespace PSFilterPdn
             }
         }
 
-        private void SetProxyErrorResult(string data)
+        private void CreateProxyTempDirectory()
         {
-            proxyResult = false;
-            proxyErrorMessage = data;
-        }
-
-        private void SetProxyPostProcessingOptions(FilterPostProcessingOptions options)
-        {
-            proxyPostProcessingOptions = options;
-        }
-
-        private void proxyProcess_Exited(object sender, EventArgs e)
-        {
-            if (!formClosePending)
+            if (proxyTempDir is null)
             {
-                SetProxyResultData();
+                proxyTempDir = new PSFilterShimDataFolder();
             }
-
-            server.Dispose();
-            server = null;
-
-            proxyProcess.Dispose();
-            proxyProcess = null;
-
-            if (formClosePending)
+            else
             {
-                if (InvokeRequired)
-                {
-                    Invoke(new MethodInvoker(Close));
-                }
-                else
-                {
-                    Close();
-                }
+                proxyTempDir.Clean();
             }
         }
 
-        private bool CreateProxyTempDirectory()
-        {
-            try
-            {
-                if (proxyTempDir is null)
-                {
-                    proxyTempDir = new PSFilterShimDataFolder();
-                }
-                else
-                {
-                    proxyTempDir.Clean();
-                }
-
-                return true;
-            }
-            catch (ArgumentException ex)
-            {
-                ShowErrorMessage(ex);
-            }
-            catch (IOException ex)
-            {
-                ShowErrorMessage(ex);
-            }
-            catch (System.Security.SecurityException ex)
-            {
-                ShowErrorMessage(ex);
-            }
-
-            return false;
-        }
-
-        private void Run32BitFilterProxy(IEffectEnvironment environment, PluginData data)
+        private bool Run32BitFilterProxy(IEffectEnvironment environment,
+                                         FilterThreadData data,
+                                         out string errorMessage)
         {
             // Check that PSFilterShim exists first thing and abort if it does not.
             if (!File.Exists(PSFilterShimPath))
             {
-                ShowErrorMessage(Resources.PSFilterShimNotFound);
-                return;
+                errorMessage = Resources.PSFilterShimNotFound;
+                return false;
             }
 
-            if (!CreateProxyTempDirectory())
-            {
-                return;
-            }
+            CreateProxyTempDirectory();
 
-            srcFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
-            destFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
-            parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-            resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-            descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-            selectionMaskFileName = string.Empty;
+            string srcFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+            string destFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+            string parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
+            string resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
+            string descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
+            string selectionMaskFileName = string.Empty;
 
             MaskSurface selectionMask = null;
 
@@ -839,40 +765,42 @@ namespace PSFilterPdn
             PSFilterShimSettings settings = new()
             {
                 RepeatEffect = false,
-                ShowAboutDialog = showAboutBoxCb.Checked,
+                ShowAboutDialog = data.ShowAboutDialog,
                 SourceImagePath = srcFileName,
                 DestinationImagePath = destFileName,
-                ParentWindowHandle = Handle,
+                ParentWindowHandle = data.ParentWindowHandle,
                 PrimaryColor = new ColorRgb24(environment.PrimaryColor).ToWin32Color(),
                 SecondaryColor = new ColorRgb24(environment.SecondaryColor).ToWin32Color(),
                 SelectionMaskPath = selectionMaskFileName,
                 ParameterDataPath = parameterDataFileName,
                 PseudoResourcePath = resourceDataFileName,
                 DescriptorRegistryPath = descriptorRegistryFileName,
-                LogFilePath = filterExecutionLogTextBox.Text,
+                LogFilePath = data.LogFilePath,
                 PluginUISettings = new PluginUISettings(highDpiMode)
             };
 
-            if (server != null)
-            {
-                server.Dispose();
-                server = null;
-            }
+            bool result = true; // assume the filter succeeded this will be set to false if it failed
+            string proxyErrorMessage = string.Empty;
+            FilterPostProcessingOptions postProcessingOptions = FilterPostProcessingOptions.None;
 
-            server = new PSFilterShimPipeServer(AbortCallback,
-                                                data,
+            using (PSFilterShimPipeServer server = new(AbortCallback,
+                                                data.PluginData,
                                                 settings,
-                                                SetProxyErrorResult,
-                                                SetProxyPostProcessingOptions,
+                                                new Action<string>(delegate(string error)
+                                                {
+                                                    result = false;
+                                                    proxyErrorMessage = error;
+                                                }),
+                                                new Action<FilterPostProcessingOptions>(delegate(FilterPostProcessingOptions options)
+                                                {
+                                                    postProcessingOptions = options;
+                                                }),
                                                 UpdateProgress,
-                                                documentMetadataProvider);
-
-            proxyData = data;
-            try
+                                                documentMetadataProvider))
             {
                 PSFilterShimImage.Save(srcFileName, sourceBitmap, documentDpi);
 
-                if ((filterParameters != null) && filterParameters.TryGetValue(data, out ParameterData parameterData))
+                if ((filterParameters != null) && filterParameters.TryGetValue(data.PluginData, out ParameterData parameterData))
                 {
                     DataContractSerializerUtil.Serialize(parameterDataFileName, parameterData);
                 }
@@ -887,115 +815,88 @@ namespace PSFilterPdn
                     DataContractSerializerUtil.Serialize(descriptorRegistryFileName, descriptorRegistry);
                 }
 
-                ProcessStartInfo psi = new(PSFilterShimPath, server.PipeName);
-
-                proxyResult = true; // assume the filter succeeded this will be set to false if it failed
-                proxyErrorMessage = string.Empty;
-                proxyPostProcessingOptions = FilterPostProcessingOptions.None;
-
-                if (proxyProcess is null)
+                using (Process process = new())
                 {
-                    proxyProcess = new Process
+                    ProcessStartInfo psi = new(PSFilterShimPath, server.PipeName);
+
+                    process.StartInfo = psi;
+                    process.Start();
+                    process.WaitForExit();
+                }
+
+                if (result)
+                {
+                    if (!data.ShowAboutDialog)
                     {
-                        EnableRaisingEvents = true,
-                        StartInfo = psi
-                    };
-                    proxyProcess.Exited += new EventHandler(proxyProcess_Exited);
-                    proxyProcess.Start();
+                        SetProxyResultData(destFileName,
+                                           data.PluginData,
+                                           postProcessingOptions,
+                                           parameterDataFileName,
+                                           resourceDataFileName,
+                                           descriptorRegistryFileName);
+                    }
+                }
+                else
+                {
+                    if (!data.ShowAboutDialog && destSurface != null)
+                    {
+                        destSurface.Dispose();
+                        destSurface = null;
+                    }
                 }
             }
-            catch (ArgumentException ax)
-            {
-                ShowErrorMessage(ax);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                ShowErrorMessage(ex);
-            }
-            catch (Win32Exception wx)
-            {
-                ShowErrorMessage(wx);
-            }
+
+            errorMessage = proxyErrorMessage;
+            return result;
         }
 
-        private void SetProxyResultData()
+        private void SetProxyResultData(string destFileName,
+                                        PluginData data,
+                                        FilterPostProcessingOptions postProcessingOptions,
+                                        string parameterDataFileName,
+                                        string resourceDataFileName,
+                                        string descriptorRegistryFileName)
         {
-            bool showAbout = false;
 
-            if (InvokeRequired)
+            destSurface?.Dispose();
+            try
             {
-                showAbout = Invoke(new Func<bool>(delegate ()
-                {
-                    return showAboutBoxCb.Checked;
-                }));
-            }
-            else
-            {
-                showAbout = showAboutBoxCb.Checked;
-            }
-
-            if (proxyResult && !showAbout && File.Exists(destFileName))
-            {
-                filterData = proxyData;
-
-                destSurface?.Dispose();
                 destSurface = PSFilterShimImage.Load(destFileName, imagingFactory);
-
-                FilterPostProcessing.Apply(Environment, destSurface, proxyPostProcessingOptions);
-
-                try
-                {
-                    ParameterData parameterData = DataContractSerializerUtil.Deserialize<ParameterData>(parameterDataFileName);
-
-                    filterParameters.AddOrUpdate(proxyData, parameterData);
-                }
-                catch (FileNotFoundException)
-                {
-                }
-
-                try
-                {
-                    pseudoResources = DataContractSerializerUtil.Deserialize<PseudoResourceCollection>(resourceDataFileName);
-                }
-                catch (FileNotFoundException)
-                {
-                }
-
-                try
-                {
-                    descriptorRegistry = DataContractSerializerUtil.Deserialize<DescriptorRegistryValues>(descriptorRegistryFileName);
-                }
-                catch (FileNotFoundException)
-                {
-                }
+                filterData = data;
             }
-            else
+            catch (FileNotFoundException)
             {
-                if (!string.IsNullOrEmpty(proxyErrorMessage))
-                {
-                    ShowErrorMessage(proxyErrorMessage);
-                }
-
-                if (!showAbout && destSurface != null)
-                {
-                    destSurface.Dispose();
-                    destSurface = null;
-                }
+                destSurface = null;
+                return;
             }
 
-            if (InvokeRequired)
+            FilterPostProcessing.Apply(Environment, destSurface, postProcessingOptions);
+
+            try
             {
-                Invoke(new MethodInvoker(delegate ()
-                {
-                    filterProgressBar.Value = 0;
-                }));
+                ParameterData parameterData = DataContractSerializerUtil.Deserialize<ParameterData>(parameterDataFileName);
+
+                filterParameters.AddOrUpdate(data, parameterData);
             }
-            else
+            catch (FileNotFoundException)
             {
-                filterProgressBar.Value = 0;
             }
 
-            UpdateTokenFromDialog();
+            try
+            {
+                pseudoResources = DataContractSerializerUtil.Deserialize<PseudoResourceCollection>(resourceDataFileName);
+            }
+            catch (FileNotFoundException)
+            {
+            }
+
+            try
+            {
+                descriptorRegistry = DataContractSerializerUtil.Deserialize<DescriptorRegistryValues>(descriptorRegistryFileName);
+            }
+            catch (FileNotFoundException)
+            {
+            }
         }
 
         private void InitializeEnvironment()
@@ -1012,65 +913,99 @@ namespace PSFilterPdn
             {
                 PluginData data = (PluginData)filterTree.SelectedNode.Tag;
 
-                if (proxyProcess is null && !filterRunning)
+                if (!filterRunning)
                 {
+                    filterRunning = true;
+
                     if (!environmentInitialized)
                     {
                         InitializeEnvironment();
                         environmentInitialized = true;
                     }
 
-                    if (data.RunWith32BitShim)
-                    {
-                        runWith32BitShim = true;
-                        Run32BitFilterProxy(Environment, data);
-                    }
-                    else
-                    {
-                        runWith32BitShim = false;
+                    FilterThreadData threadData = new(data,
+                                                      Handle,
+                                                      showAboutBoxCb.Checked,
+                                                      filterExecutionLogTextBox.Text);
 
-                        filterRunning = true;
+                    filterThread = new Thread(RunFilterThreadProc);
+                    // Some filters may use OLE which requires Single Threaded Apartment mode.
+                    filterThread.SetApartmentState(ApartmentState.STA);
+                    filterThread.Start(threadData);
+                }
+            }
+        }
 
-                        IPluginApiLogWriter logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(data,
-                                                                                                              filterExecutionLogTextBox.Text);
-                        try
+        private void RunFilterThreadProc(object state)
+        {
+            HostErrorInfo errorInfo = null;
+
+            try
+            {
+                FilterThreadData threadData = (FilterThreadData)state;
+
+                PluginData data = threadData.PluginData;
+
+                if (data.RunWith32BitShim)
+                {
+                    runWith32BitShim = true;
+
+                    if (!Run32BitFilterProxy(Environment, threadData, out string errorMessage))
+                    {
+                        if (!string.IsNullOrWhiteSpace(errorMessage))
                         {
-                            IPluginApiLogger logger = PluginApiLogger.Create(logWriter,
-                                                                             () => PluginApiLogCategories.Default,
-                                                                             nameof(LoadPsFilter));
+                            errorInfo = new HostErrorInfo(errorMessage);
+                        }
+                    }
+                }
+                else
+                {
+                    runWith32BitShim = false;
 
-                            PluginUISettings pluginUISettings = new(highDpiMode);
-                            using (LoadPsFilter lps = new(sourceBitmap,
-                                                          selectionMask,
-                                                          takeOwnershipOfSelectionMask: false,
-                                                          primaryColor,
-                                                          secondaryColor,
-                                                          documentDpi.X,
-                                                          documentDpi.Y,
-                                                          Handle,
-                                                          documentMetadataProvider,
-                                                          logger,
-                                                          pluginUISettings))
+                    filterRunning = true;
+
+                    IPluginApiLogWriter logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(data,
+                                                                                                          threadData.LogFilePath);
+                    try
+                    {
+                        IPluginApiLogger logger = PluginApiLogger.Create(logWriter,
+                                                                         () => PluginApiLogCategories.Default,
+                                                                         nameof(LoadPsFilter));
+
+                        PluginUISettings pluginUISettings = new(highDpiMode);
+                        using (LoadPsFilter lps = new(sourceBitmap,
+                                                      selectionMask,
+                                                      takeOwnershipOfSelectionMask: false,
+                                                      primaryColor,
+                                                      secondaryColor,
+                                                      documentDpi.X,
+                                                      documentDpi.Y,
+                                                      Handle,
+                                                      documentMetadataProvider,
+                                                      logger,
+                                                      pluginUISettings))
+                        {
+                            lps.SetAbortCallback(AbortCallback);
+                            lps.SetProgressCallback(UpdateProgress);
+
+                            if (descriptorRegistry != null)
                             {
-                                lps.SetAbortCallback(AbortCallback);
-                                lps.SetProgressCallback(UpdateProgress);
+                                lps.SetRegistryValues(descriptorRegistry);
+                            }
 
-                                if (descriptorRegistry != null)
-                                {
-                                    lps.SetRegistryValues(descriptorRegistry);
-                                }
+                            if ((filterParameters != null) && filterParameters.TryGetValue(data, out ParameterData parameterData))
+                            {
+                                lps.FilterParameters = parameterData;
+                            }
 
-                                if ((filterParameters != null) && filterParameters.TryGetValue(data, out ParameterData parameterData))
-                                {
-                                    lps.FilterParameters = parameterData;
-                                }
+                            lps.PseudoResources = pseudoResources;
 
-                                lps.PseudoResources = pseudoResources;
+                            bool showAboutDialog = threadData.ShowAboutDialog;
+                            bool result = lps.RunPlugin(data, showAboutDialog);
 
-                                bool showAboutDialog = showAboutBoxCb.Checked;
-                                bool result = lps.RunPlugin(data, showAboutDialog);
-
-                                if (!showAboutDialog && result)
+                            if (result)
+                            {
+                                if (!showAboutDialog)
                                 {
                                     destSurface?.Dispose();
                                     destSurface = SurfaceUtil.ToBitmapBgra32(lps.Dest, imagingFactory);
@@ -1082,9 +1017,12 @@ namespace PSFilterPdn
                                     pseudoResources = lps.PseudoResources;
                                     descriptorRegistry = lps.GetRegistryValues();
                                 }
-                                else if (!string.IsNullOrEmpty(lps.ErrorMessage))
+                            }
+                            else
+                            {
+                                if (!string.IsNullOrEmpty(lps.ErrorMessage))
                                 {
-                                    ShowErrorMessage(lps.ErrorMessage);
+                                    errorInfo = new HostErrorInfo(lps.ErrorMessage);
                                 }
                                 else
                                 {
@@ -1094,53 +1032,53 @@ namespace PSFilterPdn
                                         destSurface = null;
                                     }
                                 }
-
-                                filterProgressBar.Value = 0;
                             }
                         }
-                        catch (BadImageFormatException bifex)
+                    }
+                    finally
+                    {
+                        if (logWriter is IDisposable disposable)
                         {
-                            ShowErrorMessage(bifex);
-                        }
-                        catch (FileNotFoundException fnfex)
-                        {
-                            ShowErrorMessage(fnfex);
-                        }
-                        catch (NullReferenceException nrex)
-                        {
-                            /* the filter probably tried to access an unimplemented callback function
-                             * without checking if it is valid.
-                            */
-                            ShowErrorMessage(nrex);
-                        }
-                        catch (Win32Exception w32ex)
-                        {
-                            ShowErrorMessage(w32ex);
-                        }
-                        catch (System.Runtime.InteropServices.ExternalException eex)
-                        {
-                            ShowErrorMessage(eex);
-                        }
-                        finally
-                        {
-                            if (logWriter is IDisposable disposable)
-                            {
-                                disposable.Dispose();
-                            }
-
-                            if (!formClosePending)
-                            {
-                                UpdateTokenFromDialog();
-                            }
-                            filterRunning = false;
-                        }
-
-                        if (formClosePending)
-                        {
-                            Close();
+                            disposable.Dispose();
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                errorInfo = new HostErrorInfo(ex);
+            }
+
+            BeginInvoke(new Action<HostErrorInfo>(FilterCompleted), errorInfo);
+        }
+
+        private void FilterCompleted(HostErrorInfo errorInfo)
+        {
+            filterThread.Join();
+
+            if (errorInfo != null)
+            {
+                if (errorInfo.Exception is not null)
+                {
+                    ShowErrorMessage(errorInfo.Exception);
+                }
+                else
+                {
+                    ShowErrorMessage(errorInfo.ErrorMessage!);
+                }
+            }
+
+            filterProgressBar.Value = 0;
+
+            filterRunning = false;
+
+            if (formClosePending)
+            {
+                Close();
+            }
+            else
+            {
+                UpdateTokenFromDialog();
             }
         }
 
@@ -1180,6 +1118,49 @@ namespace PSFilterPdn
                 UpdateSearchList();
                 UpdateFilterList();
             }
+        }
+
+        private sealed class FilterThreadData
+        {
+            public FilterThreadData(PluginData pluginData,
+                                    IntPtr parentWindowHandle,
+                                    bool showAboutDialog,
+                                    string logFilePath)
+            {
+                ArgumentNullException.ThrowIfNull(pluginData);
+
+                PluginData = pluginData;
+                ParentWindowHandle = parentWindowHandle;
+                ShowAboutDialog = showAboutDialog;
+                LogFilePath = logFilePath;
+            }
+
+            public PluginData PluginData { get; }
+
+            public IntPtr ParentWindowHandle { get; }
+
+            public bool ShowAboutDialog { get; }
+
+            public string LogFilePath { get; }
+        }
+
+        private sealed class HostErrorInfo
+        {
+            public HostErrorInfo(string message)
+            {
+                ErrorMessage = message ?? string.Empty;
+                Exception = null;
+            }
+
+            public HostErrorInfo(Exception exception)
+            {
+                ErrorMessage = null;
+                Exception = exception;
+            }
+
+            public string ErrorMessage { get; }
+
+            public Exception Exception { get; }
         }
 
         private sealed class WorkerArgs
@@ -1481,7 +1462,7 @@ namespace PSFilterPdn
                 e.Cancel = true;
             }
 
-            if (proxyProcess != null || filterRunning)
+            if (filterRunning)
             {
                 if (DialogResult == DialogResult.Cancel)
                 {
