@@ -385,6 +385,15 @@ namespace PSFilterPdn.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to PSFilterShim returned an unexpected exit code: 0x{0:X8}..
+        /// </summary>
+        internal static string PSFilterShimExitCodeFormat {
+            get {
+                return ResourceManager.GetString("PSFilterShimExitCodeFormat", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Red.
         /// </summary>
         internal static string RedChannelName {

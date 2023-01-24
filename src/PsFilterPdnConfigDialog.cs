@@ -815,6 +815,8 @@ namespace PSFilterPdn
                     DataContractSerializerUtil.Serialize(descriptorRegistryFileName, descriptorRegistry);
                 }
 
+                int exitCode;
+
                 using (Process process = new())
                 {
                     ProcessStartInfo psi = new(PSFilterShimPath, server.PipeName);
@@ -822,9 +824,11 @@ namespace PSFilterPdn
                     process.StartInfo = psi;
                     process.Start();
                     process.WaitForExit();
+
+                    exitCode = process.ExitCode;
                 }
 
-                if (result)
+                if (result & exitCode == 0)
                 {
                     if (!data.ShowAboutDialog)
                     {
@@ -838,6 +842,18 @@ namespace PSFilterPdn
                 }
                 else
                 {
+                    if (exitCode != 0)
+                    {
+                        result = false;
+
+                        if (string.IsNullOrWhiteSpace(proxyErrorMessage))
+                        {
+                            proxyErrorMessage = string.Format(CultureInfo.InvariantCulture,
+                                                              Resources.PSFilterShimExitCodeFormat,
+                                                              exitCode);
+                        }
+                    }
+
                     if (!data.ShowAboutDialog && destSurface != null)
                     {
                         destSurface.Dispose();

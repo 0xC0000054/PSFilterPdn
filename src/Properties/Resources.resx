@@ -246,4 +246,7 @@
   <data name="VolumeLockedError" xml:space="preserve">
     <value>The disk is in use or locked by another process.</value>
   </data>
+  <data name="PSFilterShimExitCodeFormat" xml:space="preserve">
+    <value>PSFilterShim returned an unexpected exit code: 0x{0:X8}.</value>
+  </data>
 </root>
