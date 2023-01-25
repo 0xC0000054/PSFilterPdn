@@ -45,7 +45,6 @@ namespace PSFilterPdn
     {
         private const string DummyTreeNodeName = "dummyTreeNode";
 
-        private static readonly string EffectsFolderPath = Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location);
         private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location), "PSFilterShim.exe");
         private static readonly Guid FilterExecutionLogSaveDialogClientGuid = new("3CD2A43A-C6DD-407D-89FE-C542B2594B35");
 
@@ -1614,11 +1613,15 @@ namespace PSFilterPdn
                 ShowErrorMessage(ex);
             }
 
-            List<string> directories = new()
+            List<string> directories = new();
+
+            string effectsFolderPath = GetEffectsFolderPath();
+
+            if (!string.IsNullOrWhiteSpace(effectsFolderPath))
             {
-                EffectsFolderPath
-            };
-            foundEffectsDir = true;
+                directories.Add(effectsFolderPath);
+                foundEffectsDir = true;
+            }
 
             if (settings != null)
             {
@@ -1651,6 +1654,29 @@ namespace PSFilterPdn
                 EnableFiltersForHostState();
                 PopulateFilterTreeCategories(true);
             }
+        }
+
+        private string GetEffectsFolderPath()
+        {
+            string pluginPath = typeof(PSFilterPdnEffect).Assembly.Location;
+
+            IFileSystemService fileSystemService = Services.GetService<IFileSystemService>();
+
+            string effectsFolderPath = string.Empty;
+
+            if (fileSystemService != null)
+            {
+                foreach (PluginDirectoryInfo item in fileSystemService.GetPluginDirectoryInfos(PluginType.Effect))
+                {
+                    if (pluginPath.StartsWith(item.Path, StringComparison.OrdinalIgnoreCase))
+                    {
+                        effectsFolderPath = item.Path;
+                        break;
+                    }
+                }
+            }
+
+            return effectsFolderPath;
         }
 
         private void UpdateSearchList()
