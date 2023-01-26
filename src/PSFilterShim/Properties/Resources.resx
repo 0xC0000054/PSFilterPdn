@@ -196,4 +196,10 @@
   <data name="VolumeLockedError" xml:space="preserve">
     <value>The disk is in use or locked by another process.</value>
   </data>
+  <data name="CreateFilterThreadErrorFormat" xml:space="preserve">
+    <value>Failed to create the filter thread, LastError = {0}.</value>
+  </data>
+  <data name="InitializeCOMErrorFormat" xml:space="preserve">
+    <value>Failed to initialize COM on the filter thread, hr = 0x{0:X8}.</value>
+  </data>
 </root>

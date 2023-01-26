@@ -21,6 +21,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
@@ -123,7 +124,6 @@ namespace PSFilterPdn
                         ShowAboutDialog = false,
                         SourceImagePath = srcFileName,
                         DestinationImagePath = destFileName,
-                        ParentWindowHandle = window.Handle,
                         PrimaryColor = new ColorRgb24(Environment.PrimaryColor).ToWin32Color(),
                         SecondaryColor = new ColorRgb24(Environment.SecondaryColor).ToWin32Color(),
                         SelectionMaskPath = selectionMaskFileName,
@@ -170,7 +170,8 @@ namespace PSFilterPdn
                             DataContractSerializerUtil.Serialize(descriptorRegistryFileName, token.DescriptorRegistry);
                         }
 
-                        ProcessStartInfo psi = new(shimPath, server.PipeName);
+                        string args = server.PipeName + " " + window.Handle.ToString(CultureInfo.InvariantCulture);
+                        ProcessStartInfo psi = new(shimPath, args);
 
                         using (Process proxy = Process.Start(psi))
                         {

@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
 using System.Runtime.Serialization;
 
 namespace PSFilterPdn
@@ -45,13 +44,6 @@ namespace PSFilterPdn
 
         [DataMember]
         public string DestinationImagePath
-        {
-            get;
-            internal set;
-        }
-
-        [DataMember]
-        public IntPtr ParentWindowHandle
         {
             get;
             internal set;

@@ -88,6 +88,15 @@ namespace PSFilterShim.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Failed to initialize COM on the filter thread, hr = 0x{0:X8}..
+        /// </summary>
+        internal static string CreateFilterThreadErrorFormat {
+            get {
+                return ResourceManager.GetString("CreateFilterThreadErrorFormat", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to There is not enough space on the disk..
         /// </summary>
         internal static string DiskFullError {
@@ -183,6 +192,15 @@ namespace PSFilterShim.Properties {
         internal static string ImageWidthTooLarge {
             get {
                 return ResourceManager.GetString("ImageWidthTooLarge", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to initialize COM on the filter thread, hr = 0x{0:X8}..
+        /// </summary>
+        internal static string InitializeCOMErrorFormat {
+            get {
+                return ResourceManager.GetString("InitializeCOMErrorFormat", resourceCulture);
             }
         }
 

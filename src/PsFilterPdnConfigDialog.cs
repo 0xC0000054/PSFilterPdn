@@ -767,7 +767,6 @@ namespace PSFilterPdn
                 ShowAboutDialog = data.ShowAboutDialog,
                 SourceImagePath = srcFileName,
                 DestinationImagePath = destFileName,
-                ParentWindowHandle = data.ParentWindowHandle,
                 PrimaryColor = new ColorRgb24(environment.PrimaryColor).ToWin32Color(),
                 SecondaryColor = new ColorRgb24(environment.SecondaryColor).ToWin32Color(),
                 SelectionMaskPath = selectionMaskFileName,
@@ -818,7 +817,8 @@ namespace PSFilterPdn
 
                 using (Process process = new())
                 {
-                    ProcessStartInfo psi = new(PSFilterShimPath, server.PipeName);
+                    string args = server.PipeName + " " + data.ParentWindowHandle.ToString(CultureInfo.InvariantCulture);
+                    ProcessStartInfo psi = new(PSFilterShimPath, args);
 
                     process.StartInfo = psi;
                     process.Start();

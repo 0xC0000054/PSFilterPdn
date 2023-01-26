@@ -220,7 +220,8 @@ namespace PSFilterLoad.PSApi
         /// </exception>
         public unsafe LoadPsFilter(PSFilterPdn.PSFilterShimSettings settings,
                                    IPluginApiLogger logger,
-                                   IDocumentMetadataProvider documentMetadataProvider)
+                                   IDocumentMetadataProvider documentMetadataProvider,
+                                   IntPtr parentWindowHandle)
         {
             ArgumentNullException.ThrowIfNull(settings);
             ArgumentNullException.ThrowIfNull(logger);
@@ -242,7 +243,7 @@ namespace PSFilterLoad.PSApi
             globalParameters = new GlobalParameters();
             scriptingData = null;
             useChannelPorts = false;
-            parentWindowHandle = settings.ParentWindowHandle;
+            this.parentWindowHandle = parentWindowHandle;
             PostProcessingOptions = FilterPostProcessingOptions.None;
 
             source = PSFilterShimImage.Load(settings.SourceImagePath, out dpiX, out dpiY);
@@ -285,7 +286,7 @@ namespace PSFilterLoad.PSApi
             unsafe
             {
                 platFormDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), true);
-                ((PlatformData*)platFormDataPtr)->hwnd = settings.ParentWindowHandle;
+                ((PlatformData*)platFormDataPtr)->hwnd = parentWindowHandle;
             }
 
             lastOutRect = Rect16.Empty;
