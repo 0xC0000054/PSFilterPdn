@@ -419,14 +419,12 @@ namespace PSFilterPdn
 
         private sealed class Win32Window : IWin32Window
         {
-            private IntPtr handle;
-
-            public IntPtr Handle => handle;
-
             internal Win32Window(IntPtr hWnd)
             {
-                handle = hWnd;
+                Handle = hWnd;
             }
+
+            public IntPtr Handle { get; }
         }
     }
 }
