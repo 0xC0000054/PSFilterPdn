@@ -995,7 +995,7 @@ namespace PSFilterPdn
                                                       secondaryColor,
                                                       documentDpi.X,
                                                       documentDpi.Y,
-                                                      Handle,
+                                                      threadData.ParentWindowHandle,
                                                       documentMetadataProvider,
                                                       logger,
                                                       pluginUISettings))
