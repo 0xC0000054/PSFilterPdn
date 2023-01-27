@@ -202,7 +202,6 @@ namespace PSFilterShim
             }
         }
 
-
         [UnmanagedCallersOnly]
         private static unsafe uint ThreadProc(nint lpParameter)
         {
