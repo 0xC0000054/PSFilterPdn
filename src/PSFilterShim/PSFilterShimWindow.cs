@@ -257,7 +257,7 @@ namespace PSFilterShim
                     return 0;
 
                 case NativeConstants.WM_WINDOWPOSCHANGED:
-                    // Start the worker thread after the dialog has been displayed to the user.
+                    // Start the worker thread after the window has been displayed.
                     //
                     // This code was adapted from Raymond Chen's blog post "Waiting until the dialog box is displayed before doing something"
                     // https://devblogs.microsoft.com/oldnewthing/20060925-02/?p=29603
