@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet.Imaging;
-using PaintDotNet.IO;
 using PaintDotNet.Rendering;
 using PSFilterLoad.PSApi;
 using System;
