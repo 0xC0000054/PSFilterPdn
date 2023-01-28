@@ -77,7 +77,7 @@ namespace PSFilterPdn
             progressCallback = progress;
             // 4 bytes for the payload length and one byte for the payload.
             oneByteParameterReplyBuffer = new byte[5];
-            Array.Copy(BitConverter.GetBytes(sizeof(byte)), oneByteParameterReplyBuffer, sizeof(int));
+            BinaryPrimitives.WriteInt32LittleEndian(oneByteParameterReplyBuffer, sizeof(byte));
 
             server = new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
