@@ -296,11 +296,11 @@ namespace PSFilterShim
 
         private void RunFilter()
         {
-            PluginData pdata = pipeClient.GetPluginData();
-            PSFilterShimSettings settings = pipeClient.GetShimSettings();
-
             try
             {
+                PluginData pdata = pipeClient.GetPluginData();
+                PSFilterShimSettings settings = pipeClient.GetShimSettings();
+
                 ParameterData? filterParameters = null;
                 try
                 {
