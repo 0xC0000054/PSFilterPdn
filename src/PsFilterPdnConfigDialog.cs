@@ -168,16 +168,17 @@ namespace PSFilterPdn
             }
         }
 
-        private DialogResult ShowErrorMessage(string message)
+        private DialogResult ShowErrorMessage(string message, string details = "")
         {
             if (InvokeRequired)
             {
-                Invoke(new Action<string>((string error) => Services.GetService<IExceptionDialogService>().ShowErrorDialog(this, error, string.Empty)),
-                       message);
+                Invoke(new Action<string, string>((string errorMessage, string errorDetails)
+                    => Services.GetService<IExceptionDialogService>().ShowErrorDialog(this, errorMessage, errorDetails)),
+                       message, details);
             }
             else
             {
-                Services.GetService<IExceptionDialogService>().ShowErrorDialog(this, message, string.Empty);
+                Services.GetService<IExceptionDialogService>().ShowErrorDialog(this, message, details);
             }
 
             return DialogResult.OK;
@@ -725,12 +726,12 @@ namespace PSFilterPdn
 
         private bool Run32BitFilterProxy(IEffectEnvironment environment,
                                          FilterThreadData data,
-                                         out string errorMessage)
+                                         out PSFilterShimErrorInfo errorInfo)
         {
             // Check that PSFilterShim exists first thing and abort if it does not.
             if (!File.Exists(PSFilterShimPath))
             {
-                errorMessage = Resources.PSFilterShimNotFound;
+                errorInfo = new PSFilterShimErrorInfo(Resources.PSFilterShimNotFound);
                 return false;
             }
 
@@ -778,16 +779,16 @@ namespace PSFilterPdn
             };
 
             bool result = true; // assume the filter succeeded this will be set to false if it failed
-            string proxyErrorMessage = string.Empty;
+            PSFilterShimErrorInfo proxyError = null;
             FilterPostProcessingOptions postProcessingOptions = FilterPostProcessingOptions.None;
 
             using (PSFilterShimPipeServer server = new(AbortCallback,
                                                 data.PluginData,
                                                 settings,
-                                                new Action<string>(delegate(string error)
+                                                new Action<PSFilterShimErrorInfo>(delegate(PSFilterShimErrorInfo error)
                                                 {
                                                     result = false;
-                                                    proxyErrorMessage = error;
+                                                    proxyError = error;
                                                 }),
                                                 new Action<FilterPostProcessingOptions>(delegate(FilterPostProcessingOptions options)
                                                 {
@@ -845,12 +846,9 @@ namespace PSFilterPdn
                     {
                         result = false;
 
-                        if (string.IsNullOrWhiteSpace(proxyErrorMessage))
-                        {
-                            proxyErrorMessage = string.Format(CultureInfo.InvariantCulture,
-                                                              Resources.PSFilterShimExitCodeFormat,
-                                                              exitCode);
-                        }
+                        proxyError ??= new PSFilterShimErrorInfo(string.Format(CultureInfo.InvariantCulture,
+                                                                               Resources.PSFilterShimExitCodeFormat,
+                                                                               exitCode));
                     }
 
                     if (!data.ShowAboutDialog && destSurface != null)
@@ -861,7 +859,7 @@ namespace PSFilterPdn
                 }
             }
 
-            errorMessage = proxyErrorMessage;
+            errorInfo = proxyError;
             return result;
         }
 
@@ -965,11 +963,11 @@ namespace PSFilterPdn
                 {
                     runWith32BitShim = true;
 
-                    if (!Run32BitFilterProxy(Environment, threadData, out string errorMessage))
+                    if (!Run32BitFilterProxy(Environment, threadData, out PSFilterShimErrorInfo error))
                     {
-                        if (!string.IsNullOrWhiteSpace(errorMessage))
+                        if (error != null)
                         {
-                            errorInfo = new HostErrorInfo(errorMessage);
+                            errorInfo = new HostErrorInfo(error.Message, error.Details);
                         }
                     }
                 }
@@ -1079,7 +1077,7 @@ namespace PSFilterPdn
                 }
                 else
                 {
-                    ShowErrorMessage(errorInfo.ErrorMessage!);
+                    ShowErrorMessage(errorInfo.ErrorMessage, errorInfo.ErrorDetails);
                 }
             }
 
@@ -1161,19 +1159,27 @@ namespace PSFilterPdn
 
         private sealed class HostErrorInfo
         {
-            public HostErrorInfo(string message)
+            public HostErrorInfo(string message) : this(message, string.Empty)
+            {
+            }
+
+            public HostErrorInfo(string message, string details)
             {
                 ErrorMessage = message ?? string.Empty;
+                ErrorDetails = details ?? string.Empty;
                 Exception = null;
             }
 
             public HostErrorInfo(Exception exception)
             {
                 ErrorMessage = null;
+                ErrorDetails = null;
                 Exception = exception;
             }
 
             public string ErrorMessage { get; }
+
+            public string ErrorDetails { get; }
 
             public Exception Exception { get; }
         }

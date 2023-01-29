@@ -70,9 +70,9 @@ namespace PSFilterPdn
             Services.GetService<IExceptionDialogService>().ShowErrorDialog(window, exception.Message, exception);
         }
 
-        private void ShowErrorMessage(IWin32Window window, string message)
+        private void ShowErrorMessage(IWin32Window window, string message, string details = "")
         {
-            Services.GetService<IExceptionDialogService>().ShowErrorDialog(window, message, string.Empty);
+            Services.GetService<IExceptionDialogService>().ShowErrorDialog(window, message, details);
         }
 
         private void Run32BitFilterProxy(PSFilterPdnConfigToken token, IWin32Window window)
@@ -116,7 +116,7 @@ namespace PSFilterPdn
                     }
 
                     bool proxyResult = true;
-                    string proxyErrorMessage = string.Empty;
+                    PSFilterShimErrorInfo proxyError = null;
 
                     PSFilterShimSettings settings = new()
                     {
@@ -140,10 +140,10 @@ namespace PSFilterPdn
                     using (PSFilterShimPipeServer server = new(AbortCallback,
                                                                token.FilterData,
                                                                settings,
-                                                               delegate (string data)
+                                                               delegate (PSFilterShimErrorInfo data)
                                                                {
                                                                    proxyResult = false;
-                                                                   proxyErrorMessage = data;
+                                                                   proxyError = data;
                                                                },
                                                                delegate (FilterPostProcessingOptions options)
                                                                {
@@ -185,9 +185,9 @@ namespace PSFilterPdn
 
                         FilterPostProcessing.Apply(Environment, filterOutput, postProcessingOptions);
                     }
-                    else if (!string.IsNullOrEmpty(proxyErrorMessage))
+                    else if (proxyError != null)
                     {
-                        ShowErrorMessage(window, proxyErrorMessage);
+                        ShowErrorMessage(window, proxyError.Message, proxyError.Details);
                     }
                 }
             }

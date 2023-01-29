@@ -408,7 +408,7 @@ namespace PSFilterShim
             }
             catch (Exception ex)
             {
-                pipeClient.SetProxyErrorMessage(ex.Message);
+                pipeClient.SetProxyErrorMessage(ex);
             }
         }
     }

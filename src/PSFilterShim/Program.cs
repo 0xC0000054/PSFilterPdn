@@ -36,7 +36,7 @@ namespace PSFilterShim
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = (Exception)e.ExceptionObject;
-            pipeClient.SetProxyErrorMessage(ex.ToString());
+            pipeClient.SetProxyErrorMessage(ex);
 
             Environment.Exit(1);
         }
@@ -85,7 +85,7 @@ namespace PSFilterShim
             }
             catch (Exception ex)
             {
-                pipeClient.SetProxyErrorMessage(ex.ToString());
+                pipeClient.SetProxyErrorMessage(ex);
             }
         }
     }

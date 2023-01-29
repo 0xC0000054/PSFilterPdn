@@ -30,7 +30,7 @@ namespace PSFilterPdn
         private readonly Func<bool> abortFunc;
         private readonly PluginData pluginData;
         private readonly PSFilterShimSettings settings;
-        private readonly Action<string> errorCallback;
+        private readonly Action<PSFilterShimErrorInfo> errorCallback;
         private readonly Action<FilterPostProcessingOptions> postProcessingOptionsCallback;
         private readonly Action<byte> progressCallback;
 
@@ -56,7 +56,7 @@ namespace PSFilterPdn
         public PSFilterShimPipeServer(Func<bool> abort,
                                       PluginData plugin,
                                       PSFilterShimSettings settings,
-                                      Action<string> error,
+                                      Action<PSFilterShimErrorInfo> error,
                                       Action<FilterPostProcessingOptions> postProcessingOptions,
                                       Action<byte> progress,
                                       IDocumentMetadataProvider documentMetadataProvider)
@@ -175,7 +175,7 @@ namespace PSFilterPdn
                         }
                         break;
                     case Command.SetErrorMessage:
-                        errorCallback(Encoding.UTF8.GetString(messageBytes.Slice(1)));
+                        errorCallback(GetErrorInfo(messageBytes.Slice(1)));
                         SendEmptyReplyToClient();
                         break;
                     case Command.SetPostProcessingOptions:
@@ -210,6 +210,31 @@ namespace PSFilterPdn
             server = new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
+        }
+
+        private static PSFilterShimErrorInfo GetErrorInfo(ReadOnlySpan<byte> buffer)
+        {
+            const int HeaderSize = sizeof(int) * 2;
+
+            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(buffer);
+            int detailsLength = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(sizeof(int)));
+
+            PSFilterShimErrorInfo errorInfo = null;
+
+            if (messageLength > 0)
+            {
+                string message = Encoding.UTF8.GetString(buffer.Slice(HeaderSize, messageLength));
+                string details = string.Empty;
+
+                if (detailsLength > 0)
+                {
+                    details = Encoding.UTF8.GetString(buffer.Slice(HeaderSize + messageLength, detailsLength));
+                }
+
+                errorInfo = new PSFilterShimErrorInfo(message, details);
+            }
+
+            return errorInfo;
         }
 
         private static FilterPostProcessingOptions GetPostProcessingOptions(ReadOnlySpan<byte> buffer)

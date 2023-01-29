@@ -13,6 +13,7 @@
 using PSFilterLoad.PSApi;
 using PSFilterPdn;
 using System;
+using System.Buffers;
 using System.Buffers.Binary;
 using System.IO;
 using System.IO.Pipes;
@@ -71,7 +72,12 @@ namespace PSFilterShim
 
         public void SetProxyErrorMessage(string errorMessage)
         {
-            SendMessageToServer(Command.SetErrorMessage, errorMessage);
+            SendErrorMessageToServer(errorMessage, string.Empty);
+        }
+
+        public void SetProxyErrorMessage(Exception exception)
+        {
+            SendErrorMessageToServer(exception.Message, exception.ToString());
         }
 
         public void SetPostProcessingOptions(FilterPostProcessingOptions options)
@@ -240,7 +246,8 @@ namespace PSFilterShim
             return reply;
         }
 
-        private byte[] SendMessageToServer(Command command, string value)
+        [SkipLocalsInit]
+        private byte[] SendErrorMessageToServer(string message, string details)
         {
             byte[] reply = null;
 
@@ -248,18 +255,65 @@ namespace PSFilterShim
             {
                 stream.Connect();
 
-                int dataLength = sizeof(byte) + Encoding.UTF8.GetByteCount(value);
+                int errorMessageLength = 0;
+                int errorDetailsLength = 0;
 
-                byte[] messageBuffer = new byte[sizeof(int) + dataLength];
+                if (!string.IsNullOrEmpty(message))
+                {
+                    errorMessageLength = Encoding.UTF8.GetByteCount(message);
 
-                messageBuffer[0] = (byte)(dataLength & 0xff);
-                messageBuffer[1] = (byte)((dataLength >> 8) & 0xff);
-                messageBuffer[2] = (byte)((dataLength >> 16) & 0xff);
-                messageBuffer[3] = (byte)((dataLength >> 24) & 0xff);
-                messageBuffer[4] = (byte)command;
-                Encoding.UTF8.GetBytes(value, 0, value.Length, messageBuffer, 5);
+                    if (!string.IsNullOrEmpty(details))
+                    {
+                        errorDetailsLength = Encoding.UTF8.GetByteCount(details);
+                    }
+                }
 
-                stream.Write(messageBuffer, 0, messageBuffer.Length);
+                const int HeaderLength = sizeof(int) * 2;
+
+                int dataLength = sizeof(byte) + HeaderLength + errorMessageLength + errorDetailsLength;
+                int totalMessageLength = sizeof(int) + dataLength;
+
+                byte[] arrayFromPool = null;
+
+                try
+                {
+                    const int MaxStackBufferSize = 256;
+
+                    Span<byte> buffer = stackalloc byte[MaxStackBufferSize];
+
+                    if (totalMessageLength > MaxStackBufferSize)
+                    {
+                        arrayFromPool = ArrayPool<byte>.Shared.Rent(totalMessageLength);
+                        buffer = arrayFromPool;
+                    }
+
+                    Span<byte> messageBuffer = buffer.Slice(0, totalMessageLength);
+
+                    BinaryPrimitives.WriteInt32LittleEndian(messageBuffer, dataLength);
+                    messageBuffer[4] = (byte)Command.SetErrorMessage;
+
+                    BinaryPrimitives.WriteInt32LittleEndian(messageBuffer.Slice(5), errorMessageLength);
+                    BinaryPrimitives.WriteInt32LittleEndian(messageBuffer.Slice(5 + sizeof(int)), errorDetailsLength);
+
+                    if (errorMessageLength > 0)
+                    {
+                        Encoding.UTF8.GetBytes(message, messageBuffer.Slice(5 + HeaderLength));
+
+                        if (errorDetailsLength > 0)
+                        {
+                            Encoding.UTF8.GetBytes(details, messageBuffer.Slice(5 + HeaderLength + errorMessageLength));
+                        }
+                    }
+
+                    stream.Write(messageBuffer);
+                }
+                finally
+                {
+                    if (arrayFromPool != null)
+                    {
+                        ArrayPool<byte>.Shared.Return(arrayFromPool);
+                    }
+                }
 
                 stream.ReadExactly(replyLengthBuffer, 0, replyLengthBuffer.Length);
 
