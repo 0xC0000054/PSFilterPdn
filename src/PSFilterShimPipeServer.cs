@@ -89,7 +89,7 @@ namespace PSFilterPdn
             ReportProgress,
             GetPluginData,
             GetSettings,
-            SetErrorMessage,
+            SetErrorInfo,
             SetPostProcessingOptions,
             GetExifMetadata,
             GetXmpMetadata,
@@ -174,7 +174,7 @@ namespace PSFilterPdn
                             SendReplyToClient(new ReadOnlySpan<byte>(stream.GetBuffer(), 0, (int)stream.Length));
                         }
                         break;
-                    case Command.SetErrorMessage:
+                    case Command.SetErrorInfo:
                         errorCallback(GetErrorInfo(messageBytes.Slice(1)));
                         SendEmptyReplyToClient();
                         break;

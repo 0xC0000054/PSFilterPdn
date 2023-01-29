@@ -46,7 +46,7 @@ namespace PSFilterShim
             ReportProgress,
             GetPluginData,
             GetSettings,
-            SetErrorMessage,
+            SetErrorInfo,
             SetPostProcessingOptions,
             GetExifMetadata,
             GetXmpMetadata,
@@ -290,7 +290,7 @@ namespace PSFilterShim
                     Span<byte> messageBuffer = buffer.Slice(0, totalMessageLength);
 
                     BinaryPrimitives.WriteInt32LittleEndian(messageBuffer, dataLength);
-                    messageBuffer[4] = (byte)Command.SetErrorMessage;
+                    messageBuffer[4] = (byte)Command.SetErrorInfo;
 
                     BinaryPrimitives.WriteInt32LittleEndian(messageBuffer.Slice(5), errorMessageLength);
                     BinaryPrimitives.WriteInt32LittleEndian(messageBuffer.Slice(5 + sizeof(int)), errorDetailsLength);
