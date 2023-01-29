@@ -135,7 +135,7 @@ namespace PSFilterPdn
 
             const int MaxStackAllocBufferSize = 128;
 
-            Span<byte> messageBytes = stackalloc byte[MaxStackAllocBufferSize];
+            Span<byte> buffer = stackalloc byte[MaxStackAllocBufferSize];
             byte[] bufferFromPool = null;
 
             try
@@ -143,10 +143,10 @@ namespace PSFilterPdn
                 if (messageLength > MaxStackAllocBufferSize)
                 {
                     bufferFromPool = ArrayPool<byte>.Shared.Rent(messageLength);
-                    messageBytes = bufferFromPool;
+                    buffer = bufferFromPool;
                 }
 
-                messageBytes = messageBytes.Slice(0, messageLength);
+                Span<byte> messageBytes = buffer.Slice(0, messageLength);
                 server.ReadExactly(messageBytes);
 
                 Command command = (Command)messageBytes[0];
@@ -271,7 +271,7 @@ namespace PSFilterPdn
 
                 int totalMessageLength = sizeof(int) + count;
 
-                Span<byte> messageBytes = stackalloc byte[MaxStackAllocBufferSize];
+                Span<byte> buffer = stackalloc byte[MaxStackAllocBufferSize];
                 byte[] bufferFromPool = null;
 
                 try
@@ -279,13 +279,15 @@ namespace PSFilterPdn
                     if (totalMessageLength > MaxStackAllocBufferSize)
                     {
                         bufferFromPool = ArrayPool<byte>.Shared.Rent(totalMessageLength);
-                        messageBytes = bufferFromPool;
+                        buffer = bufferFromPool;
                     }
+
+                    Span<byte> messageBytes = buffer.Slice(0, totalMessageLength);
 
                     BinaryPrimitives.WriteInt32LittleEndian(messageBytes, count);
                     data.CopyTo(messageBytes.Slice(sizeof(int)));
 
-                    server.Write(messageBytes.Slice(0, totalMessageLength));
+                    server.Write(messageBytes);
                 }
                 finally
                 {
