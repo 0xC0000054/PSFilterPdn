@@ -121,7 +121,12 @@
     <RemoveDir Directories="$(ProjectDir)$(PublishDir)" />
   </Target>
   <Target Name="AfterPublishCommands" AfterTargets="Publish">
-    <Exec Command="call &quot;$(DevEnvDir)..\tools\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NXCOMPAT:NO &quot;$(ProjectDir)$(PublishDir)$(PublishedSingleFileName)&quot;" />
+    <!--EditBin is used to make the following changes the header of the generated 32-bit executable for compatibility with older filters:
+        1. Mark the executable as incompatible with Data Execution Prevention (DEP).
+        2. Change the OS Subsystem version to 5.1 (Windows XP) to stop the OS from automatically enabling the HeapEnableTerminationOnCorruption option.
+           See Raymond Chen's blog post "Brief Q&A on the HeapEnableTerminationOnCorruption heap information flag": https://devblogs.microsoft.com/oldnewthing/20131227-00/?p=2243
+        -->
+    <Exec Command="call &quot;$(DevEnvDir)..\tools\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NXCOMPAT:NO /SUBSYSTEM:WINDOWS,5.1 &quot;$(ProjectDir)$(PublishDir)$(PublishedSingleFileName)&quot;" />
     <Copy SourceFiles="$(ProjectDir)$(PublishDir)$(PublishedSingleFileName)" DestinationFolder="D:\Program Files\paint.net\Effects" />
   </Target>
 </Project>
