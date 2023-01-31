@@ -10,44 +10,14 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PaintDotNet.Effects;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Reflection;
 using System.Windows.Forms;
 
 namespace PSFilterPdn
 {
     internal static class PluginThemingUtil
     {
-        private static Action<EffectConfigDialog, bool> useAppThemeSetter;
-        private static bool initAppThemeSetter = false;
-
-        public static void EnableEffectDialogTheme(EffectConfigDialog dialog)
-        {
-            try
-            {
-                if (!initAppThemeSetter)
-                {
-                    initAppThemeSetter = true;
-
-                    PropertyInfo propertyInfo = typeof(EffectConfigDialog).GetProperty("UseAppThemeColors", BindingFlags.Public | BindingFlags.Instance);
-                    if (propertyInfo != null)
-                    {
-                        useAppThemeSetter = (Action<EffectConfigDialog, bool>)Delegate.CreateDelegate(typeof(Action<EffectConfigDialog, bool>), propertyInfo.GetSetMethod());
-                    }
-                }
-
-                useAppThemeSetter?.Invoke(dialog, true);
-            }
-            catch
-            {
-                // Ignore any exceptions that are thrown when trying to enable the dialog theming.
-                // The dialog should be shown to the user even if theming could not be enabled.
-            }
-        }
-
         public static bool IsDarkMode(Color backColor)
         {
             return backColor.R < 128 && backColor.G < 128 && backColor.B < 128;
