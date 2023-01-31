@@ -138,8 +138,6 @@
     <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-144.png" />
     <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-192.png" />
     <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-384.png" />
-    <EmbeddedResource Include="Resources\Icons\XPThemedCollapse.png" />
-    <EmbeddedResource Include="Resources\Icons\XPThemedExpand.png" />
     <EmbeddedResource Include="Resources\sRGB.icc" />
   </ItemGroup>
   <ItemGroup>

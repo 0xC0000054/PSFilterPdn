@@ -49,11 +49,6 @@ namespace PSFilterPdn.Controls
             // Enable default double buffering processing (DoubleBuffered returns true)
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
 
-            // Disable default CommCtrl painting on non-Vista systems
-            if (!OS.IsVistaOrLater)
-            {
-                SetStyle(ControlStyles.UserPaint, true);
-            }
             base.DrawMode = TreeViewDrawMode.OwnerDrawAll;
             backgroundBrush = new SolidBrush(BackColor);
             previousForeColor = ForeColor;
@@ -252,41 +247,12 @@ namespace PSFilterPdn.Controls
         {
             base.OnHandleCreated(e);
 
-            if (OS.IsVistaOrLater)
-            {
-                SafeNativeMethods.SendMessageW(
-                    Handle,
-                    NativeConstants.TVM_SETEXTENDEDSTYLE,
-                    (IntPtr)NativeConstants.TVS_EX_DOUBLEBUFFER,
-                    (IntPtr)NativeConstants.TVS_EX_DOUBLEBUFFER);
-            }
+            SafeNativeMethods.SendMessageW(
+                Handle,
+                NativeConstants.TVM_SETEXTENDEDSTYLE,
+                NativeConstants.TVS_EX_DOUBLEBUFFER,
+                NativeConstants.TVS_EX_DOUBLEBUFFER);
             InitTreeNodeGlyphs();
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            if (GetStyle(ControlStyles.UserPaint))
-            {
-                IntPtr hdc = e.Graphics.GetHdc();
-
-                try
-                {
-                    Message m = new()
-                    {
-                        HWnd = Handle,
-                        Msg = NativeConstants.WM_PRINTCLIENT,
-                        WParam = hdc,
-                        LParam = (IntPtr)NativeConstants.PRF_CLIENT
-                    };
-                    DefWndProc(ref m);
-                }
-                finally
-                {
-                    e.Graphics.ReleaseHdc(hdc);
-                }
-            }
-
-            base.OnPaint(e);
         }
 
         protected override void WndProc(ref Message m)
@@ -309,16 +275,8 @@ namespace PSFilterPdn.Controls
 
             if (VisualStyleRenderer.IsSupported)
             {
-                if (OS.IsVistaOrLater)
-                {
-                    collapseResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedCollapse-{0}.png");
-                    expandResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedExpand-{0}.png");
-                }
-                else
-                {
-                    collapseResourceName = "Resources.Icons.XPThemedCollapse.png";
-                    expandResourceName = "Resources.Icons.XPThemedExpand.png";
-                }
+                collapseResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedCollapse-{0}.png");
+                expandResourceName = GetBestResourceForItemHeight("Resources.Icons.VistaThemedExpand-{0}.png");
             }
             else
             {
