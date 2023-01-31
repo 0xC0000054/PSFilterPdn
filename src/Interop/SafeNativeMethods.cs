@@ -16,73 +16,73 @@ using System.Runtime.InteropServices;
 namespace PSFilterPdn.Interop
 {
     [System.Security.SuppressUnmanagedCodeSecurity]
-    internal static class SafeNativeMethods
+    internal static partial class SafeNativeMethods
     {
-        [DllImport("user32.dll")]
-        internal static extern IntPtr SendMessageW(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+        [LibraryImport("user32.dll")]
+        internal static partial IntPtr SendMessageW(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("user32.dll")]
-        internal static extern IntPtr SendMessageW(IntPtr hWnd, uint msg, IntPtr wParam, ref NativeStructs.TCHITTESTINFO lParam);
+        [LibraryImport("user32.dll")]
+        internal static partial IntPtr SendMessageW(IntPtr hWnd, uint msg, IntPtr wParam, ref NativeStructs.TCHITTESTINFO lParam);
 
-        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
-        internal static extern IntPtr GetProcessHeap();
+        [LibraryImport("kernel32.dll", SetLastError = true)]
+        internal static partial IntPtr GetProcessHeap();
 
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern IntPtr HeapAlloc(IntPtr hHeap, uint dwFlags, UIntPtr dwSize);
+        [LibraryImport("kernel32.dll")]
+        internal static partial IntPtr HeapAlloc(IntPtr hHeap, uint dwFlags, UIntPtr dwSize);
 
-        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        [LibraryImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool HeapFree(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
+        internal static partial bool HeapFree(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
 
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern IntPtr HeapReAlloc(IntPtr hHeap, uint dwFlags, IntPtr lpMem, UIntPtr dwBytes);
+        [LibraryImport("kernel32.dll")]
+        internal static partial IntPtr HeapReAlloc(IntPtr hHeap, uint dwFlags, IntPtr lpMem, UIntPtr dwBytes);
 
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern UIntPtr HeapSize(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
+        [LibraryImport("kernel32.dll")]
+        internal static partial UIntPtr HeapSize(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
 
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern unsafe UIntPtr VirtualQuery(IntPtr address, out NativeStructs.MEMORY_BASIC_INFORMATION buffer, UIntPtr sizeOfBuffer);
+        [LibraryImport("kernel32.dll")]
+        internal static unsafe partial UIntPtr VirtualQuery(IntPtr address, out NativeStructs.MEMORY_BASIC_INFORMATION buffer, UIntPtr sizeOfBuffer);
 
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern IntPtr VirtualAlloc(
+        [LibraryImport("kernel32.dll")]
+        internal static partial IntPtr VirtualAlloc(
             IntPtr lpAddress,
             UIntPtr dwSize,
             uint flAllocationType,
             uint flProtect);
 
-        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        [LibraryImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool VirtualFree(
+        internal static partial bool VirtualFree(
             IntPtr lpAddress,
             UIntPtr dwSize,
             uint dwFreeType);
 
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern IntPtr GlobalSize(IntPtr hMem);
+        [LibraryImport("kernel32.dll")]
+        internal static partial IntPtr GlobalSize(IntPtr hMem);
 
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern IntPtr GlobalFree(IntPtr hMem);
+        [LibraryImport("kernel32.dll")]
+        internal static partial IntPtr GlobalFree(IntPtr hMem);
 
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern IntPtr GlobalLock(IntPtr hMem);
+        [LibraryImport("kernel32.dll")]
+        internal static partial IntPtr GlobalLock(IntPtr hMem);
 
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern IntPtr GlobalReAlloc(IntPtr hMem, UIntPtr dwBytes, uint uFlags);
+        [LibraryImport("kernel32.dll")]
+        internal static partial IntPtr GlobalReAlloc(IntPtr hMem, UIntPtr dwBytes, uint uFlags);
 
-        [DllImport("kernel32.dll", ExactSpelling = true)]
+        [LibraryImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool GlobalUnlock(IntPtr hMem);
+        internal static partial bool GlobalUnlock(IntPtr hMem);
 
-        [DllImport("kernel32.dll", ExactSpelling = true)]
+        [LibraryImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool GlobalMemoryStatusEx(ref NativeStructs.MEMORYSTATUSEX lpBuffer);
+        internal static partial bool GlobalMemoryStatusEx(ref NativeStructs.MEMORYSTATUSEX lpBuffer);
 
-        [DllImport("user32.dll", ExactSpelling = true)]
+        [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern unsafe bool SetWindowTextW(IntPtr hWnd, ushort* lpString);
+        internal static unsafe partial bool SetWindowTextW(IntPtr hWnd, ushort* lpString);
 
-        [DllImport("comdlg32.dll", ExactSpelling = true)]
+        [LibraryImport("comdlg32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern unsafe bool ChooseColorW(ref NativeStructs.CHOOSECOLORW lppsd);
+        internal static unsafe partial bool ChooseColorW(ref NativeStructs.CHOOSECOLORW lppsd);
     }
 }

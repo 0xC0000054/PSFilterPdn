@@ -4,42 +4,42 @@ using System.Runtime.InteropServices;
 namespace PaintDotNet.SystemLayer
 {
     [System.Security.SuppressUnmanagedCodeSecurity]
-    internal static class SafeNativeMethods
+    internal static partial class SafeNativeMethods
     {
-        [DllImport("Kernel32.dll", SetLastError = false)]
-        internal static extern IntPtr HeapAlloc(IntPtr hHeap, uint dwFlags, UIntPtr dwBytes);
+        [LibraryImport("Kernel32.dll", SetLastError = false)]
+        internal static partial IntPtr HeapAlloc(IntPtr hHeap, uint dwFlags, UIntPtr dwBytes);
 
-        [DllImport("Kernel32.dll", SetLastError = true)]
+        [LibraryImport("Kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool HeapFree(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
+        internal static partial bool HeapFree(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
 
-        [DllImport("Kernel32.dll", SetLastError = false)]
-        internal static extern UIntPtr HeapSize(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
+        [LibraryImport("Kernel32.dll", SetLastError = false)]
+        internal static partial UIntPtr HeapSize(IntPtr hHeap, uint dwFlags, IntPtr lpMem);
 
-        [DllImport("Kernel32.dll", SetLastError = true)]
-        internal static extern IntPtr HeapCreate(uint flOptions, UIntPtr dwInitialSize, UIntPtr dwMaximumSize);
+        [LibraryImport("Kernel32.dll", SetLastError = true)]
+        internal static partial IntPtr HeapCreate(uint flOptions, UIntPtr dwInitialSize, UIntPtr dwMaximumSize);
 
-        [DllImport("Kernel32.dll", SetLastError = true)]
-        internal static extern uint HeapDestroy(IntPtr hHeap);
+        [LibraryImport("Kernel32.dll", SetLastError = true)]
+        internal static partial uint HeapDestroy(IntPtr hHeap);
 
-        [DllImport("Kernel32.Dll", SetLastError = true)]
-        internal unsafe static extern uint HeapSetInformation(
+        [LibraryImport("Kernel32.Dll", SetLastError = true)]
+        internal static unsafe partial uint HeapSetInformation(
             IntPtr HeapHandle,
             int HeapInformationClass,
             void* HeapInformation,
             UIntPtr HeapInformationLength
             );
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern IntPtr VirtualAlloc(
+        [LibraryImport("kernel32.dll", SetLastError = true)]
+        internal static partial IntPtr VirtualAlloc(
             IntPtr lpAddress,
             UIntPtr dwSize,
             uint flAllocationType,
             uint flProtect);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [LibraryImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool VirtualFree(
+        internal static partial bool VirtualFree(
             IntPtr lpAddress,
             UIntPtr dwSize,
             uint dwFreeType);

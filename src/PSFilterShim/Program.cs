@@ -17,16 +17,16 @@ using System.Text;
 
 namespace PSFilterShim
 {
-    static class Program
+    static partial class Program
     {
-        static class NativeMethods
+        static partial class NativeMethods
         {
-            [DllImport("kernel32.dll", EntryPoint = "SetProcessDEPPolicy")]
+            [LibraryImport("kernel32.dll", EntryPoint = "SetProcessDEPPolicy")]
             [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool SetProcessDEPPolicy(uint dwFlags);
+            internal static partial bool SetProcessDEPPolicy(uint dwFlags);
 
-            [DllImport("kernel32.dll", EntryPoint = "SetErrorMode")]
-            internal static extern uint SetErrorMode(uint uMode);
+            [LibraryImport("kernel32.dll", EntryPoint = "SetErrorMode")]
+            internal static partial uint SetErrorMode(uint uMode);
 
             internal const uint SEM_FAILCRITICALERRORS = 1U;
         }

@@ -16,16 +16,16 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
     [System.Security.SuppressUnmanagedCodeSecurity]
-    internal static class UnsafeNativeMethods
+    internal static partial class UnsafeNativeMethods
     {
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
-        internal static extern SafeLibraryHandle LoadLibraryW(string lpFileName);
+        [LibraryImport("kernel32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        internal static partial SafeLibraryHandle LoadLibraryW(string lpFileName);
 
-        [DllImport("kernel32.dll", ExactSpelling = true)]
+        [LibraryImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool FreeLibrary(IntPtr hModule);
+        internal static partial bool FreeLibrary(IntPtr hModule);
 
-        [DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, BestFitMapping = false)]
-        internal static extern IntPtr GetProcAddress(SafeLibraryHandle hModule, string lpProcName);
+        [LibraryImport("kernel32", StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
+        internal static partial IntPtr GetProcAddress(SafeLibraryHandle hModule, string lpProcName);
     }
 }
