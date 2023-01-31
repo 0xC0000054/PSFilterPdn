@@ -19,10 +19,10 @@ namespace PSFilterPdn.Interop
     internal static class SafeNativeMethods
     {
         [DllImport("user32.dll")]
-        internal static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+        internal static extern IntPtr SendMessageW(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
-        internal static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, ref NativeStructs.TCHITTESTINFO lParam);
+        internal static extern IntPtr SendMessageW(IntPtr hWnd, uint msg, IntPtr wParam, ref NativeStructs.TCHITTESTINFO lParam);
 
         [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
         internal static extern IntPtr GetProcessHeap();

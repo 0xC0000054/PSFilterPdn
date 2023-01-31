@@ -254,7 +254,7 @@ namespace PSFilterPdn.Controls
 
             if (OS.IsVistaOrLater)
             {
-                SafeNativeMethods.SendMessage(
+                SafeNativeMethods.SendMessageW(
                     Handle,
                     NativeConstants.TVM_SETEXTENDEDSTYLE,
                     (IntPtr)NativeConstants.TVS_EX_DOUBLEBUFFER,

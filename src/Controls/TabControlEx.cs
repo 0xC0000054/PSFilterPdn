@@ -531,7 +531,7 @@ namespace PSFilterPdn.Controls
                 flags = 0
             };
 
-            int index = SafeNativeMethods.SendMessage(Handle, NativeConstants.TCM_HITTEST, IntPtr.Zero, ref hti).ToInt32();
+            int index = SafeNativeMethods.SendMessageW(Handle, NativeConstants.TCM_HITTEST, IntPtr.Zero, ref hti).ToInt32();
 
             return index;
         }
