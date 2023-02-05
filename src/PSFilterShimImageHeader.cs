@@ -147,7 +147,7 @@ namespace PSFilterPdn
         {
             Span<byte> bytes = stackalloc byte[sizeof(double)];
 
-            ReadBytesFromStream(stream, bytes);
+            stream.ReadExactly(bytes);
 
             return BinaryPrimitives.ReadDoubleLittleEndian(bytes);
         }
@@ -157,7 +157,7 @@ namespace PSFilterPdn
         {
             Span<byte> bytes = stackalloc byte[sizeof(uint)];
 
-            ReadBytesFromStream(stream, bytes);
+            stream.ReadExactly(bytes);
 
             return BinaryPrimitives.ReadUInt32LittleEndian(bytes);
         }
@@ -185,23 +185,6 @@ namespace PSFilterPdn
             BinaryPrimitives.WriteUInt32LittleEndian(bytes, value);
 
             stream.Write(bytes);
-        }
-
-        private static void ReadBytesFromStream(Stream stream, Span<byte> bytes)
-        {
-            Span<byte> span = bytes;
-
-            while (span.Length > 0)
-            {
-                int bytesRead = stream.Read(span);
-
-                if (bytesRead == 0)
-                {
-                    throw new EndOfStreamException();
-                }
-
-                span = span.Slice(bytesRead);
-            }
         }
     }
 }
