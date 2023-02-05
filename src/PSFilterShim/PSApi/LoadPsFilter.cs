@@ -2051,7 +2051,7 @@ namespace PSFilterLoad.PSApi
             {
                 case ColorServicesSelector.ChooseColor:
 
-                    string name = StringUtil.FromPascalString(info->selectorParameter.pickerPrompt, string.Empty);
+                    string prompt = StringUtil.FromPascalString(info->selectorParameter.pickerPrompt, string.Empty);
 
                     if (info->sourceSpace != ColorSpace.RGBSpace)
                     {
@@ -2064,7 +2064,7 @@ namespace PSFilterLoad.PSApi
                         byte green = (byte)info->colorComponents[1];
                         byte blue = (byte)info->colorComponents[2];
 
-                        ColorRgb24? chosenColor = ColorPickerService.ShowColorPickerDialog(name, red, green, blue);
+                        ColorRgb24? chosenColor = ColorPickerService.ShowColorPickerDialog(prompt, red, green, blue);
 
                         if (chosenColor.HasValue)
                         {
