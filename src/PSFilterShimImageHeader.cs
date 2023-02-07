@@ -19,7 +19,7 @@ namespace PSFilterPdn
 {
     internal sealed class PSFilterShimImageHeader
     {
-        private const uint FileSignature = 0x49465350; // PSFI in little endian
+        private const int FileSignature = 0x49465350; // PSFI in little endian
 
         private readonly int fileVersion;
 #pragma warning disable IDE0032 // Use auto property
@@ -38,7 +38,7 @@ namespace PSFilterPdn
                 throw new ArgumentNullException(nameof(stream));
             }
 
-            uint signature = ReadUInt32LittleEndian(stream);
+            int signature = ReadInt32LittleEndian(stream);
 
             if (signature != FileSignature)
             {
@@ -113,7 +113,7 @@ namespace PSFilterPdn
                 throw new ArgumentNullException(nameof(stream));
             }
 
-            WriteUInt32LittleEndian(stream, FileSignature);
+            WriteInt32LittleEndian(stream, FileSignature);
             WriteInt32LittleEndian(stream, fileVersion);
             WriteInt32LittleEndian(stream, width);
             WriteInt32LittleEndian(stream, height);
@@ -137,11 +137,6 @@ namespace PSFilterPdn
             return headerSize;
         }
 
-        private static int ReadInt32LittleEndian(Stream stream)
-        {
-            return (int)ReadUInt32LittleEndian(stream);
-        }
-
         [SkipLocalsInit]
         private static unsafe double ReadDoubleLittleEndian(Stream stream)
         {
@@ -153,18 +148,13 @@ namespace PSFilterPdn
         }
 
         [SkipLocalsInit]
-        private static uint ReadUInt32LittleEndian(Stream stream)
+        private static int ReadInt32LittleEndian(Stream stream)
         {
-            Span<byte> bytes = stackalloc byte[sizeof(uint)];
+            Span<byte> bytes = stackalloc byte[sizeof(int)];
 
             stream.ReadExactly(bytes);
 
-            return BinaryPrimitives.ReadUInt32LittleEndian(bytes);
-        }
-
-        private static void WriteInt32LittleEndian(Stream stream, int value)
-        {
-            WriteUInt32LittleEndian(stream, (uint)value);
+            return BinaryPrimitives.ReadInt32LittleEndian(bytes);
         }
 
         [SkipLocalsInit]
@@ -178,11 +168,11 @@ namespace PSFilterPdn
         }
 
         [SkipLocalsInit]
-        private static void WriteUInt32LittleEndian(Stream stream, uint value)
+        private static void WriteInt32LittleEndian(Stream stream, int value)
         {
-            Span<byte> bytes = stackalloc byte[sizeof(uint)];
+            Span<byte> bytes = stackalloc byte[sizeof(int)];
 
-            BinaryPrimitives.WriteUInt32LittleEndian(bytes, value);
+            BinaryPrimitives.WriteInt32LittleEndian(bytes, value);
 
             stream.Write(bytes);
         }
