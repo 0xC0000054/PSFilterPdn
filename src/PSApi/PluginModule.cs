@@ -72,7 +72,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="entryPointName">The name of the entry point.</param>
         /// <returns>A <see cref="PluginEntryPoint" /> delegate.</returns>
         /// <exception cref="EntryPointNotFoundException">The entry point specified by <paramref name="entryPointName" /> was not found.</exception>
-        /// <exception cref="System.ObjectDisposedException">The object has been disposed.</exception>
+        /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public PluginEntryPoint GetEntryPoint(string entryPointName)
         {
             if (disposed)

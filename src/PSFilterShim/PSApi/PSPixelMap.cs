@@ -26,7 +26,7 @@ namespace PSFilterLoad.PSApi
         kInvertPSMask = 4
     }
 
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     internal unsafe struct PSPixelMask
     {
         public PSPixelMask* next;
@@ -66,7 +66,7 @@ namespace PSFilterLoad.PSApi
 #endif
     }
 
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     internal unsafe struct PSPixelMap
     {
         public int version;

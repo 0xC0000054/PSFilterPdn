@@ -29,10 +29,10 @@ namespace PSFilterLoad.PSApi
         [StructLayout(LayoutKind.Sequential)]
         public struct MEMORY_BASIC_INFORMATION
         {
-            public System.IntPtr BaseAddress;
-            public System.IntPtr AllocationBase;
+            public IntPtr BaseAddress;
+            public IntPtr AllocationBase;
             public uint AllocationProtect;
-            public System.UIntPtr RegionSize;
+            public UIntPtr RegionSize;
             public uint State;
             public uint Protect;
             public uint Type;

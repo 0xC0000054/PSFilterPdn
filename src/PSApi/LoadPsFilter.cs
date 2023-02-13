@@ -226,7 +226,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="owner">The handle of the parent window.</param>
         /// <param name="documentMetadataProvider">The document meta data provider.</param>
         /// <param name="pluginUISettings">The user interface settings for plug-in created dialogs.</param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="sourceBitmap"/> is null.
         /// or
         /// <paramref name="documentMetadataProvider"/> is null.

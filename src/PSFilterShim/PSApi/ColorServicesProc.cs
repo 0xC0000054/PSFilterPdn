@@ -44,21 +44,21 @@ namespace PSFilterLoad.PSApi
         XYZSpace = 6
     }
 
-    [StructLayoutAttribute(LayoutKind.Explicit)]
+    [StructLayout(LayoutKind.Explicit)]
     internal struct SelectorParameters
     {
-        [FieldOffsetAttribute(0)]
+        [FieldOffset(0)]
         public System.IntPtr pickerPrompt;
-        [FieldOffsetAttribute(0)]
+        [FieldOffset(0)]
         public System.IntPtr globalSamplePoint;
-        [FieldOffsetAttribute(0)]
+        [FieldOffset(0)]
         public SpecialColorID specialColorID;
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal unsafe delegate short ColorServicesProc(ColorServicesInfo* info);
 
-    [StructLayoutAttribute(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct ColorServicesInfo
     {
         public int infoSize;

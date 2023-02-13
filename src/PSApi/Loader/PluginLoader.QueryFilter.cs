@@ -34,7 +34,7 @@ namespace PSFilterLoad.PSApi
             /// </summary>
             /// <param name="fileName">The file name of the plug-in.</param>
             /// <param name="platform">The processor architecture that the plug-in was built for.</param>
-            /// <exception cref="System.PlatformNotSupportedException">The processor architecture specified by <paramref name="platform"/> is not supported.</exception>
+            /// <exception cref="PlatformNotSupportedException">The processor architecture specified by <paramref name="platform"/> is not supported.</exception>
             public QueryFilter(string fileName, Architecture platform, IPluginLoadingLogger logger)
             {
                 this.fileName = fileName;

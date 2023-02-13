@@ -1870,7 +1870,7 @@ namespace PSFilterPdn
 
         private void donateLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Services.GetService<PaintDotNet.AppModel.IShellService>().LaunchUrl(this, "http://forums.getpaint.net/index.php?showtopic=20622");
+            Services.GetService<IShellService>().LaunchUrl(this, "http://forums.getpaint.net/index.php?showtopic=20622");
         }
 
         private void filterTree_BeforeExpand(object sender, TreeViewCancelEventArgs e)
@@ -1960,7 +1960,7 @@ namespace PSFilterPdn
         {
             if (descriptorRegistry == null)
             {
-                string userDataPath = Services.GetService<PaintDotNet.AppModel.IUserFilesService>().UserFilesPath;
+                string userDataPath = Services.GetService<IUserFilesService>().UserFilesPath;
                 string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
 
                 try
@@ -1982,7 +1982,7 @@ namespace PSFilterPdn
         {
             if (descriptorRegistry != null && descriptorRegistry.Dirty)
             {
-                string userDataPath = Services.GetService<PaintDotNet.AppModel.IUserFilesService>().UserFilesPath;
+                string userDataPath = Services.GetService<IUserFilesService>().UserFilesPath;
                 string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
 
                 try
