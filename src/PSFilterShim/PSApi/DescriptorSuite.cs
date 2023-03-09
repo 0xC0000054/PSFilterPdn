@@ -620,8 +620,7 @@ namespace PSFilterLoad.PSApi
                 *retType = type;
             }
 
-            Dictionary<uint, AETEValue> value = item.Value as Dictionary<uint, AETEValue>;
-            if (value != null)
+            if (item.Value is Dictionary<uint, AETEValue> value)
             {
                 *descriptorHandle = handleSuite.NewHandle(0); // assign a zero byte handle to allow it to work correctly in the OpenReadDescriptorProc().
                 if (*descriptorHandle == Handle.Null)

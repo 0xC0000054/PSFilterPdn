@@ -1222,8 +1222,7 @@ namespace PSFilterLoad.PSApi.PICA
                     *retType = type;
                 }
 
-                Dictionary<uint, AETEValue> parameters = item.Value as Dictionary<uint, AETEValue>;
-                if (parameters != null)
+                if (item.Value is Dictionary<uint, AETEValue> parameters)
                 {
                     *descriptorHandle = GenerateDictionaryKey();
                     actionDescriptors.Add(*descriptorHandle, new ScriptingParameters(parameters));

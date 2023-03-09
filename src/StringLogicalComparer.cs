@@ -46,10 +46,7 @@ namespace PSFilterPdn
                 return 1;
             }
 
-            string left = x as string;
-            string right = y as string;
-
-            if (left != null && right != null)
+            if (x is string left && y is string right)
             {
                 return Compare(left, right);
             }
