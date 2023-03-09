@@ -50,7 +50,6 @@ namespace PSFilterLoad.PSApi
                                PluginLoadingLogCategory.Error,
                                "The plug-in processor architecture is not supported.");
 
-
                     // Ignore any DLLs that cannot be used on the current platform.
                     return Enumerable.Empty<PluginData>();
                 }
