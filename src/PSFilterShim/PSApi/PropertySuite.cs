@@ -88,7 +88,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (value < 1)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, "The value must be at least one.");
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "The value must be at least one.");
                 }
 
                 numberOfChannels = value;

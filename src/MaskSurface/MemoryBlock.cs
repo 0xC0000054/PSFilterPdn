@@ -87,17 +87,17 @@ namespace PSFilterLoad.PSApi
 
             if (dstOffset < 0)
             {
-                throw new ArgumentOutOfRangeException("dstOffset", dstOffset, "must be >= 0");
+                throw new ArgumentOutOfRangeException(nameof(dstOffset), dstOffset, "must be >= 0");
             }
 
             if (srcOffset < 0)
             {
-                throw new ArgumentOutOfRangeException("srcOffset", srcOffset, "must be >= 0");
+                throw new ArgumentOutOfRangeException(nameof(srcOffset), srcOffset, "must be >= 0");
             }
 
             if (length < 0)
             {
-                throw new ArgumentOutOfRangeException("length", length, "must be >= 0");
+                throw new ArgumentOutOfRangeException(nameof(length), length, "must be >= 0");
             }
 
             void* dstPtr = (void*)((byte*)dst.VoidStar + dstOffset);
@@ -128,7 +128,7 @@ namespace PSFilterLoad.PSApi
         {
             if (bytes <= 0)
             {
-                throw new ArgumentOutOfRangeException("bytes", bytes, "Bytes must be greater than zero");
+                throw new ArgumentOutOfRangeException(nameof(bytes), bytes, "Bytes must be greater than zero");
             }
 
             this.length = bytes;

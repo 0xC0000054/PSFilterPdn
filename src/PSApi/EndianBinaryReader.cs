@@ -119,7 +119,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 VerifyNotDisposed();
 

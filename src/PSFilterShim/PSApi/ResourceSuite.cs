@@ -47,7 +47,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
 
                 pseudoResources = value;
