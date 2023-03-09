@@ -179,9 +179,6 @@ namespace PSFilterLoad.PSApi
                     // A x86_64 OS can use both x64 and x86 plugins, the x86 plugins will be run using the PSFilterShim process.
                     result = platform == Architecture.X64 || platform == Architecture.X86;
                     break;
-                case Architecture.Arm:
-                    result = platform == Architecture.Arm;
-                    break;
                 case Architecture.Arm64:
                     // An ARM64 OS should be able to run ARM64 and x86 plugins, the x86 plugins will be run using the PSFilterShim process.
                     // The ARM64 version of Windows has emulation support for running x86 processes.
