@@ -55,6 +55,11 @@ namespace PSFilterLoad.PSApi.Loader
             short major = (short)(version & 0xff);
             short minor = (short)((version >> 8) & 0xff);
 
+            if (major != PSConstants.AETEMajorVersion || minor != PSConstants.AETEMinorVersion)
+            {
+                return null;
+            }
+
             short lang = *(short*)ptr;
             ptr += 2;
             short script = *(short*)ptr;
@@ -74,6 +79,12 @@ namespace PSFilterLoad.PSApi.Loader
                 propPtr += 2;
                 short suiteVersion = *(short*)propPtr;
                 propPtr += 2;
+
+                if (suiteLevel != PSConstants.AETESuiteLevel || suiteVersion != PSConstants.AETESuiteVersion)
+                {
+                    return null;
+                }
+
                 short eventCount = *(short*)propPtr;
                 propPtr += 2;
 
@@ -101,6 +112,11 @@ namespace PSFilterLoad.PSApi.Loader
                     propPtr += 2;
                     short paramCount = *(short*)propPtr;
                     propPtr += 2;
+
+                    if (paramCount < 1)
+                    {
+                        return null;
+                    }
 
                     Dictionary<uint, short> aeteParameterFlags = new(paramCount);
 
@@ -161,14 +177,7 @@ namespace PSFilterLoad.PSApi.Loader
                     }
 #endif
 
-                    if (aeteParameterFlags.Count > 0 &&
-                        major == PSConstants.AETEMajorVersion &&
-                        minor == PSConstants.AETEMinorVersion &&
-                        suiteLevel == PSConstants.AETESuiteLevel &&
-                        suiteVersion == PSConstants.AETESuiteVersion)
-                    {
-                        return new AETEData(aeteParameterFlags);
-                    }
+                    return new AETEData(aeteParameterFlags);
                 }
             }
 
