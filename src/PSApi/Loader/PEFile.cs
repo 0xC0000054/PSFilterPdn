@@ -75,7 +75,6 @@ namespace PSFilterLoad.PSApi.Loader
             if (ntSignature != IMAGE_NT_SIGNATURE)
             {
                 throw new BadImageFormatException("Invalid PE header.");
-
             }
 
             ushort machine = reader.ReadUInt16();
