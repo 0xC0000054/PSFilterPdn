@@ -87,7 +87,6 @@ namespace PSFilterPdn.EnableInfo
             }
         }
 
-        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "ConstantExpression")]
         Expression IExpressionVisitor.VisitBinary(BinaryExpression node)
         {
             if (Visit(node.Left) is ConstantExpression left && Visit(node.Right) is ConstantExpression right)
@@ -342,7 +341,6 @@ namespace PSFilterPdn.EnableInfo
             return variables.GetValue(node.Name);
         }
 
-        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "ConstantExpression")]
         Expression IExpressionVisitor.VisitUnary(UnaryExpression node)
         {
             if (Visit(node.Expression) is ConstantExpression expression)
