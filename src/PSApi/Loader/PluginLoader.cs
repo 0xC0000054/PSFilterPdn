@@ -370,7 +370,7 @@ namespace PSFilterLoad.PSApi
                         {
                             query.logger.Log(query.fileName,
                                              PluginLoadingLogCategory.Error,
-                                             "PiPL resource '{0}' requires newer filter interface version {1}.{2} and only version {3}.{4} is supported",
+                                             "PiPL resource '{0}' requires newer filter interface version {1}.{2} and only version {3}.{4} is supported.",
                                              lpszName,
                                              major,
                                              minor,
@@ -573,7 +573,7 @@ namespace PSFilterLoad.PSApi
             {
                 query.logger.Log(query.fileName,
                                  PluginLoadingLogCategory.Error,
-                                 "PiMI resource '{0}' requires a newer filter interface version {1}.{2} and only version {3}.{4} is supported",
+                                 "PiMI resource '{0}' requires a newer filter interface version {1}.{2} and only version {3}.{4} is supported.",
                                  lpszName,
                                  info->version,
                                  info->subVersion,
