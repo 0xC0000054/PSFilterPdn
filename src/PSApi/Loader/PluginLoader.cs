@@ -57,7 +57,9 @@ namespace PSFilterLoad.PSApi
                 QueryFilter queryFilter = new(fileName, platform, logger);
 
                 // Use LOAD_LIBRARY_AS_DATAFILE to prevent a BadImageFormatException from being thrown if the file is a different processor architecture than the parent process.
-                using (SafeLibraryHandle dll = UnsafeNativeMethods.LoadLibraryExW(fileName, IntPtr.Zero, NativeConstants.LOAD_LIBRARY_AS_DATAFILE))
+                const uint dwFlags = NativeConstants.LOAD_LIBRARY_AS_DATAFILE | NativeConstants.LOAD_LIBRARY_AS_IMAGE_RESOURCE;
+
+                using (SafeLibraryHandle dll = UnsafeNativeMethods.LoadLibraryExW(fileName, IntPtr.Zero, dwFlags))
                 {
                     if (dll.IsInvalid)
                     {

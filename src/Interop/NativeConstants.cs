@@ -46,6 +46,7 @@ namespace PSFilterPdn.Interop
         internal const int GPTR = 64;
 
         internal const uint LOAD_LIBRARY_AS_DATAFILE = 2;
+        internal const uint LOAD_LIBRARY_AS_IMAGE_RESOURCE = 0x00000020;
 
         internal const uint HEAP_ZERO_MEMORY = 8;
 
