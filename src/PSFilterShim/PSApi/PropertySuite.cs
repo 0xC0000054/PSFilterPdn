@@ -124,9 +124,12 @@ namespace PSFilterLoad.PSApi
                 return PSError.memFullErr;
             }
 
-            using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(*complexProperty))
+            if (bytes.Length > 0)
             {
-                bytes.CopyTo(handleSuiteLock.Data);
+                using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(*complexProperty))
+                {
+                    bytes.CopyTo(handleSuiteLock.Data);
+                }
             }
 
             return PSError.noErr;
@@ -148,9 +151,12 @@ namespace PSFilterLoad.PSApi
                 return PSError.memFullErr;
             }
 
-            using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(*complexProperty))
+            if (textLengthInBytes > 0)
             {
-                encoding.GetBytes(text, handleSuiteLock.Data);
+                using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(*complexProperty))
+                {
+                    encoding.GetBytes(text, handleSuiteLock.Data);
+                }
             }
 
             return PSError.noErr;
@@ -183,9 +189,7 @@ namespace PSFilterLoad.PSApi
                 return PSError.errPlugInPropertyUndefined;
             }
 
-            short error = PSError.noErr;
-
-            ReadOnlySpan<byte> bytes;
+            short error;
 
             switch (key)
             {
@@ -194,13 +198,10 @@ namespace PSFilterLoad.PSApi
                     error = GetSimpleProperty(simpleProperty, new Fixed16(PSConstants.Properties.BigNudgeDistance).Value);
                     break;
                 case PSProperties.Caption:
-                    if (complexProperty != null)
-                    {
-                        *complexProperty = handleSuite.NewHandle(0);
-                    }
+                    error = CreateComplexPropertyHandle(complexProperty, ReadOnlySpan<byte>.Empty);
                     break;
                 case PSProperties.ChannelName:
-                    string name = string.Empty;
+                    string name;
                     switch (index)
                     {
                         case 0:
@@ -226,38 +227,10 @@ namespace PSFilterLoad.PSApi
                     error = GetSimpleProperty(simpleProperty, false);
                     break;
                 case PSProperties.EXIFData:
-                    bytes = documentMetadataProvider.GetExifData();
-
-                    if (bytes.Length > 0)
-                    {
-                        error = CreateComplexPropertyHandle(complexProperty, bytes);
-                    }
-                    else
-                    {
-                        if (complexProperty != null)
-                        {
-                            // If the complexProperty is not null we return a valid zero byte handle,
-                            // otherwise some filters will crash with an access violation.
-                            *complexProperty = handleSuite.NewHandle(0);
-                        }
-                    }
+                    error = CreateComplexPropertyHandle(complexProperty,  documentMetadataProvider.GetExifData());
                     break;
                 case PSProperties.XMPData:
-                    bytes = documentMetadataProvider.GetXmpData();
-
-                    if (bytes.Length > 0)
-                    {
-                        error = CreateComplexPropertyHandle(complexProperty, bytes);
-                    }
-                    else
-                    {
-                        if (complexProperty != null)
-                        {
-                            // If the complexProperty is not null we return a valid zero byte handle,
-                            // otherwise some filters will crash with an access violation.
-                            *complexProperty = handleSuite.NewHandle(0);
-                        }
-                    }
+                    error = CreateComplexPropertyHandle(complexProperty, documentMetadataProvider.GetXmpData());
                     break;
                 case PSProperties.GridMajor:
                     error = GetSimpleProperty(simpleProperty, new Fixed16(PSConstants.Properties.GridMajor).Value);
@@ -293,10 +266,7 @@ namespace PSFilterLoad.PSApi
                     error = CreateComplexPropertyHandle(complexProperty, HostSerial);
                     break;
                 case PSProperties.URL:
-                    if (complexProperty != null)
-                    {
-                        *complexProperty = handleSuite.NewHandle(0);
-                    }
+                    error = CreateComplexPropertyHandle(complexProperty, ReadOnlySpan<byte>.Empty);
                     break;
                 case PSProperties.Title:
                 case PSProperties.UnicodeTitle:
