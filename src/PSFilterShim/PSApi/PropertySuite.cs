@@ -32,7 +32,7 @@ namespace PSFilterLoad.PSApi
         private readonly bool highDpi;
         private int numberOfChannels;
 
-        private static ReadOnlySpan<byte> HostSerial => new byte[] { (byte)'0' };
+        private static ReadOnlySpan<byte> HostSerial => "0"u8;
 
         public unsafe PropertySuite(IHandleSuite handleSuite,
                                     IDocumentMetadataProvider documentMetadataProvider,

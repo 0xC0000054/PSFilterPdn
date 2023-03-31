@@ -93,7 +93,7 @@ namespace PSFilterLoad.PSApi
             public int FileVersion { get; }
 
             // PFPR = PSFilterPdn registry
-            private static ReadOnlySpan<byte> Signature => new byte[] { (byte)'P', (byte)'F', (byte)'P', (byte)'R' };
+            private static ReadOnlySpan<byte> Signature => "PFPR"u8;
 
             [SkipLocalsInit]
             public static bool TryCreate(Stream stream, out DescriptorRegistryFileHeader header)
