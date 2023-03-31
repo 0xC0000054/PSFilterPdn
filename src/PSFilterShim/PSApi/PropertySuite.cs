@@ -20,7 +20,9 @@ namespace PSFilterLoad.PSApi
 {
     internal sealed class PropertySuite : IPropertySuite
     {
+#pragma warning disable IDE0032 // Use auto property
         private readonly GetPropertyProc getPropertyProc;
+#pragma warning restore IDE0032 // Use auto property
         private readonly SetPropertyProc setPropertyProc;
         private readonly IHandleSuite handleSuite;
         private readonly IDocumentMetadataProvider documentMetadataProvider;
