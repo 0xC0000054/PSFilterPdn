@@ -370,6 +370,7 @@ namespace PSFilterPdn.Metadata
                         throw new InvalidOperationException("Unsupported ExifColorSpace value.");
                 }
 
+#pragma warning disable IDE0230 // Use UTF-8 string literal
                 Dictionary<ushort, ExifValue> interopSection = new()
                 {
                     {
@@ -383,6 +384,7 @@ namespace PSFilterPdn.Metadata
 
                     }
                 };
+#pragma warning restore IDE0230 // Use UTF-8 string literal
 
                 metadataEntries.Add(ExifSection.Interop, interopSection);
             }
@@ -433,10 +435,12 @@ namespace PSFilterPdn.Metadata
             {
                 if (!exifItems.ContainsKey(ExifPropertyKeys.Photo.ExifVersion.Path.TagID))
                 {
+#pragma warning disable IDE0230 // Use UTF-8 string literal
                     exifItems.Add(
                         ExifPropertyKeys.Photo.ExifVersion.Path.TagID,
                         new ExifValue(ExifValueType.Undefined,
                                       new byte[] { (byte)'0', (byte)'2', (byte)'3', (byte)'0' }));
+#pragma warning restore IDE0230 // Use UTF-8 string literal
                 }
             }
 
@@ -455,10 +459,12 @@ namespace PSFilterPdn.Metadata
             {
                 if (!interopItems.ContainsKey(ExifPropertyKeys.Interop.InteroperabilityVersion.Path.TagID))
                 {
+#pragma warning disable IDE0230 // Use UTF-8 string literal
                     interopItems.Add(
                         ExifPropertyKeys.Interop.InteroperabilityVersion.Path.TagID,
                         new ExifValue(ExifValueType.Undefined,
                                       new byte[] { (byte)'0', (byte)'1', (byte)'0', (byte)'0' }));
+#pragma warning restore IDE0230 // Use UTF-8 string literal
                 }
             }
         }
