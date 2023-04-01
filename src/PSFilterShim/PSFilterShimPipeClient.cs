@@ -26,7 +26,6 @@ namespace PSFilterShim
     internal sealed class PSFilterShimPipeClient
     {
         private readonly string pipeName;
-        private readonly byte[] replyLengthBuffer;
         private readonly byte[] oneByteReplyBuffer;
         private readonly byte[] noParameterMessageBuffer;
         private readonly byte[] oneByteParameterMessageBuffer;
@@ -34,7 +33,6 @@ namespace PSFilterShim
         public PSFilterShimPipeClient(string pipeName)
         {
             this.pipeName = pipeName ?? throw new ArgumentNullException(nameof(pipeName));
-            replyLengthBuffer = new byte[4];
             oneByteReplyBuffer = new byte[1];
             noParameterMessageBuffer = CreateNoParameterMessageBuffer();
             oneByteParameterMessageBuffer = CreateOneByteParameterMessageBuffer();
@@ -153,6 +151,7 @@ namespace PSFilterShim
             return deserialized;
         }
 
+        [SkipLocalsInit]
         private byte[] SendMessageToServer(Command command)
         {
             byte[] reply = null;
@@ -165,9 +164,11 @@ namespace PSFilterShim
 
                 stream.Write(noParameterMessageBuffer, 0, noParameterMessageBuffer.Length);
 
-                stream.ReadExactly(replyLengthBuffer, 0, replyLengthBuffer.Length);
+                Span<byte> replyLengthBuffer = stackalloc byte[4];
 
-                int replyLength = BitConverter.ToInt32(replyLengthBuffer, 0);
+                stream.ReadExactly(replyLengthBuffer);
+
+                int replyLength = BinaryPrimitives.ReadInt32LittleEndian(replyLengthBuffer);
 
                 if (replyLength > 0)
                 {
@@ -182,6 +183,7 @@ namespace PSFilterShim
             return reply;
         }
 
+        [SkipLocalsInit]
         private byte[] SendMessageToServer(Command command, byte value)
         {
             byte[] reply = null;
@@ -195,9 +197,11 @@ namespace PSFilterShim
 
                 stream.Write(oneByteParameterMessageBuffer, 0, oneByteParameterMessageBuffer.Length);
 
-                stream.ReadExactly(replyLengthBuffer, 0, replyLengthBuffer.Length);
+                Span<byte> replyLengthBuffer = stackalloc byte[4];
 
-                int replyLength = BitConverter.ToInt32(replyLengthBuffer, 0);
+                stream.ReadExactly(replyLengthBuffer);
+
+                int replyLength = BinaryPrimitives.ReadInt32LittleEndian(replyLengthBuffer);
 
                 if (replyLength > 0)
                 {
@@ -231,9 +235,11 @@ namespace PSFilterShim
 
                 stream.Write(messageBuffer);
 
-                stream.ReadExactly(replyLengthBuffer, 0, replyLengthBuffer.Length);
+                Span<byte> replyLengthBuffer = stackalloc byte[4];
 
-                int replyLength = BitConverter.ToInt32(replyLengthBuffer, 0);
+                stream.ReadExactly(replyLengthBuffer);
+
+                int replyLength = BinaryPrimitives.ReadInt32LittleEndian(replyLengthBuffer);
 
                 if (replyLength > 0)
                 {
@@ -315,9 +321,11 @@ namespace PSFilterShim
                     }
                 }
 
-                stream.ReadExactly(replyLengthBuffer, 0, replyLengthBuffer.Length);
+                Span<byte> replyLengthBuffer = stackalloc byte[4];
 
-                int replyLength = BitConverter.ToInt32(replyLengthBuffer, 0);
+                stream.ReadExactly(replyLengthBuffer);
+
+                int replyLength = BinaryPrimitives.ReadInt32LittleEndian(replyLengthBuffer);
 
                 if (replyLength > 0)
                 {
