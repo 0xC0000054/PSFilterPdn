@@ -22,7 +22,6 @@ namespace PSFilterLoad.PSApi
     [Serializable]
     internal sealed class AETEValue
     {
-#pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]
         private uint type;
         [DataMember]
@@ -31,7 +30,6 @@ namespace PSFilterLoad.PSApi
         private int size;
         [DataMember]
         private object value;
-#pragma warning restore IDE0044 // Add readonly modifier
 
         public uint Type => type;
 
@@ -54,12 +52,10 @@ namespace PSFilterLoad.PSApi
     [Serializable]
     internal sealed class UnitFloat
     {
-#pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]
         private uint unit;
         [DataMember]
         private double value;
-#pragma warning restore IDE0044 // Add readonly modifier
 
         public uint Unit => unit;
 
@@ -76,12 +72,10 @@ namespace PSFilterLoad.PSApi
     [Serializable]
     internal sealed class EnumeratedValue
     {
-#pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]
         private uint type;
         [DataMember]
         private uint value;
-#pragma warning restore IDE0044 // Add readonly modifier
 
         public uint Type => type;
 
@@ -98,10 +92,8 @@ namespace PSFilterLoad.PSApi
     [Serializable]
     internal sealed class ActionDescriptorZString
     {
-#pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]
         private string value;
-#pragma warning restore IDE0044 // Add readonly modifier
 
         public string Value => value;
 

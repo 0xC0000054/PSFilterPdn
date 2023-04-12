@@ -103,7 +103,6 @@ namespace PSFilterLoad.PSApi.PICA
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal unsafe delegate int ActionReferenceGetContainer(PIActionReference reference, PIActionReference* value);
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable")]
     [StructLayout(LayoutKind.Sequential)]
     internal struct PSActionReferenceProcs
     {

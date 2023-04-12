@@ -19,7 +19,6 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-#pragma warning disable 0659
     [StructLayout(LayoutKind.Sequential)]
     internal struct Rect16 : System.IEquatable<Rect16>
     {
@@ -77,5 +76,4 @@ namespace PSFilterLoad.PSApi
 
         public static readonly Rect16 Empty = new();
     }
-#pragma warning restore 0659
 }

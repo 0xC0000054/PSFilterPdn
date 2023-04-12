@@ -140,7 +140,6 @@ namespace PSFilterLoad.PSApi.PICA
     internal unsafe delegate int ActionListGetZString(PIActionList list, uint index, ASZString* zstring);
 
 #pragma warning disable 108
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable")]
     [StructLayout(LayoutKind.Sequential)]
     internal struct PSActionListProcs
     {

@@ -22,12 +22,10 @@ namespace PSFilterLoad.PSApi
     [KnownType(typeof(GlobalParameters))]
     internal sealed class ParameterData
     {
-#pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]
         private GlobalParameters globalParameters;
         [DataMember]
         private Dictionary<uint, AETEValue> aeteDictonary;
-#pragma warning restore IDE0044 // Add readonly modifier
 
         public GlobalParameters GlobalParameters => globalParameters;
 

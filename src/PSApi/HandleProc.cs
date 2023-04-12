@@ -44,7 +44,7 @@ namespace PSFilterLoad.PSApi
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void DisposeRegularPIHandleProc(Handle h);
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable"), StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential)]
     internal struct HandleProcs
     {
         public short handleProcsVersion;

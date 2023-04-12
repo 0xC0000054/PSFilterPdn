@@ -1270,7 +1270,6 @@ namespace PSFilterLoad.PSApi
             return bufferSize != size;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private unsafe short AdvanceStateProc()
         {
             if (outDataPtr != IntPtr.Zero && RectNonEmpty(lastOutRect))

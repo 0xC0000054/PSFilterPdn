@@ -19,14 +19,12 @@ namespace PSFilterLoad.PSApi
     [Serializable]
     internal sealed class PseudoResource
     {
-#pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]
         private uint key;
         [DataMember]
         private int index;
         [DataMember]
         private byte[] data;
-#pragma warning restore IDE0044 // Add readonly modifier
 
         /// <summary>
         /// Gets the resource key.

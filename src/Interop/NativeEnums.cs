@@ -16,10 +16,6 @@ namespace PSFilterPdn.Interop
 {
     internal static class NativeEnums
     {
-#pragma warning disable RCS1135 // Declare enum member with zero value (when enum has FlagsAttribute).
-#pragma warning disable RCS1154 // Sort enum members.
-#pragma warning disable RCS1191 // Declare enum value as combination of names.
-
         [Flags]
         internal enum TCHITTESTFLAGS
         {
@@ -28,10 +24,6 @@ namespace PSFilterPdn.Interop
             TCHT_ONITEMLABEL = 4,
             TCHT_ONITEM = TCHT_ONITEMICON | TCHT_ONITEMLABEL
         }
-
-#pragma warning restore RCS1135 // Declare enum member with zero value (when enum has FlagsAttribute).
-#pragma warning restore RCS1154 // Sort enum members.
-#pragma warning restore RCS1191 // Declare enum value as combination of names.
     }
 }
 

@@ -78,46 +78,28 @@ namespace PSFilterLoad.PSApi
             private set;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Performance",
-            "CA1811:AvoidUncalledPrivateCode",
-            Justification = "Required to allow WCF to serialize unknown enum values.")]
         [DataMember(Name = "InputHandling")]
-#pragma warning disable RCS1213 // Remove unused member declaration.
 #pragma warning disable IDE0051 // Remove unused private members
         private byte InputHandlingValue
 #pragma warning restore IDE0051 // Remove unused private members
-#pragma warning restore RCS1213 // Remove unused member declaration.
         {
             get => (byte)InputHandling;
             set => InputHandling = (FilterDataHandling)value;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-                    "Microsoft.Performance",
-                    "CA1811:AvoidUncalledPrivateCode",
-                    Justification = "Required to allow WCF to serialize unknown enum values.")]
         [DataMember(Name = "OutputHandling")]
-#pragma warning disable RCS1213 // Remove unused member declaration.
 #pragma warning disable IDE0051 // Remove unused private members
         private byte OutputHandlingValue
 #pragma warning restore IDE0051 // Remove unused private members
-#pragma warning restore RCS1213 // Remove unused member declaration.
         {
             get => (byte)OutputHandling;
             set => OutputHandling = (FilterDataHandling)value;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-                    "Microsoft.Performance",
-                    "CA1811:AvoidUncalledPrivateCode",
-                    Justification = "Required to allow WCF to serialize unknown enum values.")]
         [DataMember(Name = "Flags1")]
-#pragma warning disable RCS1213 // Remove unused member declaration.
 #pragma warning disable IDE0051 // Remove unused private members
         private byte Flags1Value
 #pragma warning restore IDE0051 // Remove unused private members
-#pragma warning restore RCS1213 // Remove unused member declaration.
         {
             get => (byte)Flags1;
             set => Flags1 = (FilterCaseInfoFlags)value;

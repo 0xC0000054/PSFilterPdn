@@ -252,7 +252,6 @@ namespace PSFilterPdn.EnableInfo
             return left;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "booleanExpression")]
         private Expression ParseFactor()
         {
             Token token = Advance();

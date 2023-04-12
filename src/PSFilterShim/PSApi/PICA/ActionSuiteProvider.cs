@@ -77,7 +77,6 @@ namespace PSFilterLoad.PSApi.PICA
         /// </value>
         /// <exception cref="ObjectDisposedException">The class has been disposed.</exception>
         /// <exception cref="InvalidOperationException">CreateDescriptorSuite was not called before accessing the property.</exception>
-        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "CreateDescriptorSuite")]
         public ActionDescriptorSuite DescriptorSuite
         {
             get
@@ -103,7 +102,6 @@ namespace PSFilterLoad.PSApi.PICA
         /// </value>
         /// <exception cref="ObjectDisposedException">The class has been disposed.</exception>
         /// <exception cref="InvalidOperationException">CreateListSuite was not called before accessing the property.</exception>
-        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "CreateListSuite")]
         public ActionListSuite ListSuite
         {
             get
@@ -129,7 +127,6 @@ namespace PSFilterLoad.PSApi.PICA
         /// </value>
         /// <exception cref="ObjectDisposedException">The class has been disposed.</exception>
         /// <exception cref="InvalidOperationException">CreateReferenceSuite was not called before accessing the property.</exception>
-        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "CreateReferenceSuite")]
         public ActionReferenceSuite ReferenceSuite
         {
             get

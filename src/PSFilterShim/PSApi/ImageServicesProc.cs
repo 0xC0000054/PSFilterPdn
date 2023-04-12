@@ -41,7 +41,6 @@ namespace PSFilterLoad.PSApi
                                                   IntPtr coords,
                                                   InterpolationMethod method);
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable")]
     [StructLayout(LayoutKind.Sequential)]
     internal struct ImageServicesProcs
     {

@@ -20,12 +20,10 @@ namespace PSFilterLoad.PSApi
     [Serializable]
     internal sealed class DescriptorRegistryItem
     {
-#pragma warning disable IDE0044 // Add readonly modifier
         [DataMember]
         private Dictionary<uint, AETEValue> values;
         [DataMember]
         private bool isPersistent;
-#pragma warning restore IDE0044 // Add readonly modifier
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DescriptorRegistryItem"/> class.

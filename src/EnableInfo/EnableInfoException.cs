@@ -15,7 +15,6 @@ using System.Runtime.Serialization;
 
 namespace PSFilterPdn.EnableInfo
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1064:ExceptionsShouldBePublic")]
     [Serializable]
     internal sealed class EnableInfoException : Exception
     {
