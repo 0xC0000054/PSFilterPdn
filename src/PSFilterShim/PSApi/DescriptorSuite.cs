@@ -478,9 +478,9 @@ namespace PSFilterLoad.PSApi
                        state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
+            byte[] value = (byte[])item.Value;
 
-            int size = item.Size;
-            *data = handleSuite.NewHandle(size);
+            *data = handleSuite.NewHandle(value.Length);
 
             if (*data == Handle.Null)
             {
@@ -490,7 +490,7 @@ namespace PSFilterLoad.PSApi
 
             using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(*data))
             {
-                ((byte[])item.Value).CopyTo(handleSuiteLock.Data);
+                value.CopyTo(handleSuiteLock.Data);
             }
 
             return PSError.noErr;
@@ -512,9 +512,9 @@ namespace PSFilterLoad.PSApi
                        state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
+            byte[] value = (byte[])item.Value;
 
-            int size = item.Size;
-            *data = handleSuite.NewHandle(size);
+            *data = handleSuite.NewHandle(value.Length);
 
             if (*data == Handle.Null)
             {
@@ -524,7 +524,7 @@ namespace PSFilterLoad.PSApi
 
             using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(*data))
             {
-                ((byte[])item.Value).CopyTo(handleSuiteLock.Data);
+                value.CopyTo(handleSuiteLock.Data);
             }
 
             return PSError.noErr;
@@ -669,12 +669,13 @@ namespace PSFilterLoad.PSApi
                                    state.currentKey);
 
             AETEValue item = state.items[state.currentKey];
+            byte[] value = (byte[])item.Value;
 
-            int size = item.Size;
+            int size = value.Length;
 
             Marshal.WriteByte(data, (byte)size);
 
-            Marshal.Copy((byte[])item.Value, 0, new IntPtr(data.ToInt64() + 1L), size);
+            Marshal.Copy(value, 0, new IntPtr(data.ToInt64() + 1L), size);
             return PSError.noErr;
         }
 
@@ -873,7 +874,7 @@ namespace PSFilterLoad.PSApi
                        key);
             try
             {
-                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), 0, data));
+                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {
@@ -897,7 +898,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Float, GetAETEParamFlags(key), 0, *data));
+                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Float, GetAETEParamFlags(key), *data));
             }
             catch (OutOfMemoryException)
             {
@@ -923,7 +924,7 @@ namespace PSFilterLoad.PSApi
             {
                 UnitFloat item = new(unit, *data);
 
-                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.UintFloat, GetAETEParamFlags(key), 0, item));
+                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.UintFloat, GetAETEParamFlags(key), item));
             }
             catch (OutOfMemoryException)
             {
@@ -941,7 +942,7 @@ namespace PSFilterLoad.PSApi
                        key);
             try
             {
-                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Boolean, GetAETEParamFlags(key), 0, data));
+                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Boolean, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {
@@ -965,9 +966,8 @@ namespace PSFilterLoad.PSApi
                     using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(textHandle))
                     {
                         byte[] data = handleSuiteLock.Data.ToArray();
-                        int size = data.Length;
 
-                        writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), size, data));
+                        writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), data));
                     }
                 }
                 catch (OutOfMemoryException)
@@ -991,9 +991,8 @@ namespace PSFilterLoad.PSApi
                 using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(aliasHandle))
                 {
                     byte[] data = handleSuiteLock.Data.ToArray();
-                    int size = data.Length;
 
-                    writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Alias, GetAETEParamFlags(key), size, data));
+                    writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Alias, GetAETEParamFlags(key), data));
                 }
             }
             catch (OutOfMemoryException)
@@ -1013,7 +1012,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, data));
+                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {
@@ -1032,7 +1031,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), 0, data));
+                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {
@@ -1056,7 +1055,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.ObjectReference, GetAETEParamFlags(key), 0, *data));
+                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.ObjectReference, GetAETEParamFlags(key), *data));
             }
             catch (OutOfMemoryException)
             {
@@ -1078,7 +1077,7 @@ namespace PSFilterLoad.PSApi
                 // If the handle is a sub key add it to the parent descriptor.
                 if (descriptorHandles.TryGetValue(descriptorHandle, out Dictionary<uint, AETEValue> subKeys))
                 {
-                    writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys));
+                    writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, GetAETEParamFlags(key), subKeys));
                     descriptorHandles.Remove(descriptorHandle);
                 }
                 else
@@ -1117,7 +1116,7 @@ namespace PSFilterLoad.PSApi
                 byte[] data = new byte[size];
                 Marshal.Copy(new IntPtr(stringHandle.ToInt64() + 1L), data, 0, size);
 
-                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), size, data));
+                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {
@@ -1136,7 +1135,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), 0, data));
+                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {

@@ -640,7 +640,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), 0, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {
@@ -660,7 +660,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Float, GetAETEParamFlags(key), 0, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Float, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {
@@ -682,7 +682,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 UnitFloat item = new(unit, data);
 
-                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.UintFloat, GetAETEParamFlags(key), 0, item));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.UintFloat, GetAETEParamFlags(key), item));
             }
             catch (OutOfMemoryException)
             {
@@ -709,7 +709,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 if (StringUtil.TryGetCStringData(cstrValue, out ReadOnlySpan<byte> data))
                 {
-                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), data.Length, data.ToArray()));
+                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), data.ToArray()));
                 }
                 else
                 {
@@ -735,7 +735,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Boolean, GetAETEParamFlags(key), 0, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Boolean, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {
@@ -757,7 +757,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 if (actionListSuite.TryGetListValues(list, out ReadOnlyCollection<ActionListItem> values))
                 {
-                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.ValueList, GetAETEParamFlags(key), 0, values));
+                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.ValueList, GetAETEParamFlags(key), values));
                 }
                 else
                 {
@@ -784,7 +784,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 try
                 {
-                    actionDescriptors[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), 0, subKeys.ToDictionary()));
+                    actionDescriptors[descriptor].Add(key, new AETEValue(type, GetAETEParamFlags(key), subKeys.ToDictionary()));
                 }
                 catch (OutOfMemoryException)
                 {
@@ -815,7 +815,7 @@ namespace PSFilterLoad.PSApi.PICA
             try
             {
                 EnumeratedValue item = new(type, data);
-                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Enumerated, GetAETEParamFlags(key), 0, item));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Enumerated, GetAETEParamFlags(key), item));
             }
             catch (OutOfMemoryException)
             {
@@ -837,7 +837,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 if (actionReferenceSuite.TryGetReferenceValues(reference, out ReadOnlyCollection<ActionReferenceItem> values))
                 {
-                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.ObjectReference, GetAETEParamFlags(key), 0, values));
+                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.ObjectReference, GetAETEParamFlags(key), values));
                 }
                 else
                 {
@@ -862,7 +862,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), 0, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Class, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {
@@ -882,7 +882,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.GlobalClass, GetAETEParamFlags(key), 0, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.GlobalClass, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {
@@ -905,9 +905,8 @@ namespace PSFilterLoad.PSApi.PICA
                 using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(aliasHandle))
                 {
                     byte[] data = handleSuiteLock.Data.ToArray();
-                    int size = data.Length;
 
-                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Alias, GetAETEParamFlags(key), size, data));
+                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Alias, GetAETEParamFlags(key), data));
                 }
             }
             catch (OutOfMemoryException)
@@ -946,7 +945,7 @@ namespace PSFilterLoad.PSApi.PICA
                     }
                 }
 
-                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), 0, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Integer, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {
@@ -968,7 +967,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 if (zstringSuite.ConvertToActionDescriptor(zstring, out ActionDescriptorZString value))
                 {
-                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), 0, value));
+                    actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.Char, GetAETEParamFlags(key), value));
 
                     return PSError.kSPNoError;
                 }
@@ -1000,7 +999,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 Marshal.Copy(blob, data, 0, length);
 
-                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.RawData, GetAETEParamFlags(key), length, data));
+                actionDescriptors[descriptor].Add(key, new AETEValue(DescriptorTypes.RawData, GetAETEParamFlags(key), data));
             }
             catch (OutOfMemoryException)
             {
@@ -1343,8 +1342,8 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (actionDescriptors[descriptor].TryGetValue(key, out AETEValue item))
             {
-                int size = item.Size;
-                *data = handleSuite.NewHandle(size);
+                byte[] value = (byte[])item.Value;
+                *data = handleSuite.NewHandle(value.Length);
 
                 if (*data == Handle.Null)
                 {
@@ -1353,7 +1352,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(*data))
                 {
-                    ((byte[])item.Value).CopyTo(handleSuiteLock.Data);
+                    value.CopyTo(handleSuiteLock.Data);
                 }
 
                 return PSError.kSPNoError;

@@ -31,7 +31,7 @@ namespace PSFilterLoad.PSApi
 
                 if (DescriptorRegistryFileHeader.TryCreate(fs, out DescriptorRegistryFileHeader header))
                 {
-                    if (header.FileVersion == 2)
+                    if (header.FileVersion == 3)
                     {
                         long dataLength = fs.Length - fs.Position;
 
@@ -82,7 +82,7 @@ namespace PSFilterLoad.PSApi
         {
             public DescriptorRegistryFileHeader()
             {
-                FileVersion = 2;
+                FileVersion = 3;
             }
 
             private DescriptorRegistryFileHeader(int fileVersion)

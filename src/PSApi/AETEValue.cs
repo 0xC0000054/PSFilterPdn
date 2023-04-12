@@ -27,23 +27,18 @@ namespace PSFilterLoad.PSApi
         [DataMember]
         private int flags;
         [DataMember]
-        private int size;
-        [DataMember]
         private object value;
 
         public uint Type => type;
 
         public int Flags => flags;
 
-        public int Size => size;
-
         public object Value => value;
 
-        public AETEValue(uint type, int flags, int size, object value)
+        public AETEValue(uint type, int flags, object value)
         {
             this.type = type;
             this.flags = flags;
-            this.size = size;
             this.value = value;
         }
     }
