@@ -69,6 +69,7 @@
     <Compile Include="..\PSApi\IHandleSuiteCallbacks.cs" Link="PSApi\IHandleSuiteCallbacks.cs" />
     <Compile Include="..\PSApi\ImageMode.cs" Link="PSApi\ImageMode.cs" />
     <Compile Include="..\PSApi\ParameterData.cs" Link="PSApi\ParameterData.cs" />
+    <Compile Include="..\PSApi\PICA\Action Suites\ActionDescriptorZString.cs" Link="PSApi\PICA\Action Suites\ActionDescriptorZString.cs" />
     <Compile Include="..\PSApi\PICA\Action Suites\ActionListDescriptor.cs" Link="PSApi\PICA\Action Suites\ActionListDescriptor.cs" />
     <Compile Include="..\PSApi\PICA\Action Suites\ActionListItem.cs" Link="PSApi\PICA\Action Suites\ActionListItem.cs" />
     <Compile Include="..\PSApi\PICA\Action Suites\ActionReferenceItem.cs" Link="PSApi\PICA\Action Suites\ActionReferenceItem.cs" />

@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.PICA;
 using System;
 using System.Runtime.Serialization;
 
@@ -74,21 +75,6 @@ namespace PSFilterLoad.PSApi
         public EnumeratedValue(uint type, uint value)
         {
             this.type = type;
-            this.value = value;
-        }
-    }
-
-    [DataContract]
-    [Serializable]
-    internal sealed class ActionDescriptorZString
-    {
-        [DataMember]
-        private string value;
-
-        public string Value => value;
-
-        public ActionDescriptorZString(string value)
-        {
             this.value = value;
         }
     }
