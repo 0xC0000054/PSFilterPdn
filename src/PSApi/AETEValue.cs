@@ -25,20 +25,15 @@ namespace PSFilterLoad.PSApi
         [DataMember]
         private uint type;
         [DataMember]
-        private int flags;
-        [DataMember]
         private object value;
 
         public uint Type => type;
 
-        public int Flags => flags;
-
         public object Value => value;
 
-        public AETEValue(uint type, int flags, object value)
+        public AETEValue(uint type, object value)
         {
             this.type = type;
-            this.flags = flags;
             this.value = value;
         }
     }
