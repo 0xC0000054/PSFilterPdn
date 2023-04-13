@@ -14,32 +14,31 @@ using System;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    [Serializable]
-    internal enum ActionReferenceForm : uint
+    internal static class ActionReferenceForm
     {
-        Class = 0x436C7373,
-        Enumerated = 0x456E6D72,
-        Identifier = 0x49646E74,
-        Index = 0x696E6478,
-        Offset = 0x72656C65,
-        Property = 0x70726F70,
-        Name = 0x6E616D65
+        internal const uint Class = 0x436C7373;
+        internal const uint Enumerated = 0x456E6D72;
+        internal const uint Identifier = 0x49646E74;
+        internal const uint Index = 0x696E6478;
+        internal const uint Offset = 0x72656C65;
+        internal const uint Property = 0x70726F70;
+        internal const uint Name = 0x6E616D65;
     }
 
     [Serializable]
     internal sealed class ActionReferenceItem
     {
-        private readonly ActionReferenceForm form;
+        private readonly uint form;
         private readonly uint desiredClass;
         private readonly object value;
 
-        public ActionReferenceForm Form => form;
+        public uint Form => form;
 
         public uint DesiredClass => desiredClass;
 
         public object Value => value;
 
-        public ActionReferenceItem(ActionReferenceForm form, uint desiredClass, object value)
+        public ActionReferenceItem(uint form, uint desiredClass, object value)
         {
             this.form = form;
             this.desiredClass = desiredClass;

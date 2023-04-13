@@ -240,7 +240,7 @@ namespace PSFilterLoad.PSApi.PICA
                 ActionReferenceItem item = container.GetReference();
                 if (item != null)
                 {
-                    *value = (uint)item.Form;
+                    *value = item.Form;
 
                     return PSError.kSPNoError;
                 }
