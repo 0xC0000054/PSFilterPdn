@@ -17,7 +17,7 @@ namespace PSFilterLoad.PSApi.PICA
 {
     internal sealed class PICAUIHooksSuite
     {
-        private readonly IntPtr hwnd;
+        private readonly IPICASuiteDataProvider picaSuiteData;
         private readonly string pluginName;
         private readonly UISuiteMainWindowHandle uiWindowHandle;
         private readonly UISuiteHostSetCursor uiSetCursor;
@@ -26,15 +26,16 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly IASZStringSuite zstringSuite;
         private readonly IPluginApiLogger logger;
 
-        public unsafe PICAUIHooksSuite(IntPtr parentWindowHandle,
+        public unsafe PICAUIHooksSuite(IPICASuiteDataProvider picaSuiteData,
                                        string name,
                                        IASZStringSuite zstringSuite,
                                        IPluginApiLogger logger)
         {
+            ArgumentNullException.ThrowIfNull(picaSuiteData);
             ArgumentNullException.ThrowIfNull(zstringSuite);
             ArgumentNullException.ThrowIfNull(logger);
 
-            hwnd = parentWindowHandle;
+            this.picaSuiteData = picaSuiteData;
             pluginName = name ?? string.Empty;
 
             uiWindowHandle = new UISuiteMainWindowHandle(MainWindowHandle);
@@ -49,7 +50,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             logger.LogFunctionName(PluginApiLogCategory.PicaUIHooksSuite);
 
-            return hwnd;
+            return picaSuiteData.ParentWindowHandle;
         }
 
         private int HostSetCursor(IntPtr cursor)
@@ -87,14 +88,14 @@ namespace PSFilterLoad.PSApi.PICA
             return PSError.kSPNoError;
         }
 
-        public PSUIHooksSuite1 CreateUIHooksSuite1(IPICASuiteDataProvider suiteDataProvider)
+        public PSUIHooksSuite1 CreateUIHooksSuite1()
         {
             PSUIHooksSuite1 suite = new()
             {
-                processEvent = new UnmanagedFunctionPointer<ProcessEventProc>(suiteDataProvider.ProcessEvent),
-                displayPixels = new UnmanagedFunctionPointer<DisplayPixelsProc>(suiteDataProvider.DisplayPixels),
-                progressBar = new UnmanagedFunctionPointer<ProgressProc>(suiteDataProvider.Progress),
-                testAbort = new UnmanagedFunctionPointer<TestAbortProc>(suiteDataProvider.TestAbort),
+                processEvent = new UnmanagedFunctionPointer<ProcessEventProc>(picaSuiteData.ProcessEvent),
+                displayPixels = new UnmanagedFunctionPointer<DisplayPixelsProc>(picaSuiteData.DisplayPixels),
+                progressBar = new UnmanagedFunctionPointer<ProgressProc>(picaSuiteData.Progress),
+                testAbort = new UnmanagedFunctionPointer<TestAbortProc>(picaSuiteData.TestAbort),
                 MainAppWindow = new UnmanagedFunctionPointer<UISuiteMainWindowHandle>(uiWindowHandle),
                 SetCursor = new UnmanagedFunctionPointer<UISuiteHostSetCursor>(uiSetCursor),
                 TickCount = new UnmanagedFunctionPointer<UISuiteHostTickCount>(uiTickCount),

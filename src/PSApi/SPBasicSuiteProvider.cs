@@ -380,13 +380,13 @@ namespace PSFilterLoad.PSApi
 
                     if (uiHooksSuite == null)
                     {
-                        uiHooksSuite = new PICAUIHooksSuite(picaSuiteData.ParentWindowHandle,
+                        uiHooksSuite = new PICAUIHooksSuite(picaSuiteData,
                                                             pluginName,
                                                             ASZStringSuite,
                                                             logger.CreateInstanceForType(nameof(PICAUIHooksSuite)));
                     }
 
-                    PSUIHooksSuite1 suite = uiHooksSuite.CreateUIHooksSuite1(picaSuiteData);
+                    PSUIHooksSuite1 suite = uiHooksSuite.CreateUIHooksSuite1();
                     suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.ActionDescriptorSuite, StringComparison.Ordinal))
