@@ -115,10 +115,7 @@ namespace PSFilterLoad.PSApi
         {
             get
             {
-                if (zstringSuite == null)
-                {
-                    zstringSuite = new ASZStringSuite(logger.CreateInstanceForType(nameof(ASZStringSuite)));
-                }
+                zstringSuite ??= new ASZStringSuite(logger.CreateInstanceForType(nameof(ASZStringSuite)));
 
                 return zstringSuite;
             }
@@ -320,10 +317,7 @@ namespace PSFilterLoad.PSApi
                         return PSError.kSPSuiteNotFoundError;
                     }
 
-                    if (bufferSuite == null)
-                    {
-                        bufferSuite = new PICABufferSuite(logger.CreateInstanceForType(nameof(PICABufferSuite)));
-                    }
+                    bufferSuite ??= new PICABufferSuite(logger.CreateInstanceForType(nameof(PICABufferSuite)));
 
                     PSBufferSuite1 suite = bufferSuite.CreateBufferSuite1();
                     suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
@@ -335,10 +329,7 @@ namespace PSFilterLoad.PSApi
                         return PSError.kSPSuiteNotFoundError;
                     }
 
-                    if (picaHandleSuite == null)
-                    {
-                        picaHandleSuite = new PICAHandleSuite(handleSuiteCallbacks);
-                    }
+                    picaHandleSuite ??= new PICAHandleSuite(handleSuiteCallbacks);
 
                     if (version == 1)
                     {
@@ -378,13 +369,10 @@ namespace PSFilterLoad.PSApi
                         return PSError.kSPSuiteNotFoundError;
                     }
 
-                    if (uiHooksSuite == null)
-                    {
-                        uiHooksSuite = new PICAUIHooksSuite(picaSuiteData,
-                                                            pluginName,
-                                                            ASZStringSuite,
-                                                            logger.CreateInstanceForType(nameof(PICAUIHooksSuite)));
-                    }
+                    uiHooksSuite ??= new PICAUIHooksSuite(picaSuiteData,
+                                                          pluginName,
+                                                          ASZStringSuite,
+                                                          logger.CreateInstanceForType(nameof(PICAUIHooksSuite)));
 
                     PSUIHooksSuite1 suite = uiHooksSuite.CreateUIHooksSuite1();
                     suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
@@ -448,11 +436,8 @@ namespace PSFilterLoad.PSApi
                         return PSError.kSPSuiteNotFoundError;
                     }
 
-                    if (colorSpaceSuite == null)
-                    {
-                        colorSpaceSuite = new PICAColorSpaceSuite(ASZStringSuite,
-                                                                  logger.CreateInstanceForType(nameof(PICAColorSpaceSuite)));
-                    }
+                    colorSpaceSuite ??= new PICAColorSpaceSuite(ASZStringSuite,
+                                                                logger.CreateInstanceForType(nameof(PICAColorSpaceSuite)));
 
                     PSColorSpaceSuite1 csSuite = colorSpaceSuite.CreateColorSpaceSuite1();
                     suitePointer = activePICASuites.AllocateSuite(suiteKey, csSuite);
@@ -489,10 +474,7 @@ namespace PSFilterLoad.PSApi
                         return PSError.kSPSuiteNotFoundError;
                     }
 
-                    if (errorSuite == null)
-                    {
-                        errorSuite = new ErrorSuite(ASZStringSuite);
-                    }
+                    errorSuite ??= new ErrorSuite(ASZStringSuite);
 
                     PSErrorSuite1 errorProcs = errorSuite.CreateErrorSuite1();
                     suitePointer = activePICASuites.AllocateSuite(suiteKey, errorProcs);

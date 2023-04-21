@@ -47,10 +47,7 @@ namespace PSFilterPdn.EnableInfo
         /// <exception cref="EnableInfoException">The enable information string is not valid.</exception>
         public ReadOnlyCollection<Token> GetTokens()
         {
-            if (readOnlyTokens == null)
-            {
-                readOnlyTokens = new ReadOnlyCollection<Token>(ScanTokens());
-            }
+            readOnlyTokens ??= new ReadOnlyCollection<Token>(ScanTokens());
 
             return readOnlyTokens;
         }
