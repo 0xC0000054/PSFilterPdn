@@ -17,7 +17,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal sealed class PICABufferSuite : IDisposable
+    internal sealed class PICABufferSuite : IDisposable, IPICASuiteAllocator
     {
         private sealed class BufferEntry : IDisposable
         {
@@ -83,6 +83,45 @@ namespace PSFilterLoad.PSApi.PICA
             bufferSuiteGetSpace = new PSBufferSuiteGetSpace(PSBufferGetSpace);
             buffers = new Dictionary<IntPtr, BufferEntry>(IntPtrEqualityComparer.Instance);
             disposed = false;
+        }
+
+        unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
+        {
+            if (disposed)
+            {
+                throw new ObjectDisposedException("PICABufferSuite");
+            }
+
+            if (!IsSupportedVersion(version))
+            {
+                throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.BufferSuite, version);
+            }
+
+            PSBufferSuite1* suite = Memory.Allocate<PSBufferSuite1>(MemoryAllocationFlags.Default);
+
+            suite->New = new UnmanagedFunctionPointer<PSBufferSuiteNew>(bufferSuiteNew);
+            suite->Dispose = new UnmanagedFunctionPointer<PSBufferSuiteDispose>(bufferSuiteDispose);
+            suite->GetSize = new UnmanagedFunctionPointer<PSBufferSuiteGetSize>(bufferSuiteGetSize);
+            suite->GetSpace = new UnmanagedFunctionPointer<PSBufferSuiteGetSpace>(bufferSuiteGetSpace);
+
+            return new IntPtr(suite);
+        }
+
+        bool IPICASuiteAllocator.IsSupportedVersion(int version) => IsSupportedVersion(version);
+
+        public static bool IsSupportedVersion(int version) => version == 1;
+
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                disposed = true;
+
+                foreach (KeyValuePair<IntPtr, BufferEntry> item in buffers)
+                {
+                    item.Value.Dispose();
+                }
+            }
         }
 
         private unsafe IntPtr PSBufferNew(uint* requestedSize, uint minimumSize)
@@ -197,37 +236,6 @@ namespace PSFilterLoad.PSApi.PICA
             logger.Log(PluginApiLogCategory.BufferSuite, "space: {0}", space);
 
             return space;
-        }
-
-        public PSBufferSuite1 CreateBufferSuite1()
-        {
-            if (disposed)
-            {
-                throw new ObjectDisposedException("PICABufferSuite");
-            }
-
-            PSBufferSuite1 suite = new()
-            {
-                New = new UnmanagedFunctionPointer<PSBufferSuiteNew>(bufferSuiteNew),
-                Dispose = new UnmanagedFunctionPointer<PSBufferSuiteDispose>(bufferSuiteDispose),
-                GetSize = new UnmanagedFunctionPointer<PSBufferSuiteGetSize>(bufferSuiteGetSize),
-                GetSpace = new UnmanagedFunctionPointer<PSBufferSuiteGetSpace>(bufferSuiteGetSpace)
-            };
-
-            return suite;
-        }
-
-        public void Dispose()
-        {
-            if (!disposed)
-            {
-                disposed = true;
-
-                foreach (KeyValuePair<IntPtr, BufferEntry> item in buffers)
-                {
-                    item.Value.Dispose();
-                }
-            }
         }
     }
 }

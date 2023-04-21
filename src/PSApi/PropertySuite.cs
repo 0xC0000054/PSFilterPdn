@@ -18,7 +18,7 @@ using System.Text;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class PropertySuite : IPropertySuite
+    internal sealed class PropertySuite : IPICASuiteAllocator
     {
 #pragma warning disable IDE0032 // Use auto property
         private readonly GetPropertyProc getPropertyProc;
@@ -56,18 +56,17 @@ namespace PSFilterLoad.PSApi
             numberOfChannels = 0;
         }
 
-        PropertyProcs IPropertySuite.CreatePropertySuite()
+        IntPtr IPICASuiteAllocator.Allocate(int version)
         {
-            PropertyProcs suite = new()
+            if (version != PSConstants.kCurrentPropertyProcsVersion)
             {
-                propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion,
-                numPropertyProcs = PSConstants.kCurrentPropertyProcsCount,
-                getPropertyProc = new UnmanagedFunctionPointer<GetPropertyProc>(getPropertyProc),
-                setPropertyProc = new UnmanagedFunctionPointer<SetPropertyProc>(setPropertyProc)
-            };
+                throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.PropertySuite, version);
+            }
 
-            return suite;
+            return CreatePropertySuitePointer();
         }
+
+        bool IPICASuiteAllocator.IsSupportedVersion(int version) => version == PSConstants.kCurrentPropertyProcsVersion;
 
         /// <summary>
         /// Gets the get property callback delegate.

@@ -68,6 +68,7 @@
     <Compile Include="..\PSApi\IHandleSuite.cs" Link="PSApi\IHandleSuite.cs" />
     <Compile Include="..\PSApi\IHandleSuiteCallbacks.cs" Link="PSApi\IHandleSuiteCallbacks.cs" />
     <Compile Include="..\PSApi\ImageMode.cs" Link="PSApi\ImageMode.cs" />
+    <Compile Include="..\PSApi\IPICASuiteAllocator.cs" Link="PSApi\IPICASuiteAllocator.cs" />
     <Compile Include="..\PSApi\ParameterData.cs" Link="PSApi\ParameterData.cs" />
     <Compile Include="..\PSApi\PICA\Action Suites\ActionDescriptorZString.cs" Link="PSApi\PICA\Action Suites\ActionDescriptorZString.cs" />
     <Compile Include="..\PSApi\PICA\Action Suites\ActionListDescriptor.cs" Link="PSApi\PICA\Action Suites\ActionListDescriptor.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="..\PSApi\PseudoResource.cs" Link="PSApi\PseudoResource.cs" />
     <Compile Include="..\PSApi\PseudoResourceCollection.cs" Link="PSApi\PseudoResourceCollection.cs" />
     <Compile Include="..\PSApi\UnmanagedFunctionPointer`1.cs" Link="PSApi\UnmanagedFunctionPointer`1.cs" />
+    <Compile Include="..\PSApi\UnsupportedPICASuiteVersionException.cs" Link="PSApi\UnsupportedPICASuiteVersionException.cs" />
     <Compile Include="..\PSFilterShimImageFormat.cs" Link="PSFilterShimImageFormat.cs" />
     <Compile Include="..\PSFilterShimImageHeader.cs" Link="PSFilterShimImageHeader.cs" />
   </ItemGroup>

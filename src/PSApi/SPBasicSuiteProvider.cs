@@ -22,8 +22,8 @@ namespace PSFilterLoad.PSApi
     {
         private readonly IPICASuiteDataProvider picaSuiteData;
         private readonly IHandleSuiteCallbacks handleSuiteCallbacks;
-        private readonly IPropertySuite propertySuite;
-        private readonly IResourceSuite resourceSuite;
+        private readonly IPICASuiteAllocator propertySuite;
+        private readonly IPICASuiteAllocator resourceSuite;
         private readonly IPluginApiLogger logger;
         private readonly SPBasicAcquireSuite spAcquireSuite;
         private readonly SPBasicAllocateBlock spAllocateBlock;
@@ -66,8 +66,8 @@ namespace PSFilterLoad.PSApi
         public unsafe SPBasicSuiteProvider(IPICASuiteDataProvider picaSuiteData,
                                            IHandleSuite handleSuite,
                                            IHandleSuiteCallbacks handleSuiteCallbacks,
-                                           IPropertySuite propertySuite,
-                                           IResourceSuite resourceSuite,
+                                           PropertySuite propertySuite,
+                                           ResourceSuite resourceSuite,
                                            IPluginApiLogger logger)
         {
             this.picaSuiteData = picaSuiteData ?? throw new ArgumentNullException(nameof(picaSuiteData));
@@ -320,59 +320,47 @@ namespace PSFilterLoad.PSApi
 
                 if (suiteName.Equals(PSConstants.PICA.BufferSuite, StringComparison.Ordinal))
                 {
-                    if (version != 1)
+                    if (!PICABufferSuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
                     }
 
                     bufferSuite ??= new PICABufferSuite(logger.CreateInstanceForType(nameof(PICABufferSuite)));
 
-                    PSBufferSuite1 suite = bufferSuite.CreateBufferSuite1();
-                    suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, bufferSuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.HandleSuite, StringComparison.Ordinal))
                 {
-                    if (version != 1 && version != 2)
+                    if (!PICAHandleSuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
                     }
 
                     picaHandleSuite ??= new PICAHandleSuite(handleSuiteCallbacks);
 
-                    if (version == 1)
-                    {
-                        PSHandleSuite1 suite = picaHandleSuite.CreateHandleSuite1();
-                        suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
-                    }
-                    else if (version == 2)
-                    {
-                        PSHandleSuite2 suite = picaHandleSuite.CreateHandleSuite2();
-                        suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
-                    }
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, picaHandleSuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.PropertySuite, StringComparison.Ordinal))
                 {
-                    if (version != PSConstants.kCurrentPropertyProcsVersion)
+                    if (!propertySuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
                     }
 
-                    PropertyProcs suite = propertySuite.CreatePropertySuite();
-                    suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, propertySuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.ResourceSuite, StringComparison.Ordinal))
                 {
-                    if (version != PSConstants.kCurrentResourceProcsVersion)
+                    if (!resourceSuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
                     }
 
-                    ResourceProcs suite = resourceSuite.CreateResourceProcs();
-                    suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, resourceSuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.UIHooksSuite, StringComparison.Ordinal))
                 {
-                    if (version != 1)
+                    if (!PICAUIHooksSuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
                     }
@@ -382,64 +370,62 @@ namespace PSFilterLoad.PSApi
                                                           ASZStringSuite,
                                                           logger.CreateInstanceForType(nameof(PICAUIHooksSuite)));
 
-                    PSUIHooksSuite1 suite = uiHooksSuite.CreateUIHooksSuite1();
-                    suitePointer = activePICASuites.AllocateSuite(suiteKey, suite);
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, uiHooksSuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.ActionDescriptorSuite, StringComparison.Ordinal))
                 {
-                    if (version != 2)
+                    if (!ActionDescriptorSuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
                     }
+
                     if (!actionSuites.DescriptorSuiteCreated)
                     {
                         CreateActionDescriptorSuite();
                     }
 
-                    PSActionDescriptorProc actionDescriptor = actionSuites.DescriptorSuite.CreateActionDescriptorSuite2();
-                    suitePointer = activePICASuites.AllocateSuite(suiteKey, actionDescriptor);
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, actionSuites.DescriptorSuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.ActionListSuite, StringComparison.Ordinal))
                 {
-                    if (version != 1)
+                    if (!ActionListSuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
                     }
+
                     if (!actionSuites.ListSuiteCreated)
                     {
                         actionSuites.CreateListSuite(ASZStringSuite);
                     }
 
-                    PSActionListProcs listSuite = actionSuites.ListSuite.CreateActionListSuite1();
-                    suitePointer = activePICASuites.AllocateSuite(suiteKey, listSuite);
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, actionSuites.ListSuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.ActionReferenceSuite, StringComparison.Ordinal))
                 {
-                    if (version != 2)
+                    if (!ActionReferenceSuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
                     }
+
                     if (!actionSuites.ReferenceSuiteCreated)
                     {
                         actionSuites.CreateReferenceSuite();
                     }
 
-                    PSActionReferenceProcs referenceSuite = actionSuites.ReferenceSuite.CreateActionReferenceSuite2();
-                    suitePointer = activePICASuites.AllocateSuite(suiteKey, referenceSuite);
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, actionSuites.ReferenceSuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.ASZStringSuite, StringComparison.Ordinal))
                 {
-                    if (version != 1)
+                    if (!ASZStringSuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
                     }
 
-                    ASZStringSuite1 stringSuite = ASZStringSuite.CreateASZStringSuite1();
-                    suitePointer = activePICASuites.AllocateSuite(suiteKey, stringSuite);
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, ASZStringSuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.ColorSpaceSuite, StringComparison.Ordinal))
                 {
-                    if (version != 1)
+                    if (!PICAColorSpaceSuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
                     }
@@ -447,12 +433,11 @@ namespace PSFilterLoad.PSApi
                     colorSpaceSuite ??= new PICAColorSpaceSuite(ASZStringSuite,
                                                                 logger.CreateInstanceForType(nameof(PICAColorSpaceSuite)));
 
-                    PSColorSpaceSuite1 csSuite = colorSpaceSuite.CreateColorSpaceSuite1();
-                    suitePointer = activePICASuites.AllocateSuite(suiteKey, csSuite);
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, colorSpaceSuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.DescriptorRegistrySuite, StringComparison.Ordinal))
                 {
-                    if (version != 1)
+                    if (!DescriptorRegistrySuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
                     }
@@ -472,20 +457,18 @@ namespace PSFilterLoad.PSApi
                         }
                     }
 
-                    PSDescriptorRegistryProcs registrySuite = descriptorRegistrySuite.CreateDescriptorRegistrySuite1();
-                    suitePointer = activePICASuites.AllocateSuite(suiteKey, registrySuite);
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, descriptorRegistrySuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.ErrorSuite, StringComparison.Ordinal))
                 {
-                    if (version != 1)
+                    if (!ErrorSuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
                     }
 
                     errorSuite ??= new ErrorSuite(ASZStringSuite);
 
-                    PSErrorSuite1 errorProcs = errorSuite.CreateErrorSuite1();
-                    suitePointer = activePICASuites.AllocateSuite(suiteKey, errorProcs);
+                    suitePointer = activePICASuites.AllocateSuite(suiteKey, errorSuite);
                 }
                 else
                 {
@@ -495,6 +478,10 @@ namespace PSFilterLoad.PSApi
             catch (OutOfMemoryException)
             {
                 return PSError.kSPOutOfMemoryError;
+            }
+            catch (UnsupportedPICASuiteVersionException)
+            {
+                return PSError.kSPSuiteNotFoundError;
             }
 
             return PSError.kSPNoError;

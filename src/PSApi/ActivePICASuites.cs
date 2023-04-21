@@ -14,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
@@ -191,21 +190,19 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Allocates a new PICA suite.
         /// </summary>
-        /// <typeparam name="TSuite">The type of the suite.</typeparam>
         /// <param name="key">The <see cref="PICASuiteKey"/> specifying the suite name and version.</param>
         /// <param name="suite">The suite to be marshaled to unmanaged memory.</param>
         /// <returns>The pointer to the allocated suite.</returns>
-        public IntPtr AllocateSuite<TSuite>(PICASuiteKey key, TSuite suite)
+        public IntPtr AllocateSuite(PICASuiteKey key, IPICASuiteAllocator factory)
         {
             if (disposed)
             {
                 throw new ObjectDisposedException("ActivePICASuites");
             }
-            IntPtr suitePointer = Memory.Allocate(Marshal.SizeOf<TSuite>(), false);
+
+            IntPtr suitePointer = factory.Allocate(key.Version);
             try
             {
-                Marshal.StructureToPtr(suite, suitePointer, false);
-
                 activeSuites.Add(key, new PICASuite(suitePointer));
             }
             catch (Exception)

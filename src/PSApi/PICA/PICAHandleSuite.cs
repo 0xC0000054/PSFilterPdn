@@ -11,10 +11,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal sealed class PICAHandleSuite
+    internal sealed class PICAHandleSuite : IPICASuiteAllocator
     {
         private readonly NewPIHandleProc handleNewProc;
         private readonly DisposePIHandleProc handleDisposeProc;
@@ -39,6 +40,55 @@ namespace PSFilterLoad.PSApi.PICA
             setHandleLock = new SetPIHandleLockDelegate(SetHandleLock);
         }
 
+        IntPtr IPICASuiteAllocator.Allocate(int version)
+        {
+            IntPtr suitePointer;
+
+            if (version == 1)
+            {
+                suitePointer = Memory.Allocate(Marshal.SizeOf<PSHandleSuite1>(), false);
+
+                unsafe
+                {
+                    PSHandleSuite1* suite = (PSHandleSuite1*)suitePointer;
+
+                    suite->New = new UnmanagedFunctionPointer<NewPIHandleProc>(handleNewProc);
+                    suite->Dispose = new UnmanagedFunctionPointer<DisposePIHandleProc>(handleDisposeProc);
+                    suite->SetLock = new UnmanagedFunctionPointer<SetPIHandleLockDelegate>(setHandleLock);
+                    suite->GetSize = new UnmanagedFunctionPointer<GetPIHandleSizeProc>(handleGetSizeProc);
+                    suite->SetSize = new UnmanagedFunctionPointer<SetPIHandleSizeProc>(handleSetSizeProc);
+                    suite->RecoverSpace = new UnmanagedFunctionPointer<RecoverSpaceProc>(handleRecoverSpaceProc);
+                }
+            }
+            else if (version == 2)
+            {
+                suitePointer = Memory.Allocate(Marshal.SizeOf<PSHandleSuite2>(), false);
+
+                unsafe
+                {
+                    PSHandleSuite2* suite = (PSHandleSuite2*)suitePointer;
+
+                    suite->New = new UnmanagedFunctionPointer<NewPIHandleProc>(handleNewProc);
+                    suite->Dispose = new UnmanagedFunctionPointer<DisposePIHandleProc>(handleDisposeProc);
+                    suite->DisposeRegularHandle = new UnmanagedFunctionPointer<DisposeRegularPIHandleProc>(handleDisposeRegularProc);
+                    suite->SetLock = new UnmanagedFunctionPointer<SetPIHandleLockDelegate>(setHandleLock);
+                    suite->GetSize = new UnmanagedFunctionPointer<GetPIHandleSizeProc>(handleGetSizeProc);
+                    suite->SetSize = new UnmanagedFunctionPointer<SetPIHandleSizeProc>(handleSetSizeProc);
+                    suite->RecoverSpace = new UnmanagedFunctionPointer<RecoverSpaceProc>(handleRecoverSpaceProc);
+                }
+            }
+            else
+            {
+                throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.HandleSuite, version);
+            }
+
+            return suitePointer;
+        }
+
+        bool IPICASuiteAllocator.IsSupportedVersion(int version) => IsSupportedVersion(version);
+
+        public static bool IsSupportedVersion(int version) => version == 1 || version == 2;
+
         private unsafe void SetHandleLock(Handle handle, PSBoolean lockHandle, IntPtr* address, PSBoolean* oldLock)
         {
             if (oldLock != null)
@@ -55,37 +105,6 @@ namespace PSFilterLoad.PSApi.PICA
                 handleUnlockProc(handle);
                 *address = IntPtr.Zero;
             }
-        }
-
-        public PSHandleSuite1 CreateHandleSuite1()
-        {
-            PSHandleSuite1 suite = new()
-            {
-                New = new UnmanagedFunctionPointer<NewPIHandleProc>(handleNewProc),
-                Dispose = new UnmanagedFunctionPointer<DisposePIHandleProc>(handleDisposeProc),
-                SetLock = new UnmanagedFunctionPointer<SetPIHandleLockDelegate>(setHandleLock),
-                GetSize = new UnmanagedFunctionPointer<GetPIHandleSizeProc>(handleGetSizeProc),
-                SetSize = new UnmanagedFunctionPointer<SetPIHandleSizeProc>(handleSetSizeProc),
-                RecoverSpace = new UnmanagedFunctionPointer<RecoverSpaceProc>(handleRecoverSpaceProc)
-            };
-
-            return suite;
-        }
-
-        public PSHandleSuite2 CreateHandleSuite2()
-        {
-            PSHandleSuite2 suite = new()
-            {
-                New = new UnmanagedFunctionPointer<NewPIHandleProc>(handleNewProc),
-                Dispose = new UnmanagedFunctionPointer<DisposePIHandleProc>(handleDisposeProc),
-                DisposeRegularHandle = new UnmanagedFunctionPointer<DisposeRegularPIHandleProc>(handleDisposeRegularProc),
-                SetLock = new UnmanagedFunctionPointer<SetPIHandleLockDelegate>(setHandleLock),
-                GetSize = new UnmanagedFunctionPointer<GetPIHandleSizeProc>(handleGetSizeProc),
-                SetSize = new UnmanagedFunctionPointer<SetPIHandleSizeProc>(handleSetSizeProc),
-                RecoverSpace = new UnmanagedFunctionPointer<RecoverSpaceProc>(handleRecoverSpaceProc)
-            };
-
-            return suite;
         }
     }
 }

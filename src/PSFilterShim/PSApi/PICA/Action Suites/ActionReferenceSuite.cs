@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal sealed class ActionReferenceSuite : IActionReferenceSuite
+    internal sealed class ActionReferenceSuite : IActionReferenceSuite, IPICASuiteAllocator
     {
         private sealed class ActionReferenceContainer
         {
@@ -157,37 +157,41 @@ namespace PSFilterLoad.PSApi.PICA
             return reference;
         }
 
-        /// <summary>
-        /// Creates the action reference suite version 2 structure.
-        /// </summary>
-        /// <returns>A <see cref="PSActionReferenceProcs"/> containing the action reference suite callbacks.</returns>
-        public PSActionReferenceProcs CreateActionReferenceSuite2()
+        unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
         {
-            PSActionReferenceProcs suite = new()
+            if (!IsSupportedVersion(version))
             {
-                Make = new UnmanagedFunctionPointer<ActionReferenceMake>(make),
-                Free = new UnmanagedFunctionPointer<ActionReferenceFree>(free),
-                GetForm = new UnmanagedFunctionPointer<ActionReferenceGetForm>(getForm),
-                GetDesiredClass = new UnmanagedFunctionPointer<ActionReferenceGetDesiredClass>(getDesiredClass),
-                PutName = new UnmanagedFunctionPointer<ActionReferencePutName>(putName),
-                PutIndex = new UnmanagedFunctionPointer<ActionReferencePutIndex>(putIndex),
-                PutIdentifier = new UnmanagedFunctionPointer<ActionReferencePutIdentifier>(putIdentifier),
-                PutOffset = new UnmanagedFunctionPointer<ActionReferencePutOffset>(putOffset),
-                PutEnumerated = new UnmanagedFunctionPointer<ActionReferencePutEnumerated>(putEnumerated),
-                PutProperty = new UnmanagedFunctionPointer<ActionReferencePutProperty>(putProperty),
-                PutClass = new UnmanagedFunctionPointer<ActionReferencePutClass>(putClass),
-                GetNameLength = new UnmanagedFunctionPointer<ActionReferenceGetNameLength>(getNameLength),
-                GetName = new UnmanagedFunctionPointer<ActionReferenceGetName>(getName),
-                GetIndex = new UnmanagedFunctionPointer<ActionReferenceGetIndex>(getIndex),
-                GetIdentifier = new UnmanagedFunctionPointer<ActionReferenceGetIdentifier>(getIdentifier),
-                GetOffset = new UnmanagedFunctionPointer<ActionReferenceGetOffset>(getOffset),
-                GetEnumerated = new UnmanagedFunctionPointer<ActionReferenceGetEnumerated>(getEnumerated),
-                GetProperty = new UnmanagedFunctionPointer<ActionReferenceGetProperty>(getProperty),
-                GetContainer = new UnmanagedFunctionPointer<ActionReferenceGetContainer>(getContainer),
-            };
+                throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ActionReferenceSuite, version);
+            }
 
-            return suite;
+            PSActionReferenceProcs* suite = Memory.Allocate<PSActionReferenceProcs>(MemoryAllocationFlags.Default);
+
+            suite->Make = new UnmanagedFunctionPointer<ActionReferenceMake>(make);
+            suite->Free = new UnmanagedFunctionPointer<ActionReferenceFree>(free);
+            suite->GetForm = new UnmanagedFunctionPointer<ActionReferenceGetForm>(getForm);
+            suite->GetDesiredClass = new UnmanagedFunctionPointer<ActionReferenceGetDesiredClass>(getDesiredClass);
+            suite->PutName = new UnmanagedFunctionPointer<ActionReferencePutName>(putName);
+            suite->PutIndex = new UnmanagedFunctionPointer<ActionReferencePutIndex>(putIndex);
+            suite->PutIdentifier = new UnmanagedFunctionPointer<ActionReferencePutIdentifier>(putIdentifier);
+            suite->PutOffset = new UnmanagedFunctionPointer<ActionReferencePutOffset>(putOffset);
+            suite->PutEnumerated = new UnmanagedFunctionPointer<ActionReferencePutEnumerated>(putEnumerated);
+            suite->PutProperty = new UnmanagedFunctionPointer<ActionReferencePutProperty>(putProperty);
+            suite->PutClass = new UnmanagedFunctionPointer<ActionReferencePutClass>(putClass);
+            suite->GetNameLength = new UnmanagedFunctionPointer<ActionReferenceGetNameLength>(getNameLength);
+            suite->GetName = new UnmanagedFunctionPointer<ActionReferenceGetName>(getName);
+            suite->GetIndex = new UnmanagedFunctionPointer<ActionReferenceGetIndex>(getIndex);
+            suite->GetIdentifier = new UnmanagedFunctionPointer<ActionReferenceGetIdentifier>(getIdentifier);
+            suite->GetOffset = new UnmanagedFunctionPointer<ActionReferenceGetOffset>(getOffset);
+            suite->GetEnumerated = new UnmanagedFunctionPointer<ActionReferenceGetEnumerated>(getEnumerated);
+            suite->GetProperty = new UnmanagedFunctionPointer<ActionReferenceGetProperty>(getProperty);
+            suite->GetContainer = new UnmanagedFunctionPointer<ActionReferenceGetContainer>(getContainer);
+
+            return new IntPtr(suite);
         }
+
+        bool IPICASuiteAllocator.IsSupportedVersion(int version) => IsSupportedVersion(version);
+
+        public static bool IsSupportedVersion(int version) => version == 2;
 
         private PIActionReference GenerateDictionaryKey()
         {

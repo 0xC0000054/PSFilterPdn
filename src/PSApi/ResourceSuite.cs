@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class ResourceSuite : IResourceSuite
+    internal sealed class ResourceSuite : IPICASuiteAllocator
     {
         private readonly IHandleSuite handleSuite;
         private readonly IPluginApiLogger logger;
@@ -54,18 +54,17 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        ResourceProcs IResourceSuite.CreateResourceProcs()
+        IntPtr IPICASuiteAllocator.Allocate(int version)
         {
-            return new ResourceProcs
+            if (version != PSConstants.kCurrentResourceProcsVersion)
             {
-                resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion,
-                numResourceProcs = PSConstants.kCurrentResourceProcsCount,
-                addProc = new UnmanagedFunctionPointer<AddPIResourceProc>(addResourceProc),
-                countProc = new UnmanagedFunctionPointer<CountPIResourcesProc>(countResourceProc),
-                deleteProc = new UnmanagedFunctionPointer<DeletePIResourceProc>(deleteResourceProc),
-                getProc = new UnmanagedFunctionPointer<GetPIResourceProc>(getResourceProc)
-            };
+                throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ResourceSuite, version);
+            }
+
+            return CreateResourceProcsPointer();
         }
+
+        bool IPICASuiteAllocator.IsSupportedVersion(int version) => version == PSConstants.kCurrentResourceProcsVersion;
 
         public IntPtr CreateResourceProcsPointer()
         {

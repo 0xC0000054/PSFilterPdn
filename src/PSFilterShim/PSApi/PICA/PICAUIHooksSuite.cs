@@ -15,7 +15,7 @@ using System;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal sealed class PICAUIHooksSuite
+    internal sealed class PICAUIHooksSuite : IPICASuiteAllocator
     {
         private readonly IPICASuiteDataProvider picaSuiteData;
         private readonly string pluginName;
@@ -45,6 +45,31 @@ namespace PSFilterLoad.PSApi.PICA
             this.zstringSuite = zstringSuite;
             this.logger = logger;
         }
+
+        unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
+        {
+            if (!IsSupportedVersion(version))
+            {
+                throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.UIHooksSuite, version);
+            }
+
+            PSUIHooksSuite1* suite = Memory.Allocate<PSUIHooksSuite1>(MemoryAllocationFlags.Default);
+
+            suite->processEvent = new UnmanagedFunctionPointer<ProcessEventProc>(picaSuiteData.ProcessEvent);
+            suite->displayPixels = new UnmanagedFunctionPointer<DisplayPixelsProc>(picaSuiteData.DisplayPixels);
+            suite->progressBar = new UnmanagedFunctionPointer<ProgressProc>(picaSuiteData.Progress);
+            suite->testAbort = new UnmanagedFunctionPointer<TestAbortProc>(picaSuiteData.TestAbort);
+            suite->MainAppWindow = new UnmanagedFunctionPointer<UISuiteMainWindowHandle>(uiWindowHandle);
+            suite->SetCursor = new UnmanagedFunctionPointer<UISuiteHostSetCursor>(uiSetCursor);
+            suite->TickCount = new UnmanagedFunctionPointer<UISuiteHostTickCount>(uiTickCount);
+            suite->GetPluginName = new UnmanagedFunctionPointer<UISuiteGetPluginName>(uiPluginName);
+
+            return new IntPtr(suite);
+        }
+
+        bool IPICASuiteAllocator.IsSupportedVersion(int version) => IsSupportedVersion(version);
+
+        public static bool IsSupportedVersion(int version) => version == 1;
 
         private IntPtr MainWindowHandle()
         {
@@ -86,23 +111,6 @@ namespace PSFilterLoad.PSApi.PICA
             }
 
             return PSError.kSPNoError;
-        }
-
-        public PSUIHooksSuite1 CreateUIHooksSuite1()
-        {
-            PSUIHooksSuite1 suite = new()
-            {
-                processEvent = new UnmanagedFunctionPointer<ProcessEventProc>(picaSuiteData.ProcessEvent),
-                displayPixels = new UnmanagedFunctionPointer<DisplayPixelsProc>(picaSuiteData.DisplayPixels),
-                progressBar = new UnmanagedFunctionPointer<ProgressProc>(picaSuiteData.Progress),
-                testAbort = new UnmanagedFunctionPointer<TestAbortProc>(picaSuiteData.TestAbort),
-                MainAppWindow = new UnmanagedFunctionPointer<UISuiteMainWindowHandle>(uiWindowHandle),
-                SetCursor = new UnmanagedFunctionPointer<UISuiteHostSetCursor>(uiSetCursor),
-                TickCount = new UnmanagedFunctionPointer<UISuiteHostTickCount>(uiTickCount),
-                GetPluginName = new UnmanagedFunctionPointer<UISuiteGetPluginName>(uiPluginName)
-            };
-
-            return suite;
         }
     }
 }

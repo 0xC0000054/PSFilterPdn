@@ -10,14 +10,15 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using System;
+
 namespace PSFilterLoad.PSApi
 {
-    interface IPropertySuite
+    internal sealed class UnsupportedPICASuiteVersionException : NotSupportedException
     {
-        /// <summary>
-        /// Creates the property suite structure.
-        /// </summary>
-        /// <returns>A <see cref="PropertyProcs"/> structure.</returns>
-        PropertyProcs CreatePropertySuite();
+        public UnsupportedPICASuiteVersionException(string suiteName, int suiteVersion)
+            : base($"PICA suite not supported: '{suiteName}', version {suiteVersion}.")
+        {
+        }
     }
 }

@@ -14,7 +14,7 @@ using System;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal sealed class ErrorSuite
+    internal sealed class ErrorSuite : IPICASuiteAllocator
     {
         private readonly ErrorSuiteSetErrorFromPString setErrorFromPString;
         private readonly ErrorSuiteSetErrorFromCString setErrorFromCString;
@@ -43,17 +43,25 @@ namespace PSFilterLoad.PSApi.PICA
             errorMessage = null;
         }
 
-        public PSErrorSuite1 CreateErrorSuite1()
+        unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
         {
-            PSErrorSuite1 suite = new()
+            if (!IsSupportedVersion(version))
             {
-                SetErrorFromPString = new UnmanagedFunctionPointer<ErrorSuiteSetErrorFromPString>(setErrorFromPString),
-                SetErrorFromCString = new UnmanagedFunctionPointer<ErrorSuiteSetErrorFromCString>(setErrorFromCString),
-                SetErrorFromZString = new UnmanagedFunctionPointer<ErrorSuiteSetErrorFromZString>(setErrorFromZString)
-            };
+                throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ErrorSuite, version);
+            }
 
-            return suite;
+            PSErrorSuite1* suite = Memory.Allocate<PSErrorSuite1>(MemoryAllocationFlags.Default);
+
+            suite->SetErrorFromPString = new UnmanagedFunctionPointer<ErrorSuiteSetErrorFromPString>(setErrorFromPString);
+            suite->SetErrorFromCString = new UnmanagedFunctionPointer<ErrorSuiteSetErrorFromCString>(setErrorFromCString);
+            suite->SetErrorFromZString = new UnmanagedFunctionPointer<ErrorSuiteSetErrorFromZString>(setErrorFromZString);
+
+            return new IntPtr(suite);
         }
+
+        bool IPICASuiteAllocator.IsSupportedVersion(int version) => IsSupportedVersion(version);
+
+        public static bool IsSupportedVersion(int version) => version == 1;
 
         private unsafe int SetErrorFromPString(IntPtr str)
         {

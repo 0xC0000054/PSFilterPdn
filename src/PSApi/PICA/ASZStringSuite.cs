@@ -20,7 +20,7 @@ using System.Text;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal sealed class ASZStringSuite : IASZStringSuite
+    internal sealed class ASZStringSuite : IASZStringSuite, IPICASuiteAllocator
     {
         private enum ZStringFormat
         {
@@ -159,37 +159,43 @@ namespace PSFilterLoad.PSApi.PICA
             stringsIndex = 0;
         }
 
-        public ASZStringSuite1 CreateASZStringSuite1()
+        unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
         {
-            ASZStringSuite1 suite = new()
+            if (!IsSupportedVersion(version))
             {
-                MakeFromUnicode = new UnmanagedFunctionPointer<ASZStringMakeFromUnicode>(makeFromUnicode),
-                MakeFromCString = new UnmanagedFunctionPointer<ASZStringMakeFromCString>(makeFromCString),
-                MakeFromPascalString = new UnmanagedFunctionPointer<ASZStringMakeFromPascalString>(makeFromPascalString),
-                MakeRomanizationOfInteger = new UnmanagedFunctionPointer<ASZStringMakeRomanizationOfInteger>(makeRomanizationOfInteger),
-                MakeRomanizationOfFixed = new UnmanagedFunctionPointer<ASZStringMakeRomanizationOfFixed>(makeRomanizationOfFixed),
-                MakeRomanizationOfDouble = new UnmanagedFunctionPointer<ASZStringMakeRomanizationOfDouble>(makeRomanizationOfDouble),
-                GetEmpty = new UnmanagedFunctionPointer<ASZStringGetEmpty>(getEmpty),
-                Copy = new UnmanagedFunctionPointer<ASZStringCopy>(copy),
-                Replace = new UnmanagedFunctionPointer<ASZStringReplace>(replace),
-                TrimEllipsis = new UnmanagedFunctionPointer<ASZStringTrimEllipsis>(trimEllpsis),
-                TrimSpaces = new UnmanagedFunctionPointer<ASZStringTrimSpaces>(trimSpaces),
-                RemoveAccelerators = new UnmanagedFunctionPointer<ASZStringRemoveAccelerators>(removeAccelerators),
-                AddRef = new UnmanagedFunctionPointer<ASZStringAddRef>(addRef),
-                Release = new UnmanagedFunctionPointer<ASZStringRelease>(release),
-                IsAllWhiteSpace = new UnmanagedFunctionPointer<ASZStringIsAllWhiteSpace>(isAllWhitespace),
-                IsEmpty = new UnmanagedFunctionPointer<ASZStringIsEmpty>(isEmpty),
-                WillReplace = new UnmanagedFunctionPointer<ASZStringWillReplace>(willReplace),
-                LengthAsUnicodeCString = new UnmanagedFunctionPointer<ASZStringLengthAsUnicodeCString>(lengthAsUnicodeCString),
-                AsUnicodeCString = new UnmanagedFunctionPointer<ASZStringAsUnicodeCString>(asUnicodeCString),
-                LengthAsCString = new UnmanagedFunctionPointer<ASZStringLengthAsCString>(lengthAsCString),
-                AsCString = new UnmanagedFunctionPointer<ASZStringAsCString>(asCString),
-                LengthAsPascalString = new UnmanagedFunctionPointer<ASZStringLengthAsPascalString>(lengthAsPascalString),
-                AsPascalString = new UnmanagedFunctionPointer<ASZStringAsPascalString>(asPascalString)
-            };
+                throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ASZStringSuite, version);
+            }
 
-            return suite;
+            ASZStringSuite1* suite = Memory.Allocate<ASZStringSuite1>(MemoryAllocationFlags.Default);
+
+            suite->MakeFromUnicode = new UnmanagedFunctionPointer<ASZStringMakeFromUnicode>(makeFromUnicode);
+            suite->MakeFromCString = new UnmanagedFunctionPointer<ASZStringMakeFromCString>(makeFromCString);
+            suite->MakeFromPascalString = new UnmanagedFunctionPointer<ASZStringMakeFromPascalString>(makeFromPascalString);
+            suite->MakeRomanizationOfInteger = new UnmanagedFunctionPointer<ASZStringMakeRomanizationOfInteger>(makeRomanizationOfInteger);
+            suite->MakeRomanizationOfFixed = new UnmanagedFunctionPointer<ASZStringMakeRomanizationOfFixed>(makeRomanizationOfFixed);
+            suite->MakeRomanizationOfDouble = new UnmanagedFunctionPointer<ASZStringMakeRomanizationOfDouble>(makeRomanizationOfDouble);
+            suite->GetEmpty = new UnmanagedFunctionPointer<ASZStringGetEmpty>(getEmpty);
+            suite->Copy = new UnmanagedFunctionPointer<ASZStringCopy>(copy);
+            suite->Replace = new UnmanagedFunctionPointer<ASZStringReplace>(replace);
+            suite->TrimEllipsis = new UnmanagedFunctionPointer<ASZStringTrimEllipsis>(trimEllpsis);
+            suite->TrimSpaces = new UnmanagedFunctionPointer<ASZStringTrimSpaces>(trimSpaces);
+            suite->RemoveAccelerators = new UnmanagedFunctionPointer<ASZStringRemoveAccelerators>(removeAccelerators);
+            suite->AddRef = new UnmanagedFunctionPointer<ASZStringAddRef>(addRef);
+            suite->Release = new UnmanagedFunctionPointer<ASZStringRelease>(release);
+            suite->IsAllWhiteSpace = new UnmanagedFunctionPointer<ASZStringIsAllWhiteSpace>(isAllWhitespace);
+            suite->IsEmpty = new UnmanagedFunctionPointer<ASZStringIsEmpty>(isEmpty);
+            suite->WillReplace = new UnmanagedFunctionPointer<ASZStringWillReplace>(willReplace);
+            suite->LengthAsUnicodeCString = new UnmanagedFunctionPointer<ASZStringLengthAsUnicodeCString>(lengthAsUnicodeCString);
+            suite->AsUnicodeCString = new UnmanagedFunctionPointer<ASZStringAsUnicodeCString>(asUnicodeCString);
+            suite->LengthAsCString = new UnmanagedFunctionPointer<ASZStringLengthAsCString>(lengthAsCString);
+            suite->AsCString = new UnmanagedFunctionPointer<ASZStringAsCString>(asCString);
+            suite->LengthAsPascalString = new UnmanagedFunctionPointer<ASZStringLengthAsPascalString>(lengthAsPascalString);
+            suite->AsPascalString = new UnmanagedFunctionPointer<ASZStringAsPascalString>(asPascalString);
+
+            return new IntPtr(suite);
         }
+
+        bool IPICASuiteAllocator.IsSupportedVersion(int version) => IsSupportedVersion(version);
 
         bool IASZStringSuite.ConvertToActionDescriptor(ASZString zstring, out ActionDescriptorZString descriptor)
         {
@@ -271,6 +277,8 @@ namespace PSFilterLoad.PSApi.PICA
 
             return newZString;
         }
+
+        public static bool IsSupportedVersion(int version) => version == 1;
 
         private ASZString GenerateDictionaryKey()
         {

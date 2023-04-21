@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal sealed class ActionDescriptorSuite : IActionDescriptorSuite, IDisposable
+    internal sealed class ActionDescriptorSuite : IActionDescriptorSuite, IDisposable, IPICASuiteAllocator
     {
         private sealed class ScriptingParameters
         {
@@ -274,60 +274,68 @@ namespace PSFilterLoad.PSApi.PICA
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        public PSActionDescriptorProc CreateActionDescriptorSuite2()
+        unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
         {
-            PSActionDescriptorProc suite = new()
+            if (!IsSupportedVersion(version))
             {
-                Make = new UnmanagedFunctionPointer<ActionDescriptorMake>(make),
-                Free = new UnmanagedFunctionPointer<ActionDescriptorFree>(free),
-                GetType = new UnmanagedFunctionPointer<ActionDescriptorGetType>(getType),
-                GetKey = new UnmanagedFunctionPointer<ActionDescriptorGetKey>(getKey),
-                HasKey = new UnmanagedFunctionPointer<ActionDescriptorHasKey>(hasKey),
-                GetCount = new UnmanagedFunctionPointer<ActionDescriptorGetCount>(getCount),
-                IsEqual = new UnmanagedFunctionPointer<ActionDescriptorIsEqual>(isEqual),
-                Erase = new UnmanagedFunctionPointer<ActionDescriptorErase>(erase),
-                Clear = new UnmanagedFunctionPointer<ActionDescriptorClear>(clear),
-                PutInteger = new UnmanagedFunctionPointer<ActionDescriptorPutInteger>(putInteger),
-                PutFloat = new UnmanagedFunctionPointer<ActionDescriptorPutFloat>(putFloat),
-                PutUnitFloat = new UnmanagedFunctionPointer<ActionDescriptorPutUnitFloat>(putUnitFloat),
-                PutString = new UnmanagedFunctionPointer<ActionDescriptorPutString>(putString),
-                PutBoolean = new UnmanagedFunctionPointer<ActionDescriptorPutBoolean>(putBoolean),
-                PutList = new UnmanagedFunctionPointer<ActionDescriptorPutList>(putList),
-                PutObject = new UnmanagedFunctionPointer<ActionDescriptorPutObject>(putObject),
-                PutGlobalObject = new UnmanagedFunctionPointer<ActionDescriptorPutGlobalObject>(putGlobalObject),
-                PutEnumerated = new UnmanagedFunctionPointer<ActionDescriptorPutEnumerated>(putEnumerated),
-                PutReference = new UnmanagedFunctionPointer<ActionDescriptorPutReference>(putReference),
-                PutClass = new UnmanagedFunctionPointer<ActionDescriptorPutClass>(putClass),
-                PutGlobalClass = new UnmanagedFunctionPointer<ActionDescriptorPutGlobalClass>(putGlobalClass),
-                PutAlias = new UnmanagedFunctionPointer<ActionDescriptorPutAlias>(putAlias),
-                GetInteger = new UnmanagedFunctionPointer<ActionDescriptorGetInteger>(getInteger),
-                GetFloat = new UnmanagedFunctionPointer<ActionDescriptorGetFloat>(getFloat),
-                GetUnitFloat = new UnmanagedFunctionPointer<ActionDescriptorGetUnitFloat>(getUnitFloat),
-                GetStringLength = new UnmanagedFunctionPointer<ActionDescriptorGetStringLength>(getStringLength),
-                GetString = new UnmanagedFunctionPointer<ActionDescriptorGetString>(getString),
-                GetBoolean = new UnmanagedFunctionPointer<ActionDescriptorGetBoolean>(getBoolean),
-                GetList = new UnmanagedFunctionPointer<ActionDescriptorGetList>(getList),
-                GetObject = new UnmanagedFunctionPointer<ActionDescriptorGetObject>(getObject),
-                GetGlobalObject = new UnmanagedFunctionPointer<ActionDescriptorGetGlobalObject>(getGlobalObject),
-                GetEnumerated = new UnmanagedFunctionPointer<ActionDescriptorGetEnumerated>(getEnumerated),
-                GetReference = new UnmanagedFunctionPointer<ActionDescriptorGetReference>(getReference),
-                GetClass = new UnmanagedFunctionPointer<ActionDescriptorGetClass>(getClass),
-                GetGlobalClass = new UnmanagedFunctionPointer<ActionDescriptorGetGlobalClass>(getGlobalClass),
-                GetAlias = new UnmanagedFunctionPointer<ActionDescriptorGetAlias>(getAlias),
-                HasKeys = new UnmanagedFunctionPointer<ActionDescriptorHasKeys>(hasKeys),
-                PutIntegers = new UnmanagedFunctionPointer<ActionDescriptorPutIntegers>(putIntegers),
-                GetIntegers = new UnmanagedFunctionPointer<ActionDescriptorGetIntegers>(getIntegers),
-                AsHandle = new UnmanagedFunctionPointer<ActionDescriptorAsHandle>(asHandle),
-                HandleToDescriptor = new UnmanagedFunctionPointer<ActionDescriptorHandleToDescriptor>(handleToDescriptor),
-                PutZString = new UnmanagedFunctionPointer<ActionDescriptorPutZString>(putZString),
-                GetZString = new UnmanagedFunctionPointer<ActionDescriptorGetZString>(getZString),
-                PutData = new UnmanagedFunctionPointer<ActionDescriptorPutData>(putData),
-                GetDataLength = new UnmanagedFunctionPointer<ActionDescriptorGetDataLength>(getDataLength),
-                GetData = new UnmanagedFunctionPointer<ActionDescriptorGetData>(getData),
-            };
+                throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ActionDescriptorSuite, version);
+            }
 
-            return suite;
+            PSActionDescriptorProc* suite = Memory.Allocate<PSActionDescriptorProc>(MemoryAllocationFlags.Default);
+
+            suite->Make = new UnmanagedFunctionPointer<ActionDescriptorMake>(make);
+            suite->Free = new UnmanagedFunctionPointer<ActionDescriptorFree>(free);
+            suite->GetType = new UnmanagedFunctionPointer<ActionDescriptorGetType>(getType);
+            suite->GetKey = new UnmanagedFunctionPointer<ActionDescriptorGetKey>(getKey);
+            suite->HasKey = new UnmanagedFunctionPointer<ActionDescriptorHasKey>(hasKey);
+            suite->GetCount = new UnmanagedFunctionPointer<ActionDescriptorGetCount>(getCount);
+            suite->IsEqual = new UnmanagedFunctionPointer<ActionDescriptorIsEqual>(isEqual);
+            suite->Erase = new UnmanagedFunctionPointer<ActionDescriptorErase>(erase);
+            suite->Clear = new UnmanagedFunctionPointer<ActionDescriptorClear>(clear);
+            suite->PutInteger = new UnmanagedFunctionPointer<ActionDescriptorPutInteger>(putInteger);
+            suite->PutFloat = new UnmanagedFunctionPointer<ActionDescriptorPutFloat>(putFloat);
+            suite->PutUnitFloat = new UnmanagedFunctionPointer<ActionDescriptorPutUnitFloat>(putUnitFloat);
+            suite->PutString = new UnmanagedFunctionPointer<ActionDescriptorPutString>(putString);
+            suite->PutBoolean = new UnmanagedFunctionPointer<ActionDescriptorPutBoolean>(putBoolean);
+            suite->PutList = new UnmanagedFunctionPointer<ActionDescriptorPutList>(putList);
+            suite->PutObject = new UnmanagedFunctionPointer<ActionDescriptorPutObject>(putObject);
+            suite->PutGlobalObject = new UnmanagedFunctionPointer<ActionDescriptorPutGlobalObject>(putGlobalObject);
+            suite->PutEnumerated = new UnmanagedFunctionPointer<ActionDescriptorPutEnumerated>(putEnumerated);
+            suite->PutReference = new UnmanagedFunctionPointer<ActionDescriptorPutReference>(putReference);
+            suite->PutClass = new UnmanagedFunctionPointer<ActionDescriptorPutClass>(putClass);
+            suite->PutGlobalClass = new UnmanagedFunctionPointer<ActionDescriptorPutGlobalClass>(putGlobalClass);
+            suite->PutAlias = new UnmanagedFunctionPointer<ActionDescriptorPutAlias>(putAlias);
+            suite->GetInteger = new UnmanagedFunctionPointer<ActionDescriptorGetInteger>(getInteger);
+            suite->GetFloat = new UnmanagedFunctionPointer<ActionDescriptorGetFloat>(getFloat);
+            suite->GetUnitFloat = new UnmanagedFunctionPointer<ActionDescriptorGetUnitFloat>(getUnitFloat);
+            suite->GetStringLength = new UnmanagedFunctionPointer<ActionDescriptorGetStringLength>(getStringLength);
+            suite->GetString = new UnmanagedFunctionPointer<ActionDescriptorGetString>(getString);
+            suite->GetBoolean = new UnmanagedFunctionPointer<ActionDescriptorGetBoolean>(getBoolean);
+            suite->GetList = new UnmanagedFunctionPointer<ActionDescriptorGetList>(getList);
+            suite->GetObject = new UnmanagedFunctionPointer<ActionDescriptorGetObject>(getObject);
+            suite->GetGlobalObject = new UnmanagedFunctionPointer<ActionDescriptorGetGlobalObject>(getGlobalObject);
+            suite->GetEnumerated = new UnmanagedFunctionPointer<ActionDescriptorGetEnumerated>(getEnumerated);
+            suite->GetReference = new UnmanagedFunctionPointer<ActionDescriptorGetReference>(getReference);
+            suite->GetClass = new UnmanagedFunctionPointer<ActionDescriptorGetClass>(getClass);
+            suite->GetGlobalClass = new UnmanagedFunctionPointer<ActionDescriptorGetGlobalClass>(getGlobalClass);
+            suite->GetAlias = new UnmanagedFunctionPointer<ActionDescriptorGetAlias>(getAlias);
+            suite->HasKeys = new UnmanagedFunctionPointer<ActionDescriptorHasKeys>(hasKeys);
+            suite->PutIntegers = new UnmanagedFunctionPointer<ActionDescriptorPutIntegers>(putIntegers);
+            suite->GetIntegers = new UnmanagedFunctionPointer<ActionDescriptorGetIntegers>(getIntegers);
+            suite->AsHandle = new UnmanagedFunctionPointer<ActionDescriptorAsHandle>(asHandle);
+            suite->HandleToDescriptor = new UnmanagedFunctionPointer<ActionDescriptorHandleToDescriptor>(handleToDescriptor);
+            suite->PutZString = new UnmanagedFunctionPointer<ActionDescriptorPutZString>(putZString);
+            suite->GetZString = new UnmanagedFunctionPointer<ActionDescriptorGetZString>(getZString);
+            suite->PutData = new UnmanagedFunctionPointer<ActionDescriptorPutData>(putData);
+            suite->GetDataLength = new UnmanagedFunctionPointer<ActionDescriptorGetDataLength>(getDataLength);
+            suite->GetData = new UnmanagedFunctionPointer<ActionDescriptorGetData>(getData);
+
+            return new IntPtr(suite);
         }
+
+        bool IPICASuiteAllocator.IsSupportedVersion(int version) => IsSupportedVersion(version);
+
+        public static bool IsSupportedVersion(int version) => version == 2;
 
         public void Dispose()
         {

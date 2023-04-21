@@ -16,7 +16,7 @@ using System.Collections.Generic;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal sealed class PICAColorSpaceSuite
+    internal sealed class PICAColorSpaceSuite : IPICASuiteAllocator
     {
         private sealed class Color
         {
@@ -119,6 +119,38 @@ namespace PSFilterLoad.PSApi.PICA
             lookup16To8 = null;
             lookup8To16 = null;
         }
+
+        unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
+        {
+            if (!IsSupportedVersion(version))
+            {
+                throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ColorSpaceSuite, version);
+            }
+
+            PSColorSpaceSuite1* suite = Memory.Allocate<PSColorSpaceSuite1>(MemoryAllocationFlags.Default);
+
+            suite->Make = new UnmanagedFunctionPointer<CSMake>(csMake);
+            suite->Delete = new UnmanagedFunctionPointer<CSDelete>(csDelete);
+            suite->StuffComponents = new UnmanagedFunctionPointer<CSStuffComponents>(csStuffComponent);
+            suite->ExtractComponents = new UnmanagedFunctionPointer<CSExtractComponents>(csExtractComponent);
+            suite->StuffXYZ = new UnmanagedFunctionPointer<CSStuffXYZ>(csStuffXYZ);
+            suite->ExtractXYZ = new UnmanagedFunctionPointer<CSExtractXYZ>(csExtractXYZ);
+            suite->Convert8 = new UnmanagedFunctionPointer<CSConvert8>(csConvert8);
+            suite->Convert16 = new UnmanagedFunctionPointer<CSConvert16>(csConvert16);
+            suite->GetNativeSpace = new UnmanagedFunctionPointer<CSGetNativeSpace>(csGetNativeSpace);
+            suite->IsBookColor = new UnmanagedFunctionPointer<CSIsBookColor>(csIsBookColor);
+            suite->ExtractColorName = new UnmanagedFunctionPointer<CSExtractColorName>(csExtractColorName);
+            suite->PickColor = new UnmanagedFunctionPointer<CSPickColor>(csPickColor);
+            suite->Convert8to16 = new UnmanagedFunctionPointer<CSConvert>(csConvert8to16);
+            suite->Convert16to8 = new UnmanagedFunctionPointer<CSConvert>(csConvert16to8);
+            suite->ConvertToMonitorRGB = new UnmanagedFunctionPointer<CSConvertToMonitorRGB>(csConvertToMonitorRGB);
+
+            return new IntPtr(suite);
+        }
+
+        bool IPICASuiteAllocator.IsSupportedVersion(int version) => IsSupportedVersion(version);
+
+        public static bool IsSupportedVersion(int version) => version == 1;
 
         private static bool IsValidColorSpace(ColorSpace colorSpace)
         {
@@ -550,30 +582,6 @@ namespace PSFilterLoad.PSApi.PICA
                        count);
 
             return PSError.kSPUnimplementedError;
-        }
-
-        public PSColorSpaceSuite1 CreateColorSpaceSuite1()
-        {
-            PSColorSpaceSuite1 suite = new()
-            {
-                Make = new UnmanagedFunctionPointer<CSMake>(csMake),
-                Delete = new UnmanagedFunctionPointer<CSDelete>(csDelete),
-                StuffComponents = new UnmanagedFunctionPointer<CSStuffComponents>(csStuffComponent),
-                ExtractComponents = new UnmanagedFunctionPointer<CSExtractComponents>(csExtractComponent),
-                StuffXYZ = new UnmanagedFunctionPointer<CSStuffXYZ>(csStuffXYZ),
-                ExtractXYZ = new UnmanagedFunctionPointer<CSExtractXYZ>(csExtractXYZ),
-                Convert8 = new UnmanagedFunctionPointer<CSConvert8>(csConvert8),
-                Convert16 = new UnmanagedFunctionPointer<CSConvert16>(csConvert16),
-                GetNativeSpace = new UnmanagedFunctionPointer<CSGetNativeSpace>(csGetNativeSpace),
-                IsBookColor = new UnmanagedFunctionPointer<CSIsBookColor>(csIsBookColor),
-                ExtractColorName = new UnmanagedFunctionPointer<CSExtractColorName>(csExtractColorName),
-                PickColor = new UnmanagedFunctionPointer<CSPickColor>(csPickColor),
-                Convert8to16 = new UnmanagedFunctionPointer<CSConvert>(csConvert8to16),
-                Convert16to8 = new UnmanagedFunctionPointer<CSConvert>(csConvert16to8),
-                ConvertToMonitorRGB = new UnmanagedFunctionPointer<CSConvertToMonitorRGB>(csConvertToMonitorRGB),
-            };
-
-            return suite;
         }
     }
 }

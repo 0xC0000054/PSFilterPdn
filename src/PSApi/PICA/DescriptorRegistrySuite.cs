@@ -16,7 +16,7 @@ using System.Collections.Generic;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal sealed class DescriptorRegistrySuite
+    internal sealed class DescriptorRegistrySuite : IPICASuiteAllocator
     {
         private readonly DescriptorRegistryRegister register;
         private readonly DescriptorRegistryErase erase;
@@ -51,21 +51,25 @@ namespace PSFilterLoad.PSApi.PICA
             persistentValuesChanged = false;
         }
 
-        /// <summary>
-        /// Creates the Descriptor Registry suite version 1 structure.
-        /// </summary>
-        /// <returns>A <see cref="PSDescriptorRegistryProcs"/> structure containing the Descriptor Registry suite callbacks.</returns>
-        public PSDescriptorRegistryProcs CreateDescriptorRegistrySuite1()
+        unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
         {
-            PSDescriptorRegistryProcs suite = new()
+            if (!IsSupportedVersion(version))
             {
-                Register = new UnmanagedFunctionPointer<DescriptorRegistryRegister>(register),
-                Erase = new UnmanagedFunctionPointer<DescriptorRegistryErase>(erase),
-                Get = new UnmanagedFunctionPointer<DescriptorRegistryGet>(get)
-            };
+                throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.DescriptorRegistrySuite, version);
+            }
 
-            return suite;
+            PSDescriptorRegistryProcs* suite = Memory.Allocate<PSDescriptorRegistryProcs>(MemoryAllocationFlags.Default);
+
+            suite->Register = new UnmanagedFunctionPointer<DescriptorRegistryRegister>(register);
+            suite->Erase = new UnmanagedFunctionPointer<DescriptorRegistryErase>(erase);
+            suite->Get = new UnmanagedFunctionPointer<DescriptorRegistryGet>(get);
+
+            return new IntPtr(suite);
         }
+
+        bool IPICASuiteAllocator.IsSupportedVersion(int version) => IsSupportedVersion(version);
+
+        public static bool IsSupportedVersion(int version) => version == 1;
 
         /// <summary>
         /// Gets the plug-in settings for the current session.

@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal sealed class ActionListSuite : IActionListSuite
+    internal sealed class ActionListSuite : IActionListSuite, IPICASuiteAllocator
     {
         private sealed class ActionListItemCollection : Collection<ActionListItem>
         {
@@ -201,57 +201,61 @@ namespace PSFilterLoad.PSApi.PICA
             }
         }
 
-        /// <summary>
-        /// Creates the action list suite version 1 structure.
-        /// </summary>
-        /// <returns>A <see cref="PSActionListProcs"/> containing the action list suite callbacks.</returns>
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        public PSActionListProcs CreateActionListSuite1()
+        unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
         {
-            PSActionListProcs suite = new()
+            if (!IsSupportedVersion(version))
             {
-                Make = new UnmanagedFunctionPointer<ActionListMake>(make),
-                Free = new UnmanagedFunctionPointer<ActionListFree>(free),
-                GetType = new UnmanagedFunctionPointer<ActionListGetType>(getType),
-                GetCount = new UnmanagedFunctionPointer<ActionListGetCount>(getCount),
-                PutInteger = new UnmanagedFunctionPointer<ActionListPutInteger>(putInteger),
-                PutFloat = new UnmanagedFunctionPointer<ActionListPutFloat>(putFloat),
-                PutUnitFloat = new UnmanagedFunctionPointer<ActionListPutUnitFloat>(putUnitFloat),
-                PutString = new UnmanagedFunctionPointer<ActionListPutString>(putString),
-                PutBoolean = new UnmanagedFunctionPointer<ActionListPutBoolean>(putBoolean),
-                PutList = new UnmanagedFunctionPointer<ActionListPutList>(putList),
-                PutObject = new UnmanagedFunctionPointer<ActionListPutObject>(putObject),
-                PutGlobalObject = new UnmanagedFunctionPointer<ActionListPutGlobalObject>(putGlobalObject),
-                PutEnumerated = new UnmanagedFunctionPointer<ActionListPutEnumerated>(putEnumerated),
-                PutReference = new UnmanagedFunctionPointer<ActionListPutReference>(putReference),
-                PutClass = new UnmanagedFunctionPointer<ActionListPutClass>(putClass),
-                PutGlobalClass = new UnmanagedFunctionPointer<ActionListPutGlobalClass>(putGlobalClass),
-                PutAlias = new UnmanagedFunctionPointer<ActionListPutAlias>(putAlias),
-                GetInteger = new UnmanagedFunctionPointer<ActionListGetInteger>(getInteger),
-                GetFloat = new UnmanagedFunctionPointer<ActionListGetFloat>(getFloat),
-                GetUnitFloat = new UnmanagedFunctionPointer<ActionListGetUnitFloat>(getUnitFloat),
-                GetStringLength = new UnmanagedFunctionPointer<ActionListGetStringLength>(getStringLength),
-                GetString = new UnmanagedFunctionPointer<ActionListGetString>(getString),
-                GetBoolean = new UnmanagedFunctionPointer<ActionListGetBoolean>(getBoolean),
-                GetList = new UnmanagedFunctionPointer<ActionListGetList>(getList),
-                GetObject = new UnmanagedFunctionPointer<ActionListGetObject>(getObject),
-                GetGlobalObject = new UnmanagedFunctionPointer<ActionListGetGlobalObject>(getGlobalObject),
-                GetEnumerated = new UnmanagedFunctionPointer<ActionListGetEnumerated>(getEnumerated),
-                GetReference = new UnmanagedFunctionPointer<ActionListGetReference>(getReference),
-                GetClass = new UnmanagedFunctionPointer<ActionListGetClass>(getClass),
-                GetGlobalClass = new UnmanagedFunctionPointer<ActionListGetGlobalClass>(getGlobalClass),
-                GetAlias = new UnmanagedFunctionPointer<ActionListGetAlias>(getAlias),
-                PutIntegers = new UnmanagedFunctionPointer<ActionListPutIntegers>(putIntegers),
-                GetIntegers = new UnmanagedFunctionPointer<ActionListGetIntegers>(getIntegers),
-                PutData = new UnmanagedFunctionPointer<ActionListPutData>(putData),
-                GetDataLength = new UnmanagedFunctionPointer<ActionListGetDataLength>(getDataLength),
-                GetData = new UnmanagedFunctionPointer<ActionListGetData>(getData),
-                PutZString = new UnmanagedFunctionPointer<ActionListPutZString>(putZString),
-                GetZString = new UnmanagedFunctionPointer<ActionListGetZString>(getZString),
-            };
+                throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ActionListSuite, version);
+            }
 
-            return suite;
+            PSActionListProcs* suite = Memory.Allocate<PSActionListProcs>(MemoryAllocationFlags.Default);
+
+            suite->Make = new UnmanagedFunctionPointer<ActionListMake>(make);
+            suite->Free = new UnmanagedFunctionPointer<ActionListFree>(free);
+            suite->GetType = new UnmanagedFunctionPointer<ActionListGetType>(getType);
+            suite->GetCount = new UnmanagedFunctionPointer<ActionListGetCount>(getCount);
+            suite->PutInteger = new UnmanagedFunctionPointer<ActionListPutInteger>(putInteger);
+            suite->PutFloat = new UnmanagedFunctionPointer<ActionListPutFloat>(putFloat);
+            suite->PutUnitFloat = new UnmanagedFunctionPointer<ActionListPutUnitFloat>(putUnitFloat);
+            suite->PutString = new UnmanagedFunctionPointer<ActionListPutString>(putString);
+            suite->PutBoolean = new UnmanagedFunctionPointer<ActionListPutBoolean>(putBoolean);
+            suite->PutList = new UnmanagedFunctionPointer<ActionListPutList>(putList);
+            suite->PutObject = new UnmanagedFunctionPointer<ActionListPutObject>(putObject);
+            suite->PutGlobalObject = new UnmanagedFunctionPointer<ActionListPutGlobalObject>(putGlobalObject);
+            suite->PutEnumerated = new UnmanagedFunctionPointer<ActionListPutEnumerated>(putEnumerated);
+            suite->PutReference = new UnmanagedFunctionPointer<ActionListPutReference>(putReference);
+            suite->PutClass = new UnmanagedFunctionPointer<ActionListPutClass>(putClass);
+            suite->PutGlobalClass = new UnmanagedFunctionPointer<ActionListPutGlobalClass>(putGlobalClass);
+            suite->PutAlias = new UnmanagedFunctionPointer<ActionListPutAlias>(putAlias);
+            suite->GetInteger = new UnmanagedFunctionPointer<ActionListGetInteger>(getInteger);
+            suite->GetFloat = new UnmanagedFunctionPointer<ActionListGetFloat>(getFloat);
+            suite->GetUnitFloat = new UnmanagedFunctionPointer<ActionListGetUnitFloat>(getUnitFloat);
+            suite->GetStringLength = new UnmanagedFunctionPointer<ActionListGetStringLength>(getStringLength);
+            suite->GetString = new UnmanagedFunctionPointer<ActionListGetString>(getString);
+            suite->GetBoolean = new UnmanagedFunctionPointer<ActionListGetBoolean>(getBoolean);
+            suite->GetList = new UnmanagedFunctionPointer<ActionListGetList>(getList);
+            suite->GetObject = new UnmanagedFunctionPointer<ActionListGetObject>(getObject);
+            suite->GetGlobalObject = new UnmanagedFunctionPointer<ActionListGetGlobalObject>(getGlobalObject);
+            suite->GetEnumerated = new UnmanagedFunctionPointer<ActionListGetEnumerated>(getEnumerated);
+            suite->GetReference = new UnmanagedFunctionPointer<ActionListGetReference>(getReference);
+            suite->GetClass = new UnmanagedFunctionPointer<ActionListGetClass>(getClass);
+            suite->GetGlobalClass = new UnmanagedFunctionPointer<ActionListGetGlobalClass>(getGlobalClass);
+            suite->GetAlias = new UnmanagedFunctionPointer<ActionListGetAlias>(getAlias);
+            suite->PutIntegers = new UnmanagedFunctionPointer<ActionListPutIntegers>(putIntegers);
+            suite->GetIntegers = new UnmanagedFunctionPointer<ActionListGetIntegers>(getIntegers);
+            suite->PutData = new UnmanagedFunctionPointer<ActionListPutData>(putData);
+            suite->GetDataLength = new UnmanagedFunctionPointer<ActionListGetDataLength>(getDataLength);
+            suite->GetData = new UnmanagedFunctionPointer<ActionListGetData>(getData);
+            suite->PutZString = new UnmanagedFunctionPointer<ActionListPutZString>(putZString);
+            suite->GetZString = new UnmanagedFunctionPointer<ActionListGetZString>(getZString);
+
+            return new IntPtr(suite);
         }
+
+        bool IPICASuiteAllocator.IsSupportedVersion(int version) => IsSupportedVersion(version);
+
+        public static bool IsSupportedVersion(int version) => version == 1;
 
         private PIActionList GenerateDictionaryKey()
         {
