@@ -245,47 +245,55 @@ namespace PSFilterLoad.PSApi
                 return PSError.kSPBadParameterError;
             }
 
-            string suiteName = StringUtil.FromCString(name, StringCreationOptions.UseStringPool);
-            if (suiteName == null)
-            {
-                return PSError.kSPBadParameterError;
-            }
-
             int error = PSError.kSPNoError;
-            ActivePICASuites.PICASuiteKey suiteKey = new(suiteName, version);
 
-            if (activePICASuites.IsLoaded(suiteKey))
+            try
             {
-                logger.Log(PluginApiLogCategory.SPBasicSuite, "AddRef on '{0}', version: {1}", suiteName, version);
-
-                *suite = activePICASuites.AddRef(suiteKey);
-            }
-            else
-            {
-                error = AllocatePICASuite(suiteKey, ref *suite);
-
-                if (error == PSError.kSPNoError)
+                string suiteName = StringUtil.FromCString(name, StringCreationOptions.UseStringPool);
+                if (suiteName == null)
                 {
-                    logger.Log(PluginApiLogCategory.SPBasicSuite,
-                               "Loaded '{0}', version {1}",
-                               suiteName,
-                               version);
+                    return PSError.kSPBadParameterError;
                 }
-                else if (error == PSError.kSPSuiteNotFoundError)
+
+                ActivePICASuites.PICASuiteKey suiteKey = new(suiteName, version);
+
+                if (activePICASuites.IsLoaded(suiteKey))
                 {
-                    logger.Log(PluginApiLogCategory.SPBasicSuite,
-                               "PICA suite not supported: '{0}', version {1}",
-                               suiteName,
-                               version);
+                    logger.Log(PluginApiLogCategory.SPBasicSuite, "AddRef on '{0}', version: {1}", suiteName, version);
+
+                    *suite = activePICASuites.AddRef(suiteKey);
                 }
                 else
                 {
-                    logger.Log(PluginApiLogCategory.SPBasicSuite,
-                               "Error code '{0}' when loading suite: '{1}', version {2}",
-                               error,
-                               suiteName,
-                               version);
+                    error = AllocatePICASuite(suiteKey, ref *suite);
+
+                    if (error == PSError.kSPNoError)
+                    {
+                        logger.Log(PluginApiLogCategory.SPBasicSuite,
+                                   "Loaded '{0}', version {1}",
+                                   suiteName,
+                                   version);
+                    }
+                    else if (error == PSError.kSPSuiteNotFoundError)
+                    {
+                        logger.Log(PluginApiLogCategory.SPBasicSuite,
+                                   "PICA suite not supported: '{0}', version {1}",
+                                   suiteName,
+                                   version);
+                    }
+                    else
+                    {
+                        logger.Log(PluginApiLogCategory.SPBasicSuite,
+                                   "Error code '{0}' when loading suite: '{1}', version {2}",
+                                   error,
+                                   suiteName,
+                                   version);
+                    }
                 }
+            }
+            catch (OutOfMemoryException)
+            {
+                error = PSError.kSPOutOfMemoryError;
             }
 
             return error;
@@ -494,15 +502,24 @@ namespace PSFilterLoad.PSApi
 
         private int SPBasicReleaseSuite(IntPtr name, int version)
         {
-            string suiteName = StringUtil.FromCString(name, StringCreationOptions.UseStringPool);
+            int error = PSError.kSPNoError;
 
-            logger.Log(PluginApiLogCategory.SPBasicSuite, "name: {0}, version: {1}", suiteName, version);
+            try
+            {
+                string suiteName = StringUtil.FromCString(name, StringCreationOptions.UseStringPool);
 
-            ActivePICASuites.PICASuiteKey suiteKey = new(suiteName, version);
+                logger.Log(PluginApiLogCategory.SPBasicSuite, "name: {0}, version: {1}", suiteName, version);
 
-            activePICASuites.Release(suiteKey);
+                ActivePICASuites.PICASuiteKey suiteKey = new(suiteName, version);
 
-            return PSError.kSPNoError;
+                activePICASuites.Release(suiteKey);
+            }
+            catch (OutOfMemoryException)
+            {
+                error = PSError.kSPOutOfMemoryError;
+            }
+
+            return error;
         }
 
         private unsafe ASBoolean SPBasicIsEqual(IntPtr token1, IntPtr token2)
