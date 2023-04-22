@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class SPBasicSuiteProvider : IDisposable
+    internal sealed class SPBasicSuiteProvider : IDisposable, ISPBasicSuiteProvider
     {
         private readonly IPICASuiteDataProvider picaSuiteData;
         private readonly IHandleSuiteCallbacks handleSuiteCallbacks;
@@ -44,9 +44,6 @@ namespace PSFilterLoad.PSApi
 
         private ActivePICASuites activePICASuites;
         private string pluginName;
-        private Handle descriptorHandle;
-        private Dictionary<uint, AETEValue> scriptingData;
-        private AETEData aete;
         private DescriptorRegistryValues registryValues;
         private bool disposed;
 
@@ -82,7 +79,7 @@ namespace PSFilterLoad.PSApi
             spFreeBlock = new SPBasicFreeBlock(SPBasicFreeBlock);
             spReallocateBlock = new SPBasicReallocateBlock(SPBasicReallocateBlock);
             spUndefined = new SPBasicUndefined(SPBasicUndefined);
-            actionSuites = new ActionSuiteProvider(handleSuite, logger);
+            actionSuites = new ActionSuiteProvider(this, handleSuite, logger);
             activePICASuites = new ActivePICASuites();
             descriptorRegistrySuite = null;
             bufferSuite = null;
@@ -92,6 +89,8 @@ namespace PSFilterLoad.PSApi
             disposed = false;
         }
 
+        IASZStringSuite ISPBasicSuiteProvider.ASZStringSuite => ASZStringSuite;
+
         /// <summary>
         /// Gets the error suite message.
         /// </summary>
@@ -99,17 +98,6 @@ namespace PSFilterLoad.PSApi
         /// The error suite message.
         /// </value>
         public string ErrorSuiteMessage => errorSuite?.ErrorMessage;
-
-        /// <summary>
-        /// Sets the scripting information used by the plug-in.
-        /// </summary>
-        /// <value>
-        /// The scripting information used by the plug-in.
-        /// </value>
-        public AETEData Aete
-        {
-            set => aete = value;
-        }
 
         private ASZStringSuite ASZStringSuite
         {
@@ -187,6 +175,14 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
+        /// Sets the scripting information used by the plug-in.
+        /// </summary>
+        /// <value>
+        /// The scripting information used by the plug-in.
+        /// </value>
+        public void SetAeteData(AETEData aete) => actionSuites.SetAeteData(aete);
+
+        /// <summary>
         /// Sets the name of the plug-in.
         /// </summary>
         /// <param name="name">The name of the plug-in.</param>
@@ -205,10 +201,7 @@ namespace PSFilterLoad.PSApi
         /// Sets the plug-in settings for the current session.
         /// </summary>
         /// <param name="values">The plug-in settings.</param>
-        public void SetRegistryValues(DescriptorRegistryValues values)
-        {
-            registryValues = values;
-        }
+        public void SetRegistryValues(DescriptorRegistryValues values) => registryValues = values;
 
         /// <summary>
         /// Sets the scripting data.
@@ -216,10 +209,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="descriptorHandle">The descriptor handle.</param>
         /// <param name="scriptingData">The scripting data.</param>
         public void SetScriptingData(Handle descriptorHandle, Dictionary<uint, AETEValue> scriptingData)
-        {
-            this.descriptorHandle = descriptorHandle;
-            this.scriptingData = scriptingData;
-        }
+            => actionSuites.SetScriptingData(descriptorHandle, scriptingData);
 
         /// <summary>
         /// Gets the scripting data associated with the specified descriptor handle.
@@ -228,15 +218,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="scriptingData">The scripting data.</param>
         /// <returns><c>true</c> if the descriptor handle contains scripting data; otherwise, <c>false</c></returns>
         public bool TryGetScriptingData(Handle descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
-        {
-            if (actionSuites.DescriptorSuiteCreated)
-            {
-                return actionSuites.DescriptorSuite.TryGetScriptingData(descriptorHandle, out scriptingData);
-            }
-
-            scriptingData = null;
-            return false;
-        }
+            => actionSuites.TryGetScriptingData(descriptorHandle, out scriptingData);
 
         private unsafe int SPBasicAcquireSuite(IntPtr name, int version, IntPtr* suite)
         {
@@ -297,18 +279,6 @@ namespace PSFilterLoad.PSApi
             }
 
             return error;
-        }
-
-        private unsafe void CreateActionDescriptorSuite()
-        {
-            if (!actionSuites.DescriptorSuiteCreated)
-            {
-                actionSuites.CreateDescriptorSuite(
-                    aete,
-                    descriptorHandle,
-                    scriptingData,
-                    ASZStringSuite);
-            }
         }
 
         private int AllocatePICASuite(ActivePICASuites.PICASuiteKey suiteKey, ref IntPtr suitePointer)
@@ -379,11 +349,6 @@ namespace PSFilterLoad.PSApi
                         return PSError.kSPSuiteNotFoundError;
                     }
 
-                    if (!actionSuites.DescriptorSuiteCreated)
-                    {
-                        CreateActionDescriptorSuite();
-                    }
-
                     suitePointer = activePICASuites.AllocateSuite(suiteKey, actionSuites.DescriptorSuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.ActionListSuite, StringComparison.Ordinal))
@@ -393,11 +358,6 @@ namespace PSFilterLoad.PSApi
                         return PSError.kSPSuiteNotFoundError;
                     }
 
-                    if (!actionSuites.ListSuiteCreated)
-                    {
-                        actionSuites.CreateListSuite(ASZStringSuite);
-                    }
-
                     suitePointer = activePICASuites.AllocateSuite(suiteKey, actionSuites.ListSuite);
                 }
                 else if (suiteName.Equals(PSConstants.PICA.ActionReferenceSuite, StringComparison.Ordinal))
@@ -405,11 +365,6 @@ namespace PSFilterLoad.PSApi
                     if (!ActionReferenceSuite.IsSupportedVersion(version))
                     {
                         return PSError.kSPSuiteNotFoundError;
-                    }
-
-                    if (!actionSuites.ReferenceSuiteCreated)
-                    {
-                        actionSuites.CreateReferenceSuite();
                     }
 
                     suitePointer = activePICASuites.AllocateSuite(suiteKey, actionSuites.ReferenceSuite);
@@ -444,11 +399,6 @@ namespace PSFilterLoad.PSApi
 
                     if (descriptorRegistrySuite == null)
                     {
-                        if (!actionSuites.DescriptorSuiteCreated)
-                        {
-                            CreateActionDescriptorSuite();
-                        }
-
                         descriptorRegistrySuite = new DescriptorRegistrySuite(actionSuites.DescriptorSuite,
                                                                               logger.CreateInstanceForType(nameof(DescriptorRegistrySuite)));
                         if (registryValues != null)

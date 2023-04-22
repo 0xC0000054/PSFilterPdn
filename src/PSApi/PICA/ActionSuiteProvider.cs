@@ -21,21 +21,39 @@ namespace PSFilterLoad.PSApi.PICA
     /// </summary>
     internal sealed class ActionSuiteProvider : IDisposable
     {
+        private readonly ISPBasicSuiteProvider basicSuiteProvider;
         private readonly IHandleSuite handleSuite;
         private readonly IPluginApiLogger logger;
         private ActionDescriptorSuite actionDescriptorSuite;
         private ActionListSuite actionListSuite;
         private ActionReferenceSuite actionReferenceSuite;
+        private AETEData aete;
+        private Handle descriptorHandle;
+        private Dictionary<uint, AETEValue> scriptingData;
         private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ActionSuiteProvider"/> class.
         /// </summary>
-        public ActionSuiteProvider(IHandleSuite handleSuite, IPluginApiLogger logger)
+        /// <param name="basicSuiteProvider">The SPBasic suite provider.</param>
+        /// <param name="handleSuite">The handle suite.</param>
+        /// <param name="logger">The logger.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="basicSuiteProvider"/> is <see langword="null"/>.
+        /// or
+        /// <paramref name="handleSuite"/> is <see langword="null"/>.
+        /// or
+        /// <paramref name="logger"/> is <see langword="null"/>.
+        /// </exception>
+        public ActionSuiteProvider(ISPBasicSuiteProvider basicSuiteProvider,
+                                   IHandleSuite handleSuite,
+                                   IPluginApiLogger logger)
         {
+            ArgumentNullException.ThrowIfNull(basicSuiteProvider);
             ArgumentNullException.ThrowIfNull(handleSuite);
             ArgumentNullException.ThrowIfNull(logger);
 
+            this.basicSuiteProvider = basicSuiteProvider;
             this.handleSuite = handleSuite;
             this.logger = logger;
             actionDescriptorSuite = null;
@@ -45,48 +63,21 @@ namespace PSFilterLoad.PSApi.PICA
         }
 
         /// <summary>
-        /// Gets a value indicating whether the descriptor suite has been created.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if the descriptor suite has been created; otherwise, <c>false</c>.
-        /// </value>
-        public bool DescriptorSuiteCreated => actionDescriptorSuite != null;
-
-        /// <summary>
-        /// Gets a value indicating whether the list suite has been created.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if the list suite has been created; otherwise, <c>false</c>.
-        /// </value>
-        public bool ListSuiteCreated => actionListSuite != null;
-
-        /// <summary>
-        /// Gets a value indicating whether the reference suite has been created.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if the reference suite has been created; otherwise, <c>false</c>.
-        /// </value>
-        public bool ReferenceSuiteCreated => actionReferenceSuite != null;
-
-        /// <summary>
         /// Gets the action descriptor suite.
         /// </summary>
         /// <value>
         /// The action descriptor suite.
         /// </value>
         /// <exception cref="ObjectDisposedException">The class has been disposed.</exception>
-        /// <exception cref="InvalidOperationException">CreateDescriptorSuite was not called before accessing the property.</exception>
         public ActionDescriptorSuite DescriptorSuite
         {
             get
             {
-                if (disposed)
+                VerifyNotDisposed();
+
+                if (actionDescriptorSuite is null)
                 {
-                    throw new ObjectDisposedException("ActionSuiteProvider");
-                }
-                if (actionDescriptorSuite == null)
-                {
-                    throw new InvalidOperationException("CreateDescriptorSuite() must be called before accessing this property.");
+                    CreateDescriptorSuite();
                 }
 
                 return actionDescriptorSuite;
@@ -100,18 +91,17 @@ namespace PSFilterLoad.PSApi.PICA
         /// The action list suite.
         /// </value>
         /// <exception cref="ObjectDisposedException">The class has been disposed.</exception>
-        /// <exception cref="InvalidOperationException">CreateListSuite was not called before accessing the property.</exception>
         public ActionListSuite ListSuite
         {
             get
             {
-                if (disposed)
+                VerifyNotDisposed();
+
+                if (actionListSuite is null)
                 {
-                    throw new ObjectDisposedException("ActionSuiteProvider");
-                }
-                if (actionListSuite == null)
-                {
-                    throw new InvalidOperationException("CreateListSuite() must be called before accessing this property.");
+                    // The list suite has a circular dependency with the descriptor suite.
+                    // Create the descriptor suite to initialize things in the proper order.
+                    CreateDescriptorSuite();
                 }
 
                 return actionListSuite;
@@ -125,113 +115,15 @@ namespace PSFilterLoad.PSApi.PICA
         /// The action reference suite.
         /// </value>
         /// <exception cref="ObjectDisposedException">The class has been disposed.</exception>
-        /// <exception cref="InvalidOperationException">CreateReferenceSuite was not called before accessing the property.</exception>
         public ActionReferenceSuite ReferenceSuite
         {
             get
             {
-                if (disposed)
-                {
-                    throw new ObjectDisposedException("ActionSuiteProvider");
-                }
-                if (actionReferenceSuite == null)
-                {
-                    throw new InvalidOperationException("CreateReferenceSuite() must be called before accessing this property.");
-                }
+                VerifyNotDisposed();
+
+                actionReferenceSuite ??= new ActionReferenceSuite(logger.CreateInstanceForType(nameof(ActionReferenceSuite)));
 
                 return actionReferenceSuite;
-            }
-        }
-
-        /// <summary>
-        /// Creates the action descriptor suite.
-        /// </summary>
-        /// <param name="aete">The AETE scripting information.</param>
-        /// <param name="descriptorHandle">The descriptor handle.</param>
-        /// <param name="scriptingData">The scripting data.</param>
-        /// <param name="zstringSuite">The ASZString suite instance.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="zstringSuite"/> is null.</exception>
-        /// <exception cref="ObjectDisposedException">The class has been disposed.</exception>
-        public void CreateDescriptorSuite(AETEData aete, Handle descriptorHandle, Dictionary<uint, AETEValue> scriptingData, IASZStringSuite zstringSuite)
-        {
-            if (zstringSuite == null)
-            {
-                throw new ArgumentNullException(nameof(zstringSuite));
-            }
-            if (disposed)
-            {
-                throw new ObjectDisposedException("ActionSuiteProvider");
-            }
-
-            if (!DescriptorSuiteCreated)
-            {
-                if (!ReferenceSuiteCreated)
-                {
-                    CreateReferenceSuite();
-                }
-                if (!ListSuiteCreated)
-                {
-                    CreateListSuite(zstringSuite);
-                }
-                actionDescriptorSuite = new ActionDescriptorSuite(aete,
-                                                                  handleSuite,
-                                                                  actionListSuite,
-                                                                  actionReferenceSuite,
-                                                                  zstringSuite,
-                                                                  logger.CreateInstanceForType(nameof(ActionDescriptorSuite)));
-                actionListSuite.ActionDescriptorSuite = actionDescriptorSuite;
-                if (scriptingData != null)
-                {
-                    actionDescriptorSuite.SetScriptingData(descriptorHandle, scriptingData);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Creates the action list suite.
-        /// </summary>
-        /// <param name="zstringSuite">The ASZString suite instance.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="zstringSuite"/> is null.</exception>
-        /// <exception cref="ObjectDisposedException">The class has been disposed.</exception>
-        public void CreateListSuite(IASZStringSuite zstringSuite)
-        {
-            if (zstringSuite == null)
-            {
-                throw new ArgumentNullException(nameof(zstringSuite));
-            }
-            if (disposed)
-            {
-                throw new ObjectDisposedException("ActionSuiteProvider");
-            }
-
-            if (!ListSuiteCreated)
-            {
-                if (!ReferenceSuiteCreated)
-                {
-                    CreateReferenceSuite();
-                }
-
-                actionListSuite = new ActionListSuite(handleSuite,
-                                                      actionReferenceSuite,
-                                                      zstringSuite,
-                                                      logger.CreateInstanceForType(nameof(ActionListSuite)));
-            }
-        }
-
-        /// <summary>
-        /// Creates the action reference suite.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">The class has been disposed.</exception>
-        public void CreateReferenceSuite()
-        {
-            if (disposed)
-            {
-                throw new ObjectDisposedException("ActionSuiteProvider");
-            }
-
-            if (!ReferenceSuiteCreated)
-            {
-                actionReferenceSuite = new ActionReferenceSuite(logger.CreateInstanceForType(nameof(ActionReferenceSuite)));
             }
         }
 
@@ -251,6 +143,79 @@ namespace PSFilterLoad.PSApi.PICA
                 }
                 actionListSuite = null;
                 actionReferenceSuite = null;
+            }
+        }
+
+        /// <summary>
+        /// Sets the scripting information used by the plug-in.
+        /// </summary>
+        /// <param name="value">
+        /// The scripting information used by the plug-in.
+        /// </param>
+        public void SetAeteData(AETEData value) => aete = value;
+
+        /// <summary>
+        /// Sets the scripting data.
+        /// </summary>
+        /// <param name="descriptorHandle">The descriptor handle.</param>
+        /// <param name="scriptingData">The scripting data.</param>
+        public void SetScriptingData(Handle descriptorHandle, Dictionary<uint, AETEValue> scriptingData)
+        {
+            this.descriptorHandle = descriptorHandle;
+            this.scriptingData = scriptingData;
+        }
+
+        /// <summary>
+        /// Gets the scripting data associated with the specified descriptor handle.
+        /// </summary>
+        /// <param name="descriptorHandle">The descriptor handle.</param>
+        /// <param name="scriptingData">The scripting data.</param>
+        /// <returns><c>true</c> if the descriptor handle contains scripting data; otherwise, <c>false</c></returns>
+        public bool TryGetScriptingData(Handle descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
+        {
+            if (actionDescriptorSuite is not null)
+            {
+                return actionDescriptorSuite.TryGetScriptingData(descriptorHandle, out scriptingData);
+            }
+
+            scriptingData = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Creates the action descriptor suite.
+        /// </summary>
+        private void CreateDescriptorSuite()
+        {
+            if (actionDescriptorSuite is null)
+            {
+                IASZStringSuite zstringSuite = basicSuiteProvider.ASZStringSuite;
+
+                actionReferenceSuite ??= new ActionReferenceSuite(logger);
+                actionListSuite ??= new ActionListSuite(handleSuite,
+                                                        actionReferenceSuite,
+                                                        zstringSuite,
+                                                        logger);
+
+                actionDescriptorSuite = new ActionDescriptorSuite(aete,
+                                                                  handleSuite,
+                                                                  actionListSuite,
+                                                                  actionReferenceSuite,
+                                                                  zstringSuite,
+                                                                  logger);
+                actionListSuite!.ActionDescriptorSuite = actionDescriptorSuite;
+                if (scriptingData is not null)
+                {
+                    actionDescriptorSuite.SetScriptingData(descriptorHandle, scriptingData);
+                }
+            }
+        }
+
+        private void VerifyNotDisposed()
+        {
+            if (disposed)
+            {
+                throw new ObjectDisposedException("ActionSuiteProvider");
             }
         }
     }
