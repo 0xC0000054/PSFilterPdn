@@ -97,7 +97,7 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.BufferSuite, version);
             }
 
-            PSBufferSuite1* suite = Memory.Allocate<PSBufferSuite1>(MemoryAllocationFlags.Default);
+            PSBufferSuite1* suite = Memory.Allocate<PSBufferSuite1>(MemoryAllocationOptions.Default);
 
             suite->New = new UnmanagedFunctionPointer<PSBufferSuiteNew>(bufferSuiteNew);
             suite->Dispose = new UnmanagedFunctionPointer<PSBufferSuiteDispose>(bufferSuiteDispose);
@@ -142,7 +142,7 @@ namespace PSFilterLoad.PSApi.PICA
                     while (size > minimumSize)
                     {
                         // Allocate the largest buffer we can that is greater than the specified minimum size.
-                        ptr = Memory.Allocate(size, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
+                        ptr = Memory.Allocate(size, MemoryAllocationOptions.ReturnZeroOnOutOfMemory);
                         if (ptr != IntPtr.Zero)
                         {
                             buffers.Add(ptr, new BufferEntry(ptr, size));
@@ -158,7 +158,7 @@ namespace PSFilterLoad.PSApi.PICA
                         // If we cannot allocate a buffer larger than the minimum size
                         // attempt to allocate a buffer at the minimum size.
 
-                        ptr = Memory.Allocate(minimumSize, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
+                        ptr = Memory.Allocate(minimumSize, MemoryAllocationOptions.ReturnZeroOnOutOfMemory);
                         if (ptr != IntPtr.Zero)
                         {
                             buffers.Add(ptr, new BufferEntry(ptr, minimumSize));
@@ -171,7 +171,7 @@ namespace PSFilterLoad.PSApi.PICA
                 }
                 else
                 {
-                    ptr = Memory.Allocate(minimumSize, MemoryAllocationFlags.ReturnZeroOnOutOfMemory);
+                    ptr = Memory.Allocate(minimumSize, MemoryAllocationOptions.ReturnZeroOnOutOfMemory);
                     if (ptr != IntPtr.Zero)
                     {
                         buffers.Add(ptr, new BufferEntry(ptr, minimumSize));

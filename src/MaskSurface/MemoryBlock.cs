@@ -213,7 +213,7 @@ namespace PSFilterLoad.PSApi
                 }
                 else
                 {
-                    block = Memory.Allocate(bytes, zeroFill ? MemoryAllocationFlags.ZeroFill : MemoryAllocationFlags.Default);
+                    block = Memory.Allocate(bytes, zeroFill ? MemoryAllocationOptions.ZeroFill : MemoryAllocationOptions.Default);
                 }
             }
             catch (OutOfMemoryException)

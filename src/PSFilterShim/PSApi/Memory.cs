@@ -28,10 +28,10 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
     [Flags()]
-    internal enum MemoryAllocationFlags
+    internal enum MemoryAllocationOptions
     {
         /// <summary>
-        /// The default memory allocation flags.
+        /// The default memory allocation options.
         /// </summary>
         Default = 0,
         /// <summary>
@@ -67,43 +67,43 @@ namespace PSFilterLoad.PSApi
         /// Allocates a block of memory from the default process heap.
         /// </summary>
         /// <param name="size">The size of the memory to allocate.</param>
-        /// <param name="allocationFlags">The memory allocation flags.</param>
+        /// <param name="options">The memory allocation options.</param>
         /// <returns>A pointer to the allocated block of memory.</returns>
-        public static IntPtr Allocate(long size, MemoryAllocationFlags allocationFlags = MemoryAllocationFlags.Default)
+        public static IntPtr Allocate(long size, MemoryAllocationOptions options = MemoryAllocationOptions.Default)
         {
-            return Allocate((ulong)size, allocationFlags);
+            return Allocate((ulong)size, options);
         }
 
         /// <summary>
         /// Allocates a block of memory from the default process heap.
         /// </summary>
-        /// <param name="allocationFlags">The memory allocation flags.</param>
+        /// <param name="options">The memory allocation options.</param>
         /// <returns>A pointer to the allocated block of memory.</returns>
-        public static unsafe T* Allocate<T>(MemoryAllocationFlags allocationFlags) where T : unmanaged
+        public static unsafe T* Allocate<T>(MemoryAllocationOptions options) where T : unmanaged
         {
-            return (T*)Allocate((ulong)Marshal.SizeOf<T>(), allocationFlags);
+            return (T*)Allocate((ulong)Marshal.SizeOf<T>(), options);
         }
 
         /// <summary>
         /// Allocates a block of memory from the default process heap.
         /// </summary>
         /// <param name="size">The size of the memory to allocate.</param>
-        /// <param name="allocationFlags">The memory allocation flags.</param>
+        /// <param name="options">The memory allocation options.</param>
         /// <returns>A pointer to the allocated block of memory.</returns>
-        public static IntPtr Allocate(ulong size, MemoryAllocationFlags allocationFlags)
+        public static IntPtr Allocate(ulong size, MemoryAllocationOptions options)
         {
             if (hHeap == IntPtr.Zero)
             {
                 InitializeHeap();
             }
 
-            bool zeroFill = (allocationFlags & MemoryAllocationFlags.ZeroFill) == MemoryAllocationFlags.ZeroFill;
+            bool zeroFill = (options & MemoryAllocationOptions.ZeroFill) == MemoryAllocationOptions.ZeroFill;
 
             IntPtr block = SafeNativeMethods.HeapAlloc(hHeap, zeroFill ? NativeConstants.HEAP_ZERO_MEMORY : 0U, new UIntPtr(size));
 
             if (block == IntPtr.Zero)
             {
-                if ((allocationFlags & MemoryAllocationFlags.ReturnZeroOnOutOfMemory) == MemoryAllocationFlags.ReturnZeroOnOutOfMemory)
+                if ((options & MemoryAllocationOptions.ReturnZeroOnOutOfMemory) == MemoryAllocationOptions.ReturnZeroOnOutOfMemory)
                 {
                     return IntPtr.Zero;
                 }

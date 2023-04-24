@@ -164,7 +164,7 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ActionReferenceSuite, version);
             }
 
-            PSActionReferenceProcs* suite = Memory.Allocate<PSActionReferenceProcs>(MemoryAllocationFlags.Default);
+            PSActionReferenceProcs* suite = Memory.Allocate<PSActionReferenceProcs>(MemoryAllocationOptions.Default);
 
             suite->Make = new UnmanagedFunctionPointer<ActionReferenceMake>(make);
             suite->Free = new UnmanagedFunctionPointer<ActionReferenceFree>(free);

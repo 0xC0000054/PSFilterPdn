@@ -117,7 +117,7 @@ namespace PSFilterLoad.PSApi
 
         public IntPtr CreateHandleProcsPointer()
         {
-            IntPtr handleProcsPtr = Memory.Allocate(Marshal.SizeOf<HandleProcs>(), MemoryAllocationFlags.ZeroFill);
+            IntPtr handleProcsPtr = Memory.Allocate(Marshal.SizeOf<HandleProcs>(), MemoryAllocationOptions.ZeroFill);
 
             unsafe
             {
@@ -248,11 +248,11 @@ namespace PSFilterLoad.PSApi
             {
                 // The Photoshop API 'Handle' is an indirect pointer.
                 // As some plug-ins may dereference the pointer instead of calling HandleLockProc we recreate that implementation.
-                handle = new Handle(Memory.Allocate(PSHandle.SizeOf, MemoryAllocationFlags.ZeroFill));
+                handle = new Handle(Memory.Allocate(PSHandle.SizeOf, MemoryAllocationOptions.ZeroFill));
 
                 PSHandle* hand = (PSHandle*)handle.Value;
 
-                hand->pointer = Memory.Allocate(size, MemoryAllocationFlags.ZeroFill);
+                hand->pointer = Memory.Allocate(size, MemoryAllocationOptions.ZeroFill);
 
                 handles.Add(handle, new HandleEntry(handle, hand->pointer, size));
 

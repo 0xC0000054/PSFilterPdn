@@ -281,7 +281,7 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ActionDescriptorSuite, version);
             }
 
-            PSActionDescriptorProc* suite = Memory.Allocate<PSActionDescriptorProc>(MemoryAllocationFlags.Default);
+            PSActionDescriptorProc* suite = Memory.Allocate<PSActionDescriptorProc>(MemoryAllocationOptions.Default);
 
             suite->Make = new UnmanagedFunctionPointer<ActionDescriptorMake>(make);
             suite->Free = new UnmanagedFunctionPointer<ActionDescriptorFree>(free);

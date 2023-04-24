@@ -53,7 +53,7 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.UIHooksSuite, version);
             }
 
-            PSUIHooksSuite1* suite = Memory.Allocate<PSUIHooksSuite1>(MemoryAllocationFlags.Default);
+            PSUIHooksSuite1* suite = Memory.Allocate<PSUIHooksSuite1>(MemoryAllocationOptions.Default);
 
             suite->processEvent = new UnmanagedFunctionPointer<ProcessEventProc>(picaSuiteData.ProcessEvent);
             suite->displayPixels = new UnmanagedFunctionPointer<DisplayPixelsProc>(picaSuiteData.DisplayPixels);

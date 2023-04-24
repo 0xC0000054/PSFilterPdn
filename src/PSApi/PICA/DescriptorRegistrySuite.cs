@@ -58,7 +58,7 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.DescriptorRegistrySuite, version);
             }
 
-            PSDescriptorRegistryProcs* suite = Memory.Allocate<PSDescriptorRegistryProcs>(MemoryAllocationFlags.Default);
+            PSDescriptorRegistryProcs* suite = Memory.Allocate<PSDescriptorRegistryProcs>(MemoryAllocationOptions.Default);
 
             suite->Register = new UnmanagedFunctionPointer<DescriptorRegistryRegister>(register);
             suite->Erase = new UnmanagedFunctionPointer<DescriptorRegistryErase>(erase);

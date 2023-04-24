@@ -48,7 +48,7 @@ namespace PSFilterLoad.PSApi
 
         public IntPtr CreateBufferProcsPointer()
         {
-            IntPtr bufferProcsPtr = Memory.Allocate(Marshal.SizeOf<BufferProcs>(), MemoryAllocationFlags.ZeroFill);
+            IntPtr bufferProcsPtr = Memory.Allocate(Marshal.SizeOf<BufferProcs>(), MemoryAllocationOptions.ZeroFill);
 
             unsafe
             {

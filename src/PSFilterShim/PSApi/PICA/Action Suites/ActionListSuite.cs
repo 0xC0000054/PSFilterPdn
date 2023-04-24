@@ -209,7 +209,7 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ActionListSuite, version);
             }
 
-            PSActionListProcs* suite = Memory.Allocate<PSActionListProcs>(MemoryAllocationFlags.Default);
+            PSActionListProcs* suite = Memory.Allocate<PSActionListProcs>(MemoryAllocationOptions.Default);
 
             suite->Make = new UnmanagedFunctionPointer<ActionListMake>(make);
             suite->Free = new UnmanagedFunctionPointer<ActionListFree>(free);

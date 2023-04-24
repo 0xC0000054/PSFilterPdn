@@ -50,7 +50,7 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ErrorSuite, version);
             }
 
-            PSErrorSuite1* suite = Memory.Allocate<PSErrorSuite1>(MemoryAllocationFlags.Default);
+            PSErrorSuite1* suite = Memory.Allocate<PSErrorSuite1>(MemoryAllocationOptions.Default);
 
             suite->SetErrorFromPString = new UnmanagedFunctionPointer<ErrorSuiteSetErrorFromPString>(setErrorFromPString);
             suite->SetErrorFromCString = new UnmanagedFunctionPointer<ErrorSuiteSetErrorFromCString>(setErrorFromCString);

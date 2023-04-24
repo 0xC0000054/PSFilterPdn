@@ -127,7 +127,7 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ColorSpaceSuite, version);
             }
 
-            PSColorSpaceSuite1* suite = Memory.Allocate<PSColorSpaceSuite1>(MemoryAllocationFlags.Default);
+            PSColorSpaceSuite1* suite = Memory.Allocate<PSColorSpaceSuite1>(MemoryAllocationOptions.Default);
 
             suite->Make = new UnmanagedFunctionPointer<CSMake>(csMake);
             suite->Delete = new UnmanagedFunctionPointer<CSDelete>(csDelete);

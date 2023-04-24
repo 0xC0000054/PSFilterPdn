@@ -174,7 +174,7 @@ namespace PSFilterLoad.PSApi
 
                 if (width > 128)
                 {
-                    srcColCachePtr = Memory.Allocate((ulong)width * sizeof(float), MemoryAllocationFlags.Default);
+                    srcColCachePtr = Memory.Allocate((ulong)width * sizeof(float), MemoryAllocationOptions.Default);
                     srcColCache = (float*)srcColCachePtr;
                 }
                 else

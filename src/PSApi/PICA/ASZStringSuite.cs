@@ -166,7 +166,7 @@ namespace PSFilterLoad.PSApi.PICA
                 throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ASZStringSuite, version);
             }
 
-            ASZStringSuite1* suite = Memory.Allocate<ASZStringSuite1>(MemoryAllocationFlags.Default);
+            ASZStringSuite1* suite = Memory.Allocate<ASZStringSuite1>(MemoryAllocationOptions.Default);
 
             suite->MakeFromUnicode = new UnmanagedFunctionPointer<ASZStringMakeFromUnicode>(makeFromUnicode);
             suite->MakeFromCString = new UnmanagedFunctionPointer<ASZStringMakeFromCString>(makeFromCString);

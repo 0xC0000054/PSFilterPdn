@@ -2800,7 +2800,7 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void SetupSuites()
         {
-            platformDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), MemoryAllocationFlags.ZeroFill);
+            platformDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), MemoryAllocationOptions.ZeroFill);
             ((PlatformData*)platformDataPtr.ToPointer())->hwnd = parentWindowHandle;
 
             bufferProcsPtr = bufferSuite.CreateBufferProcsPointer();
@@ -2816,7 +2816,7 @@ namespace PSFilterLoad.PSApi
             readDescriptorPtr = descriptorSuite.CreateReadDescriptorPointer();
             writeDescriptorPtr = descriptorSuite.CreateWriteDescriptorPointer();
 
-            descriptorParametersPtr = Memory.Allocate(Marshal.SizeOf<PIDescriptorParameters>(), MemoryAllocationFlags.ZeroFill);
+            descriptorParametersPtr = Memory.Allocate(Marshal.SizeOf<PIDescriptorParameters>(), MemoryAllocationOptions.ZeroFill);
             PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
             descriptorParameters->descriptorParametersVersion = PSConstants.kCurrentDescriptorParametersVersion;
             descriptorParameters->readDescriptorProcs = readDescriptorPtr;
@@ -2869,7 +2869,7 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void SetupFilterRecord()
         {
-            filterRecord = Memory.Allocate<FilterRecord>(MemoryAllocationFlags.ZeroFill);
+            filterRecord = Memory.Allocate<FilterRecord>(MemoryAllocationOptions.ZeroFill);
 
             filterRecord->serial = 0;
             filterRecord->abortProc = new UnmanagedFunctionPointer<TestAbortProc>(abortProc);
@@ -2948,7 +2948,7 @@ namespace PSFilterLoad.PSApi
             filterRecord->maskTileOrigin.v = 0;
 
             filterRecord->descriptorParameters = descriptorParametersPtr;
-            errorStringPtr = Memory.Allocate(256, MemoryAllocationFlags.ZeroFill);
+            errorStringPtr = Memory.Allocate(256, MemoryAllocationOptions.ZeroFill);
             filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead.
             filterRecord->channelPortProcs = channelPortsPtr;
             filterRecord->documentInfo = readDocumentPtr;
