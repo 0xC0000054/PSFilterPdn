@@ -115,7 +115,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>An unmanaged pointer containing the SPBasic suite structure.</returns>
         public unsafe IntPtr CreateSPBasicSuitePointer()
         {
-            IntPtr basicSuitePtr = Memory.Allocate(Marshal.SizeOf<SPBasicSuite>(), true);
+            IntPtr basicSuitePtr = Memory.Allocate(Marshal.SizeOf<SPBasicSuite>(), MemoryAllocationFlags.ZeroFill);
 
             SPBasicSuite* basicSuite = (SPBasicSuite*)basicSuitePtr.ToPointer();
             basicSuite->acquireSuite = new UnmanagedFunctionPointer<SPBasicAcquireSuite>(spAcquireSuite);
@@ -501,7 +501,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                *block = Memory.Allocate(size, false);
+                *block = Memory.Allocate(size);
             }
             catch (OutOfMemoryException)
             {

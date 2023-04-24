@@ -33,7 +33,7 @@ namespace PSFilterLoad.PSApi
 
         public unsafe IntPtr CreateImageServicesSuitePointer()
         {
-            IntPtr imageServicesProcsPtr = Memory.Allocate(Marshal.SizeOf<ImageServicesProcs>(), true);
+            IntPtr imageServicesProcsPtr = Memory.Allocate(Marshal.SizeOf<ImageServicesProcs>(), MemoryAllocationFlags.ZeroFill);
 
             ImageServicesProcs* imageServicesProcs = (ImageServicesProcs*)imageServicesProcsPtr.ToPointer();
 

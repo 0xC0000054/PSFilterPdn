@@ -46,7 +46,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (version == 1)
             {
-                suitePointer = Memory.Allocate(Marshal.SizeOf<PSHandleSuite1>(), false);
+                suitePointer = Memory.Allocate(Marshal.SizeOf<PSHandleSuite1>());
 
                 unsafe
                 {
@@ -62,7 +62,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             else if (version == 2)
             {
-                suitePointer = Memory.Allocate(Marshal.SizeOf<PSHandleSuite2>(), false);
+                suitePointer = Memory.Allocate(Marshal.SizeOf<PSHandleSuite2>());
 
                 unsafe
                 {

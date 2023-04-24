@@ -67,18 +67,17 @@ namespace PSFilterLoad.PSApi
         /// Allocates a block of memory from the default process heap.
         /// </summary>
         /// <param name="size">The size of the memory to allocate.</param>
-        /// <param name="zeroFill">if <c>true</c> the allocated memory will be set to zero.</param>
+        /// <param name="allocationFlags">The memory allocation flags.</param>
         /// <returns>A pointer to the allocated block of memory.</returns>
-        public static IntPtr Allocate(long size, bool zeroFill)
+        public static IntPtr Allocate(long size, MemoryAllocationFlags allocationFlags = MemoryAllocationFlags.Default)
         {
-            return Allocate((ulong)size, zeroFill ? MemoryAllocationFlags.ZeroFill : MemoryAllocationFlags.Default);
+            return Allocate((ulong)size, allocationFlags);
         }
 
         /// <summary>
         /// Allocates a block of memory from the default process heap.
         /// </summary>
-        /// <param name="size">The size of the memory to allocate.</param>
-        /// <param name="zeroFill">if <c>true</c> the allocated memory will be set to zero.</param>
+        /// <param name="allocationFlags">The memory allocation flags.</param>
         /// <returns>A pointer to the allocated block of memory.</returns>
         public static unsafe T* Allocate<T>(MemoryAllocationFlags allocationFlags) where T : unmanaged
         {

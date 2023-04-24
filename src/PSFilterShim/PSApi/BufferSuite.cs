@@ -47,7 +47,7 @@ namespace PSFilterLoad.PSApi
 
         public IntPtr CreateBufferProcsPointer()
         {
-            IntPtr bufferProcsPtr = Memory.Allocate(Marshal.SizeOf<BufferProcs>(), true);
+            IntPtr bufferProcsPtr = Memory.Allocate(Marshal.SizeOf<BufferProcs>(), MemoryAllocationFlags.ZeroFill);
 
             unsafe
             {
@@ -111,7 +111,7 @@ namespace PSFilterLoad.PSApi
             *bufferID = IntPtr.Zero;
             try
             {
-                *bufferID = Memory.Allocate(size, false);
+                *bufferID = Memory.Allocate(size);
 
                 bufferIDs.Add(*bufferID, size);
             }

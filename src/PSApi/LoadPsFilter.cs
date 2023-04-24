@@ -616,7 +616,7 @@ namespace PSFilterLoad.PSApi
                         }
                         break;
                     case GlobalParameters.DataStorageMethod.OTOFHandle:
-                        filterRecord->parameters = new Handle(Memory.Allocate(OTOFHandleSize, false));
+                        filterRecord->parameters = new Handle(Memory.Allocate(OTOFHandleSize));
 
                         if (globalParameters.ParameterDataExecutable)
                         {
@@ -624,7 +624,7 @@ namespace PSFilterLoad.PSApi
                         }
                         else
                         {
-                            filterParametersHandle = Memory.Allocate(parameterDataBytes.Length, false);
+                            filterParametersHandle = Memory.Allocate(parameterDataBytes.Length);
                         }
 
                         Marshal.Copy(parameterDataBytes, 0, filterParametersHandle, parameterDataBytes.Length);
@@ -634,7 +634,7 @@ namespace PSFilterLoad.PSApi
 
                         break;
                     case GlobalParameters.DataStorageMethod.RawBytes:
-                        filterRecord->parameters = new Handle(Memory.Allocate(parameterDataBytes.Length, false));
+                        filterRecord->parameters = new Handle(Memory.Allocate(parameterDataBytes.Length));
                         Marshal.Copy(parameterDataBytes, 0, filterRecord->parameters.Value, parameterDataBytes.Length);
 
                         break;
@@ -663,7 +663,7 @@ namespace PSFilterLoad.PSApi
                         filterGlobalData = dataHandle.Value;
                         break;
                     case GlobalParameters.DataStorageMethod.OTOFHandle:
-                        filterGlobalData = Memory.Allocate(OTOFHandleSize, false);
+                        filterGlobalData = Memory.Allocate(OTOFHandleSize);
 
                         if (globalParameters.PluginDataExecutable)
                         {
@@ -671,7 +671,7 @@ namespace PSFilterLoad.PSApi
                         }
                         else
                         {
-                            pluginDataHandle = Memory.Allocate(pluginDataBytes.Length, false);
+                            pluginDataHandle = Memory.Allocate(pluginDataBytes.Length);
                         }
 
                         Marshal.Copy(pluginDataBytes, 0, pluginDataHandle, pluginDataBytes.Length);
@@ -681,7 +681,7 @@ namespace PSFilterLoad.PSApi
 
                         break;
                     case GlobalParameters.DataStorageMethod.RawBytes:
-                        filterGlobalData = Memory.Allocate(pluginDataBytes.Length, false);
+                        filterGlobalData = Memory.Allocate(pluginDataBytes.Length);
                         Marshal.Copy(pluginDataBytes, 0, filterGlobalData, pluginDataBytes.Length);
 
                         break;
@@ -1807,7 +1807,7 @@ namespace PSFilterLoad.PSApi
 
                 try
                 {
-                    inDataPtr = Memory.Allocate(len, false);
+                    inDataPtr = Memory.Allocate(len);
                 }
                 catch (OutOfMemoryException)
                 {
@@ -1924,7 +1924,7 @@ namespace PSFilterLoad.PSApi
 
                 try
                 {
-                    outDataPtr = Memory.Allocate(len, false);
+                    outDataPtr = Memory.Allocate(len);
                 }
                 catch (OutOfMemoryException)
                 {
@@ -2091,7 +2091,7 @@ namespace PSFilterLoad.PSApi
 
                 try
                 {
-                    maskDataPtr = Memory.Allocate(len, false);
+                    maskDataPtr = Memory.Allocate(len);
                 }
                 catch (OutOfMemoryException)
                 {
@@ -2800,7 +2800,7 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void SetupSuites()
         {
-            platformDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), true);
+            platformDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), MemoryAllocationFlags.ZeroFill);
             ((PlatformData*)platformDataPtr.ToPointer())->hwnd = parentWindowHandle;
 
             bufferProcsPtr = bufferSuite.CreateBufferProcsPointer();
@@ -2816,7 +2816,7 @@ namespace PSFilterLoad.PSApi
             readDescriptorPtr = descriptorSuite.CreateReadDescriptorPointer();
             writeDescriptorPtr = descriptorSuite.CreateWriteDescriptorPointer();
 
-            descriptorParametersPtr = Memory.Allocate(Marshal.SizeOf<PIDescriptorParameters>(), true);
+            descriptorParametersPtr = Memory.Allocate(Marshal.SizeOf<PIDescriptorParameters>(), MemoryAllocationFlags.ZeroFill);
             PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
             descriptorParameters->descriptorParametersVersion = PSConstants.kCurrentDescriptorParametersVersion;
             descriptorParameters->readDescriptorProcs = readDescriptorPtr;
@@ -2948,7 +2948,7 @@ namespace PSFilterLoad.PSApi
             filterRecord->maskTileOrigin.v = 0;
 
             filterRecord->descriptorParameters = descriptorParametersPtr;
-            errorStringPtr = Memory.Allocate(256, true);
+            errorStringPtr = Memory.Allocate(256, MemoryAllocationFlags.ZeroFill);
             filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead.
             filterRecord->channelPortProcs = channelPortsPtr;
             filterRecord->documentInfo = readDocumentPtr;
