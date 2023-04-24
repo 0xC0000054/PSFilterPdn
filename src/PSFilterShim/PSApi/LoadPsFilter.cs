@@ -283,12 +283,6 @@ namespace PSFilterLoad.PSApi
             abortFunc = null;
             progressFunc = null;
 
-            unsafe
-            {
-                platFormDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), true);
-                ((PlatformData*)platFormDataPtr)->hwnd = parentWindowHandle;
-            }
-
             lastOutRect = Rect16.Empty;
             lastInRect = Rect16.Empty;
             lastMaskRect = Rect16.Empty;
@@ -2820,6 +2814,9 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void SetupSuites()
         {
+            platFormDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), true);
+            ((PlatformData*)platFormDataPtr.ToPointer())->hwnd = parentWindowHandle;
+
             bufferProcsPtr = bufferSuite.CreateBufferProcsPointer();
 
             handleProcsPtr = handleSuite.CreateHandleProcsPointer();
