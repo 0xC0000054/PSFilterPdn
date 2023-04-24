@@ -51,7 +51,7 @@ namespace PSFilterLoad.PSApi
 
         private FilterRecord* filterRecord;
 
-        private IntPtr platFormDataPtr;
+        private IntPtr platformDataPtr;
 
         private IntPtr bufferProcsPtr;
 
@@ -699,7 +699,7 @@ namespace PSFilterLoad.PSApi
 
             AboutRecord aboutRecord = new()
             {
-                platformData = platFormDataPtr,
+                platformData = platformDataPtr,
                 sSPBasic = basicSuitePtr,
                 plugInRef = IntPtr.Zero
             };
@@ -2800,8 +2800,8 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void SetupSuites()
         {
-            platFormDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), true);
-            ((PlatformData*)platFormDataPtr.ToPointer())->hwnd = parentWindowHandle;
+            platformDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), true);
+            ((PlatformData*)platformDataPtr.ToPointer())->hwnd = parentWindowHandle;
 
             bufferProcsPtr = bufferSuite.CreateBufferProcsPointer();
 
@@ -2898,7 +2898,7 @@ namespace PSFilterLoad.PSApi
             filterRecord->maxSpace = filterRecord->bufferSpace;
             filterRecord->hostSig = HostSignature;
             filterRecord->hostProcs = new UnmanagedFunctionPointer<HostProcs>(hostProc);
-            filterRecord->platformData = platFormDataPtr;
+            filterRecord->platformData = platformDataPtr;
             filterRecord->bufferProcs = bufferProcsPtr;
             filterRecord->resourceProcs = resourceProcsPtr;
             filterRecord->processEvent = new UnmanagedFunctionPointer<ProcessEventProc>(processEventProc);
@@ -3076,10 +3076,10 @@ namespace PSFilterLoad.PSApi
                     }
                 }
 
-                if (platFormDataPtr != IntPtr.Zero)
+                if (platformDataPtr != IntPtr.Zero)
                 {
-                    Memory.Free(platFormDataPtr);
-                    platFormDataPtr = IntPtr.Zero;
+                    Memory.Free(platformDataPtr);
+                    platformDataPtr = IntPtr.Zero;
                 }
 
                 if (bufferProcsPtr != IntPtr.Zero)
