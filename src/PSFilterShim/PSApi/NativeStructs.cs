@@ -62,7 +62,7 @@ namespace PSFilterLoad.PSApi
             public int* lpCustColors;
             public uint Flags;
             public IntPtr lCustData;
-            public void* lpfnHook;
+            public delegate* unmanaged<IntPtr, uint, UIntPtr, IntPtr, UIntPtr> lpfnHook;
             public ushort* lpTemplateName;
         }
     }
