@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5E94B0F6-BC88-4F23-84B0-C5B3A7C9CBD3}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		IgnoredWords.dic = IgnoredWords.dic
 		PSFilterPdn.ruleset = PSFilterPdn.ruleset
 	EndProjectSection
 EndProject
