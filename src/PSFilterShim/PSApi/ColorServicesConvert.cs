@@ -344,26 +344,26 @@ namespace PSFilterLoad.PSApi
             switch (resultSpace)
             {
                 case ColorSpace.CMYKSpace:
-                    CMYK cmyk = ColorConverter.RGBtoCMYK(red, green, blue);
+                    CMYK cmyk = ColorConverter.RGBToCMYK(red, green, blue);
                     color = new ColorResult(cmyk.Cyan, cmyk.Magenta, cmyk.Yellow, cmyk.Black);
                     break;
                 case ColorSpace.GraySpace:
                     color = new ColorResult(ColorConverter.GetRGBIntensity(red, green, blue, source.maxChannelValue));
                     break;
                 case ColorSpace.HSBSpace:
-                    HSB hsb = ColorConverter.RGBtoHSB(red, green, blue);
+                    HSB hsb = ColorConverter.RGBToHSB(red, green, blue);
                     color = new ColorResult(hsb.Hue, hsb.Saturation, hsb.Brightness);
                     break;
                 case ColorSpace.HSLSpace:
-                    HSL hsl = ColorConverter.RGBtoHSL(red, green, blue);
+                    HSL hsl = ColorConverter.RGBToHSL(red, green, blue);
                     color = new ColorResult(hsl.Hue, hsl.Saturation, hsl.Luminance);
                     break;
                 case ColorSpace.LabSpace:
-                    Lab lab = ColorConverter.RGBtoLab(red, green, blue);
+                    Lab lab = ColorConverter.RGBToLab(red, green, blue);
                     color = ScaleCIELabOutputRange(lab);
                     break;
                 case ColorSpace.XYZSpace:
-                    XYZ xyz = ColorConverter.RGBtoXYZ(red, green, blue);
+                    XYZ xyz = ColorConverter.RGBToXYZ(red, green, blue);
                     color = new ColorResult(xyz.X, xyz.Y, xyz.Z);
                     break;
                 default:
@@ -385,27 +385,27 @@ namespace PSFilterLoad.PSApi
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
-                    RGB rgb = ColorConverter.CMYKtoRGB(c, m, y, k);
+                    RGB rgb = ColorConverter.CMYKToRGB(c, m, y, k);
                     color = new ColorResult(rgb.Red, rgb.Green, rgb.Blue);
                     break;
                 case ColorSpace.HSBSpace:
-                    HSB hsb = ColorConverter.CMYKtoHSB(c, m, y, k);
+                    HSB hsb = ColorConverter.CMYKToHSB(c, m, y, k);
                     color = new ColorResult(hsb.Hue, hsb.Saturation, hsb.Brightness);
                     break;
                 case ColorSpace.HSLSpace:
-                    HSL hsl = ColorConverter.CMYKtoHSL(c, m, y, k);
+                    HSL hsl = ColorConverter.CMYKToHSL(c, m, y, k);
                     color = new ColorResult(hsl.Hue, hsl.Saturation, hsl.Luminance);
                     break;
                 case ColorSpace.LabSpace:
-                    Lab lab = ColorConverter.CMYKtoLab(c, m, y, k);
+                    Lab lab = ColorConverter.CMYKToLab(c, m, y, k);
                     color = ScaleCIELabOutputRange(lab);
                     break;
                 case ColorSpace.XYZSpace:
-                    XYZ xyz = ColorConverter.CMYKtoXYZ(c, m, y, k);
+                    XYZ xyz = ColorConverter.CMYKToXYZ(c, m, y, k);
                     color = new ColorResult(xyz.X, xyz.Y, xyz.Z);
                     break;
                 case ColorSpace.GraySpace:
-                    color = new ColorResult(ColorConverter.CMYKtoRGB(c, m, y, k).GetIntensity(source.maxChannelValue));
+                    color = new ColorResult(ColorConverter.CMYKToRGB(c, m, y, k).GetIntensity(source.maxChannelValue));
                     break;
                 default:
                     throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
@@ -425,16 +425,16 @@ namespace PSFilterLoad.PSApi
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
-                    RGB rgb = ColorConverter.HSBtoRGB(h, s, b);
+                    RGB rgb = ColorConverter.HSBToRGB(h, s, b);
                     color = new ColorResult(rgb.Red, rgb.Green, rgb.Blue);
                     break;
 
                 case ColorSpace.CMYKSpace:
-                    CMYK cmyk = ColorConverter.HSBtoCMYK(h, s, b);
+                    CMYK cmyk = ColorConverter.HSBToCMYK(h, s, b);
                     color = new ColorResult(cmyk.Cyan, cmyk.Magenta, cmyk.Yellow, cmyk.Black);
                     break;
                 case ColorSpace.HSLSpace:
-                    HSL hsl = ColorConverter.HSBtoHSL(h, s, b);
+                    HSL hsl = ColorConverter.HSBToHSL(h, s, b);
                     color = new ColorResult(hsl.Hue, hsl.Saturation, hsl.Luminance);
                     break;
                 case ColorSpace.LabSpace:
@@ -442,11 +442,11 @@ namespace PSFilterLoad.PSApi
                     color = ScaleCIELabOutputRange(lab);
                     break;
                 case ColorSpace.XYZSpace:
-                    XYZ xyz = ColorConverter.HSBtoXYZ(h, s, b);
+                    XYZ xyz = ColorConverter.HSBToXYZ(h, s, b);
                     color = new ColorResult(xyz.X, xyz.Y, xyz.Z);
                     break;
                 case ColorSpace.GraySpace:
-                    color = new ColorResult(ColorConverter.HSBtoRGB(h, s, b).GetIntensity(source.maxChannelValue));
+                    color = new ColorResult(ColorConverter.HSBToRGB(h, s, b).GetIntensity(source.maxChannelValue));
                     break;
                 default:
                     throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
@@ -465,16 +465,16 @@ namespace PSFilterLoad.PSApi
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
-                    RGB rgb = ColorConverter.HSLtoRGB(h, s, l);
+                    RGB rgb = ColorConverter.HSLToRGB(h, s, l);
                     color = new ColorResult(rgb.Red, rgb.Green, rgb.Blue);
                     break;
 
                 case ColorSpace.CMYKSpace:
-                    CMYK cmyk = ColorConverter.HSLtoCMYK(h, s, l);
+                    CMYK cmyk = ColorConverter.HSLToCMYK(h, s, l);
                     color = new ColorResult(cmyk.Cyan, cmyk.Magenta, cmyk.Yellow, cmyk.Black);
                     break;
                 case ColorSpace.HSBSpace:
-                    HSB hsb = ColorConverter.HSLtoHSB(h, s, l);
+                    HSB hsb = ColorConverter.HSLToHSB(h, s, l);
                     color = new ColorResult(hsb.Hue, hsb.Saturation, hsb.Brightness);
                     break;
                 case ColorSpace.LabSpace:
@@ -482,11 +482,11 @@ namespace PSFilterLoad.PSApi
                     color = ScaleCIELabOutputRange(lab);
                     break;
                 case ColorSpace.XYZSpace:
-                    XYZ xyz = ColorConverter.HSLtoXYZ(h, s, l);
+                    XYZ xyz = ColorConverter.HSLToXYZ(h, s, l);
                     color = new ColorResult(xyz.X, xyz.Y, xyz.Z);
                     break;
                 case ColorSpace.GraySpace:
-                    color = new ColorResult(ColorConverter.HSLtoRGB(h, s, l).GetIntensity(source.maxChannelValue));
+                    color = new ColorResult(ColorConverter.HSLToRGB(h, s, l).GetIntensity(source.maxChannelValue));
                     break;
                 default:
                     throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
@@ -506,28 +506,28 @@ namespace PSFilterLoad.PSApi
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
-                    RGB rgb = ColorConverter.LabtoRGB(l, a, b);
+                    RGB rgb = ColorConverter.LabToRGB(l, a, b);
                     color = new ColorResult(rgb.Red, rgb.Green, rgb.Blue);
                     break;
 
                 case ColorSpace.CMYKSpace:
-                    CMYK cmyk = ColorConverter.LabtoCMYK(l, a, b);
+                    CMYK cmyk = ColorConverter.LabToCMYK(l, a, b);
                     color = new ColorResult(cmyk.Cyan, cmyk.Magenta, cmyk.Yellow, cmyk.Black);
                     break;
                 case ColorSpace.HSBSpace:
-                    HSB hsb = ColorConverter.LabtoHSB(l, a, b);
+                    HSB hsb = ColorConverter.LabToHSB(l, a, b);
                     color = new ColorResult(hsb.Hue, hsb.Saturation, hsb.Brightness);
                     break;
                 case ColorSpace.HSLSpace:
-                    HSL hsl = ColorConverter.LabtoHSL(l, a, b);
+                    HSL hsl = ColorConverter.LabToHSL(l, a, b);
                     color = new ColorResult(hsl.Hue, hsl.Saturation, hsl.Luminance);
                     break;
                 case ColorSpace.XYZSpace:
-                    XYZ xyz = ColorConverter.LabtoXYZ(l, a, b);
+                    XYZ xyz = ColorConverter.LabToXYZ(l, a, b);
                     color = new ColorResult(xyz.X, xyz.Y, xyz.Z);
                     break;
                 case ColorSpace.GraySpace:
-                    color = new ColorResult(ColorConverter.LabtoRGB(l, a, b).GetIntensity(source.maxChannelValue));
+                    color = new ColorResult(ColorConverter.LabToRGB(l, a, b).GetIntensity(source.maxChannelValue));
                     break;
                 default:
                     throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
@@ -547,28 +547,28 @@ namespace PSFilterLoad.PSApi
             switch (resultSpace)
             {
                 case ColorSpace.RGBSpace:
-                    RGB rgb = ColorConverter.XYZtoRGB(x, y, z);
+                    RGB rgb = ColorConverter.XYZToRGB(x, y, z);
                     color = new ColorResult(rgb.Red, rgb.Green, rgb.Blue);
                     break;
 
                 case ColorSpace.CMYKSpace:
-                    CMYK cmyk = ColorConverter.XYZtoCMYK(x, y, z);
+                    CMYK cmyk = ColorConverter.XYZToCMYK(x, y, z);
                     color = new ColorResult(cmyk.Cyan, cmyk.Magenta, cmyk.Yellow, cmyk.Black);
                     break;
                 case ColorSpace.HSBSpace:
-                    HSB hsb = ColorConverter.XYZtoHSB(x, y, z);
+                    HSB hsb = ColorConverter.XYZToHSB(x, y, z);
                     color = new ColorResult(hsb.Hue, hsb.Saturation, hsb.Brightness);
                     break;
                 case ColorSpace.HSLSpace:
-                    HSL hsl = ColorConverter.XYZtoHSL(x, y, z);
+                    HSL hsl = ColorConverter.XYZToHSL(x, y, z);
                     color = new ColorResult(hsl.Hue, hsl.Saturation, hsl.Luminance);
                     break;
                 case ColorSpace.LabSpace:
-                    Lab lab = ColorConverter.XYZtoLab(x, y, z);
+                    Lab lab = ColorConverter.XYZToLab(x, y, z);
                     color = ScaleCIELabOutputRange(lab);
                     break;
                 case ColorSpace.GraySpace:
-                    color = new ColorResult(ColorConverter.XYZtoRGB(x, y, z).GetIntensity(source.maxChannelValue));
+                    color = new ColorResult(ColorConverter.XYZToRGB(x, y, z).GetIntensity(source.maxChannelValue));
                     break;
                 default:
                     throw new InvalidEnumArgumentException("Unsupported color space conversion", (int)resultSpace, typeof(ColorSpace));
@@ -589,23 +589,23 @@ namespace PSFilterLoad.PSApi
                     color = new ColorResult(gray, gray, gray);
                     break;
                 case ColorSpace.CMYKSpace:
-                    CMYK cmyk = ColorConverter.RGBtoCMYK(gray, gray, gray);
+                    CMYK cmyk = ColorConverter.RGBToCMYK(gray, gray, gray);
                     color = new ColorResult(cmyk.Cyan, cmyk.Magenta, cmyk.Yellow, cmyk.Black);
                     break;
                 case ColorSpace.HSBSpace:
-                    HSB hsb = ColorConverter.RGBtoHSB(gray, gray, gray);
+                    HSB hsb = ColorConverter.RGBToHSB(gray, gray, gray);
                     color = new ColorResult(hsb.Hue, hsb.Saturation, hsb.Brightness);
                     break;
                 case ColorSpace.HSLSpace:
-                    HSL hsl = ColorConverter.RGBtoHSL(gray, gray, gray);
+                    HSL hsl = ColorConverter.RGBToHSL(gray, gray, gray);
                     color = new ColorResult(hsl.Hue, hsl.Saturation, hsl.Luminance);
                     break;
                 case ColorSpace.LabSpace:
-                    Lab lab = ColorConverter.RGBtoLab(gray, gray, gray);
+                    Lab lab = ColorConverter.RGBToLab(gray, gray, gray);
                     color = ScaleCIELabOutputRange(lab);
                     break;
                 case ColorSpace.XYZSpace:
-                    XYZ xyz = ColorConverter.RGBtoXYZ(gray, gray, gray);
+                    XYZ xyz = ColorConverter.RGBToXYZ(gray, gray, gray);
                     color = new ColorResult(xyz.X, xyz.Y, xyz.Z);
                     break;
                 default:

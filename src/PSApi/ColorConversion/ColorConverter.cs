@@ -42,10 +42,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="y">The yellow component in the range of [0, 1].</param>
         /// <param name="k">The black component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static HSB CMYKtoHSB(double c, double m, double y, double k)
+        public static HSB CMYKToHSB(double c, double m, double y, double k)
         {
-            RGB rgb = CMYKtoRGB(c, m, y, k);
-            return RGBtoHSB(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = CMYKToRGB(c, m, y, k);
+            return RGBToHSB(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -56,10 +56,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="y">The yellow component in the range of [0, 1].</param>
         /// <param name="k">The black component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static HSL CMYKtoHSL(double c, double m, double y, double k)
+        public static HSL CMYKToHSL(double c, double m, double y, double k)
         {
-            RGB rgb = CMYKtoRGB(c, m, y, k);
-            return RGBtoHSL(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = CMYKToRGB(c, m, y, k);
+            return RGBToHSL(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -70,10 +70,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="y">The yellow component in the range of [0, 1].</param>
         /// <param name="k">The black component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static Lab CMYKtoLab(double c, double m, double y, double k)
+        public static Lab CMYKToLab(double c, double m, double y, double k)
         {
-            XYZ xyz = CMYKtoXYZ(c, m, y, k);
-            return XYZtoLab(xyz.X, xyz.Y, xyz.Z);
+            XYZ xyz = CMYKToXYZ(c, m, y, k);
+            return XYZToLab(xyz.X, xyz.Y, xyz.Z);
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="y">The yellow component in the range of [0, 1].</param>
         /// <param name="k">The black component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static RGB CMYKtoRGB(double c, double m, double y, double k)
+        public static RGB CMYKToRGB(double c, double m, double y, double k)
         {
             double r = 1.0 - Math.Min(1.0, c * (1.0 - k) + k);
             double g = 1.0 - Math.Min(1.0, m * (1.0 - k) + k);
@@ -101,10 +101,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="y">The yellow component in the range of [0, 1].</param>
         /// <param name="k">The black component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static XYZ CMYKtoXYZ(double c, double m, double y, double k)
+        public static XYZ CMYKToXYZ(double c, double m, double y, double k)
         {
-            RGB rgb = CMYKtoRGB(c, m, y, k);
-            return RGBtoXYZ(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = CMYKToRGB(c, m, y, k);
+            return RGBToXYZ(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -114,10 +114,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="saturation">The saturation component in the range of [0, 1].</param>
         /// <param name="brightness">The brightness component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static CMYK HSBtoCMYK(double hue, double saturation, double brightness)
+        public static CMYK HSBToCMYK(double hue, double saturation, double brightness)
         {
-            RGB rgb = HSBtoRGB(hue, saturation, brightness);
-            return RGBtoCMYK(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = HSBToRGB(hue, saturation, brightness);
+            return RGBToCMYK(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -127,10 +127,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="saturation">The saturation component in the range of [0, 1].</param>
         /// <param name="brightness">The brightness component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static HSL HSBtoHSL(double hue, double saturation, double brightness)
+        public static HSL HSBToHSL(double hue, double saturation, double brightness)
         {
-            RGB rgb = HSBtoRGB(hue, saturation, brightness);
-            return RGBtoHSL(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = HSBToRGB(hue, saturation, brightness);
+            return RGBToHSL(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -142,8 +142,8 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <returns>The converted color.</returns>
         public static Lab HSBToLab(double hue, double saturation, double brightness)
         {
-            XYZ xyz = HSBtoXYZ(hue, saturation, brightness);
-            return XYZtoLab(xyz.X, xyz.Y, xyz.Z);
+            XYZ xyz = HSBToXYZ(hue, saturation, brightness);
+            return XYZToLab(xyz.X, xyz.Y, xyz.Z);
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="saturation">The saturation component in the range of [0, 1].</param>
         /// <param name="brightness">The brightness component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static RGB HSBtoRGB(double hue, double saturation, double brightness)
+        public static RGB HSBToRGB(double hue, double saturation, double brightness)
         {
             double r;
             double g;
@@ -227,10 +227,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="saturation">The saturation component in the range of [0, 1].</param>
         /// <param name="brightness">The brightness component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static XYZ HSBtoXYZ(double hue, double saturation, double brightness)
+        public static XYZ HSBToXYZ(double hue, double saturation, double brightness)
         {
-            RGB rgb = HSBtoRGB(hue, saturation, brightness);
-            return RGBtoXYZ(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = HSBToRGB(hue, saturation, brightness);
+            return RGBToXYZ(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -240,10 +240,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="saturation">The saturation component in the range of [0, 1].</param>
         /// <param name="lightness">The lightness component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static CMYK HSLtoCMYK(double hue, double saturation, double lightness)
+        public static CMYK HSLToCMYK(double hue, double saturation, double lightness)
         {
-            RGB rgb = HSLtoRGB(hue, saturation, lightness);
-            return RGBtoCMYK(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = HSLToRGB(hue, saturation, lightness);
+            return RGBToCMYK(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -253,10 +253,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="saturation">The saturation component in the range of [0, 1].</param>
         /// <param name="lightness">The lightness component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static HSB HSLtoHSB(double hue, double saturation, double lightness)
+        public static HSB HSLToHSB(double hue, double saturation, double lightness)
         {
-            RGB rgb = HSLtoRGB(hue, saturation, lightness);
-            return RGBtoHSB(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = HSLToRGB(hue, saturation, lightness);
+            return RGBToHSB(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -268,8 +268,8 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <returns>The converted color.</returns>
         public static Lab HSLToLab(double hue, double saturation, double lightness)
         {
-            XYZ xyz = HSLtoXYZ(hue, saturation, lightness);
-            return XYZtoLab(xyz.X, xyz.Y, xyz.Z);
+            XYZ xyz = HSLToXYZ(hue, saturation, lightness);
+            return XYZToLab(xyz.X, xyz.Y, xyz.Z);
         }
 
         private static double GetHSLColorComponent(double color1, double color2, double adjustedHue)
@@ -306,7 +306,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="saturation">The saturation component in the range of [0, 1].</param>
         /// <param name="lightness">The lightness component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static RGB HSLtoRGB(double hue, double saturation, double lightness)
+        public static RGB HSLToRGB(double hue, double saturation, double lightness)
         {
             double r;
             double g;
@@ -339,10 +339,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="saturation">The saturation component in the range of [0, 1].</param>
         /// <param name="lightness">The lightness component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static XYZ HSLtoXYZ(double hue, double saturation, double lightness)
+        public static XYZ HSLToXYZ(double hue, double saturation, double lightness)
         {
-            RGB rgb = HSLtoRGB(hue, saturation, lightness);
-            return RGBtoXYZ(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = HSLToRGB(hue, saturation, lightness);
+            return RGBToXYZ(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -352,10 +352,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="a">The a component in the range of [-128, 127].</param>
         /// <param name="b">The b component in the range of [-128, 127].</param>
         /// <returns>The converted color.</returns>
-        public static CMYK LabtoCMYK(double l, double a, double b)
+        public static CMYK LabToCMYK(double l, double a, double b)
         {
-            RGB rgb = LabtoRGB(l, a, b);
-            return RGBtoCMYK(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = LabToRGB(l, a, b);
+            return RGBToCMYK(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -365,10 +365,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="a">The a component in the range of [-128, 127].</param>
         /// <param name="b">The b component in the range of [-128, 127].</param>
         /// <returns>The converted color.</returns>
-        public static HSB LabtoHSB(double l, double a, double b)
+        public static HSB LabToHSB(double l, double a, double b)
         {
-            RGB rgb = LabtoRGB(l, a, b);
-            return RGBtoHSB(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = LabToRGB(l, a, b);
+            return RGBToHSB(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -378,10 +378,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="a">The a component in the range of [-128, 127].</param>
         /// <param name="b">The b component in the range of [-128, 127].</param>
         /// <returns>The converted color.</returns>
-        public static HSL LabtoHSL(double l, double a, double b)
+        public static HSL LabToHSL(double l, double a, double b)
         {
-            RGB rgb = LabtoRGB(l, a, b);
-            return RGBtoHSL(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = LabToRGB(l, a, b);
+            return RGBToHSL(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -391,10 +391,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="a">The a component in the range of [-128, 127].</param>
         /// <param name="b">The b component in the range of [-128, 127].</param>
         /// <returns>The converted color.</returns>
-        public static RGB LabtoRGB(double l, double a, double b)
+        public static RGB LabToRGB(double l, double a, double b)
         {
-            XYZ xyz = LabtoXYZ(l, a, b);
-            return XYZtoRGB(xyz.X, xyz.Y, xyz.Z);
+            XYZ xyz = LabToXYZ(l, a, b);
+            return XYZToRGB(xyz.X, xyz.Y, xyz.Z);
         }
 
         /// <summary>
@@ -404,7 +404,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="a">The a component in the range of [-128, 127].</param>
         /// <param name="b">The b component in the range of [-128, 127].</param>
         /// <returns>The converted color.</returns>
-        public static XYZ LabtoXYZ(double l, double a, double b)
+        public static XYZ LabToXYZ(double l, double a, double b)
         {
             double var_Y = (l + 16.0) / 116.0;
             double var_X = var_Y + (a / 500.0);
@@ -453,7 +453,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="green">The green component in the range of [0, 1].</param>
         /// <param name="blue">The blue component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static CMYK RGBtoCMYK(double red, double green, double blue)
+        public static CMYK RGBToCMYK(double red, double green, double blue)
         {
             double c;
             double m;
@@ -485,7 +485,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="green">The green component in the range of [0, 1].</param>
         /// <param name="blue">The blue component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static HSB RGBtoHSB(double red, double green, double blue)
+        public static HSB RGBToHSB(double red, double green, double blue)
         {
             double min = Math.Min(red, Math.Min(green, blue));
             double max = Math.Max(red, Math.Max(green, blue));
@@ -541,7 +541,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="green">The green component in the range of [0, 1].</param>
         /// <param name="blue">The blue component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static HSL RGBtoHSL(double red, double green, double blue)
+        public static HSL RGBToHSL(double red, double green, double blue)
         {
             double min = Math.Min(red, Math.Min(green, blue));
             double max = Math.Max(red, Math.Max(green, blue));
@@ -597,10 +597,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="green">The green component in the range of [0, 1].</param>
         /// <param name="blue">The blue component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static Lab RGBtoLab(double red, double green, double blue)
+        public static Lab RGBToLab(double red, double green, double blue)
         {
-            XYZ xyz = RGBtoXYZ(red, green, blue);
-            return XYZtoLab(xyz.X, xyz.Y, xyz.Z);
+            XYZ xyz = RGBToXYZ(red, green, blue);
+            return XYZToLab(xyz.X, xyz.Y, xyz.Z);
         }
 
         /// <summary>
@@ -610,7 +610,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="green">The green component in the range of [0, 1].</param>
         /// <param name="blue">The blue component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static XYZ RGBtoXYZ(double red, double green, double blue)
+        public static XYZ RGBToXYZ(double red, double green, double blue)
         {
             // Convert to sRGB.
             double sRed = red > 0.04045 ? Math.Pow((red + 0.055) / 1.055, 2.4) : red / 12.92;
@@ -633,10 +633,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="y">The y component in the range of [0, 1].</param>
         /// <param name="z">The z component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static CMYK XYZtoCMYK(double x, double y, double z)
+        public static CMYK XYZToCMYK(double x, double y, double z)
         {
-            RGB rgb = XYZtoRGB(x, y, z);
-            return RGBtoCMYK(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = XYZToRGB(x, y, z);
+            return RGBToCMYK(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -646,10 +646,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="y">The y component in the range of [0, 1].</param>
         /// <param name="z">The z component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static HSB XYZtoHSB(double x, double y, double z)
+        public static HSB XYZToHSB(double x, double y, double z)
         {
-            RGB rgb = XYZtoRGB(x, y, z);
-            return RGBtoHSB(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = XYZToRGB(x, y, z);
+            return RGBToHSB(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -659,10 +659,10 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="y">The y component in the range of [0, 1].</param>
         /// <param name="z">The z component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static HSL XYZtoHSL(double x, double y, double z)
+        public static HSL XYZToHSL(double x, double y, double z)
         {
-            RGB rgb = XYZtoRGB(x, y, z);
-            return RGBtoHSL(rgb.Red, rgb.Green, rgb.Blue);
+            RGB rgb = XYZToRGB(x, y, z);
+            return RGBToHSL(rgb.Red, rgb.Green, rgb.Blue);
         }
 
         /// <summary>
@@ -672,7 +672,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="y">The y component in the range of [0, 1].</param>
         /// <param name="z">The z component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static Lab XYZtoLab(double x, double y, double z)
+        public static Lab XYZToLab(double x, double y, double z)
         {
             double var_X = x / XYZ.D50.X;
             double var_Y = y / XYZ.D50.Y;
@@ -717,7 +717,7 @@ namespace PSFilterLoad.PSApi.ColorConversion
         /// <param name="y">The y component in the range of [0, 1].</param>
         /// <param name="z">The z component in the range of [0, 1].</param>
         /// <returns>The converted color.</returns>
-        public static RGB XYZtoRGB(double x, double y, double z)
+        public static RGB XYZToRGB(double x, double y, double z)
         {
             // Adapt the XYZ D50 white point to D65 using the Bradford transform.
             // http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
