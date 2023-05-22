@@ -357,8 +357,13 @@ namespace PSFilterLoad.PSApi
                         break;
                 }
 
-                EnableInfoVariables variables = new(imageWidth, imageHeight, imageMode, hasTransparencyMask,
-                                                                        targetChannelCount, trueChannelCount, hostState);
+                EnableInfoVariables variables = new(imageWidth,
+                                                    imageHeight,
+                                                    imageMode,
+                                                    hasTransparencyMask,
+                                                    targetChannelCount,
+                                                    trueChannelCount,
+                                                    hostState);
 
                 bool? enableInfoResult = EnableInfoResultCache.Instance.TryGetValue(enableInfo, variables);
                 if (enableInfoResult.HasValue)

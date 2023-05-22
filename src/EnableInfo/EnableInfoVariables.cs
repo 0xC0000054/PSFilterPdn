@@ -41,8 +41,13 @@ namespace PSFilterPdn.EnableInfo
         /// <param name="hostState">The current host state.</param>
         /// <exception cref="ArgumentNullException"><paramref name="hostState"/> is null.</exception>
         /// <exception cref="InvalidEnumArgumentException"><paramref name="imageMode"/> is not a supported value.</exception>
-        public EnableInfoVariables(int imageWidth, int imageHeight, ImageMode imageMode, bool hasTransparencyMask, int targetChannelCount,
-            int trueChannelCount, HostState hostState)
+        public EnableInfoVariables(int imageWidth,
+                                   int imageHeight,
+                                   ImageMode imageMode,
+                                   bool hasTransparencyMask,
+                                   int targetChannelCount,
+                                   int trueChannelCount,
+                                   HostState hostState)
         {
             if (hostState == null)
             {
