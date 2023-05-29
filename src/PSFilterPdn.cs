@@ -43,7 +43,7 @@ namespace PSFilterPdn
         private static ManualResetEvent filterDone;
 
         public PSFilterPdnEffect()
-            : base(StaticName, StaticIcon, null, new BitmapEffectOptions { IsConfigurable = true })
+            : base(StaticName, StaticIcon, null, BitmapEffectOptions.Create() with { IsConfigurable = true })
         {
             repeatEffect = true;
             filterThread = null;

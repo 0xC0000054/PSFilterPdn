@@ -1767,7 +1767,7 @@ namespace PSFilterLoad.PSApi
                 if (scaleFactor > 1) // Filter preview
                 {
                     tempSurface = new Surface(scaleWidth, scaleHeight);
-                    tempSurface.FitSurface(ResamplingAlgorithm.AdaptiveBestQuality, source);
+                    tempSurface.FitSurface(ResamplingAlgorithm.AdaptiveHighQuality, source);
                 }
                 else
                 {

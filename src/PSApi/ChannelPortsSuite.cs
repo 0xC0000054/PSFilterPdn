@@ -246,7 +246,7 @@ namespace PSFilterLoad.PSApi
                         }
 
                         scaledChannelSurface = new Surface(dstWidth, dstHeight);
-                        scaledChannelSurface.FitSurface(ResamplingAlgorithm.AdaptiveBestQuality, filterImageProvider.Source);
+                        scaledChannelSurface.FitSurface(ResamplingAlgorithm.AdaptiveHighQuality, filterImageProvider.Source);
                     }
 
                     FillChannelData(channel, destination, scaledChannelSurface, dstRect);
