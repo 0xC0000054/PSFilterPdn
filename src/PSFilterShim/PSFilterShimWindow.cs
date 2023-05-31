@@ -351,9 +351,16 @@ namespace PSFilterShim
                         if (filterParameters != null)
                         {
                             // Ignore the filters that only use the data handle, e.g. Filter Factory.
-                            byte[] parameterData = filterParameters.GlobalParameters.GetParameterDataBytes();
-
-                            if (parameterData != null || filterParameters.AETEDictionary != null)
+                            //
+                            // Filter Factory-based plugins appear to store compiled code in the data handle
+                            // that is specific to the address space layout of the process when the filter was
+                            // first invoked.
+                            //
+                            // Because PSFilterPdn starts a new instance of the PSFilterShim process for each filter
+                            // it executes, this behavior would cause the process to crash with an access violation
+                            // when running a Filter Factory-based plugin with its last used parameters.
+                            if (filterParameters.GlobalParameters.GetParameterDataBytes() != null
+                                || filterParameters.AETEDictionary != null)
                             {
                                 lps.FilterParameters = filterParameters;
                                 lps.IsRepeatEffect = settings.RepeatEffect;
