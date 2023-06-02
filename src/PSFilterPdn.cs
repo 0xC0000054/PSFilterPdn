@@ -374,6 +374,12 @@ namespace PSFilterPdn
                             filterThread.Join();
                             filterThread = null;
                         }
+
+                        // Create the source bitmap if the plugin returned an error.
+                        if (filterOutput is null)
+                        {
+                            sourceBitmap ??= Environment.GetSourceBitmapBgra32();
+                        }
                     }
                 }
             }
