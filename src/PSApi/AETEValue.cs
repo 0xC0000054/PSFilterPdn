@@ -20,6 +20,7 @@ namespace PSFilterLoad.PSApi
     [KnownType(typeof(UnitFloat))]
     [KnownType(typeof(EnumeratedValue))]
     [KnownType(typeof(ActionDescriptorZString))]
+    [KnownType(typeof(DescriptorSimpleReference))]
     [Serializable]
     internal sealed class AETEValue
     {

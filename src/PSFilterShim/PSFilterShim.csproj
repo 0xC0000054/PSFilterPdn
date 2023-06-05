@@ -39,6 +39,7 @@
     <Compile Include="..\PSApi\AETEValue.cs" Link="PSApi\AETEValue.cs" />
     <Compile Include="..\PSApi\DescriptorRegistryItem.cs" Link="PSApi\DescriptorRegistryItem.cs" />
     <Compile Include="..\PSApi\DescriptorRegistryValues.cs" Link="PSApi\DescriptorRegistryValues.cs" />
+    <Compile Include="..\PSApi\DescriptorSimpleReference.cs" Link="PSApi\DescriptorSimpleReference.cs" />
     <Compile Include="..\PSApi\Diagnostics\Formatters\CStringPointerFormatter.cs" Link="PSApi\Diagnostics\Formatters\CStringPointerFormatter.cs" />
     <Compile Include="..\PSApi\Diagnostics\Formatters\Fixed16AsIntegerStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\Fixed16AsIntegerStringFormatter.cs" />
     <Compile Include="..\PSApi\Diagnostics\Formatters\FourCCAsStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\FourCCAsStringFormatter.cs" />

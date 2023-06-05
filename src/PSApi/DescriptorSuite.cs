@@ -598,7 +598,9 @@ namespace PSFilterLoad.PSApi
 
             AETEValue item = state.items[state.currentKey];
 
-            *data = (PIDescriptorSimpleReference)item.Value;
+            DescriptorSimpleReference reference = (DescriptorSimpleReference)item.Value;
+
+            reference.GetData(data);
 
             return PSError.noErr;
         }
@@ -1049,7 +1051,8 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.ObjectReference, *data));
+                DescriptorSimpleReference reference = new(data);
+                writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(DescriptorTypes.ObjectReference, reference));
             }
             catch (OutOfMemoryException)
             {
