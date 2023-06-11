@@ -20,7 +20,6 @@ namespace PSFilterLoad.PSApi
     {
         private readonly Dictionary<string, DescriptorRegistryItem> persistedValues;
         private readonly Dictionary<string, DescriptorRegistryItem> sessionValues;
-        private bool dirty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DescriptorRegistryValues"/> class.
@@ -52,7 +51,7 @@ namespace PSFilterLoad.PSApi
 
             persistedValues = persistentItems;
             sessionValues = sessionItems;
-            dirty = persistentValuesChanged;
+            Dirty = persistentValuesChanged;
         }
 
         internal DescriptorRegistryValues(Dictionary<string, DescriptorRegistryItem> persistedValues,
@@ -60,7 +59,7 @@ namespace PSFilterLoad.PSApi
         {
             this.persistedValues = persistedValues ?? throw new ArgumentNullException(nameof(persistedValues));
             sessionValues = new Dictionary<string, DescriptorRegistryItem>();
-            this.dirty = dirty;
+            Dirty = dirty;
         }
 
         public void AddToRegistry(Dictionary<string, DescriptorRegistryItem> registry)
