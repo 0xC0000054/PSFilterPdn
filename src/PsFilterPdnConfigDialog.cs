@@ -1965,7 +1965,7 @@ namespace PSFilterPdn
 
                 try
                 {
-                    descriptorRegistry = DescriptorRegistryFile.Losd(path);
+                    descriptorRegistry = DescriptorRegistryFile.Load(path);
                 }
                 catch (DirectoryNotFoundException)
                 {

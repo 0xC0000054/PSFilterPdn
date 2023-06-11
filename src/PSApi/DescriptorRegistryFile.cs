@@ -20,7 +20,7 @@ namespace PSFilterLoad.PSApi
 {
     internal static class DescriptorRegistryFile
     {
-        public static DescriptorRegistryValues Losd(string path)
+        public static DescriptorRegistryValues Load(string path)
         {
             Dictionary<string, DescriptorRegistryItem> persistentItems = new(StringComparer.Ordinal);
             bool isOldFormat = false;
