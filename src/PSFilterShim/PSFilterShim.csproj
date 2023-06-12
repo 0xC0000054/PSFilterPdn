@@ -37,7 +37,6 @@
     <Compile Include="..\DataContractSerializerUtil.cs" Link="DataContractSerializerUtil.cs" />
     <Compile Include="..\PSApi\AETEData.cs" Link="PSApi\AETEData.cs" />
     <Compile Include="..\PSApi\AETEValue.cs" Link="PSApi\AETEValue.cs" />
-    <Compile Include="..\PSApi\DescriptorRegistryItem.cs" Link="PSApi\DescriptorRegistryItem.cs" />
     <Compile Include="..\PSApi\DescriptorRegistryValues.cs" Link="PSApi\DescriptorRegistryValues.cs" />
     <Compile Include="..\PSApi\DescriptorSimpleReference.cs" Link="PSApi\DescriptorSimpleReference.cs" />
     <Compile Include="..\PSApi\Diagnostics\Formatters\CStringPointerFormatter.cs" Link="PSApi\Diagnostics\Formatters\CStringPointerFormatter.cs" />

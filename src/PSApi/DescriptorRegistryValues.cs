@@ -18,72 +18,20 @@ namespace PSFilterLoad.PSApi
     [Serializable]
     internal sealed class DescriptorRegistryValues
     {
-        private readonly Dictionary<string, DescriptorRegistryItem> persistedValues;
-        private readonly Dictionary<string, DescriptorRegistryItem> sessionValues;
+        private readonly Dictionary<string, Dictionary<uint, AETEValue>> persistedValues;
+        private readonly Dictionary<string, Dictionary<uint, AETEValue>> sessionValues;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DescriptorRegistryValues"/> class.
-        /// </summary>
-        /// <param name="values">The registry values.</param>
-        /// <param name="persistentValuesChanged"><c>true</c> if the persistent values have been changed; otherwise, <c>false</c>.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="values"/> is null.</exception>
-        public DescriptorRegistryValues(IDictionary<string, DescriptorRegistryItem> values, bool persistentValuesChanged)
+        public DescriptorRegistryValues()
         {
-            if (values == null)
-            {
-                throw new ArgumentNullException(nameof(values));
-            }
-
-            Dictionary<string, DescriptorRegistryItem> persistentItems = new(StringComparer.Ordinal);
-            Dictionary<string, DescriptorRegistryItem> sessionItems = new(StringComparer.Ordinal);
-
-            foreach (KeyValuePair<string, DescriptorRegistryItem> item in values)
-            {
-                if (item.Value.IsPersistent)
-                {
-                    persistentItems.Add(item.Key, item.Value);
-                }
-                else
-                {
-                    sessionItems.Add(item.Key, item.Value);
-                }
-            }
-
-            persistedValues = persistentItems;
-            sessionValues = sessionItems;
-            Dirty = persistentValuesChanged;
+            persistedValues = new Dictionary<string, Dictionary<uint, AETEValue>>();
+            sessionValues = new Dictionary<string, Dictionary<uint, AETEValue>>();
         }
 
-        internal DescriptorRegistryValues(Dictionary<string, DescriptorRegistryItem> persistedValues,
-                                          bool dirty)
+        internal DescriptorRegistryValues(Dictionary<string, Dictionary<uint, AETEValue>> persistedValues)
         {
             this.persistedValues = persistedValues ?? throw new ArgumentNullException(nameof(persistedValues));
-            sessionValues = new Dictionary<string, DescriptorRegistryItem>();
-            Dirty = dirty;
-        }
-
-        public void AddToRegistry(Dictionary<string, DescriptorRegistryItem> registry)
-        {
-            if (persistedValues != null)
-            {
-                foreach (KeyValuePair<string, DescriptorRegistryItem> item in persistedValues)
-                {
-                    registry.Add(item.Key, item.Value);
-                }
-            }
-
-            if (sessionValues != null)
-            {
-                foreach (KeyValuePair<string, DescriptorRegistryItem> item in sessionValues)
-                {
-                    registry.Add(item.Key, item.Value);
-                }
-            }
-        }
-
-        public Dictionary<string, DescriptorRegistryItem> GetPersistedValuesReadOnly()
-        {
-            return persistedValues;
+            sessionValues = new Dictionary<string, Dictionary<uint, AETEValue>>();
+            Dirty = false;
         }
 
         /// <summary>
@@ -93,5 +41,37 @@ namespace PSFilterLoad.PSApi
         ///   <c>true</c> if the persisted settings have changed; otherwise, <c>false</c>.
         /// </value>
         public bool Dirty { get; set; }
+
+        public void Add(string key, Dictionary<uint, AETEValue> values, bool isPersistent)
+        {
+            if (isPersistent)
+            {
+                persistedValues.AddOrUpdate(key, values);
+                Dirty = true;
+            }
+            else
+            {
+                sessionValues.AddOrUpdate(key, values);
+            }
+        }
+
+        public Dictionary<string, Dictionary<uint, AETEValue>> GetPersistedValuesReadOnly()
+        {
+            return persistedValues;
+        }
+
+        public void Remove(string key)
+        {
+            if (!persistedValues.Remove(key))
+            {
+                sessionValues.Remove(key);
+            }
+        }
+
+        public bool TryGetValue(string key, out Dictionary<uint, AETEValue> value)
+        {
+            return persistedValues.TryGetValue(key, out value)
+                || sessionValues.TryGetValue(key, out value);
+        }
     }
 }

@@ -24,8 +24,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         private readonly IActionDescriptorSuite actionDescriptorSuite;
         private readonly IPluginApiLogger logger;
-        private readonly Dictionary<string, DescriptorRegistryItem> registry;
-        private bool persistentValuesChanged;
+        private readonly DescriptorRegistryValues registry;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DescriptorRegistrySuite"/> class.
@@ -37,18 +36,19 @@ namespace PSFilterLoad.PSApi.PICA
         /// or
         /// <paramref name="logger"/> is null.
         /// </exception>
-        public unsafe DescriptorRegistrySuite(IActionDescriptorSuite actionDescriptorSuite, IPluginApiLogger logger)
+        public unsafe DescriptorRegistrySuite(IActionDescriptorSuite actionDescriptorSuite,
+                                              IPluginApiLogger logger,
+                                              DescriptorRegistryValues registry)
         {
             ArgumentNullException.ThrowIfNull(actionDescriptorSuite);
             ArgumentNullException.ThrowIfNull(logger);
 
             this.actionDescriptorSuite = actionDescriptorSuite;
             this.logger = logger;
+            this.registry = registry ?? new DescriptorRegistryValues();
             register = new DescriptorRegistryRegister(Register);
             erase = new DescriptorRegistryErase(Erase);
             get = new DescriptorRegistryGet(Get);
-            registry = new Dictionary<string, DescriptorRegistryItem>(StringComparer.Ordinal);
-            persistentValuesChanged = false;
         }
 
         unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
@@ -80,27 +80,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// </returns>
         public DescriptorRegistryValues GetRegistryValues()
         {
-            if (registry.Count > 0)
-            {
-                return new DescriptorRegistryValues(registry, persistentValuesChanged);
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Sets the plug-in settings for the current session.
-        /// </summary>
-        /// <param name="values">The plug-in settings.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="values"/> is null.</exception>
-        public void SetRegistryValues(DescriptorRegistryValues values)
-        {
-            if (values == null)
-            {
-                throw new ArgumentNullException(nameof(values));
-            }
-
-            values.AddToRegistry(registry);
+            return registry;
         }
 
         private int Register(IntPtr key, PIActionDescriptor descriptor, PSBoolean isPersistent)
@@ -121,11 +101,7 @@ namespace PSFilterLoad.PSApi.PICA
 
                 if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out Dictionary<uint, AETEValue> values))
                 {
-                    registry.AddOrUpdate(registryKey, new DescriptorRegistryItem(values, isPersistent));
-                    if (isPersistent)
-                    {
-                        persistentValuesChanged = true;
-                    }
+                    registry.Add(registryKey, values, isPersistent);
                 }
                 else
                 {
@@ -183,9 +159,9 @@ namespace PSFilterLoad.PSApi.PICA
                            "key: {0}",
                            key);
 
-                if (registry.TryGetValue(registryKey, out DescriptorRegistryItem item))
+                if (registry.TryGetValue(registryKey, out Dictionary<uint, AETEValue> item))
                 {
-                    *descriptor = actionDescriptorSuite.CreateDescriptor(item.Values);
+                    *descriptor = actionDescriptorSuite.CreateDescriptor(item);
                 }
                 else
                 {

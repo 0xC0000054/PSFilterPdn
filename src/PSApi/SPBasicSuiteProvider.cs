@@ -400,11 +400,8 @@ namespace PSFilterLoad.PSApi
                     if (descriptorRegistrySuite == null)
                     {
                         descriptorRegistrySuite = new DescriptorRegistrySuite(actionSuites.DescriptorSuite,
-                                                                              logger.CreateInstanceForType(nameof(DescriptorRegistrySuite)));
-                        if (registryValues != null)
-                        {
-                            descriptorRegistrySuite.SetRegistryValues(registryValues);
-                        }
+                                                                              logger.CreateInstanceForType(nameof(DescriptorRegistrySuite)),
+                                                                              registryValues);
                     }
 
                     suitePointer = activePICASuites.AllocateSuite(suiteKey, descriptorRegistrySuite);

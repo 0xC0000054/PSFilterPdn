@@ -22,16 +22,15 @@ namespace PSFilterLoad.PSApi
     {
         public static DescriptorRegistryValues Load(string path)
         {
-            Dictionary<string, DescriptorRegistryItem> persistentItems = new(StringComparer.Ordinal);
-            bool isOldFormat = false;
+            Dictionary<string, Dictionary<uint, AETEValue>> persistentItems = new(StringComparer.Ordinal);
 
             using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
             {
-                IDictionary<string, DescriptorRegistryItem> values = null;
+                IDictionary<string, Dictionary<uint, AETEValue>> values = null;
 
                 if (DescriptorRegistryFileHeader.TryCreate(fs, out DescriptorRegistryFileHeader header))
                 {
-                    if (header.FileVersion == 3)
+                    if (header.FileVersion == 4)
                     {
                         long dataLength = fs.Length - fs.Position;
 
@@ -41,21 +40,21 @@ namespace PSFilterLoad.PSApi
 
                         using (MemoryStream ms = new(data))
                         {
-                            values = PSFilterPdn.DataContractSerializerUtil.Deserialize<Dictionary<string, DescriptorRegistryItem>>(ms);
+                            values = PSFilterPdn.DataContractSerializerUtil.Deserialize<Dictionary<string, Dictionary<uint, AETEValue>>>(ms);
                         }
                     }
                 }
 
                 if (values != null && values.Count > 0)
                 {
-                    foreach (KeyValuePair<string, DescriptorRegistryItem> item in values)
+                    foreach (KeyValuePair<string, Dictionary<uint, AETEValue>> item in values)
                     {
                         persistentItems.Add(item.Key, item.Value);
                     }
                 }
             }
 
-            return new DescriptorRegistryValues(persistentItems, isOldFormat);
+            return new DescriptorRegistryValues(persistentItems);
         }
 
         public static void Save(string path, DescriptorRegistryValues values)
@@ -82,7 +81,7 @@ namespace PSFilterLoad.PSApi
         {
             public DescriptorRegistryFileHeader()
             {
-                FileVersion = 3;
+                FileVersion = 4;
             }
 
             private DescriptorRegistryFileHeader(int fileVersion)
