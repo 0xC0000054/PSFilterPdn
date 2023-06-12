@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterPdn;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
@@ -22,12 +23,10 @@ namespace PSFilterLoad.PSApi
     {
         public static DescriptorRegistryValues Load(string path)
         {
-            Dictionary<string, Dictionary<uint, AETEValue>> persistentItems = new(StringComparer.Ordinal);
+            DescriptorRegistryValues registryValues = new();
 
             using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
             {
-                IDictionary<string, Dictionary<uint, AETEValue>> values = null;
-
                 if (DescriptorRegistryFileHeader.TryCreate(fs, out DescriptorRegistryFileHeader header))
                 {
                     if (header.FileVersion == 4)
@@ -40,21 +39,14 @@ namespace PSFilterLoad.PSApi
 
                         using (MemoryStream ms = new(data))
                         {
-                            values = PSFilterPdn.DataContractSerializerUtil.Deserialize<Dictionary<string, Dictionary<uint, AETEValue>>>(ms);
+                            var values = DataContractSerializerUtil.Deserialize<Dictionary<string, Dictionary<uint, AETEValue>>>(ms);
+                            registryValues = new DescriptorRegistryValues(values);
                         }
-                    }
-                }
-
-                if (values != null && values.Count > 0)
-                {
-                    foreach (KeyValuePair<string, Dictionary<uint, AETEValue>> item in values)
-                    {
-                        persistentItems.Add(item.Key, item.Value);
                     }
                 }
             }
 
-            return new DescriptorRegistryValues(persistentItems);
+            return registryValues;
         }
 
         public static void Save(string path, DescriptorRegistryValues values)
@@ -67,7 +59,7 @@ namespace PSFilterLoad.PSApi
 
                     using (MemoryStream ms = new())
                     {
-                        PSFilterPdn.DataContractSerializerUtil.Serialize(ms, values.GetPersistedValuesReadOnly());
+                        DataContractSerializerUtil.Serialize(ms, values.GetPersistedValuesReadOnly());
 
                         fs.Write(ms.GetBuffer(), 0, (int)ms.Length);
                     }
