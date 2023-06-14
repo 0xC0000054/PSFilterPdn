@@ -23,24 +23,32 @@ namespace PSFilterLoad.PSApi
     {
         public static DescriptorRegistryValues Load(string path)
         {
-            bool shouldDeleteOldVersion = false;
-
-            using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
+            try
             {
-                if (DescriptorRegistryFileHeader.TryCreate(fs, out DescriptorRegistryFileHeader header))
+                bool shouldDeleteOldVersion = false;
+
+                using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
                 {
-                    if (header.FileVersion == 4)
+                    if (DescriptorRegistryFileHeader.TryCreate(fs, out DescriptorRegistryFileHeader header))
                     {
-                        long dataLength = fs.Length - fs.Position;
-
-                        byte[] data = new byte[dataLength];
-
-                        fs.ReadExactly(data, 0, data.Length);
-
-                        using (MemoryStream ms = new(data))
+                        if (header.FileVersion == 4)
                         {
-                            var values = DataContractSerializerUtil.Deserialize<Dictionary<string, Dictionary<uint, AETEValue>>>(ms);
-                            return new DescriptorRegistryValues(values);
+                            long dataLength = fs.Length - fs.Position;
+
+                            byte[] data = new byte[dataLength];
+
+                            fs.ReadExactly(data, 0, data.Length);
+
+                            using (MemoryStream ms = new(data))
+                            {
+                                var values = DataContractSerializerUtil.Deserialize<Dictionary<string, Dictionary<uint, AETEValue>>>(ms);
+                                return new DescriptorRegistryValues(values);
+                            }
+                        }
+                        else
+                        {
+                            // The descriptor registry file is an unsupported version, delete it.
+                            shouldDeleteOldVersion = true;
                         }
                     }
                     else
@@ -49,16 +57,19 @@ namespace PSFilterLoad.PSApi
                         shouldDeleteOldVersion = true;
                     }
                 }
-                else
+
+                if (shouldDeleteOldVersion)
                 {
-                    // The descriptor registry file is an unsupported version, delete it.
-                    shouldDeleteOldVersion = true;
+                    File.Delete(path);
                 }
             }
-
-            if (shouldDeleteOldVersion)
+            catch (DirectoryNotFoundException)
             {
-                File.Delete(path);
+                // The Paint.NET user files folder does not exist.
+            }
+            catch (FileNotFoundException)
+            {
+                // This file would only exist if a plugin has persisted settings.
             }
 
             return new DescriptorRegistryValues();

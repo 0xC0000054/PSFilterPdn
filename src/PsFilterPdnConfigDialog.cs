@@ -1963,18 +1963,7 @@ namespace PSFilterPdn
                 string userDataPath = Services.GetService<IUserFilesService>().UserFilesPath;
                 string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
 
-                try
-                {
-                    descriptorRegistry = DescriptorRegistryFile.Load(path);
-                }
-                catch (DirectoryNotFoundException)
-                {
-                    // The Paint.NET user files folder does not exist.
-                }
-                catch (FileNotFoundException)
-                {
-                    // This file would only exist if a plugin has persisted settings.
-                }
+                descriptorRegistry = DescriptorRegistryFile.Load(path);                
             }
         }
 
