@@ -23,7 +23,7 @@ namespace PSFilterLoad.PSApi
     {
         public static DescriptorRegistryValues Load(string path)
         {
-            DescriptorRegistryValues registryValues = new();
+            bool shouldDeleteOldVersion = false;
 
             using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
             {
@@ -40,13 +40,28 @@ namespace PSFilterLoad.PSApi
                         using (MemoryStream ms = new(data))
                         {
                             var values = DataContractSerializerUtil.Deserialize<Dictionary<string, Dictionary<uint, AETEValue>>>(ms);
-                            registryValues = new DescriptorRegistryValues(values);
+                            return new DescriptorRegistryValues(values);
                         }
                     }
+                    else
+                    {
+                        // The descriptor registry file is an unsupported version, delete it.
+                        shouldDeleteOldVersion = true;
+                    }
+                }
+                else
+                {
+                    // The descriptor registry file is an unsupported version, delete it.
+                    shouldDeleteOldVersion = true;
                 }
             }
 
-            return registryValues;
+            if (shouldDeleteOldVersion)
+            {
+                File.Delete(path);
+            }
+
+            return new DescriptorRegistryValues();
         }
 
         public static void Save(string path, DescriptorRegistryValues values)
