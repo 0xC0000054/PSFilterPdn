@@ -158,7 +158,7 @@ namespace PSFilterShim
 
                     if (windowRect.X < screenWorkingArea.X)
                     {
-                        windowRect.X = windowRect.X;
+                        windowRect.X = screenWorkingArea.X;
                     }
                     else if (windowRect.Right > screenWorkingArea.Right)
                     {
