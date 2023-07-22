@@ -20,7 +20,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
     internal static class PluginApiLogWriterFactory
     {
         public static IPluginApiLogWriter? CreateFilterExecutionLogger(PluginData plugin,
-                                                                       string logFilePath)
+                                                                       string? logFilePath)
         {
             IPluginApiLogWriter? writer;
 

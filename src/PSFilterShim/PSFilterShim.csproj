@@ -34,7 +34,6 @@
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\DataContractSerializerUtil.cs" Link="DataContractSerializerUtil.cs" />
     <Compile Include="..\MessagePackResolver.cs" Link="MessagePackResolver.cs" />
     <Compile Include="..\MessagePackSerializerUtil.cs" Link="MessagePackSerializerUtil.cs" />
     <Compile Include="..\PSApi\AETEData.cs" Link="PSApi\AETEData.cs" />
@@ -90,6 +89,9 @@
     <Compile Include="..\PSApi\UnsupportedPICASuiteVersionException.cs" Link="PSApi\UnsupportedPICASuiteVersionException.cs" />
     <Compile Include="..\PSFilterShimImageFormat.cs" Link="PSFilterShimImageFormat.cs" />
     <Compile Include="..\PSFilterShimImageHeader.cs" Link="PSFilterShimImageHeader.cs" />
+    <Compile Include="..\PSFilterShimResolver.cs" Link="PSFilterShimResolver.cs" />
+    <Compile Include="..\PSFilterShimSettings.cs" Link="PSFilterShimSettings.cs" />
+    <Compile Include="..\PSFilterShimSettings.Formatter.cs" Link="PSFilterShimSettings.Formatter.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.1" />

@@ -10,7 +10,8 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
+using MessagePack;
+using MessagePack.Formatters;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -20,13 +21,18 @@ namespace PSFilterLoad.PSApi
     /// Represents a collection of Pseudo-Resources
     /// </summary>
     /// <seealso cref="Collection{PSResource}" />
-    [Serializable]
+    [MessagePackObject]
+    [MessagePackFormatter(typeof(Formatter))]
     internal sealed class PseudoResourceCollection : Collection<PseudoResource>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PseudoResourceCollection"/> class.
         /// </summary>
         public PseudoResourceCollection() : base()
+        {
+        }
+
+        private PseudoResourceCollection(IList<PseudoResource> items) : base(items)
         {
         }
 
@@ -71,6 +77,25 @@ namespace PSFilterLoad.PSApi
             }
 
             return -1;
+        }
+
+        private sealed class Formatter : IMessagePackFormatter<PseudoResourceCollection>
+        {
+            public PseudoResourceCollection Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+            {
+                options.Security.DepthStep(ref reader);
+
+                IList<PseudoResource> items = options.Resolver.GetFormatterWithVerify<IList<PseudoResource>>().Deserialize(ref reader, options);
+
+                reader.Depth--;
+
+                return new PseudoResourceCollection(items);
+            }
+
+            public void Serialize(ref MessagePackWriter writer, PseudoResourceCollection value, MessagePackSerializerOptions options)
+            {
+                options.Resolver.GetFormatterWithVerify<IList<PseudoResource>>().Serialize(ref writer, value.Items, options);
+            }
         }
     }
 }

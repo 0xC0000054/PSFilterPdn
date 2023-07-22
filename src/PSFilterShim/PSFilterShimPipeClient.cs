@@ -15,10 +15,8 @@ using PSFilterPdn;
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
-using System.IO;
 using System.IO.Pipes;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 using System.Text;
 
 namespace PSFilterShim
@@ -137,18 +135,9 @@ namespace PSFilterShim
 
         private T DeserializeClass<T>(Command command) where T : class
         {
-            T deserialized = null;
+            ReadOnlyMemory<byte> reply = SendMessageToServer(command);
 
-            byte[] reply = SendMessageToServer(command);
-
-            using (MemoryStream stream = new(reply))
-            {
-                DataContractSerializer serializer = new(typeof(T));
-
-                deserialized = (T)serializer.ReadObject(stream);
-            }
-
-            return deserialized;
+            return MessagePackSerializerUtil.Deserialize<T>(reply, PSFilterShimResolver.Options);
         }
 
         [SkipLocalsInit]

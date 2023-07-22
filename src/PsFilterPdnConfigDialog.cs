@@ -806,7 +806,7 @@ namespace PSFilterPdn
 
                 if (pseudoResources.Count > 0)
                 {
-                    DataContractSerializerUtil.Serialize(resourceDataFileName, pseudoResources);
+                    MessagePackSerializerUtil.Serialize(resourceDataFileName, pseudoResources, MessagePackResolver.Options);
                 }
 
                 if (descriptorRegistry != null && descriptorRegistry.HasData)
@@ -898,7 +898,8 @@ namespace PSFilterPdn
 
             try
             {
-                pseudoResources = DataContractSerializerUtil.Deserialize<PseudoResourceCollection>(resourceDataFileName);
+                pseudoResources = MessagePackSerializerUtil.Deserialize<PseudoResourceCollection>(resourceDataFileName,
+                                                                                                  MessagePackResolver.Options);
             }
             catch (FileNotFoundException)
             {

@@ -16,6 +16,8 @@
  * All rights reserved.
 */
 
+using MessagePack;
+using MessagePack.Formatters;
 using System;
 using System.Runtime.Serialization;
 
@@ -50,61 +52,10 @@ namespace PSFilterLoad.PSApi
         WritesOutsideSelection = 1 << 3
     }
 
-    [DataContract()]
+    [MessagePackObject]
+    [MessagePackFormatter(typeof(Formatter))]
     internal sealed class FilterCaseInfo
     {
-        public FilterDataHandling InputHandling
-        {
-            get;
-            private set;
-        }
-
-        public FilterDataHandling OutputHandling
-        {
-            get;
-            private set;
-        }
-
-        public FilterCaseInfoFlags Flags1
-        {
-            get;
-            private set;
-        }
-
-        [DataMember]
-        public byte Flags2
-        {
-            get;
-            private set;
-        }
-
-        [DataMember(Name = "InputHandling")]
-#pragma warning disable IDE0051 // Remove unused private members
-        private byte InputHandlingValue
-#pragma warning restore IDE0051 // Remove unused private members
-        {
-            get => (byte)InputHandling;
-            set => InputHandling = (FilterDataHandling)value;
-        }
-
-        [DataMember(Name = "OutputHandling")]
-#pragma warning disable IDE0051 // Remove unused private members
-        private byte OutputHandlingValue
-#pragma warning restore IDE0051 // Remove unused private members
-        {
-            get => (byte)OutputHandling;
-            set => OutputHandling = (FilterDataHandling)value;
-        }
-
-        [DataMember(Name = "Flags1")]
-#pragma warning disable IDE0051 // Remove unused private members
-        private byte Flags1Value
-#pragma warning restore IDE0051 // Remove unused private members
-        {
-            get => (byte)Flags1;
-            set => Flags1 = (FilterCaseInfoFlags)value;
-        }
-
         internal const int SizeOf = 4;
 
         internal FilterCaseInfo(FilterDataHandling inputHandling, FilterDataHandling outputHandling, FilterCaseInfoFlags flags1, byte flags2)
@@ -115,6 +66,42 @@ namespace PSFilterLoad.PSApi
             Flags2 = flags2;
         }
 
+        public FilterDataHandling InputHandling { get; }
+
+        public FilterDataHandling OutputHandling { get; }
+
+        public FilterCaseInfoFlags Flags1 { get; }
+
+        public byte Flags2 { get; }
+
         public bool IsSupported => InputHandling != FilterDataHandling.CantFilter && OutputHandling != FilterDataHandling.CantFilter;
+
+        private sealed class Formatter : IMessagePackFormatter<FilterCaseInfo>
+        {
+            public FilterCaseInfo Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+            {
+                options.Security.DepthStep(ref reader);
+
+                byte inputHandling = reader.ReadByte();
+                byte outputHandling = reader.ReadByte();
+                byte flags1 = reader.ReadByte();
+                byte flags2 = reader.ReadByte();
+
+                reader.Depth--;
+
+                return new FilterCaseInfo((FilterDataHandling)inputHandling,
+                                          (FilterDataHandling)outputHandling,
+                                          (FilterCaseInfoFlags)flags1,
+                                          flags2);
+            }
+
+            public void Serialize(ref MessagePackWriter writer, FilterCaseInfo value, MessagePackSerializerOptions options)
+            {
+                writer.Write((byte)value.InputHandling);
+                writer.Write((byte)value.OutputHandling);
+                writer.Write((byte)value.Flags1);
+                writer.Write(value.Flags2);
+            }
+        }
     }
 }

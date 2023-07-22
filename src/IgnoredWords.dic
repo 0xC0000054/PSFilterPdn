@@ -5,6 +5,7 @@ cmyk
 config
 cust
 deserialize
+deserialized
 dest
 dict
 dpi

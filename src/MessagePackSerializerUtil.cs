@@ -11,6 +11,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using MessagePack;
+using System;
+using System.Buffers;
 using System.IO;
 
 namespace PSFilterPdn
@@ -34,6 +36,11 @@ namespace PSFilterPdn
             return MessagePackSerializer.Deserialize<T>(stream, options);
         }
 
+        public static T Deserialize<T>(ReadOnlyMemory<byte> buffer, MessagePackSerializerOptions options)
+        {
+            return MessagePackSerializer.Deserialize<T>(buffer, options);
+        }
+
         public static void Serialize<T>(string path, T obj, MessagePackSerializerOptions options)
         {
             using (FileStream fs = new(path, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -45,6 +52,11 @@ namespace PSFilterPdn
         public static void Serialize<T>(Stream stream, T obj, MessagePackSerializerOptions options)
         {
             MessagePackSerializer.Serialize(stream, obj, options);
+        }
+
+        public static void Serialize<T>(IBufferWriter<byte> bufferWriter, T obj, MessagePackSerializerOptions options)
+        {
+            MessagePackSerializer.Serialize<T>(bufferWriter, obj, options);
         }
     }
 }

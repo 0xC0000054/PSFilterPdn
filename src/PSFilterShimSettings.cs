@@ -10,99 +10,43 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System.Runtime.Serialization;
+using MessagePack;
+using PSFilterLoad.PSApi;
+
+#nullable enable
 
 namespace PSFilterPdn
 {
-    [DataContract]
-    internal sealed class PSFilterShimSettings
+    [MessagePackObject]
+    [MessagePackFormatter(typeof(Formatter))]
+    internal sealed partial class PSFilterShimSettings
     {
         internal PSFilterShimSettings()
         {
         }
 
-        [DataMember]
-        public bool RepeatEffect
-        {
-            get;
-            internal set;
-        }
+        public bool RepeatEffect { get; init; }
 
-        [DataMember]
-        public bool ShowAboutDialog
-        {
-            get;
-            internal set;
-        }
+        public bool ShowAboutDialog { get; init; }
 
-        [DataMember]
-        public string SourceImagePath
-        {
-            get;
-            internal set;
-        }
+        public string? SourceImagePath { get; init; }
 
-        [DataMember]
-        public string DestinationImagePath
-        {
-            get;
-            internal set;
-        }
+        public string? DestinationImagePath { get; init; }
 
-        [DataMember]
-        public int PrimaryColor
-        {
-            get;
-            internal set;
-        }
+        public int PrimaryColor { get; init; }
 
-        [DataMember]
-        public int SecondaryColor
-        {
-            get;
-            internal set;
-        }
+        public int SecondaryColor { get; init; }
 
-        [DataMember]
-        public string SelectionMaskPath
-        {
-            get;
-            internal set;
-        }
+        public string? SelectionMaskPath { get; init; }
 
-        [DataMember]
-        public string ParameterDataPath
-        {
-            get;
-            internal set;
-        }
+        public string? ParameterDataPath { get; init; }
 
-        [DataMember]
-        public string PseudoResourcePath
-        {
-            get;
-            internal set;
-        }
+        public string? PseudoResourcePath { get; init; }
 
-        [DataMember]
-        public string DescriptorRegistryPath
-        {
-            get;
-            internal set;
-        }
+        public string? DescriptorRegistryPath { get; init; }
 
-        [DataMember]
-        public string LogFilePath
-        {
-            get;
-            internal set;
-        }
+        public string? LogFilePath { get; init; }
 
-        [DataMember]
-        public PSFilterLoad.PSApi.PluginUISettings PluginUISettings
-        {
-            get;
-            internal set;
-        }
+        public PluginUISettings? PluginUISettings { get; init; }
     }
 }

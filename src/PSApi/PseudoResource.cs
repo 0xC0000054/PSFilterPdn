@@ -10,21 +10,26 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
-using System.Runtime.Serialization;
+using MessagePack;
+using MessagePack.Formatters;
+using System.Buffers;
 
 namespace PSFilterLoad.PSApi
 {
-    [DataContract]
-    [Serializable]
+    [MessagePackObject]
+    [MessagePackFormatter(typeof(Formatter))]
     internal sealed class PseudoResource
     {
-        [DataMember]
         private uint key;
-        [DataMember]
         private int index;
-        [DataMember]
         private byte[] data;
+
+        public PseudoResource(uint key, int index, byte[] data)
+        {
+            this.key = key;
+            this.index = index;
+            this.data = data;
+        }
 
         /// <summary>
         /// Gets the resource key.
@@ -49,13 +54,6 @@ namespace PSFilterLoad.PSApi
             return data;
         }
 
-        public PseudoResource(uint key, int index, byte[] data)
-        {
-            this.key = key;
-            this.index = index;
-            this.data = data;
-        }
-
         public bool Equals(uint otherKey)
         {
             return key == otherKey;
@@ -64,6 +62,29 @@ namespace PSFilterLoad.PSApi
         public bool Equals(uint otherKey, int otherIndex)
         {
             return key == otherKey && index == otherIndex;
+        }
+
+        private sealed class Formatter : IMessagePackFormatter<PseudoResource>
+        {
+            public PseudoResource Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+            {
+                options.Security.DepthStep(ref reader);
+
+                uint key = reader.ReadUInt32();
+                int index = reader.ReadInt32();
+                byte[] data = reader.ReadBytes().Value.ToArray();
+
+                reader.Depth--;
+
+                return new PseudoResource(key, index, data);
+            }
+
+            public void Serialize(ref MessagePackWriter writer, PseudoResource value, MessagePackSerializerOptions options)
+            {
+                writer.Write(value.key);
+                writer.Write(value.index);
+                writer.Write(value.data);
+            }
         }
     }
 }

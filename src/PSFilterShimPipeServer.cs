@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using CommunityToolkit.HighPerformance.Buffers;
 using PSFilterLoad.PSApi;
 using System;
 using System.Buffers;
@@ -161,17 +162,17 @@ namespace PSFilterPdn
                         SendEmptyReplyToClient();
                         break;
                     case Command.GetPluginData:
-                        using (MemoryStream stream = new())
+                        using (ArrayPoolBufferWriter<byte> bufferWriter = new())
                         {
-                            DataContractSerializerUtil.Serialize(stream, pluginData);
-                            SendReplyToClient(new ReadOnlySpan<byte>(stream.GetBuffer(), 0, (int)stream.Length));
+                            MessagePackSerializerUtil.Serialize(bufferWriter, pluginData, PSFilterShimResolver.Options);
+                            SendReplyToClient(bufferWriter.WrittenSpan);
                         }
                         break;
                     case Command.GetSettings:
-                        using (MemoryStream stream = new())
+                        using (ArrayPoolBufferWriter<byte> bufferWriter = new())
                         {
-                            DataContractSerializerUtil.Serialize(stream, settings);
-                            SendReplyToClient(new ReadOnlySpan<byte>(stream.GetBuffer(), 0, (int)stream.Length));
+                            MessagePackSerializerUtil.Serialize(bufferWriter, settings, PSFilterShimResolver.Options);
+                            SendReplyToClient(bufferWriter.WrittenSpan);
                         }
                         break;
                     case Command.SetErrorInfo:

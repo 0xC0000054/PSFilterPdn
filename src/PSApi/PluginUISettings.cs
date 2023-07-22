@@ -10,14 +10,18 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System.Runtime.Serialization;
+using MessagePack;
+using MessagePack.Formatters;
+
+#nullable enable
 
 namespace PSFilterLoad.PSApi
 {
     /// <summary>
     /// Encapsulates the user interfaces settings for plug-in created dialogs.
     /// </summary>
-    [DataContract]
+    [MessagePackObject]
+    [MessagePackFormatter(typeof(Formatter))]
     internal sealed class PluginUISettings
     {
         /// <summary>
@@ -35,11 +39,40 @@ namespace PSFilterLoad.PSApi
         /// <value>
         ///   <c>true</c> if the host is running in high DPI mode; otherwise, <c>false</c>.
         /// </value>
-        [DataMember]
         public bool HighDpi
         {
             get;
             private set;
+        }
+
+        private sealed class Formatter : IMessagePackFormatter<PluginUISettings?>
+        {
+            public PluginUISettings? Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+            {
+                if (reader.TryReadNil())
+                {
+                    return null;
+                }
+
+                options.Security.DepthStep(ref reader);
+
+                bool highDpi = reader.ReadBoolean();
+
+                reader.Depth--;
+
+                return new PluginUISettings(highDpi);
+            }
+
+            public void Serialize(ref MessagePackWriter writer, PluginUISettings? value, MessagePackSerializerOptions options)
+            {
+                if (value is null)
+                {
+                    writer.WriteNil();
+                    return;
+                }
+
+                writer.Write(value.HighDpi);
+            }
         }
     }
 }

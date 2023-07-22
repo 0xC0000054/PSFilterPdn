@@ -23,24 +23,34 @@ namespace PSFilterLoad.PSApi
     [DataContract()]
     internal sealed class PluginData : IEquatable<PluginData>
     {
-#pragma warning disable 649
-        [DataMember(Name = nameof(FileName))]
-        private string fileName;
-        [DataMember(Name = nameof(EntryPoint))]
-        private string entryPoint;
-        [DataMember(Name = nameof(Category))]
-        private string category;
-        [DataMember(Name = nameof(Title))]
-        private string title;
-        [DataMember(Name = nameof(FilterInfo))]
-        private FilterCaseInfoCollection filterInfo;
-        [DataMember(Name = nameof(Aete))]
-        private AETEData aete;
-        [DataMember(Name = nameof(ModuleEntryPoints))]
-        private ReadOnlyCollection<string> moduleEntryPoints;
-        [DataMember(Name = nameof(ProcessorArchitecture))]
-        private readonly Architecture processorArchitecture;
-#pragma warning restore 0649
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PluginData"/> class.
+        /// </summary>
+        /// <param name="fileName">The file path of the filter.</param>
+        /// <param name="entryPoint">The filter entry point.</param>
+        /// <param name="category">The filter category.</param>
+        /// <param name="title">The filter title.</param>
+        /// <param name="filterInfo">The filter information used to determine how transparency is processed..</param>
+        /// <param name="aete">The AETE scripting information.</param>
+        /// <param name="processorArchitecture">The processor architecture of the plug-in.</param>
+        internal PluginData(string fileName,
+                            string entryPoint,
+                            string category,
+                            string title,
+                            FilterCaseInfoCollection filterInfo,
+                            AETEData aete,
+                            ReadOnlyCollection<string> moduleEntryPoints,
+                            Architecture processorArchitecture)
+        {
+            FileName = fileName;
+            EntryPoint = entryPoint;
+            Category = category;
+            Title = title;
+            FilterInfo = filterInfo;
+            Aete = aete;
+            ModuleEntryPoints = moduleEntryPoints;
+            ProcessorArchitecture = processorArchitecture;
+        }
 
         /// <summary>
         /// Gets the file path of the filter.
@@ -48,7 +58,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The file path of the filter.
         /// </value>
-        public string FileName => fileName;
+        public string FileName { get; }
 
         /// <summary>
         /// Gets the filter entry point.
@@ -56,7 +66,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The entry point.
         /// </value>
-        public string EntryPoint => entryPoint;
+        public string EntryPoint { get; }
 
         /// <summary>
         /// Gets the filter category.
@@ -64,7 +74,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The filter category.
         /// </value>
-        public string Category => category;
+        public string Category { get; }
 
         /// <summary>
         /// Gets the filter title.
@@ -72,7 +82,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The filter title.
         /// </value>
-        public string Title => title;
+        public string Title { get; }
 
         /// <summary>
         /// Gets the filter information used to determine how transparency is processed.
@@ -80,7 +90,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The filter information used to determine how transparency is processed.
         /// </value>
-        public FilterCaseInfoCollection FilterInfo => filterInfo;
+        public FilterCaseInfoCollection FilterInfo { get; }
 
         /// <summary>
         /// Gets the AETE scripting information.
@@ -88,7 +98,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The AETE scripting information.
         /// </value>
-        public AETEData Aete => aete;
+        public AETEData Aete { get; }
 
         /// <summary>
         /// Gets a collection containing all of the entry points in the filter module.
@@ -96,11 +106,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The collection containing all of the entry points in the module.
         /// </value>
-        public ReadOnlyCollection<string> ModuleEntryPoints
-        {
-            get => moduleEntryPoints;
-            internal set => moduleEntryPoints = value;
-        }
+        public ReadOnlyCollection<string> ModuleEntryPoints { get; internal set; }
 
         /// <summary>
         /// Gets the processor architecture that the plug-in was built for.
@@ -108,7 +114,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The processor architecture.
         /// </value>
-        public Architecture ProcessorArchitecture => processorArchitecture;
+        public Architecture ProcessorArchitecture { get; }
 
         public override bool Equals(object obj)
         {
@@ -132,10 +138,10 @@ namespace PSFilterLoad.PSApi
                 return false;
             }
 
-            return string.Equals(fileName, other.fileName, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(entryPoint, other.entryPoint, StringComparison.Ordinal) &&
-                   string.Equals(category, other.category, StringComparison.Ordinal) &&
-                   string.Equals(title, other.title, StringComparison.Ordinal);
+            return string.Equals(FileName, other.FileName, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(EntryPoint, other.EntryPoint, StringComparison.Ordinal) &&
+                   string.Equals(Category, other.Category, StringComparison.Ordinal) &&
+                   string.Equals(Title, other.Title, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -155,10 +161,10 @@ namespace PSFilterLoad.PSApi
             FilterCase filterCase;
 
             // Some filters do not handle transparency correctly despite what their filterInfo says.
-            if (filterInfo == null ||
-                category.Equals("Axion", StringComparison.Ordinal) ||
-                category.Equals("Vizros 4", StringComparison.Ordinal) && title.StartsWith("Lake", StringComparison.Ordinal) ||
-                category.Equals("Nik Collection", StringComparison.Ordinal) && title.StartsWith("Dfine 2", StringComparison.Ordinal))
+            if (FilterInfo == null ||
+                Category.Equals("Axion", StringComparison.Ordinal) ||
+                Category.Equals("Vizros 4", StringComparison.Ordinal) && Title.StartsWith("Lake", StringComparison.Ordinal) ||
+                Category.Equals("Nik Collection", StringComparison.Ordinal) && Title.StartsWith("Dfine 2", StringComparison.Ordinal))
             {
                 if (hasTransparency())
                 {
@@ -175,11 +181,11 @@ namespace PSFilterLoad.PSApi
 
                 int filterCaseIndex = (int)filterCase - 1;
 
-                if (!filterInfo[filterCaseIndex].IsSupported)
+                if (!FilterInfo[filterCaseIndex].IsSupported)
                 {
                     if (hasTransparency())
                     {
-                        if (filterInfo[filterCaseIndex + 2].IsSupported)
+                        if (FilterInfo[filterCaseIndex + 2].IsSupported)
                         {
                             switch (filterCase)
                             {
@@ -194,7 +200,7 @@ namespace PSFilterLoad.PSApi
                         else
                         {
                             // If the protected transparency modes are not supported use the next most appropriate mode.
-                            if (filterInfo[FilterCase.FloatingSelection].IsSupported)
+                            if (FilterInfo[FilterCase.FloatingSelection].IsSupported)
                             {
                                 filterCase = FilterCase.FloatingSelection;
                             }
@@ -236,10 +242,10 @@ namespace PSFilterLoad.PSApi
 
             unchecked
             {
-                hash = (hash * 127) + (fileName != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(fileName) : 0);
-                hash = (hash * 127) + (entryPoint != null ? entryPoint.GetHashCode() : 0);
-                hash = (hash * 127) + (category != null ? category.GetHashCode() : 0);
-                hash = (hash * 127) + (title != null ? title.GetHashCode() : 0);
+                hash = (hash * 127) + (FileName != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(FileName) : 0);
+                hash = (hash * 127) + (EntryPoint != null ? EntryPoint.GetHashCode() : 0);
+                hash = (hash * 127) + (Category != null ? Category.GetHashCode() : 0);
+                hash = (hash * 127) + (Title != null ? Title.GetHashCode() : 0);
             }
 
             return hash;
@@ -263,11 +269,6 @@ namespace PSFilterLoad.PSApi
         public static bool operator !=(PluginData pluginData1, PluginData pluginData2)
         {
             return !(pluginData1 == pluginData2);
-        }
-
-        internal bool IsValid()
-        {
-            return !string.IsNullOrEmpty(category) && !string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(entryPoint);
         }
     }
 }

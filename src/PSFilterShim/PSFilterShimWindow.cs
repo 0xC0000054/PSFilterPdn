@@ -314,7 +314,8 @@ namespace PSFilterShim
                 PseudoResourceCollection? pseudoResources = null;
                 try
                 {
-                    pseudoResources = DataContractSerializerUtil.Deserialize<PseudoResourceCollection>(settings.PseudoResourcePath);
+                    pseudoResources = MessagePackSerializerUtil.Deserialize<PseudoResourceCollection>(settings.PseudoResourcePath,
+                                                                                                      MessagePackResolver.Options);
                 }
                 catch (FileNotFoundException)
                 {
@@ -388,7 +389,9 @@ namespace PSFilterShim
                                     pseudoResources = lps.PseudoResources;
                                     if (pseudoResources != null && pseudoResources.Count > 0)
                                     {
-                                        DataContractSerializerUtil.Serialize(settings.PseudoResourcePath, pseudoResources);
+                                        MessagePackSerializerUtil.Serialize(settings.PseudoResourcePath,
+                                                                            pseudoResources,
+                                                                            MessagePackResolver.Options);
                                     }
 
                                     registryValues = lps.GetRegistryValues();
