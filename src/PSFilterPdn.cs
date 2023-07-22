@@ -165,7 +165,7 @@ namespace PSFilterPdn
                             DataContractSerializerUtil.Serialize(resourceDataFileName, token.PseudoResources);
                         }
 
-                        if (token.DescriptorRegistry != null)
+                        if (token.DescriptorRegistry != null && token.DescriptorRegistry.HasData)
                         {
                             MessagePackSerializerUtil.Serialize(descriptorRegistryFileName,
                                                                 token.DescriptorRegistry,

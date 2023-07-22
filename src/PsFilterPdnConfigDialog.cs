@@ -809,7 +809,7 @@ namespace PSFilterPdn
                     DataContractSerializerUtil.Serialize(resourceDataFileName, pseudoResources);
                 }
 
-                if (descriptorRegistry != null)
+                if (descriptorRegistry != null && descriptorRegistry.HasData)
                 {
                     MessagePackSerializerUtil.Serialize(descriptorRegistryFileName, descriptorRegistry, MessagePackResolver.Options);
                 }

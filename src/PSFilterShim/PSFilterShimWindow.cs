@@ -392,7 +392,7 @@ namespace PSFilterShim
                                     }
 
                                     registryValues = lps.GetRegistryValues();
-                                    if (registryValues != null)
+                                    if (registryValues != null && registryValues.HasData)
                                     {
                                         MessagePackSerializerUtil.Serialize(settings.DescriptorRegistryPath,
                                                                             registryValues,

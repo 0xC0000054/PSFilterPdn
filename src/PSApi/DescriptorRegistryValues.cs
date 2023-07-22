@@ -52,6 +52,14 @@ namespace PSFilterLoad.PSApi
         /// </value>
         public bool Dirty { get; set; }
 
+        /// <summary>
+        /// Gets a value indicating whether this instance has data.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance has data; otherwise, <c>false</c>.
+        /// </value>
+        public bool HasData => persistedValues.Count > 0 || sessionValues.Count > 0;
+
         public void Add(string key, Dictionary<uint, AETEValue> values, bool isPersistent)
         {
             if (isPersistent)
