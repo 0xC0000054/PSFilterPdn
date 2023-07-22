@@ -10,7 +10,10 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
+using MessagePack;
+using MessagePack.Formatters;
+
+#nullable enable
 
 namespace PSFilterLoad.PSApi.PICA
 {
@@ -25,24 +28,44 @@ namespace PSFilterLoad.PSApi.PICA
         internal const uint Name = 0x6E616D65;
     }
 
-    [Serializable]
+    [MessagePackObject]
+    [MessagePackFormatter(typeof(Formatter))]
     internal sealed class ActionReferenceItem
     {
-        private readonly uint form;
-        private readonly uint desiredClass;
-        private readonly object value;
-
-        public uint Form => form;
-
-        public uint DesiredClass => desiredClass;
-
-        public object Value => value;
-
-        public ActionReferenceItem(uint form, uint desiredClass, object value)
+        public ActionReferenceItem(uint form, uint desiredClass, object? value)
         {
-            this.form = form;
-            this.desiredClass = desiredClass;
-            this.value = value;
+            Form = form;
+            DesiredClass = desiredClass;
+            Value = value;
+        }
+
+        public uint Form { get; }
+
+        public uint DesiredClass { get; }
+
+        public object? Value { get; }
+
+        private sealed class Formatter : IMessagePackFormatter<ActionReferenceItem>
+        {
+            public ActionReferenceItem Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+            {
+                options.Security.DepthStep(ref reader);
+
+                uint form = reader.ReadUInt32();
+                uint desiredClass = reader.ReadUInt32();
+                object? value = ScriptingObjectFieldFormatter.Instance.Deserialize(ref reader, options);
+
+                reader.Depth--;
+
+                return new ActionReferenceItem(form, desiredClass, value);
+            }
+
+            public void Serialize(ref MessagePackWriter writer, ActionReferenceItem value, MessagePackSerializerOptions options)
+            {
+                writer.Write(value.Form);
+                writer.Write(value.DesiredClass);
+                ScriptingObjectFieldFormatter.Instance.Serialize(ref writer, value.Value, options);
+            }
         }
     }
 }

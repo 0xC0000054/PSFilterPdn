@@ -13,13 +13,13 @@
 using MessagePack;
 using MessagePack.Formatters;
 
-namespace PSFilterLoad.PSApi.PICA
+namespace PSFilterLoad.PSApi
 {
     [MessagePackObject]
     [MessagePackFormatter(typeof(Formatter))]
-    internal sealed class ActionListItem
+    internal sealed class EnumeratedValue
     {
-        public ActionListItem(uint type, object value)
+        public EnumeratedValue(uint type, uint value)
         {
             Type = type;
             Value = value;
@@ -27,26 +27,26 @@ namespace PSFilterLoad.PSApi.PICA
 
         public uint Type { get; }
 
-        public object Value { get; }
+        public uint Value { get; }
 
-        private sealed class Formatter : IMessagePackFormatter<ActionListItem>
+        private sealed class Formatter : IMessagePackFormatter<EnumeratedValue>
         {
-            public ActionListItem Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+            public EnumeratedValue Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
             {
                 options.Security.DepthStep(ref reader);
 
                 uint type = reader.ReadUInt32();
-                object value = ScriptingObjectFieldFormatter.Instance.Deserialize(ref reader, options)!;
+                uint value = reader.ReadUInt32();
 
                 reader.Depth--;
 
-                return new ActionListItem(type, value);
+                return new EnumeratedValue(type, value);
             }
 
-            public void Serialize(ref MessagePackWriter writer, ActionListItem value, MessagePackSerializerOptions options)
+            public void Serialize(ref MessagePackWriter writer, EnumeratedValue value, MessagePackSerializerOptions options)
             {
                 writer.Write(value.Type);
-                ScriptingObjectFieldFormatter.Instance.Serialize(ref writer, value.Value, options);
+                writer.Write(value.Value);
             }
         }
     }

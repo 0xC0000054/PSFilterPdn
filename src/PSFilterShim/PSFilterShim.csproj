@@ -35,10 +35,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\DataContractSerializerUtil.cs" Link="DataContractSerializerUtil.cs" />
+    <Compile Include="..\MessagePackResolver.cs" Link="MessagePackResolver.cs" />
+    <Compile Include="..\MessagePackSerializerUtil.cs" Link="MessagePackSerializerUtil.cs" />
     <Compile Include="..\PSApi\AETEData.cs" Link="PSApi\AETEData.cs" />
-    <Compile Include="..\PSApi\AETEValue.cs" Link="PSApi\AETEValue.cs" />
     <Compile Include="..\PSApi\DescriptorRegistryValues.cs" Link="PSApi\DescriptorRegistryValues.cs" />
-    <Compile Include="..\PSApi\DescriptorSimpleReference.cs" Link="PSApi\DescriptorSimpleReference.cs" />
     <Compile Include="..\PSApi\Diagnostics\Formatters\CStringPointerFormatter.cs" Link="PSApi\Diagnostics\Formatters\CStringPointerFormatter.cs" />
     <Compile Include="..\PSApi\Diagnostics\Formatters\Fixed16AsIntegerStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\Fixed16AsIntegerStringFormatter.cs" />
     <Compile Include="..\PSApi\Diagnostics\Formatters\FourCCAsStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\FourCCAsStringFormatter.cs" />
@@ -63,6 +63,7 @@
     <Compile Include="..\PSApi\FilterPadding.cs" Link="PSApi\FilterPadding.cs" />
     <Compile Include="..\PSApi\FilterPostProcessingOptions.cs" Link="PSApi\FilterPostProcessingOptions.cs" />
     <Compile Include="..\PSApi\GlobalParameters.cs" Link="PSApi\GlobalParameters.cs" />
+    <Compile Include="..\PSApi\GlobalParameters.Formatter.cs" Link="PSApi\GlobalParameters.Formatter.cs" />
     <Compile Include="..\PSApi\HandleSuiteLock.cs" Link="PSApi\HandleSuiteLock.cs" />
     <Compile Include="..\PSApi\IDocumentMetadataProvider.cs" Link="PSApi\IDocumentMetadataProvider.cs" />
     <Compile Include="..\PSApi\IHandleSuite.cs" Link="PSApi\IHandleSuite.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="..\PSApi\IPICASuiteAllocator.cs" Link="PSApi\IPICASuiteAllocator.cs" />
     <Compile Include="..\PSApi\ISPBasicSuiteProvider.cs" Link="PSApi\ISPBasicSuiteProvider.cs" />
     <Compile Include="..\PSApi\ParameterData.cs" Link="PSApi\ParameterData.cs" />
+    <Compile Include="..\PSApi\ParameterData.Formatter.cs" Link="PSApi\ParameterData.Formatter.cs" />
     <Compile Include="..\PSApi\PICA\Action Suites\ActionDescriptorZString.cs" Link="PSApi\PICA\Action Suites\ActionDescriptorZString.cs" />
     <Compile Include="..\PSApi\PICA\Action Suites\ActionListDescriptor.cs" Link="PSApi\PICA\Action Suites\ActionListDescriptor.cs" />
     <Compile Include="..\PSApi\PICA\Action Suites\ActionListItem.cs" Link="PSApi\PICA\Action Suites\ActionListItem.cs" />
@@ -79,6 +81,11 @@
     <Compile Include="..\PSApi\PluginUISettings.cs" Link="PSApi\PluginUISettings.cs" />
     <Compile Include="..\PSApi\PseudoResource.cs" Link="PSApi\PseudoResource.cs" />
     <Compile Include="..\PSApi\PseudoResourceCollection.cs" Link="PSApi\PseudoResourceCollection.cs" />
+    <Compile Include="..\PSApi\Scripting\AETEValue.cs" Link="PSApi\Scripting\AETEValue.cs" />
+    <Compile Include="..\PSApi\Scripting\DescriptorSimpleReference.cs" Link="PSApi\Scripting\DescriptorSimpleReference.cs" />
+    <Compile Include="..\PSApi\Scripting\EnumeratedValue.cs" Link="PSApi\Scripting\EnumeratedValue.cs" />
+    <Compile Include="..\PSApi\Scripting\ScriptingObjectFieldFormatter.cs" Link="PSApi\Scripting\ScriptingObjectFieldFormatter.cs" />
+    <Compile Include="..\PSApi\Scripting\UnitFloat.cs" Link="PSApi\Scripting\UnitFloat.cs" />
     <Compile Include="..\PSApi\UnmanagedFunctionPointer`1.cs" Link="PSApi\UnmanagedFunctionPointer`1.cs" />
     <Compile Include="..\PSApi\UnsupportedPICASuiteVersionException.cs" Link="PSApi\UnsupportedPICASuiteVersionException.cs" />
     <Compile Include="..\PSFilterShimImageFormat.cs" Link="PSFilterShimImageFormat.cs" />
@@ -86,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.1" />
+    <PackageReference Include="MessagePack" Version="2.5.124" />
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
   </ItemGroup>

@@ -10,12 +10,15 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using MessagePack;
+using MessagePack.Formatters;
 using System;
 using System.Collections.Generic;
 
 namespace PSFilterLoad.PSApi
 {
-    [Serializable]
+    [MessagePackObject]
+    [MessagePackFormatter(typeof(Formatter))]
     internal sealed class DescriptorRegistryValues
     {
         private readonly Dictionary<string, Dictionary<uint, AETEValue>> persistedValues;
@@ -32,6 +35,13 @@ namespace PSFilterLoad.PSApi
             this.persistedValues = persistedValues ?? throw new ArgumentNullException(nameof(persistedValues));
             sessionValues = new Dictionary<string, Dictionary<uint, AETEValue>>();
             Dirty = false;
+        }
+
+        private DescriptorRegistryValues(Dictionary<string, Dictionary<uint, AETEValue>> persistedValues,
+                                        Dictionary<string, Dictionary<uint, AETEValue>> sessionValues)
+        {
+            this.persistedValues = persistedValues ?? throw new ArgumentNullException(nameof(persistedValues));
+            this.sessionValues = sessionValues ?? throw new ArgumentNullException(nameof(sessionValues));
         }
 
         /// <summary>
@@ -72,6 +82,37 @@ namespace PSFilterLoad.PSApi
         {
             return persistedValues.TryGetValue(key, out value)
                 || sessionValues.TryGetValue(key, out value);
+        }
+
+        private sealed class Formatter : IMessagePackFormatter<DescriptorRegistryValues>
+        {
+            public static readonly IMessagePackFormatter<DescriptorRegistryValues> Instance = new Formatter();
+
+            private Formatter()
+            {
+            }
+
+            public DescriptorRegistryValues Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+            {
+                options.Security.DepthStep(ref reader);
+
+                var formatter = options.Resolver.GetFormatterWithVerify<Dictionary<string, Dictionary<uint, AETEValue>>>();
+
+                Dictionary<string, Dictionary<uint, AETEValue>> persistedValues = formatter.Deserialize(ref reader, options);
+                Dictionary<string, Dictionary<uint, AETEValue>> sessionValues = formatter.Deserialize(ref reader, options);
+
+                reader.Depth--;
+
+                return new DescriptorRegistryValues(persistedValues, sessionValues);
+            }
+
+            public void Serialize(ref MessagePackWriter writer, DescriptorRegistryValues value, MessagePackSerializerOptions options)
+            {
+                var formatter = options.Resolver.GetFormatterWithVerify<Dictionary<string, Dictionary<uint, AETEValue>>>();
+
+                formatter.Serialize(ref writer, value.persistedValues, options);
+                formatter.Serialize(ref writer, value.sessionValues, options);
+            }
         }
     }
 }

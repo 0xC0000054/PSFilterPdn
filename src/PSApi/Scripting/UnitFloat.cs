@@ -13,34 +13,41 @@
 using MessagePack;
 using MessagePack.Formatters;
 
-namespace PSFilterLoad.PSApi.PICA
+namespace PSFilterLoad.PSApi
 {
     [MessagePackObject]
     [MessagePackFormatter(typeof(Formatter))]
-    internal sealed class ActionDescriptorZString
+    internal sealed class UnitFloat
     {
-        public ActionDescriptorZString(string value)
+        public UnitFloat(uint unit, double value)
         {
+            Unit = unit;
             Value = value;
         }
 
-        public string Value { get; }
+        public uint Unit { get; }
 
-        private sealed class Formatter : IMessagePackFormatter<ActionDescriptorZString>
+        public double Value { get; }
+
+        private sealed class Formatter : IMessagePackFormatter<UnitFloat>
         {
-            public ActionDescriptorZString Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+            public UnitFloat Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
             {
                 options.Security.DepthStep(ref reader);
 
-                string value = reader.ReadString()!;
+                uint unit = reader.ReadUInt32();
+                double value = reader.ReadDouble();
 
                 reader.Depth--;
 
-                return new ActionDescriptorZString(value);
+                return new UnitFloat(unit, value);
             }
 
-            public void Serialize(ref MessagePackWriter writer, ActionDescriptorZString value, MessagePackSerializerOptions options)
-                => writer.Write(value.Value);
+            public void Serialize(ref MessagePackWriter writer, UnitFloat value, MessagePackSerializerOptions options)
+            {
+                writer.Write(value.Unit);
+                writer.Write(value.Value);
+            }
         }
     }
 }

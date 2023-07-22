@@ -191,7 +191,7 @@ namespace PSFilterLoad.PSApi
             set
             {
                 globalParameters = value.GlobalParameters;
-                scriptingData = value.AETEDictionary;
+                scriptingData = value.ScriptingData;
             }
         }
 

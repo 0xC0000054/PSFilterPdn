@@ -10,25 +10,48 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
+using MessagePack;
+using MessagePack.Formatters;
 using System.Collections.Generic;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    [Serializable]
+    [MessagePackObject]
+    [MessagePackFormatter(typeof(Formatter))]
     internal sealed class ActionListDescriptor
     {
-        private readonly uint type;
-        private readonly Dictionary<uint, AETEValue> descriptorValues;
-
-        public uint Type => type;
-
-        public Dictionary<uint, AETEValue> DescriptorValues => descriptorValues;
-
         public ActionListDescriptor(uint type, Dictionary<uint, AETEValue> descriptorValues)
         {
-            this.type = type;
-            this.descriptorValues = descriptorValues;
+            Type = type;
+            DescriptorValues = descriptorValues;
+        }
+
+        public uint Type { get; }
+
+        public Dictionary<uint, AETEValue> DescriptorValues { get; }
+
+        private sealed class Formatter : IMessagePackFormatter<ActionListDescriptor>
+        {
+            public ActionListDescriptor Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+            {
+                options.Security.DepthStep(ref reader);
+
+                uint type = reader.ReadUInt32();
+                Dictionary<uint, AETEValue> value = options.Resolver.GetFormatterWithVerify<Dictionary<uint, AETEValue>>().Deserialize(ref reader,
+                                                                                                                                       options);
+
+                reader.Depth--;
+
+                return new ActionListDescriptor(type, value);
+            }
+
+            public void Serialize(ref MessagePackWriter writer, ActionListDescriptor value, MessagePackSerializerOptions options)
+            {
+                writer.Write(value.Type);
+                options.Resolver.GetFormatterWithVerify<Dictionary<uint, AETEValue>>().Serialize(ref writer,
+                                                                                                 value.DescriptorValues,
+                                                                                                 options);
+            }
         }
     }
 }

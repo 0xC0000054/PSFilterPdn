@@ -304,7 +304,8 @@ namespace PSFilterShim
                 ParameterData? filterParameters = null;
                 try
                 {
-                    filterParameters = DataContractSerializerUtil.Deserialize<ParameterData>(settings.ParameterDataPath);
+                    filterParameters = MessagePackSerializerUtil.Deserialize<ParameterData>(settings.ParameterDataPath,
+                                                                                            MessagePackResolver.Options);
                 }
                 catch (FileNotFoundException)
                 {
@@ -322,7 +323,8 @@ namespace PSFilterShim
                 DescriptorRegistryValues? registryValues = null;
                 try
                 {
-                    registryValues = DataContractSerializerUtil.Deserialize<DescriptorRegistryValues>(settings.DescriptorRegistryPath);
+                    registryValues = MessagePackSerializerUtil.Deserialize<DescriptorRegistryValues>(settings.DescriptorRegistryPath,
+                                                                                                     MessagePackResolver.Options);
                 }
                 catch (FileNotFoundException)
                 {
@@ -350,21 +352,8 @@ namespace PSFilterShim
 
                         if (filterParameters != null)
                         {
-                            // Ignore the filters that only use the data handle, e.g. Filter Factory.
-                            //
-                            // Filter Factory-based plugins appear to store compiled code in the data handle
-                            // that is specific to the address space layout of the process when the filter was
-                            // first invoked.
-                            //
-                            // Because PSFilterPdn starts a new instance of the PSFilterShim process for each filter
-                            // it executes, this behavior would cause the process to crash with an access violation
-                            // when running a Filter Factory-based plugin with its last used parameters.
-                            if (filterParameters.GlobalParameters.GetParameterDataBytes() != null
-                                || filterParameters.AETEDictionary != null)
-                            {
-                                lps.FilterParameters = filterParameters;
-                                lps.IsRepeatEffect = settings.RepeatEffect;
-                            }
+                            lps.FilterParameters = filterParameters;
+                            lps.IsRepeatEffect = settings.RepeatEffect;
                         }
 
                         if (pseudoResources != null)
@@ -388,13 +377,26 @@ namespace PSFilterShim
 
                                 if (!lps.IsRepeatEffect)
                                 {
-                                    DataContractSerializerUtil.Serialize(settings.ParameterDataPath, lps.FilterParameters);
-                                    DataContractSerializerUtil.Serialize(settings.PseudoResourcePath, lps.PseudoResources);
+                                    ParameterData parameterData = lps.FilterParameters;
+                                    if (parameterData.ShouldSerialize())
+                                    {
+                                        MessagePackSerializerUtil.Serialize(settings.ParameterDataPath,
+                                                                            parameterData,
+                                                                            MessagePackResolver.Options);
+                                    }
+
+                                    pseudoResources = lps.PseudoResources;
+                                    if (pseudoResources != null && pseudoResources.Count > 0)
+                                    {
+                                        DataContractSerializerUtil.Serialize(settings.PseudoResourcePath, pseudoResources);
+                                    }
 
                                     registryValues = lps.GetRegistryValues();
                                     if (registryValues != null)
                                     {
-                                        DataContractSerializerUtil.Serialize(settings.DescriptorRegistryPath, registryValues);
+                                        MessagePackSerializerUtil.Serialize(settings.DescriptorRegistryPath,
+                                                                            registryValues,
+                                                                            MessagePackResolver.Options);
                                     }
                                 }
                             }

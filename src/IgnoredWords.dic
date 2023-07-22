@@ -6,6 +6,7 @@ config
 cust
 deserialize
 dest
+dict
 dpi
 dw
 Exif

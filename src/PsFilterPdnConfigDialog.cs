@@ -801,7 +801,7 @@ namespace PSFilterPdn
 
                 if ((filterParameters != null) && filterParameters.TryGetValue(data.PluginData, out ParameterData parameterData))
                 {
-                    DataContractSerializerUtil.Serialize(parameterDataFileName, parameterData);
+                    MessagePackSerializerUtil.Serialize(parameterDataFileName, parameterData, MessagePackResolver.Options);
                 }
 
                 if (pseudoResources.Count > 0)
@@ -811,7 +811,7 @@ namespace PSFilterPdn
 
                 if (descriptorRegistry != null)
                 {
-                    DataContractSerializerUtil.Serialize(descriptorRegistryFileName, descriptorRegistry);
+                    MessagePackSerializerUtil.Serialize(descriptorRegistryFileName, descriptorRegistry, MessagePackResolver.Options);
                 }
 
                 int exitCode;
@@ -887,7 +887,8 @@ namespace PSFilterPdn
 
             try
             {
-                ParameterData parameterData = DataContractSerializerUtil.Deserialize<ParameterData>(parameterDataFileName);
+                ParameterData parameterData = MessagePackSerializerUtil.Deserialize<ParameterData>(parameterDataFileName,
+                                                                                                   MessagePackResolver.Options);
 
                 filterParameters.AddOrUpdate(data, parameterData);
             }
@@ -905,7 +906,8 @@ namespace PSFilterPdn
 
             try
             {
-                descriptorRegistry = DataContractSerializerUtil.Deserialize<DescriptorRegistryValues>(descriptorRegistryFileName);
+                descriptorRegistry = MessagePackSerializerUtil.Deserialize<DescriptorRegistryValues>(descriptorRegistryFileName,
+                                                                                                     MessagePackResolver.Options);
             }
             catch (FileNotFoundException)
             {
@@ -1963,7 +1965,7 @@ namespace PSFilterPdn
                 string userDataPath = Services.GetService<IUserFilesService>().UserFilesPath;
                 string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
 
-                descriptorRegistry = DescriptorRegistryFile.Load(path);                
+                descriptorRegistry = DescriptorRegistryFile.Load(path);
             }
         }
 

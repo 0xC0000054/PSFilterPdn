@@ -10,41 +10,67 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System.Runtime.Serialization;
+using MessagePack;
+
+#nullable enable
 
 namespace PSFilterLoad.PSApi
 {
     /// <summary>
-    /// The class that holds the saved filter global parameter data.
+    /// The class that encapsulates the filter's global parameter data.
     /// </summary>
-    [DataContract]
-    internal sealed class GlobalParameters
+    [MessagePackObject]
+    [MessagePackFormatter(typeof(Formatter))]
+    internal sealed partial class GlobalParameters
     {
-        public enum DataStorageMethod
+        internal enum DataStorageMethod : int
         {
             HandleSuite,
             OTOFHandle,
             RawBytes
         }
 
-        [DataMember]
-        private byte[] parameterDataBytes;
-        [DataMember]
-        private DataStorageMethod parameterDataStorageMethod;
-        [DataMember]
+#pragma warning disable IDE0032 // Use auto property
+        private byte[]? parameterDataBytes;
+        private int parameterDataStorageMethod;
         private bool parameterDataExecutable;
-        [DataMember]
-        private byte[] pluginDataBytes;
-        [DataMember]
-        private DataStorageMethod pluginDataStorageMethod;
-        [DataMember]
+        private byte[]? pluginDataBytes;
+        private int pluginDataStorageMethod;
         private bool pluginDataExecutable;
+#pragma warning restore IDE0032 // Use auto property
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GlobalParameters"/> class.
+        /// </summary>
+        internal GlobalParameters()
+        {
+            parameterDataBytes = null;
+            ParameterDataStorageMethod = DataStorageMethod.HandleSuite;
+            parameterDataExecutable = false;
+            pluginDataBytes = null;
+            PluginDataStorageMethod = DataStorageMethod.HandleSuite;
+        }
+
+        private GlobalParameters(byte[]? parameterDataBytes,
+                                 int parameterDataStorageMethod,
+                                 bool parameterDataExecutable,
+                                 byte[]? pluginDataBytes,
+                                 int pluginDataStorageMethod,
+                                 bool pluginDataExecutable)
+        {
+            this.parameterDataBytes = parameterDataBytes;
+            this.parameterDataStorageMethod = parameterDataStorageMethod;
+            this.parameterDataExecutable = parameterDataExecutable;
+            this.pluginDataBytes = pluginDataBytes;
+            this.pluginDataStorageMethod = pluginDataStorageMethod;
+            this.pluginDataExecutable = pluginDataExecutable;
+        }
 
         /// <summary>
         /// Gets the parameter data bytes.
         /// </summary>
         /// <returns>The parameter data bytes.</returns>
-        public byte[] GetParameterDataBytes()
+        public byte[]? GetParameterDataBytes()
         {
             return parameterDataBytes;
         }
@@ -66,8 +92,8 @@ namespace PSFilterLoad.PSApi
         /// </value>
         public DataStorageMethod ParameterDataStorageMethod
         {
-            get => parameterDataStorageMethod;
-            set => parameterDataStorageMethod = value;
+            get => (DataStorageMethod)parameterDataStorageMethod;
+            set => parameterDataStorageMethod = (int)value;
         }
 
         /// <summary>
@@ -86,7 +112,7 @@ namespace PSFilterLoad.PSApi
         /// Gets the plugin data bytes.
         /// </summary>
         /// <returns>The plugin data bytes.</returns>
-        public byte[] GetPluginDataBytes()
+        public byte[]? GetPluginDataBytes()
         {
             return pluginDataBytes;
         }
@@ -108,8 +134,8 @@ namespace PSFilterLoad.PSApi
         /// </value>
         public DataStorageMethod PluginDataStorageMethod
         {
-            get => pluginDataStorageMethod;
-            set => pluginDataStorageMethod = value;
+            get => (DataStorageMethod)pluginDataStorageMethod;
+            set => pluginDataStorageMethod = (int)value;
         }
 
         /// <summary>
@@ -122,19 +148,6 @@ namespace PSFilterLoad.PSApi
         {
             get => pluginDataExecutable;
             set => pluginDataExecutable = value;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalParameters"/> class.
-        /// </summary>
-        public GlobalParameters()
-        {
-            parameterDataBytes = null;
-            parameterDataStorageMethod = DataStorageMethod.HandleSuite;
-            parameterDataExecutable = false;
-            pluginDataBytes = null;
-            pluginDataStorageMethod = DataStorageMethod.HandleSuite;
-            pluginDataExecutable = false;
         }
     }
 }

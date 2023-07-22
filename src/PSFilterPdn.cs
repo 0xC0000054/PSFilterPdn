@@ -157,7 +157,7 @@ namespace PSFilterPdn
 
                         if (token.FilterParameters.TryGetValue(token.FilterData, out ParameterData parameterData))
                         {
-                            DataContractSerializerUtil.Serialize(parameterDataFileName, parameterData);
+                            MessagePackSerializerUtil.Serialize(parameterDataFileName, parameterData, MessagePackResolver.Options);
                         }
 
                         if (token.PseudoResources.Count > 0)
@@ -167,7 +167,9 @@ namespace PSFilterPdn
 
                         if (token.DescriptorRegistry != null)
                         {
-                            DataContractSerializerUtil.Serialize(descriptorRegistryFileName, token.DescriptorRegistry);
+                            MessagePackSerializerUtil.Serialize(descriptorRegistryFileName,
+                                                                token.DescriptorRegistry,
+                                                                MessagePackResolver.Options);
                         }
 
                         string args = server.PipeName + " " + window.Handle.ToString(CultureInfo.InvariantCulture);

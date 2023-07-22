@@ -31,7 +31,7 @@ namespace PSFilterLoad.PSApi
                 {
                     if (DescriptorRegistryFileHeader.TryCreate(fs, out DescriptorRegistryFileHeader header))
                     {
-                        if (header.FileVersion == 4)
+                        if (header.FileVersion == 5)
                         {
                             long dataLength = fs.Length - fs.Position;
 
@@ -41,7 +41,7 @@ namespace PSFilterLoad.PSApi
 
                             using (MemoryStream ms = new(data))
                             {
-                                var values = DataContractSerializerUtil.Deserialize<Dictionary<string, Dictionary<uint, AETEValue>>>(ms);
+                                var values = MessagePackSerializerUtil.Deserialize<Dictionary<string, Dictionary<uint, AETEValue>>>(ms, MessagePackResolver.Options);
                                 return new DescriptorRegistryValues(values);
                             }
                         }
@@ -85,7 +85,7 @@ namespace PSFilterLoad.PSApi
 
                     using (MemoryStream ms = new())
                     {
-                        DataContractSerializerUtil.Serialize(ms, values.GetPersistedValuesReadOnly());
+                        MessagePackSerializerUtil.Serialize(ms, values.GetPersistedValuesReadOnly(), MessagePackResolver.Options);
 
                         fs.Write(ms.GetBuffer(), 0, (int)ms.Length);
                     }
@@ -99,7 +99,7 @@ namespace PSFilterLoad.PSApi
         {
             public DescriptorRegistryFileHeader()
             {
-                FileVersion = 4;
+                FileVersion = 5;
             }
 
             private DescriptorRegistryFileHeader(int fileVersion)
