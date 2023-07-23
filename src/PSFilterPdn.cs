@@ -92,9 +92,9 @@ namespace PSFilterPdn
                 {
                     string srcFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
                     string destFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
-                    string parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-                    string resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-                    string descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
+                    string parameterDataFileName = null;
+                    string resourceDataFileName = null;
+                    string descriptorRegistryFileName = null;
                     string selectionMaskFileName = null;
 
                     DocumentDpi documentDpi = new(Environment.Document.Resolution);
@@ -102,11 +102,13 @@ namespace PSFilterPdn
 
                     if (token.FilterParameters.TryGetValue(token.FilterData, out ParameterData parameterData))
                     {
+                        parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
                         MessagePackSerializerUtil.Serialize(parameterDataFileName, parameterData, MessagePackResolver.Options);
                     }
 
                     if (token.PseudoResources.Count > 0)
                     {
+                        resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
                         MessagePackSerializerUtil.Serialize(resourceDataFileName,
                                                             token.PseudoResources,
                                                             MessagePackResolver.Options);
@@ -114,6 +116,7 @@ namespace PSFilterPdn
 
                     if (token.DescriptorRegistry != null && token.DescriptorRegistry.HasData)
                     {
+                        descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
                         MessagePackSerializerUtil.Serialize(descriptorRegistryFileName,
                                                             token.DescriptorRegistry,
                                                             MessagePackResolver.Options);
@@ -128,7 +131,6 @@ namespace PSFilterPdn
                         if (selectionMask != null)
                         {
                             selectionMaskFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
-
                             PSFilterShimImage.SaveSelectionMask(selectionMaskFileName, selectionMask);
                         }
                     }

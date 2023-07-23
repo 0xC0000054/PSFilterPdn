@@ -302,33 +302,42 @@ namespace PSFilterShim
                 PSFilterShimSettings settings = pipeClient.GetShimSettings();
 
                 ParameterData? filterParameters = null;
-                try
+                if (!string.IsNullOrEmpty(settings.ParameterDataPath))
                 {
-                    filterParameters = MessagePackSerializerUtil.Deserialize<ParameterData>(settings.ParameterDataPath,
-                                                                                            MessagePackResolver.Options);
-                }
-                catch (FileNotFoundException)
-                {
+                    try
+                    {
+                        filterParameters = MessagePackSerializerUtil.Deserialize<ParameterData>(settings.ParameterDataPath,
+                                                                                                MessagePackResolver.Options);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                    }
                 }
 
                 PseudoResourceCollection? pseudoResources = null;
-                try
+                if (!string.IsNullOrEmpty(settings.PseudoResourcePath))
                 {
-                    pseudoResources = MessagePackSerializerUtil.Deserialize<PseudoResourceCollection>(settings.PseudoResourcePath,
-                                                                                                      MessagePackResolver.Options);
-                }
-                catch (FileNotFoundException)
-                {
+                    try
+                    {
+                        pseudoResources = MessagePackSerializerUtil.Deserialize<PseudoResourceCollection>(settings.PseudoResourcePath,
+                                                                                                          MessagePackResolver.Options);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                    }
                 }
 
                 DescriptorRegistryValues? registryValues = null;
-                try
+                if (!string.IsNullOrEmpty(settings.DescriptorRegistryPath))
                 {
-                    registryValues = MessagePackSerializerUtil.Deserialize<DescriptorRegistryValues>(settings.DescriptorRegistryPath,
-                                                                                                     MessagePackResolver.Options);
-                }
-                catch (FileNotFoundException)
-                {
+                    try
+                    {
+                        registryValues = MessagePackSerializerUtil.Deserialize<DescriptorRegistryValues>(settings.DescriptorRegistryPath,
+                                                                                                         MessagePackResolver.Options);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                    }
                 }
 
                 IPluginApiLogWriter? logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(pdata, settings.LogFilePath);
