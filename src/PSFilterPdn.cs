@@ -95,7 +95,29 @@ namespace PSFilterPdn
                     string parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
                     string resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
                     string descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-                    string selectionMaskFileName = string.Empty;
+                    string selectionMaskFileName = null;
+
+                    DocumentDpi documentDpi = new(Environment.Document.Resolution);
+                    PSFilterShimImage.Save(srcFileName, Environment.GetSourceBitmapBgra32(), documentDpi);
+
+                    if (token.FilterParameters.TryGetValue(token.FilterData, out ParameterData parameterData))
+                    {
+                        MessagePackSerializerUtil.Serialize(parameterDataFileName, parameterData, MessagePackResolver.Options);
+                    }
+
+                    if (token.PseudoResources.Count > 0)
+                    {
+                        MessagePackSerializerUtil.Serialize(resourceDataFileName,
+                                                            token.PseudoResources,
+                                                            MessagePackResolver.Options);
+                    }
+
+                    if (token.DescriptorRegistry != null && token.DescriptorRegistry.HasData)
+                    {
+                        MessagePackSerializerUtil.Serialize(descriptorRegistryFileName,
+                                                            token.DescriptorRegistry,
+                                                            MessagePackResolver.Options);
+                    }
 
                     MaskSurface selectionMask = null;
 
@@ -148,28 +170,6 @@ namespace PSFilterPdn
                                                                null,
                                                                documentMetadataProvider))
                     {
-                        DocumentDpi documentDpi = new(Environment.Document.Resolution);
-                        PSFilterShimImage.Save(srcFileName, Environment.GetSourceBitmapBgra32(), documentDpi);
-
-                        if (token.FilterParameters.TryGetValue(token.FilterData, out ParameterData parameterData))
-                        {
-                            MessagePackSerializerUtil.Serialize(parameterDataFileName, parameterData, MessagePackResolver.Options);
-                        }
-
-                        if (token.PseudoResources.Count > 0)
-                        {
-                            MessagePackSerializerUtil.Serialize(resourceDataFileName,
-                                                                token.PseudoResources,
-                                                                MessagePackResolver.Options);
-                        }
-
-                        if (token.DescriptorRegistry != null && token.DescriptorRegistry.HasData)
-                        {
-                            MessagePackSerializerUtil.Serialize(descriptorRegistryFileName,
-                                                                token.DescriptorRegistry,
-                                                                MessagePackResolver.Options);
-                        }
-
                         string args = server.PipeName + " " + window.Handle.ToString(CultureInfo.InvariantCulture);
                         ProcessStartInfo psi = new(shimPath, args);
 

@@ -742,7 +742,24 @@ namespace PSFilterPdn
             string parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
             string resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
             string descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-            string selectionMaskFileName = string.Empty;
+            string selectionMaskFileName = null;
+
+            PSFilterShimImage.Save(srcFileName, sourceBitmap, documentDpi);
+
+            if ((filterParameters != null) && filterParameters.TryGetValue(data.PluginData, out ParameterData parameterData))
+            {
+                MessagePackSerializerUtil.Serialize(parameterDataFileName, parameterData, MessagePackResolver.Options);
+            }
+
+            if (pseudoResources.Count > 0)
+            {
+                MessagePackSerializerUtil.Serialize(resourceDataFileName, pseudoResources, MessagePackResolver.Options);
+            }
+
+            if (descriptorRegistry != null && descriptorRegistry.HasData)
+            {
+                MessagePackSerializerUtil.Serialize(descriptorRegistryFileName, descriptorRegistry, MessagePackResolver.Options);
+            }
 
             MaskSurface selectionMask = null;
 
@@ -794,23 +811,6 @@ namespace PSFilterPdn
                                                 UpdateProgress,
                                                 documentMetadataProvider))
             {
-                PSFilterShimImage.Save(srcFileName, sourceBitmap, documentDpi);
-
-                if ((filterParameters != null) && filterParameters.TryGetValue(data.PluginData, out ParameterData parameterData))
-                {
-                    MessagePackSerializerUtil.Serialize(parameterDataFileName, parameterData, MessagePackResolver.Options);
-                }
-
-                if (pseudoResources.Count > 0)
-                {
-                    MessagePackSerializerUtil.Serialize(resourceDataFileName, pseudoResources, MessagePackResolver.Options);
-                }
-
-                if (descriptorRegistry != null && descriptorRegistry.HasData)
-                {
-                    MessagePackSerializerUtil.Serialize(descriptorRegistryFileName, descriptorRegistry, MessagePackResolver.Options);
-                }
-
                 int exitCode;
 
                 using (Process process = new())
