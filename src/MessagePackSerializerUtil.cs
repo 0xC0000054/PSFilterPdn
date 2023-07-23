@@ -56,7 +56,7 @@ namespace PSFilterPdn
 
         public static void Serialize<T>(IBufferWriter<byte> bufferWriter, T obj, MessagePackSerializerOptions options)
         {
-            MessagePackSerializer.Serialize<T>(bufferWriter, obj, options);
+            MessagePackSerializer.Serialize(bufferWriter, obj, options);
         }
     }
 }
