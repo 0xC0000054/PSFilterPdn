@@ -797,19 +797,19 @@ namespace PSFilterPdn
             FilterPostProcessingOptions postProcessingOptions = FilterPostProcessingOptions.None;
 
             using (PSFilterShimPipeServer server = new(AbortCallback,
-                                                data.PluginData,
-                                                settings,
-                                                new Action<PSFilterShimErrorInfo>(delegate(PSFilterShimErrorInfo error)
-                                                {
-                                                    result = false;
-                                                    proxyError = error;
-                                                }),
-                                                new Action<FilterPostProcessingOptions>(delegate(FilterPostProcessingOptions options)
-                                                {
-                                                    postProcessingOptions = options;
-                                                }),
-                                                UpdateProgress,
-                                                documentMetadataProvider))
+                                                       data.PluginData,
+                                                       settings,
+                                                       new Action<PSFilterShimErrorInfo>(delegate(PSFilterShimErrorInfo error)
+                                                       {
+                                                           result = false;
+                                                           proxyError = error;
+                                                       }),
+                                                       new Action<FilterPostProcessingOptions>(delegate(FilterPostProcessingOptions options)
+                                                       {
+                                                           postProcessingOptions = options;
+                                                       }),
+                                                       UpdateProgress,
+                                                       documentMetadataProvider))
             {
                 int exitCode;
 
