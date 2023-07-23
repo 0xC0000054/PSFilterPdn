@@ -19,6 +19,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using PaintDotNet;
 using PSFilterLoad.PSApi.Diagnostics;
+using PSFilterLoad.PSApi.Interop;
 using PSFilterShim;
 using PSFilterShim.Properties;
 

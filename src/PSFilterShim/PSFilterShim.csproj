@@ -36,57 +36,89 @@
   <ItemGroup>
     <Compile Include="..\MessagePackResolver.cs" Link="MessagePackResolver.cs" />
     <Compile Include="..\MessagePackSerializerUtil.cs" Link="MessagePackSerializerUtil.cs" />
+    <Compile Include="..\PSApi\ColorConversion\**\*.cs" Link="PSApi\ColorConversion\%(RecursiveDir)%(FileName)%(Extension)" />
+    <Compile Include="..\PSApi\Diagnostics\**\*.cs" Link="PSApi\Diagnostics\%(RecursiveDir)%(FileName)%(Extension)" />
+    <Compile Include="..\PSApi\Interop\NativeConstants.cs" Link="PSApi\Interop\NativeConstants.cs" />
+    <Compile Include="..\PSApi\Interop\NativeStructs.cs" Link="PSApi\Interop\NativeStructs.cs" />
+    <Compile Include="..\PSApi\Interop\SafeNativeMethods.cs" Link="PSApi\Interop\SafeNativeMethods.cs" />
+    <Compile Include="..\PSApi\PICA\**\*.cs" Link="PSApi\PICA\%(RecursiveDir)%(FileName)%(Extension)" />
+    <Compile Include="..\PSApi\Scripting\**\*.cs" Link="PSApi\Scripting\%(RecursiveDir)%(FileName)%(Extension)" />
+    <Compile Include="..\PSApi\AboutRecord.cs" Link="PSApi\AboutRecord.cs" />
+    <Compile Include="..\PSApi\ActivePICASuites.cs" Link="PSApi\ActivePICASuites.cs" />
+    <Compile Include="..\PSApi\AdvanceStateProc.cs" Link="PSApi\AdvanceStateProc.cs" />
     <Compile Include="..\PSApi\AETEData.cs" Link="PSApi\AETEData.cs" />
+    <Compile Include="..\PSApi\BufferProcs.cs" Link="PSApi\BufferProcs.cs" />
+    <Compile Include="..\PSApi\BufferSuite.cs" Link="PSApi\BufferSuite.cs" />
+    <Compile Include="..\PSApi\ChannelPortsProcs.cs" Link="PSApi\ChannelPortsProcs.cs" />
+    <Compile Include="..\PSApi\ColorPickerDialog.cs" Link="PSApi\ColorPickerDialog.cs" />
+    <Compile Include="..\PSApi\ColorPickerService.cs" Link="PSApi\ColorPickerService.cs" />
+    <Compile Include="..\PSApi\ColorServicesConvert.cs" Link="PSApi\ColorServicesConvert.cs" />
+    <Compile Include="..\PSApi\ColorServicesProc.cs" Link="PSApi\ColorServicesProc.cs" />
+    <Compile Include="..\PSApi\DescriptorRegistryFile.cs" Link="PSApi\DescriptorRegistryFile.cs" />
     <Compile Include="..\PSApi\DescriptorRegistryValues.cs" Link="PSApi\DescriptorRegistryValues.cs" />
-    <Compile Include="..\PSApi\Diagnostics\Formatters\CStringPointerFormatter.cs" Link="PSApi\Diagnostics\Formatters\CStringPointerFormatter.cs" />
-    <Compile Include="..\PSApi\Diagnostics\Formatters\Fixed16AsIntegerStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\Fixed16AsIntegerStringFormatter.cs" />
-    <Compile Include="..\PSApi\Diagnostics\Formatters\FourCCAsStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\FourCCAsStringFormatter.cs" />
-    <Compile Include="..\PSApi\Diagnostics\Formatters\HandleAsHexStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\HandleAsHexStringFormatter.cs" />
-    <Compile Include="..\PSApi\Diagnostics\Formatters\IntPtrAsHexStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\IntPtrAsHexStringFormatter.cs" />
-    <Compile Include="..\PSApi\Diagnostics\Formatters\PointerAsHexStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\PointerAsHexStringFormatter.cs" />
-    <Compile Include="..\PSApi\Diagnostics\Formatters\PointerAsStringFormatter.cs" Link="PSApi\Diagnostics\Formatters\PointerAsStringFormatter.cs" />
-    <Compile Include="..\PSApi\Diagnostics\Writers\IPluginApiLogWriter.cs" Link="PSApi\Diagnostics\Writers\IPluginApiLogWriter.cs" />
-    <Compile Include="..\PSApi\Diagnostics\Writers\PluginApiFileLogWriter.cs" Link="PSApi\Diagnostics\Writers\PluginApiFileLogWriter.cs" />
-    <Compile Include="..\PSApi\Diagnostics\Writers\PluginApiTraceListenerLogWriter.cs" Link="PSApi\Diagnostics\Writers\PluginApiTraceListenerLogWriter.cs" />
-    <Compile Include="..\PSApi\Diagnostics\IPluginApiLogger.cs" Link="PSApi\Diagnostics\IPluginApiLogger.cs" />
-    <Compile Include="..\PSApi\Diagnostics\PluginApiLogger.cs" Link="PSApi\Diagnostics\PluginApiLogger.cs" />
-    <Compile Include="..\PSApi\Diagnostics\PluginApiLogCategory.cs" Link="PSApi\Diagnostics\PluginApiLogCategory.cs" />
-    <Compile Include="..\PSApi\Diagnostics\PluginApiLogCategories.cs" Link="PSApi\Diagnostics\PluginApiLogCategories.cs" />
-    <Compile Include="..\PSApi\Diagnostics\PluginApiLogger.Null.cs" Link="PSApi\Diagnostics\PluginApiLogger.Null.cs" />
-    <Compile Include="..\PSApi\Diagnostics\PluginApiLogWriterFactory.cs" Link="PSApi\Diagnostics\PluginApiLogWriterFactory.cs" />
-    <Compile Include="..\PSApi\Diagnostics\OptionalParameterGuard.cs" Link="PSApi\Diagnostics\OptionalParameterGuard.cs" />
+    <Compile Include="..\PSApi\DescriptorSuite.cs" Link="PSApi\DescriptorSuite.cs" />
+    <Compile Include="..\PSApi\DescriptorTypes.cs" Link="PSApi\DescriptorTypes.cs" />
     <Compile Include="..\PSApi\DictionaryExtensions.cs" Link="PSApi\DictionaryExtensions.cs" />
+    <Compile Include="..\PSApi\DisplayPixelsProc.cs" Link="PSApi\DisplayPixelsProc.cs" />
     <Compile Include="..\PSApi\FilterCase.cs" Link="PSApi\FilterCase.cs" />
     <Compile Include="..\PSApi\FilterCaseInfo.cs" Link="PSApi\FilterCaseInfo.cs" />
     <Compile Include="..\PSApi\FilterCaseInfoCollection.cs" Link="PSApi\FilterCaseInfoCollection.cs" />
     <Compile Include="..\PSApi\FilterPadding.cs" Link="PSApi\FilterPadding.cs" />
     <Compile Include="..\PSApi\FilterPostProcessingOptions.cs" Link="PSApi\FilterPostProcessingOptions.cs" />
+    <Compile Include="..\PSApi\FilterRecord.cs" Link="PSApi\FilterRecord.cs" />
+    <Compile Include="..\PSApi\FilterSelector.cs" Link="PSApi\FilterSelector.cs" />
+    <Compile Include="..\PSApi\Fixed16.cs" Link="PSApi\Fixed16.cs" />
     <Compile Include="..\PSApi\GlobalParameters.cs" Link="PSApi\GlobalParameters.cs" />
     <Compile Include="..\PSApi\GlobalParameters.Formatter.cs" Link="PSApi\GlobalParameters.Formatter.cs" />
+    <Compile Include="..\PSApi\Handle.cs" Link="PSApi\Handle.cs" />
+    <Compile Include="..\PSApi\HandleProc.cs" Link="PSApi\HandleProc.cs" />
+    <Compile Include="..\PSApi\HandleSuite.cs" Link="PSApi\HandleSuite.cs" />
     <Compile Include="..\PSApi\HandleSuiteLock.cs" Link="PSApi\HandleSuiteLock.cs" />
+    <Compile Include="..\PSApi\HostProcs.cs" Link="PSApi\HostProcs.cs" />
     <Compile Include="..\PSApi\IDocumentMetadataProvider.cs" Link="PSApi\IDocumentMetadataProvider.cs" />
+    <Compile Include="..\PSApi\IFilterImageProvider.cs" Link="PSApi\IFilterImageProvider.cs" />
     <Compile Include="..\PSApi\IHandleSuite.cs" Link="PSApi\IHandleSuite.cs" />
     <Compile Include="..\PSApi\IHandleSuiteCallbacks.cs" Link="PSApi\IHandleSuiteCallbacks.cs" />
     <Compile Include="..\PSApi\ImageMode.cs" Link="PSApi\ImageMode.cs" />
+    <Compile Include="..\PSApi\ImageServicesProc.cs" Link="PSApi\ImageServicesProc.cs" />
+    <Compile Include="..\PSApi\ImageServicesSuite.cs" Link="PSApi\ImageServicesSuite.cs" />
+    <Compile Include="..\PSApi\IntPtrEqualityComparer.cs" Link="PSApi\IntPtrEqualityComparer.cs" />
+    <Compile Include="..\PSApi\IntPtrExtensions.cs" Link="PSApi\IntPtrExtensions.cs" />
     <Compile Include="..\PSApi\IPICASuiteAllocator.cs" Link="PSApi\IPICASuiteAllocator.cs" />
+    <Compile Include="..\PSApi\IPICASuiteDataProvider.cs" Link="PSApi\IPICASuiteDataProvider.cs" />
     <Compile Include="..\PSApi\ISPBasicSuiteProvider.cs" Link="PSApi\ISPBasicSuiteProvider.cs" />
+    <Compile Include="..\PSApi\Memory.cs" Link="PSApi\Memory.cs" />
     <Compile Include="..\PSApi\ParameterData.cs" Link="PSApi\ParameterData.cs" />
     <Compile Include="..\PSApi\ParameterData.Formatter.cs" Link="PSApi\ParameterData.Formatter.cs" />
-    <Compile Include="..\PSApi\PICA\Action Suites\ActionDescriptorZString.cs" Link="PSApi\PICA\Action Suites\ActionDescriptorZString.cs" />
-    <Compile Include="..\PSApi\PICA\Action Suites\ActionListDescriptor.cs" Link="PSApi\PICA\Action Suites\ActionListDescriptor.cs" />
-    <Compile Include="..\PSApi\PICA\Action Suites\ActionListItem.cs" Link="PSApi\PICA\Action Suites\ActionListItem.cs" />
-    <Compile Include="..\PSApi\PICA\Action Suites\ActionReferenceItem.cs" Link="PSApi\PICA\Action Suites\ActionReferenceItem.cs" />
-    <Compile Include="..\PSApi\PICA\ASBoolean.cs" Link="PSApi\PICA\ASBoolean.cs" />
+    <Compile Include="..\PSApi\PIDescriptorParameters.cs" Link="PSApi\PIDescriptorParameters.cs" />
+    <Compile Include="..\PSApi\PlatformData.cs" Link="PSApi\PlatformData.cs" />
+    <Compile Include="..\PSApi\PlugInMonitor.cs" Link="PSApi\PlugInMonitor.cs" />
+    <Compile Include="..\PSApi\PluginPhase.cs" Link="PSApi\PluginPhase.cs" />
     <Compile Include="..\PSApi\PluginUISettings.cs" Link="PSApi\PluginUISettings.cs" />
+    <Compile Include="..\PSApi\Point.cs" Link="PSApi\Point.cs" />
+    <Compile Include="..\PSApi\ProcessEventProc.cs" Link="PSApi\ProcessEventProc.cs" />
+    <Compile Include="..\PSApi\ProgressProc.cs" Link="PSApi\ProgressProc.cs" />
+    <Compile Include="..\PSApi\PropertyProcs.cs" Link="PSApi\PropertyProcs.cs" />
+    <Compile Include="..\PSApi\PSBoolean.cs" Link="PSApi\PSBoolean.cs" />
+    <Compile Include="..\PSApi\PSConstants.cs" Link="PSApi\PSConstants.cs" />
+    <Compile Include="..\PSApi\PSError.cs" Link="PSApi\PSError.cs" />
     <Compile Include="..\PSApi\PseudoResource.cs" Link="PSApi\PseudoResource.cs" />
     <Compile Include="..\PSApi\PseudoResourceCollection.cs" Link="PSApi\PseudoResourceCollection.cs" />
-    <Compile Include="..\PSApi\Scripting\AETEValue.cs" Link="PSApi\Scripting\AETEValue.cs" />
-    <Compile Include="..\PSApi\Scripting\DescriptorSimpleReference.cs" Link="PSApi\Scripting\DescriptorSimpleReference.cs" />
-    <Compile Include="..\PSApi\Scripting\EnumeratedValue.cs" Link="PSApi\Scripting\EnumeratedValue.cs" />
-    <Compile Include="..\PSApi\Scripting\ScriptingObjectFieldFormatter.cs" Link="PSApi\Scripting\ScriptingObjectFieldFormatter.cs" />
-    <Compile Include="..\PSApi\Scripting\UnitFloat.cs" Link="PSApi\Scripting\UnitFloat.cs" />
+    <Compile Include="..\PSApi\PSPixelMap.cs" Link="PSApi\PSPixelMap.cs" />
+    <Compile Include="..\PSApi\PSProperties.cs" Link="PSApi\PSProperties.cs" />
+    <Compile Include="..\PSApi\ReadImageDocumentDesc.cs" Link="PSApi\ReadImageDocumentDesc.cs" />
+    <Compile Include="..\PSApi\Rect.cs" Link="PSApi\Rect.cs" />
+    <Compile Include="..\PSApi\ResourceProc.cs" Link="PSApi\ResourceProc.cs" />
+    <Compile Include="..\PSApi\ResourceSuite.cs" Link="PSApi\ResourceSuite.cs" />
+    <Compile Include="..\PSApi\RGBColor.cs" Link="PSApi\RGBColor.cs" />
+    <Compile Include="..\PSApi\SPBasicSuite.cs" Link="PSApi\SPBasicSuite.cs" />
+    <Compile Include="..\PSApi\SPBasicSuiteProvider.cs" Link="PSApi\SPBasicSuiteProvider.cs" />
+    <Compile Include="..\PSApi\StringUtil.cs" Link="PSApi\StringUtil.cs" />
+    <Compile Include="..\PSApi\TestAbortProc.cs" Link="PSApi\TestAbortProc.cs" />
     <Compile Include="..\PSApi\UnmanagedFunctionPointer`1.cs" Link="PSApi\UnmanagedFunctionPointer`1.cs" />
     <Compile Include="..\PSApi\UnsupportedPICASuiteVersionException.cs" Link="PSApi\UnsupportedPICASuiteVersionException.cs" />
+    <Compile Include="..\PSApi\VPoint.cs" Link="PSApi\VPoint.cs" />
+    <Compile Include="..\PSApi\VRect.cs" Link="PSApi\VRect.cs" />
     <Compile Include="..\PSFilterShimImageFormat.cs" Link="PSFilterShimImageFormat.cs" />
     <Compile Include="..\PSFilterShimImageHeader.cs" Link="PSFilterShimImageHeader.cs" />
     <Compile Include="..\PSFilterShimResolver.cs" Link="PSFilterShimResolver.cs" />
@@ -129,6 +161,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="PSApi\Interop\" />
   </ItemGroup>
   <Target Name="DeleteExistingPublishedFiles" BeforeTargets="PrepareForPublish">
     <!--Delete the existing publish directory. Otherwise the 'editbin' command will sometimes fail to open the file.-->
