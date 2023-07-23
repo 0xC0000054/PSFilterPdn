@@ -118,20 +118,16 @@ namespace PSFilterPdn
                     bool proxyResult = true;
                     PSFilterShimErrorInfo proxyError = null;
 
-                    PSFilterShimSettings settings = new()
-                    {
-                        RepeatEffect = true,
-                        ShowAboutDialog = false,
-                        SourceImagePath = srcFileName,
-                        DestinationImagePath = destFileName,
-                        PrimaryColor = new ColorRgb24(Environment.PrimaryColor).ToWin32Color(),
-                        SecondaryColor = new ColorRgb24(Environment.SecondaryColor).ToWin32Color(),
-                        SelectionMaskPath = selectionMaskFileName,
-                        ParameterDataPath = parameterDataFileName,
-                        PseudoResourcePath = resourceDataFileName,
-                        DescriptorRegistryPath = descriptorRegistryFileName,
-                        PluginUISettings = null
-                    };
+                    PSFilterShimSettings settings = new(repeatEffect: true,
+                                                        showAboutDialog: false,
+                                                        srcFileName,
+                                                        destFileName,
+                                                        new ColorRgb24(Environment.PrimaryColor).ToWin32Color(),
+                                                        new ColorRgb24(Environment.SecondaryColor).ToWin32Color(),
+                                                        selectionMaskFileName,
+                                                        parameterDataFileName,
+                                                        resourceDataFileName,
+                                                        descriptorRegistryFileName);
 
                     DocumentMetadataProvider documentMetadataProvider = new(Environment.Document);
 

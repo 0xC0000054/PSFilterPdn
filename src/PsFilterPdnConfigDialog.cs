@@ -762,21 +762,18 @@ namespace PSFilterPdn
                 selectionMask?.Dispose();
             }
 
-            PSFilterShimSettings settings = new()
-            {
-                RepeatEffect = false,
-                ShowAboutDialog = data.ShowAboutDialog,
-                SourceImagePath = srcFileName,
-                DestinationImagePath = destFileName,
-                PrimaryColor = new ColorRgb24(environment.PrimaryColor).ToWin32Color(),
-                SecondaryColor = new ColorRgb24(environment.SecondaryColor).ToWin32Color(),
-                SelectionMaskPath = selectionMaskFileName,
-                ParameterDataPath = parameterDataFileName,
-                PseudoResourcePath = resourceDataFileName,
-                DescriptorRegistryPath = descriptorRegistryFileName,
-                LogFilePath = data.LogFilePath,
-                PluginUISettings = new PluginUISettings(highDpiMode)
-            };
+            PSFilterShimSettings settings = new(repeatEffect: false,
+                                                data.ShowAboutDialog,
+                                                srcFileName,
+                                                destFileName,
+                                                new ColorRgb24(Environment.PrimaryColor).ToWin32Color(),
+                                                new ColorRgb24(Environment.SecondaryColor).ToWin32Color(),
+                                                selectionMaskFileName,
+                                                parameterDataFileName,
+                                                resourceDataFileName,
+                                                descriptorRegistryFileName,
+                                                data.LogFilePath,
+                                                new PluginUISettings(highDpiMode));
 
             bool result = true; // assume the filter succeeded this will be set to false if it failed
             PSFilterShimErrorInfo proxyError = null;

@@ -26,25 +26,33 @@ namespace PSFilterPdn
             {
                 options.Security.DepthStep(ref reader);
 
-                PSFilterShimSettings settings = new()
-                {
-                    RepeatEffect = reader.ReadBoolean(),
-                    ShowAboutDialog = reader.ReadBoolean(),
-                    SourceImagePath = reader.ReadString(),
-                    DestinationImagePath = reader.ReadString(),
-                    PrimaryColor = reader.ReadInt32(),
-                    SecondaryColor = reader.ReadInt32(),
-                    SelectionMaskPath = reader.ReadString(),
-                    ParameterDataPath = reader.ReadString(),
-                    PseudoResourcePath = reader.ReadString(),
-                    DescriptorRegistryPath = reader.ReadString(),
-                    LogFilePath = reader.ReadString(),
-                    PluginUISettings = options.Resolver.GetFormatterWithVerify<PluginUISettings?>().Deserialize(ref reader, options),
-                };
+                bool repeatEffect = reader.ReadBoolean();
+                bool showAboutDialog = reader.ReadBoolean();
+                string sourceImagePath = reader.ReadString()!;
+                string destinationImagePath = reader.ReadString()!;
+                int primaryColor = reader.ReadInt32();
+                int secondaryColor = reader.ReadInt32();
+                string? selectionMaskPath = reader.ReadString();
+                string? parameterDataPath = reader.ReadString();
+                string? pseudoResourcePath = reader.ReadString();
+                string? descriptorRegistryPath = reader.ReadString();
+                string? logFilePath = reader.ReadString();
+                PluginUISettings? pluginUISettings = options.Resolver.GetFormatterWithVerify<PluginUISettings?>().Deserialize(ref reader, options);
 
                 reader.Depth--;
 
-                return settings;
+                return new PSFilterShimSettings(repeatEffect,
+                                                showAboutDialog,
+                                                sourceImagePath,
+                                                destinationImagePath,
+                                                primaryColor,
+                                                secondaryColor,
+                                                selectionMaskPath,
+                                                parameterDataPath,
+                                                pseudoResourcePath,
+                                                descriptorRegistryPath,
+                                                logFilePath,
+                                                pluginUISettings);
             }
 
             public void Serialize(ref MessagePackWriter writer, PSFilterShimSettings value, MessagePackSerializerOptions options)
