@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using CommunityToolkit.HighPerformance.Buffers;
 using PSFilterPdn;
 using System;
 using System.Buffers.Binary;
@@ -35,13 +36,17 @@ namespace PSFilterLoad.PSApi
                         {
                             long dataLength = fs.Length - fs.Position;
 
-                            byte[] data = new byte[dataLength];
-
-                            fs.ReadExactly(data, 0, data.Length);
-
-                            using (MemoryStream ms = new(data))
+                            if (dataLength > int.MaxValue)
                             {
-                                var values = MessagePackSerializerUtil.Deserialize<Dictionary<string, Dictionary<uint, AETEValue>>>(ms, MessagePackResolver.Options);
+                                throw new IOException("The descriptor registry data is larger than 2GB.");
+                            }
+
+                            using (MemoryOwner<byte> memoryOwner = MemoryOwner<byte>.Allocate((int)dataLength))
+                            {
+                                fs.ReadExactly(memoryOwner.Span);
+
+                                var values = MessagePackSerializerUtil.Deserialize<Dictionary<string, Dictionary<uint, AETEValue>>>(memoryOwner.Memory,
+                                                                                                                                    MessagePackResolver.Options);
                                 return new DescriptorRegistryValues(values);
                             }
                         }
@@ -83,11 +88,13 @@ namespace PSFilterLoad.PSApi
                 {
                     new DescriptorRegistryFileHeader().Save(fs);
 
-                    using (MemoryStream ms = new())
+                    using (ArrayPoolBufferWriter<byte> bufferWriter = new())
                     {
-                        MessagePackSerializerUtil.Serialize(ms, values.GetPersistedValuesReadOnly(), MessagePackResolver.Options);
+                        MessagePackSerializerUtil.Serialize(bufferWriter,
+                                                            values.GetPersistedValuesReadOnly(),
+                                                            MessagePackResolver.Options);
 
-                        fs.Write(ms.GetBuffer(), 0, (int)ms.Length);
+                        fs.Write(bufferWriter.WrittenSpan);
                     }
                 }
 
