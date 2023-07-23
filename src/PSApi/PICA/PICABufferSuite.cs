@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PSFilterLoad.PSApi.Diagnostics;
-using PSFilterPdn.Interop;
+using PSFilterLoad.PSApi.Interop;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;

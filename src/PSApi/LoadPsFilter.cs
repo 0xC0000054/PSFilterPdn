@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 using PaintDotNet;
 using PaintDotNet.Imaging;
 using PSFilterLoad.PSApi.Diagnostics;
-using PSFilterPdn.Interop;
+using PSFilterLoad.PSApi.Interop;
 using PSFilterPdn.Properties;
 
 namespace PSFilterLoad.PSApi

@@ -36,45 +36,5 @@ namespace PSFilterPdn.Interop
             public POINT pt;
             public NativeEnums.TCHITTESTFLAGS flags;
         }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct MEMORY_BASIC_INFORMATION
-        {
-            public IntPtr BaseAddress;
-            public IntPtr AllocationBase;
-            public uint AllocationProtect;
-            public UIntPtr RegionSize;
-            public uint State;
-            public uint Protect;
-            public uint Type;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct MEMORYSTATUSEX
-        {
-            public uint dwLength;
-            public uint dwMemoryLoad;
-            public ulong ullTotalPhys;
-            public ulong ullAvailPhys;
-            public ulong ullTotalPageFile;
-            public ulong ullAvailPageFile;
-            public ulong ullTotalVirtual;
-            public ulong ullAvailVirtual;
-            public ulong ullAvailExtendedVirtual;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal unsafe struct CHOOSECOLORW
-        {
-            public uint lStructSize;
-            public IntPtr hwndOwner;
-            public IntPtr hInstance;
-            public int rgbResult;
-            public int* lpCustColors;
-            public uint Flags;
-            public IntPtr lCustData;
-            public delegate* unmanaged<IntPtr, uint, UIntPtr, IntPtr, UIntPtr> lpfnHook;
-            public ushort* lpTemplateName;
-        }
     }
 }

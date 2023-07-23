@@ -10,7 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PSFilterPdn.Interop;
+using PSFilterLoad.PSApi.Interop;
 using System;
 using System.Runtime.InteropServices;
 

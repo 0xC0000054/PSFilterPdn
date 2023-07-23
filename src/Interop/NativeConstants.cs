@@ -43,27 +43,8 @@ namespace PSFilterPdn.Interop
 
         internal const uint OPEN_EXISTING = 3;
 
-        internal const int GPTR = 64;
-
         internal const uint LOAD_LIBRARY_AS_DATAFILE = 2;
         internal const uint LOAD_LIBRARY_AS_IMAGE_RESOURCE = 0x00000020;
-
-        internal const uint HEAP_ZERO_MEMORY = 8;
-
-        internal const int PAGE_NOACCESS = 1;
-        internal const int PAGE_READONLY = 2;
-        internal const int PAGE_READWRITE = 4;
-        internal const int PAGE_WRITECOPY = 8;
-
-        internal const int PAGE_EXECUTE = 16;
-        internal const int PAGE_EXECUTE_READ = 32;
-        internal const int PAGE_EXECUTE_READWRITE = 64;
-        internal const int PAGE_EXECUTE_WRITECOPY = 128;
-
-        internal const int PAGE_GUARD = 256;
-
-        internal const uint MEM_COMMIT = 0x1000;
-        internal const uint MEM_RELEASE = 0x8000;
 
         internal const ushort PROCESSOR_ARCHITECTURE_INTEL = 0;
         internal const ushort PROCESSOR_ARCHITECTURE_AMD64 = 9;

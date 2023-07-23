@@ -20,7 +20,7 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PSFilterPdn.Interop;
+using PSFilterLoad.PSApi.Interop;
 using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
