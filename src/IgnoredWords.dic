@@ -1,9 +1,11 @@
 aete
 api
 app
+bicubic
 cmyk
 config
 cust
+desc
 deserialize
 deserialized
 dest
@@ -29,10 +31,12 @@ plugins
 proc
 procs
 ptr
+ptrs
 rect
 rects
 rgb
 serializer
+src
 ul
 ull
 Utf
