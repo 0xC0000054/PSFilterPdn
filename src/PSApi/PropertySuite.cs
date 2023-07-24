@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PSFilterLoad.PSApi.Diagnostics;
-using PSFilterPdn.Properties;
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -204,16 +203,16 @@ namespace PSFilterLoad.PSApi
                     switch (index)
                     {
                         case 0:
-                            name = Resources.RedChannelName;
+                            name = StringResources.RedChannelName;
                             break;
                         case 1:
-                            name = Resources.GreenChannelName;
+                            name = StringResources.GreenChannelName;
                             break;
                         case 2:
-                            name = Resources.BlueChannelName;
+                            name = StringResources.BlueChannelName;
                             break;
                         case 3:
-                            name = Resources.AlphaChannelName;
+                            name = StringResources.AlphaChannelName;
                             break;
                         default:
                             return PSError.errPlugInPropertyUndefined;

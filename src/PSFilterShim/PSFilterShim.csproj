@@ -99,6 +99,7 @@
     <Compile Include="..\PSApi\ProcessEventProc.cs" Link="PSApi\ProcessEventProc.cs" />
     <Compile Include="..\PSApi\ProgressProc.cs" Link="PSApi\ProgressProc.cs" />
     <Compile Include="..\PSApi\PropertyProcs.cs" Link="PSApi\PropertyProcs.cs" />
+    <Compile Include="..\PSApi\PropertySuite.cs" Link="PSApi\PropertySuite.cs" />
     <Compile Include="..\PSApi\PSBoolean.cs" Link="PSApi\PSBoolean.cs" />
     <Compile Include="..\PSApi\PSConstants.cs" Link="PSApi\PSConstants.cs" />
     <Compile Include="..\PSApi\PSError.cs" Link="PSApi\PSError.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="..\PSApi\PseudoResourceCollection.cs" Link="PSApi\PseudoResourceCollection.cs" />
     <Compile Include="..\PSApi\PSPixelMap.cs" Link="PSApi\PSPixelMap.cs" />
     <Compile Include="..\PSApi\PSProperties.cs" Link="PSApi\PSProperties.cs" />
+    <Compile Include="..\PSApi\ReadImageDocument.cs" Link="PSApi\ReadImageDocument.cs" />
     <Compile Include="..\PSApi\ReadImageDocumentDesc.cs" Link="PSApi\ReadImageDocumentDesc.cs" />
     <Compile Include="..\PSApi\Rect.cs" Link="PSApi\Rect.cs" />
     <Compile Include="..\PSApi\ResourceProc.cs" Link="PSApi\ResourceProc.cs" />

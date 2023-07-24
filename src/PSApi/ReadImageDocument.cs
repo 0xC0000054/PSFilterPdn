@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PSFilterPdn.Properties;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -104,7 +103,7 @@ namespace PSFilterLoad.PSApi
                 doc->hResolution = new Fixed16((int)(dpiX + 0.5));
                 doc->vResolution = new Fixed16((int)(dpiY + 0.5));
 
-                IntPtr channel = CreateReadChannelDesc(PSConstants.ChannelPorts.Red, Resources.RedChannelName, doc->depth, doc->bounds);
+                IntPtr channel = CreateReadChannelDesc(PSConstants.ChannelPorts.Red, StringResources.RedChannelName, doc->depth, doc->bounds);
 
                 ReadChannelDesc* ch = (ReadChannelDesc*)channel.ToPointer();
 
@@ -114,10 +113,10 @@ namespace PSFilterLoad.PSApi
                     switch (i)
                     {
                         case PSConstants.ChannelPorts.Green:
-                            name = Resources.GreenChannelName;
+                            name = StringResources.GreenChannelName;
                             break;
                         case PSConstants.ChannelPorts.Blue:
-                            name = Resources.BlueChannelName;
+                            name = StringResources.BlueChannelName;
                             break;
                     }
 
@@ -132,13 +131,19 @@ namespace PSFilterLoad.PSApi
 
                 if (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection)
                 {
-                    IntPtr alphaPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.Alpha, Resources.AlphaChannelName, doc->depth, doc->bounds);
+                    IntPtr alphaPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.Alpha,
+                                                            StringResources.AlphaChannelName,
+                                                            doc->depth,
+                                                            doc->bounds);
                     doc->targetTransparency = doc->mergedTransparency = alphaPtr;
                 }
 
                 if (hasSelection)
                 {
-                    IntPtr selectionPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.SelectionMask, Resources.MaskChannelName, doc->depth, doc->bounds);
+                    IntPtr selectionPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.SelectionMask,
+                                                                StringResources.SelectionMaskChannelName,
+                                                                doc->depth,
+                                                                doc->bounds);
                     doc->selection = selectionPtr;
                 }
             }
