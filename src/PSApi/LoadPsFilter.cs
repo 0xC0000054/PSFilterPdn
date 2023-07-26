@@ -1429,13 +1429,7 @@ namespace PSFilterLoad.PSApi
                         byte* src = surfaceLock.GetRowPointerUnchecked(0);
                         byte* dst = ptr + (y * maskRowBytes);
 
-                        for (int x = 0; x < surfaceWidth; x++)
-                        {
-                            *dst = *src;
-
-                            src++;
-                            dst++;
-                        }
+                        Memory.Copy(src, dst, (uint)surfaceWidth);
                     }
                 }
             }
@@ -1446,15 +1440,10 @@ namespace PSFilterLoad.PSApi
                 {
                     for (int y = 0; y < surfaceHeight; y++)
                     {
-                        byte src = *surfaceLock.GetPointPointerUnchecked(0, y);
+                        byte value = *surfaceLock.GetPointPointerUnchecked(0, y);
                         byte* dst = ptr + (y * maskRowBytes);
 
-                        for (int x = 0; x < left; x++)
-                        {
-                            *dst = src;
-
-                            dst++;
-                        }
+                        Memory.Fill(dst, (uint)left, value);
                     }
                 }
             }
@@ -1470,13 +1459,7 @@ namespace PSFilterLoad.PSApi
                         byte* src = surfaceLock.GetRowPointerUnchecked(lastSurfaceRow);
                         byte* dst = ptr + ((lockBottom - y) * maskRowBytes);
 
-                        for (int x = 0; x < surfaceWidth; x++)
-                        {
-                            *dst = *src;
-
-                            src++;
-                            dst++;
-                        }
+                        Memory.Copy(src, dst, (uint)surfaceWidth);
                     }
                 }
             }
@@ -1488,15 +1471,10 @@ namespace PSFilterLoad.PSApi
                     int rowEnd = rect.right - rect.left - right;
                     for (int y = 0; y < surfaceHeight; y++)
                     {
-                        byte src = *surfaceLock.GetPointPointerUnchecked(lastSurfaceColumn, y);
+                        byte value = *surfaceLock.GetPointPointerUnchecked(lastSurfaceColumn, y);
                         byte* dst = ptr + (y * maskRowBytes) + rowEnd;
 
-                        for (int x = 0; x < right; x++)
-                        {
-                            *dst = src;
-
-                            dst++;
-                        }
+                        Memory.Fill(dst, (uint)right, value);
                     }
                 }
             }
@@ -2132,13 +2110,7 @@ namespace PSFilterLoad.PSApi
                     byte* srcRow = maskLock.GetPointPointerUnchecked(left, y);
                     byte* dstRow = ptr + ((y - top + padding.top) * width) + padding.left;
 
-                    for (int x = left; x < right; x++)
-                    {
-                        *dstRow = *srcRow;
-
-                        srcRow++;
-                        dstRow++;
-                    }
+                    Memory.Copy(srcRow, dstRow, (uint)width);
                 }
             }
 

@@ -324,6 +324,17 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
+        /// Fills the memory block with the specified value.
+        /// </summary>
+        /// <param name="ptr">The starting address of the memory block to fill.</param>
+        /// <param name="length">The length of the memory block.</param>
+        /// <param name="value">The value to place in the memory block.</param>
+        public static unsafe void Fill(void* address, nuint length, byte value)
+        {
+            NativeMemory.Fill(address, length, value);
+        }
+
+        /// <summary>
         /// Fills the memory block with the zeros.
         /// </summary>
         /// <param name="ptr">The starting address of the memory block to fill.</param>
