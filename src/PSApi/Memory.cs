@@ -304,12 +304,12 @@ namespace PSFilterLoad.PSApi
         /// Copies bytes from one area of memory to another. Since this function only
         /// takes pointers, it can not do any bounds checking.
         /// </summary>
-        /// <param name="dst">The starting address of where to copy bytes to.</param>
-        /// <param name="src">The starting address of where to copy bytes from.</param>
+        /// <param name="source">The starting address of where to copy bytes from.</param>
+        /// <param name="destination">The starting address of where to copy bytes to.</param>
         /// <param name="length">The number of bytes to copy</param>
-        public static unsafe void Copy(void* dst, void* src, ulong length)
+        public static unsafe void Copy(void* source, void* destination, ulong length)
         {
-            Buffer.MemoryCopy(src, dst, length, length);
+            Buffer.MemoryCopy(source, destination, length, length);
         }
 
         /// <summary>

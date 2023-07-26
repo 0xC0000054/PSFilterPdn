@@ -129,8 +129,8 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
             {
                 unsafe
                 {
-                    Memory.Copy(scan0.VoidStar,
-                                source.scan0.VoidStar,
+                    Memory.Copy(source.scan0.VoidStar,
+                                scan0.VoidStar,
                                 ((ulong)(height - 1) * (ulong)stride) + (ulong)width);
                 }
             }
@@ -143,7 +143,7 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
                 {
                     for (int y = 0; y < copyHeight; ++y)
                     {
-                        Memory.Copy(GetRowAddressUnchecked(y), source.GetRowAddressUnchecked(y), (ulong)copyWidth);
+                        Memory.Copy(source.GetRowAddressUnchecked(y), GetRowAddressUnchecked(y), (ulong)copyWidth);
                     }
                 }
             }
