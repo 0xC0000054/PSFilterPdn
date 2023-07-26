@@ -1392,7 +1392,7 @@ namespace PSFilterLoad.PSApi
                             return PSError.paramErr;
                         }
 
-                        Memory.Fill(maskData, (byte)maskPadding, Memory.Size(maskData));
+                        Memory.Fill(maskData, Memory.Size(maskData), (byte)maskPadding);
                         break;
                 }
             }
@@ -1540,7 +1540,7 @@ namespace PSFilterLoad.PSApi
                             return PSError.paramErr;
                         }
 
-                        Memory.Fill(inData, (byte)inputPadding, Memory.Size(inData));
+                        Memory.Fill(inData, Memory.Size(inData), (byte)inputPadding);
                         break;
                 }
             }
