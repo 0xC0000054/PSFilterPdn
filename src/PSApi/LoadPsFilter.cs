@@ -17,11 +17,9 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using PaintDotNet;
-using PaintDotNet.Imaging;
 using PSFilterLoad.PSApi.Diagnostics;
+using PSFilterLoad.PSApi.Imaging;
 using PSFilterLoad.PSApi.Interop;
-using PSFilterPdn.Properties;
 
 namespace PSFilterLoad.PSApi
 {
@@ -78,12 +76,15 @@ namespace PSFilterLoad.PSApi
         private bool parameterDataRestored;
         private bool pluginDataRestored;
 
-        private Surface source;
-        private Surface dest;
-        private MaskSurface mask;
-        private Surface tempSurface;
-        private MaskSurface tempMask;
-        private Surface displaySurface;
+        private ISurface<ImageSurface> source;
+#pragma warning disable IDE0032 // Use auto property
+        private ISurface<ImageSurface> dest;
+#pragma warning restore IDE0032 // Use auto property
+        private ISurface<MaskSurface> mask;
+        private ISurface<ImageSurface> tempSurface;
+        private ISurface<MaskSurface> tempMask;
+        private readonly IDisplayPixelsSurfaceFactory displayPixelsSurfaceFactory;
+        private DisplayPixelsSurface displaySurface;
         private Bitmap checkerBoardBitmap;
 
         private bool disposed;
@@ -118,7 +119,6 @@ namespace PSFilterLoad.PSApi
         private IntPtr inDataPtr;
         private IntPtr outDataPtr;
 
-        private bool copyToDest;
         private bool sizesSetup;
         private bool frValuesSetup;
         private bool useChannelPorts;
@@ -142,7 +142,7 @@ namespace PSFilterLoad.PSApi
         /// </remarks>
         private const uint HostSignature = 0x4e44502e;
 
-        internal Surface Dest => dest;
+        internal ISurface<ImageSurface> Dest => dest;
 
         /// <summary>
         /// The filter progress callback.
@@ -200,6 +200,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         internal bool IsRepeatEffect
         {
+            get => isRepeatEffect;
             set => isRepeatEffect = value;
         }
 
@@ -214,7 +215,10 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Loads and runs Photoshop Filters
         /// </summary>
-        /// <param name="sourceBitmap">The source bitmap.</param>
+        /// <param name="source">The source bitmap.</param>
+        /// <param name="takeOwnershipOfSource">
+        /// <see langword="true"/> if the class takes ownership of the source; otherwise, <see langword="false"/>.
+        /// </param>
         /// <param name="selectionMask">The selection mask.</param>
         /// <param name="takeOwnershipOfSelectionMask">
         /// <see langword="true"/> if the class takes ownership of the selection mask; otherwise, <see langword="false"/>.
@@ -227,32 +231,34 @@ namespace PSFilterLoad.PSApi
         /// <param name="documentMetadataProvider">The document meta data provider.</param>
         /// <param name="pluginUISettings">The user interface settings for plug-in created dialogs.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="sourceBitmap"/> is null.
+        /// <paramref name="source"/> is null.
         /// or
         /// <paramref name="documentMetadataProvider"/> is null.
         /// or
         /// <paramref name="logger"/> is null.
         /// </exception>
-        internal unsafe LoadPsFilter(IBitmapSource<ColorBgra32> sourceBitmap,
+        internal unsafe LoadPsFilter(ImageSurface source,
+                                     bool takeOwnershipOfSource,
                                      MaskSurface selectionMask,
                                      bool takeOwnershipOfSelectionMask,
-                                     ColorBgra32 primaryColor,
-                                     ColorBgra32 secondaryColor,
+                                     ColorRgb24 primaryColor,
+                                     ColorRgb24 secondaryColor,
                                      double dpiX,
                                      double dpiY,
                                      IntPtr owner,
                                      IDocumentMetadataProvider documentMetadataProvider,
+                                     IDisplayPixelsSurfaceFactory displayPixelsSurfaceFactory,
                                      IPluginApiLogger logger,
                                      PluginUISettings pluginUISettings)
         {
-            ArgumentNullException.ThrowIfNull(sourceBitmap);
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(displayPixelsSurfaceFactory);
             ArgumentNullException.ThrowIfNull(documentMetadataProvider);
             ArgumentNullException.ThrowIfNull(logger);
 
             inputHandling = FilterDataHandling.None;
             outputHandling = FilterDataHandling.None;
             writesOutsideSelection = false;
-            copyToDest = true;
 
             filterGlobalData = IntPtr.Zero;
             previousPhase = PluginPhase.None;
@@ -281,9 +287,8 @@ namespace PSFilterLoad.PSApi
             lastOutLoPlane = -1;
             lastInLoPlane = -1;
 
-            source = SurfaceUtil.FromBitmapBgra32(sourceBitmap);
-
-            dest = new Surface(source.Width, source.Height);
+            this.source = takeOwnershipOfSource ? source : source.Clone();
+            dest = source.Clone();
 
             advanceProc = new AdvanceStateProc(AdvanceStateProc);
             colorProc = new ColorServicesProc(ColorServicesProc);
@@ -300,9 +305,9 @@ namespace PSFilterLoad.PSApi
             imageServicesSuite = new ImageServicesSuite(logger.CreateInstanceForType(nameof(ImageServicesSuite)));
             propertySuite = new PropertySuite(handleSuite,
                                               documentMetadataProvider,
-                                              logger.CreateInstanceForType(nameof(PropertySuite)),
-                                              source.Width,
-                                              source.Height,
+                                              logger.CreateInstanceForType(nameof(PSApi.PropertySuite)),
+                                              this.source.Width,
+                                              this.source.Height,
                                               pluginUISettings);
             resourceSuite = new ResourceSuite(handleSuite, logger.CreateInstanceForType(nameof(ResourceSuite)));
             basicSuiteProvider = new SPBasicSuiteProvider(this,
@@ -318,9 +323,10 @@ namespace PSFilterLoad.PSApi
             this.dpiX = dpiX;
             this.dpiY = dpiY;
             this.logger = logger;
+            this.displayPixelsSurfaceFactory = displayPixelsSurfaceFactory;
             this.documentMetadataProvider = documentMetadataProvider;
 
-            readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
+            readImageDocument = new ReadImageDocument(this.source.Width, this.source.Height, dpiX, dpiY);
 
             if (selectionMask != null)
             {
@@ -341,11 +347,11 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        Surface IFilterImageProvider.Source => source;
+        ISurface<ImageSurface> IFilterImageProvider.Source => source;
 
-        Surface IFilterImageProvider.Destination => dest;
+        ISurface<ImageSurface> IFilterImageProvider.Destination => dest;
 
-        MaskSurface IFilterImageProvider.Mask => mask;
+        ISurface<MaskSurface> IFilterImageProvider.Mask => mask;
 
         IntPtr IPICASuiteDataProvider.ParentWindowHandle => parentWindowHandle;
 
@@ -363,7 +369,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="data">The plugin to check.</param>
         private void SetFilterTransparencyMode(PluginData data)
         {
-            filterCase = data.GetFilterTransparencyMode(hasSelectionMask, () => SurfaceUtil.HasTransparentPixels(source));
+            filterCase = data.GetFilterTransparencyMode(hasSelectionMask, source.HasTransparency);
         }
 
         /// <summary>
@@ -607,7 +613,7 @@ namespace PSFilterLoad.PSApi
                         filterRecord->parameters = handleSuite.NewHandle(parameterDataBytes.Length);
                         if (filterRecord->parameters == Handle.Null)
                         {
-                            throw new OutOfMemoryException(Resources.OutOfMemoryError);
+                            throw new OutOfMemoryException(StringResources.OutOfMemoryError);
                         }
 
                         using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(filterRecord->parameters))
@@ -652,7 +658,7 @@ namespace PSFilterLoad.PSApi
                         Handle dataHandle = handleSuite.NewHandle(pluginDataBytes.Length);
                         if (dataHandle == Handle.Null)
                         {
-                            throw new OutOfMemoryException(Resources.OutOfMemoryError);
+                            throw new OutOfMemoryException(StringResources.OutOfMemoryError);
                         }
 
                         using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(dataHandle))
@@ -1000,33 +1006,6 @@ namespace PSFilterLoad.PSApi
             return true;
         }
 
-        private unsafe void CopySourceTransparency()
-        {
-            if (!copyToDest)
-            {
-                for (int y = 0; y < dest.Height; y++)
-                {
-                    ColorBgra* src = source.GetRowPointerUnchecked(y);
-                    ColorBgra* dst = dest.GetRowPointerUnchecked(y);
-
-                    for (int x = 0; x < dest.Width; x++)
-                    {
-                        dst->A = src->A;
-
-                        src++;
-                        dst++;
-                    }
-                }
-
-#if DEBUG
-                using (Bitmap dst = dest.CreateAliasedBitmap())
-                {
-
-                }
-#endif
-            }
-        }
-
         /// <summary>
         /// Determines whether the source surface is completely transparent.
         /// </summary>
@@ -1038,18 +1017,21 @@ namespace PSFilterLoad.PSApi
             int height = source.Height;
             int width = source.Width;
 
-            for (int y = 0; y < height; y++)
+            using (ISurfaceLock sourceLock = source.Lock(SurfaceLockMode.Read))
             {
-                ColorBgra* ptr = source.GetRowPointerUnchecked(y);
-                ColorBgra* endPtr = ptr + width;
-
-                while (ptr < endPtr)
+                for (int y = 0; y < height; y++)
                 {
-                    if (ptr->A > 0)
+                    byte* ptr = sourceLock.GetRowPointerUnchecked(y);
+                    byte* endPtr = ptr + width;
+
+                    while (ptr < endPtr)
                     {
-                        return false;
+                        if (ptr[3] > 0)
+                        {
+                            return false;
+                        }
+                        ptr++;
                     }
-                    ptr++;
                 }
             }
 
@@ -1089,7 +1071,7 @@ namespace PSFilterLoad.PSApi
                 outputHandling = info.OutputHandling;
                 FilterCaseInfoFlags filterCaseFlags = info.Flags1;
 
-                copyToDest = (filterCaseFlags & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None;
+                // The plugin always copies the source to the destination, it clones the source surface in the constructor.
                 writesOutsideSelection = (filterCaseFlags & FilterCaseInfoFlags.WritesOutsideSelection) != FilterCaseInfoFlags.None;
 
                 bool worksWithBlankData = (filterCaseFlags & FilterCaseInfoFlags.WorksWithBlankData) != FilterCaseInfoFlags.None;
@@ -1099,20 +1081,10 @@ namespace PSFilterLoad.PSApi
                     // If the filter does not support processing completely transparent (blank) layers return an error message.
                     if (IsBlankLayer())
                     {
-                        errorMessage = Resources.BlankDataNotSupported;
+                        errorMessage = StringResources.BlankDataNotSupported;
                         return false;
                     }
                 }
-            }
-
-            if (copyToDest)
-            {
-                dest.CopySurface(source); // copy the source image to the dest image if the filter does not write to all the pixels.
-            }
-            else if (filterCase != FilterCase.EditableTransparencyNoSelection && filterCase != FilterCase.EditableTransparencyWithSelection)
-            {
-                // Copy the source transparency to the destination if the filter does not modify it.
-                CopySourceTransparency();
             }
 
             if (pdata.Aete != null)
@@ -1166,39 +1138,39 @@ namespace PSFilterLoad.PSApi
                         case PSError.writErr:
                         case PSError.openErr:
                         case PSError.ioErr:
-                            message = Resources.FileIOError;
+                            message = StringResources.FileIOError;
                             break;
                         case PSError.eofErr:
-                            message = Resources.EndOfFileError;
+                            message = StringResources.EndOfFileError;
                             break;
                         case PSError.dskFulErr:
-                            message = Resources.DiskFullError;
+                            message = StringResources.DiskFullError;
                             break;
                         case PSError.fLckdErr:
-                            message = Resources.FileLockedError;
+                            message = StringResources.FileLockedError;
                             break;
                         case PSError.vLckdErr:
-                            message = Resources.VolumeLockedError;
+                            message = StringResources.VolumeLockedError;
                             break;
                         case PSError.fnfErr:
-                            message = Resources.FileNotFoundError;
+                            message = StringResources.FileNotFoundError;
                             break;
                         case PSError.memFullErr:
                         case PSError.nilHandleErr:
                         case PSError.memWZErr:
-                            message = Resources.OutOfMemoryError;
+                            message = StringResources.OutOfMemoryError;
                             break;
                         case PSError.filterBadMode:
-                            message = Resources.UnsupportedImageMode;
+                            message = StringResources.UnsupportedImageMode;
                             break;
                         case PSError.errPlugInPropertyUndefined:
-                            message = Resources.PlugInPropertyUndefined;
+                            message = StringResources.PlugInPropertyUndefined;
                             break;
                         case PSError.errHostDoesNotSupportColStep:
-                            message = Resources.HostDoesNotSupportColStep;
+                            message = StringResources.HostDoesNotSupportColStep;
                             break;
                         case PSError.errInvalidSamplePoint:
-                            message = Resources.InvalidSamplePoint;
+                            message = StringResources.InvalidSamplePoint;
                             break;
                         case PSError.errPlugInHostInsufficient:
                         case PSError.errUnknownPort:
@@ -1207,12 +1179,12 @@ namespace PSFilterLoad.PSApi
                         case PSError.errUnsupportedDepth:
                         case PSError.errUnsupportedDepthConversion:
                         case PSError.errUnsupportedRowBits:
-                            message = Resources.PlugInHostInsufficient;
+                            message = StringResources.PlugInHostInsufficient;
                             break;
                         case PSError.paramErr:
                         case PSError.filterBadParameters:
                         default:
-                            message = Resources.FilterBadParameters;
+                            message = StringResources.FilterBadParameters;
                             break;
                     }
                 }
@@ -1400,7 +1372,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="maskPadding">The mask padding mode.</param>
         /// <param name="padding">The padding extents.</param>
         /// <param name="mask">The mask.</param>
-        private static unsafe short SetMaskPadding(IntPtr maskData, int maskRowBytes, Rect16 rect, short maskPadding, FilterPadding padding, MaskSurface mask)
+        private static unsafe short SetMaskPadding(IntPtr maskData, int maskRowBytes, Rect16 rect, short maskPadding, FilterPadding padding, ISurface<MaskSurface> mask)
         {
             if (!padding.IsEmpty)
             {
@@ -1428,7 +1400,11 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private static unsafe void SetMaskEdgePadding(IntPtr maskData, int maskRowBytes, Rect16 rect, FilterPadding padding, MaskSurface mask)
+        private static unsafe void SetMaskEdgePadding(IntPtr maskData,
+                                                      int maskRowBytes,
+                                                      Rect16 rect,
+                                                      FilterPadding padding,
+                                                      ISurface<MaskSurface> mask)
         {
             int top = padding.top;
             int left = padding.left;
@@ -1446,68 +1422,81 @@ namespace PSFilterLoad.PSApi
 
             if (top > 0)
             {
-                for (int y = 0; y < top; y++)
+                using (ISurfaceLock surfaceLock = mask.Lock(SurfaceLockMode.Read))
                 {
-                    byte* src = mask.GetRowAddressUnchecked(0);
-                    byte* dst = ptr + (y * maskRowBytes);
-
-                    for (int x = 0; x < surfaceWidth; x++)
+                    for (int y = 0; y < top; y++)
                     {
-                        *dst = *src;
+                        byte* src = surfaceLock.GetRowPointerUnchecked(0);
+                        byte* dst = ptr + (y * maskRowBytes);
 
-                        src++;
-                        dst++;
+                        for (int x = 0; x < surfaceWidth; x++)
+                        {
+                            *dst = *src;
+
+                            src++;
+                            dst++;
+                        }
                     }
                 }
             }
 
             if (left > 0)
             {
-                for (int y = 0; y < surfaceHeight; y++)
+                using (ISurfaceLock surfaceLock = mask.Lock(SurfaceLockMode.Read))
                 {
-                    byte src = mask.GetPointUnchecked(0, y);
-                    byte* dst = ptr + (y * maskRowBytes);
-
-                    for (int x = 0; x < left; x++)
+                    for (int y = 0; y < surfaceHeight; y++)
                     {
-                        *dst = src;
+                        byte src = *surfaceLock.GetPointPointerUnchecked(0, y);
+                        byte* dst = ptr + (y * maskRowBytes);
 
-                        dst++;
+                        for (int x = 0; x < left; x++)
+                        {
+                            *dst = src;
+
+                            dst++;
+                        }
                     }
                 }
             }
 
             if (bottom > 0)
             {
-                int lockBottom = rect.bottom - rect.top - 1;
-                for (int y = 0; y < bottom; y++)
+                using (ISurfaceLock surfaceLock = mask.Lock(SurfaceLockMode.Read))
                 {
-                    byte* src = mask.GetRowAddressUnchecked(lastSurfaceRow);
-                    byte* dst = ptr + ((lockBottom - y) * maskRowBytes);
+                    int lockBottom = rect.bottom - rect.top - 1;
 
-                    for (int x = 0; x < surfaceWidth; x++)
+                    for (int y = 0; y < bottom; y++)
                     {
-                        *dst = *src;
+                        byte* src = surfaceLock.GetRowPointerUnchecked(lastSurfaceRow);
+                        byte* dst = ptr + ((lockBottom - y) * maskRowBytes);
 
-                        src++;
-                        dst++;
+                        for (int x = 0; x < surfaceWidth; x++)
+                        {
+                            *dst = *src;
+
+                            src++;
+                            dst++;
+                        }
                     }
                 }
             }
 
             if (right > 0)
             {
-                int rowEnd = rect.right - rect.left - right;
-                for (int y = 0; y < surfaceHeight; y++)
+                using (ISurfaceLock surfaceLock = mask.Lock(SurfaceLockMode.Read))
                 {
-                    byte src = mask.GetPointUnchecked(lastSurfaceColumn, y);
-                    byte* dst = ptr + (y * maskRowBytes) + rowEnd;
-
-                    for (int x = 0; x < right; x++)
+                    int rowEnd = rect.right - rect.left - right;
+                    for (int y = 0; y < surfaceHeight; y++)
                     {
-                        *dst = src;
+                        byte src = *surfaceLock.GetPointPointerUnchecked(lastSurfaceColumn, y);
+                        byte* dst = ptr + (y * maskRowBytes) + rowEnd;
 
-                        dst++;
+                        for (int x = 0; x < right; x++)
+                        {
+                            *dst = src;
+
+                            dst++;
+                        }
                     }
                 }
             }
@@ -1524,7 +1513,14 @@ namespace PSFilterLoad.PSApi
         /// <param name="inputPadding">The input padding mode.</param>
         /// <param name="padding">The padding extents.</param>
         /// <param name="surface">The surface.</param>
-        private static unsafe short SetFilterPadding(IntPtr inData, int inRowBytes, Rect16 rect, int nplanes, short ofs, short inputPadding, FilterPadding padding, Surface surface)
+        private static unsafe short SetFilterPadding(IntPtr inData,
+                                                     int inRowBytes,
+                                                     Rect16 rect,
+                                                     int nplanes,
+                                                     short ofs,
+                                                     short inputPadding,
+                                                     FilterPadding padding,
+                                                     ISurface<ImageSurface> surface)
         {
             if (!padding.IsEmpty)
             {
@@ -1551,7 +1547,13 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private static unsafe void SetFilterEdgePadding(IntPtr inData, int inRowBytes, Rect16 rect, int nplanes, short ofs, FilterPadding padding, Surface surface)
+        private static unsafe void SetFilterEdgePadding(IntPtr inData,
+                                                        int inRowBytes,
+                                                        Rect16 rect,
+                                                        int nplanes,
+                                                        short ofs,
+                                                        FilterPadding padding,
+                                                        ISurface<ImageSurface> surface)
         {
             int top = padding.top;
             int left = padding.left;
@@ -1561,154 +1563,160 @@ namespace PSFilterLoad.PSApi
 
             int surfaceHeight = surface.Height;
             int surfaceWidth = surface.Width;
+            int sourceChannelCount = surface.ChannelCount;
 
             int lastSurfaceRow = surfaceWidth - 1;
             int lastSurfaceColumn = surfaceHeight - 1;
 
             byte* inDataPtr = (byte*)inData;
 
-            if (top > 0)
+            using (ISurfaceLock surfaceLock = surface.Lock(SurfaceLockMode.Read))
             {
-                for (int y = 0; y < top; y++)
+                if (top > 0)
                 {
-                    ColorBgra* src = surface.GetRowPointerUnchecked(0);
-                    byte* dst = inDataPtr + (y * inRowBytes);
-
-                    for (int x = 0; x < surfaceWidth; x++)
+                    for (int y = 0; y < top; y++)
                     {
-                        switch (nplanes)
-                        {
-                            case 1:
-                                *dst = (*src)[ofs];
-                                break;
-                            case 2:
-                                dst[0] = (*src)[ofs];
-                                dst[1] = (*src)[ofs + 1];
-                                break;
-                            case 3:
-                                dst[0] = src->R;
-                                dst[1] = src->G;
-                                dst[2] = src->B;
-                                break;
-                            case 4:
-                                dst[0] = src->R;
-                                dst[1] = src->G;
-                                dst[2] = src->B;
-                                dst[3] = src->A;
-                                break;
-                        }
+                        byte* src = surfaceLock.GetRowPointerUnchecked(0);
+                        byte* dst = inDataPtr + (y * inRowBytes);
 
-                        src++;
-                        dst += nplanes;
+                        for (int x = 0; x < surfaceWidth; x++)
+                        {
+                            switch (nplanes)
+                            {
+                                case 1:
+                                    *dst = src[ofs];
+                                    break;
+                                case 2:
+                                    dst[0] = src[ofs];
+                                    dst[1] = src[ofs + 1];
+                                    break;
+                                case 3:
+                                    dst[0] = src[2];
+                                    dst[1] = src[1];
+                                    dst[2] = src[0];
+                                    break;
+                                case 4:
+                                    dst[0] = src[2];
+                                    dst[1] = src[1];
+                                    dst[2] = src[0];
+                                    dst[3] = src[3];
+                                    break;
+                            }
+
+                            src += sourceChannelCount;
+                            dst += nplanes;
+                        }
                     }
                 }
-            }
 
-            if (left > 0)
-            {
-                for (int y = 0; y < surfaceHeight; y++)
+                if (left > 0)
                 {
-                    ColorBgra src = surface.GetPointUnchecked(0, y);
-                    byte* dst = inDataPtr + (y * inRowBytes);
-
-                    for (int x = 0; x < left; x++)
+                    for (int y = 0; y < surfaceHeight; y++)
                     {
-                        switch (nplanes)
+                        byte* src = surfaceLock.GetPointPointerUnchecked(0, y);
+                        byte* dst = inDataPtr + (y * inRowBytes);
+
+                        for (int x = 0; x < left; x++)
                         {
-                            case 1:
-                                *dst = src[ofs];
-                                break;
-                            case 2:
-                                dst[0] = src[ofs];
-                                dst[1] = src[ofs + 1];
-                                break;
-                            case 3:
-                                dst[0] = src.R;
-                                dst[1] = src.G;
-                                dst[2] = src.B;
-                                break;
-                            case 4:
-                                dst[0] = src.R;
-                                dst[1] = src.G;
-                                dst[2] = src.B;
-                                dst[3] = src.A;
-                                break;
+                            switch (nplanes)
+                            {
+                                case 1:
+                                    *dst = src[ofs];
+                                    break;
+                                case 2:
+                                    dst[0] = src[ofs];
+                                    dst[1] = src[ofs + 1];
+                                    break;
+                                case 3:
+                                    dst[0] = src[2];
+                                    dst[1] = src[1];
+                                    dst[2] = src[0];
+                                    break;
+                                case 4:
+                                    dst[0] = src[2];
+                                    dst[1] = src[1];
+                                    dst[2] = src[0];
+                                    dst[3] = src[3];
+                                    break;
+                            }
+
+                            dst += nplanes;
                         }
-                        dst += nplanes;
                     }
                 }
-            }
 
-            if (bottom > 0)
-            {
-                int lockBottom = rect.bottom - rect.top - 1;
-                for (int y = 0; y < bottom; y++)
+                if (bottom > 0)
                 {
-                    ColorBgra* src = surface.GetRowPointerUnchecked(lastSurfaceColumn);
-                    byte* dst = inDataPtr + ((lockBottom - y) * inRowBytes);
-
-                    for (int x = 0; x < surfaceWidth; x++)
+                    int lockBottom = rect.bottom - rect.top - 1;
+                    for (int y = 0; y < bottom; y++)
                     {
-                        switch (nplanes)
-                        {
-                            case 1:
-                                *dst = (*src)[ofs];
-                                break;
-                            case 2:
-                                dst[0] = (*src)[ofs];
-                                dst[1] = (*src)[ofs + 1];
-                                break;
-                            case 3:
-                                dst[0] = src->R;
-                                dst[1] = src->G;
-                                dst[2] = src->B;
-                                break;
-                            case 4:
-                                dst[0] = src->R;
-                                dst[1] = src->G;
-                                dst[2] = src->B;
-                                dst[3] = src->A;
-                                break;
-                        }
+                        byte* src = surfaceLock.GetRowPointerUnchecked(lastSurfaceColumn);
+                        byte* dst = inDataPtr + ((lockBottom - y) * inRowBytes);
 
-                        src++;
-                        dst += nplanes;
+                        for (int x = 0; x < surfaceWidth; x++)
+                        {
+                            switch (nplanes)
+                            {
+                                case 1:
+                                    *dst = src[ofs];
+                                    break;
+                                case 2:
+                                    dst[0] = src[ofs];
+                                    dst[1] = src[ofs + 1];
+                                    break;
+                                case 3:
+                                    dst[0] = src[2];
+                                    dst[1] = src[1];
+                                    dst[2] = src[0];
+                                    break;
+                                case 4:
+                                    dst[0] = src[2];
+                                    dst[1] = src[1];
+                                    dst[2] = src[0];
+                                    dst[3] = src[3];
+                                    break;
+                            }
+
+                            src += sourceChannelCount;
+                            dst += nplanes;
+                        }
                     }
                 }
-            }
 
-            if (right > 0)
-            {
-                int rowEnd = rect.right - rect.left - right;
-                for (int y = 0; y < surfaceHeight; y++)
+                if (right > 0)
                 {
-                    ColorBgra src = surface.GetPointUnchecked(lastSurfaceRow, y);
-                    byte* dst = inDataPtr + (y * inRowBytes) + rowEnd;
-
-                    for (int x = 0; x < right; x++)
+                    int rowEnd = rect.right - rect.left - right;
+                    for (int y = 0; y < surfaceHeight; y++)
                     {
-                        switch (nplanes)
+                        byte* src = surfaceLock.GetPointPointerUnchecked(lastSurfaceRow, y);
+                        byte* dst = inDataPtr + (y * inRowBytes) + rowEnd;
+
+                        for (int x = 0; x < right; x++)
                         {
-                            case 1:
-                                *dst = src[ofs];
-                                break;
-                            case 2:
-                                dst[0] = src[ofs];
-                                dst[1] = src[ofs + 1];
-                                break;
-                            case 3:
-                                dst[0] = src.R;
-                                dst[1] = src.G;
-                                dst[2] = src.B;
-                                break;
-                            case 4:
-                                dst[0] = src.R;
-                                dst[1] = src.G;
-                                dst[2] = src.B;
-                                dst[3] = src.A;
-                                break;
+                            switch (nplanes)
+                            {
+                                case 1:
+                                    *dst = src[ofs];
+                                    break;
+                                case 2:
+                                    dst[0] = src[ofs];
+                                    dst[1] = src[ofs + 1];
+                                    break;
+                                case 3:
+                                    dst[0] = src[2];
+                                    dst[1] = src[1];
+                                    dst[2] = src[0];
+                                    break;
+                                case 4:
+                                    dst[0] = src[2];
+                                    dst[1] = src[1];
+                                    dst[2] = src[0];
+                                    dst[3] = src[3];
+                                    break;
+                            }
+
+                            dst += nplanes;
                         }
-                        dst += nplanes;
                     }
                 }
             }
@@ -1766,8 +1774,7 @@ namespace PSFilterLoad.PSApi
 
                 if (scaleFactor > 1) // Filter preview
                 {
-                    tempSurface = new Surface(scaleWidth, scaleHeight);
-                    tempSurface.FitSurface(ResamplingAlgorithm.AdaptiveHighQuality, source);
+                    tempSurface = source.CreateScaledSurface(scaleWidth, scaleHeight);
                 }
                 else
                 {
@@ -1852,37 +1859,42 @@ namespace PSFilterLoad.PSApi
             int bottom = lockRect.Bottom;
             int right = lockRect.Right;
 
-            for (int y = top; y < bottom; y++)
+            using (ISurfaceLock surfaceLock = tempSurface.Lock(SurfaceLockMode.Read))
             {
-                byte* src = (byte*)tempSurface.GetPointPointerUnchecked(left, y);
-                byte* dst = (byte*)ptr + ((y - top + padding.top) * stride) + padding.left;
+                int sourceChannelCount = tempSurface.ChannelCount;
 
-                for (int x = left; x < right; x++)
+                for (int y = top; y < bottom; y++)
                 {
-                    switch (nplanes)
-                    {
-                        case 1:
-                            *dst = src[channelOffset];
-                            break;
-                        case 2:
-                            dst[0] = src[channelOffset];
-                            dst[1] = src[channelOffset + 1];
-                            break;
-                        case 3:
-                            dst[0] = src[2];
-                            dst[1] = src[1];
-                            dst[2] = src[0];
-                            break;
-                        case 4:
-                            dst[0] = src[2];
-                            dst[1] = src[1];
-                            dst[2] = src[0];
-                            dst[3] = src[3];
-                            break;
-                    }
+                    byte* src = surfaceLock.GetPointPointerUnchecked(left, y);
+                    byte* dst = (byte*)ptr + ((y - top + padding.top) * stride) + padding.left;
 
-                    src += ColorBgra.SizeOf;
-                    dst += nplanes;
+                    for (int x = left; x < right; x++)
+                    {
+                        switch (nplanes)
+                        {
+                            case 1:
+                                *dst = src[channelOffset];
+                                break;
+                            case 2:
+                                dst[0] = src[channelOffset];
+                                dst[1] = src[channelOffset + 1];
+                                break;
+                            case 3:
+                                dst[0] = src[2];
+                                dst[1] = src[1];
+                                dst[2] = src[0];
+                                break;
+                            case 4:
+                                dst[0] = src[2];
+                                dst[1] = src[1];
+                                dst[2] = src[0];
+                                dst[3] = src[3];
+                                break;
+                        }
+
+                        src += sourceChannelCount;
+                        dst += nplanes;
+                    }
                 }
             }
 
@@ -1902,11 +1914,6 @@ namespace PSFilterLoad.PSApi
                        filterRecord->outLoPlane,
                        filterRecord->outHiPlane);
 
-#if DEBUG
-            using (Bitmap dst = dest.CreateAliasedBitmap())
-            {
-            }
-#endif
             Rect16 rect = filterRecord->outRect;
             int nplanes = filterRecord->outHiPlane - filterRecord->outLoPlane + 1;
             int width = rect.right - rect.left;
@@ -1961,37 +1968,42 @@ namespace PSFilterLoad.PSApi
             int bottom = lockRect.Bottom;
             int right = lockRect.Right;
 
-            for (int y = top; y < bottom; y++)
+            using (ISurfaceLock surfaceLock = dest.Lock(SurfaceLockMode.Read))
             {
-                byte* src = (byte*)dest.GetPointPointerUnchecked(left, y);
-                byte* dst = (byte*)ptr + ((y - top + padding.top) * stride) + padding.left;
+                int sourceChannelCount = dest.ChannelCount;
 
-                for (int x = left; x < right; x++)
+                for (int y = top; y < bottom; y++)
                 {
-                    switch (nplanes)
-                    {
-                        case 1:
-                            *dst = src[channelOffset];
-                            break;
-                        case 2:
-                            dst[0] = src[channelOffset];
-                            dst[1] = src[channelOffset + 1];
-                            break;
-                        case 3:
-                            dst[0] = src[2];
-                            dst[1] = src[1];
-                            dst[2] = src[0];
-                            break;
-                        case 4:
-                            dst[0] = src[2];
-                            dst[1] = src[1];
-                            dst[2] = src[0];
-                            dst[3] = src[3];
-                            break;
-                    }
+                    byte* src = surfaceLock.GetPointPointerUnchecked(left, y);
+                    byte* dst = (byte*)ptr + ((y - top + padding.top) * stride) + padding.left;
 
-                    src += ColorBgra.SizeOf;
-                    dst += nplanes;
+                    for (int x = left; x < right; x++)
+                    {
+                        switch (nplanes)
+                        {
+                            case 1:
+                                *dst = src[channelOffset];
+                                break;
+                            case 2:
+                                dst[0] = src[channelOffset];
+                                dst[1] = src[channelOffset + 1];
+                                break;
+                            case 3:
+                                dst[0] = src[2];
+                                dst[1] = src[1];
+                                dst[2] = src[0];
+                                break;
+                            case 4:
+                                dst[0] = src[2];
+                                dst[1] = src[1];
+                                dst[2] = src[0];
+                                dst[3] = src[3];
+                                break;
+                        }
+
+                        src += sourceChannelCount;
+                        dst += nplanes;
+                    }
                 }
             }
 
@@ -2046,8 +2058,7 @@ namespace PSFilterLoad.PSApi
 
                 if (scaleFactor > 1) // Filter preview
                 {
-                    tempMask = new MaskSurface(scaleWidth, scaleHeight);
-                    tempMask.FitSurface(mask);
+                    tempMask = mask.CreateScaledSurface(scaleWidth, scaleHeight);
                 }
                 else
                 {
@@ -2114,17 +2125,20 @@ namespace PSFilterLoad.PSApi
             int bottom = lockRect.Bottom;
             int right = lockRect.Right;
 
-            for (int y = top; y < bottom; y++)
+            using (ISurfaceLock maskLock = tempMask.Lock(SurfaceLockMode.Read))
             {
-                byte* srcRow = tempMask.GetPointAddressUnchecked(left, y);
-                byte* dstRow = ptr + ((y - top + padding.top) * width) + padding.left;
-
-                for (int x = left; x < right; x++)
+                for (int y = top; y < bottom; y++)
                 {
-                    *dstRow = *srcRow;
+                    byte* srcRow = maskLock.GetPointPointerUnchecked(left, y);
+                    byte* dstRow = ptr + ((y - top + padding.top) * width) + padding.left;
 
-                    srcRow++;
-                    dstRow++;
+                    for (int x = left; x < right; x++)
+                    {
+                        *dstRow = *srcRow;
+
+                        srcRow++;
+                        dstRow++;
+                    }
                 }
             }
 
@@ -2185,37 +2199,42 @@ namespace PSFilterLoad.PSApi
                 int bottom = lockRect.Bottom;
                 int right = lockRect.Right;
 
-                for (int y = top; y < bottom; y++)
+                using (ISurfaceLock destLock = dest.Lock(SurfaceLockMode.Write))
                 {
-                    byte* src = (byte*)outDataPtr + ((y - top + padding.top) * outRowBytes) + padding.left;
-                    byte* dst = (byte*)dest.GetPointPointerUnchecked(left, y);
+                    int destChannelCount = dest.ChannelCount;
 
-                    for (int x = left; x < right; x++)
+                    for (int y = top; y < bottom; y++)
                     {
-                        switch (nplanes)
-                        {
-                            case 1:
-                                dst[ofs] = *src;
-                                break;
-                            case 2:
-                                dst[ofs] = src[0];
-                                dst[ofs + 1] = src[1];
-                                break;
-                            case 3:
-                                dst[0] = src[2];
-                                dst[1] = src[1];
-                                dst[2] = src[0];
-                                break;
-                            case 4:
-                                dst[0] = src[2];
-                                dst[1] = src[1];
-                                dst[2] = src[0];
-                                dst[3] = src[3];
-                                break;
-                        }
+                        byte* src = (byte*)outDataPtr + ((y - top + padding.top) * outRowBytes) + padding.left;
+                        byte* dst = destLock.GetPointPointerUnchecked(left, y);
 
-                        src += nplanes;
-                        dst += ColorBgra.SizeOf;
+                        for (int x = left; x < right; x++)
+                        {
+                            switch (nplanes)
+                            {
+                                case 1:
+                                    dst[ofs] = *src;
+                                    break;
+                                case 2:
+                                    dst[ofs] = src[0];
+                                    dst[ofs + 1] = src[1];
+                                    break;
+                                case 3:
+                                    dst[0] = src[2];
+                                    dst[1] = src[1];
+                                    dst[2] = src[0];
+                                    break;
+                                case 4:
+                                    dst[0] = src[2];
+                                    dst[1] = src[1];
+                                    dst[2] = src[0];
+                                    dst[3] = src[3];
+                                    break;
+                            }
+
+                            src += nplanes;
+                            dst += destChannelCount;
+                        }
                     }
                 }
             }
@@ -2228,48 +2247,52 @@ namespace PSFilterLoad.PSApi
                 int width = source.Width;
                 int height = source.Height;
 
-                for (int y = 0; y < height; y++)
+                using (ISurfaceLock surfaceLock = source.Lock(SurfaceLockMode.ReadWrite))
                 {
-                    ColorBgra* ptr = source.GetRowPointerUnchecked(y);
-                    ColorBgra* endPtr = ptr + width;
+                    int sourceChannelCount = source.ChannelCount;
 
-                    while (ptr < endPtr)
+                    for (int y = 0; y < height; y++)
                     {
-                        if (ptr->A == 0)
-                        {
-                            switch (inputHandling)
-                            {
-                                case FilterDataHandling.BlackMat:
-                                    break;
-                                case FilterDataHandling.GrayMat:
-                                    break;
-                                case FilterDataHandling.WhiteMat:
-                                    break;
-                                case FilterDataHandling.Defringe:
-                                    break;
-                                case FilterDataHandling.BlackZap:
-                                    ptr->B = ptr->G = ptr->R = 0;
-                                    break;
-                                case FilterDataHandling.GrayZap:
-                                    ptr->B = ptr->G = ptr->R = 128;
-                                    break;
-                                case FilterDataHandling.WhiteZap:
-                                    ptr->B = ptr->G = ptr->R = 255;
-                                    break;
-                                case FilterDataHandling.BackgroundZap:
-                                    ptr->R = backgroundColor[0];
-                                    ptr->G = backgroundColor[1];
-                                    ptr->B = backgroundColor[2];
-                                    break;
-                                case FilterDataHandling.ForegroundZap:
-                                    ptr->R = foregroundColor[0];
-                                    ptr->G = foregroundColor[1];
-                                    ptr->B = foregroundColor[2];
-                                    break;
-                            }
-                        }
+                        byte* ptr = surfaceLock.GetRowPointerUnchecked(y);
 
-                        ptr++;
+                        for (int x = 0; x < width; x++)
+                        {
+                            if (ptr[3] == 0)
+                            {
+                                switch (inputHandling)
+                                {
+                                    case FilterDataHandling.BlackMat:
+                                        break;
+                                    case FilterDataHandling.GrayMat:
+                                        break;
+                                    case FilterDataHandling.WhiteMat:
+                                        break;
+                                    case FilterDataHandling.Defringe:
+                                        break;
+                                    case FilterDataHandling.BlackZap:
+                                        ptr[0] = ptr[1] = ptr[2] = 0;
+                                        break;
+                                    case FilterDataHandling.GrayZap:
+                                        ptr[0] = ptr[1] = ptr[2] = 128;
+                                        break;
+                                    case FilterDataHandling.WhiteZap:
+                                        ptr[0] = ptr[1] = ptr[2] = 255;
+                                        break;
+                                    case FilterDataHandling.BackgroundZap:
+                                        ptr[2] = backgroundColor[0];
+                                        ptr[1] = backgroundColor[1];
+                                        ptr[0] = backgroundColor[2];
+                                        break;
+                                    case FilterDataHandling.ForegroundZap:
+                                        ptr[2] = foregroundColor[0];
+                                        ptr[1] = foregroundColor[1];
+                                        ptr[0] = foregroundColor[2];
+                                        break;
+                                }
+                            }
+
+                            ptr += sourceChannelCount;
+                        }
                     }
                 }
             }
@@ -2310,25 +2333,30 @@ namespace PSFilterLoad.PSApi
 
         private void ClipToFloatingSelectionMask()
         {
-            for (int y = 0; y < dest.Height; y++)
+            using (ISurfaceLock sourceLock = source.Lock(SurfaceLockMode.Read))
+            using (ISurfaceLock destLock = dest.Lock(SurfaceLockMode.Write))
+            using (ISurfaceLock maskLock = mask.Lock(SurfaceLockMode.Read))
             {
-                ColorBgra* src = source.GetRowPointerUnchecked(y);
-                ColorBgra* dst = dest.GetRowPointerUnchecked(y);
-                byte* maskPixel = mask.GetRowAddressUnchecked(y);
-
-                for (int x = 0; x < dest.Width; x++)
+                for (int y = 0; y < dest.Height; y++)
                 {
-                    // Copy the original pixel data to the destination image
-                    // for pixels that are completely transparent.
-                    // The filter should not modify these pixels.
-                    if (*maskPixel == 0)
-                    {
-                        *dst = *src;
-                    }
+                    uint* src = (uint*)sourceLock.GetRowPointerUnchecked(y);
+                    uint* dst = (uint*)destLock.GetRowPointerUnchecked(y);
+                    byte* maskPixel = maskLock.GetRowPointerUnchecked(y);
 
-                    src++;
-                    dst++;
-                    maskPixel++;
+                    for (int x = 0; x < dest.Width; x++)
+                    {
+                        // Copy the original pixel data to the destination image
+                        // for pixels that are completely transparent.
+                        // The filter should not modify these pixels.
+                        if (*maskPixel == 0)
+                        {
+                            *dst = *src;
+                        }
+
+                        src++;
+                        dst++;
+                        maskPixel++;
+                    }
                 }
             }
         }
@@ -2425,11 +2453,14 @@ namespace PSFilterLoad.PSApi
 
                     if (point->h >= 0 && point->h < source.Width && point->v >= 0 && point->v < source.Height)
                     {
-                        ColorBgra pixel = source.GetPointUnchecked(point->h, point->v);
-                        info->colorComponents[0] = pixel.R;
-                        info->colorComponents[1] = pixel.G;
-                        info->colorComponents[2] = pixel.B;
-                        info->colorComponents[3] = 0;
+                        using (ISurfaceLock sourceLock = source.Lock(SurfaceLockMode.Read))
+                        {
+                            byte* pixel = sourceLock.GetPointPointerUnchecked(point->h, point->v);
+                            info->colorComponents[0] = pixel[2];
+                            info->colorComponents[1] = pixel[1];
+                            info->colorComponents[2] = pixel[0];
+                            info->colorComponents[3] = 0;
+                        }
 
                         err = ColorServicesConvert.Convert(ColorSpace.RGBSpace, info->resultSpace, info->colorComponents);
                     }
@@ -2441,7 +2472,10 @@ namespace PSFilterLoad.PSApi
 
         private void SetupDisplaySurface(int width, int height, bool haveMask)
         {
-            if ((displaySurface == null) || width != displaySurface.Width || height != displaySurface.Height)
+            if ((displaySurface == null)
+                || width != displaySurface.Width
+                || height != displaySurface.Height
+                || haveMask != displaySurface.SupportsTransparency)
             {
                 if (displaySurface != null)
                 {
@@ -2449,12 +2483,7 @@ namespace PSFilterLoad.PSApi
                     displaySurface = null;
                 }
 
-                displaySurface = new Surface(width, height);
-
-                if (!haveMask)
-                {
-                    new UnaryPixelOps.SetAlphaChannelTo255().Apply(displaySurface, displaySurface.Bounds);
-                }
+                displaySurface = displayPixelsSurfaceFactory.Create(width, height, haveMask);
             }
         }
 
@@ -2466,53 +2495,50 @@ namespace PSFilterLoad.PSApi
         /// <param name="dstRow">The row offset to render at.</param>
         /// <param name="allOpaque"><c>true</c> if the alpha channel of the bitmap does not contain any transparency; otherwise, <c>false</c>.</param>
         /// <returns><see cref="PSError.noErr"/> on success; or any other PSError constant on failure.</returns>
-        private short Display32BitBitmap(Graphics gr, int dstCol, int dstRow, bool allOpaque)
+        private unsafe short Display32BitBitmap(Graphics gr, int dstCol, int dstRow, bool allOpaque)
         {
-            // Skip the rendering of the checker board if the surface does not contain any transparency.
-            if (allOpaque)
+            using (IDisplayPixelsSurfaceLock displaySurfaceLock = displaySurface.Lock(SurfaceLockMode.Read))
+            using (Bitmap aliasedDisplayPixelsBitmap = displaySurfaceLock.CreateAliasedBitmap())
             {
-                using (Bitmap bmp = displaySurface.CreateAliasedBitmap())
+                // Skip the rendering of the checker board if the surface does not contain any transparency.
+                if (allOpaque)
                 {
-                    gr.DrawImageUnscaled(bmp, dstCol, dstRow);
+                    gr.DrawImageUnscaled(aliasedDisplayPixelsBitmap, dstCol, dstRow);
                 }
-            }
-            else
-            {
-                int width = displaySurface.Width;
-                int height = displaySurface.Height;
-
-                try
+                else
                 {
-                    if (checkerBoardBitmap == null ||
-                        checkerBoardBitmap.Width != width ||
-                        checkerBoardBitmap.Height != height)
-                    {
-                        DrawCheckerBoardBitmap(width, height);
-                    }
+                    int width = displaySurface.Width;
+                    int height = displaySurface.Height;
 
-                    // Use a temporary bitmap to prevent flickering when the image is rendered over the checker board.
-                    using (Bitmap temp = new(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                    try
                     {
-                        Rectangle rect = new(0, 0, width, height);
-
-                        using (Graphics tempGr = Graphics.FromImage(temp))
+                        if (checkerBoardBitmap == null ||
+                            checkerBoardBitmap.Width != width ||
+                            checkerBoardBitmap.Height != height)
                         {
-                            tempGr.DrawImageUnscaled(checkerBoardBitmap, rect);
-                            using (Bitmap bmp = displaySurface.CreateAliasedBitmap())
-                            {
-                                tempGr.DrawImageUnscaled(bmp, rect);
-                            }
+                            DrawCheckerBoardBitmap(width, height);
                         }
 
-                        gr.DrawImageUnscaled(temp, dstCol, dstRow);
+                        // Use a temporary bitmap to prevent flickering when the image is rendered over the checker board.
+                        using (Bitmap temp = new(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                        {
+                            Rectangle rect = new(0, 0, width, height);
+
+                            using (Graphics tempGr = Graphics.FromImage(temp))
+                            {
+                                tempGr.DrawImageUnscaled(checkerBoardBitmap, rect);
+                                tempGr.DrawImageUnscaled(aliasedDisplayPixelsBitmap, rect);
+                            }
+
+                            gr.DrawImageUnscaled(temp, dstCol, dstRow);
+                        }
+                    }
+                    catch (OutOfMemoryException)
+                    {
+                        return PSError.memFullErr;
                     }
                 }
-                catch (OutOfMemoryException)
-                {
-                    return PSError.memFullErr;
-                }
             }
-
             return PSError.noErr;
         }
 
@@ -2560,46 +2586,51 @@ namespace PSFilterLoad.PSApi
                 bottom = height;
             }
 
-            if (srcPixelMap->colBytes == 1)
+            using (IDisplayPixelsSurfaceLock displaySurfaceLock = displaySurface.Lock(SurfaceLockMode.Write))
             {
-                int greenPlaneOffset = srcPixelMap->planeBytes;
-                int bluePlaneOffset = srcPixelMap->planeBytes * 2;
-                for (int y = top; y < bottom; y++)
+                int destChannelCount = displaySurface.ChannelCount;
+
+                if (srcPixelMap->colBytes == 1)
                 {
-                    byte* redPlane = baseAddr + (y * srcPixelMap->rowBytes) + left;
-                    byte* greenPlane = redPlane + greenPlaneOffset;
-                    byte* bluePlane = redPlane + bluePlaneOffset;
-
-                    ColorBgra* dst = displaySurface.GetRowPointerUnchecked(y - top);
-
-                    for (int x = 0; x < width; x++)
+                    int greenPlaneOffset = srcPixelMap->planeBytes;
+                    int bluePlaneOffset = srcPixelMap->planeBytes * 2;
+                    for (int y = top; y < bottom; y++)
                     {
-                        dst->R = *redPlane;
-                        dst->G = *greenPlane;
-                        dst->B = *bluePlane;
+                        byte* redPlane = baseAddr + (y * srcPixelMap->rowBytes) + left;
+                        byte* greenPlane = redPlane + greenPlaneOffset;
+                        byte* bluePlane = redPlane + bluePlaneOffset;
 
-                        redPlane++;
-                        greenPlane++;
-                        bluePlane++;
-                        dst++;
+                        byte* dst = displaySurfaceLock.GetRowPointerUnchecked(y - top);
+
+                        for (int x = 0; x < width; x++)
+                        {
+                            dst[2] = *redPlane;
+                            dst[1] = *greenPlane;
+                            dst[0] = *bluePlane;
+
+                            redPlane++;
+                            greenPlane++;
+                            bluePlane++;
+                            dst += destChannelCount;
+                        }
                     }
                 }
-            }
-            else
-            {
-                for (int y = top; y < bottom; y++)
+                else
                 {
-                    byte* src = baseAddr + (y * srcPixelMap->rowBytes) + (left * srcPixelMap->colBytes);
-                    ColorBgra* dst = displaySurface.GetRowPointerUnchecked(y - top);
-
-                    for (int x = 0; x < width; x++)
+                    for (int y = top; y < bottom; y++)
                     {
-                        dst->B = src[2];
-                        dst->G = src[1];
-                        dst->R = src[0];
+                        byte* src = baseAddr + (y * srcPixelMap->rowBytes) + (left * srcPixelMap->colBytes);
+                        byte* dst = displaySurfaceLock.GetRowPointerUnchecked(y - top);
 
-                        src += srcPixelMap->colBytes;
-                        dst++;
+                        for (int x = 0; x < width; x++)
+                        {
+                            dst[0] = src[2];
+                            dst[1] = src[1];
+                            dst[2] = src[0];
+
+                            src += srcPixelMap->colBytes;
+                            dst += destChannelCount;
+                        }
                     }
                 }
             }
@@ -2616,20 +2647,26 @@ namespace PSFilterLoad.PSApi
                     if (mask->maskData != IntPtr.Zero && mask->colBytes != 0 && mask->rowBytes != 0)
                     {
                         byte* maskPtr = (byte*)mask->maskData.ToPointer();
-                        for (int y = top; y < bottom; y++)
-                        {
-                            byte* src = maskPtr + (y * mask->rowBytes) + left;
-                            ColorBgra* dst = displaySurface.GetRowPointerUnchecked(y - top);
-                            for (int x = 0; x < width; x++)
-                            {
-                                dst->A = *src;
-                                if (*src < 255)
-                                {
-                                    allOpaque = false;
-                                }
 
-                                src += mask->colBytes;
-                                dst++;
+                        using (IDisplayPixelsSurfaceLock displaySurfaceLock = displaySurface.Lock(SurfaceLockMode.Write))
+                        {
+                            int destChannelCount = displaySurface.ChannelCount;
+
+                            for (int y = top; y < bottom; y++)
+                            {
+                                byte* src = maskPtr + (y * mask->rowBytes) + left;
+                                byte* dst = displaySurfaceLock.GetRowPointerUnchecked(y - top);
+                                for (int x = 0; x < width; x++)
+                                {
+                                    dst[3] = *src;
+                                    if (*src < 255)
+                                    {
+                                        allOpaque = false;
+                                    }
+
+                                    src += mask->colBytes;
+                                    dst += destChannelCount;
+                                }
                             }
                         }
                     }
@@ -2638,7 +2675,8 @@ namespace PSFilterLoad.PSApi
                 }
                 else
                 {
-                    using (Bitmap bmp = displaySurface.CreateAliasedBitmap())
+                    using (IDisplayPixelsSurfaceLock displaySurfaceLock = displaySurface.Lock(SurfaceLockMode.Read))
+                    using (Bitmap bmp = displaySurfaceLock.CreateAliasedBitmap())
                     {
                         gr.DrawImageUnscaled(bmp, dstCol, dstRow);
                     }
@@ -2682,26 +2720,7 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void DrawFloatingSelectionMask()
         {
-            int width = source.Width;
-            int height = source.Height;
-            mask = new MaskSurface(width, height);
-
-            for (int y = 0; y < height; y++)
-            {
-                ColorBgra* src = source.GetRowPointerUnchecked(y);
-                byte* dst = mask.GetRowAddressUnchecked(y);
-
-                for (int x = 0; x < width; x++)
-                {
-                    if (src->A > 0)
-                    {
-                        *dst = 255;
-                    }
-
-                    src++;
-                    dst++;
-                }
-            }
+            mask = SelectionMaskRenderer.FromTransparency(source);
         }
 
         private void HostProc(short selector, IntPtr data)
@@ -2835,7 +2854,7 @@ namespace PSFilterLoad.PSApi
                 descriptorParameters->descriptor = handleSuite.NewHandle(0);
                 if (descriptorParameters->descriptor == Handle.Null)
                 {
-                    throw new OutOfMemoryException(Resources.OutOfMemoryError);
+                    throw new OutOfMemoryException(StringResources.OutOfMemoryError);
                 }
                 descriptorSuite.SetScriptingData(descriptorParameters->descriptor, scriptingData);
                 basicSuiteProvider.SetScriptingData(descriptorParameters->descriptor, scriptingData);

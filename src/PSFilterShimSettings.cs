@@ -28,6 +28,8 @@ namespace PSFilterPdn
                                     string destinationImagePath,
                                     int primaryColor,
                                     int secondaryColor,
+                                    double dpiX,
+                                    double dpiY,
                                     string? selectionMaskPath,
                                     string? parameterDataPath,
                                     string? pseudoResourcePath,
@@ -41,6 +43,8 @@ namespace PSFilterPdn
             DestinationImagePath = destinationImagePath ?? throw new ArgumentNullException(nameof(destinationImagePath));
             PrimaryColor = primaryColor;
             SecondaryColor = secondaryColor;
+            DpiX = dpiX;
+            DpiY = dpiY;
             SelectionMaskPath = selectionMaskPath;
             ParameterDataPath = parameterDataPath;
             PseudoResourcePath = pseudoResourcePath;
@@ -60,6 +64,10 @@ namespace PSFilterPdn
         public int PrimaryColor { get; }
 
         public int SecondaryColor { get; }
+
+        public double DpiX { get; }
+
+        public double DpiY { get; }
 
         public string? SelectionMaskPath { get; }
 

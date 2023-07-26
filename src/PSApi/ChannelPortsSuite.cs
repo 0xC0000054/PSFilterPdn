@@ -10,8 +10,8 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PaintDotNet;
 using PSFilterLoad.PSApi.Diagnostics;
+using PSFilterLoad.PSApi.Imaging;
 using System;
 using System.Runtime.InteropServices;
 
@@ -25,8 +25,8 @@ namespace PSFilterLoad.PSApi
         private readonly ReadPortForWritePortProc readPortForWritePortProc;
         private readonly IPluginApiLogger logger;
 
-        private Surface scaledChannelSurface;
-        private MaskSurface scaledSelectionMask;
+        private ISurface<ImageSurface> scaledChannelSurface;
+        private ISurface<MaskSurface> scaledSelectionMask;
         private bool disposed;
 
         /// <summary>
@@ -88,57 +88,68 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private static unsafe void FillChannelData(int channel, PixelMemoryDesc* destiniation, Surface source, VRect srcRect)
+        private static unsafe void FillChannelData(int channel, PixelMemoryDesc* destiniation, ISurface<ImageSurface> source, VRect srcRect)
         {
             byte* dstPtr = (byte*)destiniation->data.ToPointer();
             int stride = destiniation->rowBits / 8;
             int bpp = destiniation->colBits / 8;
             int offset = destiniation->bitOffset / 8;
 
-            for (int y = srcRect.top; y < srcRect.bottom; y++)
+            using (ISurfaceLock sourceLock = source.Lock(SurfaceLockMode.Read))
             {
-                ColorBgra* src = source.GetPointPointerUnchecked(srcRect.left, y);
-                byte* dst = dstPtr + (y * stride) + offset;
-                for (int x = srcRect.left; x < srcRect.right; x++)
+                int sourceChannelCount = source.ChannelCount;
+
+                for (int y = srcRect.top; y < srcRect.bottom; y++)
                 {
-                    switch (channel)
+                    byte* src = sourceLock.GetPointPointerUnchecked(srcRect.left, y);
+                    byte* dst = dstPtr + (y * stride) + offset;
+
+                    for (int x = srcRect.left; x < srcRect.right; x++)
                     {
-                        case PSConstants.ChannelPorts.Red:
-                            *dst = src->R;
-                            break;
-                        case PSConstants.ChannelPorts.Green:
-                            *dst = src->G;
-                            break;
-                        case PSConstants.ChannelPorts.Blue:
-                            *dst = src->B;
-                            break;
-                        case PSConstants.ChannelPorts.Alpha:
-                            *dst = src->A;
-                            break;
+                        switch (channel)
+                        {
+                            case PSConstants.ChannelPorts.Red:
+                                *dst = src[2];
+                                break;
+                            case PSConstants.ChannelPorts.Green:
+                                *dst = src[1];
+                                break;
+                            case PSConstants.ChannelPorts.Blue:
+                                *dst = src[0];
+                                break;
+                            case PSConstants.ChannelPorts.Alpha:
+                                *dst = src[3];
+                                break;
+                        }
+
+                        src += sourceChannelCount;
+                        dst += bpp;
                     }
-                    src++;
-                    dst += bpp;
                 }
             }
         }
 
-        private static unsafe void FillSelectionMask(PixelMemoryDesc* destiniation, MaskSurface source, VRect srcRect)
+        private static unsafe void FillSelectionMask(PixelMemoryDesc* destiniation, ISurface<MaskSurface> mask, VRect srcRect)
         {
             byte* dstPtr = (byte*)destiniation->data.ToPointer();
             int stride = destiniation->rowBits / 8;
             int bpp = destiniation->colBits / 8;
             int offset = destiniation->bitOffset / 8;
 
-            for (int y = srcRect.top; y < srcRect.bottom; y++)
+            using (ISurfaceLock maskLock = mask.Lock(SurfaceLockMode.Read))
             {
-                byte* src = source.GetPointAddressUnchecked(srcRect.left, y);
-                byte* dst = dstPtr + (y * stride) + offset;
-                for (int x = srcRect.left; x < srcRect.right; x++)
+                for (int y = srcRect.top; y < srcRect.bottom; y++)
                 {
-                    *dst = *src;
+                    byte* src = maskLock.GetPointPointerUnchecked(srcRect.left, y);
+                    byte* dst = dstPtr + (y * stride) + offset;
 
-                    src++;
-                    dst += bpp;
+                    for (int x = srcRect.left; x < srcRect.right; x++)
+                    {
+                        *dst = *src;
+
+                        src++;
+                        dst += bpp;
+                    }
                 }
             }
         }
@@ -196,7 +207,7 @@ namespace PSFilterLoad.PSApi
                 {
                     FillSelectionMask(destination, filterImageProvider.Mask, srcRect);
                 }
-                else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
+                else
                 {
                     if ((scaledSelectionMask == null) || scaledSelectionMask.Width != dstWidth || scaledSelectionMask.Height != dstHeight)
                     {
@@ -206,24 +217,7 @@ namespace PSFilterLoad.PSApi
                             scaledSelectionMask = null;
                         }
 
-                        scaledSelectionMask = new MaskSurface(dstWidth, dstHeight);
-                        scaledSelectionMask.FitSurface(filterImageProvider.Mask);
-                    }
-
-                    FillSelectionMask(destination, scaledSelectionMask, dstRect);
-                }
-                else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
-                {
-                    if ((scaledSelectionMask == null) || scaledSelectionMask.Width != dstWidth || scaledSelectionMask.Height != dstHeight)
-                    {
-                        if (scaledSelectionMask != null)
-                        {
-                            scaledSelectionMask.Dispose();
-                            scaledSelectionMask = null;
-                        }
-
-                        scaledSelectionMask = new MaskSurface(dstWidth, dstHeight);
-                        scaledSelectionMask.FitSurface(filterImageProvider.Mask);
+                        scaledSelectionMask = filterImageProvider.Mask.CreateScaledSurface(dstWidth, dstHeight);
                     }
 
                     FillSelectionMask(destination, scaledSelectionMask, dstRect);
@@ -235,7 +229,7 @@ namespace PSFilterLoad.PSApi
                 {
                     FillChannelData(channel, destination, filterImageProvider.Source, srcRect);
                 }
-                else if (dstWidth < srcWidth || dstHeight < srcHeight) // scale down
+                else
                 {
                     if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
                     {
@@ -245,24 +239,7 @@ namespace PSFilterLoad.PSApi
                             scaledChannelSurface = null;
                         }
 
-                        scaledChannelSurface = new Surface(dstWidth, dstHeight);
-                        scaledChannelSurface.FitSurface(ResamplingAlgorithm.AdaptiveHighQuality, filterImageProvider.Source);
-                    }
-
-                    FillChannelData(channel, destination, scaledChannelSurface, dstRect);
-                }
-                else if (dstWidth > srcWidth || dstHeight > srcHeight) // scale up
-                {
-                    if ((scaledChannelSurface == null) || scaledChannelSurface.Width != dstWidth || scaledChannelSurface.Height != dstHeight)
-                    {
-                        if (scaledChannelSurface != null)
-                        {
-                            scaledChannelSurface.Dispose();
-                            scaledChannelSurface = null;
-                        }
-
-                        scaledChannelSurface = new Surface(dstWidth, dstHeight);
-                        scaledChannelSurface.FitSurface(ResamplingAlgorithm.Cubic, filterImageProvider.Source);
+                        scaledChannelSurface = filterImageProvider.Source.CreateScaledSurface(dstWidth, dstHeight);
                     }
 
                     FillChannelData(channel, destination, scaledChannelSurface, dstRect);

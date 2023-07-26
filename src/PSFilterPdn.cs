@@ -16,6 +16,8 @@ using PaintDotNet.Effects;
 using PaintDotNet.Imaging;
 using PSFilterLoad.PSApi;
 using PSFilterLoad.PSApi.Diagnostics;
+using PSFilterLoad.PSApi.Imaging;
+using PSFilterLoad.PSApi.Imaging.Internal;
 using PSFilterPdn.Properties;
 using System;
 using System.ComponentModel;
@@ -98,7 +100,7 @@ namespace PSFilterPdn
                     string selectionMaskFileName = null;
 
                     DocumentDpi documentDpi = new(Environment.Document.Resolution);
-                    PSFilterShimImage.Save(srcFileName, Environment.GetSourceBitmapBgra32(), documentDpi);
+                    PSFilterShimImage.Save(srcFileName, Environment.GetSourceBitmapBgra32());
 
                     if (token.FilterParameters.TryGetValue(token.FilterData, out ParameterData parameterData))
                     {
@@ -126,7 +128,7 @@ namespace PSFilterPdn
 
                     try
                     {
-                        selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment);
+                        selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
 
                         if (selectionMask != null)
                         {
@@ -148,6 +150,8 @@ namespace PSFilterPdn
                                                         destFileName,
                                                         new ColorRgb24(Environment.PrimaryColor).ToWin32Color(),
                                                         new ColorRgb24(Environment.SecondaryColor).ToWin32Color(),
+                                                        documentDpi.X,
+                                                        documentDpi.Y,
                                                         selectionMaskFileName,
                                                         parameterDataFileName,
                                                         resourceDataFileName,
@@ -217,6 +221,8 @@ namespace PSFilterPdn
 
         private void RunRepeatFilter(PSFilterPdnConfigToken token, IWin32Window window)
         {
+            ImageSurface source = null;
+            MaskSurface selectionMask = null;
             try
             {
                 DocumentDpi documentDpi = new(Environment.Document.Resolution);
@@ -233,19 +239,28 @@ namespace PSFilterPdn
                                                                  nameof(LoadPsFilter));
 
                 DocumentMetadataProvider documentMetadataProvider = new(Environment.Document);
+                source = new WICBitmapSurface<ColorBgra32>(Environment.GetSourceBitmapBgra32(), Services);
+                selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
+                DisplayPixelsSurfaceFactory displayPixelsSurfaceFactory = new(Services);
 
-                using (LoadPsFilter lps = new(Environment.GetSourceBitmapBgra32(),
-                                              SelectionMaskRenderer.FromPdnSelection(Environment),
+                using (LoadPsFilter lps = new(source,
+                                              takeOwnershipOfSource: true,
+                                              selectionMask,
                                               takeOwnershipOfSelectionMask: true,
-                                              Environment.PrimaryColor,
-                                              Environment.SecondaryColor,
+                                              new ColorRgb24(Environment.PrimaryColor),
+                                              new ColorRgb24(Environment.SecondaryColor),
                                               documentDpi.X,
                                               documentDpi.Y,
                                               window.Handle,
                                               documentMetadataProvider,
+                                              displayPixelsSurfaceFactory,
                                               logger,
                                               null))
                 {
+                    // These items are now owned by the LoadPsFilter instance.
+                    source = null;
+                    selectionMask = null;
+
                     lps.SetAbortCallback(AbortCallback);
                     if (token.DescriptorRegistry != null)
                     {
@@ -292,6 +307,8 @@ namespace PSFilterPdn
             }
             finally
             {
+                source?.Dispose();
+                selectionMask?.Dispose();
                 filterDone.Set();
             }
         }

@@ -10,10 +10,13 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PaintDotNet;
+using PSFilterLoad.PSApi.Imaging;
+using PSFilterLoad.PSApi.Imaging.Internal;
 using PSFilterPdn;
 using System;
 using System.IO;
+
+#nullable enable
 
 namespace PSFilterShim
 {
@@ -25,9 +28,9 @@ namespace PSFilterShim
     {
         private const int BufferSize = 4096;
 
-        public static Surface Load(string path, out double dpiX, out double dpiY)
+        public static ImageSurface Load(string path)
         {
-            Surface surface = null;
+            ImageSurface surface;
 
             using (FileStream stream = new(path,
                                            FileMode.Open,
@@ -38,25 +41,25 @@ namespace PSFilterShim
             {
                 PSFilterShimImageHeader header = new(stream);
 
-                if (header.Format != PSFilterShimImageFormat.Bgra32)
+                if (header.Format != SurfacePixelFormat.Bgra32)
                 {
                     throw new InvalidOperationException("This method requires an image that uses the Bgra32 format.");
                 }
 
-                dpiX = header.DpiX;
-                dpiY = header.DpiY;
-
-                surface = new Surface(header.Width, header.Height);
+                surface = new ShimSurfaceBgra32(header.Width, header.Height);
 
                 int rowLengthInBytes = header.Stride;
 
                 unsafe
                 {
-                    for (int y = 0; y < header.Height; y++)
+                    using (ISurfaceLock surfaceLock = surface.Lock(SurfaceLockMode.Write))
                     {
-                        ColorBgra* dst = surface.GetRowAddressUnchecked(y);
+                        for (int y = 0; y < header.Height; y++)
+                        {
+                            byte* dst = surfaceLock.GetRowPointerUnchecked(y);
 
-                        stream.ReadExactly(new Span<byte>((byte*)dst, rowLengthInBytes));
+                            stream.ReadExactly(new Span<byte>(dst, rowLengthInBytes));
+                        }
                     }
                 }
             }
@@ -64,44 +67,50 @@ namespace PSFilterShim
             return surface;
         }
 
-        public static MaskSurface LoadSelectionMask(string path)
+        public static MaskSurface? LoadSelectionMask(string? path)
         {
-            MaskSurface surface = null;
+            MaskSurface? surface = null;
 
-            using (FileStream stream = new(path,
-                                           FileMode.Open,
-                                           FileAccess.Read,
-                                           FileShare.Read,
-                                           BufferSize,
-                                           FileOptions.SequentialScan))
+            if (!string.IsNullOrEmpty(path))
             {
-                PSFilterShimImageHeader header = new(stream);
-
-                if (header.Format != PSFilterShimImageFormat.Alpha8)
+                using (FileStream stream = new(path,
+                                               FileMode.Open,
+                                               FileAccess.Read,
+                                               FileShare.Read,
+                                               BufferSize,
+                                               FileOptions.SequentialScan))
                 {
-                    throw new InvalidOperationException("This method requires an image that uses the Alpha8 format.");
-                }
+                    PSFilterShimImageHeader header = new(stream);
 
-                surface = new MaskSurface(header.Width, header.Height);
-
-                int rowLengthInBytes = header.Stride;
-
-                unsafe
-                {
-                    for (int y = 0; y < header.Height; y++)
+                    if (header.Format != SurfacePixelFormat.Gray8)
                     {
-                        byte* dst = surface.GetRowAddressUnchecked(y);
-
-                        stream.ReadExactly(new Span<byte>(dst, rowLengthInBytes));
+                        throw new InvalidOperationException("This method requires an image that uses the Gray8 format.");
                     }
-                }
+
+                    surface = new ShimMaskSurface(header.Width, header.Height);
+
+                    int rowLengthInBytes = header.Stride;
+
+                    unsafe
+                    {
+                        using (ISurfaceLock surfaceLock = surface.Lock(SurfaceLockMode.Write))
+                        {
+                            for (int y = 0; y < header.Height; y++)
+                            {
+                                byte* dst = surfaceLock.GetRowPointerUnchecked(y);
+
+                                stream.ReadExactly(new Span<byte>(dst, rowLengthInBytes));
+                            }
+                        }
+                    }
+                } 
             }
 
             return surface;
         }
 
 
-        public static void Save(string path, Surface surface)
+        public static void Save(string path, ISurface<ImageSurface> surface)
         {
             if (surface is null)
             {
@@ -110,9 +119,7 @@ namespace PSFilterShim
 
             PSFilterShimImageHeader header = new(surface.Width,
                                                  surface.Height,
-                                                 PSFilterShimImageFormat.Bgra32,
-                                                 96.0,
-                                                 96.0);
+                                                 SurfacePixelFormat.Bgra32);
             FileStreamOptions options = new()
             {
                 Mode = FileMode.Create,
@@ -130,11 +137,14 @@ namespace PSFilterShim
 
                 unsafe
                 {
-                    for (int y = 0; y < header.Height; y++)
+                    using (ISurfaceLock surfaceLock = surface.Lock(SurfaceLockMode.Read))
                     {
-                        ColorBgra* src = surface.GetRowAddressUnchecked(y);
+                        for (int y = 0; y < header.Height; y++)
+                        {
+                            byte* src = surfaceLock.GetRowPointerUnchecked(y);
 
-                        stream.Write(new ReadOnlySpan<byte>((byte*)src, rowLengthInBytes));
+                            stream.Write(new ReadOnlySpan<byte>(src, rowLengthInBytes));
+                        }
                     }
                 }
             }

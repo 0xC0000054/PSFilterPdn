@@ -10,11 +10,8 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PaintDotNet.Effects;
-using PaintDotNet.Rendering;
 using PSFilterLoad.PSApi.Imaging;
 using PSFilterLoad.PSApi.Imaging.Internal;
-using System;
 
 #nullable enable
 
@@ -22,29 +19,12 @@ namespace PSFilterLoad.PSApi
 {
     internal static class SelectionMaskRenderer
     {
-        public static MaskSurface? FromPdnSelection(IEffectEnvironment environment, IServiceProvider serviceProvider)
-        {
-            SizeInt32 documentSize = environment.Document.Size;
-            RectInt32 documentBounds = new(Point2Int32.Zero, documentSize);
-
-            IEffectSelectionInfo selectionInfo = environment.Selection;
-
-            MaskSurface? selectionMask = null;
-
-            if (selectionInfo.RenderBounds != documentBounds)
-            {
-                selectionMask = new PDNMaskSurface(selectionInfo.MaskBitmap, serviceProvider);
-            }
-
-            return selectionMask;
-        }
-
-        public static unsafe Imaging.ISurface<MaskSurface> FromTransparency(Imaging.ISurface<ImageSurface> source)
+        public static unsafe ISurface<MaskSurface> FromTransparency(ISurface<ImageSurface> source)
         {
             int width = source.Width;
             int height = source.Height;
 
-            MaskSurface mask = new PDNMaskSurface(width, height, ((IWICBitmapSurface)source).ImagingFactory);
+            MaskSurface mask = new ShimMaskSurface(width, height);
 
             using (ISurfaceLock sourceLock = source.Lock(SurfaceLockMode.Read))
             using (ISurfaceLock maskLock = mask.Lock(SurfaceLockMode.Write))

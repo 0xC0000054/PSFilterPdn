@@ -10,7 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PaintDotNet;
+using PSFilterLoad.PSApi.Imaging;
 
 namespace PSFilterLoad.PSApi
 {
@@ -25,10 +25,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The filter source image.
         /// </value>
-        Surface Source
-        {
-            get;
-        }
+        ISurface<ImageSurface> Source { get; }
 
         /// <summary>
         /// Gets the filter destination image.
@@ -36,10 +33,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The filter destination image.
         /// </value>
-        Surface Destination
-        {
-            get;
-        }
+        ISurface<ImageSurface> Destination { get; }
 
         /// <summary>
         /// Gets the filter mask image.
@@ -47,9 +41,6 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The filter mask image.
         /// </value>
-        MaskSurface Mask
-        {
-            get;
-        }
+        ISurface<MaskSurface> Mask { get; }
     }
 }

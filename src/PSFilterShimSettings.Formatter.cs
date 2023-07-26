@@ -32,6 +32,8 @@ namespace PSFilterPdn
                 string destinationImagePath = reader.ReadString()!;
                 int primaryColor = reader.ReadInt32();
                 int secondaryColor = reader.ReadInt32();
+                double dpiX = reader.ReadDouble();
+                double dpiY = reader.ReadDouble();
                 string? selectionMaskPath = reader.ReadString();
                 string? parameterDataPath = reader.ReadString();
                 string? pseudoResourcePath = reader.ReadString();
@@ -47,6 +49,8 @@ namespace PSFilterPdn
                                                 destinationImagePath,
                                                 primaryColor,
                                                 secondaryColor,
+                                                dpiX,
+                                                dpiY,
                                                 selectionMaskPath,
                                                 parameterDataPath,
                                                 pseudoResourcePath,
@@ -63,6 +67,8 @@ namespace PSFilterPdn
                 writer.Write(value.DestinationImagePath);
                 writer.Write(value.PrimaryColor);
                 writer.Write(value.SecondaryColor);
+                writer.Write(value.DpiX);
+                writer.Write(value.DpiY);
                 writer.Write(value.SelectionMaskPath);
                 writer.Write(value.ParameterDataPath);
                 writer.Write(value.PseudoResourcePath);

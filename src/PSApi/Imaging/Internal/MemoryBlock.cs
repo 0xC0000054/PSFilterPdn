@@ -1,16 +1,29 @@
-﻿using System;
+﻿/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// https://github.com/0xC0000054/PSFilterPdn
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2023 Nicholas Hayes
+//
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
 
-namespace PSFilterLoad.PSApi
+// Adapted from:
+/////////////////////////////////////////////////////////////////////////////////
+// Paint.NET                                                                   //
+// Copyright (C) dotPDN LLC, Rick Brewster, Tom Jackson, and contributors.     //
+// Portions Copyright (C) Microsoft Corporation. All Rights Reserved.          //
+// See src/Resources/Files/License.txt for full licensing and attribution      //
+// details.                                                                    //
+// .                                                                           //
+/////////////////////////////////////////////////////////////////////////////////
+
+using System;
+
+namespace PSFilterLoad.PSApi.Imaging.Internal
 {
-    /////////////////////////////////////////////////////////////////////////////////
-    // Paint.NET                                                                   //
-    // Copyright (C) dotPDN LLC, Rick Brewster, Tom Jackson, and contributors.     //
-    // Portions Copyright (C) Microsoft Corporation. All Rights Reserved.          //
-    // See src/Resources/Files/License.txt for full licensing and attribution      //
-    // details.                                                                    //
-    // .                                                                           //
-    /////////////////////////////////////////////////////////////////////////////////
-
     internal unsafe sealed class MemoryBlock : IDisposable
     {
         // blocks this size or larger are allocated with AllocateLarge (VirtualAlloc) instead of Allocate (HeapAlloc)
@@ -28,7 +41,7 @@ namespace PSFilterLoad.PSApi
 
         private bool disposed = false;
 
-        public MemoryBlock Parent => this.parentBlock;
+        public MemoryBlock Parent => parentBlock;
 
         public long Length
         {
@@ -115,7 +128,7 @@ namespace PSFilterLoad.PSApi
                 throw new ObjectDisposedException("MemoryBlock");
             }
 
-            MemoryBlock dupe = new(this.length);
+            MemoryBlock dupe = new(length);
             CopyBlock(dupe, 0, this, 0, length);
             return dupe;
         }
@@ -131,10 +144,10 @@ namespace PSFilterLoad.PSApi
                 throw new ArgumentOutOfRangeException(nameof(bytes), bytes, "Bytes must be greater than zero");
             }
 
-            this.length = bytes;
-            this.parentBlock = null;
-            this.voidStar = Allocate(bytes, zeroFill).ToPointer();
-            this.valid = true;
+            length = bytes;
+            parentBlock = null;
+            voidStar = Allocate(bytes, zeroFill).ToPointer();
+            valid = true;
         }
 
         /// <summary>
@@ -151,8 +164,8 @@ namespace PSFilterLoad.PSApi
             this.parentBlock = parentBlock;
             byte* bytePointer = (byte*)parentBlock.VoidStar;
             bytePointer += offset;
-            this.voidStar = (void*)bytePointer;
-            this.valid = true;
+            voidStar = (void*)bytePointer;
+            valid = true;
             this.length = length;
         }
 
@@ -177,11 +190,11 @@ namespace PSFilterLoad.PSApi
                 {
                 }
 
-                if (this.valid && parentBlock == null)
+                if (valid && parentBlock == null)
                 {
-                    if (this.length >= largeBlockThreshold)
+                    if (length >= largeBlockThreshold)
                     {
-                        Memory.FreeLarge(new IntPtr(voidStar), (ulong)this.length);
+                        Memory.FreeLarge(new IntPtr(voidStar), (ulong)length);
                     }
                     else
                     {
@@ -191,7 +204,7 @@ namespace PSFilterLoad.PSApi
 
                 parentBlock = null;
                 voidStar = null;
-                this.valid = false;
+                valid = false;
             }
         }
 

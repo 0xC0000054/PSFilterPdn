@@ -18,6 +18,8 @@ using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
 using PSFilterLoad.PSApi;
 using PSFilterLoad.PSApi.Diagnostics;
+using PSFilterLoad.PSApi.Imaging;
+using PSFilterLoad.PSApi.Imaging.Internal;
 using PSFilterPdn.Controls;
 using PSFilterPdn.EnableInfo;
 using PSFilterPdn.Properties;
@@ -87,10 +89,10 @@ namespace PSFilterPdn
         private readonly IImagingFactory imagingFactory;
         private readonly DocumentDpi documentDpi;
         private readonly DocumentMetadataProvider documentMetadataProvider;
-        private IEffectInputBitmap<ColorBgra32> sourceBitmap;
+        private ImageSurface sourceBitmap;
         private MaskSurface selectionMask;
-        private ColorBgra32 primaryColor;
-        private ColorBgra32 secondaryColor;
+        private ColorRgb24 primaryColor;
+        private ColorRgb24 secondaryColor;
         private bool environmentInitialized;
 
         private IBitmap<ColorBgra32> destSurface;
@@ -724,8 +726,7 @@ namespace PSFilterPdn
             }
         }
 
-        private bool Run32BitFilterProxy(IEffectEnvironment environment,
-                                         FilterThreadData data,
+        private bool Run32BitFilterProxy(FilterThreadData data,
                                          out PSFilterShimErrorInfo errorInfo)
         {
             // Check that PSFilterShim exists first thing and abort if it does not.
@@ -744,7 +745,7 @@ namespace PSFilterPdn
             string descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
             string selectionMaskFileName = null;
 
-            PSFilterShimImage.Save(srcFileName, sourceBitmap, documentDpi);
+            PSFilterShimImage.Save(srcFileName, sourceBitmap);
 
             if ((filterParameters != null) && filterParameters.TryGetValue(data.PluginData, out ParameterData parameterData))
             {
@@ -765,7 +766,7 @@ namespace PSFilterPdn
 
             try
             {
-                selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment);
+                selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
 
                 if (selectionMask != null)
                 {
@@ -785,6 +786,8 @@ namespace PSFilterPdn
                                                 destFileName,
                                                 new ColorRgb24(Environment.PrimaryColor).ToWin32Color(),
                                                 new ColorRgb24(Environment.SecondaryColor).ToWin32Color(),
+                                                documentDpi.X,
+                                                documentDpi.Y,
                                                 selectionMaskFileName,
                                                 parameterDataFileName,
                                                 resourceDataFileName,
@@ -914,10 +917,10 @@ namespace PSFilterPdn
 
         private void InitializeEnvironment()
         {
-            sourceBitmap = Environment.GetSourceBitmapBgra32();
-            primaryColor = Environment.PrimaryColor;
-            secondaryColor = Environment.SecondaryColor;
-            selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment);
+            sourceBitmap = new WICBitmapSurface<ColorBgra32>(Environment.GetSourceBitmapBgra32(), imagingFactory);
+            primaryColor = new ColorRgb24(Environment.PrimaryColor);
+            secondaryColor = new ColorRgb24(Environment.SecondaryColor);
+            selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
         }
 
         private void runFilterBtn_Click(object sender, EventArgs e)
@@ -963,7 +966,7 @@ namespace PSFilterPdn
                 {
                     runWith32BitShim = true;
 
-                    if (!Run32BitFilterProxy(Environment, threadData, out PSFilterShimErrorInfo error))
+                    if (!Run32BitFilterProxy(threadData, out PSFilterShimErrorInfo error))
                     {
                         if (error != null)
                         {
@@ -986,7 +989,10 @@ namespace PSFilterPdn
                                                                          nameof(LoadPsFilter));
 
                         PluginUISettings pluginUISettings = new(highDpiMode);
+                        DisplayPixelsSurfaceFactory displayPixelsSurfaceFactory = new(imagingFactory);
+
                         using (LoadPsFilter lps = new(sourceBitmap,
+                                                      takeOwnershipOfSource: false,
                                                       selectionMask,
                                                       takeOwnershipOfSelectionMask: false,
                                                       primaryColor,
@@ -995,6 +1001,7 @@ namespace PSFilterPdn
                                                       documentDpi.Y,
                                                       threadData.ParentWindowHandle,
                                                       documentMetadataProvider,
+                                                      displayPixelsSurfaceFactory,
                                                       logger,
                                                       pluginUISettings))
                         {
@@ -2000,7 +2007,7 @@ namespace PSFilterPdn
                 }
 
                 SizeInt32 canvasSize = sourceBitmap.Size;
-                Lazy<bool> lazyHasTransparency = new(() => HasTransparentPixels(sourceBitmap));
+                Lazy<bool> lazyHasTransparency = new(() => sourceBitmap.HasTransparency());
 
                 HostState hostState = new()
                 {
@@ -2027,33 +2034,6 @@ namespace PSFilterPdn
                                                                 hostState);
                     }
                 }
-            }
-
-            static unsafe bool HasTransparentPixels(IEffectInputBitmap<ColorBgra32> bitmap)
-            {
-                using (IBitmapLock<ColorBgra32> bitmapLock = bitmap.Lock(bitmap.Bounds()))
-                {
-                    RegionPtr<ColorBgra32> region = bitmapLock.AsRegionPtr();
-
-                    foreach (RegionRowPtr<ColorBgra32> row in region.Rows)
-                    {
-                        ColorBgra32* ptr = row.Ptr;
-                        ColorBgra32* ptrEnd = row.EndPtr;
-
-                        while (ptr < ptrEnd)
-                        {
-                            if (ptr->A < 255)
-                            {
-                                return true;
-                            }
-
-                            ptr++;
-                        }
-                    }
-
-                }
-
-                return false;
             }
         }
 

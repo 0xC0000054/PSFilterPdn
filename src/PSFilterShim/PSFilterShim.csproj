@@ -38,6 +38,7 @@
     <Compile Include="..\MessagePackSerializerUtil.cs" Link="MessagePackSerializerUtil.cs" />
     <Compile Include="..\PSApi\ColorConversion\**\*.cs" Link="PSApi\ColorConversion\%(RecursiveDir)%(FileName)%(Extension)" />
     <Compile Include="..\PSApi\Diagnostics\**\*.cs" Link="PSApi\Diagnostics\%(RecursiveDir)%(FileName)%(Extension)" />
+    <Compile Include="..\PSApi\Imaging\*.cs" Link="PSApi\Imaging\%(FileName)%(Extension)" />
     <Compile Include="..\PSApi\Interop\NativeConstants.cs" Link="PSApi\Interop\NativeConstants.cs" />
     <Compile Include="..\PSApi\Interop\NativeStructs.cs" Link="PSApi\Interop\NativeStructs.cs" />
     <Compile Include="..\PSApi\Interop\SafeNativeMethods.cs" Link="PSApi\Interop\SafeNativeMethods.cs" />
@@ -50,6 +51,7 @@
     <Compile Include="..\PSApi\BufferProcs.cs" Link="PSApi\BufferProcs.cs" />
     <Compile Include="..\PSApi\BufferSuite.cs" Link="PSApi\BufferSuite.cs" />
     <Compile Include="..\PSApi\ChannelPortsProcs.cs" Link="PSApi\ChannelPortsProcs.cs" />
+    <Compile Include="..\PSApi\ChannelPortsSuite.cs" Link="PSApi\ChannelPortsSuite.cs" />
     <Compile Include="..\PSApi\ColorPickerDialog.cs" Link="PSApi\ColorPickerDialog.cs" />
     <Compile Include="..\PSApi\ColorPickerService.cs" Link="PSApi\ColorPickerService.cs" />
     <Compile Include="..\PSApi\ColorServicesConvert.cs" Link="PSApi\ColorServicesConvert.cs" />
@@ -87,6 +89,7 @@
     <Compile Include="..\PSApi\IPICASuiteAllocator.cs" Link="PSApi\IPICASuiteAllocator.cs" />
     <Compile Include="..\PSApi\IPICASuiteDataProvider.cs" Link="PSApi\IPICASuiteDataProvider.cs" />
     <Compile Include="..\PSApi\ISPBasicSuiteProvider.cs" Link="PSApi\ISPBasicSuiteProvider.cs" />
+    <Compile Include="..\PSApi\LoadPsFilter.cs" Link="PSApi\LoadPsFilter.cs" />
     <Compile Include="..\PSApi\Memory.cs" Link="PSApi\Memory.cs" />
     <Compile Include="..\PSApi\ParameterData.cs" Link="PSApi\ParameterData.cs" />
     <Compile Include="..\PSApi\ParameterData.Formatter.cs" Link="PSApi\ParameterData.Formatter.cs" />
@@ -121,7 +124,6 @@
     <Compile Include="..\PSApi\UnsupportedPICASuiteVersionException.cs" Link="PSApi\UnsupportedPICASuiteVersionException.cs" />
     <Compile Include="..\PSApi\VPoint.cs" Link="PSApi\VPoint.cs" />
     <Compile Include="..\PSApi\VRect.cs" Link="PSApi\VRect.cs" />
-    <Compile Include="..\PSFilterShimImageFormat.cs" Link="PSFilterShimImageFormat.cs" />
     <Compile Include="..\PSFilterShimImageHeader.cs" Link="PSFilterShimImageHeader.cs" />
     <Compile Include="..\PSFilterShimResolver.cs" Link="PSFilterShimResolver.cs" />
     <Compile Include="..\PSFilterShimSettings.cs" Link="PSFilterShimSettings.cs" />

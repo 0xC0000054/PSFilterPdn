@@ -18,6 +18,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using PSFilterLoad.PSApi;
 using PSFilterLoad.PSApi.Diagnostics;
+using PSFilterLoad.PSApi.Imaging;
 using PSFilterPdn;
 using PSFilterShim.Interop;
 using PSFilterShim.Properties;
@@ -341,16 +342,35 @@ namespace PSFilterShim
                 }
 
                 IPluginApiLogWriter? logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(pdata, settings.LogFilePath);
+                ImageSurface? source = null;
+                MaskSurface? selectionMask = null;
 
                 try
                 {
+                    source = PSFilterShimImage.Load(settings.SourceImagePath);
+                    selectionMask = PSFilterShimImage.LoadSelectionMask(settings.SelectionMaskPath);
+
                     IPluginApiLogger logger = PluginApiLogger.Create(logWriter,
                                                                      () => PluginApiLogCategories.Default,
                                                                      nameof(LoadPsFilter));
 
                     DocumentMetadataProvider documentMetadataProvider = new(pipeClient);
+                    ColorRgb24 primaryColor = ColorRgb24.FromWin32Color(settings.PrimaryColor);
+                    ColorRgb24 secondaryColor = ColorRgb24.FromWin32Color(settings.SecondaryColor);
 
-                    using (LoadPsFilter lps = new(settings, logger, documentMetadataProvider, hwnd))
+                    using (LoadPsFilter lps = new(source,
+                                                  takeOwnershipOfSource: true,
+                                                  selectionMask,
+                                                  takeOwnershipOfSelectionMask: true,
+                                                  primaryColor,
+                                                  secondaryColor,
+                                                  settings.DpiX,
+                                                  settings.DpiY,
+                                                  hwnd,
+                                                  documentMetadataProvider,
+                                                  DisplayPixelsSurfaceFactory.Instance,
+                                                  logger,
+                                                  settings.PluginUISettings))
                     {
                         lps.SetAbortCallback(pipeClient.AbortFilter);
 

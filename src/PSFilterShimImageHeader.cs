@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Imaging;
 using System;
 using System.Buffers.Binary;
 using System.IO;
@@ -25,10 +26,8 @@ namespace PSFilterPdn
 #pragma warning disable IDE0032 // Use auto property
         private readonly int width;
         private readonly int height;
-        private readonly PSFilterShimImageFormat format;
+        private readonly SurfacePixelFormat format;
         private readonly int stride;
-        private readonly double dpiX;
-        private readonly double dpiY;
 #pragma warning restore IDE0032 // Use auto property
 
         public PSFilterShimImageHeader(Stream stream)
@@ -47,57 +46,46 @@ namespace PSFilterPdn
 
             fileVersion = ReadInt32LittleEndian(stream);
 
-            if (fileVersion != 2)
+            if (fileVersion != 3)
             {
                 throw new FormatException("The PSFilterShimImage has an unsupported file version.");
             }
 
             width = ReadInt32LittleEndian(stream);
             height = ReadInt32LittleEndian(stream);
-            format = (PSFilterShimImageFormat)ReadInt32LittleEndian(stream);
+            format = (SurfacePixelFormat)ReadInt32LittleEndian(stream);
             stride = ReadInt32LittleEndian(stream);
-            dpiX = ReadDoubleLittleEndian(stream);
-            dpiY = ReadDoubleLittleEndian(stream);
         }
 
         public PSFilterShimImageHeader(int width,
                                        int height,
-                                       PSFilterShimImageFormat format,
-                                       double dpiX,
-                                       double dpiY)
+                                       SurfacePixelFormat format)
         {
-            fileVersion = 2;
+            fileVersion = 3;
             this.width = width;
             this.height = height;
             this.format = format;
 
             switch (format)
             {
-                case PSFilterShimImageFormat.Bgra32:
+                case SurfacePixelFormat.Bgra32:
                     stride = checked(width * 4);
                     break;
-                case PSFilterShimImageFormat.Alpha8:
+                case SurfacePixelFormat.Gray8:
                     stride = width;
                     break;
                 default:
-                    throw new ArgumentException($"Unsupported {nameof(PSFilterShimImageFormat)} value: {format}.");
+                    throw new ArgumentException($"Unsupported {nameof(SurfacePixelFormat)} value: {format}.");
             }
-
-            this.dpiX = dpiX;
-            this.dpiY = dpiY;
         }
 
         public int Width => width;
 
         public int Height => height;
 
-        public PSFilterShimImageFormat Format => format;
+        public SurfacePixelFormat Format => format;
 
         public int Stride => stride;
-
-        public double DpiX => dpiX;
-
-        public double DpiY => dpiY;
 
         public long GetTotalFileSize()
         {
@@ -119,8 +107,6 @@ namespace PSFilterPdn
             WriteInt32LittleEndian(stream, height);
             WriteInt32LittleEndian(stream, (int)format);
             WriteInt32LittleEndian(stream, stride);
-            WriteDoubleLittleEndian(stream, dpiX);
-            WriteDoubleLittleEndian(stream, dpiY);
         }
 
         private static long GetHeaderSize()
@@ -131,20 +117,8 @@ namespace PSFilterPdn
             headerSize += sizeof(int); // height
             headerSize += sizeof(int); // format
             headerSize += sizeof(int); // stride
-            headerSize += sizeof(double); // dpiX
-            headerSize += sizeof(double); // dpiY
 
             return headerSize;
-        }
-
-        [SkipLocalsInit]
-        private static unsafe double ReadDoubleLittleEndian(Stream stream)
-        {
-            Span<byte> bytes = stackalloc byte[sizeof(double)];
-
-            stream.ReadExactly(bytes);
-
-            return BinaryPrimitives.ReadDoubleLittleEndian(bytes);
         }
 
         [SkipLocalsInit]
@@ -155,16 +129,6 @@ namespace PSFilterPdn
             stream.ReadExactly(bytes);
 
             return BinaryPrimitives.ReadInt32LittleEndian(bytes);
-        }
-
-        [SkipLocalsInit]
-        private static unsafe void WriteDoubleLittleEndian(Stream stream, double value)
-        {
-            Span<byte> bytes = stackalloc byte[sizeof(double)];
-
-            BinaryPrimitives.WriteDoubleLittleEndian(bytes, value);
-
-            stream.Write(bytes);
         }
 
         [SkipLocalsInit]

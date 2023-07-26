@@ -12,7 +12,7 @@
 
 using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
-using PSFilterLoad.PSApi;
+using PSFilterLoad.PSApi.Imaging;
 using System;
 using System.Buffers;
 using System.IO;
@@ -40,7 +40,7 @@ namespace PSFilterPdn
             {
                 PSFilterShimImageHeader header = new(stream);
 
-                if (header.Format != PSFilterShimImageFormat.Bgra32)
+                if (header.Format != SurfacePixelFormat.Bgra32)
                 {
                     throw new InvalidOperationException("This method requires an image that uses the Bgra32 format.");
                 }
@@ -68,7 +68,7 @@ namespace PSFilterPdn
             return bitmap;
         }
 
-        public static void Save(string path, IBitmapSource<ColorBgra32> bitmap, DocumentDpi documentDpi)
+        public static void Save(string path, IBitmapSource<ColorBgra32> bitmap)
         {
             if (bitmap is null)
             {
@@ -79,9 +79,7 @@ namespace PSFilterPdn
 
             PSFilterShimImageHeader header = new(bitmapSize.Width,
                                                  bitmapSize.Height,
-                                                 PSFilterShimImageFormat.Bgra32,
-                                                 documentDpi.X,
-                                                 documentDpi.Y);
+                                                 SurfacePixelFormat.Bgra32);
             FileStreamOptions options = new()
             {
                 Mode = FileMode.Create,
@@ -124,6 +122,45 @@ namespace PSFilterPdn
             }
         }
 
+        public static unsafe void Save(string path, ImageSurface bitmap)
+        {
+            if (bitmap is null)
+            {
+                throw new ArgumentNullException(nameof(bitmap));
+            }
+
+            SizeInt32 bitmapSize = bitmap.Size;
+
+            PSFilterShimImageHeader header = new(bitmapSize.Width,
+                                                 bitmapSize.Height,
+                                                 bitmap.Format);
+            FileStreamOptions options = new()
+            {
+                Mode = FileMode.Create,
+                Access = FileAccess.Write,
+                Share = FileShare.None,
+                Options = FileOptions.SequentialScan,
+                PreallocationSize = header.GetTotalFileSize(),
+            };
+
+            using (FileStream stream = new(path, options))
+            {
+                header.Save(stream);
+
+                using (ISurfaceLock bitmapLock = bitmap.Lock(SurfaceLockMode.Read))
+                {
+                    int bufferStride = header.Stride;
+
+                    for (int y = 0; y < header.Height; y++)
+                    {
+                        ReadOnlySpan<byte> pixels = new(bitmapLock.GetRowPointerUnchecked(y), bufferStride);
+
+                        stream.Write(pixels);
+                    }
+                }
+            }
+        }
+
         public static void SaveSelectionMask(string path, MaskSurface surface)
         {
             if (surface is null)
@@ -133,9 +170,7 @@ namespace PSFilterPdn
 
             PSFilterShimImageHeader header = new(surface.Width,
                                                  surface.Height,
-                                                 PSFilterShimImageFormat.Alpha8,
-                                                 96.0,
-                                                 96.0);
+                                                 SurfacePixelFormat.Gray8);
 
             FileStreamOptions options = new()
             {
@@ -154,11 +189,14 @@ namespace PSFilterPdn
 
                 unsafe
                 {
-                    for (int y = 0; y < header.Height; y++)
+                    using (ISurfaceLock maskLock = surface.Lock(SurfaceLockMode.Read))
                     {
-                        byte* src = surface.GetRowAddressUnchecked(y);
+                        for (int y = 0; y < header.Height; y++)
+                        {
+                            byte* src = maskLock.GetRowPointerUnchecked(y);
 
-                        stream.Write(new ReadOnlySpan<byte>(src, rowLengthInBytes));
+                            stream.Write(new ReadOnlySpan<byte>(src, rowLengthInBytes));
+                        }
                     }
                 }
             }

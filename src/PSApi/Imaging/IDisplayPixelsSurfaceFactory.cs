@@ -10,11 +10,12 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-namespace PSFilterPdn
+#nullable enable
+
+namespace PSFilterLoad.PSApi.Imaging
 {
-    internal enum PSFilterShimImageFormat : int
+    internal interface IDisplayPixelsSurfaceFactory
     {
-        Bgra32,
-        Alpha8
+        public DisplayPixelsSurface Create(int width, int height, bool hasTransparency);
     }
 }
