@@ -7,6 +7,7 @@ bgra
 bicubic
 cmyk
 config
+coord
 cust
 desc
 deserialize
