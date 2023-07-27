@@ -19,25 +19,25 @@ using System;
 
 namespace PSFilterLoad.PSApi.Imaging
 {
-    internal sealed class DisplayPixelsSurfaceFactory : IDisplayPixelsSurfaceFactory
+    internal sealed class SurfaceFactory : ISurfaceFactory
     {
         private readonly IImagingFactory imagingFactory;
 
-        public DisplayPixelsSurfaceFactory(IServiceProvider serviceProvider)
+        public SurfaceFactory(IServiceProvider serviceProvider)
         {
             ArgumentNullException.ThrowIfNull(serviceProvider, nameof(serviceProvider));
 
             imagingFactory = serviceProvider.GetService<IImagingFactory>() ?? throw new InvalidOperationException("Failed to get the WIC factory.");
         }
 
-        public DisplayPixelsSurfaceFactory(IImagingFactory imagingFactory)
+        public SurfaceFactory(IImagingFactory imagingFactory)
         {
             ArgumentNullException.ThrowIfNull(imagingFactory, nameof(imagingFactory));
 
             this.imagingFactory = imagingFactory;
         }
 
-        public DisplayPixelsSurface Create(int width, int height, bool hasTransparency)
+        public DisplayPixelsSurface CreateDisplayPixelsSurface(int width, int height, bool hasTransparency)
         {
             DisplayPixelsSurface surface;
 
@@ -51,6 +51,34 @@ namespace PSFilterLoad.PSApi.Imaging
             }
 
             return surface;
+        }
+
+        public ImageSurface CreateImageSurface(int width, int height, SurfacePixelFormat format)
+        {
+            ImageSurface surface;
+
+            switch (format)
+            {
+                case SurfacePixelFormat.Bgra32:
+                    surface = new WICBitmapSurface<ColorBgra32>(width, height, imagingFactory);
+                    break;
+                case SurfacePixelFormat.Bgr24:
+                    surface = new WICBitmapSurface<ColorBgr24>(width, height, imagingFactory);
+                    break;
+                case SurfacePixelFormat.Gray8:
+                    surface = new WICBitmapSurface<ColorAlpha8>(width, height, imagingFactory);
+                    break;
+                case SurfacePixelFormat.Unknown:
+                default:
+                    throw new InvalidOperationException($"Unsupported {nameof(SurfacePixelFormat)}: {format}.");
+            }
+
+            return surface;
+        }
+
+        public MaskSurface CreateMaskSurface(int width, int height)
+        {
+            return new PDNMaskSurface(width, height, imagingFactory);
         }
     }
 }

@@ -14,8 +14,12 @@
 
 namespace PSFilterLoad.PSApi.Imaging
 {
-    internal interface IDisplayPixelsSurfaceFactory
+    internal interface ISurfaceFactory
     {
-        public DisplayPixelsSurface Create(int width, int height, bool hasTransparency);
+        public DisplayPixelsSurface CreateDisplayPixelsSurface(int width, int height, bool hasTransparency);
+
+        public ImageSurface CreateImageSurface(int width, int height, SurfacePixelFormat format);
+
+        public MaskSurface CreateMaskSurface(int width, int height);
     }
 }

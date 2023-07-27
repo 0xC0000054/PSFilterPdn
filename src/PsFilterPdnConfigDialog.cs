@@ -989,7 +989,7 @@ namespace PSFilterPdn
                                                                          nameof(LoadPsFilter));
 
                         PluginUISettings pluginUISettings = new(highDpiMode);
-                        DisplayPixelsSurfaceFactory displayPixelsSurfaceFactory = new(imagingFactory);
+                        SurfaceFactory displayPixelsSurfaceFactory = new(imagingFactory);
 
                         using (LoadPsFilter lps = new(sourceBitmap,
                                                       takeOwnershipOfSource: false,

@@ -20,7 +20,7 @@ using System.Drawing;
 
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
-    internal sealed unsafe class WICBitmapSurface<TPixel> : ImageSurface, IWICBitmapSurface where TPixel : unmanaged, INaturalPixelInfo
+    internal sealed unsafe class WICBitmapSurface<TPixel> : ImageSurface where TPixel : unmanaged, INaturalPixelInfo
     {
         private readonly IBitmap<TPixel> bitmap;
         private readonly IImagingFactory imagingFactory;
@@ -64,7 +64,7 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
             bitmap = bitmapSource.ToBitmap();
         }
 
-        public WICBitmapSurface(int width, int height, IImagingFactory imagingFactory, bool takeOwnershipOfImagingFactory = false)
+        public WICBitmapSurface(int width, int height, IImagingFactory imagingFactory)
         {
             ArgumentNullException.ThrowIfNull(imagingFactory, nameof(imagingFactory));
 
@@ -145,8 +145,6 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
         public override SurfacePixelFormat Format { get; }
 
         public override bool SupportsTransparency => default(TPixel).SupportsTransparency;
-
-        IImagingFactory IWICBitmapSurface.ImagingFactory => imagingFactory;
 
         public override WICBitmapSurface<TPixel> Clone()
         {

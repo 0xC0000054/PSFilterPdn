@@ -368,10 +368,14 @@ namespace PSFilterShim
                                                   settings.DpiY,
                                                   hwnd,
                                                   documentMetadataProvider,
-                                                  DisplayPixelsSurfaceFactory.Instance,
+                                                  SurfaceFactory.Instance,
                                                   logger,
                                                   settings.PluginUISettings))
                     {
+                        // These items are now owned by the LoadPsFilter instance.
+                        source = null;
+                        selectionMask = null;
+
                         lps.SetAbortCallback(pipeClient.AbortFilter);
 
                         if (!settings.RepeatEffect)
@@ -445,6 +449,8 @@ namespace PSFilterShim
                     {
                         disposable.Dispose();
                     }
+                    source?.Dispose();
+                    selectionMask?.Dispose();
                 }
             }
             catch (Exception ex)

@@ -241,7 +241,7 @@ namespace PSFilterPdn
                 DocumentMetadataProvider documentMetadataProvider = new(Environment.Document);
                 source = new WICBitmapSurface<ColorBgra32>(Environment.GetSourceBitmapBgra32(), Services);
                 selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
-                DisplayPixelsSurfaceFactory displayPixelsSurfaceFactory = new(Services);
+                SurfaceFactory displayPixelsSurfaceFactory = new(Services);
 
                 using (LoadPsFilter lps = new(source,
                                               takeOwnershipOfSource: true,

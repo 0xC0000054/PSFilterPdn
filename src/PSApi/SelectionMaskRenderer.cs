@@ -38,37 +38,5 @@ namespace PSFilterLoad.PSApi
 
             return selectionMask;
         }
-
-        public static unsafe Imaging.ISurface<MaskSurface> FromFloatingSelection(Imaging.ISurface<ImageSurface> source)
-        {
-            int width = source.Width;
-            int height = source.Height;
-
-            MaskSurface mask = new PDNMaskSurface(width, height, ((IWICBitmapSurface)source).ImagingFactory);
-
-            using (ISurfaceLock sourceLock = source.Lock(SurfaceLockMode.Read))
-            using (ISurfaceLock maskLock = mask.Lock(SurfaceLockMode.Write))
-            {
-                int sourceChannelCount = source.ChannelCount;
-                for (int y = 0; y < height; y++)
-                {
-                    byte* src = sourceLock.GetRowPointerUnchecked(y);
-                    byte* dst = maskLock.GetRowPointerUnchecked(y);
-
-                    for (int x = 0; x < width; x++)
-                    {
-                        if (src[3] > 0)
-                        {
-                            *dst = 255;
-                        }
-
-                        src += sourceChannelCount;
-                        dst++;
-                    }
-                }
-            }
-
-            return mask;
-        }
     }
 }

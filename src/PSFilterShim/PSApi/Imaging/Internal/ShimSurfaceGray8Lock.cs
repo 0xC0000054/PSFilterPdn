@@ -14,9 +14,9 @@
 
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
-    internal sealed unsafe class ShimMaskSurfaceLock : Disposable, ISurfaceLock
+    internal sealed unsafe class ShimSurfaceGray8Lock : Disposable, ISurfaceLock
     {
-        public ShimMaskSurfaceLock(void* buffer, int bufferStride, int width, int height)
+        public ShimSurfaceGray8Lock(void* buffer, int bufferStride, int width, int height)
         {
             Buffer = buffer;
             BufferStride = bufferStride;

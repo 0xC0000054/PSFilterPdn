@@ -83,7 +83,7 @@ namespace PSFilterLoad.PSApi
         private ISurface<MaskSurface> mask;
         private ISurface<ImageSurface> tempSurface;
         private ISurface<MaskSurface> tempMask;
-        private readonly IDisplayPixelsSurfaceFactory displayPixelsSurfaceFactory;
+        private readonly ISurfaceFactory surfaceFactory;
         private DisplayPixelsSurface displaySurface;
         private Bitmap checkerBoardBitmap;
 
@@ -229,6 +229,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="dpiY">The vertical document resolution in pixels-per-inch.</param>
         /// <param name="owner">The handle of the parent window.</param>
         /// <param name="documentMetadataProvider">The document meta data provider.</param>
+        /// <param name="surfaceFactory">The surface factory.</param>
         /// <param name="pluginUISettings">The user interface settings for plug-in created dialogs.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="source"/> is null.
@@ -247,13 +248,13 @@ namespace PSFilterLoad.PSApi
                                      double dpiY,
                                      IntPtr owner,
                                      IDocumentMetadataProvider documentMetadataProvider,
-                                     IDisplayPixelsSurfaceFactory displayPixelsSurfaceFactory,
+                                     ISurfaceFactory surfaceFactory,
                                      IPluginApiLogger logger,
                                      PluginUISettings pluginUISettings)
         {
             ArgumentNullException.ThrowIfNull(source);
-            ArgumentNullException.ThrowIfNull(displayPixelsSurfaceFactory);
             ArgumentNullException.ThrowIfNull(documentMetadataProvider);
+            ArgumentNullException.ThrowIfNull(surfaceFactory);
             ArgumentNullException.ThrowIfNull(logger);
 
             inputHandling = FilterDataHandling.None;
@@ -323,7 +324,7 @@ namespace PSFilterLoad.PSApi
             this.dpiX = dpiX;
             this.dpiY = dpiY;
             this.logger = logger;
-            this.displayPixelsSurfaceFactory = displayPixelsSurfaceFactory;
+            this.surfaceFactory = surfaceFactory;
             this.documentMetadataProvider = documentMetadataProvider;
 
             readImageDocument = new ReadImageDocument(this.source.Width, this.source.Height, dpiX, dpiY);
@@ -2455,7 +2456,7 @@ namespace PSFilterLoad.PSApi
                     displaySurface = null;
                 }
 
-                displaySurface = displayPixelsSurfaceFactory.Create(width, height, haveMask);
+                displaySurface = surfaceFactory.CreateDisplayPixelsSurface(width, height, haveMask);
             }
         }
 
@@ -2692,7 +2693,32 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void DrawFloatingSelectionMask()
         {
-            mask = SelectionMaskRenderer.FromFloatingSelection(source);
+            int width = source.Width;
+            int height = source.Height;
+
+            mask = surfaceFactory.CreateMaskSurface(width, height);
+
+            using (ISurfaceLock sourceLock = source.Lock(SurfaceLockMode.Read))
+            using (ISurfaceLock maskLock = mask.Lock(SurfaceLockMode.Write))
+            {
+                int sourceChannelCount = source.ChannelCount;
+                for (int y = 0; y < height; y++)
+                {
+                    byte* src = sourceLock.GetRowPointerUnchecked(y);
+                    byte* dst = maskLock.GetRowPointerUnchecked(y);
+
+                    for (int x = 0; x < width; x++)
+                    {
+                        if (src[3] > 0)
+                        {
+                            *dst = 255;
+                        }
+
+                        src += sourceChannelCount;
+                        dst++;
+                    }
+                }
+            }
         }
 
         private void HostProc(short selector, IntPtr data)
