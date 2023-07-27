@@ -39,7 +39,7 @@ namespace PSFilterLoad.PSApi
             return selectionMask;
         }
 
-        public static unsafe Imaging.ISurface<MaskSurface> FromTransparency(Imaging.ISurface<ImageSurface> source)
+        public static unsafe Imaging.ISurface<MaskSurface> FromFloatingSelection(Imaging.ISurface<ImageSurface> source)
         {
             int width = source.Width;
             int height = source.Height;

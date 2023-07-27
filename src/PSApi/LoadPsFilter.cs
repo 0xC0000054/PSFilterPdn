@@ -2692,7 +2692,7 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void DrawFloatingSelectionMask()
         {
-            mask = SelectionMaskRenderer.FromTransparency(source);
+            mask = SelectionMaskRenderer.FromFloatingSelection(source);
         }
 
         private void HostProc(short selector, IntPtr data)

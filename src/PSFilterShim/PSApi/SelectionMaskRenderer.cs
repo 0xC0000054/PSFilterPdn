@@ -19,7 +19,7 @@ namespace PSFilterLoad.PSApi
 {
     internal static class SelectionMaskRenderer
     {
-        public static unsafe ISurface<MaskSurface> FromTransparency(ISurface<ImageSurface> source)
+        public static unsafe ISurface<MaskSurface> FromFloatingSelection(ISurface<ImageSurface> source)
         {
             int width = source.Width;
             int height = source.Height;
