@@ -2952,21 +2952,21 @@ namespace PSFilterLoad.PSApi
 
             if (iccProfile.Length > 0)
             {
-                filterRecord->iCCprofileData = handleSuite.NewHandle(iccProfile.Length);
+                filterRecord->iccProfileData = handleSuite.NewHandle(iccProfile.Length);
 
-                if (filterRecord->iCCprofileData != Handle.Null)
+                if (filterRecord->iccProfileData != Handle.Null)
                 {
-                    using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(filterRecord->iCCprofileData))
+                    using (HandleSuiteLock handleSuiteLock = handleSuite.LockHandle(filterRecord->iccProfileData))
                     {
                         iccProfile.CopyTo(handleSuiteLock.Data);
-                        filterRecord->iCCprofileSize = iccProfile.Length;
+                        filterRecord->iccProfileSize = iccProfile.Length;
                     }
                 }
             }
             else
             {
-                filterRecord->iCCprofileData = Handle.Null;
-                filterRecord->iCCprofileSize = 0;
+                filterRecord->iccProfileData = Handle.Null;
+                filterRecord->iccProfileSize = 0;
             }
             filterRecord->canUseICCProfiles = 1;
         }
