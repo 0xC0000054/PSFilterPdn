@@ -989,7 +989,7 @@ namespace PSFilterPdn
                                                                          nameof(LoadPsFilter));
 
                         PluginUISettings pluginUISettings = new(highDpiMode);
-                        SurfaceFactory displayPixelsSurfaceFactory = new(imagingFactory);
+                        SurfaceFactory surfaceFactory = new(imagingFactory);
 
                         using (LoadPsFilter lps = new(sourceBitmap,
                                                       takeOwnershipOfSource: false,
@@ -1001,7 +1001,7 @@ namespace PSFilterPdn
                                                       documentDpi.Y,
                                                       threadData.ParentWindowHandle,
                                                       documentMetadataProvider,
-                                                      displayPixelsSurfaceFactory,
+                                                      surfaceFactory,
                                                       logger,
                                                       pluginUISettings))
                         {
