@@ -56,12 +56,7 @@ namespace PSFilterPdn
             get => searchDirectories;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                searchDirectories = value;
+                searchDirectories = value ?? throw new ArgumentNullException(nameof(value));
                 Dirty = true;
             }
         }
