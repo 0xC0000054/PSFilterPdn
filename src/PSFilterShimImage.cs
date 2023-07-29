@@ -85,7 +85,6 @@ namespace PSFilterPdn
                 Mode = FileMode.Create,
                 Access = FileAccess.Write,
                 Share = FileShare.None,
-                Options = FileOptions.SequentialScan,
                 PreallocationSize = header.GetTotalFileSize(),
             };
 
@@ -139,7 +138,6 @@ namespace PSFilterPdn
                 Mode = FileMode.Create,
                 Access = FileAccess.Write,
                 Share = FileShare.None,
-                Options = FileOptions.SequentialScan,
                 PreallocationSize = header.GetTotalFileSize(),
             };
 
@@ -177,7 +175,6 @@ namespace PSFilterPdn
                 Mode = FileMode.Create,
                 Access = FileAccess.Write,
                 Share = FileShare.None,
-                Options = FileOptions.SequentialScan,
                 PreallocationSize = header.GetTotalFileSize(),
             };
 
