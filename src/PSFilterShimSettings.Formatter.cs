@@ -26,12 +26,15 @@ namespace PSFilterPdn
             {
                 options.Security.DepthStep(ref reader);
 
+                var resolver = options.Resolver;
+                IMessagePackFormatter<ColorRgb24> colorFormatter = resolver.GetFormatterWithVerify<ColorRgb24>();
+
                 bool repeatEffect = reader.ReadBoolean();
                 bool showAboutDialog = reader.ReadBoolean();
                 string sourceImagePath = reader.ReadString()!;
                 string destinationImagePath = reader.ReadString()!;
-                int primaryColor = reader.ReadInt32();
-                int secondaryColor = reader.ReadInt32();
+                ColorRgb24 primaryColor = colorFormatter.Deserialize(ref reader, options);
+                ColorRgb24 secondaryColor = colorFormatter.Deserialize(ref reader, options);
                 double dpiX = reader.ReadDouble();
                 double dpiY = reader.ReadDouble();
                 string? selectionMaskPath = reader.ReadString();
@@ -39,7 +42,7 @@ namespace PSFilterPdn
                 string? pseudoResourcePath = reader.ReadString();
                 string? descriptorRegistryPath = reader.ReadString();
                 string? logFilePath = reader.ReadString();
-                PluginUISettings? pluginUISettings = options.Resolver.GetFormatterWithVerify<PluginUISettings?>().Deserialize(ref reader, options);
+                PluginUISettings? pluginUISettings = resolver.GetFormatterWithVerify<PluginUISettings?>().Deserialize(ref reader, options);
 
                 reader.Depth--;
 
@@ -61,12 +64,15 @@ namespace PSFilterPdn
 
             public void Serialize(ref MessagePackWriter writer, PSFilterShimSettings value, MessagePackSerializerOptions options)
             {
+                var resolver = options.Resolver;
+                IMessagePackFormatter<ColorRgb24> colorFormatter = resolver.GetFormatterWithVerify<ColorRgb24>();
+
                 writer.Write(value.RepeatEffect);
                 writer.Write(value.ShowAboutDialog);
                 writer.Write(value.SourceImagePath);
                 writer.Write(value.DestinationImagePath);
-                writer.Write(value.PrimaryColor);
-                writer.Write(value.SecondaryColor);
+                colorFormatter.Serialize(ref writer, value.PrimaryColor, options);
+                colorFormatter.Serialize(ref writer, value.SecondaryColor, options);
                 writer.Write(value.DpiX);
                 writer.Write(value.DpiY);
                 writer.Write(value.SelectionMaskPath);
@@ -74,7 +80,7 @@ namespace PSFilterPdn
                 writer.Write(value.PseudoResourcePath);
                 writer.Write(value.DescriptorRegistryPath);
                 writer.Write(value.LogFilePath);
-                options.Resolver.GetFormatterWithVerify<PluginUISettings?>().Serialize(ref writer, value.PluginUISettings, options);
+                resolver.GetFormatterWithVerify<PluginUISettings?>().Serialize(ref writer, value.PluginUISettings, options);
             }
         }
     }

@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using MessagePack;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
@@ -17,7 +18,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace PSFilterLoad.PSApi
 {
-    internal readonly struct ColorRgb24 : IEquatable<ColorRgb24>
+    [MessagePackObject]
+    [MessagePackFormatter(typeof(Formatter))]
+    internal readonly partial struct ColorRgb24 : IEquatable<ColorRgb24>
     {
         public ColorRgb24(byte red, byte green, byte blue)
         {

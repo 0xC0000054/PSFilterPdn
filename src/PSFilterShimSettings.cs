@@ -26,8 +26,8 @@ namespace PSFilterPdn
                                     bool showAboutDialog,
                                     string sourceImagePath,
                                     string destinationImagePath,
-                                    int primaryColor,
-                                    int secondaryColor,
+                                    ColorRgb24 primaryColor,
+                                    ColorRgb24 secondaryColor,
                                     double dpiX,
                                     double dpiY,
                                     string? selectionMaskPath,
@@ -61,9 +61,9 @@ namespace PSFilterPdn
 
         public string DestinationImagePath { get; }
 
-        public int PrimaryColor { get; }
+        public ColorRgb24 PrimaryColor { get; }
 
-        public int SecondaryColor { get; }
+        public ColorRgb24 SecondaryColor { get; }
 
         public double DpiX { get; }
 

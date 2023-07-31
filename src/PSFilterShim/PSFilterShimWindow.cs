@@ -355,8 +355,8 @@ namespace PSFilterShim
                                                                      nameof(LoadPsFilter));
 
                     DocumentMetadataProvider documentMetadataProvider = new(pipeClient);
-                    ColorRgb24 primaryColor = ColorRgb24.FromWin32Color(settings.PrimaryColor);
-                    ColorRgb24 secondaryColor = ColorRgb24.FromWin32Color(settings.SecondaryColor);
+                    ColorRgb24 primaryColor = settings.PrimaryColor;
+                    ColorRgb24 secondaryColor = settings.SecondaryColor;
 
                     using (LoadPsFilter lps = new(source,
                                                   takeOwnershipOfSource: true,
