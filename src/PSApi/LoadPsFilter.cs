@@ -288,9 +288,6 @@ namespace PSFilterLoad.PSApi
             lastOutLoPlane = -1;
             lastInLoPlane = -1;
 
-            this.source = takeOwnershipOfSource ? source : source.Clone();
-            dest = source.Clone();
-
             advanceProc = new AdvanceStateProc(AdvanceStateProc);
             colorProc = new ColorServicesProc(ColorServicesProc);
             displayPixelsProc = new DisplayPixelsProc(DisplayPixelsProc);
@@ -329,22 +326,33 @@ namespace PSFilterLoad.PSApi
 
             readImageDocument = new ReadImageDocument(this.source.Width, this.source.Height, dpiX, dpiY);
 
-            if (selectionMask != null)
+            try
             {
-                if (takeOwnershipOfSelectionMask)
+                this.source = takeOwnershipOfSource ? source : source.Clone();
+                dest = source.Clone();
+
+                if (selectionMask != null)
                 {
-                    mask = selectionMask;
+                    if (takeOwnershipOfSelectionMask)
+                    {
+                        mask = selectionMask;
+                    }
+                    else
+                    {
+                        mask = selectionMask.Clone();
+                    }
+                    hasSelectionMask = true;
                 }
                 else
                 {
-                    mask = selectionMask.Clone();
+                    mask = null;
+                    hasSelectionMask = false;
                 }
-                hasSelectionMask = true;
             }
-            else
+            catch (Exception)
             {
-                mask = null;
-                hasSelectionMask = false;
+                Dispose();
+                throw;
             }
         }
 
