@@ -17,7 +17,7 @@ using System.Drawing;
 
 namespace PSFilterLoad.PSApi.Imaging
 {
-    internal interface ISurface<T> : IDisposable where T : class
+    internal interface ISurface<T> : IDisposable where T : class, ISurface<T>
     {
         public int Width { get; }
 
