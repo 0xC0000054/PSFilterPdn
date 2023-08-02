@@ -78,15 +78,7 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
             this.imagingFactory = imagingFactory;
 
-            try
-            {
-                bitmap = imagingFactory.CreateBitmap<TPixel>(width, height);
-            }
-            catch (Exception)
-            {
-                imagingFactory.Dispose();
-                throw;
-            }
+            bitmap = imagingFactory.CreateBitmap<TPixel>(width, height);
         }
 
         private WICBitmapSurface(WICBitmapSurface<TPixel> original, int newWidth, int newHeight)
