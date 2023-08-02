@@ -304,8 +304,8 @@ namespace PSFilterLoad.PSApi
             propertySuite = new PropertySuite(handleSuite,
                                               documentMetadataProvider,
                                               logger.CreateInstanceForType(nameof(PSApi.PropertySuite)),
-                                              this.source.Width,
-                                              this.source.Height,
+                                              source.Width,
+                                              source.Height,
                                               pluginUISettings);
             resourceSuite = new ResourceSuite(handleSuite, logger.CreateInstanceForType(nameof(ResourceSuite)));
             basicSuiteProvider = new SPBasicSuiteProvider(this,
@@ -324,7 +324,7 @@ namespace PSFilterLoad.PSApi
             this.surfaceFactory = surfaceFactory;
             this.documentMetadataProvider = documentMetadataProvider;
 
-            readImageDocument = new ReadImageDocument(this.source.Width, this.source.Height, dpiX, dpiY);
+            readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
 
             try
             {
