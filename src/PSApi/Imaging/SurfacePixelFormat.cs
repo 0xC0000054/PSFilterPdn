@@ -16,7 +16,7 @@ namespace PSFilterLoad.PSApi.Imaging
     {
         Unknown = 0,
         Bgra32,
+        Gray8,
         Bgr24,
-        Gray8
     }
 }
