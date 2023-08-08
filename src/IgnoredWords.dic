@@ -15,6 +15,7 @@ deserialized
 dest
 dict
 dpi
+dst
 dw
 Exif
 hsb
@@ -49,4 +50,6 @@ wnd
 wparam
 Xmp
 xyz
+xyzw
 zstring
+zyxw

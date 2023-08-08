@@ -1495,7 +1495,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="inData">The input data.</param>
         /// <param name="inRowBytes">The input row bytes (stride).</param>
         /// <param name="rect">The input rect.</param>
-        /// <param name="nplanes">The number of channels in the image.</param>
+        /// <param name="numberOfPlanes">The number of channels in the image.</param>
         /// <param name="ofs">The single channel offset to map to BGRA color space.</param>
         /// <param name="inputPadding">The input padding mode.</param>
         /// <param name="padding">The padding extents.</param>
@@ -1503,8 +1503,8 @@ namespace PSFilterLoad.PSApi
         private static unsafe short SetFilterPadding(IntPtr inData,
                                                      int inRowBytes,
                                                      Rect16 rect,
-                                                     int nplanes,
-                                                     short ofs,
+                                                     int numberOfPlanes,
+                                                     int channelIndex,
                                                      short inputPadding,
                                                      FilterPadding padding,
                                                      ISurface<ImageSurface> surface)
@@ -1514,7 +1514,7 @@ namespace PSFilterLoad.PSApi
                 switch (inputPadding)
                 {
                     case PSConstants.Padding.plugInWantsEdgeReplication:
-                        SetFilterEdgePadding(inData, inRowBytes, rect, nplanes, ofs, padding, surface);
+                        SetFilterEdgePadding(inData, inRowBytes, rect, numberOfPlanes, channelIndex, padding, surface);
                         break;
                     case PSConstants.Padding.plugInDoesNotWantPadding:
                         break;
@@ -1537,8 +1537,8 @@ namespace PSFilterLoad.PSApi
         private static unsafe void SetFilterEdgePadding(IntPtr inData,
                                                         int inRowBytes,
                                                         Rect16 rect,
-                                                        int nplanes,
-                                                        short ofs,
+                                                        int numberOfPlanes,
+                                                        int channelIndex,
                                                         FilterPadding padding,
                                                         ISurface<ImageSurface> surface)
         {
@@ -1550,7 +1550,6 @@ namespace PSFilterLoad.PSApi
 
             int surfaceHeight = surface.Height;
             int surfaceWidth = surface.Width;
-            int sourceChannelCount = surface.ChannelCount;
 
             int lastSurfaceRow = surfaceWidth - 1;
             int lastSurfaceColumn = surfaceHeight - 1;
@@ -1563,36 +1562,10 @@ namespace PSFilterLoad.PSApi
                 {
                     for (int y = 0; y < top; y++)
                     {
-                        byte* src = surfaceLock.GetRowPointerUnchecked(0);
+                        uint* src = (uint*)surfaceLock.GetRowPointerUnchecked(0);
                         byte* dst = inDataPtr + (y * inRowBytes);
 
-                        for (int x = 0; x < surfaceWidth; x++)
-                        {
-                            switch (nplanes)
-                            {
-                                case 1:
-                                    *dst = src[ofs];
-                                    break;
-                                case 2:
-                                    dst[0] = src[ofs];
-                                    dst[1] = src[ofs + 1];
-                                    break;
-                                case 3:
-                                    dst[0] = src[2];
-                                    dst[1] = src[1];
-                                    dst[2] = src[0];
-                                    break;
-                                case 4:
-                                    dst[0] = src[2];
-                                    dst[1] = src[1];
-                                    dst[2] = src[0];
-                                    dst[3] = src[3];
-                                    break;
-                            }
-
-                            src += sourceChannelCount;
-                            dst += nplanes;
-                        }
+                        ImageRow.Load(src, dst, surfaceWidth, channelIndex, numberOfPlanes);
                     }
                 }
 
@@ -1600,35 +1573,10 @@ namespace PSFilterLoad.PSApi
                 {
                     for (int y = 0; y < surfaceHeight; y++)
                     {
-                        byte* src = surfaceLock.GetPointPointerUnchecked(0, y);
+                        uint src = *(uint*)surfaceLock.GetPointPointerUnchecked(0, y);
                         byte* dst = inDataPtr + (y * inRowBytes);
 
-                        for (int x = 0; x < left; x++)
-                        {
-                            switch (nplanes)
-                            {
-                                case 1:
-                                    *dst = src[ofs];
-                                    break;
-                                case 2:
-                                    dst[0] = src[ofs];
-                                    dst[1] = src[ofs + 1];
-                                    break;
-                                case 3:
-                                    dst[0] = src[2];
-                                    dst[1] = src[1];
-                                    dst[2] = src[0];
-                                    break;
-                                case 4:
-                                    dst[0] = src[2];
-                                    dst[1] = src[1];
-                                    dst[2] = src[0];
-                                    dst[3] = src[3];
-                                    break;
-                            }
-
-                            dst += nplanes;
-                        }
+                        ImageRow.Fill(src, dst, left, channelIndex, numberOfPlanes);
                     }
                 }
 
@@ -1637,36 +1585,10 @@ namespace PSFilterLoad.PSApi
                     int lockBottom = rect.bottom - rect.top - 1;
                     for (int y = 0; y < bottom; y++)
                     {
-                        byte* src = surfaceLock.GetRowPointerUnchecked(lastSurfaceColumn);
+                        uint* src = (uint*)surfaceLock.GetRowPointerUnchecked(lastSurfaceColumn);
                         byte* dst = inDataPtr + ((lockBottom - y) * inRowBytes);
 
-                        for (int x = 0; x < surfaceWidth; x++)
-                        {
-                            switch (nplanes)
-                            {
-                                case 1:
-                                    *dst = src[ofs];
-                                    break;
-                                case 2:
-                                    dst[0] = src[ofs];
-                                    dst[1] = src[ofs + 1];
-                                    break;
-                                case 3:
-                                    dst[0] = src[2];
-                                    dst[1] = src[1];
-                                    dst[2] = src[0];
-                                    break;
-                                case 4:
-                                    dst[0] = src[2];
-                                    dst[1] = src[1];
-                                    dst[2] = src[0];
-                                    dst[3] = src[3];
-                                    break;
-                            }
-
-                            src += sourceChannelCount;
-                            dst += nplanes;
-                        }
+                        ImageRow.Load(src, dst, surfaceWidth, channelIndex, numberOfPlanes);
                     }
                 }
 
@@ -1675,35 +1597,10 @@ namespace PSFilterLoad.PSApi
                     int rowEnd = rect.right - rect.left - right;
                     for (int y = 0; y < surfaceHeight; y++)
                     {
-                        byte* src = surfaceLock.GetPointPointerUnchecked(lastSurfaceRow, y);
+                        uint src = *(uint*)surfaceLock.GetPointPointerUnchecked(lastSurfaceRow, y);
                         byte* dst = inDataPtr + (y * inRowBytes) + rowEnd;
 
-                        for (int x = 0; x < right; x++)
-                        {
-                            switch (nplanes)
-                            {
-                                case 1:
-                                    *dst = src[ofs];
-                                    break;
-                                case 2:
-                                    dst[0] = src[ofs];
-                                    dst[1] = src[ofs + 1];
-                                    break;
-                                case 3:
-                                    dst[0] = src[2];
-                                    dst[1] = src[1];
-                                    dst[2] = src[0];
-                                    break;
-                                case 4:
-                                    dst[0] = src[2];
-                                    dst[1] = src[1];
-                                    dst[2] = src[0];
-                                    dst[3] = src[3];
-                                    break;
-                            }
-
-                            dst += nplanes;
-                        }
+                        ImageRow.Fill(src, dst, right, channelIndex, numberOfPlanes);
                     }
                 }
             }
@@ -1821,20 +1718,20 @@ namespace PSFilterLoad.PSApi
                 return PSError.memFullErr;
             }
 
-            short channelOffset = filterRecord->inLoPlane;
+            int channelIndex = filterRecord->inLoPlane;
 
             switch (filterRecord->inLoPlane) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
             {
                 case 0:
-                    channelOffset = 2;
+                    channelIndex = 2;
                     break;
                 case 2:
-                    channelOffset = 0;
+                    channelIndex = 0;
                     break;
             }
 
             bool validImageBounds = rect.left < source.Width && rect.top < source.Height;
-            short padErr = SetFilterPadding(inDataPtr, stride, rect, nplanes, channelOffset, filterRecord->inputPadding, padding, tempSurface);
+            short padErr = SetFilterPadding(inDataPtr, stride, rect, nplanes, channelIndex, filterRecord->inputPadding, padding, tempSurface);
             if (padErr != PSError.noErr || !validImageBounds)
             {
                 return padErr;
@@ -1844,44 +1741,15 @@ namespace PSFilterLoad.PSApi
             int top = lockRect.Top;
             int left = lockRect.Left;
             int bottom = lockRect.Bottom;
-            int right = lockRect.Right;
 
             using (ISurfaceLock surfaceLock = tempSurface.Lock(SurfaceLockMode.Read))
             {
-                int sourceChannelCount = tempSurface.ChannelCount;
-
                 for (int y = top; y < bottom; y++)
                 {
-                    byte* src = surfaceLock.GetPointPointerUnchecked(left, y);
+                    uint* src = (uint*)surfaceLock.GetPointPointerUnchecked(left, y);
                     byte* dst = (byte*)ptr + ((y - top + padding.top) * stride) + padding.left;
 
-                    for (int x = left; x < right; x++)
-                    {
-                        switch (nplanes)
-                        {
-                            case 1:
-                                *dst = src[channelOffset];
-                                break;
-                            case 2:
-                                dst[0] = src[channelOffset];
-                                dst[1] = src[channelOffset + 1];
-                                break;
-                            case 3:
-                                dst[0] = src[2];
-                                dst[1] = src[1];
-                                dst[2] = src[0];
-                                break;
-                            case 4:
-                                dst[0] = src[2];
-                                dst[1] = src[1];
-                                dst[2] = src[0];
-                                dst[3] = src[3];
-                                break;
-                        }
-
-                        src += sourceChannelCount;
-                        dst += nplanes;
-                    }
+                    ImageRow.Load(src, dst, lockRect.Width, channelIndex, nplanes);
                 }
             }
 
@@ -1930,20 +1798,20 @@ namespace PSFilterLoad.PSApi
             filterRecord->outRowBytes = stride;
             filterRecord->outColumnBytes = nplanes;
 
-            short channelOffset = filterRecord->outLoPlane;
+            int channelIndex = filterRecord->outLoPlane;
 
             switch (filterRecord->outLoPlane) // Photoshop uses RGBA pixel order so map the Red and Blue channels to BGRA order
             {
                 case 0:
-                    channelOffset = 2;
+                    channelIndex = 2;
                     break;
                 case 2:
-                    channelOffset = 0;
+                    channelIndex = 0;
                     break;
             }
 
             bool validImageBounds = rect.left < dest.Width && rect.top < dest.Height;
-            short padErr = SetFilterPadding(outDataPtr, stride, rect, nplanes, channelOffset, filterRecord->outputPadding, padding, dest);
+            short padErr = SetFilterPadding(outDataPtr, stride, rect, nplanes, channelIndex, filterRecord->outputPadding, padding, dest);
             if (padErr != PSError.noErr || !validImageBounds)
             {
                 return padErr;
@@ -1953,44 +1821,15 @@ namespace PSFilterLoad.PSApi
             int top = lockRect.Top;
             int left = lockRect.Left;
             int bottom = lockRect.Bottom;
-            int right = lockRect.Right;
 
             using (ISurfaceLock surfaceLock = dest.Lock(SurfaceLockMode.Read))
             {
-                int sourceChannelCount = dest.ChannelCount;
-
                 for (int y = top; y < bottom; y++)
                 {
-                    byte* src = surfaceLock.GetPointPointerUnchecked(left, y);
+                    uint* src = (uint*)surfaceLock.GetPointPointerUnchecked(left, y);
                     byte* dst = (byte*)ptr + ((y - top + padding.top) * stride) + padding.left;
 
-                    for (int x = left; x < right; x++)
-                    {
-                        switch (nplanes)
-                        {
-                            case 1:
-                                *dst = src[channelOffset];
-                                break;
-                            case 2:
-                                dst[0] = src[channelOffset];
-                                dst[1] = src[channelOffset + 1];
-                                break;
-                            case 3:
-                                dst[0] = src[2];
-                                dst[1] = src[1];
-                                dst[2] = src[0];
-                                break;
-                            case 4:
-                                dst[0] = src[2];
-                                dst[1] = src[1];
-                                dst[2] = src[0];
-                                dst[3] = src[3];
-                                break;
-                        }
-
-                        src += sourceChannelCount;
-                        dst += nplanes;
-                    }
+                    ImageRow.Load(src, dst, lockRect.Width, channelIndex, nplanes);
                 }
             }
 
@@ -2155,14 +1994,14 @@ namespace PSFilterLoad.PSApi
                     return;
                 }
 
-                int ofs = loplane;
+                int channelIndex = loplane;
                 switch (loplane)
                 {
                     case 0:
-                        ofs = 2;
+                        channelIndex = 2;
                         break;
                     case 2:
-                        ofs = 0;
+                        channelIndex = 0;
                         break;
                 }
 
@@ -2178,44 +2017,15 @@ namespace PSFilterLoad.PSApi
                 int top = lockRect.Top;
                 int left = lockRect.Left;
                 int bottom = lockRect.Bottom;
-                int right = lockRect.Right;
 
                 using (ISurfaceLock destLock = dest.Lock(SurfaceLockMode.Write))
                 {
-                    int destChannelCount = dest.ChannelCount;
-
                     for (int y = top; y < bottom; y++)
                     {
                         byte* src = (byte*)outDataPtr + ((y - top + padding.top) * outRowBytes) + padding.left;
-                        byte* dst = destLock.GetPointPointerUnchecked(left, y);
+                        uint* dst = (uint*)destLock.GetPointPointerUnchecked(left, y);
 
-                        for (int x = left; x < right; x++)
-                        {
-                            switch (nplanes)
-                            {
-                                case 1:
-                                    dst[ofs] = *src;
-                                    break;
-                                case 2:
-                                    dst[ofs] = src[0];
-                                    dst[ofs + 1] = src[1];
-                                    break;
-                                case 3:
-                                    dst[0] = src[2];
-                                    dst[1] = src[1];
-                                    dst[2] = src[0];
-                                    break;
-                                case 4:
-                                    dst[0] = src[2];
-                                    dst[1] = src[1];
-                                    dst[2] = src[0];
-                                    dst[3] = src[3];
-                                    break;
-                            }
-
-                            src += nplanes;
-                            dst += destChannelCount;
-                        }
+                        ImageRow.Store(src, dst, lockRect.Width, channelIndex, nplanes);
                     }
                 }
             }
