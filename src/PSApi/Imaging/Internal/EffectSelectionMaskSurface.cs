@@ -57,10 +57,17 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
         public override bool IsReadOnly => true;
 
-        public override ISurface<MaskSurface> Clone() => new EffectSelectionMaskSurface(this);
+        public override ISurface<MaskSurface> Clone()
+        {
+            VerifyNotDisposed();
+
+            return new EffectSelectionMaskSurface(this);
+        }
 
         public override ISurface<MaskSurface> CreateScaledSurface(int newWidth, int newHeight)
         {
+            VerifyNotDisposed();
+
             PDNMaskSurface scaledSurface = new(newWidth, newHeight, imagingFactory);
 
             using (IBitmapSource<ColorAlpha8> bitmapScaler = imagingFactory.CreateBitmapScaler<ColorAlpha8>(effectInputBitmap,

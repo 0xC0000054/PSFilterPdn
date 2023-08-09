@@ -80,10 +80,17 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
         public override bool IsReadOnly => true;
 
-        public override ISurface<ImageSurface> Clone() => new EffectInputBitmapSurface(this);
+        public override ISurface<ImageSurface> Clone()
+        {
+            VerifyNotDisposed();
+
+            return new EffectInputBitmapSurface(this);
+        }
 
         public override ISurface<ImageSurface> CreateScaledSurface(int newWidth, int newHeight)
         {
+            VerifyNotDisposed();
+
             WICBitmapSurface<ColorBgra32> scaledSurface = new(newWidth, newHeight, imagingFactory);
 
             using (IBitmapSource<ColorBgra32> bitmapScaler = imagingFactory.CreateBitmapScaler<ColorBgra32>(effectInputBitmap,
