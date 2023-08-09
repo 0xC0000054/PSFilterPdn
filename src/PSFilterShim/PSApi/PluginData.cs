@@ -13,14 +13,12 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
 
 namespace PSFilterLoad.PSApi
 {
     /// <summary>
     /// The class that encapsulates an Adobe® Photoshop® filter plugin
     /// </summary>
-    [DataContract()]
     internal sealed class PluginData : IEquatable<PluginData>
     {
         /// <summary>
