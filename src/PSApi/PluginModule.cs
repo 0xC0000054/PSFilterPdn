@@ -48,7 +48,7 @@ namespace PSFilterLoad.PSApi
 
                 if (address != IntPtr.Zero)
                 {
-                    this.entryPoint = (PluginEntryPoint)Marshal.GetDelegateForFunctionPointer(address, typeof(PluginEntryPoint));
+                    this.entryPoint = Marshal.GetDelegateForFunctionPointer<PluginEntryPoint>(address);
                     this.fileName = fileName;
                 }
                 else
@@ -87,7 +87,7 @@ namespace PSFilterLoad.PSApi
                 throw new EntryPointNotFoundException(string.Format(CultureInfo.CurrentCulture, Resources.PluginEntryPointNotFound, entryPointName, fileName));
             }
 
-            return (PluginEntryPoint)Marshal.GetDelegateForFunctionPointer(address, typeof(PluginEntryPoint));
+            return Marshal.GetDelegateForFunctionPointer<PluginEntryPoint>(address);
         }
 
         /// <summary>
