@@ -146,7 +146,7 @@ namespace PSFilterPdn
 
                     bool proxyResult = true;
                     PSFilterShimErrorInfo proxyError = null;
-                    FilterCase filterCase = token.FilterData.GetFilterTransparencyMode(!string.IsNullOrEmpty(selectionMaskFileName), source.HasTransparency);
+                    FilterCase filterCase = token.FilterData.GetFilterTransparencyMode(!string.IsNullOrEmpty(selectionMaskFileName), source);
 
                     PSFilterShimSettings settings = new(repeatEffect: true,
                                                         showAboutDialog: false,
@@ -230,7 +230,7 @@ namespace PSFilterPdn
 
         private void RunRepeatFilter(PSFilterPdnConfigToken token, IWin32Window window)
         {
-            ImageSurface source = null;
+            EffectInputBitmapSurface source = null;
             MaskSurface selectionMask = null;
             try
             {
@@ -251,7 +251,7 @@ namespace PSFilterPdn
                 source = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), Services);
                 selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
                 SurfaceFactory surfaceFactory = new(Services);
-                FilterCase filterCase = token.FilterData.GetFilterTransparencyMode(selectionMask is not null, source.HasTransparency);
+                FilterCase filterCase = token.FilterData.GetFilterTransparencyMode(selectionMask is not null, source);
 
                 using (LoadPsFilter lps = new(source,
                                               takeOwnershipOfSource: true,

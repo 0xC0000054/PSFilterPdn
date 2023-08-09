@@ -40,7 +40,5 @@ namespace PSFilterLoad.PSApi.Imaging
         Size ISurface<MaskSurface>.Size => new(Width, Height);
 
         bool ISurface<MaskSurface>.SupportsTransparency => false;
-
-        bool ISurface<MaskSurface>.HasTransparency() => false;
     }
 }

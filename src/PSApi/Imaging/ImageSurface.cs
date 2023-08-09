@@ -36,8 +36,6 @@ namespace PSFilterLoad.PSApi.Imaging
 
         public abstract ISurface<ImageSurface> CreateScaledSurface(int newWidth, int newHeight);
 
-        public virtual bool HasTransparency() => false;
-
         public virtual ISurfaceLock Lock(SurfaceLockMode mode)
             => Lock(new Rectangle(0, 0, Width, Height), mode);
 

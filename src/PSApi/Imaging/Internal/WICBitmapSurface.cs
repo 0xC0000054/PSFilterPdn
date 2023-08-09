@@ -112,40 +112,6 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
             return new WICBitmapSurface<TPixel>(this, newWidth, newHeight);
         }
 
-        public override bool HasTransparency()
-        {
-            VerifyNotDisposed();
-
-            if (Format == SurfacePixelFormat.Bgra32)
-            {
-                using (IBitmapLock<TPixel> bitmapLock = bitmap.Lock(BitmapLockOptions.Read))
-                {
-                    int width = Width;
-                    int height = Height;
-                    byte* scan0 = (byte*)bitmapLock.Buffer;
-                    int stride = bitmapLock.BufferStride;
-
-                    for (int y = 0; y < height; y++)
-                    {
-                        ColorBgra32* ptr = (ColorBgra32*)(scan0 + (y * stride));
-                        ColorBgra32* ptrEnd = ptr + width;
-
-                        while (ptr < ptrEnd)
-                        {
-                            if (ptr->A < 255)
-                            {
-                                return true;
-                            }
-
-                            ptr++;
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-
         public override ISurfaceLock Lock(Rectangle bounds, SurfaceLockMode mode)
         {
             VerifyNotDisposed();

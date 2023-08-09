@@ -40,7 +40,5 @@ namespace PSFilterLoad.PSApi.Imaging
         public ISurfaceLock Lock(SurfaceLockMode mode);
 
         public ISurfaceLock Lock(Rectangle bounds, SurfaceLockMode mode);
-
-        public bool HasTransparency();
     }
 }

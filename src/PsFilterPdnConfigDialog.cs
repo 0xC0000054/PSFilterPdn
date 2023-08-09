@@ -89,7 +89,7 @@ namespace PSFilterPdn
         private readonly IImagingFactory imagingFactory;
         private readonly DocumentDpi documentDpi;
         private readonly DocumentMetadataProvider documentMetadataProvider;
-        private ImageSurface sourceBitmap;
+        private EffectInputBitmapSurface sourceBitmap;
         private MaskSurface selectionMask;
         private ColorRgb24 primaryColor;
         private ColorRgb24 secondaryColor;
@@ -780,7 +780,7 @@ namespace PSFilterPdn
                 selectionMask?.Dispose();
             }
 
-            FilterCase filterCase = data.PluginData.GetFilterTransparencyMode(!string.IsNullOrEmpty(selectionMaskFileName), sourceBitmap.HasTransparency);
+            FilterCase filterCase = data.PluginData.GetFilterTransparencyMode(!string.IsNullOrEmpty(selectionMaskFileName), sourceBitmap);
 
             PSFilterShimSettings settings = new(repeatEffect: false,
                                                 data.ShowAboutDialog,
@@ -993,7 +993,7 @@ namespace PSFilterPdn
 
                         PluginUISettings pluginUISettings = new(highDpiMode);
                         SurfaceFactory surfaceFactory = new(imagingFactory);
-                        FilterCase filterCase = data.GetFilterTransparencyMode(selectionMask is not null, sourceBitmap.HasTransparency);
+                        FilterCase filterCase = data.GetFilterTransparencyMode(selectionMask is not null, sourceBitmap);
 
                         using (LoadPsFilter lps = new(sourceBitmap,
                                                       takeOwnershipOfSource: false,
@@ -2012,17 +2012,12 @@ namespace PSFilterPdn
                 }
 
                 SizeInt32 canvasSize = sourceBitmap.Size;
-                Lazy<bool> lazyHasTransparency = new(() => sourceBitmap.HasTransparency());
 
                 HostState hostState = new()
                 {
                     HasMultipleLayers = false,
                     HasSelection = selectionMask != null
                 };
-
-#pragma warning disable IDE0039 // Use local function
-                Func<bool> hasTransparency = () => lazyHasTransparency.Value;
-#pragma warning restore IDE0039 // Use local function
 
                 foreach (KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>> item in filterTreeNodes)
                 {
@@ -2035,7 +2030,7 @@ namespace PSFilterPdn
 
                         node.Enabled = plugin.SupportsHostState(canvasSize.Width,
                                                                 canvasSize.Height,
-                                                                hasTransparency,
+                                                                sourceBitmap,
                                                                 hostState);
                     }
                 }

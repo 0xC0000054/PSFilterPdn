@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using MessagePack;
+using PSFilterLoad.PSApi.Imaging.Internal;
 using PSFilterPdn.EnableInfo;
 using System;
 using System.Collections.ObjectModel;
@@ -180,15 +181,12 @@ namespace PSFilterLoad.PSApi
         /// Gets the mode that indicates how the filter processes transparency.
         /// </summary>
         /// <param name="hasSelection"><c>true</c> if the host has an active selection; otherwise, <c>false</c>.</param>
-        /// <param name="hasTransparency">A delegate that allows the method to determine if the image has transparency.</param>
+        /// <param name="surface">The surface to check for transparency.</param>
         /// <returns>One of the <see cref="FilterCase"/> values indicating how the filter processes transparency.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="hasTransparency"/> is null.</exception>
-        public FilterCase GetFilterTransparencyMode(bool hasSelection, Func<bool> hasTransparency)
+        /// <exception cref="ArgumentNullException"><paramref name="surface"/> is null.</exception>
+        public FilterCase GetFilterTransparencyMode(bool hasSelection, ISurfaceHasTransparency surface)
         {
-            if (hasTransparency == null)
-            {
-                throw new ArgumentNullException(nameof(hasTransparency));
-            }
+            ArgumentNullException.ThrowIfNull(surface, nameof(surface));
 
             FilterCase filterCase;
 
@@ -198,7 +196,7 @@ namespace PSFilterLoad.PSApi
                 Category.Equals("Vizros 4", StringComparison.Ordinal) && Title.StartsWith("Lake", StringComparison.Ordinal) ||
                 Category.Equals("Nik Collection", StringComparison.Ordinal) && Title.StartsWith("Dfine 2", StringComparison.Ordinal))
             {
-                if (hasTransparency())
+                if (surface.HasTransparency())
                 {
                     filterCase = FilterCase.FloatingSelection;
                 }
@@ -215,7 +213,7 @@ namespace PSFilterLoad.PSApi
 
                 if (!FilterInfo[filterCaseIndex].IsSupported)
                 {
-                    if (hasTransparency())
+                    if (surface.HasTransparency())
                     {
                         if (FilterInfo[filterCaseIndex + 2].IsSupported)
                         {
@@ -288,7 +286,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="imageWidth">The width of the image.</param>
         /// <param name="imageHeight">The height of the image.</param>
-        /// <param name="hasTransparency">Indicates if the image has transparency.</param>
+        /// <param name="surface">The surface to check for transparency.</param>
         /// <param name="hostState">The current state of the host application.</param>
         /// <returns>
         /// <c>true</c> if the filter can process the image and host application state; otherwise, <c>false</c>.
@@ -296,7 +294,7 @@ namespace PSFilterLoad.PSApi
         /// <exception cref="ArgumentNullException">
         /// <paramref name="hostState"/> is null.
         /// </exception>
-        internal bool SupportsHostState(int imageWidth, int imageHeight, Func<bool> hasTransparency, HostState hostState)
+        internal bool SupportsHostState(int imageWidth, int imageHeight, ISurfaceHasTransparency surface, HostState hostState)
         {
             if (hostState == null)
             {
@@ -307,7 +305,7 @@ namespace PSFilterLoad.PSApi
 
             const ImageMode imageMode = ImageMode.RGB;
 
-            FilterCase filterCase = GetFilterTransparencyMode(hostState.HasSelection, hasTransparency);
+            FilterCase filterCase = GetFilterTransparencyMode(hostState.HasSelection, surface);
 
             if (!string.IsNullOrEmpty(enableInfo))
             {

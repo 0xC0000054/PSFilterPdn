@@ -21,7 +21,7 @@ using System.Drawing;
 
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
-    internal sealed unsafe class EffectInputBitmapSurface : ImageSurface
+    internal sealed unsafe class EffectInputBitmapSurface : ImageSurface, ISurfaceHasTransparency
     {
         private readonly IEffectInputBitmap<ColorBgra32> effectInputBitmap;
         private readonly IImagingFactory imagingFactory;
@@ -101,8 +101,6 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
             return scaledSurface;
         }
 
-        public override bool HasTransparency() => imageHasTransparency.Value;
-
         public override ISurfaceLock Lock(Rectangle bounds, SurfaceLockMode mode)
         {
             VerifyNotDisposed();
@@ -118,6 +116,8 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
             return new WICBitmapSurfaceLock<ColorBgra32>(bitmapLock, Format);
         }
+
+        bool ISurfaceHasTransparency.HasTransparency() => imageHasTransparency.Value;
 
         protected override void Dispose(bool disposing)
         {

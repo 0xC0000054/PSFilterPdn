@@ -42,8 +42,6 @@ namespace PSFilterLoad.PSApi.Imaging
 
         ISurface<DisplayPixelsSurface> ISurface<DisplayPixelsSurface>.CreateScaledSurface(int newWidth, int newHeight) => throw new NotImplementedException();
 
-        bool ISurface<DisplayPixelsSurface>.HasTransparency() => throw new NotImplementedException();
-
         ISurfaceLock ISurface<DisplayPixelsSurface>.Lock(SurfaceLockMode mode) => Lock(mode);
 
         ISurfaceLock ISurface<DisplayPixelsSurface>.Lock(Rectangle bounds, SurfaceLockMode mode) => Lock(bounds, mode);

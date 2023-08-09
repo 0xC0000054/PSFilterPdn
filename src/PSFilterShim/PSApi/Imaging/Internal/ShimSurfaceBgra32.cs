@@ -84,25 +84,6 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
             return surf;
         }
 
-        public override bool HasTransparency()
-        {
-            for (int y = 0; y < height; y++)
-            {
-                ColorBgra32* p = GetRowAddressUnchecked(y);
-                for (int x = 0; x < width; x++)
-                {
-                    if (p->A < 255)
-                    {
-                        return true;
-                    }
-
-                    p++;
-                }
-            }
-
-            return false;
-        }
-
         public override ShimSurfaceBgra32Lock Lock(SurfaceLockMode mode)
         {
             return new(scan0.VoidStar, stride, width, height);
