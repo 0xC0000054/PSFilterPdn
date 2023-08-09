@@ -37,6 +37,7 @@ namespace PSFilterPdn
                 ColorRgb24 secondaryColor = colorFormatter.Deserialize(ref reader, options);
                 double dpiX = reader.ReadDouble();
                 double dpiY = reader.ReadDouble();
+                FilterCase filterCase = resolver.GetFormatterWithVerify<FilterCase>().Deserialize(ref reader, options);
                 string? selectionMaskPath = reader.ReadString();
                 string? parameterDataPath = reader.ReadString();
                 string? pseudoResourcePath = reader.ReadString();
@@ -54,6 +55,7 @@ namespace PSFilterPdn
                                                 secondaryColor,
                                                 dpiX,
                                                 dpiY,
+                                                filterCase,
                                                 selectionMaskPath,
                                                 parameterDataPath,
                                                 pseudoResourcePath,
@@ -75,6 +77,7 @@ namespace PSFilterPdn
                 colorFormatter.Serialize(ref writer, value.SecondaryColor, options);
                 writer.Write(value.DpiX);
                 writer.Write(value.DpiY);
+                resolver.GetFormatterWithVerify<FilterCase>().Serialize(ref writer, value.FilterCase, options);
                 writer.Write(value.SelectionMaskPath);
                 writer.Write(value.ParameterDataPath);
                 writer.Write(value.PseudoResourcePath);

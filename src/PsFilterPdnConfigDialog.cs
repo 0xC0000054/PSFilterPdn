@@ -780,6 +780,8 @@ namespace PSFilterPdn
                 selectionMask?.Dispose();
             }
 
+            FilterCase filterCase = data.PluginData.GetFilterTransparencyMode(!string.IsNullOrEmpty(selectionMaskFileName), sourceBitmap.HasTransparency);
+
             PSFilterShimSettings settings = new(repeatEffect: false,
                                                 data.ShowAboutDialog,
                                                 srcFileName,
@@ -788,6 +790,7 @@ namespace PSFilterPdn
                                                 new ColorRgb24(Environment.SecondaryColor),
                                                 documentDpi.X,
                                                 documentDpi.Y,
+                                                filterCase,
                                                 selectionMaskFileName,
                                                 parameterDataFileName,
                                                 resourceDataFileName,
@@ -990,6 +993,7 @@ namespace PSFilterPdn
 
                         PluginUISettings pluginUISettings = new(highDpiMode);
                         SurfaceFactory surfaceFactory = new(imagingFactory);
+                        FilterCase filterCase = data.GetFilterTransparencyMode(selectionMask is not null, sourceBitmap.HasTransparency);
 
                         using (LoadPsFilter lps = new(sourceBitmap,
                                                       takeOwnershipOfSource: false,
@@ -1000,6 +1004,7 @@ namespace PSFilterPdn
                                                       documentDpi.X,
                                                       documentDpi.Y,
                                                       threadData.ParentWindowHandle,
+                                                      filterCase,
                                                       documentMetadataProvider,
                                                       surfaceFactory,
                                                       logger,

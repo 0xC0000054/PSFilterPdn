@@ -97,7 +97,7 @@ namespace PSFilterLoad.PSApi
 
         private Func<bool> abortFunc;
         private string errorMessage;
-        private FilterCase filterCase;
+        private readonly FilterCase filterCase;
         private double dpiX;
         private double dpiY;
         private bool hasSelectionMask;
@@ -228,6 +228,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="dpiX">The horizontal document resolution in pixels-per-inch.</param>
         /// <param name="dpiY">The vertical document resolution in pixels-per-inch.</param>
         /// <param name="owner">The handle of the parent window.</param>
+        /// <param name="filterCase">The filter transparency mode.</param>
         /// <param name="documentMetadataProvider">The document meta data provider.</param>
         /// <param name="surfaceFactory">The surface factory.</param>
         /// <param name="pluginUISettings">The user interface settings for plug-in created dialogs.</param>
@@ -247,6 +248,7 @@ namespace PSFilterLoad.PSApi
                                      double dpiX,
                                      double dpiY,
                                      IntPtr owner,
+                                     FilterCase filterCase,
                                      IDocumentMetadataProvider documentMetadataProvider,
                                      ISurfaceFactory surfaceFactory,
                                      IPluginApiLogger logger,
@@ -321,6 +323,7 @@ namespace PSFilterLoad.PSApi
             this.dpiX = dpiX;
             this.dpiY = dpiY;
             this.logger = logger;
+            this.filterCase = filterCase;
             this.surfaceFactory = surfaceFactory;
             this.documentMetadataProvider = documentMetadataProvider;
 
@@ -371,15 +374,6 @@ namespace PSFilterLoad.PSApi
         ProgressProc IPICASuiteDataProvider.Progress => progressProc;
 
         TestAbortProc IPICASuiteDataProvider.TestAbort => abortProc;
-
-        /// <summary>
-        /// Determines how images with transparent pixels are displayed to the filter.
-        /// </summary>
-        /// <param name="data">The plugin to check.</param>
-        private void SetFilterTransparencyMode(PluginData data)
-        {
-            filterCase = data.GetFilterTransparencyMode(hasSelectionMask, source.HasTransparency);
-        }
 
         /// <summary>
         /// Determines whether the memory block is marked as executable.
@@ -1093,8 +1087,6 @@ namespace PSFilterLoad.PSApi
 
             useChannelPorts = EnableChannelPorts(pdata);
             basicSuiteProvider.SetPluginName(pdata.Title.TrimEnd('.'));
-
-            SetFilterTransparencyMode(pdata);
 
             bool copySourceToDestination = true;
 

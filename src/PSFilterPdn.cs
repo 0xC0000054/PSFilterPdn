@@ -88,6 +88,7 @@ namespace PSFilterPdn
                 return;
             }
 
+            EffectInputBitmapSurface source = null;
             try
             {
                 using (PSFilterShimDataFolder proxyTempDir = new())
@@ -100,7 +101,9 @@ namespace PSFilterPdn
                     string selectionMaskFileName = null;
 
                     DocumentDpi documentDpi = new(Environment.Document.Resolution);
-                    PSFilterShimImage.Save(srcFileName, Environment.GetSourceBitmapBgra32());
+                    source = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), Services);
+
+                    PSFilterShimImage.Save(srcFileName, source);
 
                     if (token.FilterParameters.TryGetValue(token.FilterData, out ParameterData parameterData))
                     {
@@ -143,6 +146,7 @@ namespace PSFilterPdn
 
                     bool proxyResult = true;
                     PSFilterShimErrorInfo proxyError = null;
+                    FilterCase filterCase = token.FilterData.GetFilterTransparencyMode(!string.IsNullOrEmpty(selectionMaskFileName), source.HasTransparency);
 
                     PSFilterShimSettings settings = new(repeatEffect: true,
                                                         showAboutDialog: false,
@@ -152,6 +156,7 @@ namespace PSFilterPdn
                                                         new ColorRgb24(Environment.SecondaryColor),
                                                         documentDpi.X,
                                                         documentDpi.Y,
+                                                        filterCase,
                                                         selectionMaskFileName,
                                                         parameterDataFileName,
                                                         resourceDataFileName,
@@ -217,6 +222,10 @@ namespace PSFilterPdn
             {
                 ShowErrorMessage(window, wx);
             }
+            finally
+            {
+                source?.Dispose();
+            }
         }
 
         private void RunRepeatFilter(PSFilterPdnConfigToken token, IWin32Window window)
@@ -242,6 +251,7 @@ namespace PSFilterPdn
                 source = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), Services);
                 selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
                 SurfaceFactory surfaceFactory = new(Services);
+                FilterCase filterCase = token.FilterData.GetFilterTransparencyMode(selectionMask is not null, source.HasTransparency);
 
                 using (LoadPsFilter lps = new(source,
                                               takeOwnershipOfSource: true,
@@ -252,6 +262,7 @@ namespace PSFilterPdn
                                               documentDpi.X,
                                               documentDpi.Y,
                                               window.Handle,
+                                              filterCase,
                                               documentMetadataProvider,
                                               surfaceFactory,
                                               logger,

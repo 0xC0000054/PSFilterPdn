@@ -68,59 +68,6 @@ namespace PSFilterPdn
             return bitmap;
         }
 
-        public static void Save(string path, IBitmapSource<ColorBgra32> bitmap)
-        {
-            if (bitmap is null)
-            {
-                throw new ArgumentNullException(nameof(bitmap));
-            }
-
-            SizeInt32 bitmapSize = bitmap.Size;
-
-            PSFilterShimImageHeader header = new(bitmapSize.Width,
-                                                 bitmapSize.Height,
-                                                 SurfacePixelFormat.Bgra32);
-            FileStreamOptions options = new()
-            {
-                Mode = FileMode.Create,
-                Access = FileAccess.Write,
-                Share = FileShare.None,
-                PreallocationSize = header.GetTotalFileSize(),
-            };
-
-            using (FileStream stream = new(path, options))
-            {
-                header.Save(stream);
-
-                byte[] buffer = ArrayPool<byte>.Shared.Rent(header.Stride);
-
-                try
-                {
-                    unsafe
-                    {
-                        fixed (byte* ptr = buffer)
-                        {
-                            int bufferStride = header.Stride;
-                            uint bufferSize = (uint)bufferStride;
-
-                            for (int y = 0; y < header.Height; y++)
-                            {
-                                RectInt32 copyRect = new(0, y, header.Width, 1);
-
-                                bitmap.CopyPixels(ptr, bufferStride, bufferSize, copyRect);
-
-                                stream.Write(buffer, 0, bufferStride);
-                            }
-                        }
-                    }
-                }
-                finally
-                {
-                    ArrayPool<byte>.Shared.Return(buffer);
-                }
-            }
-        }
-
         public static unsafe void Save(string path, ImageSurface bitmap)
         {
             if (bitmap is null)

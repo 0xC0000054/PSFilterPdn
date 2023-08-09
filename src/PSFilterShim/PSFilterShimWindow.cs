@@ -367,6 +367,7 @@ namespace PSFilterShim
                                                   settings.DpiX,
                                                   settings.DpiY,
                                                   hwnd,
+                                                  settings.FilterCase,
                                                   documentMetadataProvider,
                                                   SurfaceFactory.Instance,
                                                   logger,

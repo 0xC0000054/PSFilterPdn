@@ -30,6 +30,7 @@ namespace PSFilterPdn
                                     ColorRgb24 secondaryColor,
                                     double dpiX,
                                     double dpiY,
+                                    FilterCase filterCase,
                                     string? selectionMaskPath,
                                     string? parameterDataPath,
                                     string? pseudoResourcePath,
@@ -45,6 +46,7 @@ namespace PSFilterPdn
             SecondaryColor = secondaryColor;
             DpiX = dpiX;
             DpiY = dpiY;
+            FilterCase = filterCase;
             SelectionMaskPath = selectionMaskPath;
             ParameterDataPath = parameterDataPath;
             PseudoResourcePath = pseudoResourcePath;
@@ -68,6 +70,8 @@ namespace PSFilterPdn
         public double DpiX { get; }
 
         public double DpiY { get; }
+
+        public FilterCase FilterCase { get; }
 
         public string? SelectionMaskPath { get; }
 
