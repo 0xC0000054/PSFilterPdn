@@ -38,6 +38,8 @@ namespace PSFilterLoad.PSApi.Imaging
 
         Size ISurface<DisplayPixelsSurface>.Size => new(Width, Height);
 
+        bool ISurface<DisplayPixelsSurface>.IsReadOnly => false;
+
         ISurface<DisplayPixelsSurface> ISurface<DisplayPixelsSurface>.Clone() => throw new NotImplementedException();
 
         ISurface<DisplayPixelsSurface> ISurface<DisplayPixelsSurface>.CreateScaledSurface(int newWidth, int newHeight) => throw new NotImplementedException();

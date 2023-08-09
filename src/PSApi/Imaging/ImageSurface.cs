@@ -32,6 +32,8 @@ namespace PSFilterLoad.PSApi.Imaging
 
         public Size Size => new(Width, Height);
 
+        public virtual bool IsReadOnly => false;
+
         public abstract ISurface<ImageSurface> Clone();
 
         public abstract ISurface<ImageSurface> CreateScaledSurface(int newWidth, int newHeight);

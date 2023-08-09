@@ -55,6 +55,8 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
         public override int Height { get; }
 
+        public override bool IsReadOnly => true;
+
         public override ISurface<MaskSurface> Clone() => new EffectSelectionMaskSurface(this);
 
         public override ISurface<MaskSurface> CreateScaledSurface(int newWidth, int newHeight)

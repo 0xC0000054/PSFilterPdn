@@ -2062,6 +2062,25 @@ namespace PSFilterLoad.PSApi
                 int width = source.Width;
                 int height = source.Height;
 
+                if (source.IsReadOnly)
+                {
+                    // If the source image is read only we make a copy that can be written to.
+                    ImageSurface newSource = surfaceFactory.CreateImageSurface(width, height, source.Format);
+
+                    using (ISurfaceLock sourceLock = source.Lock(SurfaceLockMode.Read))
+                    using (ISurfaceLock destLock = newSource.Lock(SurfaceLockMode.Write))
+                    {
+                        nuint bytesPerPixel = (nuint)source.ChannelCount * (nuint)(source.BitsPerChannel / 8);
+
+                        nuint imageDataSize = (((nuint)sourceLock.Height - 1) * (nuint)sourceLock.BufferStride) + ((nuint)sourceLock.Width * bytesPerPixel);
+
+                        NativeMemory.Copy(sourceLock.Buffer, destLock.Buffer, imageDataSize);
+                    }
+
+                    source.Dispose();
+                    source = newSource;
+                }
+
                 using (ISurfaceLock surfaceLock = source.Lock(SurfaceLockMode.ReadWrite))
                 {
                     int sourceChannelCount = source.ChannelCount;

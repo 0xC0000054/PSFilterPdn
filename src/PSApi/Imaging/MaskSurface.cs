@@ -22,6 +22,8 @@ namespace PSFilterLoad.PSApi.Imaging
 
         public abstract int Height { get; }
 
+        public virtual bool IsReadOnly => false;
+
         public abstract ISurface<MaskSurface> Clone();
 
         public abstract ISurface<MaskSurface> CreateScaledSurface(int newWidth, int newHeight);

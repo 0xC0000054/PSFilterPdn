@@ -31,6 +31,8 @@ namespace PSFilterLoad.PSApi.Imaging
 
         public Size Size { get; }
 
+        public bool IsReadOnly { get; }
+
         public bool SupportsTransparency { get; }
 
         public ISurface<T> Clone();
