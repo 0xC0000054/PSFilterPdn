@@ -1762,16 +1762,13 @@ namespace PSFilterLoad.PSApi
             }
 
             void* ptr = inDataPtr.ToPointer();
-            int top = lockRect.Top;
-            int left = lockRect.Left;
-            int bottom = lockRect.Bottom;
 
-            using (ISurfaceLock surfaceLock = tempSurface.Lock(SurfaceLockMode.Read))
+            using (ISurfaceLock surfaceLock = tempSurface.Lock(lockRect, SurfaceLockMode.Read))
             {
-                for (int y = top; y < bottom; y++)
+                for (int y = 0; y < lockRect.Height; y++)
                 {
-                    uint* src = (uint*)surfaceLock.GetPointPointerUnchecked(left, y);
-                    byte* dst = (byte*)ptr + ((y - top + padding.top) * stride) + padding.left;
+                    uint* src = (uint*)surfaceLock.GetRowPointerUnchecked(y);
+                    byte* dst = (byte*)ptr + ((y + padding.top) * stride) + padding.left;
 
                     ImageRow.Load(src, dst, lockRect.Width, channelIndex, nplanes);
                 }
@@ -1842,16 +1839,13 @@ namespace PSFilterLoad.PSApi
             }
 
             void* ptr = outDataPtr.ToPointer();
-            int top = lockRect.Top;
-            int left = lockRect.Left;
-            int bottom = lockRect.Bottom;
 
-            using (ISurfaceLock surfaceLock = dest.Lock(SurfaceLockMode.Read))
+            using (ISurfaceLock surfaceLock = dest.Lock(lockRect, SurfaceLockMode.Read))
             {
-                for (int y = top; y < bottom; y++)
+                for (int y = 0; y < lockRect.Height; y++)
                 {
-                    uint* src = (uint*)surfaceLock.GetPointPointerUnchecked(left, y);
-                    byte* dst = (byte*)ptr + ((y - top + padding.top) * stride) + padding.left;
+                    uint* src = (uint*)surfaceLock.GetRowPointerUnchecked(y);
+                    byte* dst = (byte*)ptr + ((y + padding.top) * stride) + padding.left;
 
                     ImageRow.Load(src, dst, lockRect.Width, channelIndex, nplanes);
                 }
@@ -1970,19 +1964,15 @@ namespace PSFilterLoad.PSApi
             }
 
             byte* ptr = (byte*)maskDataPtr.ToPointer();
-            int top = lockRect.Top;
-            int left = lockRect.Left;
-            int bottom = lockRect.Bottom;
-            int right = lockRect.Right;
 
-            using (ISurfaceLock maskLock = tempMask.Lock(SurfaceLockMode.Read))
+            using (ISurfaceLock maskLock = tempMask.Lock(lockRect, SurfaceLockMode.Read))
             {
-                for (int y = top; y < bottom; y++)
+                for (int y = 0; y < lockRect.Height; y++)
                 {
-                    byte* srcRow = maskLock.GetPointPointerUnchecked(left, y);
-                    byte* dstRow = ptr + ((y - top + padding.top) * width) + padding.left;
+                    byte* srcRow = maskLock.GetRowPointerUnchecked(y);
+                    byte* dstRow = ptr + ((y + padding.top) * width) + padding.left;
 
-                    NativeMemory.Copy(srcRow, dstRow, (uint)width);
+                    NativeMemory.Copy(srcRow, dstRow, (uint)lockRect.Width);
                 }
             }
 
