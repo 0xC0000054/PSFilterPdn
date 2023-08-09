@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet.Imaging;
-using PaintDotNet.Rendering;
 using System;
 using System.Drawing;
 
@@ -22,19 +21,6 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
     internal sealed class PDNMaskSurface : MaskSurface
     {
         private readonly WICBitmapSurface<ColorAlpha8> mask;
-
-        public PDNMaskSurface(IBitmapSource<ColorAlpha8> bitmapSource, IServiceProvider serviceProvider)
-        {
-            ArgumentNullException.ThrowIfNull(bitmapSource, nameof(bitmapSource));
-            ArgumentNullException.ThrowIfNull(serviceProvider, nameof(serviceProvider));
-
-            SizeInt32 bitmapSize = bitmapSource.Size;
-
-            Width = bitmapSize.Width;
-            Height = bitmapSize.Height;
-
-            mask = new WICBitmapSurface<ColorAlpha8>(bitmapSource, serviceProvider);
-        }
 
         public PDNMaskSurface(int width, int height, IImagingFactory imagingFactory)
         {

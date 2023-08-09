@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PaintDotNet;
 using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
 using System;
@@ -24,45 +23,6 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
     {
         private readonly IBitmap<TPixel> bitmap;
         private readonly IImagingFactory imagingFactory;
-
-        public WICBitmapSurface(IBitmapSource<TPixel> bitmapSource, IServiceProvider serviceProvider)
-        {
-            ArgumentNullException.ThrowIfNull(bitmapSource, nameof(bitmapSource));
-            ArgumentNullException.ThrowIfNull(serviceProvider, nameof(serviceProvider));
-
-            (int channelCount, int bitsPerChannel, SurfacePixelFormat format) = GetFormatInfo(typeof(TPixel));
-            SizeInt32 size = bitmapSource.Size;
-
-            ChannelCount = channelCount;
-            BitsPerChannel = bitsPerChannel;
-            Format = format;
-            Width = size.Width;
-            Height = size.Height;
-
-            imagingFactory = serviceProvider.GetService<IImagingFactory>() ?? throw new InvalidOperationException("Failed to get the WIC factory.");
-
-            bitmap = bitmapSource.ToBitmap();
-        }
-
-        public WICBitmapSurface(IBitmapSource<TPixel> bitmapSource,
-                                IImagingFactory imagingFactory)
-        {
-            ArgumentNullException.ThrowIfNull(bitmapSource, nameof(bitmapSource));
-            ArgumentNullException.ThrowIfNull(imagingFactory, nameof(imagingFactory));
-
-            (int channelCount, int bitsPerChannel, SurfacePixelFormat format) = GetFormatInfo(typeof(TPixel));
-            SizeInt32 size = bitmapSource.Size;
-
-            ChannelCount = channelCount;
-            BitsPerChannel = bitsPerChannel;
-            Format = format;
-            Width = size.Width;
-            Height = size.Height;
-
-            this.imagingFactory = imagingFactory;
-
-            bitmap = bitmapSource.ToBitmap();
-        }
 
         public WICBitmapSurface(int width, int height, IImagingFactory imagingFactory)
         {

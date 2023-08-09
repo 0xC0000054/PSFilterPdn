@@ -329,7 +329,7 @@ namespace PSFilterLoad.PSApi
             try
             {
                 this.source = takeOwnershipOfSource ? source : source.Clone();
-                dest = source.Clone();
+                dest = surfaceFactory.CreateImageSurface(source.Width, source.Height, source.Format);
 
                 if (selectionMask != null)
                 {
@@ -1053,6 +1053,29 @@ namespace PSFilterLoad.PSApi
             return data.Category.Equals("Amico Perry", StringComparison.Ordinal);
         }
 
+        private unsafe void CopySourceToDestination()
+        {
+            using (ISurfaceLock sourceLock = source.Lock(SurfaceLockMode.Read))
+            using (ISurfaceLock destLock = dest.Lock(SurfaceLockMode.Write))
+            {
+                if (sourceLock.Width == destLock.Width
+                    && sourceLock.Height == destLock.Height
+                    && sourceLock.Format == destLock.Format
+                    && sourceLock.BufferStride == destLock.BufferStride)
+                {
+                    nuint bytesPerPixel = (nuint)source.ChannelCount * (nuint)(source.BitsPerChannel / 8);
+
+                    nuint imageDataSize = (((nuint)sourceLock.Height - 1) * (nuint)sourceLock.BufferStride) + ((nuint)sourceLock.Width * bytesPerPixel);
+
+                    NativeMemory.Copy(sourceLock.Buffer, destLock.Buffer, imageDataSize);
+                }
+                else
+                {
+                    throw new NotSupportedException("The source and destination images must have the same size, format and stride.");
+                }
+            }
+        }
+
         /// <summary>
         /// Runs a filter from the specified PluginData
         /// </summary>
@@ -1073,6 +1096,8 @@ namespace PSFilterLoad.PSApi
 
             SetFilterTransparencyMode(pdata);
 
+            bool copySourceToDestination = true;
+
             if (pdata.FilterInfo != null)
             {
                 FilterCaseInfo info = pdata.FilterInfo[filterCase];
@@ -1080,7 +1105,7 @@ namespace PSFilterLoad.PSApi
                 outputHandling = info.OutputHandling;
                 FilterCaseInfoFlags filterCaseFlags = info.Flags1;
 
-                // The plugin always copies the source to the destination, it clones the source surface in the constructor.
+                copySourceToDestination = (filterCaseFlags & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None;
                 writesOutsideSelection = (filterCaseFlags & FilterCaseInfoFlags.WritesOutsideSelection) != FilterCaseInfoFlags.None;
 
                 bool worksWithBlankData = (filterCaseFlags & FilterCaseInfoFlags.WorksWithBlankData) != FilterCaseInfoFlags.None;
@@ -1094,6 +1119,13 @@ namespace PSFilterLoad.PSApi
                         return false;
                     }
                 }
+            }
+
+            if (copySourceToDestination || filterCase != FilterCase.EditableTransparencyNoSelection && filterCase != FilterCase.EditableTransparencyWithSelection)
+            {
+                // We copy the source to the destination when the filter requests it, or if the filter does not
+                // support the editable transparency image modes.
+                CopySourceToDestination();
             }
 
             if (pdata.Aete != null)

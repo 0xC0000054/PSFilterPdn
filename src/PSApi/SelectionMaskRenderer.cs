@@ -33,7 +33,7 @@ namespace PSFilterLoad.PSApi
 
             if (selectionInfo.RenderBounds != documentBounds)
             {
-                selectionMask = new PDNMaskSurface(selectionInfo.MaskBitmap, serviceProvider);
+                selectionMask = new EffectSelectionMaskSurface(selectionInfo.MaskBitmap, serviceProvider);
             }
 
             return selectionMask;

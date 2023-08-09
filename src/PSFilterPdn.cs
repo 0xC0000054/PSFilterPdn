@@ -239,7 +239,7 @@ namespace PSFilterPdn
                                                                  nameof(LoadPsFilter));
 
                 DocumentMetadataProvider documentMetadataProvider = new(Environment.Document);
-                source = new WICBitmapSurface<ColorBgra32>(Environment.GetSourceBitmapBgra32(), Services);
+                source = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), Services);
                 selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
                 SurfaceFactory surfaceFactory = new(Services);
 

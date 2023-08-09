@@ -917,7 +917,7 @@ namespace PSFilterPdn
 
         private void InitializeEnvironment()
         {
-            sourceBitmap = new WICBitmapSurface<ColorBgra32>(Environment.GetSourceBitmapBgra32(), imagingFactory);
+            sourceBitmap = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), imagingFactory);
             primaryColor = new ColorRgb24(Environment.PrimaryColor);
             secondaryColor = new ColorRgb24(Environment.SecondaryColor);
             selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
