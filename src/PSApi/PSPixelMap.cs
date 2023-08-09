@@ -59,7 +59,7 @@ namespace PSFilterLoad.PSApi
             return builder.ToString();
         }
 
-        private string GetFormattedString()
+        private readonly string GetFormattedString()
             => string.Format("maskData=0x{0}, rowBytes={1}, colBytes{2}, maskDescription={3}",
                              new object[] { maskData.ToHexString(), rowBytes, colBytes, maskDescription });
     }
@@ -79,7 +79,7 @@ namespace PSFilterLoad.PSApi
         public int maskPhaseRow;
         public int maskPhaseCol;
 
-        public override string ToString() => string.Format(
+        public override readonly string ToString() => string.Format(
                 "version={0}, bounds={1}, imageMode={2}, rowBytes={3}, colBytes={4}, planeBytes={5}, baseAddress=0x{6}, mat={7}, masks={8}",
                 new object[]{ version, bounds, ((ImageMode)imageMode).ToString("G"), rowBytes, colBytes, planeBytes, baseAddr.ToHexString(),
                      FormatPSPixelMask(mat), FormatPSPixelMask(masks) });

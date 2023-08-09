@@ -34,7 +34,7 @@ namespace PSFilterLoad.PSApi.PICA
         public ushort y;
         public ushort z;
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return string.Format("X: {0}, Y: {1}, Z: {2}", x, y, z);
         }
@@ -66,19 +66,19 @@ namespace PSFilterLoad.PSApi.PICA
             value = new IntPtr(index);
         }
 
-        public int Index => value.ToInt32();
+        public readonly int Index => value.ToInt32();
 
         public override bool Equals(object obj)
         {
             return obj is ColorID other && Equals(other);
         }
 
-        public bool Equals(ColorID other)
+        public readonly bool Equals(ColorID other)
         {
             return value == other.value;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return -1584136870 + value.GetHashCode();
         }
@@ -160,19 +160,19 @@ namespace PSFilterLoad.PSApi.PICA
             value = new IntPtr(index);
         }
 
-        public int Index => value.ToInt32();
+        public readonly int Index => value.ToInt32();
 
         public override bool Equals(object obj)
         {
             return obj is ASZString other && Equals(other);
         }
 
-        public bool Equals(ASZString other)
+        public readonly bool Equals(ASZString other)
         {
             return value == other.value;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return -1584136870 + value.GetHashCode();
         }

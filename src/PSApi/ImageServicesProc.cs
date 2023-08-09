@@ -28,7 +28,7 @@ namespace PSFilterLoad.PSApi
         public int rowBytes;
         public int colBytes;
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"data: 0x{data.ToHexString()}, bounds={bounds}, rowBytes={rowBytes}, colBytes={colBytes}";
         }

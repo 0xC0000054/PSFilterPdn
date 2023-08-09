@@ -54,10 +54,10 @@ namespace PSFilterLoad.PSApi
         /// Gets the 16.16 fixed point number.
         /// </summary>
         /// <returns>The 16.16 fixed point number.</returns>
-        public int Value => fixedValue;
+        public readonly int Value => fixedValue;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string DebuggerDisplay => string.Format("Fixed = {0}", fixedValue);
+        private readonly string DebuggerDisplay => string.Format("Fixed = {0}", fixedValue);
 
         /// <summary>
         /// Determines whether the specified <see cref="object"/>, is equal to this instance.
@@ -83,7 +83,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
         /// </returns>
-        public bool Equals(Fixed16 other)
+        public readonly bool Equals(Fixed16 other)
         {
             return fixedValue == other.fixedValue;
         }
@@ -94,7 +94,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return fixedValue.GetHashCode();
         }
@@ -103,7 +103,7 @@ namespace PSFilterLoad.PSApi
         /// Converts the 16.16 fixed point value to an Int32.
         /// </summary>
         /// <returns>The 16.16 fixed point value converted to an Int32.</returns>
-        public int ToInt32()
+        public readonly int ToInt32()
         {
             return fixedValue >> 16;
         }
@@ -112,7 +112,7 @@ namespace PSFilterLoad.PSApi
         /// Converts the 16.16 fixed point value to a Double.
         /// </summary>
         /// <returns>The 16.16 fixed point value converted to a Double.</returns>
-        public double ToDouble()
+        public readonly double ToDouble()
         {
             return fixedValue / 65536.0;
         }

@@ -25,7 +25,7 @@ namespace PSFilterLoad.PSApi
         public int bottom;
         public int right;
 
-        public bool Equals(VRect rect)
+        public readonly bool Equals(VRect rect)
         {
             return left == rect.left && top == rect.top && right == rect.right && bottom == rect.bottom;
         }
@@ -40,7 +40,7 @@ namespace PSFilterLoad.PSApi
             return false;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             unchecked
             {
@@ -65,7 +65,7 @@ namespace PSFilterLoad.PSApi
             return !left.Equals(right);
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return "Top=" + top.ToString() + ",Bottom=" + bottom.ToString() + ",Left=" + left.ToString() + ",Right=" + right.ToString();
         }

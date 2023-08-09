@@ -31,19 +31,19 @@ namespace PSFilterLoad.PSApi
             value = new IntPtr(index);
         }
 
-        public int Index => value.ToInt32();
+        public readonly int Index => value.ToInt32();
 
         public override bool Equals(object obj)
         {
             return obj is PIReadDescriptor other && Equals(other);
         }
 
-        public bool Equals(PIReadDescriptor other)
+        public readonly bool Equals(PIReadDescriptor other)
         {
             return value == other.value;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return -1584136870 + value.GetHashCode();
         }
@@ -75,19 +75,19 @@ namespace PSFilterLoad.PSApi
             value = new IntPtr(index);
         }
 
-        public int Index => value.ToInt32();
+        public readonly int Index => value.ToInt32();
 
         public override bool Equals(object obj)
         {
             return obj is PIWriteDescriptor other && Equals(other);
         }
 
-        public bool Equals(PIWriteDescriptor other)
+        public readonly bool Equals(PIWriteDescriptor other)
         {
             return value == other.value;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return -1584136870 + value.GetHashCode();
         }

@@ -38,7 +38,7 @@ namespace PSFilterLoad.PSApi
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string DebuggerDisplay
+        private readonly string DebuggerDisplay
         {
             get
             {
@@ -73,7 +73,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         ///   <see langword="true"/> if the current object is equal to the <paramref name="other"/> parameter; otherwise, <see langword="false"/>.
         /// </returns>
-        public bool Equals(PSBoolean other)
+        public readonly bool Equals(PSBoolean other)
         {
             // Use a comparison where any non zero value is true.
             if (value != 0)
@@ -92,7 +92,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return value != 0 ? TrueLiteral : FalseLiteral;
         }
@@ -103,7 +103,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A <see cref="string"/> that represents this instance.
         /// </returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return value != 0 ? bool.TrueString : bool.FalseString;
         }

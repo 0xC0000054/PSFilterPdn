@@ -31,19 +31,19 @@ namespace PSFilterLoad.PSApi.PICA
             value = new IntPtr(index);
         }
 
-        public int Index => value.ToInt32();
+        public readonly int Index => value.ToInt32();
 
         public override bool Equals(object obj)
         {
             return obj is PIActionReference other && Equals(other);
         }
 
-        public bool Equals(PIActionReference other)
+        public readonly bool Equals(PIActionReference other)
         {
             return value == other.value;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return -1584136870 + value.GetHashCode();
         }

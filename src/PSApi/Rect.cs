@@ -39,12 +39,12 @@ namespace PSFilterLoad.PSApi
                 return false;
             }
         }
-        public bool Equals(Rect16 rect)
+        public readonly bool Equals(Rect16 rect)
         {
             return left == rect.left && top == rect.top && right == rect.right && bottom == rect.bottom;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             unchecked
             {
@@ -69,7 +69,7 @@ namespace PSFilterLoad.PSApi
             return !left.Equals(right);
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return "Top=" + top.ToString() + ",Bottom=" + bottom.ToString() + ",Left=" + left.ToString() + ",Right=" + right.ToString();
         }
