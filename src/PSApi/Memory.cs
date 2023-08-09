@@ -300,50 +300,6 @@ namespace PSFilterLoad.PSApi
             return size;
         }
 
-        /// <summary>
-        /// Copies bytes from one area of memory to another. Since this function only
-        /// takes pointers, it can not do any bounds checking.
-        /// </summary>
-        /// <param name="source">The starting address of where to copy bytes from.</param>
-        /// <param name="destination">The starting address of where to copy bytes to.</param>
-        /// <param name="length">The number of bytes to copy</param>
-        public static unsafe void Copy(void* source, void* destination, ulong length)
-        {
-            Buffer.MemoryCopy(source, destination, length, length);
-        }
-
-        /// <summary>
-        /// Fills the memory block with the specified value.
-        /// </summary>
-        /// <param name="ptr">The starting address of the memory block to fill.</param>
-        /// <param name="length">The length of the memory block.</param>
-        /// <param name="value">The value to place in the memory block.</param>
-        public static unsafe void Fill(IntPtr address, nuint length, byte value)
-        {
-            NativeMemory.Fill(address.ToPointer(), length, value);
-        }
-
-        /// <summary>
-        /// Fills the memory block with the specified value.
-        /// </summary>
-        /// <param name="ptr">The starting address of the memory block to fill.</param>
-        /// <param name="length">The length of the memory block.</param>
-        /// <param name="value">The value to place in the memory block.</param>
-        public static unsafe void Fill(void* address, nuint length, byte value)
-        {
-            NativeMemory.Fill(address, length, value);
-        }
-
-        /// <summary>
-        /// Fills the memory block with the zeros.
-        /// </summary>
-        /// <param name="ptr">The starting address of the memory block to fill.</param>
-        /// <param name="length">The length of the memory block.</param>
-        public static unsafe void SetToZero(IntPtr address, nuint length)
-        {
-            NativeMemory.Clear(address.ToPointer(), length);
-        }
-
         // Adapted from: http://joeduffyblog.com/2005/04/08/dg-update-dispose-finalization-and-resource-management/
         private static class MemoryPressureManager
         {

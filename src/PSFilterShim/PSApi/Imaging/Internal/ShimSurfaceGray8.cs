@@ -22,6 +22,7 @@
 
 using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using PaintDotNet;
 
 #nullable enable
@@ -120,30 +121,26 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
         /// The source surface does not need to have the same dimensions as this surface. Clipping
         /// will be handled automatically. No resizing will be done.
         /// </remarks>
-        private void CopySurface(ShimSurfaceGray8 source)
+        private unsafe void CopySurface(ShimSurfaceGray8 source)
         {
             if (stride == source.stride &&
                 width == source.width &&
                 height == source.height)
             {
-                unsafe
-                {
-                    Memory.Copy(source.scan0.VoidStar,
+                NativeMemory.Copy(source.scan0.VoidStar,
                                 scan0.VoidStar,
-                                ((ulong)(height - 1) * (ulong)stride) + (ulong)width);
-                }
+                                checked(((nuint)(height - 1) * (nuint)stride) + (nuint)width));
             }
             else
             {
                 int copyWidth = Math.Min(width, source.width);
                 int copyHeight = Math.Min(height, source.height);
 
-                unsafe
+                for (int y = 0; y < copyHeight; ++y)
                 {
-                    for (int y = 0; y < copyHeight; ++y)
-                    {
-                        Memory.Copy(source.GetRowAddressUnchecked(y), GetRowAddressUnchecked(y), (ulong)copyWidth);
-                    }
+                    NativeMemory.Copy(source.GetRowAddressUnchecked(y),
+                                      GetRowAddressUnchecked(y),
+                                      (nuint)copyWidth);
                 }
             }
         }

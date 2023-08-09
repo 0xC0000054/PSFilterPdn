@@ -171,17 +171,5 @@ namespace PaintDotNet.SystemLayer
                 MemoryPressureManager.RemoveMemoryPressure((long)bytes);
             }
         }
-
-        /// <summary>
-        /// Copies bytes from one area of memory to another. Since this function only
-        /// takes pointers, it can not do any bounds checking.
-        /// </summary>
-        /// <param name="dst">The starting address of where to copy bytes to.</param>
-        /// <param name="src">The starting address of where to copy bytes from.</param>
-        /// <param name="length">The number of bytes to copy</param>
-        public static void Copy(void* dst, void* src, ulong length)
-        {
-            Buffer.MemoryCopy(src, dst, length, length);
-        }
     }
 }

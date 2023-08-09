@@ -13,6 +13,7 @@
 using PaintDotNet;
 using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 
 #nullable enable
 
@@ -128,31 +129,27 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
         /// The source surface does not need to have the same dimensions as this surface. Clipping
         /// will be handled automatically. No resizing will be done.
         /// </remarks>
-        private void CopySurface(ShimSurfaceBgr24 source)
+        private unsafe void CopySurface(ShimSurfaceBgr24 source)
         {
             if (stride == source.stride &&
                 (width * sizeof(ColorBgr24)) == stride &&
                 width == source.width &&
                 height == source.height)
             {
-                unsafe
-                {
-                    Memory.Copy(source.scan0.VoidStar,
-                                scan0.VoidStar,
-                                ((ulong)(height - 1) * (ulong)stride) + ((ulong)width * (ulong)sizeof(ColorBgr24)));
-                }
+                NativeMemory.Copy(source.scan0.VoidStar,
+                                  scan0.VoidStar,
+                                  checked(((nuint)(height - 1) * (nuint)stride) + ((nuint)width * (nuint)sizeof(ColorBgr24))));
             }
             else
             {
                 int copyWidth = Math.Min(width, source.width);
                 int copyHeight = Math.Min(height, source.height);
 
-                unsafe
+                for (int y = 0; y < copyHeight; ++y)
                 {
-                    for (int y = 0; y < copyHeight; ++y)
-                    {
-                        Memory.Copy(source.GetRowAddressUnchecked(y), GetRowAddressUnchecked(y), (ulong)copyWidth * (ulong)sizeof(ColorBgr24));
-                    }
+                    NativeMemory.Copy(source.GetRowAddressUnchecked(y),
+                                      GetRowAddressUnchecked(y),
+                                      (nuint)copyWidth * (nuint)sizeof(ColorBgr24));
                 }
             }
         }

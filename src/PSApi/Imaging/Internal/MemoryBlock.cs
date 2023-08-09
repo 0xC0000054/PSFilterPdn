@@ -115,7 +115,7 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
             void* dstPtr = (void*)((byte*)dst.VoidStar + dstOffset);
             void* srcPtr = (void*)((byte*)src.VoidStar + srcOffset);
-            Memory.Copy(srcPtr, dstPtr, (ulong)length);
+            System.Runtime.InteropServices.NativeMemory.Copy(srcPtr, dstPtr, checked((nuint)length));
         }
 
         /// <summary>

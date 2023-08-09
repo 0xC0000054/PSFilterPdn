@@ -1,17 +1,29 @@
-﻿using System;
+﻿/////////////////////////////////////////////////////////////////////////////////
+//
+// Photoshop-compatible filter host Effect plugin for Paint.NET
+// https://github.com/0xC0000054/PSFilterPdn
+//
+// This software is provided under the Microsoft Public License:
+//   Copyright (C) 2010-2023 Nicholas Hayes
+//
+// See LICENSE.txt for complete licensing and attribution information.
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////
+// Paint.NET                                                                   //
+// Copyright (C) dotPDN LLC, Rick Brewster, Tom Jackson, and contributors.     //
+// Portions Copyright (C) Microsoft Corporation. All Rights Reserved.          //
+// See src/Resources/Files/License.txt for full licensing and attribution      //
+// details.                                                                    //
+// .                                                                           //
+/////////////////////////////////////////////////////////////////////////////////
+
+using System;
 using PaintDotNet.SystemLayer;
 
 namespace PaintDotNet
 {
-    /////////////////////////////////////////////////////////////////////////////////
-    // Paint.NET                                                                   //
-    // Copyright (C) dotPDN LLC, Rick Brewster, Tom Jackson, and contributors.     //
-    // Portions Copyright (C) Microsoft Corporation. All Rights Reserved.          //
-    // See src/Resources/Files/License.txt for full licensing and attribution      //
-    // details.                                                                    //
-    // .                                                                           //
-    /////////////////////////////////////////////////////////////////////////////////
-
     internal unsafe sealed class MemoryBlock : IDisposable
     {
         // blocks this size or larger are allocated with AllocateLarge (VirtualAlloc) instead of Allocate (HeapAlloc)
@@ -109,7 +121,7 @@ namespace PaintDotNet
 
             void* dstPtr = (void*)((byte*)dst.VoidStar + dstOffset);
             void* srcPtr = (void*)((byte*)src.VoidStar + srcOffset);
-            Memory.Copy(dstPtr, srcPtr, (ulong)length);
+            System.Runtime.InteropServices.NativeMemory.Copy(dstPtr, srcPtr, checked((nuint)length));
         }
 
         /// <summary>

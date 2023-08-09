@@ -1425,7 +1425,7 @@ namespace PSFilterLoad.PSApi
                             return PSError.paramErr;
                         }
 
-                        Memory.Fill(maskData, Memory.Size(maskData), (byte)maskPadding);
+                        NativeMemory.Fill(maskData.ToPointer(), Memory.Size(maskData), (byte)maskPadding);
                         break;
                 }
             }
@@ -1462,7 +1462,7 @@ namespace PSFilterLoad.PSApi
                         byte* src = surfaceLock.GetRowPointerUnchecked(0);
                         byte* dst = ptr + (y * maskRowBytes);
 
-                        Memory.Copy(src, dst, (uint)surfaceWidth);
+                        NativeMemory.Copy(src, dst, (uint)surfaceWidth);
                     }
                 }
             }
@@ -1476,7 +1476,7 @@ namespace PSFilterLoad.PSApi
                         byte value = *surfaceLock.GetPointPointerUnchecked(0, y);
                         byte* dst = ptr + (y * maskRowBytes);
 
-                        Memory.Fill(dst, (uint)left, value);
+                        NativeMemory.Fill(dst, (uint)left, value);
                     }
                 }
             }
@@ -1492,7 +1492,7 @@ namespace PSFilterLoad.PSApi
                         byte* src = surfaceLock.GetRowPointerUnchecked(lastSurfaceRow);
                         byte* dst = ptr + ((lockBottom - y) * maskRowBytes);
 
-                        Memory.Copy(src, dst, (uint)surfaceWidth);
+                        NativeMemory.Copy(src, dst, (uint)surfaceWidth);
                     }
                 }
             }
@@ -1507,7 +1507,7 @@ namespace PSFilterLoad.PSApi
                         byte value = *surfaceLock.GetPointPointerUnchecked(lastSurfaceColumn, y);
                         byte* dst = ptr + (y * maskRowBytes) + rowEnd;
 
-                        Memory.Fill(dst, (uint)right, value);
+                        NativeMemory.Fill(dst, (uint)right, value);
                     }
                 }
             }
@@ -1551,7 +1551,7 @@ namespace PSFilterLoad.PSApi
                             return PSError.paramErr;
                         }
 
-                        Memory.Fill(inData, Memory.Size(inData), (byte)inputPadding);
+                        NativeMemory.Fill(inData.ToPointer(), Memory.Size(inData), (byte)inputPadding);
                         break;
                 }
             }
@@ -1982,7 +1982,7 @@ namespace PSFilterLoad.PSApi
                     byte* srcRow = maskLock.GetPointPointerUnchecked(left, y);
                     byte* dstRow = ptr + ((y - top + padding.top) * width) + padding.left;
 
-                    Memory.Copy(srcRow, dstRow, (uint)width);
+                    NativeMemory.Copy(srcRow, dstRow, (uint)width);
                 }
             }
 
