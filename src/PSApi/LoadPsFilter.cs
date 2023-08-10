@@ -2049,6 +2049,12 @@ namespace PSFilterLoad.PSApi
         {
             if (inputHandling != FilterDataHandling.None && (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection))
             {
+                if (inputHandling >= FilterDataHandling.BlackMat && inputHandling <= FilterDataHandling.Defringe)
+                {
+                    logger.Log(PluginApiLogCategory.FilterCaseInfo, "Unsupported InputHandling mode '{0}', the input will be unchanged.", inputHandling);
+                    return;
+                }
+
                 int width = source.Width;
                 int height = source.Height;
 
@@ -2085,14 +2091,6 @@ namespace PSFilterLoad.PSApi
                             {
                                 switch (inputHandling)
                                 {
-                                    case FilterDataHandling.BlackMat:
-                                        break;
-                                    case FilterDataHandling.GrayMat:
-                                        break;
-                                    case FilterDataHandling.WhiteMat:
-                                        break;
-                                    case FilterDataHandling.Defringe:
-                                        break;
                                     case FilterDataHandling.BlackZap:
                                         ptr[0] = ptr[1] = ptr[2] = 0;
                                         break;
@@ -2112,6 +2110,8 @@ namespace PSFilterLoad.PSApi
                                         ptr[1] = foregroundColor.G;
                                         ptr[0] = foregroundColor.B;
                                         break;
+                                    default:
+                                        throw new InvalidOperationException($"Unsupported InputHandling mode: {inputHandling}.");
                                 }
                             }
 
@@ -2124,11 +2124,20 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void PostProcessOutputData()
         {
-            if (outputHandling == FilterDataHandling.FillMask &&
-                (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection))
+            if (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection)
             {
-                // Set the alpha value to opaque in the areas affected by the filter.
-                PostProcessingOptions |= FilterPostProcessingOptions.SetAlphaTo255;
+                switch (outputHandling)
+                {
+                    case FilterDataHandling.None:
+                        break;
+                    case FilterDataHandling.FillMask:
+                        // Set the alpha value to opaque in the areas affected by the filter.
+                        PostProcessingOptions |= FilterPostProcessingOptions.SetAlphaTo255;
+                        break;
+                    default:
+                        logger.Log(PluginApiLogCategory.FilterCaseInfo, "Unsupported OutputHandling mode '{0}', the output will be unchanged.", outputHandling);
+                        break;
+                }
             }
 
             switch (filterCase)

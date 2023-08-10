@@ -22,6 +22,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
         DescriptorSuite,
         DisplayPixelsCallback,
         Error,
+        FilterCaseInfo,
         HandleSuite,
         HostCallback,
         ImageServicesSuite,

@@ -31,6 +31,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
             builder.Add(PluginApiLogCategory.DescriptorSuite);
             builder.Add(PluginApiLogCategory.DisplayPixelsCallback);
             builder.Add(PluginApiLogCategory.Error);
+            builder.Add(PluginApiLogCategory.FilterCaseInfo);
             builder.Add(PluginApiLogCategory.HandleSuite);
             builder.Add(PluginApiLogCategory.HostCallback);
             builder.Add(PluginApiLogCategory.ImageServicesSuite);
