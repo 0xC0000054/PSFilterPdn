@@ -101,8 +101,8 @@ namespace PSFilterLoad.PSApi
         private double dpiX;
         private double dpiY;
         private bool hasSelectionMask;
-        private byte[] backgroundColor;
-        private byte[] foregroundColor;
+        private readonly ColorRgb24 backgroundColor;
+        private readonly ColorRgb24 foregroundColor;
 
         private FilterDataHandling inputHandling;
         private FilterDataHandling outputHandling;
@@ -317,8 +317,8 @@ namespace PSFilterLoad.PSApi
                                                           resourceSuite,
                                                           logger.CreateInstanceForType(nameof(SPBasicSuiteProvider)));
 
-            backgroundColor = new byte[4] { secondaryColor.R, secondaryColor.G, secondaryColor.B, 0 };
-            foregroundColor = new byte[4] { primaryColor.R, primaryColor.G, primaryColor.B, 0 };
+            backgroundColor = secondaryColor;
+            foregroundColor = primaryColor;
 
             this.dpiX = dpiX;
             this.dpiY = dpiY;
@@ -2103,14 +2103,14 @@ namespace PSFilterLoad.PSApi
                                         ptr[0] = ptr[1] = ptr[2] = 255;
                                         break;
                                     case FilterDataHandling.BackgroundZap:
-                                        ptr[2] = backgroundColor[0];
-                                        ptr[1] = backgroundColor[1];
-                                        ptr[0] = backgroundColor[2];
+                                        ptr[2] = backgroundColor.R;
+                                        ptr[1] = backgroundColor.G;
+                                        ptr[0] = backgroundColor.B;
                                         break;
                                     case FilterDataHandling.ForegroundZap:
-                                        ptr[2] = foregroundColor[0];
-                                        ptr[1] = foregroundColor[1];
-                                        ptr[0] = foregroundColor[2];
+                                        ptr[2] = foregroundColor.R;
+                                        ptr[1] = foregroundColor.G;
+                                        ptr[0] = foregroundColor.B;
                                         break;
                                 }
                             }
@@ -2246,18 +2246,18 @@ namespace PSFilterLoad.PSApi
                     {
                         case SpecialColorID.BackgroundColor:
 
-                            for (int i = 0; i < 4; i++)
-                            {
-                                info->colorComponents[i] = backgroundColor[i];
-                            }
+                            info->colorComponents[0] = backgroundColor.R;
+                            info->colorComponents[1] = backgroundColor.G;
+                            info->colorComponents[2] = backgroundColor.B;
+                            info->colorComponents[3] = 0;
 
                             break;
                         case SpecialColorID.ForegroundColor:
 
-                            for (int i = 0; i < 4; i++)
-                            {
-                                info->colorComponents[i] = foregroundColor[i];
-                            }
+                            info->colorComponents[0] = foregroundColor.R;
+                            info->colorComponents[1] = foregroundColor.G;
+                            info->colorComponents[2] = foregroundColor.B;
+                            info->colorComponents[3] = 0;
 
                             break;
                         default:
@@ -2748,19 +2748,21 @@ namespace PSFilterLoad.PSApi
             // Dividing 65535 by 255 produces a integer value of 257, floating point math is not required.
             const int RGBColorMultiplier = 257;
 
-            filterRecord->background.red = (ushort)(backgroundColor[0] * RGBColorMultiplier);
-            filterRecord->background.green = (ushort)(backgroundColor[1] * RGBColorMultiplier);
-            filterRecord->background.blue = (ushort)(backgroundColor[2] * RGBColorMultiplier);
+            filterRecord->background.red = (ushort)(backgroundColor.R * RGBColorMultiplier);
+            filterRecord->background.green = (ushort)(backgroundColor.G * RGBColorMultiplier);
+            filterRecord->background.blue = (ushort)(backgroundColor.B * RGBColorMultiplier);
 
-            filterRecord->foreground.red = (ushort)(foregroundColor[0] * RGBColorMultiplier);
-            filterRecord->foreground.green = (ushort)(foregroundColor[1] * RGBColorMultiplier);
-            filterRecord->foreground.blue = (ushort)(foregroundColor[2] * RGBColorMultiplier);
+            filterRecord->foreground.red = (ushort)(foregroundColor.R * RGBColorMultiplier);
+            filterRecord->foreground.green = (ushort)(foregroundColor.G * RGBColorMultiplier);
+            filterRecord->foreground.blue = (ushort)(foregroundColor.B * RGBColorMultiplier);
 
-            for (int i = 0; i < 4; i++)
-            {
-                filterRecord->backColor[i] = backgroundColor[i];
-                filterRecord->foreColor[i] = foregroundColor[i];
-            }
+            filterRecord->backColor[0] = backgroundColor.R;
+            filterRecord->backColor[1] = backgroundColor.G;
+            filterRecord->backColor[2] = backgroundColor.B;
+
+            filterRecord->foreColor[0] = foregroundColor.R;
+            filterRecord->foreColor[1] = foregroundColor.G;
+            filterRecord->foreColor[2] = foregroundColor.B;
 
             filterRecord->bufferSpace = bufferSuite.AvailableSpace;
             filterRecord->maxSpace = filterRecord->bufferSpace;
