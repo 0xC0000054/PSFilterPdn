@@ -15,7 +15,6 @@ using PSFilterLoad.PSApi;
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
-using System.IO;
 using System.IO.Pipes;
 using System.Runtime.CompilerServices;
 using System.Text;

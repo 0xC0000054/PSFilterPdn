@@ -14,7 +14,6 @@ using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
 using PSFilterLoad.PSApi.Imaging;
 using System;
-using System.Buffers;
 using System.IO;
 
 namespace PSFilterPdn

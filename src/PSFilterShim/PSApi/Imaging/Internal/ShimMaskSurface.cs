@@ -20,9 +20,7 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
 using System.Drawing;
-using PaintDotNet;
 
 #nullable enable
 
