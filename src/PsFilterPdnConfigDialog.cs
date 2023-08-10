@@ -1285,43 +1285,40 @@ namespace PSFilterPdn
         /// <returns>True if the item is not a duplicate; otherwise false.</returns>
         private static bool IsNotDuplicateNode(ref List<TreeNodeEx> nodes, PluginData data)
         {
-            if (IntPtr.Size == 8)
+            int index = nodes.FindIndex(t => t.Text == data.Title);
+
+            if (index >= 0)
             {
-                int index = nodes.FindIndex(t => t.Text == data.Title);
+                TreeNode node = nodes[index];
+                PluginData menuData = (PluginData)node.Tag;
 
-                if (index >= 0)
+                if (Is64BitFilterIncompatible(data))
                 {
-                    TreeNode node = nodes[index];
-                    PluginData menuData = (PluginData)node.Tag;
-
-                    if (Is64BitFilterIncompatible(data))
+                    // If the 64-bit filter in the menu is incompatible remove it and use the 32-bit version.
+                    if (!menuData.RunWith32BitShim && data.RunWith32BitShim)
                     {
-                        // If the 64-bit filter in the menu is incompatible remove it and use the 32-bit version.
-                        if (!menuData.RunWith32BitShim && data.RunWith32BitShim)
-                        {
-                            nodes.RemoveAt(index);
-                        }
-
-                        return data.RunWith32BitShim;
-                    }
-
-                    if (menuData.RunWith32BitShim && !data.RunWith32BitShim)
-                    {
-                        // If the new plugin is 64-bit and the old one is not remove the old one and use the 64-bit one.
                         nodes.RemoveAt(index);
-
-                        return true;
                     }
 
-                    // If the filter has the same processor architecture and title but is located in a different 8bf file, add it to the menu.
-                    if (menuData.RunWith32BitShim == data.RunWith32BitShim &&
-                        !menuData.FileName.Equals(data.FileName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-
-                    return false;
+                    return data.RunWith32BitShim;
                 }
+
+                if (menuData.RunWith32BitShim && !data.RunWith32BitShim)
+                {
+                    // If the new plugin is 64-bit and the old one is not remove the old one and use the 64-bit one.
+                    nodes.RemoveAt(index);
+
+                    return true;
+                }
+
+                // If the filter has the same processor architecture and title but is located in a different 8bf file, add it to the menu.
+                if (menuData.RunWith32BitShim == data.RunWith32BitShim &&
+                    !menuData.FileName.Equals(data.FileName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                return false;
             }
 
             return true;
