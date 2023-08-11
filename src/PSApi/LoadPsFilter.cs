@@ -2079,43 +2079,41 @@ namespace PSFilterLoad.PSApi
 
                 using (ISurfaceLock surfaceLock = source.Lock(SurfaceLockMode.ReadWrite))
                 {
-                    int sourceChannelCount = source.ChannelCount;
+                    uint transparentPixelColor;
+
+                    switch (inputHandling)
+                    {
+                        case FilterDataHandling.BlackZap:
+                            transparentPixelColor = 0x00000000;
+                            break;
+                        case FilterDataHandling.GrayZap:
+                            transparentPixelColor = 0x00808080;
+                            break;
+                        case FilterDataHandling.WhiteZap:
+                            transparentPixelColor = 0x00ffffff;
+                            break;
+                        case FilterDataHandling.BackgroundZap:
+                            transparentPixelColor = (uint)((backgroundColor.R << 16) | (backgroundColor.G << 8) | backgroundColor.B);
+                            break;
+                        case FilterDataHandling.ForegroundZap:
+                            transparentPixelColor = (uint)((foregroundColor.R << 16) | (foregroundColor.G << 8) | foregroundColor.B);
+                            break;
+                        default:
+                            throw new InvalidOperationException($"Unsupported InputHandling mode: {inputHandling}.");
+                    }
 
                     for (int y = 0; y < height; y++)
                     {
-                        byte* ptr = surfaceLock.GetRowPointerUnchecked(y);
+                        uint* ptr = (uint*)surfaceLock.GetRowPointerUnchecked(y);
 
                         for (int x = 0; x < width; x++)
                         {
-                            if (ptr[3] == 0)
+                            if (*ptr < 0x01000000)
                             {
-                                switch (inputHandling)
-                                {
-                                    case FilterDataHandling.BlackZap:
-                                        ptr[0] = ptr[1] = ptr[2] = 0;
-                                        break;
-                                    case FilterDataHandling.GrayZap:
-                                        ptr[0] = ptr[1] = ptr[2] = 128;
-                                        break;
-                                    case FilterDataHandling.WhiteZap:
-                                        ptr[0] = ptr[1] = ptr[2] = 255;
-                                        break;
-                                    case FilterDataHandling.BackgroundZap:
-                                        ptr[2] = backgroundColor.R;
-                                        ptr[1] = backgroundColor.G;
-                                        ptr[0] = backgroundColor.B;
-                                        break;
-                                    case FilterDataHandling.ForegroundZap:
-                                        ptr[2] = foregroundColor.R;
-                                        ptr[1] = foregroundColor.G;
-                                        ptr[0] = foregroundColor.B;
-                                        break;
-                                    default:
-                                        throw new InvalidOperationException($"Unsupported InputHandling mode: {inputHandling}.");
-                                }
+                                *ptr = transparentPixelColor;
                             }
 
-                            ptr += sourceChannelCount;
+                            ptr++;
                         }
                     }
                 }
