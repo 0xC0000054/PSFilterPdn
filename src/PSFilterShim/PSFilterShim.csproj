@@ -26,6 +26,7 @@
     <CodeAnalysisRuleSet>..\PSFilterPdn.ruleset</CodeAnalysisRuleSet>
     <ApplicationManifest>PSFilterShim.manifest</ApplicationManifest>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <TrimMode>partial</TrimMode>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -33,6 +34,9 @@
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
+  <ItemGroup>
+    <TrimmerRootAssembly Include="PSFilterShim" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="..\MessagePackResolver.cs" Link="MessagePackResolver.cs" />
     <Compile Include="..\MessagePackSerializerUtil.cs" Link="MessagePackSerializerUtil.cs" />
