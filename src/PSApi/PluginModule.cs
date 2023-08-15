@@ -10,26 +10,28 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PSFilterPdn.Interop;
-using PSFilterPdn.Properties;
+using TerraFX.Interop.Windows;
 using System;
+using System.Buffers;
+using System.ComponentModel;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PSFilterLoad.PSApi
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
     internal unsafe delegate void PluginEntryPoint(FilterSelector selector, void* pluginParamBlock, ref IntPtr pluginData, ref short result);
 
-    internal sealed class PluginModule : IDisposable
+    internal sealed unsafe class PluginModule : Disposable
     {
         /// <summary>
         /// The entry point for the FilterParmBlock and AboutRecord
         /// </summary>
         public readonly PluginEntryPoint entryPoint;
         private readonly string fileName;
-        private SafeLibraryHandle handle;
-        private bool disposed;
+        private HMODULE handle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginModule"/> class.
@@ -37,32 +39,31 @@ namespace PSFilterLoad.PSApi
         /// <param name="fileName">The file name of the DLL to load.</param>
         /// <param name="entryPoint">The name of the entry point in the DLL.</param>
         /// <exception cref="EntryPointNotFoundException">The entry point specified by <paramref name="entryPoint"/> was not found in <paramref name="fileName"/>.</exception>
-        /// <exception cref="System.IO.FileNotFoundException">The file specified by <paramref name="fileName"/> cannot be found.</exception>
+        /// <exception cref="Win32Exception">Failed to load the plugin library.</exception>
         public PluginModule(string fileName, string entryPoint)
         {
-            disposed = false;
-            handle = UnsafeNativeMethods.LoadLibraryExW(fileName, IntPtr.Zero, 0U);
-            if (!handle.IsInvalid)
+            fixed (char* lpFileName = fileName)
             {
-                IntPtr address = UnsafeNativeMethods.GetProcAddress(handle, entryPoint);
+                handle = Windows.LoadLibraryExW((ushort*)lpFileName, HANDLE.NULL, 0U);
+            }
 
-                if (address != IntPtr.Zero)
+            if (handle != HANDLE.NULL)
+            {
+                try
                 {
-                    this.entryPoint = Marshal.GetDelegateForFunctionPointer<PluginEntryPoint>(address);
+                    this.entryPoint = GetEntryPointDelegate(entryPoint);
                     this.fileName = fileName;
                 }
-                else
+                catch (Exception)
                 {
-                    handle.Dispose();
-                    handle = null;
-
-                    throw new EntryPointNotFoundException(string.Format(CultureInfo.CurrentCulture, Resources.PluginEntryPointNotFound, entryPoint, fileName));
+                    Dispose();
+                    throw;
                 }
             }
             else
             {
-                int hr = Marshal.GetHRForLastWin32Error();
-                Marshal.ThrowExceptionForHR(hr);
+                int error = Marshal.GetLastSystemError();
+                throw new Win32Exception(error);
             }
         }
 
@@ -75,36 +76,79 @@ namespace PSFilterLoad.PSApi
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public PluginEntryPoint GetEntryPoint(string entryPointName)
         {
-            if (disposed)
+            VerifyNotDisposed();
+
+            return GetEntryPointDelegate(entryPointName);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (handle != HMODULE.NULL)
             {
-                throw new ObjectDisposedException("PluginModule");
+                Windows.FreeLibrary(handle);
+                handle = HMODULE.NULL;
             }
-
-            IntPtr address = UnsafeNativeMethods.GetProcAddress(handle, entryPointName);
-
-            if (address == IntPtr.Zero)
-            {
-                throw new EntryPointNotFoundException(string.Format(CultureInfo.CurrentCulture, Resources.PluginEntryPointNotFound, entryPointName, fileName));
-            }
-
-            return Marshal.GetDelegateForFunctionPointer<PluginEntryPoint>(address);
         }
 
         /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// Gets the entry point delegate.
         /// </summary>
-        public void Dispose()
+        /// <param name="name">The entry point name.</param>
+        /// <returns>The entry point delegate.</returns>
+        /// <exception cref="EntryPointNotFoundException">he entry point specified by <paramref name="name" /> was not found.</exception>
+        [SkipLocalsInit]
+        private PluginEntryPoint GetEntryPointDelegate(string name)
         {
-            if (!disposed)
-            {
-                disposed = true;
+            const int MaxStackAllocBufferSize = 128;
 
-                if (handle != null && !handle.IsClosed)
+            Span<byte> buffer = stackalloc byte[MaxStackAllocBufferSize];
+            byte[] bufferFromPool = null;
+
+            PluginEntryPoint entryPoint;
+
+            try
+            {
+                int asciiNameLength = Encoding.ASCII.GetByteCount(name);
+
+                int asciiNameLengthWithTerminator = checked(asciiNameLength + 1);
+
+                if (asciiNameLengthWithTerminator > MaxStackAllocBufferSize)
                 {
-                    handle.Dispose();
-                    handle = null;
+                    bufferFromPool = ArrayPool<byte>.Shared.Rent(asciiNameLengthWithTerminator);
+                    buffer = bufferFromPool;
+                }
+
+                buffer = buffer.Slice(0, asciiNameLengthWithTerminator);
+
+                int bytesWritten = Encoding.ASCII.GetBytes(name, buffer);
+
+                // Add the NUL-terminator.
+                buffer[bytesWritten] = 0;
+
+                fixed (byte* lpProcName = buffer)
+                {
+                    IntPtr address = Windows.GetProcAddress(handle, (sbyte*)lpProcName);
+
+                    if (address == IntPtr.Zero)
+                    {
+                        throw new EntryPointNotFoundException(string.Format(CultureInfo.CurrentCulture,
+                                                                            StringResources.PluginEntryPointNotFound,
+                                                                            name,
+                                                                            fileName));
+                    }
+
+                    entryPoint = Marshal.GetDelegateForFunctionPointer<PluginEntryPoint>(address);
                 }
             }
+            finally
+            {
+                if (bufferFromPool != null)
+                {
+                    ArrayPool<byte>.Shared.Return(bufferFromPool);
+                }
+            }
+
+            return entryPoint;
         }
     }
 }

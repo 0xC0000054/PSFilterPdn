@@ -11,44 +11,46 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet;
-using PSFilterPdn.Interop;
+using TerraFX.Interop.Windows;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
+using static TerraFX.Interop.Windows.Windows;
+
 namespace PSFilterLoad.PSApi.Loader
 {
     internal static class AeteResource
     {
-        internal static unsafe AETEData Parse(IntPtr hModule, short resourceID)
+        internal static unsafe AETEData Parse(HMODULE hModule, short resourceID)
         {
-            IntPtr hRes = IntPtr.Zero;
+            HRSRC hRes = HRSRC.NULL;
 
             fixed (char* typePtr = "AETE")
             {
-                hRes = UnsafeNativeMethods.FindResourceW(hModule, (IntPtr)resourceID, (IntPtr)typePtr);
+                hRes = FindResourceW(hModule, MAKEINTRESOURCE((ushort)resourceID), (ushort*)typePtr);
             }
 
-            if (hRes == IntPtr.Zero)
+            if (hRes == HRSRC.NULL)
             {
                 return null;
             }
 
-            IntPtr loadRes = UnsafeNativeMethods.LoadResource(hModule, hRes);
-            if (loadRes == IntPtr.Zero)
+            HGLOBAL loadRes = LoadResource(hModule, hRes);
+            if (loadRes == HGLOBAL.NULL)
             {
                 return null;
             }
 
-            IntPtr lockRes = UnsafeNativeMethods.LockResource(loadRes);
-            if (lockRes == IntPtr.Zero)
+            void* lockRes = LockResource(loadRes);
+            if (lockRes == null)
             {
                 return null;
             }
 
-            byte* ptr = (byte*)lockRes.ToPointer() + 2;
+            byte* ptr = (byte*)lockRes + 2;
             short version = *(short*)ptr;
             ptr += 2;
 

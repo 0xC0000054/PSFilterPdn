@@ -17,15 +17,20 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		FastDebug|Any CPU = FastDebug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.FastDebug|Any CPU.ActiveCfg = FastDebug|Any CPU
+		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.FastDebug|Any CPU.Build.0 = FastDebug|Any CPU
 		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56D67AEC-EA75-48D3-8CF5-745324C7E25E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{02970578-949F-4B9E-A373-75A28DF880EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{02970578-949F-4B9E-A373-75A28DF880EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02970578-949F-4B9E-A373-75A28DF880EA}.FastDebug|Any CPU.ActiveCfg = FastDebug|Any CPU
+		{02970578-949F-4B9E-A373-75A28DF880EA}.FastDebug|Any CPU.Build.0 = FastDebug|Any CPU
 		{02970578-949F-4B9E-A373-75A28DF880EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02970578-949F-4B9E-A373-75A28DF880EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection

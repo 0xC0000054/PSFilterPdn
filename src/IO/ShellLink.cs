@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet;
-using PSFilterPdn.Interop;
+using TerraFX.Interop.Windows;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
@@ -21,22 +21,25 @@ namespace PSFilterPdn
     /// <summary>
     /// Encapsulates a ShellLink shortcut file
     /// </summary>
-    internal sealed class ShellLink : IDisposable
+    internal sealed unsafe class ShellLink : Disposable
     {
-        private NativeInterfaces.IShellLinkW shellLink;
-        private bool disposed;
-
-        [ComImport(), Guid(NativeConstants.CLSID_ShellLink)]
-        private class ShellLinkCoClass
-        {
-        }
+        private ComPtr<IShellLinkW> shellLink;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ShellLink"/> class.
         /// </summary>
         public ShellLink()
         {
-            shellLink = (NativeInterfaces.IShellLinkW)new ShellLinkCoClass();
+            shellLink = default;
+            HRESULT hr = Windows.CoCreateInstance(Windows.__uuidof<TerraFX.Interop.Windows.ShellLink>(),
+                                                  null,
+                                                  (uint)CLSCTX.CLSCTX_INPROC_SERVER,
+                                                  Windows.__uuidof<IShellLinkW>(),
+                                                  (void**)shellLink.GetAddressOf());
+            if (hr.FAILED)
+            {
+                Marshal.ThrowExceptionForHR(hr.Value);
+            }
         }
 
         /// <summary>
@@ -49,7 +52,7 @@ namespace PSFilterPdn
         /// </returns>
         /// <exception cref="ArgumentNullException"><paramref name="path"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="path"/> is empty.</exception>
-        public unsafe bool TryGetTargetPath(string path, [NotNullWhen(true)] out string targetPath)
+        public bool TryGetTargetPath(string path, [NotNullWhen(true)] out string targetPath)
         {
             ArgumentNullException.ThrowIfNull(path, nameof(path));
 
@@ -58,21 +61,29 @@ namespace PSFilterPdn
                 ExceptionUtil.ThrowArgumentException("Must not be empty.", nameof(path));
             }
 
-            if (disposed)
+            if (IsDisposed)
             {
                 ExceptionUtil.ThrowObjectDisposedException(nameof(ShellLink));
             }
 
-            int hr;
+            HRESULT hr;
 
-            fixed (char* pszFileName = path)
+            using (ComPtr<IPersistFile> asPersistFile = default)
             {
-                hr = ((NativeInterfaces.IPersistFile)shellLink).Load((ushort*)pszFileName, NativeConstants.STGM_READ);
+                hr = shellLink.As(&asPersistFile);
+
+                if (hr.SUCCEEDED)
+                {
+                    fixed (char* pszFileName = path)
+                    {
+                        hr = asPersistFile.Get()->Load((ushort*)pszFileName, 0);
+                    }
+                }
             }
 
-            if (hr == NativeConstants.S_OK)
+            if (hr.SUCCEEDED)
             {
-                const int cchMaxPath = NativeConstants.MAX_PATH;
+                const int cchMaxPath = MAX.MAX_PATH;
 
                 // We use stackalloc instead of a an ArrayPool because the IShellLinkW.GetPath method
                 // does not provide the length of the native string.
@@ -80,9 +91,9 @@ namespace PSFilterPdn
                 // allocated buffer.
                 char* pszFile = stackalloc char[cchMaxPath];
 
-                hr = shellLink.GetPath((ushort*)pszFile, cchMaxPath, IntPtr.Zero, 0U);
+                hr = shellLink.Get()->GetPath((ushort*)pszFile, cchMaxPath, null, 0U);
 
-                if (hr == NativeConstants.S_OK)
+                if (hr.SUCCEEDED)
                 {
                     targetPath = new string(pszFile);
                     return true;
@@ -102,30 +113,11 @@ namespace PSFilterPdn
             Dispose(false);
         }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (!disposed)
+            if (disposing)
             {
-                disposed = true;
-
-                if (disposing)
-                {
-                }
-
-                if (shellLink != null)
-                {
-                    Marshal.ReleaseComObject(shellLink);
-                    shellLink = null;
-                }
+                shellLink.Dispose();
             }
         }
     }

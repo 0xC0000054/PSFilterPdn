@@ -35,7 +35,7 @@ namespace PSFilterLoad.PSApi
 
         public byte B { get; init; }
 
-        public static ColorRgb24 FromWin32Color(int win32Color)
+        public static ColorRgb24 FromWin32Color(uint win32Color)
         {
             byte r = (byte)(win32Color & 0xff);
             byte g = (byte)((win32Color >> 8) & 0xff);
@@ -59,9 +59,9 @@ namespace PSFilterLoad.PSApi
             return HashCode.Combine(R, G, B);
         }
 
-        public int ToWin32Color()
+        public uint ToWin32Color()
         {
-            return R | (G << 8) | (B << 16);
+            return (uint)(R | (G << 8) | (B << 16));
         }
 
         public static bool operator ==(ColorRgb24 left, ColorRgb24 right)

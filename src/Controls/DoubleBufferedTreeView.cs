@@ -10,7 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PSFilterPdn.Interop;
+using TerraFX.Interop.Windows;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -247,11 +247,11 @@ namespace PSFilterPdn.Controls
         {
             base.OnHandleCreated(e);
 
-            SafeNativeMethods.SendMessageW(
-                Handle,
-                NativeConstants.TVM_SETEXTENDEDSTYLE,
-                NativeConstants.TVS_EX_DOUBLEBUFFER,
-                NativeConstants.TVS_EX_DOUBLEBUFFER);
+            Windows.SendMessageW(
+                (HWND)Handle,
+                TVM.TVM_SETEXTENDEDSTYLE,
+                TVS.TVS_EX_DOUBLEBUFFER,
+                TVS.TVS_EX_DOUBLEBUFFER);
             InitTreeNodeGlyphs();
         }
 
@@ -259,7 +259,7 @@ namespace PSFilterPdn.Controls
         {
             base.WndProc(ref m);
 
-            if (m.Msg == NativeConstants.WM_THEMECHANGED)
+            if (m.Msg == WM.WM_THEMECHANGED)
             {
                 InitTreeNodeGlyphs();
             }

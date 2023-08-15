@@ -20,10 +20,12 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PSFilterLoad.PSApi.Interop;
+using TerraFX.Interop.Windows;
 using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
+
+using static TerraFX.Interop.Windows.Windows;
 
 namespace PSFilterLoad.PSApi
 {
@@ -44,9 +46,9 @@ namespace PSFilterLoad.PSApi
         ReturnZeroOnOutOfMemory = 2
     }
 
-    internal static class Memory
+    internal static unsafe class Memory
     {
-        private static IntPtr hHeap;
+        private static HANDLE hHeap;
 
         /// <summary>
         /// Initializes the heap.
@@ -54,9 +56,9 @@ namespace PSFilterLoad.PSApi
         /// <exception cref="System.ComponentModel.Win32Exception">GetProcessHeap returned NULL</exception>
         private static void InitializeHeap()
         {
-            hHeap = SafeNativeMethods.GetProcessHeap();
+            hHeap = GetProcessHeap();
 
-            if (hHeap == IntPtr.Zero)
+            if (hHeap == HANDLE.NULL)
             {
                 int error = Marshal.GetLastWin32Error();
                 throw new System.ComponentModel.Win32Exception(error, string.Format(CultureInfo.InvariantCulture, "GetProcessHeap returned NULL, LastError = {0}", error));
@@ -71,7 +73,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>A pointer to the allocated block of memory.</returns>
         public static IntPtr Allocate(long size, MemoryAllocationOptions options = MemoryAllocationOptions.Default)
         {
-            return Allocate((ulong)size, options);
+            return Allocate((nuint)size, options);
         }
 
         /// <summary>
@@ -81,7 +83,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>A pointer to the allocated block of memory.</returns>
         public static unsafe T* Allocate<T>(MemoryAllocationOptions options) where T : unmanaged
         {
-            return (T*)Allocate((ulong)Marshal.SizeOf<T>(), options);
+            return (T*)Allocate((nuint)Marshal.SizeOf<T>(), options);
         }
 
         /// <summary>
@@ -90,18 +92,18 @@ namespace PSFilterLoad.PSApi
         /// <param name="size">The size of the memory to allocate.</param>
         /// <param name="options">The memory allocation options.</param>
         /// <returns>A pointer to the allocated block of memory.</returns>
-        public static IntPtr Allocate(ulong size, MemoryAllocationOptions options)
+        public static nint Allocate(nuint size, MemoryAllocationOptions options = MemoryAllocationOptions.Default)
         {
-            if (hHeap == IntPtr.Zero)
+            if (hHeap == HANDLE.NULL)
             {
                 InitializeHeap();
             }
 
             bool zeroFill = (options & MemoryAllocationOptions.ZeroFill) == MemoryAllocationOptions.ZeroFill;
 
-            IntPtr block = SafeNativeMethods.HeapAlloc(hHeap, zeroFill ? NativeConstants.HEAP_ZERO_MEMORY : 0U, new UIntPtr(size));
+            void* block = HeapAlloc(hHeap, zeroFill ? HEAP.HEAP_ZERO_MEMORY : 0U, size);
 
-            if (block == IntPtr.Zero)
+            if (block == null)
             {
                 if ((options & MemoryAllocationOptions.ReturnZeroOnOutOfMemory) == MemoryAllocationOptions.ReturnZeroOnOutOfMemory)
                 {
@@ -118,7 +120,7 @@ namespace PSFilterLoad.PSApi
                 MemoryPressureManager.AddMemoryPressure((long)size);
             }
 
-            return block;
+            return (nint)block;
         }
 
         /// <summary>
@@ -126,11 +128,11 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="size">The size of the memory to allocate.</param>
         /// <returns>A pointer to the allocated block of memory.</returns>
-        public static IntPtr AllocateExecutable(long size)
+        public static nint AllocateExecutable(long size)
         {
-            IntPtr block = SafeNativeMethods.VirtualAlloc(IntPtr.Zero, new UIntPtr((ulong)size), NativeConstants.MEM_COMMIT, NativeConstants.PAGE_EXECUTE_READWRITE);
+            void* block = VirtualAlloc(null, (nuint)size, MEM.MEM_COMMIT, PAGE.PAGE_EXECUTE_READWRITE);
 
-            if (block == IntPtr.Zero)
+            if (block == null)
             {
                 throw new OutOfMemoryException("VirtualAlloc returned a null pointer");
             }
@@ -140,7 +142,7 @@ namespace PSFilterLoad.PSApi
                 MemoryPressureManager.AddMemoryPressure(size);
             }
 
-            return block;
+            return (nint)block;
         }
 
         /// <summary>
@@ -148,12 +150,11 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="bytes">The number of bytes you want to allocate.</param>
         /// <returns>A pointer to a block of memory at least as large as bytes</returns>
-        public static IntPtr AllocateLarge(ulong bytes)
+        public static nint AllocateLarge(ulong bytes)
         {
-            IntPtr block = SafeNativeMethods.VirtualAlloc(IntPtr.Zero, new UIntPtr(bytes),
-                NativeConstants.MEM_COMMIT, NativeConstants.PAGE_READWRITE);
+            void* block = VirtualAlloc(null, (nuint)bytes, MEM.MEM_COMMIT, PAGE.PAGE_READWRITE);
 
-            if (block == IntPtr.Zero)
+            if (block == null)
             {
                 throw new OutOfMemoryException("VirtualAlloc returned a null pointer");
             }
@@ -163,19 +164,19 @@ namespace PSFilterLoad.PSApi
                 MemoryPressureManager.AddMemoryPressure((long)bytes);
             }
 
-            return block;
+            return (nint)block;
         }
 
         /// <summary>
         /// Frees the block of memory allocated by Allocate().
         /// </summary>
         /// <param name="hMem">The block to free.</param>
-        public static void Free(IntPtr hMem)
+        public static void Free(nint hMem)
         {
-            if (hHeap != IntPtr.Zero)
+            if (hHeap != HANDLE.NULL)
             {
                 nuint size = Size(hMem);
-                if (!SafeNativeMethods.HeapFree(hHeap, 0, hMem))
+                if (!HeapFree(hHeap, 0, hMem.ToPointer()))
                 {
                     int error = Marshal.GetLastWin32Error();
 
@@ -193,7 +194,7 @@ namespace PSFilterLoad.PSApi
         /// Frees the block of memory allocated by Allocate&lt;T&gt;() and sets the pointer to null.
         /// </summary>
         /// <param name="mem">The block to free.</param>
-        public static unsafe void Free<T>(ref T* mem) where T : unmanaged
+        public static void Free<T>(ref T* mem) where T : unmanaged
         {
             if (mem != null)
             {
@@ -207,9 +208,9 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="hMem">The block to free.</param>
         /// <param name="size">The size of the allocated block.</param>
-        public static void FreeExecutable(IntPtr hMem, long size)
+        public static void FreeExecutable(nint hMem, long size)
         {
-            if (!SafeNativeMethods.VirtualFree(hMem, UIntPtr.Zero, NativeConstants.MEM_RELEASE))
+            if (!VirtualFree(hMem.ToPointer(), UIntPtr.Zero, MEM.MEM_RELEASE))
             {
                 int error = Marshal.GetLastWin32Error();
                 throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "HeapFree returned an error 0x{0:X8}", error));
@@ -226,9 +227,9 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="block">The block to free.</param>
         /// <param name="bytes">The size of the block.</param>
-        public static void FreeLarge(IntPtr block, ulong bytes)
+        public static void FreeLarge(nint block, ulong bytes)
         {
-            if (!SafeNativeMethods.VirtualFree(block, UIntPtr.Zero, NativeConstants.MEM_RELEASE))
+            if (!VirtualFree(block.ToPointer(), 0, MEM.MEM_RELEASE))
             {
                 int error = Marshal.GetLastWin32Error();
                 throw new InvalidOperationException("VirtualFree returned an error: " + error.ToString(CultureInfo.InvariantCulture));
@@ -246,26 +247,26 @@ namespace PSFilterLoad.PSApi
         /// <param name="pv">The pointer to the block to resize.</param>
         /// <param name="newSize">The new size of the block.</param>
         /// <returns>The pointer to the resized block.</returns>
-        public static IntPtr ReAlloc(IntPtr pv, int newSize)
+        public static nint ReAlloc(nint pv, int newSize)
         {
             if (hHeap == IntPtr.Zero)
             {
                 InitializeHeap();
             }
-            IntPtr block;
+            void* block;
 
             nuint oldSize = Size(pv);
 
             try
             {
-                UIntPtr bytes = new((ulong)newSize);
-                block = SafeNativeMethods.HeapReAlloc(hHeap, 0U, pv, bytes);
+                block = HeapReAlloc(hHeap, 0U, pv.ToPointer(), (uint)newSize);
             }
             catch (OverflowException)
             {
                 throw new OutOfMemoryException();
             }
-            if (block == IntPtr.Zero)
+
+            if (block == null)
             {
                 throw new OutOfMemoryException();
             }
@@ -280,7 +281,7 @@ namespace PSFilterLoad.PSApi
                 MemoryPressureManager.AddMemoryPressure(newSize);
             }
 
-            return block;
+            return (nint)block;
         }
 
         /// <summary>
@@ -288,13 +289,13 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="hMem">The block pointer to retrieve the size of.</param>
         /// <returns>The size of the allocated block.</returns>
-        public static nuint Size(IntPtr hMem)
+        public static nuint Size(nint hMem)
         {
             nuint size = 0;
 
             if (hHeap != IntPtr.Zero)
             {
-                size = SafeNativeMethods.HeapSize(hHeap, 0, hMem);
+                size = HeapSize(hHeap, 0, hMem.ToPointer());
             }
 
             return size;

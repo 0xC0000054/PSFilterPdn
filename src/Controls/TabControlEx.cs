@@ -10,7 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PSFilterPdn.Interop;
+using TerraFX.Interop.Windows;
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -521,17 +521,17 @@ namespace PSFilterPdn.Controls
             graphics.ResetTransform();
         }
 
-        private int GetTabIndexUnderCursor()
+        private unsafe int GetTabIndexUnderCursor()
         {
             Point cursor = PointToClient(MousePosition);
 
-            NativeStructs.TCHITTESTINFO hti = new()
+            TCHITTESTINFO hti = new()
             {
-                pt = new NativeStructs.POINT(cursor.X, cursor.Y),
+                pt = new POINT(cursor.X, cursor.Y),
                 flags = 0
             };
 
-            int index = SafeNativeMethods.SendMessageW(Handle, NativeConstants.TCM_HITTEST, IntPtr.Zero, ref hti).ToInt32();
+            int index = (int)Windows.SendMessageW((HWND)Handle, TCM.TCM_HITTEST, 0, (LPARAM)(&hti));
 
             return index;
         }

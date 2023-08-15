@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet;
-using PSFilterPdn.Interop;
+using TerraFX.Interop.Windows;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -263,11 +263,16 @@ namespace PSFilterPdn
                 {
                     if (!string.IsNullOrEmpty(target))
                     {
-                        uint fileAttributes = UnsafeNativeMethods.GetFileAttributesW(target);
+                        uint fileAttributes = Windows.INVALID_FILE_ATTRIBUTES;
 
-                        if (fileAttributes != NativeConstants.INVALID_FILE_ATTRIBUTES)
+                        fixed (char* lpFileName = target)
                         {
-                            if ((fileAttributes & NativeConstants.FILE_ATTRIBUTE_DIRECTORY) != 0)
+                            fileAttributes = Windows.GetFileAttributesW((ushort*)lpFileName);
+                        }
+
+                        if (fileAttributes != Windows.INVALID_FILE_ATTRIBUTES)
+                        {
+                            if ((fileAttributes & FILE.FILE_ATTRIBUTE_DIRECTORY) != 0)
                             {
                                 // If the shortcut target is a directory, add it to the search list.
                                 searchDirectories.Enqueue(target);

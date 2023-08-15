@@ -10,19 +10,20 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi;
+using PSFilterLoad.PSApi.Diagnostics;
+using PSFilterLoad.PSApi.Imaging;
+using PSFilterPdn;
+using PSFilterShim.Properties;
+using TerraFX.Interop.Windows;
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-using PSFilterLoad.PSApi;
-using PSFilterLoad.PSApi.Diagnostics;
-using PSFilterLoad.PSApi.Imaging;
-using PSFilterPdn;
-using PSFilterShim.Interop;
-using PSFilterShim.Properties;
-using NativeConstants = PSFilterShim.Interop.NativeConstants;
+
+using static TerraFX.Interop.Windows.Windows;
 
 #nullable enable
 
@@ -30,13 +31,13 @@ namespace PSFilterShim
 {
     internal sealed class PSFilterShimWindow : IDisposable
     {
-        private const uint StartFilterThreadMessage = NativeConstants.WM_USER;
+        private const uint StartFilterThreadMessage = WM.WM_USER;
         private const uint EndFilterThreadMessage = StartFilterThreadMessage + 1;
 
         private readonly PSFilterShimPipeClient pipeClient;
         private GCHandle handle;
-        private IntPtr hwnd;
-        private IntPtr filterThreadHandle;
+        private HWND hwnd;
+        private HANDLE filterThreadHandle;
         private bool shown;
 
         public PSFilterShimWindow(PSFilterShimPipeClient pipeClient)
@@ -62,14 +63,14 @@ namespace PSFilterShim
             fixed (char* lpszClassName = className)
             fixed (char* lpWindowName = title)
             {
-                nint hInstance = NativeMethods.GetModuleHandleW(null);
+                HINSTANCE hInstance = GetModuleHandleW(null);
 
                 if (hInstance == 0)
                 {
                     throw new Win32Exception();
                 }
 
-                nint arrowCursor = NativeMethods.LoadCursorW(0, NativeConstants.IDC_ARROW);
+                HCURSOR arrowCursor = LoadCursorW(HINSTANCE.NULL, IDC.IDC_ARROW);
 
                 if (arrowCursor == 0)
                 {
@@ -78,15 +79,15 @@ namespace PSFilterShim
 
                 WNDCLASSW windowClass = new()
                 {
-                    style = NativeConstants.CS_HREDRAW | NativeConstants.CS_VREDRAW,
+                    style = CS.CS_HREDRAW | CS.CS_VREDRAW,
                     lpfnWndProc = &WindowProc,
                     hInstance = hInstance,
                     hCursor = arrowCursor,
-                    hbrBackground = NativeConstants.COLOR_WINDOW + 1,
+                    hbrBackground = new HBRUSH((void*)(COLOR.COLOR_WINDOW + 1)),
                     lpszClassName = (ushort*)lpszClassName
                 };
 
-                if (NativeMethods.RegisterClassW(&windowClass) == 0)
+                if (RegisterClassW(&windowClass) == 0)
                 {
                     throw new Win32Exception();
                 }
@@ -95,7 +96,7 @@ namespace PSFilterShim
 
                 if (parentWindowHandle != 0)
                 {
-                    CenterOnParent(parentWindowHandle, ref windowRect);
+                    CenterOnParent((HWND)parentWindowHandle, ref windowRect);
                 }
                 else
                 {
@@ -104,18 +105,18 @@ namespace PSFilterShim
 
                 // We do not set the parent window handle in CreateWindowExW because this could prevent
                 // the user from interacting with Paint.NET if the PSFilterShim process crashes.
-                if (NativeMethods.CreateWindowExW(0,
-                                                  windowClass.lpszClassName,
-                                                  (ushort*)lpWindowName,
-                                                  NativeConstants.WS_OVERLAPPED | NativeConstants.WS_CAPTION | NativeConstants.WS_VISIBLE,
-                                                  windowRect.X,
-                                                  windowRect.Y,
-                                                  windowRect.Width,
-                                                  windowRect.Height,
-                                                  0,
-                                                  0,
-                                                  windowClass.hInstance,
-                                                  GCHandle.ToIntPtr(handle)) == 0)
+                if (CreateWindowExW(0,
+                                    windowClass.lpszClassName,
+                                    (ushort*)lpWindowName,
+                                    WS.WS_OVERLAPPED | WS.WS_CAPTION | WS.WS_VISIBLE,
+                                    windowRect.X,
+                                    windowRect.Y,
+                                    windowRect.Width,
+                                    windowRect.Height,
+                                    HWND.NULL,
+                                    HMENU.NULL,
+                                    windowClass.hInstance,
+                                    GCHandle.ToIntPtr(handle).ToPointer()) == 0)
                 {
                     throw new Win32Exception();
                 }
@@ -128,31 +129,31 @@ namespace PSFilterShim
         {
             MSG msg;
 
-            while (NativeMethods.GetMessageW(&msg, 0, 0, 0) > 0)
+            while (GetMessageW(&msg, HWND.NULL, 0, 0) > 0)
             {
-                NativeMethods.TranslateMessage(&msg);
-                NativeMethods.DispatchMessageW(&msg);
+                TranslateMessage(&msg);
+                DispatchMessageW(&msg);
             }
         }
 
-        private static unsafe void CenterOnParent(nint parentWindowHandle, ref Rectangle windowRect)
+        private static unsafe void CenterOnParent(HWND parentWindowHandle, ref Rectangle windowRect)
         {
-            nint hMonitor = NativeMethods.MonitorFromWindow(parentWindowHandle, NativeConstants.MONITOR_DEFAULTTONEAREST);
+            HMONITOR hMonitor = MonitorFromWindow(parentWindowHandle, MONITOR.MONITOR_DEFAULTTONEAREST);
 
             MONITORINFO info = new()
             {
                 cbSize = (uint)sizeof(MONITORINFO)
             };
 
-            if (NativeMethods.GetMonitorInfoW(hMonitor, &info))
+            if (GetMonitorInfoW(hMonitor, &info))
             {
-                Rectangle screenWorkingArea = Rectangle.FromLTRB(info.rcWork.left,
-                                                                 info.rcWork.top,
-                                                                 info.rcWork.right,
-                                                                 info.rcWork.bottom);
+                Rectangle screenWorkingArea = System.Drawing.Rectangle.FromLTRB(info.rcWork.left,
+                                                                                info.rcWork.top,
+                                                                                info.rcWork.right,
+                                                                                info.rcWork.bottom);
                 RECT parentBounds;
 
-                if (NativeMethods.GetWindowRect(parentWindowHandle, &parentBounds))
+                if (GetWindowRect(parentWindowHandle, &parentBounds))
                 {
                     windowRect.X = (parentBounds.left + parentBounds.right - windowRect.Width) / 2;
                     windowRect.Y = (parentBounds.top + parentBounds.bottom - windowRect.Height) / 2;
@@ -184,19 +185,19 @@ namespace PSFilterShim
             // See Raymond Chen's blog post "How do I get the handle of the primary monitor?"
             // https://devblogs.microsoft.com/oldnewthing/20070809-00/?p=25643
             POINT zero = new(0, 0);
-            nint hMonitor = NativeMethods.MonitorFromPoint(zero, NativeConstants.MONITOR_DEFAULTTONEAREST);
+            HMONITOR hMonitor = MonitorFromPoint(zero, MONITOR.MONITOR_DEFAULTTONEAREST);
 
             MONITORINFO info = new()
             {
                 cbSize = (uint)sizeof(MONITORINFO)
             };
 
-            if (NativeMethods.GetMonitorInfoW(hMonitor, &info))
+            if (GetMonitorInfoW(hMonitor, &info))
             {
-                Rectangle workingArea = Rectangle.FromLTRB(info.rcWork.left,
-                                                           info.rcWork.top,
-                                                           info.rcWork.right,
-                                                           info.rcWork.bottom);
+                Rectangle workingArea = System.Drawing.Rectangle.FromLTRB(info.rcWork.left,
+                                                                          info.rcWork.top,
+                                                                          info.rcWork.right,
+                                                                          info.rcWork.bottom);
 
                 windowRect.X = Math.Max(workingArea.X, workingArea.X + (workingArea.Width - windowRect.Width) / 2);
                 windowRect.Y = Math.Max(workingArea.Y, workingArea.Y + (workingArea.Height - windowRect.Height) / 2);
@@ -204,14 +205,16 @@ namespace PSFilterShim
         }
 
         [UnmanagedCallersOnly]
-        private static unsafe uint ThreadProc(nint lpParameter)
+        private static unsafe uint ThreadProc(void* lpParameter)
         {
-            PSFilterShimWindow window = (PSFilterShimWindow)GCHandle.FromIntPtr(lpParameter).Target!;
+            PSFilterShimWindow window = (PSFilterShimWindow)GCHandle.FromIntPtr((nint)lpParameter).Target!;
 
-            // Some filters may use the clipboard or other features that require OLE to be initialized.
-            int hr = NativeMethods.OleInitialize(null);
+            // Some filters may use the clipboard or other features that require COM to be initialized.
+            const COINIT dwFlags = COINIT.COINIT_APARTMENTTHREADED | COINIT.COINIT_DISABLE_OLE1DDE;
 
-            if (NativeMethods.SUCCEEDED(hr))
+            HRESULT hr = CoInitializeEx(null, (uint)dwFlags);
+
+            if (SUCCEEDED(hr))
             {
                 try
                 {
@@ -219,7 +222,7 @@ namespace PSFilterShim
                 }
                 finally
                 {
-                    NativeMethods.OleUninitialize();
+                    CoUninitialize();
                 }
             }
             else
@@ -229,50 +232,50 @@ namespace PSFilterShim
                                                                      hr));
             }
 
-            _ = NativeMethods.PostMessageW(window.hwnd, EndFilterThreadMessage, 0, 0);
+            _ = PostMessageW(window.hwnd, EndFilterThreadMessage, 0, 0);
             return 0;
         }
 
         [UnmanagedCallersOnly]
-        private static unsafe nint WindowProc(nint hwnd, uint message, nint wParam, nuint lParam)
+        private static unsafe LRESULT WindowProc(HWND hwnd, uint message, WPARAM wParam, LPARAM lParam)
         {
-            nint handle = NativeMethods.GetWindowLongW(hwnd, NativeConstants.GWLP_USERDATA);
+            nint handle = GetWindowLongPtrW(hwnd, GWLP.GWLP_USERDATA);
             PSFilterShimWindow? window = handle != 0 ? (PSFilterShimWindow)GCHandle.FromIntPtr(handle).Target! : null;
 
             switch (message)
             {
-                case NativeConstants.WM_CREATE:
+                case WM.WM_CREATE:
 
                     CREATESTRUCTW* createParams = (CREATESTRUCTW*)lParam;
 
-                    _ = NativeMethods.SetWindowLongW(hwnd, NativeConstants.GWLP_USERDATA, createParams->lpCreateParams);
+                    _ = SetWindowLongPtrW(hwnd, GWLP.GWLP_USERDATA, (nint)createParams->lpCreateParams);
 
-                    window = (PSFilterShimWindow)GCHandle.FromIntPtr(createParams->lpCreateParams).Target!;
+                    window = (PSFilterShimWindow)GCHandle.FromIntPtr((nint)createParams->lpCreateParams).Target!;
                     window.hwnd = hwnd;
 
                     return 0;
 
-                case NativeConstants.WM_DESTROY:
-                    NativeMethods.PostQuitMessage(0);
+                case WM.WM_DESTROY:
+                    PostQuitMessage(0);
                     return 0;
 
-                case NativeConstants.WM_WINDOWPOSCHANGED:
+                case WM.WM_WINDOWPOSCHANGED:
                     // Start the worker thread after the window has been displayed.
                     //
                     // This code was adapted from Raymond Chen's blog post "Waiting until the dialog box is displayed before doing something"
                     // https://devblogs.microsoft.com/oldnewthing/20060925-02/?p=29603
                     WINDOWPOS* windowPos = (WINDOWPOS*)lParam;
 
-                    if ((windowPos->flags & NativeConstants.SWP_SHOWWINDOW) != 0 && !window!.shown)
+                    if ((windowPos->flags & SWP.SWP_SHOWWINDOW) != 0 && !window!.shown)
                     {
                         window.shown = true;
 
-                        NativeMethods.PostMessageW(hwnd, StartFilterThreadMessage, 0, 0);
+                        PostMessageW(hwnd, StartFilterThreadMessage, 0, 0);
                     }
                     return 0;
 
                 case StartFilterThreadMessage:
-                    window!.filterThreadHandle = NativeMethods.CreateThread(0, 0, &ThreadProc, handle, 0, null);
+                    window!.filterThreadHandle = CreateThread(null, 0, &ThreadProc, handle.ToPointer(), 0, null);
 
                     if (window.filterThreadHandle == 0)
                     {
@@ -280,18 +283,18 @@ namespace PSFilterShim
                         window.pipeClient.SetProxyErrorMessage(string.Format(CultureInfo.InvariantCulture,
                                                                              Resources.CreateFilterThreadErrorFormat,
                                                                              lastError));
-                        NativeMethods.DestroyWindow(hwnd);
+                        DestroyWindow(hwnd);
                     }
                     return 0;
                 case EndFilterThreadMessage:
-                    NativeMethods.WaitForSingleObject(window!.filterThreadHandle, NativeConstants.INFINITE);
-                    NativeMethods.CloseHandle(window.filterThreadHandle);
+                    WaitForSingleObject(window!.filterThreadHandle, INFINITE);
+                    CloseHandle(window.filterThreadHandle);
 
-                    NativeMethods.DestroyWindow(hwnd);
+                    DestroyWindow(hwnd);
                     return 0;
 
                 default:
-                    return NativeMethods.DefWindowProcW(hwnd, message, wParam, lParam);
+                    return DefWindowProcW(hwnd, message, wParam, lParam);
             }
         }
 

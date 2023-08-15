@@ -11,10 +11,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PSFilterLoad.PSApi.Diagnostics;
-using PSFilterLoad.PSApi.Interop;
+using TerraFX.Interop.Windows;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+
+using static TerraFX.Interop.Windows.Windows;
 
 namespace PSFilterLoad.PSApi
 {
@@ -177,29 +179,29 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         ///   <c>true</c> if the pointer is valid; otherwise, <c>false</c>.
         /// </returns>
-        private static bool IsValidReadPtr(IntPtr ptr)
+        private static unsafe bool IsValidReadPtr(IntPtr ptr)
         {
-            NativeStructs.MEMORY_BASIC_INFORMATION mbi = new();
-            int mbiSize = Marshal.SizeOf<NativeStructs.MEMORY_BASIC_INFORMATION>();
+            MEMORY_BASIC_INFORMATION mbi = new();
+            uint mbiSize = (uint)sizeof(MEMORY_BASIC_INFORMATION);
 
-            if (SafeNativeMethods.VirtualQuery(ptr, out mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
+            if (VirtualQuery(ptr.ToPointer(), &mbi, (nuint)mbiSize) == 0)
             {
                 return false;
             }
 
-            if (mbi.State != NativeConstants.MEM_COMMIT ||
-                (mbi.Protect & NativeConstants.PAGE_GUARD) != 0 ||
-                (mbi.Protect & NativeConstants.PAGE_NOACCESS) != 0)
+            if (mbi.State != MEM.MEM_COMMIT ||
+                (mbi.Protect & PAGE.PAGE_GUARD) != 0 ||
+                (mbi.Protect & PAGE.PAGE_NOACCESS) != 0)
             {
                 return false;
             }
 
-            const int ReadProtect = NativeConstants.PAGE_READONLY |
-                                    NativeConstants.PAGE_READWRITE |
-                                    NativeConstants.PAGE_WRITECOPY |
-                                    NativeConstants.PAGE_EXECUTE_READ |
-                                    NativeConstants.PAGE_EXECUTE_READWRITE |
-                                    NativeConstants.PAGE_EXECUTE_WRITECOPY;
+            const int ReadProtect = PAGE.PAGE_READONLY |
+                                    PAGE.PAGE_READWRITE |
+                                    PAGE.PAGE_WRITECOPY |
+                                    PAGE.PAGE_EXECUTE_READ |
+                                    PAGE.PAGE_EXECUTE_READWRITE |
+                                    PAGE.PAGE_EXECUTE_WRITECOPY;
 
             return (mbi.Protect & ReadProtect) != 0;
         }
@@ -211,27 +213,27 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         ///   <c>true</c> if the pointer is valid; otherwise, <c>false</c>.
         /// </returns>
-        private static bool IsValidWritePtr(IntPtr ptr)
+        private static unsafe bool IsValidWritePtr(IntPtr ptr)
         {
-            NativeStructs.MEMORY_BASIC_INFORMATION mbi = new();
-            int mbiSize = Marshal.SizeOf<NativeStructs.MEMORY_BASIC_INFORMATION>();
+            MEMORY_BASIC_INFORMATION mbi = new();
+            uint mbiSize = (uint)sizeof(MEMORY_BASIC_INFORMATION);
 
-            if (SafeNativeMethods.VirtualQuery(ptr, out mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
+            if (VirtualQuery(ptr.ToPointer(), &mbi, (nuint)mbiSize) == 0)
             {
                 return false;
             }
 
-            if (mbi.State != NativeConstants.MEM_COMMIT ||
-                (mbi.Protect & NativeConstants.PAGE_GUARD) != 0 ||
-                (mbi.Protect & NativeConstants.PAGE_NOACCESS) != 0)
+            if (mbi.State != MEM.MEM_COMMIT ||
+                (mbi.Protect & PAGE.PAGE_GUARD) != 0 ||
+                (mbi.Protect & PAGE.PAGE_NOACCESS) != 0)
             {
                 return false;
             }
 
-            const int WriteProtect = NativeConstants.PAGE_READWRITE |
-                                     NativeConstants.PAGE_WRITECOPY |
-                                     NativeConstants.PAGE_EXECUTE_READWRITE |
-                                     NativeConstants.PAGE_EXECUTE_WRITECOPY;
+            const int WriteProtect = PAGE.PAGE_READWRITE |
+                                     PAGE.PAGE_WRITECOPY |
+                                     PAGE.PAGE_EXECUTE_READWRITE |
+                                     PAGE.PAGE_EXECUTE_WRITECOPY;
 
             return (mbi.Protect & WriteProtect) != 0;
         }
@@ -311,16 +313,16 @@ namespace PSFilterLoad.PSApi
                 }
                 else
                 {
-                    if (SafeNativeMethods.GlobalSize(handle.Value).ToInt64() > 0L)
+                    if (GlobalSize((HGLOBAL)handle.Value) > 0)
                     {
-                        IntPtr hPtr = Marshal.ReadIntPtr(handle.Value);
+                        HGLOBAL hPtr = (HGLOBAL)Marshal.ReadIntPtr(handle.Value);
 
-                        if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+                        if (IsValidReadPtr(hPtr) && GlobalSize(hPtr) > 0)
                         {
-                            SafeNativeMethods.GlobalFree(hPtr);
+                            GlobalFree(hPtr);
                         }
 
-                        SafeNativeMethods.GlobalFree(handle.Value);
+                        GlobalFree((HGLOBAL)handle.Value);
                     }
                 }
             }
@@ -361,16 +363,16 @@ namespace PSFilterLoad.PSApi
 
         private static unsafe IntPtr LockNonSuiteHandle(Handle h)
         {
-            if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)
+            if (GlobalSize((HGLOBAL)h.Value) > 0)
             {
-                IntPtr hPtr = Marshal.ReadIntPtr(h.Value);
+                HGLOBAL hPtr = (HGLOBAL)Marshal.ReadIntPtr(h.Value);
 
-                if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+                if (IsValidReadPtr(hPtr) && GlobalSize(hPtr) > 0)
                 {
-                    return SafeNativeMethods.GlobalLock(hPtr);
+                    return (nint)GlobalLock(hPtr);
                 }
 
-                return SafeNativeMethods.GlobalLock(h.Value);
+                return (nint)GlobalLock((HGLOBAL)h.Value);
             }
 
             if (IsValidReadPtr(h.Value) && IsValidWritePtr(h.Value)) // Pointer to a pointer?
@@ -397,17 +399,17 @@ namespace PSFilterLoad.PSApi
 
         private static int GetNonSuiteHandleSize(Handle h)
         {
-            if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)
+            if (GlobalSize((HGLOBAL)h.Value) > 0)
             {
                 IntPtr hPtr = Marshal.ReadIntPtr(h.Value);
 
                 if (IsValidReadPtr(hPtr))
                 {
-                    return SafeNativeMethods.GlobalSize(hPtr).ToInt32();
+                    return (int)GlobalSize((HGLOBAL)hPtr);
                 }
                 else
                 {
-                    return SafeNativeMethods.GlobalSize(h.Value).ToInt32();
+                    return (int)GlobalSize((HGLOBAL)h.Value);
                 }
             }
 
@@ -449,13 +451,13 @@ namespace PSFilterLoad.PSApi
             }
             else
             {
-                if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)
+                if (GlobalSize((HGLOBAL)h.Value) > 0)
                 {
-                    IntPtr hPtr = Marshal.ReadIntPtr(h.Value);
+                    HGLOBAL hPtr = (HGLOBAL)Marshal.ReadIntPtr(h.Value);
 
-                    if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+                    if (IsValidReadPtr(hPtr) && GlobalSize(hPtr) > 0)
                     {
-                        IntPtr hMem = SafeNativeMethods.GlobalReAlloc(hPtr, new UIntPtr((uint)newSize), NativeConstants.GPTR);
+                        IntPtr hMem = GlobalReAlloc(hPtr, new UIntPtr((uint)newSize), GMEM.GMEM_FIXED | GMEM.GMEM_ZEROINIT);
                         if (hMem == IntPtr.Zero)
                         {
                             return PSError.memFullErr;
@@ -464,7 +466,7 @@ namespace PSFilterLoad.PSApi
                     }
                     else
                     {
-                        if (SafeNativeMethods.GlobalReAlloc(h.Value, new UIntPtr((uint)newSize), NativeConstants.GPTR) == IntPtr.Zero)
+                        if (GlobalReAlloc((HGLOBAL)h.Value, new UIntPtr((uint)newSize), GMEM.GMEM_FIXED | GMEM.GMEM_ZEROINIT) == 0)
                         {
                             return PSError.memFullErr;
                         }
@@ -485,17 +487,17 @@ namespace PSFilterLoad.PSApi
 
             if (!AllocatedBySuite(h))
             {
-                if (SafeNativeMethods.GlobalSize(h.Value).ToInt64() > 0L)
+                if (GlobalSize((HGLOBAL)h.Value) > 0)
                 {
-                    IntPtr hPtr = Marshal.ReadIntPtr(h.Value);
+                    HGLOBAL hPtr = (HGLOBAL)Marshal.ReadIntPtr(h.Value);
 
-                    if (IsValidReadPtr(hPtr) && SafeNativeMethods.GlobalSize(hPtr).ToInt64() > 0L)
+                    if (IsValidReadPtr(hPtr) && GlobalSize(hPtr) > 0)
                     {
-                        SafeNativeMethods.GlobalUnlock(hPtr);
+                        GlobalUnlock(hPtr);
                     }
                     else
                     {
-                        SafeNativeMethods.GlobalUnlock(h.Value);
+                        GlobalUnlock((HGLOBAL)h.Value);
                     }
                 }
             }

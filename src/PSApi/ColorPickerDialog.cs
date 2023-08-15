@@ -10,9 +10,11 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PSFilterLoad.PSApi.Interop;
 using System;
 using System.Runtime.InteropServices;
+using TerraFX.Interop.Windows;
+
+using static TerraFX.Interop.Windows.Windows;
 
 #nullable enable
 
@@ -33,24 +35,24 @@ namespace PSFilterLoad.PSApi
         {
             bool result = false;
 
-            int* lpCustomColors = stackalloc int[16];
+            COLORREF* lpCustomColors = stackalloc COLORREF[16];
             GCHandle handle = GCHandle.Alloc(this);
 
             try
             {
-                NativeStructs.CHOOSECOLORW chooseColor = new()
+                CHOOSECOLORW chooseColor = new()
                 {
-                    lStructSize = (uint)Marshal.SizeOf<NativeStructs.CHOOSECOLORW>(),
+                    lStructSize = (uint)sizeof(CHOOSECOLORW),
                     rgbResult = Color.ToWin32Color(),
                     lpCustColors = lpCustomColors,
-                    Flags = NativeConstants.CC_RGBINIT | NativeConstants.CC_FULLOPEN | NativeConstants.CC_ENABLEHOOK | NativeConstants.CC_SOLIDCOLOR,
+                    Flags = CC.CC_RGBINIT | CC.CC_FULLOPEN | CC.CC_ENABLEHOOK | CC.CC_SOLIDCOLOR,
                     lpfnHook = &HookProc,
                     lCustData = GCHandle.ToIntPtr(handle)
                 };
 
-                if (SafeNativeMethods.ChooseColorW(ref chooseColor))
+                if (ChooseColorW(&chooseColor))
                 {
-                    Color = ColorRgb24.FromWin32Color(chooseColor.rgbResult);
+                    Color = ColorRgb24.FromWin32Color(chooseColor.rgbResult.Value);
                     result = true;
                 }
             }
@@ -63,18 +65,18 @@ namespace PSFilterLoad.PSApi
         }
 
         [UnmanagedCallersOnly]
-        private static unsafe UIntPtr HookProc(IntPtr hWnd, uint msg, UIntPtr wParam, IntPtr lParam)
+        private static unsafe nuint HookProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
         {
-            if (msg == NativeConstants.WM_INITDIALOG)
+            if (msg == WM.WM_INITDIALOG)
             {
-                NativeStructs.CHOOSECOLORW* state = (NativeStructs.CHOOSECOLORW*)lParam;
+                CHOOSECOLORW* state = (CHOOSECOLORW*)lParam.Value;
                 ColorPickerDialog dialog = (ColorPickerDialog)GCHandle.FromIntPtr(state->lCustData).Target!;
 
                 if (!string.IsNullOrWhiteSpace(dialog.title))
                 {
                     fixed (char* lpString = dialog.title)
                     {
-                        _ = SafeNativeMethods.SetWindowTextW(hWnd, (ushort*)lpString);
+                        _ = SetWindowTextW(hWnd, (ushort*)lpString);
                     }
                 }
             }

@@ -22,9 +22,12 @@
 //#define REPORTLEAKS
 
 using PSFilterShim;
+using TerraFX.Interop.Windows;
 using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
+
+using static TerraFX.Interop.Windows.Windows;
 
 namespace PaintDotNet.SystemLayer
 {
@@ -32,13 +35,13 @@ namespace PaintDotNet.SystemLayer
     /// Contains methods for allocating, freeing, and performing operations on memory
     /// that is fixed (pinned) in memory.
     /// </summary>
-    internal unsafe static class Memory
+    internal static unsafe class Memory
     {
-        private static IntPtr hHeap;
+        private static HANDLE hHeap;
 
         private static void CreateHeap()
         {
-            hHeap = SafeNativeMethods.HeapCreate(0, UIntPtr.Zero, UIntPtr.Zero);
+            hHeap = HeapCreate(0, UIntPtr.Zero, UIntPtr.Zero);
 
             if (hHeap == IntPtr.Zero)
             {
@@ -50,10 +53,10 @@ namespace PaintDotNet.SystemLayer
             try
             {
                 // Enable the low-fragmentation heap (LFH)
-                SafeNativeMethods.HeapSetInformation(hHeap,
-                    NativeConstants.HeapCompatibilityInformation,
-                    (void*)&info,
-                    new UIntPtr(4UL));
+                HeapSetInformation(hHeap,
+                    HEAP_INFORMATION_CLASS.HeapCompatibilityInformation,
+                    &info,
+                    4U);
             }
             catch (EntryPointNotFoundException)
             {
@@ -68,17 +71,17 @@ namespace PaintDotNet.SystemLayer
         /// <param name="zeroFill"><see langword="true"/> if the memory block should be filled with zeros; otherwise, <see langword="false"/>.</param>
         /// <returns>A pointer to a block of memory at least as large as <b>bytes</b>.</returns>
         /// <exception cref="OutOfMemoryException">Thrown if the memory manager could not fulfill the request for a memory block at least as large as <b>bytes</b>.</exception>
-        public static IntPtr Allocate(ulong bytes, bool zeroFill = false)
+        public static nint Allocate(ulong bytes, bool zeroFill = false)
         {
-            if (hHeap == IntPtr.Zero)
+            if (hHeap == HANDLE.NULL)
             {
                 CreateHeap();
             }
 
-            uint dwFlags = zeroFill ? NativeConstants.HEAP_ZERO_MEMORY : 0;
+            uint dwFlags = zeroFill ? HEAP.HEAP_ZERO_MEMORY : 0U;
 
-            IntPtr block = SafeNativeMethods.HeapAlloc(hHeap, dwFlags, new UIntPtr(bytes));
-            if (block == IntPtr.Zero)
+            void* block = HeapAlloc(hHeap, dwFlags, new UIntPtr(bytes));
+            if (block == null)
             {
                 throw new OutOfMemoryException("HeapAlloc returned a null pointer");
             }
@@ -88,7 +91,7 @@ namespace PaintDotNet.SystemLayer
                 MemoryPressureManager.AddMemoryPressure((long)bytes);
             }
 
-            return block;
+            return (nint)block;
         }
 
         /// <summary>
@@ -101,12 +104,11 @@ namespace PaintDotNet.SystemLayer
         /// granularity is the page size of the system (usually 4K). Blocks allocated with this method may also
         /// be protected using the ProtectBlock method.
         /// </remarks>
-        public static IntPtr AllocateLarge(ulong bytes)
+        public static nint AllocateLarge(ulong bytes)
         {
-            IntPtr block = SafeNativeMethods.VirtualAlloc(IntPtr.Zero, new UIntPtr(bytes),
-                NativeConstants.MEM_COMMIT, NativeConstants.PAGE_READWRITE);
+            void* block = VirtualAlloc(null, new UIntPtr(bytes), MEM.MEM_COMMIT, PAGE.PAGE_READWRITE);
 
-            if (block == IntPtr.Zero)
+            if (block == null)
             {
                 throw new OutOfMemoryException("VirtualAlloc returned a null pointer");
             }
@@ -116,7 +118,7 @@ namespace PaintDotNet.SystemLayer
                 MemoryPressureManager.AddMemoryPressure((long)bytes);
             }
 
-            return block;
+            return (nint)block;
         }
 
         /// <summary>
@@ -124,13 +126,13 @@ namespace PaintDotNet.SystemLayer
         /// </summary>
         /// <param name="block">The block to free.</param>
         /// <exception cref="InvalidOperationException">There was an error freeing the block.</exception>
-        public static void Free(IntPtr block)
+        public static void Free(nint block)
         {
-            if (Memory.hHeap != IntPtr.Zero)
+            if (hHeap != HANDLE.NULL)
             {
-                long bytes = (long)SafeNativeMethods.HeapSize(hHeap, 0, block);
+                long bytes = (long)HeapSize(hHeap, 0, block.ToPointer());
 
-                bool result = SafeNativeMethods.HeapFree(hHeap, 0, block);
+                bool result = HeapFree(hHeap, 0, block.ToPointer());
 
                 if (!result)
                 {
@@ -156,9 +158,9 @@ namespace PaintDotNet.SystemLayer
         /// </summary>
         /// <param name="block">The block to free.</param>
         /// <param name="bytes">The size of the block.</param>
-        public static void FreeLarge(IntPtr block, ulong bytes)
+        public static void FreeLarge(nint block, ulong bytes)
         {
-            bool result = SafeNativeMethods.VirtualFree(block, UIntPtr.Zero, NativeConstants.MEM_RELEASE);
+            bool result = VirtualFree(block.ToPointer(), UIntPtr.Zero, MEM.MEM_RELEASE);
 
             if (!result)
             {

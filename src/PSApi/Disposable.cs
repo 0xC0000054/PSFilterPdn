@@ -16,7 +16,7 @@ using System.Threading;
 
 #nullable enable
 
-namespace PSFilterLoad.PSApi.Imaging
+namespace PSFilterLoad.PSApi
 {
     internal abstract class Disposable : IDisposable
     {

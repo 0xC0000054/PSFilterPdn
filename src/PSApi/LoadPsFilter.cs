@@ -10,6 +10,9 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using PSFilterLoad.PSApi.Diagnostics;
+using PSFilterLoad.PSApi.Imaging;
+using TerraFX.Interop.Windows;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,9 +20,8 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using PSFilterLoad.PSApi.Diagnostics;
-using PSFilterLoad.PSApi.Imaging;
-using PSFilterLoad.PSApi.Interop;
+
+using static TerraFX.Interop.Windows.Windows;
 
 namespace PSFilterLoad.PSApi
 {
@@ -30,7 +32,7 @@ namespace PSFilterLoad.PSApi
             return rect.left < rect.right && rect.top < rect.bottom;
         }
 
-        private static readonly long OTOFHandleSize = IntPtr.Size + 4L;
+        private static readonly uint OTOFHandleSize = (uint)IntPtr.Size + 4;
         private const int OTOFSignature = 0x464f544f;
 
         #region CallbackDelegates
@@ -384,17 +386,18 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         private static bool IsMemoryExecutable(IntPtr ptr)
         {
-            int mbiSize = Marshal.SizeOf<NativeStructs.MEMORY_BASIC_INFORMATION>();
+            MEMORY_BASIC_INFORMATION mbi = new();
+            uint mbiSize = (uint)sizeof(MEMORY_BASIC_INFORMATION);
 
-            if (SafeNativeMethods.VirtualQuery(ptr, out NativeStructs.MEMORY_BASIC_INFORMATION mbi, new UIntPtr((ulong)mbiSize)) == UIntPtr.Zero)
+            if (Windows.VirtualQuery(ptr.ToPointer(), &mbi, mbiSize) == 0)
             {
                 return false;
             }
 
-            const int ExecuteProtect = NativeConstants.PAGE_EXECUTE |
-                                       NativeConstants.PAGE_EXECUTE_READ |
-                                       NativeConstants.PAGE_EXECUTE_READWRITE |
-                                       NativeConstants.PAGE_EXECUTE_WRITECOPY;
+            const int ExecuteProtect = PAGE.PAGE_EXECUTE |
+                                       PAGE.PAGE_EXECUTE_READ |
+                                       PAGE.PAGE_EXECUTE_READWRITE |
+                                       PAGE.PAGE_EXECUTE_WRITECOPY;
 
             return (mbi.Protect & ExecuteProtect) != 0;
         }
@@ -407,9 +410,9 @@ namespace PSFilterLoad.PSApi
         /// <param name="baseAddressSize">The size of the memory block at the base address.</param>
         /// <param name="size">The size.</param>
         /// <returns><c>true</c> if the address is a fake indirect pointer; otherwise, <c>false</c></returns>
-        private static bool IsFakeIndirectPointer(IntPtr address, IntPtr baseAddress, long baseAddressSize, out long size)
+        private static bool IsFakeIndirectPointer(IntPtr address, IntPtr baseAddress, nuint baseAddressSize, out nuint size)
         {
-            size = 0L;
+            size = 0;
 
             bool result = false;
 
@@ -419,7 +422,7 @@ namespace PSFilterLoad.PSApi
             if (address == fakeIndirectAddress)
             {
                 result = true;
-                size = baseAddressSize - IntPtr.Size;
+                size = baseAddressSize - (nuint)IntPtr.Size;
             }
 
             return result;
@@ -475,22 +478,24 @@ namespace PSFilterLoad.PSApi
                 }
                 else
                 {
-                    long size = SafeNativeMethods.GlobalSize(filterRecord->parameters.Value).ToInt64();
+                    HGLOBAL filterParametersHandle = (HGLOBAL)filterRecord->parameters.Value;
+                    nuint size = GlobalSize(filterParametersHandle);
 
-                    if (size > 0L)
+                    if (size > 0)
                     {
-                        IntPtr parameters = SafeNativeMethods.GlobalLock(filterRecord->parameters.Value);
+                        void* parameters = GlobalLock(filterParametersHandle);
 
                         try
                         {
-                            IntPtr hPtr = Marshal.ReadIntPtr(parameters);
+                            HGLOBAL hPtr = (HGLOBAL)Marshal.ReadIntPtr((nint)parameters);
 
-                            if (size == OTOFHandleSize && Marshal.ReadInt32(parameters, IntPtr.Size) == OTOFSignature)
+                            if (size == OTOFHandleSize && Marshal.ReadInt32((nint)parameters, IntPtr.Size) == OTOFSignature)
                             {
-                                long ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64();
-                                if (ps > 0L)
+                                nuint ps = GlobalSize(hPtr);
+                                if (ps > 0)
                                 {
                                     byte[] buf = new byte[(int)ps];
+
                                     Marshal.Copy(hPtr, buf, 0, buf.Length);
                                     globalParameters.SetParameterDataBytes(buf);
                                     globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.OTOFHandle;
@@ -500,8 +505,8 @@ namespace PSFilterLoad.PSApi
                             }
                             else
                             {
-                                long pointerSize = SafeNativeMethods.GlobalSize(hPtr).ToInt64();
-                                if (pointerSize > 0L || IsFakeIndirectPointer(hPtr, parameters, size, out pointerSize))
+                                nuint pointerSize = GlobalSize(hPtr);
+                                if (pointerSize > 0 || IsFakeIndirectPointer(hPtr, (nint)parameters, size, out pointerSize))
                                 {
                                     byte[] buf = new byte[(int)pointerSize];
 
@@ -513,7 +518,7 @@ namespace PSFilterLoad.PSApi
                                 {
                                     byte[] buf = new byte[(int)size];
 
-                                    Marshal.Copy(parameters, buf, 0, buf.Length);
+                                    Marshal.Copy((nint)parameters, buf, 0, buf.Length);
                                     globalParameters.SetParameterDataBytes(buf);
                                     globalParameters.ParameterDataStorageMethod = GlobalParameters.DataStorageMethod.RawBytes;
                                 }
@@ -521,11 +526,12 @@ namespace PSFilterLoad.PSApi
                         }
                         finally
                         {
-                            SafeNativeMethods.GlobalUnlock(filterRecord->parameters.Value);
+                            GlobalUnlock(filterParametersHandle);
                         }
                     }
                 }
             }
+
             if (filterRecord->parameters != Handle.Null && filterGlobalData != IntPtr.Zero)
             {
                 if (handleSuite.AllocatedBySuite(filterGlobalData))
@@ -540,30 +546,30 @@ namespace PSFilterLoad.PSApi
                 }
                 else
                 {
-                    long pluginDataSize;
+                    nuint pluginDataSize;
                     bool allocatedByBufferSuite;
                     IntPtr ptr;
 
                     if (bufferSuite.AllocatedBySuite(filterGlobalData))
                     {
-                        pluginDataSize = bufferSuite.GetBufferSize(filterGlobalData);
+                        pluginDataSize = (nuint)bufferSuite.GetBufferSize(filterGlobalData);
                         allocatedByBufferSuite = true;
                         ptr = bufferSuite.LockBuffer(filterGlobalData);
                     }
                     else
                     {
-                        pluginDataSize = SafeNativeMethods.GlobalSize(filterGlobalData).ToInt64();
+                        pluginDataSize = GlobalSize((HGLOBAL)filterGlobalData);
                         allocatedByBufferSuite = false;
-                        ptr = SafeNativeMethods.GlobalLock(filterGlobalData);
+                        ptr = (nint)GlobalLock((HGLOBAL)filterGlobalData);
                     }
 
                     try
                     {
                         if (pluginDataSize == OTOFHandleSize && Marshal.ReadInt32(ptr, IntPtr.Size) == OTOFSignature)
                         {
-                            IntPtr hPtr = Marshal.ReadIntPtr(ptr);
-                            long ps = SafeNativeMethods.GlobalSize(hPtr).ToInt64();
-                            if (ps > 0L)
+                            HGLOBAL hPtr = (HGLOBAL)Marshal.ReadIntPtr(ptr);
+                            nuint ps = GlobalSize(hPtr);
+                            if (ps > 0)
                             {
                                 byte[] dataBuf = new byte[(int)ps];
                                 Marshal.Copy(hPtr, dataBuf, 0, dataBuf.Length);
@@ -588,7 +594,7 @@ namespace PSFilterLoad.PSApi
                         }
                         else
                         {
-                            SafeNativeMethods.GlobalUnlock(ptr);
+                            GlobalUnlock((HGLOBAL)filterGlobalData);
                         }
                     }
                 }

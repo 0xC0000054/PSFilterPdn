@@ -27,6 +27,7 @@
     <ApplicationManifest>PSFilterShim.manifest</ApplicationManifest>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <TrimMode>partial</TrimMode>
+    <Configurations>Debug;Release;FastDebug</Configurations>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -43,9 +44,6 @@
     <Compile Include="..\PSApi\ColorConversion\**\*.cs" Link="PSApi\ColorConversion\%(RecursiveDir)%(FileName)%(Extension)" />
     <Compile Include="..\PSApi\Diagnostics\**\*.cs" Link="PSApi\Diagnostics\%(RecursiveDir)%(FileName)%(Extension)" />
     <Compile Include="..\PSApi\Imaging\*.cs" Link="PSApi\Imaging\%(FileName)%(Extension)" />
-    <Compile Include="..\PSApi\Interop\NativeConstants.cs" Link="PSApi\Interop\NativeConstants.cs" />
-    <Compile Include="..\PSApi\Interop\NativeStructs.cs" Link="PSApi\Interop\NativeStructs.cs" />
-    <Compile Include="..\PSApi\Interop\SafeNativeMethods.cs" Link="PSApi\Interop\SafeNativeMethods.cs" />
     <Compile Include="..\PSApi\PICA\**\*.cs" Link="PSApi\PICA\%(RecursiveDir)%(FileName)%(Extension)" />
     <Compile Include="..\PSApi\Scripting\**\*.cs" Link="PSApi\Scripting\%(RecursiveDir)%(FileName)%(Extension)" />
     <Compile Include="..\PSApi\AboutRecord.cs" Link="PSApi\AboutRecord.cs" />
@@ -67,6 +65,7 @@
     <Compile Include="..\PSApi\DescriptorTypes.cs" Link="PSApi\DescriptorTypes.cs" />
     <Compile Include="..\PSApi\DictionaryExtensions.cs" Link="PSApi\DictionaryExtensions.cs" />
     <Compile Include="..\PSApi\DisplayPixelsProc.cs" Link="PSApi\DisplayPixelsProc.cs" />
+    <Compile Include="..\PSApi\Disposable.cs" Link="PSApi\Disposable.cs" />
     <Compile Include="..\PSApi\FilterCase.cs" Link="PSApi\FilterCase.cs" />
     <Compile Include="..\PSApi\FilterCaseInfo.cs" Link="PSApi\FilterCaseInfo.cs" />
     <Compile Include="..\PSApi\FilterCaseInfoCollection.cs" Link="PSApi\FilterCaseInfoCollection.cs" />
@@ -100,6 +99,7 @@
     <Compile Include="..\PSApi\ParameterData.Formatter.cs" Link="PSApi\ParameterData.Formatter.cs" />
     <Compile Include="..\PSApi\PIDescriptorParameters.cs" Link="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="..\PSApi\PlatformData.cs" Link="PSApi\PlatformData.cs" />
+    <Compile Include="..\PSApi\PlugInModule.cs" Link="PSApi\PlugInModule.cs" />
     <Compile Include="..\PSApi\PlugInMonitor.cs" Link="PSApi\PlugInMonitor.cs" />
     <Compile Include="..\PSApi\PluginPhase.cs" Link="PSApi\PluginPhase.cs" />
     <Compile Include="..\PSApi\PluginUISettings.cs" Link="PSApi\PluginUISettings.cs" />
@@ -139,6 +139,7 @@
     <PackageReference Include="MessagePack" Version="2.5.124" />
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
+    <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.22621.2" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="PaintDotNet\ColorPicker\ColorGradientControl.cs">
@@ -171,9 +172,33 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='FastDebug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PdnOutDir>D:\Program Files\paint.net\Effects\PSFilterPdn</PdnOutDir>
+  </PropertyGroup>
   <ItemGroup>
-    <Folder Include="PSApi\Interop\" />
+    <PublishedFiles Include="$(ProjectDir)$(PublishDir)*.*" />
+    <FastDebugFiles Include="$(TargetDir)**\*.*" Condition="'$(ConfigurationName)' == 'FastDebug'" />
+    <PSFilterShimFilesToDelete Include="$(PdnOutDir)\PSFilterShim.*" />
+    <PSFilterShimFilesToDelete Include="$(PdnOutDir)\Microsoft.Win32.SystemEvents.dll" />
+    <PSFilterShimFilesToDelete Include="$(PdnOutDir)\System.Drawing.Common.dll" />
   </ItemGroup>
+  <Target Name="PreBuild" AfterTargets="Build" Condition="'$(ConfigurationName)' != 'FastDebug'">
+    <!-- Remove the existing loose files before deploying a single file build -->
+    <RemoveDir Directories="$(PdnOutDir)\runtimes" />
+    <Delete Files="@(PSFilterShimFilesToDelete)" />
+  </Target>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(ConfigurationName)' == 'FastDebug'">
+    <!--EditBin is used to make the following changes the header of the generated 32-bit executable for compatibility with older filters:
+        1. Mark the executable as incompatible with Data Execution Prevention (DEP).
+        2. Change the OS Subsystem version to 5.1 (Windows XP) to stop the OS from automatically enabling the HeapEnableTerminationOnCorruption option.
+           See Raymond Chen's blog post "Brief Q&A on the HeapEnableTerminationOnCorruption heap information flag": https://devblogs.microsoft.com/oldnewthing/20131227-00/?p=2243
+        -->
+    <Exec Command="call &quot;$(DevEnvDir)..\tools\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NXCOMPAT:NO /SUBSYSTEM:WINDOWS,5.1 &quot;$(TargetDir)$(TargetName).exe&quot;" />
+    <Copy SourceFiles="@(FastDebugFiles)" DestinationFolder="$(PdnOutDir)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" />
+  </Target>
   <Target Name="DeleteExistingPublishedFiles" BeforeTargets="PrepareForPublish">
     <!--Delete the existing publish directory. Otherwise the 'editbin' command will sometimes fail to open the file.-->
     <RemoveDir Directories="$(ProjectDir)$(PublishDir)" />
@@ -185,6 +210,6 @@
            See Raymond Chen's blog post "Brief Q&A on the HeapEnableTerminationOnCorruption heap information flag": https://devblogs.microsoft.com/oldnewthing/20131227-00/?p=2243
         -->
     <Exec Command="call &quot;$(DevEnvDir)..\tools\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NXCOMPAT:NO /SUBSYSTEM:WINDOWS,5.1 &quot;$(ProjectDir)$(PublishDir)$(PublishedSingleFileName)&quot;" />
-    <Copy SourceFiles="$(ProjectDir)$(PublishDir)$(PublishedSingleFileName)" DestinationFolder="D:\Program Files\paint.net\Effects" />
+    <Copy SourceFiles="@(PublishedFiles)" DestinationFolder="$(PdnOutDir)" OverwriteReadOnlyFiles="true" />
   </Target>
 </Project>

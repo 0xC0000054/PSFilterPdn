@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PSFilterLoad.PSApi.Diagnostics;
-using PSFilterLoad.PSApi.Interop;
+using TerraFX.Interop.Windows;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -217,16 +217,16 @@ namespace PSFilterLoad.PSApi.PICA
             return 0;
         }
 
-        private uint PSBufferGetSpace()
+        private unsafe uint PSBufferGetSpace()
         {
             // Assume that we have 1 GB of available space.
             uint space = 1024 * 1024 * 1024;
 
-            NativeStructs.MEMORYSTATUSEX buffer = new()
+            MEMORYSTATUSEX buffer = new()
             {
-                dwLength = (uint)Marshal.SizeOf<NativeStructs.MEMORYSTATUSEX>()
+                dwLength = (uint)sizeof(MEMORYSTATUSEX)
             };
-            if (SafeNativeMethods.GlobalMemoryStatusEx(ref buffer))
+            if (Windows.GlobalMemoryStatusEx(&buffer))
             {
                 if (buffer.ullAvailVirtual < uint.MaxValue)
                 {

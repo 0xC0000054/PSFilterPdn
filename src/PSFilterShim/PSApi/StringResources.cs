@@ -53,5 +53,7 @@ namespace PSFilterLoad.PSApi
         public static string AlphaChannelName => Resources.AlphaChannelName;
 
         public static string SelectionMaskChannelName => Resources.MaskChannelName;
+
+        public static string PluginEntryPointNotFound => Resources.PluginEntryPointNotFound;
     }
 }
