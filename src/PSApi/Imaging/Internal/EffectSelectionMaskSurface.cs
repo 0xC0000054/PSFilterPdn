@@ -95,7 +95,7 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
                 ExceptionUtil.ThrowArgumentException("Cannot lock the effect selection mask surface for writing.", nameof(mode));
             }
 
-            RectInt32 rectInt32Bounds = bounds;
+            RectInt32 rectInt32Bounds = new(bounds.X, bounds.Y, bounds.Width, bounds.Height);
 
             IBitmapLock<ColorAlpha8> bitmapLock = effectInputBitmap.Lock(rectInt32Bounds);
 

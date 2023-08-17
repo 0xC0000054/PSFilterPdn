@@ -115,7 +115,7 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
         {
             VerifyNotDisposed();
 
-            RectInt32 rectInt32Bounds = bounds;
+            RectInt32 rectInt32Bounds = new(bounds.X, bounds.Y, bounds.Width, bounds.Height);
             BitmapLockOptions bitmapLockOptions;
 
             switch (mode)

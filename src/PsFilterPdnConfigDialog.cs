@@ -2016,8 +2016,6 @@ namespace PSFilterPdn
                     environmentInitialized = true;
                 }
 
-                SizeInt32 canvasSize = sourceBitmap.Size;
-
                 HostState hostState = new()
                 {
                     HasMultipleLayers = false,
@@ -2033,8 +2031,8 @@ namespace PSFilterPdn
                         TreeNodeEx node = filterCollection[i];
                         PluginData plugin = (PluginData)node.Tag;
 
-                        node.Enabled = plugin.SupportsHostState(canvasSize.Width,
-                                                                canvasSize.Height,
+                        node.Enabled = plugin.SupportsHostState(sourceBitmap.Width,
+                                                                sourceBitmap.Height,
                                                                 sourceBitmap,
                                                                 hostState);
                     }

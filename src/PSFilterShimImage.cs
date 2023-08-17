@@ -74,10 +74,8 @@ namespace PSFilterPdn
                 throw new ArgumentNullException(nameof(bitmap));
             }
 
-            SizeInt32 bitmapSize = bitmap.Size;
-
-            PSFilterShimImageHeader header = new(bitmapSize.Width,
-                                                 bitmapSize.Height,
+            PSFilterShimImageHeader header = new(bitmap.Width,
+                                                 bitmap.Height,
                                                  bitmap.Format);
             FileStreamOptions options = new()
             {
