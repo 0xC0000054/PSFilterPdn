@@ -31,11 +31,11 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
     /// </summary>
     internal sealed unsafe class ShimMaskSurface : MaskSurface
     {
-        private readonly ShimSurfaceGray8 surface;
+        private readonly WICBitmapSurface<ColorAlpha8> surface;
 
-        public ShimMaskSurface(int width, int height)
+        public ShimMaskSurface(int width, int height, IWICFactory factory)
         {
-            surface = new ShimSurfaceGray8(width, height);
+            surface = new WICBitmapSurface<ColorAlpha8>(width, height, factory);
         }
 
         private ShimMaskSurface(ShimMaskSurface cloneMe)
@@ -51,12 +51,12 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
         /// <summary>
         /// Gets the width of the Surface.
         /// </summary>
-        public override int Width { get; }
+        public override int Width => surface.Width;
 
         /// <summary>
         /// Gets the height of the Surface.
         /// </summary>
-        public override int Height { get; }
+        public override int Height => surface.Height;
 
         public override ShimMaskSurface Clone()
         {
@@ -72,14 +72,14 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
             return new(this, newWidth, newHeight);
         }
 
-        public override ShimSurfaceGray8Lock Lock(SurfaceLockMode mode)
+        public override ISurfaceLock Lock(SurfaceLockMode mode)
         {
             VerifyNotDisposed();
 
             return surface.Lock(mode);
         }
 
-        public override  ShimSurfaceGray8Lock Lock(Rectangle bounds, SurfaceLockMode mode)
+        public override  ISurfaceLock Lock(Rectangle bounds, SurfaceLockMode mode)
         {
             VerifyNotDisposed();
 

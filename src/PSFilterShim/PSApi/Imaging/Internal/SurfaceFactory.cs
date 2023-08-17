@@ -45,10 +45,10 @@ namespace PSFilterLoad.PSApi.Imaging
             switch (format)
             {
                 case SurfacePixelFormat.Bgra32:
-                    surface = new ShimSurfaceBgra32(width, height);
+                    surface = new WICBitmapSurface<ColorBgra32>(width, height, imagingFactory);
                     break;
                 case SurfacePixelFormat.Gray8:
-                    surface = new ShimSurfaceGray8(width, height);
+                    surface = new WICBitmapSurface<ColorAlpha8>(width, height, imagingFactory);
                     break;
                 case SurfacePixelFormat.Pbgra32:
                     surface = new WICBitmapSurface<ColorPbgra32>(width, height, imagingFactory);
@@ -65,7 +65,7 @@ namespace PSFilterLoad.PSApi.Imaging
         {
             VerifyNotDisposed();
 
-            return new ShimMaskSurface(width, height);
+            return new ShimMaskSurface(width, height, imagingFactory);
         }
 
         public TransparencyCheckerboardSurface CreateTransparencyCheckerboardSurface()

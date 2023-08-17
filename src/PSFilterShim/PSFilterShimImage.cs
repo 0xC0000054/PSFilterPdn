@@ -28,7 +28,7 @@ namespace PSFilterShim
     {
         private const int BufferSize = 4096;
 
-        public static ImageSurface Load(string path)
+        public static ImageSurface Load(string path, IWICFactory factory)
         {
             ImageSurface surface;
 
@@ -46,7 +46,7 @@ namespace PSFilterShim
                     throw new InvalidOperationException("This method requires an image that uses the Bgra32 format.");
                 }
 
-                surface = new ShimSurfaceBgra32(header.Width, header.Height);
+                surface = new WICBitmapSurface<ColorBgra32>(header.Width, header.Height, factory);
 
                 int rowLengthInBytes = header.Stride;
 
@@ -67,7 +67,7 @@ namespace PSFilterShim
             return surface;
         }
 
-        public static MaskSurface? LoadSelectionMask(string? path)
+        public static MaskSurface? LoadSelectionMask(string? path, IWICFactory factory)
         {
             MaskSurface? surface = null;
 
@@ -87,7 +87,7 @@ namespace PSFilterShim
                         throw new InvalidOperationException("This method requires an image that uses the Gray8 format.");
                     }
 
-                    surface = new ShimMaskSurface(header.Width, header.Height);
+                    surface = new ShimMaskSurface(header.Width, header.Height, factory);
 
                     int rowLengthInBytes = header.Stride;
 

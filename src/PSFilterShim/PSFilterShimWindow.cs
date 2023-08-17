@@ -356,8 +356,8 @@ namespace PSFilterShim
 
                 try
                 {
-                    source = PSFilterShimImage.Load(settings.SourceImagePath);
-                    selectionMask = PSFilterShimImage.LoadSelectionMask(settings.SelectionMaskPath);
+                    source = PSFilterShimImage.Load(settings.SourceImagePath, imagingFactory);
+                    selectionMask = PSFilterShimImage.LoadSelectionMask(settings.SelectionMaskPath, imagingFactory);
 
                     IPluginApiLogger logger = PluginApiLogger.Create(logWriter,
                                                                      () => PluginApiLogCategories.Default,
