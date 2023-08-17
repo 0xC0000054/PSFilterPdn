@@ -14,7 +14,6 @@ using PaintDotNet;
 using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
 using System;
-using System.Drawing;
 
 #nullable enable
 

@@ -15,7 +15,6 @@ using PaintDotNet.Effects;
 using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
 using System;
-using System.Drawing;
 
 #nullable enable
 
@@ -119,7 +118,7 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
                 ExceptionUtil.ThrowArgumentException("Cannot lock the effect input surface for writing.", nameof(mode));
             }
 
-            RectInt32 rectInt32Bounds = bounds;
+            RectInt32 rectInt32Bounds = new(bounds.X, bounds.Y, bounds.Width, bounds.Height);
 
             IBitmapLock<ColorBgra32> bitmapLock = effectInputBitmap.Lock(rectInt32Bounds);
 

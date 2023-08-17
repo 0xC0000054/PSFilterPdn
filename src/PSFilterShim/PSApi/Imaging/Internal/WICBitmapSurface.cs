@@ -12,7 +12,6 @@
 
 using TerraFX.Interop.Windows;
 using System;
-using System.Drawing;
 
 #nullable enable
 

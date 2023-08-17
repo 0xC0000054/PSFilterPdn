@@ -44,6 +44,7 @@
     <Compile Include="..\PSApi\ColorConversion\**\*.cs" Link="PSApi\ColorConversion\%(RecursiveDir)%(FileName)%(Extension)" />
     <Compile Include="..\PSApi\Diagnostics\**\*.cs" Link="PSApi\Diagnostics\%(RecursiveDir)%(FileName)%(Extension)" />
     <Compile Include="..\PSApi\Imaging\*.cs" Link="PSApi\Imaging\%(FileName)%(Extension)" />
+    <Compile Include="..\PSApi\Primitives\*.cs" Link="PSApi\Primitives\%(FileName)%(Extension)" />
     <Compile Include="..\PSApi\Rendering\*.cs" Link="PSApi\Rendering\%(FileName)%(Extension)" />
     <Compile Include="..\PSApi\PICA\**\*.cs" Link="PSApi\PICA\%(RecursiveDir)%(FileName)%(Extension)" />
     <Compile Include="..\PSApi\Scripting\**\*.cs" Link="PSApi\Scripting\%(RecursiveDir)%(FileName)%(Extension)" />
@@ -140,7 +141,6 @@
     <PackageReference Include="MessagePack" Version="2.5.124" />
     <PackageReference Include="PointerToolkit" Version="1.0.0" />
     <PackageReference Include="PointerToolkit.TerraFX.Interop.Windows" Version="10.0.22621.2" />
-    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
     <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.22621.2" />
   </ItemGroup>
@@ -185,12 +185,9 @@
     <PublishedFiles Include="$(ProjectDir)$(PublishDir)*.*" />
     <FastDebugFiles Include="$(TargetDir)**\*.*" Condition="'$(ConfigurationName)' == 'FastDebug'" />
     <PSFilterShimFilesToDelete Include="$(PdnOutDir)\PSFilterShim.*" />
-    <PSFilterShimFilesToDelete Include="$(PdnOutDir)\Microsoft.Win32.SystemEvents.dll" />
-    <PSFilterShimFilesToDelete Include="$(PdnOutDir)\System.Drawing.Common.dll" />
   </ItemGroup>
   <Target Name="PreBuild" AfterTargets="Build" Condition="'$(ConfigurationName)' != 'FastDebug'">
     <!-- Remove the existing loose files before deploying a single file build -->
-    <RemoveDir Directories="$(PdnOutDir)\runtimes" />
     <Delete Files="@(PSFilterShimFilesToDelete)" />
   </Target>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(ConfigurationName)' == 'FastDebug'">

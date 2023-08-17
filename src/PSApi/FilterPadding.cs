@@ -10,8 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System.Drawing;
-
 namespace PSFilterLoad.PSApi
 {
     internal readonly struct FilterPadding

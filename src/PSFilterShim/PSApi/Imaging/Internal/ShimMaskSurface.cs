@@ -20,8 +20,6 @@
 // .                                                                           //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System.Drawing;
-
 #nullable enable
 
 namespace PSFilterLoad.PSApi.Imaging.Internal

@@ -20,7 +20,6 @@ using PSFilterShim.Properties;
 using TerraFX.Interop.Windows;
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -149,10 +148,7 @@ namespace PSFilterShim
 
             if (GetMonitorInfoW(hMonitor, &info))
             {
-                Rectangle screenWorkingArea = System.Drawing.Rectangle.FromLTRB(info.rcWork.left,
-                                                                                info.rcWork.top,
-                                                                                info.rcWork.right,
-                                                                                info.rcWork.bottom);
+                Rectangle screenWorkingArea = info.rcWork;
                 RECT parentBounds;
 
                 if (GetWindowRect(parentWindowHandle, &parentBounds))
@@ -196,10 +192,7 @@ namespace PSFilterShim
 
             if (GetMonitorInfoW(hMonitor, &info))
             {
-                Rectangle workingArea = System.Drawing.Rectangle.FromLTRB(info.rcWork.left,
-                                                                          info.rcWork.top,
-                                                                          info.rcWork.right,
-                                                                          info.rcWork.bottom);
+                Rectangle workingArea = info.rcWork;
 
                 windowRect.X = Math.Max(workingArea.X, workingArea.X + (workingArea.Width - windowRect.Width) / 2);
                 windowRect.Y = Math.Max(workingArea.Y, workingArea.Y + (workingArea.Height - windowRect.Height) / 2);
