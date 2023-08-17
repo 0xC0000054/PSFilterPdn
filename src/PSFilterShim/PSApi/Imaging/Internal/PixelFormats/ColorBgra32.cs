@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct ColorBgra32
+    internal struct ColorBgra32 : IPixelFormatInfo
     {
         public byte B;
 
@@ -33,5 +33,15 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
         public byte R;
 
         public byte A;
+
+        static int IPixelFormatInfo.ChannelCount => 4;
+
+        static int IPixelFormatInfo.BitsPerChannel => 8;
+
+        static SurfacePixelFormat IPixelFormatInfo.Format => SurfacePixelFormat.Bgra32;
+
+        static bool IPixelFormatInfo.SupportsTransparency => true;
+
+        static int IPixelFormatInfo.BytesPerPixel => 4;
     }
 }

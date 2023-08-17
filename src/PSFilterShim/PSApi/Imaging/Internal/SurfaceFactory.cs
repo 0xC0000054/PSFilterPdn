@@ -11,34 +11,35 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PSFilterLoad.PSApi.Imaging.Internal;
+using PSFilterShim;
 using System;
 
 #nullable enable
 
 namespace PSFilterLoad.PSApi.Imaging
 {
-    internal sealed class SurfaceFactory : ISurfaceFactory
+    internal sealed class SurfaceFactory : Disposable, ISurfaceFactory
     {
-        public static readonly ISurfaceFactory Instance = new SurfaceFactory();
+        private readonly IWICFactory imagingFactory;
+        private readonly TransparencyCheckerboardSurface transparencyCheckerboardSurface;
 
-        public DisplayPixelsSurface CreateDisplayPixelsSurface(int width, int height, bool hasTransparency)
+        public SurfaceFactory(IWICFactory imagingFactory, string transparencyCheckerboardPath)
         {
-            DisplayPixelsSurface surface;
+            this.imagingFactory = imagingFactory ?? throw new ArgumentNullException(nameof(imagingFactory));
+            transparencyCheckerboardSurface = PSFilterShimImage.LoadTransparencyCheckerboard(transparencyCheckerboardPath, imagingFactory);
+        }
 
-            if (hasTransparency)
-            {
-                surface = new DisplayPixelsSurfaceBgra32(width, height);
-            }
-            else
-            {
-                surface = new DisplayPixelsSurfaceBgr24(width, height);
-            }
+        public DisplayPixelsSurface CreateDisplayPixelsSurface(int width, int height)
+        {
+            VerifyNotDisposed();
 
-            return surface;
+            return new ShimDisplayPixelsSurface(width, height, imagingFactory);
         }
 
         public ImageSurface CreateImageSurface(int width, int height, SurfacePixelFormat format)
         {
+            VerifyNotDisposed();
+
             ImageSurface surface;
 
             switch (format)
@@ -46,11 +47,11 @@ namespace PSFilterLoad.PSApi.Imaging
                 case SurfacePixelFormat.Bgra32:
                     surface = new ShimSurfaceBgra32(width, height);
                     break;
-                case SurfacePixelFormat.Bgr24:
-                    surface = new ShimSurfaceBgr24(width, height);
-                    break;
                 case SurfacePixelFormat.Gray8:
                     surface = new ShimSurfaceGray8(width, height);
+                    break;
+                case SurfacePixelFormat.Pbgra32:
+                    surface = new WICBitmapSurface<ColorPbgra32>(width, height, imagingFactory);
                     break;
                 case SurfacePixelFormat.Unknown:
                 default:
@@ -62,7 +63,24 @@ namespace PSFilterLoad.PSApi.Imaging
 
         public MaskSurface CreateMaskSurface(int width, int height)
         {
+            VerifyNotDisposed();
+
             return new ShimMaskSurface(width, height);
+        }
+
+        public TransparencyCheckerboardSurface CreateTransparencyCheckerboardSurface()
+        {
+            VerifyNotDisposed();
+
+            return transparencyCheckerboardSurface.Clone();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                transparencyCheckerboardSurface.Dispose();
+            }
         }
     }
 }

@@ -12,12 +12,13 @@
 
 using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterLoad.PSApi.Imaging;
+using PSFilterLoad.PSApi.Rendering;
+using TerraFX.Interop.DirectX;
 using TerraFX.Interop.Windows;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
@@ -86,8 +87,11 @@ namespace PSFilterLoad.PSApi
         private ISurface<ImageSurface> tempSurface;
         private ISurface<MaskSurface> tempMask;
         private readonly ISurfaceFactory surfaceFactory;
+        private readonly IRenderTargetFactory renderTargetFactory;
         private DisplayPixelsSurface displaySurface;
-        private Bitmap checkerBoardBitmap;
+        private TransparencyCheckerboardSurface transparencyCheckerboard;
+        private IDeviceContextRenderTarget displayPixelsRenderTarget;
+        private IDeviceBitmapBrush checkerboardBrush;
 
         private bool disposed;
         private PluginModule module;
@@ -253,6 +257,7 @@ namespace PSFilterLoad.PSApi
                                      FilterCase filterCase,
                                      IDocumentMetadataProvider documentMetadataProvider,
                                      ISurfaceFactory surfaceFactory,
+                                     IRenderTargetFactory renderTargetFactory,
                                      IPluginApiLogger logger,
                                      PluginUISettings pluginUISettings)
         {
@@ -327,6 +332,7 @@ namespace PSFilterLoad.PSApi
             this.logger = logger;
             this.filterCase = filterCase;
             this.surfaceFactory = surfaceFactory;
+            this.renderTargetFactory = renderTargetFactory;
             this.documentMetadataProvider = documentMetadataProvider;
 
             readImageDocument = new ReadImageDocument(source.Width, source.Height, dpiX, dpiY);
@@ -2311,8 +2317,7 @@ namespace PSFilterLoad.PSApi
         {
             if ((displaySurface == null)
                 || width != displaySurface.Width
-                || height != displaySurface.Height
-                || haveMask != displaySurface.SupportsTransparency)
+                || height != displaySurface.Height)
             {
                 if (displaySurface != null)
                 {
@@ -2320,63 +2325,20 @@ namespace PSFilterLoad.PSApi
                     displaySurface = null;
                 }
 
-                displaySurface = surfaceFactory.CreateDisplayPixelsSurface(width, height, haveMask);
+                displaySurface = surfaceFactory.CreateDisplayPixelsSurface(width, height);
             }
-        }
 
-        /// <summary>
-        /// Renders the 32-bit bitmap to the HDC.
-        /// </summary>
-        /// <param name="gr">The Graphics object to render to.</param>
-        /// <param name="dstCol">The column offset to render at.</param>
-        /// <param name="dstRow">The row offset to render at.</param>
-        /// <param name="allOpaque"><c>true</c> if the alpha channel of the bitmap does not contain any transparency; otherwise, <c>false</c>.</param>
-        /// <returns><see cref="PSError.noErr"/> on success; or any other PSError constant on failure.</returns>
-        private unsafe short Display32BitBitmap(Graphics gr, int dstCol, int dstRow, bool allOpaque)
-        {
-            using (IDisplayPixelsSurfaceLock displaySurfaceLock = displaySurface.Lock(SurfaceLockMode.Read))
-            using (Bitmap aliasedDisplayPixelsBitmap = displaySurfaceLock.CreateAliasedBitmap())
+            if (displayPixelsRenderTarget == null
+                || haveMask != displayPixelsRenderTarget.SupportsTransparency)
             {
-                // Skip the rendering of the checker board if the surface does not contain any transparency.
-                if (allOpaque)
+                if (displayPixelsRenderTarget != null)
                 {
-                    gr.DrawImageUnscaled(aliasedDisplayPixelsBitmap, dstCol, dstRow);
+                    displayPixelsRenderTarget.Dispose();
+                    displayPixelsRenderTarget = null;
                 }
-                else
-                {
-                    int width = displaySurface.Width;
-                    int height = displaySurface.Height;
 
-                    try
-                    {
-                        if (checkerBoardBitmap == null ||
-                            checkerBoardBitmap.Width != width ||
-                            checkerBoardBitmap.Height != height)
-                        {
-                            DrawCheckerBoardBitmap(width, height);
-                        }
-
-                        // Use a temporary bitmap to prevent flickering when the image is rendered over the checker board.
-                        using (Bitmap temp = new(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
-                        {
-                            Rectangle rect = new(0, 0, width, height);
-
-                            using (Graphics tempGr = Graphics.FromImage(temp))
-                            {
-                                tempGr.DrawImageUnscaled(checkerBoardBitmap, rect);
-                                tempGr.DrawImageUnscaled(aliasedDisplayPixelsBitmap, rect);
-                            }
-
-                            gr.DrawImageUnscaled(temp, dstCol, dstRow);
-                        }
-                    }
-                    catch (OutOfMemoryException)
-                    {
-                        return PSError.memFullErr;
-                    }
-                }
+                displayPixelsRenderTarget = renderTargetFactory.Create(haveMask);
             }
-            return PSError.noErr;
         }
 
         private unsafe short DisplayPixelsProc(PSPixelMap* srcPixelMap, VRect* srcRect, int dstRow, int dstCol, IntPtr platformContext)
@@ -2402,157 +2364,173 @@ namespace PSFilterLoad.PSApi
             int height = srcRect->bottom - srcRect->top;
 
             bool hasTransparencyMask = srcPixelMap->version >= 1 && srcPixelMap->masks != null;
+            short err = PSError.noErr;
 
             try
             {
                 SetupDisplaySurface(width, height, hasTransparencyMask);
-            }
-            catch (OutOfMemoryException)
-            {
-                return PSError.memFullErr;
-            }
-            byte* baseAddr = (byte*)srcPixelMap->baseAddr.ToPointer();
 
-            int top = srcRect->top;
-            int left = srcRect->left;
-            int bottom = srcRect->bottom;
-            // Some plug-ins set the srcRect incorrectly for 100% or greater zoom.
-            if (srcPixelMap->bounds.Equals(*srcRect) && (top > 0 || left > 0))
-            {
-                top = left = 0;
-                bottom = height;
-            }
+                byte* baseAddr = (byte*)srcPixelMap->baseAddr.ToPointer();
 
-            using (IDisplayPixelsSurfaceLock displaySurfaceLock = displaySurface.Lock(SurfaceLockMode.Write))
-            {
-                int destChannelCount = displaySurface.ChannelCount;
-
-                if (srcPixelMap->colBytes == 1)
+                int top = srcRect->top;
+                int left = srcRect->left;
+                int bottom = srcRect->bottom;
+                // Some plug-ins set the srcRect incorrectly for 100% or greater zoom.
+                if (srcPixelMap->bounds.Equals(*srcRect) && (top > 0 || left > 0))
                 {
-                    int greenPlaneOffset = srcPixelMap->planeBytes;
-                    int bluePlaneOffset = srcPixelMap->planeBytes * 2;
-                    for (int y = top; y < bottom; y++)
+                    top = left = 0;
+                    bottom = height;
+                }
+
+                using (ISurfaceLock displaySurfaceLock = displaySurface.Lock(SurfaceLockMode.Write))
+                {
+                    if (srcPixelMap->colBytes == 1)
                     {
-                        byte* redPlane = baseAddr + (y * srcPixelMap->rowBytes) + left;
-                        byte* greenPlane = redPlane + greenPlaneOffset;
-                        byte* bluePlane = redPlane + bluePlaneOffset;
-
-                        byte* dst = displaySurfaceLock.GetRowPointerUnchecked(y - top);
-
-                        for (int x = 0; x < width; x++)
+                        int greenPlaneOffset = srcPixelMap->planeBytes;
+                        int bluePlaneOffset = srcPixelMap->planeBytes * 2;
+                        for (int y = top; y < bottom; y++)
                         {
-                            dst[2] = *redPlane;
-                            dst[1] = *greenPlane;
-                            dst[0] = *bluePlane;
+                            byte* redPlane = baseAddr + (y * srcPixelMap->rowBytes) + left;
+                            byte* greenPlane = redPlane + greenPlaneOffset;
+                            byte* bluePlane = redPlane + bluePlaneOffset;
 
-                            redPlane++;
-                            greenPlane++;
-                            bluePlane++;
-                            dst += destChannelCount;
+                            byte* dst = displaySurfaceLock.GetRowPointerUnchecked(y - top);
+
+                            for (int x = 0; x < width; x++)
+                            {
+                                dst[2] = *redPlane;
+                                dst[1] = *greenPlane;
+                                dst[0] = *bluePlane;
+
+                                redPlane++;
+                                greenPlane++;
+                                bluePlane++;
+                                dst += 4;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int y = top; y < bottom; y++)
+                        {
+                            byte* src = baseAddr + (y * srcPixelMap->rowBytes) + (left * srcPixelMap->colBytes);
+                            byte* dst = displaySurfaceLock.GetRowPointerUnchecked(y - top);
+
+                            for (int x = 0; x < width; x++)
+                            {
+                                dst[0] = src[2];
+                                dst[1] = src[1];
+                                dst[2] = src[0];
+
+                                src += srcPixelMap->colBytes;
+                                dst += 4;
+                            }
                         }
                     }
                 }
-                else
-                {
-                    for (int y = top; y < bottom; y++)
-                    {
-                        byte* src = baseAddr + (y * srcPixelMap->rowBytes) + (left * srcPixelMap->colBytes);
-                        byte* dst = displaySurfaceLock.GetRowPointerUnchecked(y - top);
 
-                        for (int x = 0; x < width; x++)
-                        {
-                            dst[0] = src[2];
-                            dst[1] = src[1];
-                            dst[2] = src[0];
-
-                            src += srcPixelMap->colBytes;
-                            dst += destChannelCount;
-                        }
-                    }
-                }
-            }
-
-            short err = PSError.noErr;
-            using (Graphics gr = Graphics.FromHdc(platformContext))
-            {
                 // Apply the transparency mask if present.
+                bool hasTranparency = false;
+
                 if (hasTransparencyMask)
                 {
-                    bool allOpaque = true;
                     PSPixelMask* mask = srcPixelMap->masks;
 
                     if (mask->maskData != IntPtr.Zero && mask->colBytes != 0 && mask->rowBytes != 0)
                     {
                         byte* maskPtr = (byte*)mask->maskData.ToPointer();
 
-                        using (IDisplayPixelsSurfaceLock displaySurfaceLock = displaySurface.Lock(SurfaceLockMode.Write))
+                        using (ISurfaceLock displaySurfaceLock = displaySurface.Lock(SurfaceLockMode.ReadWrite))
                         {
-                            int destChannelCount = displaySurface.ChannelCount;
-
                             for (int y = top; y < bottom; y++)
                             {
                                 byte* src = maskPtr + (y * mask->rowBytes) + left;
                                 byte* dst = displaySurfaceLock.GetRowPointerUnchecked(y - top);
                                 for (int x = 0; x < width; x++)
                                 {
-                                    dst[3] = *src;
-                                    if (*src < 255)
+                                    byte alpha = *src;
+
+                                    if (alpha < 255)
                                     {
-                                        allOpaque = false;
+                                        hasTranparency = true;
+                                        dst[0] = PremultiplyColor(dst[0], alpha);
+                                        dst[1] = PremultiplyColor(dst[1], alpha);
+                                        dst[2] = PremultiplyColor(dst[2], alpha);
                                     }
+                                    dst[3] = alpha;
 
                                     src += mask->colBytes;
-                                    dst += destChannelCount;
+                                    dst += 4;
                                 }
+                            }
+
+                            static byte PremultiplyColor(byte color, byte alpha)
+                            {
+                                int r1 = color * alpha + 0x80;
+                                int r2 = ((r1 >> 8) + r1) >> 8;
+                                return (byte)r2;
                             }
                         }
                     }
-
-                    err = Display32BitBitmap(gr, dstCol, dstRow, allOpaque);
                 }
-                else
+
+                HDC hdc = (HDC)platformContext;
+                RECT hdcBounds = new(dstCol, dstRow, dstCol + width, dstRow + height);
+
+                displayPixelsRenderTarget.BindToDeviceContext(hdc, hdcBounds);
+
+                displayPixelsRenderTarget.BeginDraw();
+                try
                 {
-                    using (IDisplayPixelsSurfaceLock displaySurfaceLock = displaySurface.Lock(SurfaceLockMode.Read))
-                    using (Bitmap bmp = displaySurfaceLock.CreateAliasedBitmap())
+                    if (hasTranparency)
                     {
-                        gr.DrawImageUnscaled(bmp, dstCol, dstRow);
+                        transparencyCheckerboard ??= surfaceFactory.CreateTransparencyCheckerboardSurface();
+                        checkerboardBrush ??= displayPixelsRenderTarget.CreateBitmapBrush(transparencyCheckerboard);
+
+                        bool changedBlendMode = false;
+                        D2D1_PRIMITIVE_BLEND originalBlend = displayPixelsRenderTarget.PrimitiveBlend;
+
+                        if (originalBlend != D2D1_PRIMITIVE_BLEND.D2D1_PRIMITIVE_BLEND_COPY)
+                        {
+                            displayPixelsRenderTarget.PrimitiveBlend = D2D1_PRIMITIVE_BLEND.D2D1_PRIMITIVE_BLEND_COPY;
+                            changedBlendMode = true;
+                        }
+
+                        displayPixelsRenderTarget.FillRectangle(0, 0, width, height, checkerboardBrush);
+
+                        if (changedBlendMode)
+                        {
+                            displayPixelsRenderTarget.PrimitiveBlend = originalBlend;
+                        }
+                    }
+
+                    using (IDeviceBitmap deviceBitmap = displayPixelsRenderTarget.CreateBitmap(displaySurface, !hasTranparency))
+                    {
+                        displayPixelsRenderTarget.DrawBitmap(deviceBitmap);
                     }
                 }
+                finally
+                {
+                    displayPixelsRenderTarget.EndDraw();
+                }
+            }
+            catch (OutOfMemoryException)
+            {
+                err = PSError.memFullErr;
+            }
+            catch (RecreateTargetException)
+            {
+                checkerboardBrush?.Dispose();
+                checkerboardBrush = null;
+                displayPixelsRenderTarget?.Dispose();
+                displayPixelsRenderTarget = null;
+            }
+            catch (Direct2DException)
+            {
+                err = PSError.paramErr;
             }
 
             return err;
-        }
-
-        private unsafe void DrawCheckerBoardBitmap(int width, int height)
-        {
-            checkerBoardBitmap?.Dispose();
-            checkerBoardBitmap = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            BitmapData bd = checkerBoardBitmap.LockBits(new Rectangle(0, 0, checkerBoardBitmap.Width, checkerBoardBitmap.Height),
-                                                        ImageLockMode.WriteOnly,
-                                                        System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            try
-            {
-                void* scan0 = bd.Scan0.ToPointer();
-                int stride = bd.Stride;
-
-                for (int y = 0; y < checkerBoardBitmap.Height; y++)
-                {
-                    byte* p = (byte*)scan0 + (y * stride);
-                    for (int x = 0; x < checkerBoardBitmap.Width; x++)
-                    {
-                        byte v = (byte)((((x ^ y) & 8) * 8) + 191);
-
-                        p[0] = p[1] = p[2] = v;
-                        p[3] = 255;
-                        p += 4;
-                    }
-                }
-            }
-            finally
-            {
-                checkerBoardBitmap.UnlockBits(bd);
-            }
         }
 
         private unsafe void DrawFloatingSelectionMask()
@@ -2895,21 +2873,37 @@ namespace PSFilterLoad.PSApi
                         module.Dispose();
                         module = null;
                     }
+
                     if (source != null)
                     {
                         source.Dispose();
                         source = null;
                     }
+
                     if (dest != null)
                     {
                         dest.Dispose();
                         dest = null;
                     }
-                    if (checkerBoardBitmap != null)
+
+                    if (transparencyCheckerboard != null)
                     {
-                        checkerBoardBitmap.Dispose();
-                        checkerBoardBitmap = null;
+                        transparencyCheckerboard.Dispose();
+                        transparencyCheckerboard = null;
                     }
+
+                    if (checkerboardBrush != null)
+                    {
+                        checkerboardBrush.Dispose();
+                        checkerboardBrush = null;
+                    }
+
+                    if (displayPixelsRenderTarget != null)
+                    {
+                        displayPixelsRenderTarget.Dispose();
+                        displayPixelsRenderTarget = null;
+                    }
+
                     if (tempSurface != null)
                     {
                         tempSurface.Dispose();

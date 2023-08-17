@@ -10,13 +10,14 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-namespace PSFilterLoad.PSApi.Imaging
+using TerraFX.Interop.Windows;
+
+#nullable enable
+
+namespace PSFilterLoad.PSApi.Imaging.Internal
 {
-    internal enum SurfacePixelFormat
+    internal unsafe interface IWICFactory
     {
-        Unknown = 0,
-        Bgra32,
-        Gray8,
-        Pbgra32,
+        IWICImagingFactory* Get();
     }
 }

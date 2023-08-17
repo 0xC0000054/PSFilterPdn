@@ -17,35 +17,31 @@ using System.Drawing;
 
 namespace PSFilterLoad.PSApi.Imaging
 {
-    internal abstract class DisplayPixelsSurface : Disposable, IDisplayPixelsSurface
+    internal abstract class DisplayPixelsSurface : Disposable, ISurface<DisplayPixelsSurface>
     {
         public abstract int Width { get; }
 
         public abstract int Height { get; }
 
-        public abstract int ChannelCount { get; }
-
-        public abstract SurfacePixelFormat Format { get; }
-
-        public abstract bool SupportsTransparency { get; }
-
-        public virtual IDisplayPixelsSurfaceLock Lock(SurfaceLockMode mode)
+        public virtual ISurfaceLock Lock(SurfaceLockMode mode)
             => Lock(new Rectangle(0, 0, Width, Height), mode);
 
-        public abstract IDisplayPixelsSurfaceLock Lock(Rectangle bounds, SurfaceLockMode mode);
+        public abstract ISurfaceLock Lock(Rectangle bounds, SurfaceLockMode mode);
+
+        int ISurface<DisplayPixelsSurface>.ChannelCount => 4;
 
         int ISurface<DisplayPixelsSurface>.BitsPerChannel => 8;
 
+        SurfacePixelFormat ISurface<DisplayPixelsSurface>.Format => SurfacePixelFormat.Pbgra32;
+
         Size ISurface<DisplayPixelsSurface>.Size => new(Width, Height);
+
+        bool ISurface<DisplayPixelsSurface>.SupportsTransparency => true;
 
         bool ISurface<DisplayPixelsSurface>.IsReadOnly => false;
 
         ISurface<DisplayPixelsSurface> ISurface<DisplayPixelsSurface>.Clone() => throw new NotImplementedException();
 
         ISurface<DisplayPixelsSurface> ISurface<DisplayPixelsSurface>.CreateScaledSurface(int newWidth, int newHeight) => throw new NotImplementedException();
-
-        ISurfaceLock ISurface<DisplayPixelsSurface>.Lock(SurfaceLockMode mode) => Lock(mode);
-
-        ISurfaceLock ISurface<DisplayPixelsSurface>.Lock(Rectangle bounds, SurfaceLockMode mode) => Lock(bounds, mode);
     }
 }

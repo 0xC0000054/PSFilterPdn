@@ -109,6 +109,44 @@ namespace PSFilterShim
             return surface;
         }
 
+        public static TransparencyCheckerboardSurface LoadTransparencyCheckerboard(string path, IWICFactory factory)
+        {
+            TransparencyCheckerboardSurface surface;
+
+            using (FileStream stream = new(path,
+                                           FileMode.Open,
+                                           FileAccess.Read,
+                                           FileShare.Read,
+                                           BufferSize,
+                                           FileOptions.SequentialScan))
+            {
+                PSFilterShimImageHeader header = new(stream);
+
+                if (header.Format != SurfacePixelFormat.Pbgra32)
+                {
+                    throw new InvalidOperationException("This method requires an image that uses the Pbgra32 format.");
+                }
+
+                surface = new ShimTransparencyCheckerboardSurface(header.Width, header.Height, factory);
+
+                int rowLengthInBytes = header.Stride;
+
+                unsafe
+                {
+                    using (ISurfaceLock surfaceLock = surface.Lock(SurfaceLockMode.Write))
+                    {
+                        for (int y = 0; y < header.Height; y++)
+                        {
+                            byte* dst = surfaceLock.GetRowPointerUnchecked(y);
+
+                            stream.ReadExactly(new Span<byte>(dst, rowLengthInBytes));
+                        }
+                    }
+                }
+            }
+
+            return surface;
+        }
 
         public static void Save(string path, ISurface<ImageSurface> surface)
         {

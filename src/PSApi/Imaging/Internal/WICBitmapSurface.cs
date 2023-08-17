@@ -166,6 +166,12 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
                 bitsPerChannel = 8;
                 format = SurfacePixelFormat.Bgra32;
             }
+            else if (pixelType == typeof(ColorPbgra32))
+            {
+                channelCount = 4;
+                bitsPerChannel = 8;
+                format = SurfacePixelFormat.Pbgra32;
+            }
             else
             {
                 throw new NotSupportedException($"Unsupported pixel type: {pixelType}");

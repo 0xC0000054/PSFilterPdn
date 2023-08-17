@@ -10,13 +10,16 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-namespace PSFilterLoad.PSApi.Imaging
+using TerraFX.Interop.DirectX;
+
+#nullable enable
+
+namespace PSFilterLoad.PSApi.Rendering
 {
-    internal enum SurfacePixelFormat
+    internal sealed class RecreateTargetException : Direct2DException
     {
-        Unknown = 0,
-        Bgra32,
-        Gray8,
-        Pbgra32,
+        public RecreateTargetException() : base("The D2D target must be recreated.", D2DERR.D2DERR_RECREATE_TARGET)
+        {
+        }
     }
 }

@@ -69,6 +69,7 @@ namespace PSFilterPdn
             switch (format)
             {
                 case SurfacePixelFormat.Bgra32:
+                case SurfacePixelFormat.Pbgra32:
                     stride = checked(width * 4);
                     break;
                 case SurfacePixelFormat.Gray8:

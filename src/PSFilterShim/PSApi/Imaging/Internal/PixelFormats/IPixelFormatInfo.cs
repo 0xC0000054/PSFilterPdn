@@ -10,16 +10,20 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System.Drawing;
-
 #nullable enable
 
-namespace PSFilterLoad.PSApi.Imaging
+namespace PSFilterLoad.PSApi.Imaging.Internal
 {
-    internal interface IDisplayPixelsSurface : ISurface<DisplayPixelsSurface>
+    internal interface IPixelFormatInfo
     {
-        public new IDisplayPixelsSurfaceLock Lock(SurfaceLockMode mode);
+        static abstract int ChannelCount { get; }
 
-        public new IDisplayPixelsSurfaceLock Lock(Rectangle bounds, SurfaceLockMode mode);
+        static abstract int BitsPerChannel { get; }
+
+        static abstract SurfacePixelFormat Format { get; }
+
+        static abstract bool SupportsTransparency { get; }
+
+        static abstract int BytesPerPixel { get; }
     }
 }

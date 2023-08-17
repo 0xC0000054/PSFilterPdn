@@ -17,37 +17,31 @@ using System.Drawing;
 
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
-    internal sealed class DisplayPixelsSurfaceBgra32 : DisplayPixelsSurface
+    internal sealed unsafe class PDNDisplayPixelsSurface : DisplayPixelsSurface
     {
-        private readonly WICBitmapSurface<ColorBgra32> bitmap;
+        private readonly WICBitmapSurface<ColorPbgra32> bitmap;
 
-        public DisplayPixelsSurfaceBgra32(int width, int height, IImagingFactory imagingFactory)
+        public PDNDisplayPixelsSurface(int width, int height, IImagingFactory imagingFactory)
         {
-            bitmap = new WICBitmapSurface<ColorBgra32>(width, height, imagingFactory);
+            bitmap = new WICBitmapSurface<ColorPbgra32>(width, height, imagingFactory);
         }
 
         public override int Width => bitmap.Width;
 
         public override int Height => bitmap.Height;
 
-        public override int ChannelCount => 4;
-
-        public override SurfacePixelFormat Format => SurfacePixelFormat.Bgra32;
-
-        public override bool SupportsTransparency => true;
-
-        public override IDisplayPixelsSurfaceLock Lock(SurfaceLockMode mode)
+        public override ISurfaceLock Lock(SurfaceLockMode mode)
         {
             VerifyNotDisposed();
 
-            return new DisplayPixelsSurfaceBgra32Lock(bitmap.Lock(mode));
+            return bitmap.Lock(mode);
         }
 
-        public override IDisplayPixelsSurfaceLock Lock(Rectangle bounds, SurfaceLockMode mode)
+        public override ISurfaceLock Lock(Rectangle bounds, SurfaceLockMode mode)
         {
             VerifyNotDisposed();
 
-            return new DisplayPixelsSurfaceBgra32Lock(bitmap.Lock(bounds, mode));
+            return bitmap.Lock(bounds, mode);
         }
 
         protected override void Dispose(bool disposing)

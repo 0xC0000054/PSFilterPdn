@@ -10,14 +10,12 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System.Drawing;
-
 #nullable enable
 
-namespace PSFilterLoad.PSApi.Imaging
+namespace PSFilterLoad.PSApi.Rendering
 {
-    internal interface IDisplayPixelsSurfaceLock : ISurfaceLock
+    internal unsafe interface INativeResourceProperty<T> where T : unmanaged
     {
-        Bitmap CreateAliasedBitmap();
+        T* NativeResource { get; }
     }
 }

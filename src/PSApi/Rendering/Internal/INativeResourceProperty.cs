@@ -10,13 +10,12 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-namespace PSFilterLoad.PSApi.Imaging
+#nullable enable
+
+namespace PSFilterLoad.PSApi.Rendering.Internal
 {
-    internal enum SurfacePixelFormat
+    internal interface INativeResourceProperty<T>
     {
-        Unknown = 0,
-        Bgra32,
-        Gray8,
-        Pbgra32,
+        T NativeResource { get; }
     }
 }

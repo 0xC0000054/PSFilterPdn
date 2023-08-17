@@ -26,6 +26,7 @@ namespace PSFilterPdn
                                     bool showAboutDialog,
                                     string sourceImagePath,
                                     string destinationImagePath,
+                                    string transparencyCheckerboardPath,
                                     ColorRgb24 primaryColor,
                                     ColorRgb24 secondaryColor,
                                     double dpiX,
@@ -42,6 +43,7 @@ namespace PSFilterPdn
             ShowAboutDialog = showAboutDialog;
             SourceImagePath = sourceImagePath ?? throw new ArgumentNullException(nameof(sourceImagePath));
             DestinationImagePath = destinationImagePath ?? throw new ArgumentNullException(nameof(destinationImagePath));
+            TransparencyCheckerboardPath = transparencyCheckerboardPath ?? throw new ArgumentNullException(nameof(transparencyCheckerboardPath));
             PrimaryColor = primaryColor;
             SecondaryColor = secondaryColor;
             DpiX = dpiX;
@@ -62,6 +64,8 @@ namespace PSFilterPdn
         public string SourceImagePath { get; }
 
         public string DestinationImagePath { get; }
+
+        public string TransparencyCheckerboardPath { get; }
 
         public ColorRgb24 PrimaryColor { get; }
 

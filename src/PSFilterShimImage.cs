@@ -105,6 +105,42 @@ namespace PSFilterPdn
             }
         }
 
+        public static unsafe void Save(string path, TransparencyCheckerboardSurface bitmap)
+        {
+            if (bitmap is null)
+            {
+                throw new ArgumentNullException(nameof(bitmap));
+            }
+
+            PSFilterShimImageHeader header = new(bitmap.Width,
+                                                 bitmap.Height,
+                                                 SurfacePixelFormat.Pbgra32);
+            FileStreamOptions options = new()
+            {
+                Mode = FileMode.Create,
+                Access = FileAccess.Write,
+                Share = FileShare.None,
+                PreallocationSize = header.GetTotalFileSize(),
+            };
+
+            using (FileStream stream = new(path, options))
+            {
+                header.Save(stream);
+
+                using (ISurfaceLock bitmapLock = bitmap.Lock(SurfaceLockMode.Read))
+                {
+                    int bufferStride = header.Stride;
+
+                    for (int y = 0; y < header.Height; y++)
+                    {
+                        ReadOnlySpan<byte> pixels = new(bitmapLock.GetRowPointerUnchecked(y), bufferStride);
+
+                        stream.Write(pixels);
+                    }
+                }
+            }
+        }
+
         public static void SaveSelectionMask(string path, MaskSurface surface)
         {
             if (surface is null)

@@ -13,6 +13,8 @@
 using PSFilterLoad.PSApi;
 using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterLoad.PSApi.Imaging;
+using PSFilterLoad.PSApi.Imaging.Internal;
+using PSFilterLoad.PSApi.Rendering.Internal;
 using PSFilterPdn;
 using PSFilterShim.Properties;
 using TerraFX.Interop.Windows;
@@ -218,7 +220,11 @@ namespace PSFilterShim
             {
                 try
                 {
-                    window.RunFilter();
+                    using (WICFactory imagingFactory = new())
+                    using (Direct2DFactory direct2DFactory = new())
+                    {
+                        window.RunFilter(imagingFactory, direct2DFactory);
+                    }
                 }
                 finally
                 {
@@ -298,7 +304,7 @@ namespace PSFilterShim
             }
         }
 
-        private void RunFilter()
+        private void RunFilter(IWICFactory imagingFactory, IDirect2DFactory direct2DFactory)
         {
             try
             {
@@ -360,7 +366,9 @@ namespace PSFilterShim
                     DocumentMetadataProvider documentMetadataProvider = new(pipeClient);
                     ColorRgb24 primaryColor = settings.PrimaryColor;
                     ColorRgb24 secondaryColor = settings.SecondaryColor;
+                    RenderTargetFactory renderTargetFactory = new(direct2DFactory);
 
+                    using (SurfaceFactory surfaceFactory = new(imagingFactory, settings.TransparencyCheckerboardPath))
                     using (LoadPsFilter lps = new(source,
                                                   takeOwnershipOfSource: true,
                                                   selectionMask,
@@ -372,7 +380,8 @@ namespace PSFilterShim
                                                   hwnd,
                                                   settings.FilterCase,
                                                   documentMetadataProvider,
-                                                  SurfaceFactory.Instance,
+                                                  surfaceFactory,
+                                                  renderTargetFactory,
                                                   logger,
                                                   settings.PluginUISettings))
                     {

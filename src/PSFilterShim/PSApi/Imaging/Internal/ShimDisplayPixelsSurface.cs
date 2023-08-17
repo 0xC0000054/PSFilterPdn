@@ -16,38 +16,31 @@ using System.Drawing;
 
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
-    internal sealed unsafe class DisplayPixelsSurfaceBgr24 : DisplayPixelsSurface
+    internal sealed unsafe class ShimDisplayPixelsSurface : DisplayPixelsSurface
     {
-        private readonly ShimSurfaceBgr24 bitmap;
+        private readonly WICBitmapSurface<ColorPbgra32> bitmap;
 
-        public DisplayPixelsSurfaceBgr24(int width, int height)
+        public ShimDisplayPixelsSurface(int width, int height, IWICFactory factory)
         {
-            // GDI+ requires the stride to be padded to a multiple of 4 bytes.
-            bitmap = new ShimSurfaceBgr24(width, height, fourByteAlignedStride: true);
+            bitmap = new WICBitmapSurface<ColorPbgra32>(width, height, factory);
         }
 
         public override int Width => bitmap.Width;
 
         public override int Height => bitmap.Height;
 
-        public override int ChannelCount => 3;
-
-        public override SurfacePixelFormat Format => SurfacePixelFormat.Bgr24;
-
-        public override bool SupportsTransparency => false;
-
-        public override IDisplayPixelsSurfaceLock Lock(SurfaceLockMode mode)
+        public override ISurfaceLock Lock(SurfaceLockMode mode)
         {
             VerifyNotDisposed();
 
-            return new DisplayPixelsSurfaceLock(bitmap.Lock(mode));
+            return bitmap.Lock(mode);
         }
 
-        public override IDisplayPixelsSurfaceLock Lock(Rectangle bounds, SurfaceLockMode mode)
+        public override ISurfaceLock Lock(Rectangle bounds, SurfaceLockMode mode)
         {
             VerifyNotDisposed();
 
-            return new DisplayPixelsSurfaceLock(bitmap.Lock(bounds, mode));
+            return bitmap.Lock(bounds, mode);
         }
 
         protected override void Dispose(bool disposing)

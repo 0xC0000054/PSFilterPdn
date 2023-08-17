@@ -20,6 +20,7 @@ using PSFilterLoad.PSApi;
 using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterLoad.PSApi.Imaging;
 using PSFilterLoad.PSApi.Imaging.Internal;
+using PSFilterLoad.PSApi.Rendering.Internal;
 using PSFilterPdn.Controls;
 using PSFilterPdn.EnableInfo;
 using PSFilterPdn.Properties;
@@ -91,6 +92,7 @@ namespace PSFilterPdn
         private readonly DocumentMetadataProvider documentMetadataProvider;
         private EffectInputBitmapSurface sourceBitmap;
         private MaskSurface selectionMask;
+        private TransparencyCheckerboardSurface transparencyCheckerboard;
         private ColorRgb24 primaryColor;
         private ColorRgb24 secondaryColor;
         private bool environmentInitialized;
@@ -740,12 +742,14 @@ namespace PSFilterPdn
 
             string srcFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
             string destFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+            string checkerboardFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
             string parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
             string resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
             string descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
             string selectionMaskFileName = null;
 
             PSFilterShimImage.Save(srcFileName, sourceBitmap);
+            PSFilterShimImage.Save(checkerboardFileName, transparencyCheckerboard);
 
             if ((filterParameters != null) && filterParameters.TryGetValue(data.PluginData, out ParameterData parameterData))
             {
@@ -786,6 +790,7 @@ namespace PSFilterPdn
                                                 data.ShowAboutDialog,
                                                 srcFileName,
                                                 destFileName,
+                                                checkerboardFileName,
                                                 new ColorRgb24(Environment.PrimaryColor),
                                                 new ColorRgb24(Environment.SecondaryColor),
                                                 documentDpi.X,
@@ -924,6 +929,7 @@ namespace PSFilterPdn
             primaryColor = new ColorRgb24(Environment.PrimaryColor);
             secondaryColor = new ColorRgb24(Environment.SecondaryColor);
             selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
+            transparencyCheckerboard = new PDNTransparencyCheckerboardSurface(imagingFactory);
         }
 
         private void runFilterBtn_Click(object sender, EventArgs e)
@@ -992,9 +998,10 @@ namespace PSFilterPdn
                                                                          nameof(LoadPsFilter));
 
                         PluginUISettings pluginUISettings = new(highDpiMode);
-                        SurfaceFactory surfaceFactory = new(imagingFactory);
+                        RenderTargetFactory renderTargetFactory = new(Services);
                         FilterCase filterCase = data.GetFilterTransparencyMode(selectionMask is not null, sourceBitmap);
 
+                        using (SurfaceFactory surfaceFactory = new(imagingFactory, transparencyCheckerboard))
                         using (LoadPsFilter lps = new(sourceBitmap,
                                                       takeOwnershipOfSource: false,
                                                       selectionMask,
@@ -1007,6 +1014,7 @@ namespace PSFilterPdn
                                                       filterCase,
                                                       documentMetadataProvider,
                                                       surfaceFactory,
+                                                      renderTargetFactory,
                                                       logger,
                                                       pluginUISettings))
                         {

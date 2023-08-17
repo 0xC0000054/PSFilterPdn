@@ -10,13 +10,14 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-namespace PSFilterLoad.PSApi.Imaging
+using TerraFX.Interop.DirectX;
+
+#nullable enable
+
+namespace PSFilterLoad.PSApi.Rendering.Internal
 {
-    internal enum SurfacePixelFormat
+    internal interface IDirect2DFactory
     {
-        Unknown = 0,
-        Bgra32,
-        Gray8,
-        Pbgra32,
+        unsafe ID2D1Factory* Get();
     }
 }

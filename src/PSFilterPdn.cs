@@ -18,6 +18,7 @@ using PSFilterLoad.PSApi;
 using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterLoad.PSApi.Imaging;
 using PSFilterLoad.PSApi.Imaging.Internal;
+using PSFilterLoad.PSApi.Rendering.Internal;
 using PSFilterPdn.Properties;
 using System;
 using System.ComponentModel;
@@ -95,15 +96,23 @@ namespace PSFilterPdn
                 {
                     string srcFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
                     string destFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+                    string checkerboardFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
                     string parameterDataFileName = null;
                     string resourceDataFileName = null;
                     string descriptorRegistryFileName = null;
                     string selectionMaskFileName = null;
 
                     DocumentDpi documentDpi = new(Environment.Document.Resolution);
-                    source = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), Services);
+                    IImagingFactory imagingFactory = Services.GetService<IImagingFactory>() ?? throw new InvalidOperationException("Failed to get the WIC factory.");
+
+                    source = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), imagingFactory);
 
                     PSFilterShimImage.Save(srcFileName, source);
+
+                    using (PDNTransparencyCheckerboardSurface surface = new(imagingFactory))
+                    {
+                        PSFilterShimImage.Save(checkerboardFileName, surface);
+                    }
 
                     if (token.FilterParameters.TryGetValue(token.FilterData, out ParameterData parameterData))
                     {
@@ -152,6 +161,7 @@ namespace PSFilterPdn
                                                         showAboutDialog: false,
                                                         srcFileName,
                                                         destFileName,
+                                                        checkerboardFileName,
                                                         new ColorRgb24(Environment.PrimaryColor),
                                                         new ColorRgb24(Environment.SecondaryColor),
                                                         documentDpi.X,
@@ -250,9 +260,10 @@ namespace PSFilterPdn
                 DocumentMetadataProvider documentMetadataProvider = new(Environment.Document);
                 source = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), Services);
                 selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
-                SurfaceFactory surfaceFactory = new(Services);
+                RenderTargetFactory renderTargetFactory = new(Services);
                 FilterCase filterCase = token.FilterData.GetFilterTransparencyMode(selectionMask is not null, source);
 
+                using (SurfaceFactory surfaceFactory = new(Services))
                 using (LoadPsFilter lps = new(source,
                                               takeOwnershipOfSource: true,
                                               selectionMask,
@@ -265,6 +276,7 @@ namespace PSFilterPdn
                                               filterCase,
                                               documentMetadataProvider,
                                               surfaceFactory,
+                                              renderTargetFactory,
                                               logger,
                                               null))
                 {

@@ -10,13 +10,13 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-namespace PSFilterLoad.PSApi.Imaging
+using System;
+
+#nullable enable
+
+namespace PSFilterLoad.PSApi.Rendering
 {
-    internal enum SurfacePixelFormat
+    internal interface IDeviceBitmapBrush : IDisposable
     {
-        Unknown = 0,
-        Bgra32,
-        Gray8,
-        Pbgra32,
     }
 }

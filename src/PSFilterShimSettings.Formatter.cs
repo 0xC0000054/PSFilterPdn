@@ -33,6 +33,7 @@ namespace PSFilterPdn
                 bool showAboutDialog = reader.ReadBoolean();
                 string sourceImagePath = reader.ReadString()!;
                 string destinationImagePath = reader.ReadString()!;
+                string transparencyCheckerboardPath = reader.ReadString()!;
                 ColorRgb24 primaryColor = colorFormatter.Deserialize(ref reader, options);
                 ColorRgb24 secondaryColor = colorFormatter.Deserialize(ref reader, options);
                 double dpiX = reader.ReadDouble();
@@ -51,6 +52,7 @@ namespace PSFilterPdn
                                                 showAboutDialog,
                                                 sourceImagePath,
                                                 destinationImagePath,
+                                                transparencyCheckerboardPath,
                                                 primaryColor,
                                                 secondaryColor,
                                                 dpiX,
@@ -73,6 +75,7 @@ namespace PSFilterPdn
                 writer.Write(value.ShowAboutDialog);
                 writer.Write(value.SourceImagePath);
                 writer.Write(value.DestinationImagePath);
+                writer.Write(value.TransparencyCheckerboardPath);
                 colorFormatter.Serialize(ref writer, value.PrimaryColor, options);
                 colorFormatter.Serialize(ref writer, value.SecondaryColor, options);
                 writer.Write(value.DpiX);

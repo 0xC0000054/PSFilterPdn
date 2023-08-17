@@ -10,13 +10,12 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-namespace PSFilterLoad.PSApi.Imaging
+#nullable enable
+
+namespace PSFilterLoad.PSApi.Rendering
 {
-    internal enum SurfacePixelFormat
+    internal interface IRenderTargetFactory
     {
-        Unknown = 0,
-        Bgra32,
-        Gray8,
-        Pbgra32,
+        IDeviceContextRenderTarget Create(bool maybeHasTransparency);
     }
 }
