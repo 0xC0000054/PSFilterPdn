@@ -33,7 +33,8 @@ namespace PSFilterLoad.PSApi.Rendering.Internal
 
             DeviceContextProperties properties = new()
             {
-                PixelFormat = new DevicePixelFormat(PaintDotNet.Dxgi.DxgiFormat.B8G8R8A8_UNorm, alphaMode)
+                PixelFormat = new DevicePixelFormat(PaintDotNet.Dxgi.DxgiFormat.B8G8R8A8_UNorm, alphaMode),
+                Usage = DeviceContextUsage.GdiCompatible
             };
 
             deviceContext = factory.CreateDCDeviceContext(properties);

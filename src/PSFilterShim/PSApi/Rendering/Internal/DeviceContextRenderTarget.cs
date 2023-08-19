@@ -33,7 +33,11 @@ namespace PSFilterLoad.PSApi.Rendering.Internal
         {
             D2D1_ALPHA_MODE alphaMode = maybeHasTransparency ? D2D1_ALPHA_MODE_PREMULTIPLIED : D2D1_ALPHA_MODE_IGNORE;
             D2D1_PIXEL_FORMAT pixelFormat = new(DXGI_FORMAT_B8G8R8A8_UNORM, alphaMode);
-            D2D1_RENDER_TARGET_PROPERTIES properties = new(D2D1_RENDER_TARGET_TYPE.D2D1_RENDER_TARGET_TYPE_DEFAULT, pixelFormat, 96.0f, 96.0f);
+            D2D1_RENDER_TARGET_PROPERTIES properties = new(D2D1_RENDER_TARGET_TYPE.D2D1_RENDER_TARGET_TYPE_DEFAULT,
+                                                           pixelFormat,
+                                                           96.0f,
+                                                           96.0f,
+                                                           D2D1_RENDER_TARGET_USAGE.D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE);
 
             HRESULT hr = factory.Get()->CreateDCRenderTarget(&properties, renderTarget.GetAddressOf());
             Direct2DException.ThrowIfFailed("Failed to create the ID2D1DCRenderTarget.", hr);
