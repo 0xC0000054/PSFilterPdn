@@ -25,6 +25,7 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
         public PDNTransparencyCheckerboardSurface(IImagingFactory imagingFactory)
         {
+            // TODO: Change this to use PaintDotNet.AppModel.IVisualStylingService after PDN 5.0.10 is released.
             int dpiScaleFactor = (int)Math.Floor(UIScaleFactor.Current.Scale);
 
             // At 96 DPI (scale factor 1.0), each checkerboard tile is 8x8 pixels.
