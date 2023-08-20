@@ -103,9 +103,9 @@ namespace PSFilterLoad.PSApi
         private Func<bool> abortFunc;
         private string errorMessage;
         private readonly FilterCase filterCase;
-        private double dpiX;
-        private double dpiY;
-        private bool hasSelectionMask;
+        private readonly double dpiX;
+        private readonly double dpiY;
+        private readonly bool hasSelectionMask;
         private readonly ColorRgb24 backgroundColor;
         private readonly ColorRgb24 foregroundColor;
 
@@ -132,10 +132,10 @@ namespace PSFilterLoad.PSApi
         private readonly HandleSuite handleSuite;
         private ChannelPortsSuite channelPortsSuite;
         private DescriptorSuite descriptorSuite;
-        private ImageServicesSuite imageServicesSuite;
-        private PropertySuite propertySuite;
+        private readonly ImageServicesSuite imageServicesSuite;
+        private readonly PropertySuite propertySuite;
         private ReadImageDocument readImageDocument;
-        private ResourceSuite resourceSuite;
+        private readonly ResourceSuite resourceSuite;
         private SPBasicSuiteProvider basicSuiteProvider;
 
         /// <summary>

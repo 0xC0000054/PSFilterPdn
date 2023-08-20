@@ -20,10 +20,10 @@ namespace PSFilterLoad.PSApi
     {
         private readonly IHandleSuite handleSuite;
         private readonly IPluginApiLogger logger;
-        private CountPIResourcesProc countResourceProc;
-        private GetPIResourceProc getResourceProc;
-        private DeletePIResourceProc deleteResourceProc;
-        private AddPIResourceProc addResourceProc;
+        private readonly CountPIResourcesProc countResourceProc;
+        private readonly GetPIResourceProc getResourceProc;
+        private readonly DeletePIResourceProc deleteResourceProc;
+        private readonly AddPIResourceProc addResourceProc;
         private PseudoResourceCollection pseudoResources;
 
         public ResourceSuite(IHandleSuite handleSuite, IPluginApiLogger logger)

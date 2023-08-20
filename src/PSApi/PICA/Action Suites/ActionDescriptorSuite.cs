@@ -23,8 +23,8 @@ namespace PSFilterLoad.PSApi.PICA
     {
         private sealed class ScriptingParameters
         {
-            private Dictionary<uint, AETEValue> parameters;
-            private List<uint> keys;
+            private readonly Dictionary<uint, AETEValue> parameters;
+            private readonly List<uint> keys;
 
             public ScriptingParameters()
             {
@@ -103,8 +103,8 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly IASZStringSuite zstringSuite;
         private readonly IPluginApiLogger logger;
 
-        private Dictionary<PIActionDescriptor, ScriptingParameters> actionDescriptors;
-        private Dictionary<Handle, ScriptingParameters> descriptorHandles;
+        private readonly Dictionary<PIActionDescriptor, ScriptingParameters> actionDescriptors;
+        private readonly Dictionary<Handle, ScriptingParameters> descriptorHandles;
         private int actionDescriptorsIndex;
         private bool disposed;
 

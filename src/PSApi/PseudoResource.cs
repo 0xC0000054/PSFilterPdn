@@ -20,9 +20,9 @@ namespace PSFilterLoad.PSApi
     [MessagePackFormatter(typeof(Formatter))]
     internal sealed class PseudoResource
     {
-        private uint key;
+        private readonly uint key;
         private int index;
-        private byte[] data;
+        private readonly byte[] data;
 
         public PseudoResource(uint key, int index, byte[] data)
         {

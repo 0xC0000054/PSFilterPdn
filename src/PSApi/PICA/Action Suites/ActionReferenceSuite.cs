@@ -22,7 +22,7 @@ namespace PSFilterLoad.PSApi.PICA
     {
         private sealed class ActionReferenceContainer
         {
-            private List<ActionReferenceItem> references;
+            private readonly List<ActionReferenceItem> references;
             private readonly int index;
 
             public ActionReferenceContainer() : this(new List<ActionReferenceItem>(), 0)

@@ -71,7 +71,7 @@ namespace PSFilterLoad.PSApi
         private readonly int documentHeight;
         private readonly double dpiX;
         private readonly double dpiY;
-        private List<ChannelDescPtrs> channelReadDescPtrs;
+        private readonly List<ChannelDescPtrs> channelReadDescPtrs;
         private bool disposed;
 
         public ReadImageDocument(int documentWidth, int documentHeight, double dpiX, double dpiY)
