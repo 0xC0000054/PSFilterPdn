@@ -16,13 +16,13 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class ImageServicesSuite
+    internal sealed unsafe class ImageServicesSuite
     {
         private readonly PIResampleProc interpolate1DProc;
         private readonly PIResampleProc interpolate2DProc;
         private readonly IPluginApiLogger logger;
 
-        public unsafe ImageServicesSuite(IPluginApiLogger logger)
+        public ImageServicesSuite(IPluginApiLogger logger)
         {
             ArgumentNullException.ThrowIfNull(logger);
 
@@ -31,7 +31,7 @@ namespace PSFilterLoad.PSApi
             this.logger = logger;
         }
 
-        public unsafe IntPtr CreateImageServicesSuitePointer()
+        public IntPtr CreateImageServicesSuitePointer()
         {
             IntPtr imageServicesProcsPtr = Memory.Allocate(Marshal.SizeOf<ImageServicesProcs>(), MemoryAllocationOptions.ZeroFill);
 
@@ -45,11 +45,11 @@ namespace PSFilterLoad.PSApi
             return imageServicesProcsPtr;
         }
 
-        private unsafe short Interpolate1DProc(PSImagePlane* source,
-                                               PSImagePlane* destination,
-                                               Rect16* area,
-                                               IntPtr coords,
-                                               InterpolationMethod method)
+        private short Interpolate1DProc(PSImagePlane* source,
+                                        PSImagePlane* destination,
+                                        Rect16* area,
+                                        IntPtr coords,
+                                        InterpolationMethod method)
         {
             logger.Log(PluginApiLogCategory.ImageServicesSuite,
                        "source: [{0}], destination: [{1}], area: {2}, coords: 0x{3}, method: {4}",
@@ -62,11 +62,11 @@ namespace PSFilterLoad.PSApi
             return PSError.memFullErr;
         }
 
-        private unsafe short Interpolate2DProc(PSImagePlane* source,
-                                               PSImagePlane* destination,
-                                               Rect16* area,
-                                               IntPtr coords,
-                                               InterpolationMethod method)
+        private short Interpolate2DProc(PSImagePlane* source,
+                                        PSImagePlane* destination,
+                                        Rect16* area,
+                                        IntPtr coords,
+                                        InterpolationMethod method)
         {
             logger.Log(PluginApiLogCategory.ImageServicesSuite,
                        "source: [{0}], destination: [{1}], area: {2}, coords: 0x{3}, method: {4}",
