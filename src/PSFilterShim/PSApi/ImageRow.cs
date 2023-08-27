@@ -353,14 +353,10 @@ namespace PSFilterLoad.PSApi
 
                     while (rowWidth >= 32)
                     {
-                        Vector256<uint> src1 = Vector256.Create((uint)source[0], source[1], source[2], source[3],
-                                                                source[4], source[5], source[6], source[7]);
-                        Vector256<uint> src2 = Vector256.Create((uint)source[8], source[9], source[10], source[11],
-                                                                source[12], source[13], source[14], source[15]);
-                        Vector256<uint> src3 = Vector256.Create((uint)source[16], source[17], source[18], source[19],
-                                                                source[20], source[21], source[22], source[23]);
-                        Vector256<uint> src4 = Vector256.Create((uint)source[24], source[25], source[26], source[27],
-                                                                source[28], source[29], source[30], source[31]);
+                        Vector256<byte> src1234 = Vector256.Load(source);
+                        (Vector256<ushort> src12, Vector256<ushort> src34) = Vector256.Widen(src1234);
+                        (Vector256<uint> src1, Vector256<uint> src2) = Vector256.Widen(src12);
+                        (Vector256<uint> src3, Vector256<uint> src4) = Vector256.Widen(src34);
 
                         Vector256<uint> target1 = Vector256.Load(destination);
                         Vector256<uint> target2 = Vector256.Load(destination + 8);
@@ -421,10 +417,10 @@ namespace PSFilterLoad.PSApi
 
                     while (rowWidth >= 16)
                     {
-                        Vector128<uint> src1 = Vector128.Create((uint)source[0], source[1], source[2], source[3]);
-                        Vector128<uint> src2 = Vector128.Create((uint)source[4], source[5], source[6], source[7]);
-                        Vector128<uint> src3 = Vector128.Create((uint)source[8], source[9], source[10], source[11]);
-                        Vector128<uint> src4 = Vector128.Create((uint)source[12], source[13], source[14], source[15]);
+                        Vector128<byte> src1234 = Vector128.Load(source);
+                        (Vector128<ushort> src12, Vector128<ushort> src34) = Vector128.Widen(src1234);
+                        (Vector128<uint> src1, Vector128<uint> src2) = Vector128.Widen(src12);
+                        (Vector128<uint> src3, Vector128<uint> src4) = Vector128.Widen(src34);
 
                         Vector128<uint> target1 = Vector128.Load(destination);
                         Vector128<uint> target2 = Vector128.Load(destination + 4);
