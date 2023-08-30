@@ -111,8 +111,6 @@ namespace PSFilterLoad.PSApi.Rendering.Internal
 
             try
             {
-
-
                 using (ISurfaceLock surfaceLock = surface.Lock(SurfaceLockMode.Read))
                 {
                     HRESULT hr = renderTarget.Get()->CreateBitmap(bitmapSize,
