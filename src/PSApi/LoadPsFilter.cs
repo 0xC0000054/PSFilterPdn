@@ -160,12 +160,7 @@ namespace PSFilterLoad.PSApi
 
         internal void SetAbortCallback(Func<bool> callback)
         {
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
-
-            abortFunc = callback;
+            abortFunc = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
         /// <summary>
