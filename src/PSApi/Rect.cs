@@ -29,16 +29,9 @@ namespace PSFilterLoad.PSApi
 
         public override bool Equals(object obj)
         {
-            if (obj is Rect16)
-            {
-                Rect16 rect = (Rect16)obj;
-                return Equals(rect);
-            }
-            else
-            {
-                return false;
-            }
+            return obj is Rect16 other && Equals(other);
         }
+
         public readonly bool Equals(Rect16 rect)
         {
             return left == rect.left && top == rect.top && right == rect.right && bottom == rect.bottom;

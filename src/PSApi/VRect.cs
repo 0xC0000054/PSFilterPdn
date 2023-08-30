@@ -32,12 +32,7 @@ namespace PSFilterLoad.PSApi
 
         public override bool Equals(object obj)
         {
-            if (obj is VRect)
-            {
-                return Equals((VRect)obj);
-            }
-
-            return false;
+            return obj is VRect other && Equals(other);
         }
 
         public override readonly int GetHashCode()
