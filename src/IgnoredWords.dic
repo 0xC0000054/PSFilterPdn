@@ -22,6 +22,7 @@ Exif
 hsb
 hsl
 hwnd
+ifd
 Interop
 Iptc
 lexer
@@ -41,6 +42,7 @@ ptrs
 rect
 rects
 rgb
+romanization
 serializer
 src
 ul
