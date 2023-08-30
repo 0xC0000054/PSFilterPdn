@@ -14,11 +14,14 @@
  * Copyright (c) 1992-1998, Adobe Systems Incorporated.
  * All rights reserved.
 */
+
+using System;
 using System.Runtime.InteropServices;
+
 namespace PSFilterLoad.PSApi
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct VRect : System.IEquatable<VRect>
+    internal struct VRect : IEquatable<VRect>
     {
         public int top;
         public int left;
@@ -37,17 +40,7 @@ namespace PSFilterLoad.PSApi
 
         public override readonly int GetHashCode()
         {
-            unchecked
-            {
-                int hash = 23;
-
-                hash = (hash * 127) + top.GetHashCode();
-                hash = (hash * 127) + left.GetHashCode();
-                hash = (hash * 127) + bottom.GetHashCode();
-                hash = (hash * 127) + right.GetHashCode();
-
-                return hash;
-            }
+            return HashCode.Combine(top, left, bottom, right);
         }
 
         public static bool operator ==(VRect left, VRect right)

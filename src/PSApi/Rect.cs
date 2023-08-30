@@ -15,12 +15,13 @@
  * All rights reserved.
 */
 
+using System;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct Rect16 : System.IEquatable<Rect16>
+    internal struct Rect16 : IEquatable<Rect16>
     {
         public short top;
         public short left;
@@ -39,17 +40,7 @@ namespace PSFilterLoad.PSApi
 
         public override readonly int GetHashCode()
         {
-            unchecked
-            {
-                int hash = 23;
-
-                hash = (hash * 127) + top.GetHashCode();
-                hash = (hash * 127) + left.GetHashCode();
-                hash = (hash * 127) + bottom.GetHashCode();
-                hash = (hash * 127) + right.GetHashCode();
-
-                return hash;
-            }
+            return HashCode.Combine(top, left, bottom, right);
         }
 
         public static bool operator ==(Rect16 left, Rect16 right)
