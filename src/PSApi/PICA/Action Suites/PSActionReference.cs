@@ -33,7 +33,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         public readonly int Index => value.ToInt32();
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is PIActionReference other && Equals(other);
         }
@@ -48,7 +48,7 @@ namespace PSFilterLoad.PSApi.PICA
             return -1584136870 + value.GetHashCode();
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return Index.ToString();
         }

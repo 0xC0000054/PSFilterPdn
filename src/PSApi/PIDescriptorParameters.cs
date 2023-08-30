@@ -33,7 +33,7 @@ namespace PSFilterLoad.PSApi
 
         public readonly int Index => value.ToInt32();
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is PIReadDescriptor other && Equals(other);
         }
@@ -48,7 +48,7 @@ namespace PSFilterLoad.PSApi
             return -1584136870 + value.GetHashCode();
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return Index.ToString();
         }
@@ -77,7 +77,7 @@ namespace PSFilterLoad.PSApi
 
         public readonly int Index => value.ToInt32();
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is PIWriteDescriptor other && Equals(other);
         }
@@ -92,7 +92,7 @@ namespace PSFilterLoad.PSApi
             return -1584136870 + value.GetHashCode();
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return Index.ToString();
         }

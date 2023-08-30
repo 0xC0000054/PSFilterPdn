@@ -35,7 +35,7 @@ namespace PSFilterLoad.PSApi
         public int colBytes;
         public MaskDescription maskDescription;
 
-        public override unsafe string ToString()
+        public override readonly unsafe string ToString()
         {
             System.Text.StringBuilder builder = new(256);
 
