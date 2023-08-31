@@ -41,6 +41,6 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The filter mask image.
         /// </value>
-        ISurface<MaskSurface> Mask { get; }
+        ISurface<MaskSurface>? Mask { get; }
     }
 }

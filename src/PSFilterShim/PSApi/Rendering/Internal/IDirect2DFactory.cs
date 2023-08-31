@@ -12,8 +12,6 @@
 
 using TerraFX.Interop.DirectX;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Rendering.Internal
 {
     internal interface IDirect2DFactory

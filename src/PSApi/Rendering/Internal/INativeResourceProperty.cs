@@ -10,8 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Rendering.Internal
 {
     internal interface INativeResourceProperty<T>

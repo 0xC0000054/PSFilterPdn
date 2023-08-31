@@ -109,7 +109,7 @@ namespace PSFilterLoad.PSApi
 
                 for (int i = PSConstants.ChannelPorts.Green; i <= PSConstants.ChannelPorts.Blue; i++)
                 {
-                    string name = null;
+                    string name;
                     switch (i)
                     {
                         case PSConstants.ChannelPorts.Green:
@@ -118,6 +118,8 @@ namespace PSFilterLoad.PSApi
                         case PSConstants.ChannelPorts.Blue:
                             name = StringResources.BlueChannelName;
                             break;
+                        default:
+                            throw new InvalidOperationException("Unsupported channel index.");
                     }
 
                     IntPtr ptr = CreateReadChannelDesc(i, name, doc->depth, doc->bounds);

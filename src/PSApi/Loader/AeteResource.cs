@@ -24,7 +24,7 @@ namespace PSFilterLoad.PSApi.Loader
 {
     internal static class AeteResource
     {
-        internal static unsafe AETEData Parse(HMODULE hModule, short resourceID)
+        internal static unsafe AETEData? Parse(HMODULE hModule, short resourceID)
         {
             HRSRC hRes = HRSRC.NULL;
 

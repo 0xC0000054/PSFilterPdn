@@ -196,7 +196,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             logger.Log(PluginApiLogCategory.BufferSuite, "buffer: 0x{0}", new PointerAsHexStringFormatter(buffer));
 
-            if (buffer != null && buffers.TryGetValue(*buffer, out BufferEntry entry))
+            if (buffer != null && buffers.TryGetValue(*buffer, out BufferEntry? entry))
             {
                 entry.Dispose();
                 buffers.Remove(*buffer);
@@ -209,7 +209,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             logger.Log(PluginApiLogCategory.BufferSuite, "buffer: 0x{0}", new IntPtrAsHexStringFormatter(buffer));
 
-            if (buffer != IntPtr.Zero && buffers.TryGetValue(buffer, out BufferEntry entry))
+            if (buffer != IntPtr.Zero && buffers.TryGetValue(buffer, out BufferEntry? entry))
             {
                 return entry.Size;
             }

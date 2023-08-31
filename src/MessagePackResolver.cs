@@ -15,8 +15,6 @@ using MessagePack.Formatters;
 using MessagePack.ImmutableCollection;
 using MessagePack.Resolvers;
 
-#nullable enable
-
 namespace PSFilterPdn
 {
     internal sealed class MessagePackResolver : IFormatterResolver

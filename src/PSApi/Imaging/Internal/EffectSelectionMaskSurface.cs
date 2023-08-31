@@ -16,8 +16,6 @@ using PaintDotNet.Rendering;
 using PaintDotNet;
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
     internal sealed unsafe class EffectSelectionMaskSurface : MaskSurface

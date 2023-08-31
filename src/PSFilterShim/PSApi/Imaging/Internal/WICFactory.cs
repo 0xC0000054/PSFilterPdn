@@ -15,8 +15,6 @@ using System;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
 
-#nullable enable
-
 using static TerraFX.Interop.Windows.Windows;
 
 namespace PSFilterLoad.PSApi.Imaging.Internal

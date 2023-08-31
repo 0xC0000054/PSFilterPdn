@@ -14,8 +14,6 @@ using MessagePack;
 using MessagePack.Formatters;
 using System.Collections.Generic;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     internal sealed partial class ParameterData

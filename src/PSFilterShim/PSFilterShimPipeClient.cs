@@ -53,7 +53,7 @@ namespace PSFilterShim
         {
             byte[] reply = SendMessageToServer(Command.AbortCallback);
 
-            return reply != null && reply[0] != 0;
+            return reply[0] != 0;
         }
 
         public PluginData GetPluginData()
@@ -143,7 +143,7 @@ namespace PSFilterShim
         [SkipLocalsInit]
         private byte[] SendMessageToServer(Command command)
         {
-            byte[] reply = null;
+            byte[] reply = Array.Empty<byte>();
 
             using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
             {
@@ -175,7 +175,7 @@ namespace PSFilterShim
         [SkipLocalsInit]
         private byte[] SendMessageToServer(Command command, byte value)
         {
-            byte[] reply = null;
+            byte[] reply = Array.Empty<byte>();
 
             using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
             {
@@ -208,7 +208,7 @@ namespace PSFilterShim
         [SkipLocalsInit]
         private byte[] SendMessageToServer(Command command, int value)
         {
-            byte[] reply = null;
+            byte[] reply = Array.Empty<byte>();
 
             using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
             {
@@ -244,7 +244,7 @@ namespace PSFilterShim
         [SkipLocalsInit]
         private byte[] SendErrorMessageToServer(string message, string details)
         {
-            byte[] reply = null;
+            byte[] reply = Array.Empty<byte>();
 
             using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
             {
@@ -268,7 +268,7 @@ namespace PSFilterShim
                 int dataLength = sizeof(byte) + HeaderLength + errorMessageLength + errorDetailsLength;
                 int totalMessageLength = sizeof(int) + dataLength;
 
-                byte[] arrayFromPool = null;
+                byte[]? arrayFromPool = null;
 
                 try
                 {

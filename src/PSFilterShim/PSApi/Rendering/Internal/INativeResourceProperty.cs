@@ -10,8 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Rendering
 {
     internal unsafe interface INativeResourceProperty<T> where T : unmanaged

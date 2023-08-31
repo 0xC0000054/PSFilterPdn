@@ -13,8 +13,6 @@
 using TerraFX.Interop.Windows;
 using System;
 
-#nullable enable
-
 using static TerraFX.Interop.Windows.GUID;
 using static TerraFX.Interop.Windows.Pointers;
 using static TerraFX.Interop.Windows.WICBitmapCreateCacheOption;

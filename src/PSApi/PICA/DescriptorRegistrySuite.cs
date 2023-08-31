@@ -38,7 +38,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// </exception>
         public unsafe DescriptorRegistrySuite(IActionDescriptorSuite actionDescriptorSuite,
                                               IPluginApiLogger logger,
-                                              DescriptorRegistryValues registry)
+                                              DescriptorRegistryValues? registry)
         {
             ArgumentNullException.ThrowIfNull(actionDescriptorSuite);
             ArgumentNullException.ThrowIfNull(logger);
@@ -87,7 +87,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                string registryKey = StringUtil.FromCString(key, StringCreationOptions.UseStringPool);
+                string? registryKey = StringUtil.FromCString(key, StringCreationOptions.UseStringPool);
                 if (registryKey == null)
                 {
                     return PSError.kSPBadParameterError;
@@ -99,7 +99,7 @@ namespace PSFilterLoad.PSApi.PICA
                            descriptor,
                            isPersistent);
 
-                if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out Dictionary<uint, AETEValue> values))
+                if (actionDescriptorSuite.TryGetDescriptorValues(descriptor, out Dictionary<uint, AETEValue>? values))
                 {
                     registry.Add(registryKey, values, isPersistent);
                 }
@@ -120,7 +120,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             try
             {
-                string registryKey = StringUtil.FromCString(key, StringCreationOptions.UseStringPool);
+                string? registryKey = StringUtil.FromCString(key, StringCreationOptions.UseStringPool);
                 if (registryKey == null)
                 {
                     return PSError.kSPBadParameterError;
@@ -149,7 +149,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             try
             {
-                string registryKey = StringUtil.FromCString(key, StringCreationOptions.UseStringPool);
+                string? registryKey = StringUtil.FromCString(key, StringCreationOptions.UseStringPool);
                 if (registryKey == null)
                 {
                     return PSError.kSPBadParameterError;
@@ -159,7 +159,7 @@ namespace PSFilterLoad.PSApi.PICA
                            "key: {0}",
                            key);
 
-                if (registry.TryGetValue(registryKey, out Dictionary<uint, AETEValue> item))
+                if (registry.TryGetValue(registryKey, out Dictionary<uint, AETEValue>? item))
                 {
                     *descriptor = actionDescriptorSuite.CreateDescriptor(item);
                 }

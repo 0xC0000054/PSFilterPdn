@@ -28,7 +28,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
 
         public void Write(string fileName, string message)
         {
-            if (dictionary.TryGetValue(fileName, out List<string> errors))
+            if (dictionary.TryGetValue(fileName, out List<string>? errors))
             {
                 errors.Add(message);
             }

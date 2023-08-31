@@ -13,8 +13,6 @@
 using PaintDotNet.Direct2D1;
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Rendering.Internal
 {
     internal sealed class PDNDeviceBitmapBrush : Disposable, IDeviceBitmapBrush, INativeResourceProperty<IBitmapBrush>

@@ -72,7 +72,7 @@ namespace PSFilterLoad.PSApi
 
                 uint key = reader.ReadUInt32();
                 int index = reader.ReadInt32();
-                byte[] data = reader.ReadBytes().Value.ToArray();
+                byte[] data = reader.ReadBytes()!.Value.ToArray();
 
                 reader.Depth--;
 

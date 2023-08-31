@@ -15,8 +15,6 @@ using TerraFX.Interop.DirectX;
 using TerraFX.Interop.Windows;
 using System;
 
-#nullable enable
-
 using static TerraFX.Interop.DirectX.DXGI_FORMAT;
 using static TerraFX.Interop.DirectX.D2D1_ALPHA_MODE;
 using static TerraFX.Interop.DirectX.Pointers;

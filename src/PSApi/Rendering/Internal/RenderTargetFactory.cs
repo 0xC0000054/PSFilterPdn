@@ -14,8 +14,6 @@ using PaintDotNet;
 using PaintDotNet.Direct2D1;
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Rendering.Internal
 {
     internal class RenderTargetFactory : IRenderTargetFactory

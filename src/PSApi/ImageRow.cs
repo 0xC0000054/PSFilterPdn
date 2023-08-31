@@ -15,8 +15,6 @@ using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     internal static unsafe class ImageRow

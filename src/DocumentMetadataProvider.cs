@@ -23,8 +23,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-#nullable enable
-
 namespace PSFilterPdn
 {
     internal sealed class DocumentMetadataProvider : IDocumentMetadataProvider

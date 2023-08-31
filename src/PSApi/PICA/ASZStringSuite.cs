@@ -67,13 +67,13 @@ namespace PSFilterLoad.PSApi.PICA
                 switch (format)
                 {
                     case ZStringFormat.Ascii:
-                        data = StringUtil.FromCString((byte*)ptr, length, StringCreationOptions.TrimNullTerminator);
+                        data = StringUtil.FromCString((byte*)ptr, length, StringCreationOptions.TrimNullTerminator)!;
                         break;
                     case ZStringFormat.Unicode:
-                        data = StringUtil.FromCStringUni((char*)ptr, length, StringCreationOptions.TrimNullTerminator);
+                        data = StringUtil.FromCStringUni((char*)ptr, length, StringCreationOptions.TrimNullTerminator)!;
                         break;
                     case ZStringFormat.Pascal:
-                        data = StringUtil.FromPascalString((byte*)ptr, StringCreationOptions.TrimNullTerminator);
+                        data = StringUtil.FromPascalString((byte*)ptr, StringCreationOptions.TrimNullTerminator)!;
                         break;
                     default:
                         throw new InvalidEnumArgumentException("format", (int)format, typeof(ZStringFormat));
@@ -197,7 +197,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         bool IPICASuiteAllocator.IsSupportedVersion(int version) => IsSupportedVersion(version);
 
-        bool IASZStringSuite.ConvertToActionDescriptor(ASZString zstring, out ActionDescriptorZString descriptor)
+        bool IASZStringSuite.ConvertToActionDescriptor(ASZString zstring, out ActionDescriptorZString? descriptor)
         {
             if (zstring == Empty)
             {
@@ -205,7 +205,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             else
             {
-                if (strings.TryGetValue(zstring, out ZString value))
+                if (strings.TryGetValue(zstring, out ZString? value))
                 {
                     descriptor = new ActionDescriptorZString(value.Data);
                 }
@@ -219,7 +219,7 @@ namespace PSFilterLoad.PSApi.PICA
             return true;
         }
 
-        ASZString IASZStringSuite.CreateFromActionDescriptor(ActionDescriptorZString descriptor)
+        ASZString IASZStringSuite.CreateFromActionDescriptor(ActionDescriptorZString? descriptor)
         {
             ASZString newZString = Empty;
 
@@ -241,13 +241,13 @@ namespace PSFilterLoad.PSApi.PICA
             }
             else
             {
-                if (strings.TryGetValue(zstring, out ZString item))
+                if (strings.TryGetValue(zstring, out ZString? item))
                 {
                     value = item.Data;
                 }
                 else
                 {
-                    value = null;
+                    value = null!;
                     return false;
                 }
             }
@@ -429,7 +429,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             else
             {
-                if (strings.TryGetValue(source, out ZString existing))
+                if (strings.TryGetValue(source, out ZString? existing))
                 {
                     try
                     {
@@ -463,8 +463,8 @@ namespace PSFilterLoad.PSApi.PICA
             // Inserting an empty string is a no-op.
             if (replacement != Empty)
             {
-                if (strings.TryGetValue(replacement, out ZString source) &&
-                    strings.TryGetValue(zstr, out ZString target))
+                if (strings.TryGetValue(replacement, out ZString? source) &&
+                    strings.TryGetValue(zstr, out ZString? target))
                 {
                     string valueToInsert = source.Data;
                     string originalValue = target.Data;
@@ -504,7 +504,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (zstr != Empty)
             {
-                if (strings.TryGetValue(zstr, out ZString item))
+                if (strings.TryGetValue(zstr, out ZString? item))
                 {
                     string value = item.Data;
 
@@ -529,7 +529,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (zstr != Empty)
             {
-                if (strings.TryGetValue(zstr, out ZString item))
+                if (strings.TryGetValue(zstr, out ZString? item))
                 {
                     string value = item.Data;
 
@@ -554,7 +554,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (zstr != Empty)
             {
-                if (strings.TryGetValue(zstr, out ZString item))
+                if (strings.TryGetValue(zstr, out ZString? item))
                 {
                     string value = item.Data;
 
@@ -615,7 +615,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (zstr != Empty)
             {
-                if (strings.TryGetValue(zstr, out ZString item))
+                if (strings.TryGetValue(zstr, out ZString? item))
                 {
                     item.RefCount += 1;
                     strings[zstr] = item;
@@ -635,7 +635,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (zstr != Empty)
             {
-                if (strings.TryGetValue(zstr, out ZString item))
+                if (strings.TryGetValue(zstr, out ZString? item))
                 {
                     item.RefCount -= 1;
 
@@ -667,7 +667,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (zstr != Empty)
             {
-                if (strings.TryGetValue(zstr, out ZString item))
+                if (strings.TryGetValue(zstr, out ZString? item))
                 {
                     string value = item.Data;
 
@@ -703,7 +703,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             if (zstr != Empty)
             {
-                if (strings.TryGetValue(zstr, out ZString item))
+                if (strings.TryGetValue(zstr, out ZString? item))
                 {
                     string value = item.Data;
                     if (value != null)
@@ -727,7 +727,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             else
             {
-                if (strings.TryGetValue(zstr, out ZString item))
+                if (strings.TryGetValue(zstr, out ZString? item))
                 {
                     if (item.Data != null)
                     {
@@ -757,7 +757,7 @@ namespace PSFilterLoad.PSApi.PICA
                 string value = string.Empty;
                 if (zstr != Empty)
                 {
-                    if (strings.TryGetValue(zstr, out ZString item))
+                    if (strings.TryGetValue(zstr, out ZString? item))
                     {
                         value = item.Data;
                     }
@@ -800,7 +800,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             else
             {
-                if (strings.TryGetValue(zstr, out ZString item))
+                if (strings.TryGetValue(zstr, out ZString? item))
                 {
                     if (item.Data != null)
                     {
@@ -829,7 +829,7 @@ namespace PSFilterLoad.PSApi.PICA
                 string value = string.Empty;
                 if (zstr != Empty)
                 {
-                    if (strings.TryGetValue(zstr, out ZString item))
+                    if (strings.TryGetValue(zstr, out ZString? item))
                     {
                         value = item.Data;
                     }
@@ -871,7 +871,7 @@ namespace PSFilterLoad.PSApi.PICA
             }
             else
             {
-                if (strings.TryGetValue(zstr, out ZString item))
+                if (strings.TryGetValue(zstr, out ZString? item))
                 {
                     if (item.Data != null)
                     {
@@ -900,7 +900,7 @@ namespace PSFilterLoad.PSApi.PICA
                 string value = string.Empty;
                 if (zstr != Empty)
                 {
-                    if (strings.TryGetValue(zstr, out ZString item))
+                    if (strings.TryGetValue(zstr, out ZString? item))
                     {
                         value = item.Data;
                     }

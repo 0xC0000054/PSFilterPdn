@@ -47,7 +47,7 @@ namespace PSFilterPdn.EnableInfo
             return Visit(node) is BooleanConstantExpression result && result.Value;
         }
 
-        private Expression Visit(Expression node)
+        private Expression? Visit(Expression node)
         {
             return node?.Accept(this);
         }

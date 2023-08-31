@@ -12,8 +12,6 @@
 
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Rendering
 {
     internal interface IDeviceBitmapBrush : IDisposable

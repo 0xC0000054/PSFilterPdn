@@ -38,7 +38,7 @@ namespace PSFilterLoad.PSApi
                                     IPluginApiLogger logger,
                                     int documentWidth,
                                     int documentHeight,
-                                    PluginUISettings pluginUISettings)
+                                    PluginUISettings? pluginUISettings)
         {
             ArgumentNullException.ThrowIfNull(handleSuite);
             ArgumentNullException.ThrowIfNull(documentMetadataProvider);

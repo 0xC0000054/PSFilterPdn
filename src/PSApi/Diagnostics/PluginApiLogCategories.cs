@@ -12,8 +12,6 @@
 
 using System.Collections.Immutable;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Diagnostics
 {
     internal static class PluginApiLogCategories

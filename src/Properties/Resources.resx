@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="DiskFullError" xml:space="preserve">
     <value>There is not enough space on the disk.</value>
@@ -248,5 +248,8 @@
   </data>
   <data name="PSFilterShimExitCodeFormat" xml:space="preserve">
     <value>PSFilterShim returned an unexpected exit code: 0x{0:X8}.</value>
+  </data>
+  <data name="UnknownUserFilePath" xml:space="preserve">
+    <value>Failed to get the Paint.NET user files folder path.</value>
   </data>
 </root>

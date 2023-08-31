@@ -46,7 +46,7 @@ namespace PSFilterPdn
         {
             get
             {
-                return typeof(PSFilterPdnEffect).Assembly.GetName().Version;
+                return typeof(PSFilterPdnEffect).Assembly.GetName().Version!;
             }
         }
 

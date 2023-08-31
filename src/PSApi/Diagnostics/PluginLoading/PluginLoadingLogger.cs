@@ -47,7 +47,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
                 return;
             }
 
-            string message = value.ToString();
+            string message = value?.ToString() ?? "<null>";
             writer.Write(fileName, message);
         }
 

@@ -12,8 +12,6 @@
 
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Imaging
 {
     internal interface ISurface<T> : IDisposable where T : class, ISurface<T>

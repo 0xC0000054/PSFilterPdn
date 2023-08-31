@@ -36,7 +36,7 @@ namespace PSFilterLoad.PSApi.Loader
         {
             Architecture architecture;
 
-            FileStream stream = null;
+            FileStream? stream = null;
 
             try
             {

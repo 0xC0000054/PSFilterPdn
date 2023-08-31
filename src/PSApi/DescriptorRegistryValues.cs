@@ -14,6 +14,7 @@ using MessagePack;
 using MessagePack.Formatters;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PSFilterLoad.PSApi
 {
@@ -86,7 +87,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public bool TryGetValue(string key, out Dictionary<uint, AETEValue> value)
+        public bool TryGetValue(string key, [MaybeNullWhen(false)] out Dictionary<uint, AETEValue> value)
         {
             return persistedValues.TryGetValue(key, out value)
                 || sessionValues.TryGetValue(key, out value);

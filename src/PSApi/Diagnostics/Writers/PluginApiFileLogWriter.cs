@@ -10,28 +10,30 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
 using System.IO;
 
 namespace PSFilterLoad.PSApi.Diagnostics
 {
-    internal sealed class PluginApiFileLogWriter : IDisposable, IPluginApiLogWriter
+    internal sealed class PluginApiFileLogWriter : Disposable, IPluginApiLogWriter
     {
-        private StreamWriter writer;
+        private readonly StreamWriter writer;
 
         public PluginApiFileLogWriter(string path)
             => writer = File.CreateText(path);
 
-        public void Dispose()
+        public void Write(string logMessage)
         {
-            if (writer != null)
-            {
-                writer.Dispose();
-                writer = null;
-            }
+            VerifyNotDisposed();
+
+            writer.WriteLine(logMessage);
         }
 
-        public void Write(string logMessage)
-            => writer.WriteLine(logMessage);
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                writer?.Dispose();
+            }
+        }
     }
 }

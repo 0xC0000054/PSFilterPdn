@@ -17,8 +17,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 
-#nullable enable
-
 namespace PSFilterPdn
 {
     internal sealed class PSFilterShimPluginDataFormatter : IMessagePackFormatter<PluginData>
@@ -42,9 +40,9 @@ namespace PSFilterPdn
             writer.Write(value.EntryPoint);
             writer.Write(value.Category);
             writer.Write(value.Title);
-            resolver.GetFormatterWithVerify<FilterCaseInfoCollection>().Serialize(ref writer, value.FilterInfo, options);
-            resolver.GetFormatterWithVerify<AETEData>().Serialize(ref writer, value.Aete, options);
-            resolver.GetFormatterWithVerify<ReadOnlyCollection<string>>().Serialize(ref writer, value.ModuleEntryPoints, options);
+            resolver.GetFormatterWithVerify<FilterCaseInfoCollection?>().Serialize(ref writer, value.FilterInfo, options);
+            resolver.GetFormatterWithVerify<AETEData?>().Serialize(ref writer, value.Aete, options);
+            resolver.GetFormatterWithVerify<ReadOnlyCollection<string>?>().Serialize(ref writer, value.ModuleEntryPoints, options);
             resolver.GetFormatterWithVerify<Architecture>().Serialize(ref writer, value.ProcessorArchitecture, options);
         }
     }

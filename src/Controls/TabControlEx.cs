@@ -28,17 +28,17 @@ namespace PSFilterPdn.Controls
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private Container components;
+        private Container? components;
         private Color backColor;
         private Color foreColor;
         private Color inactiveTabColor;
         private Color borderColor;
         private Color hotTrackColor;
         private int hotTabIndex;
-        private SolidBrush backgroundBrush;
-        private SolidBrush inactiveTabBrush;
-        private Pen borderPen;
-        private SolidBrush hotTrackBrush;
+        private SolidBrush? backgroundBrush;
+        private SolidBrush? inactiveTabBrush;
+        private Pen? borderPen;
+        private SolidBrush? hotTrackBrush;
 
         private static readonly Color DefaultBorderColor = SystemColors.ControlDark;
         private static readonly Color DefaultHotTrackColor = Color.FromArgb(128, SystemColors.HotTrack);
@@ -430,17 +430,17 @@ namespace PSFilterPdn.Controls
             {
                 Rectangle activeTabRect = Rectangle.Inflate(bounds, 2, 2);
 
-                graphics.FillRectangle(backgroundBrush, activeTabRect);
+                graphics.FillRectangle(backgroundBrush!, activeTabRect);
                 DrawTabBorder(graphics, activeTabRect);
             }
             else if (state == TabState.MouseOver)
             {
-                graphics.FillRectangle(hotTrackBrush, bounds);
+                graphics.FillRectangle(hotTrackBrush!, bounds);
                 DrawTabBorder(graphics, bounds);
             }
             else
             {
-                graphics.FillRectangle(inactiveTabBrush, bounds);
+                graphics.FillRectangle(inactiveTabBrush!, bounds);
                 DrawTabBorder(graphics, bounds);
             }
 
@@ -489,7 +489,7 @@ namespace PSFilterPdn.Controls
                     throw new InvalidEnumArgumentException();
             }
 
-            graphics.DrawLines(borderPen, points);
+            graphics.DrawLines(borderPen!, points);
         }
 
         private void DrawTabText(Graphics graphics, Rectangle bounds, TabPage page, TabState state)

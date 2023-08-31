@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PSFilterLoad.PSApi.PICA
 {
@@ -22,20 +23,20 @@ namespace PSFilterLoad.PSApi.PICA
         /// <param name="zstring">The ZString to convert.</param>
         /// <param name="descriptor">The <see cref="ActionDescriptorZString"/> that contains the value of the specified ZString.</param>
         /// <returns><c>true</c> if the ZString was converted to an action descriptor; otherwise, <c>false</c> if the ZString is invalid.</returns>
-        bool ConvertToActionDescriptor(ASZString zstring, out ActionDescriptorZString descriptor);
+        bool ConvertToActionDescriptor(ASZString zstring, out ActionDescriptorZString? descriptor);
         /// <summary>
         /// Creates a ZString from an action descriptor.
         /// </summary>
         /// <param name="descriptor">The descriptor.</param>
         /// <returns>The new ZString value.</returns>
-        ASZString CreateFromActionDescriptor(ActionDescriptorZString descriptor);
+        ASZString CreateFromActionDescriptor(ActionDescriptorZString? descriptor);
         /// <summary>
         /// Gets the value of the specified ZString.
         /// </summary>
         /// <param name="zstring">The ZString to convert.</param>
         /// <param name="value">The <see cref="string"/> that contains the value of the specified ZString.</param>
         /// <returns><c>true</c> if the ZString was converted to a string; otherwise, <c>false</c> if the ZString is invalid.</returns>
-        bool ConvertToString(ASZString zstring, out string value);
+        bool ConvertToString(ASZString zstring, [MaybeNullWhen(false)] out string value);
         /// <summary>
         /// Creates a ZString from the specified string.
         /// </summary>

@@ -13,8 +13,6 @@
 using TerraFX.Interop.DirectX;
 using TerraFX.Interop.Windows;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Rendering.Internal
 {
     internal sealed unsafe class DeviceBitmapBrush : Disposable, IDeviceBitmapBrush, INativeResourceProperty<ID2D1BitmapBrush>

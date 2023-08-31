@@ -21,7 +21,7 @@ namespace PSFilterPdn.EnableInfo
         private readonly string source;
         private readonly int length;
         private int index;
-        private ReadOnlyCollection<Token> readOnlyTokens;
+        private ReadOnlyCollection<Token>? readOnlyTokens;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EnableInfoLexer"/> class.

@@ -14,8 +14,6 @@ using TerraFX.Interop.Windows;
 using System;
 using System.Runtime.InteropServices;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
     internal sealed class WICException : COMException

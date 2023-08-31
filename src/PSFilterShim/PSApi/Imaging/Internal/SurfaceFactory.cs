@@ -14,8 +14,6 @@ using PSFilterLoad.PSApi.Imaging.Internal;
 using PSFilterShim;
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Imaging
 {
     internal sealed class SurfaceFactory : Disposable, ISurfaceFactory

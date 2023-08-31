@@ -16,8 +16,6 @@ using PSFilterLoad.PSApi.Imaging;
 using PSFilterLoad.PSApi.Imaging.Internal;
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     internal static class SelectionMaskRenderer

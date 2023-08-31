@@ -33,7 +33,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                if (values.TryGetValue(enableInfo, out EnableInfoData data))
+                if (values.TryGetValue(enableInfo, out EnableInfoData? data))
                 {
                     result = data.TryGetResult(variables);
                 }
@@ -56,7 +56,7 @@ namespace PSFilterLoad.PSApi
 
         private sealed class EnableInfoData
         {
-            private readonly Expression expression;
+            private readonly Expression? expression;
             private readonly Dictionary<EnableInfoVariables, bool> resultCache;
 
             internal EnableInfoData(string enableInfo)

@@ -79,8 +79,8 @@ namespace PSFilterLoad.PSApi.PICA
 
         private readonly Dictionary<ColorID, Color> colors;
         private int colorsIndex;
-        private byte[] lookup16To8;
-        private ushort[] lookup8To16;
+        private byte[]? lookup16To8;
+        private ushort[]? lookup8To16;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PICAColorSpaceSuite"/> class.
@@ -468,7 +468,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             int error;
 
-            if (zstringSuite.ConvertToString(promptZString, out string prompt))
+            if (zstringSuite.ConvertToString(promptZString, out string? prompt))
             {
                 ColorRgb24? chosenColor = ColorPickerService.ShowColorPickerDialog(prompt);
 

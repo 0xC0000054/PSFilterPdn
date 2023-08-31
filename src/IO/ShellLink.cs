@@ -52,7 +52,7 @@ namespace PSFilterPdn
         /// </returns>
         /// <exception cref="ArgumentNullException"><paramref name="path"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="path"/> is empty.</exception>
-        public bool TryGetTargetPath(string path, [NotNullWhen(true)] out string targetPath)
+        public bool TryGetTargetPath(string path, [MaybeNullWhen(false)] out string targetPath)
         {
             ArgumentNullException.ThrowIfNull(path, nameof(path));
 

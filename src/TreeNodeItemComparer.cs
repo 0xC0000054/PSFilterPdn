@@ -25,7 +25,7 @@ namespace PSFilterPdn
 
         public static TreeNodeItemComparer Instance => instance;
 
-        public int Compare(object x, object y)
+        public int Compare(object? x, object? y)
         {
             if (ReferenceEquals(x, y))
             {

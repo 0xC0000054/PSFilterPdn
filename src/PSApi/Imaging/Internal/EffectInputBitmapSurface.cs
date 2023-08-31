@@ -16,8 +16,6 @@ using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
     internal sealed unsafe class EffectInputBitmapSurface : ImageSurface, ISurfaceHasTransparency

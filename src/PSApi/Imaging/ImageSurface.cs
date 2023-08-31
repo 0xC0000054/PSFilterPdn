@@ -10,8 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Imaging
 {
     internal abstract unsafe class ImageSurface : Disposable, ISurface<ImageSurface>

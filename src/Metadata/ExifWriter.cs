@@ -50,12 +50,12 @@ namespace PSFilterPdn.Metadata
                 WriteDirectory(writer, metadata[ExifSection.Image], imageInfo.IFDEntries, imageInfo.StartOffset);
                 WriteDirectory(writer, metadata[ExifSection.Photo], exifInfo.IFDEntries, exifInfo.StartOffset);
 
-                if (ifdEntries.TryGetValue(ExifSection.Interop, out IFDEntryInfo interopInfo))
+                if (ifdEntries.TryGetValue(ExifSection.Interop, out IFDEntryInfo? interopInfo))
                 {
                     WriteDirectory(writer, metadata[ExifSection.Interop], interopInfo.IFDEntries, interopInfo.StartOffset);
                 }
 
-                if (ifdEntries.TryGetValue(ExifSection.GpsInfo, out IFDEntryInfo gpsInfo))
+                if (ifdEntries.TryGetValue(ExifSection.GpsInfo, out IFDEntryInfo? gpsInfo))
                 {
                     WriteDirectory(writer, metadata[ExifSection.GpsInfo], gpsInfo.IFDEntries, gpsInfo.StartOffset);
                 }
@@ -127,14 +127,14 @@ namespace PSFilterPdn.Metadata
         {
             IFDEntryInfo imageIFDInfo = CreateIFDList(metadata[ExifSection.Image], FirstIFDOffset);
             IFDEntryInfo exifIFDInfo = CreateIFDList(metadata[ExifSection.Photo], imageIFDInfo.NextAvailableOffset);
-            IFDEntryInfo interopIFDInfo = null;
-            IFDEntryInfo gpsIFDInfo = null;
+            IFDEntryInfo? interopIFDInfo = null;
+            IFDEntryInfo? gpsIFDInfo = null;
 
             UpdateSubIFDOffset(ref imageIFDInfo,
                                ExifPropertyKeys.Image.ExifTag.Path.TagID,
                                (uint)exifIFDInfo.StartOffset);
 
-            if (metadata.TryGetValue(ExifSection.Interop, out Dictionary<ushort, ExifValue> interopSection))
+            if (metadata.TryGetValue(ExifSection.Interop, out Dictionary<ushort, ExifValue>? interopSection))
             {
                 interopIFDInfo = CreateIFDList(interopSection, exifIFDInfo.NextAvailableOffset);
 
@@ -143,7 +143,7 @@ namespace PSFilterPdn.Metadata
                                    (uint)interopIFDInfo.StartOffset);
             }
 
-            if (metadata.TryGetValue(ExifSection.GpsInfo, out Dictionary<ushort, ExifValue> gpsSection))
+            if (metadata.TryGetValue(ExifSection.GpsInfo, out Dictionary<ushort, ExifValue>? gpsSection))
             {
                 long startOffset = interopIFDInfo?.NextAvailableOffset ?? exifIFDInfo.NextAvailableOffset;
                 gpsIFDInfo = CreateIFDList(gpsSection, startOffset);
@@ -169,8 +169,8 @@ namespace PSFilterPdn.Metadata
         private static IFDInfo CreateIFDInfo(
             IFDEntryInfo imageIFDInfo,
             IFDEntryInfo exifIFDInfo,
-            IFDEntryInfo interopIFDInfo,
-            IFDEntryInfo gpsIFDInfo)
+            IFDEntryInfo? interopIFDInfo,
+            IFDEntryInfo? gpsIFDInfo)
         {
             Dictionary<ExifSection, IFDEntryInfo> entries = new()
             {
@@ -406,7 +406,7 @@ namespace PSFilterPdn.Metadata
                     continue;
                 }
 
-                if (metadataEntries.TryGetValue(section, out Dictionary<ushort, ExifValue> values))
+                if (metadataEntries.TryGetValue(section, out Dictionary<ushort, ExifValue>? values))
                 {
                     values.TryAdd(key.TagID, value);
                 }
@@ -431,7 +431,7 @@ namespace PSFilterPdn.Metadata
 
         private static void AddVersionEntries(ref Dictionary<ExifSection, Dictionary<ushort, ExifValue>> metadataEntries)
         {
-            if (metadataEntries.TryGetValue(ExifSection.Photo, out Dictionary<ushort, ExifValue> exifItems))
+            if (metadataEntries.TryGetValue(ExifSection.Photo, out Dictionary<ushort, ExifValue>? exifItems))
             {
                 if (!exifItems.ContainsKey(ExifPropertyKeys.Photo.ExifVersion.Path.TagID))
                 {
@@ -444,7 +444,7 @@ namespace PSFilterPdn.Metadata
                 }
             }
 
-            if (metadataEntries.TryGetValue(ExifSection.GpsInfo, out Dictionary<ushort, ExifValue> gpsItems))
+            if (metadataEntries.TryGetValue(ExifSection.GpsInfo, out Dictionary<ushort, ExifValue>? gpsItems))
             {
                 if (!gpsItems.ContainsKey(ExifPropertyKeys.GpsInfo.GPSVersionID.Path.TagID))
                 {
@@ -455,7 +455,7 @@ namespace PSFilterPdn.Metadata
                 }
             }
 
-            if (metadataEntries.TryGetValue(ExifSection.Interop, out Dictionary<ushort, ExifValue> interopItems))
+            if (metadataEntries.TryGetValue(ExifSection.Interop, out Dictionary<ushort, ExifValue>? interopItems))
             {
                 if (!interopItems.ContainsKey(ExifPropertyKeys.Interop.InteroperabilityVersion.Path.TagID))
                 {

@@ -102,7 +102,7 @@ namespace PSFilterLoad.PSApi
             const int MaxStackAllocBufferSize = 128;
 
             Span<byte> buffer = stackalloc byte[MaxStackAllocBufferSize];
-            byte[] bufferFromPool = null;
+            byte[]? bufferFromPool = null;
 
             PluginEntryPoint entryPoint;
 

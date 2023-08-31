@@ -14,8 +14,6 @@ using System;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Diagnostics
 {
     internal sealed partial class PluginApiLogger : IPluginApiLogger

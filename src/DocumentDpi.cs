@@ -41,7 +41,7 @@ namespace PSFilterPdn
 
         public double Y { get; }
 
-        public override bool Equals([NotNullWhen(true)] object obj)
+        public override bool Equals([NotNullWhen(true)] object? obj)
         {
             return obj is DocumentDpi other && Equals(other);
         }

@@ -12,8 +12,6 @@
 
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Imaging
 {
     internal abstract class DisplayPixelsSurface : Disposable, ISurface<DisplayPixelsSurface>

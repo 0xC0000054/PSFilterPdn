@@ -28,7 +28,7 @@ namespace PSFilterPdn
 
         public static IBitmap<ColorBgra32> Load(string path, IImagingFactory imagingFactory)
         {
-            IBitmap<ColorBgra32> bitmap = null;
+            IBitmap<ColorBgra32> bitmap;
 
             using (FileStream stream = new(path,
                                            FileMode.Open,

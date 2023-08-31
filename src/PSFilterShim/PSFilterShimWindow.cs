@@ -26,8 +26,6 @@ using System.Runtime.InteropServices;
 
 using static TerraFX.Interop.Windows.Windows;
 
-#nullable enable
-
 namespace PSFilterShim
 {
     internal sealed class PSFilterShimWindow : IDisposable

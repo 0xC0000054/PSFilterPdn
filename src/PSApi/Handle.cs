@@ -25,7 +25,7 @@ namespace PSFilterLoad.PSApi
 
         public IntPtr Value { get; }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Handle other && Equals(other);
         }

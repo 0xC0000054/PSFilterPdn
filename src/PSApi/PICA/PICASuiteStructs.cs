@@ -68,7 +68,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         public readonly int Index => value.ToInt32();
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is ColorID other && Equals(other);
         }
@@ -162,7 +162,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         public readonly int Index => value.ToInt32();
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is ASZString other && Equals(other);
         }

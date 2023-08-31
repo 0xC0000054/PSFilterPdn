@@ -403,6 +403,15 @@ namespace PSFilterPdn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to get the Paint.NET user files folder path..
+        /// </summary>
+        internal static string UnknownUserFilePath {
+            get {
+                return ResourceManager.GetString("UnknownUserFilePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unsupported image mode..
         /// </summary>
         internal static string UnsupportedImageMode {

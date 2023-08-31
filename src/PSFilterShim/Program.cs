@@ -31,12 +31,12 @@ namespace PSFilterShim
             internal const uint SEM_FAILCRITICALERRORS = 1U;
         }
 
-        static PSFilterShimPipeClient pipeClient;
+        static PSFilterShimPipeClient? pipeClient;
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = (Exception)e.ExceptionObject;
-            pipeClient.SetProxyErrorMessage(ex);
+            pipeClient!.SetProxyErrorMessage(ex);
 
             Environment.Exit(1);
         }

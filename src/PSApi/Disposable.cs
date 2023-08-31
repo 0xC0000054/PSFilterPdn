@@ -14,8 +14,6 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     internal abstract class Disposable : IDisposable

@@ -13,6 +13,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using TerraFX.Interop.Windows;
 
 namespace PSFilterPdn
 {
@@ -33,7 +34,7 @@ namespace PSFilterPdn
         {
             Dirty = false;
             searchSubdirectories = true;
-            searchDirectories = null;
+            searchDirectories = new HashSet<string>();
         }
 
         /// <summary>

@@ -12,8 +12,6 @@
 
 using MessagePack;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     /// <summary>

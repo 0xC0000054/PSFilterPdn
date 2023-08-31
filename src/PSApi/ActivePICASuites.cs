@@ -60,7 +60,7 @@ namespace PSFilterLoad.PSApi
 
             private string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "{0}, version {1}", name, version);
 
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 if (obj == null)
                 {
@@ -72,7 +72,7 @@ namespace PSFilterLoad.PSApi
                     return true;
                 }
 
-                PICASuiteKey key = obj as PICASuiteKey;
+                PICASuiteKey? key = obj as PICASuiteKey;
                 if (key == null)
                 {
                     return false;
@@ -94,7 +94,7 @@ namespace PSFilterLoad.PSApi
                 return hash;
             }
 
-            public bool Equals(PICASuiteKey other)
+            public bool Equals(PICASuiteKey? other)
             {
                 if (other == null)
                 {
@@ -104,14 +104,14 @@ namespace PSFilterLoad.PSApi
                 return name.Equals(other.name, StringComparison.Ordinal) && version == other.version;
             }
 
-            public static bool operator ==(PICASuiteKey p1, PICASuiteKey p2)
+            public static bool operator ==(PICASuiteKey? p1, PICASuiteKey? p2)
             {
                 if (ReferenceEquals(p1, p2))
                 {
                     return true;
                 }
 
-                if (((object)p1) == null || ((object)p2) == null)
+                if (((object?)p1) == null || ((object?)p2) == null)
                 {
                     return false;
                 }
@@ -119,7 +119,7 @@ namespace PSFilterLoad.PSApi
                 return p1.Equals(p2);
             }
 
-            public static bool operator !=(PICASuiteKey p1, PICASuiteKey p2)
+            public static bool operator !=(PICASuiteKey? p1, PICASuiteKey? p2)
             {
                 return !(p1 == p2);
             }
@@ -255,7 +255,7 @@ namespace PSFilterLoad.PSApi
                 throw new ObjectDisposedException("ActivePICASuites");
             }
 
-            if (activeSuites.TryGetValue(key, out PICASuite suite))
+            if (activeSuites.TryGetValue(key, out PICASuite? suite))
             {
                 suite.RefCount -= 1;
 
@@ -281,7 +281,7 @@ namespace PSFilterLoad.PSApi
                 {
                     item.Dispose();
                 }
-                activeSuites = null;
+                activeSuites.Clear();
             }
         }
     }

@@ -21,7 +21,7 @@ namespace PSFilterPdn
     {
         public static T Deserialize<T>(string path, MessagePackSerializerOptions options)
         {
-            T obj = default;
+            T obj;
 
             using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
             {

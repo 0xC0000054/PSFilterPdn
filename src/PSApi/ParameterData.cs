@@ -13,8 +13,6 @@
 using MessagePack;
 using System.Collections.Generic;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     /// <summary>

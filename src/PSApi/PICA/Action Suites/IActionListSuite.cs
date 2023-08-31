@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PSFilterLoad.PSApi.PICA
 {
@@ -22,7 +23,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <param name="list">The list.</param>
         /// <param name="values">The values contained within the list.</param>
         /// <returns><c>true</c> if the list is valid; otherwise, <c>false</c>.</returns>
-        bool TryGetListValues(PIActionList list, out ReadOnlyCollection<ActionListItem> values);
+        bool TryGetListValues(PIActionList list, [MaybeNullWhen(false)] out ReadOnlyCollection<ActionListItem> values);
 
         /// <summary>
         /// Creates a list that contains the specified values.

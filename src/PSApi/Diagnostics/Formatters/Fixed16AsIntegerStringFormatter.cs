@@ -10,8 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Diagnostics
 {
     internal readonly struct Fixed16AsIntegerStringFormatter

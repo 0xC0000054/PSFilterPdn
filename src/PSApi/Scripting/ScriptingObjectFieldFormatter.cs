@@ -19,8 +19,6 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     /// <summary>

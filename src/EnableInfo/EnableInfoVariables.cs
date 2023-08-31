@@ -175,7 +175,7 @@ namespace PSFilterPdn.EnableInfo
             return new UndefinedVariableConstantExpression(name);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == null)
             {
@@ -189,7 +189,7 @@ namespace PSFilterPdn.EnableInfo
             return Equals(obj as EnableInfoVariables);
         }
 
-        public bool Equals(EnableInfoVariables other)
+        public bool Equals(EnableInfoVariables? other)
         {
             if (other == null)
             {
@@ -229,14 +229,14 @@ namespace PSFilterPdn.EnableInfo
             return hashCode;
         }
 
-        public static bool operator ==(EnableInfoVariables variables1, EnableInfoVariables variables2)
+        public static bool operator ==(EnableInfoVariables? variables1, EnableInfoVariables? variables2)
         {
             if (ReferenceEquals(variables1, variables2))
             {
                 return true;
             }
 
-            if (((object)variables1) == null || ((object)variables2) == null)
+            if (((object?)variables1) == null || ((object?)variables2) == null)
             {
                 return false;
             }
@@ -244,7 +244,7 @@ namespace PSFilterPdn.EnableInfo
             return variables1.Equals(variables2);
         }
 
-        public static bool operator !=(EnableInfoVariables variables1, EnableInfoVariables variables2)
+        public static bool operator !=(EnableInfoVariables? variables1, EnableInfoVariables? variables2)
         {
             return !(variables1 == variables2);
         }

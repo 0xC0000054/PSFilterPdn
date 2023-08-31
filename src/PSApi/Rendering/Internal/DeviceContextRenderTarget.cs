@@ -17,8 +17,6 @@ using TerraFX.Interop.DirectX;
 using TerraFX.Interop.Windows;
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Rendering.Internal
 {
     internal sealed unsafe class DeviceContextRenderTarget : Disposable, IDeviceContextRenderTarget

@@ -71,7 +71,7 @@ namespace PSFilterLoad.PSApi
         private IntPtr basicSuitePtr;
 
         private GlobalParameters globalParameters;
-        private Dictionary<uint, AETEValue> scriptingData;
+        private Dictionary<uint, AETEValue>? scriptingData;
         private bool isRepeatEffect;
         private IntPtr pluginDataHandle;
         private IntPtr filterParametersHandle;
@@ -82,25 +82,25 @@ namespace PSFilterLoad.PSApi
 #pragma warning disable IDE0032 // Use auto property
         private ISurface<ImageSurface> dest;
 #pragma warning restore IDE0032 // Use auto property
-        private ISurface<MaskSurface> mask;
-        private ISurface<ImageSurface> tempSurface;
-        private ISurface<MaskSurface> tempMask;
+        private ISurface<MaskSurface>? mask;
+        private ISurface<ImageSurface>? tempSurface;
+        private ISurface<MaskSurface>? tempMask;
         private readonly ISurfaceFactory surfaceFactory;
         private readonly IRenderTargetFactory renderTargetFactory;
-        private DisplayPixelsSurface displaySurface;
-        private TransparencyCheckerboardSurface transparencyCheckerboard;
-        private IDeviceContextRenderTarget displayPixelsRenderTarget;
-        private IDeviceBitmapBrush checkerboardBrush;
+        private DisplayPixelsSurface? displaySurface;
+        private TransparencyCheckerboardSurface? transparencyCheckerboard;
+        private IDeviceContextRenderTarget? displayPixelsRenderTarget;
+        private IDeviceBitmapBrush? checkerboardBrush;
 
         private bool disposed;
-        private PluginModule module;
+        private PluginModule? module;
         private PluginPhase previousPhase;
-        private Action<byte> progressFunc;
+        private Action<byte>? progressFunc;
         private byte lastProgressPercentage;
         private IntPtr filterGlobalData;
         private short result;
 
-        private Func<bool> abortFunc;
+        private Func<bool>? abortFunc;
         private string errorMessage;
         private readonly FilterCase filterCase;
         private readonly double dpiX;
@@ -169,7 +169,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// The plug-in settings for the current session.
         /// </returns>
-        internal DescriptorRegistryValues GetRegistryValues()
+        internal DescriptorRegistryValues? GetRegistryValues()
         {
             return basicSuiteProvider.GetRegistryValues();
         }
@@ -241,7 +241,7 @@ namespace PSFilterLoad.PSApi
         /// </exception>
         internal unsafe LoadPsFilter(ImageSurface source,
                                      bool takeOwnershipOfSource,
-                                     MaskSurface selectionMask,
+                                     MaskSurface? selectionMask,
                                      bool takeOwnershipOfSelectionMask,
                                      ColorRgb24 primaryColor,
                                      ColorRgb24 secondaryColor,
@@ -253,7 +253,7 @@ namespace PSFilterLoad.PSApi
                                      ISurfaceFactory surfaceFactory,
                                      IRenderTargetFactory renderTargetFactory,
                                      IPluginApiLogger logger,
-                                     PluginUISettings pluginUISettings)
+                                     PluginUISettings? pluginUISettings)
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(documentMetadataProvider);
@@ -365,7 +365,7 @@ namespace PSFilterLoad.PSApi
 
         ISurface<ImageSurface> IFilterImageProvider.Destination => dest;
 
-        ISurface<MaskSurface> IFilterImageProvider.Mask => mask;
+        ISurface<MaskSurface>? IFilterImageProvider.Mask => mask;
 
         IntPtr IPICASuiteDataProvider.ParentWindowHandle => parentWindowHandle;
 
@@ -447,7 +447,7 @@ namespace PSFilterLoad.PSApi
             PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
             if (descriptorParameters->descriptor != Handle.Null)
             {
-                if (basicSuiteProvider.TryGetScriptingData(descriptorParameters->descriptor, out Dictionary<uint, AETEValue> data))
+                if (basicSuiteProvider.TryGetScriptingData(descriptorParameters->descriptor, out Dictionary<uint, AETEValue>? data))
                 {
                     scriptingData = data;
                 }
@@ -611,7 +611,7 @@ namespace PSFilterLoad.PSApi
                 return;
             }
 
-            byte[] parameterDataBytes = globalParameters.GetParameterDataBytes();
+            byte[]? parameterDataBytes = globalParameters.GetParameterDataBytes();
             if (parameterDataBytes != null)
             {
                 parameterDataRestored = true;
@@ -657,7 +657,7 @@ namespace PSFilterLoad.PSApi
                         throw new InvalidEnumArgumentException("ParameterDataStorageMethod", (int)globalParameters.ParameterDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
                 }
             }
-            byte[] pluginDataBytes = globalParameters.GetPluginDataBytes();
+            byte[]? pluginDataBytes = globalParameters.GetPluginDataBytes();
             if (pluginDataBytes != null)
             {
                 pluginDataRestored = true;
@@ -721,14 +721,14 @@ namespace PSFilterLoad.PSApi
 
             if (pdata.ModuleEntryPoints == null)
             {
-                module.entryPoint(FilterSelector.About, &aboutRecord, ref filterGlobalData, ref result);
+                module!.entryPoint(FilterSelector.About, &aboutRecord, ref filterGlobalData, ref result);
             }
             else
             {
                 // call all the entry points in the module only one should show the about box.
                 foreach (string entryPoint in pdata.ModuleEntryPoints)
                 {
-                    PluginEntryPoint ep = module.GetEntryPoint(entryPoint);
+                    PluginEntryPoint ep = module!.GetEntryPoint(entryPoint);
 
                     ep(FilterSelector.About, &aboutRecord, ref filterGlobalData, ref result);
 
@@ -761,7 +761,7 @@ namespace PSFilterLoad.PSApi
 
             logger.Log(PluginApiLogCategory.Selector, "Before FilterSelectorStart");
 
-            module.entryPoint(FilterSelector.Start, filterRecord, ref filterGlobalData, ref result);
+            module!.entryPoint(FilterSelector.Start, filterRecord, ref filterGlobalData, ref result);
 
             logger.Log(PluginApiLogCategory.Selector, "After FilterSelectorStart");
 
@@ -854,7 +854,7 @@ namespace PSFilterLoad.PSApi
 
             logger.Log(PluginApiLogCategory.Selector, "Before FilterSelectorParameters");
 
-            module.entryPoint(FilterSelector.Parameters, filterRecord, ref filterGlobalData, ref result);
+            module!.entryPoint(FilterSelector.Parameters, filterRecord, ref filterGlobalData, ref result);
 
             logger.Log(PluginApiLogCategory.Selector,
                        "After FilterSelectorParameters: data = 0x{0}, parameters = 0x{1}",
@@ -994,7 +994,7 @@ namespace PSFilterLoad.PSApi
 
             logger.Log(PluginApiLogCategory.Selector, "Before FilterSelectorPrepare");
 
-            module.entryPoint(FilterSelector.Prepare, filterRecord, ref filterGlobalData, ref result);
+            module!.entryPoint(FilterSelector.Prepare, filterRecord, ref filterGlobalData, ref result);
 
             logger.Log(PluginApiLogCategory.Selector, "After FilterSelectorPrepare");
 
@@ -1761,7 +1761,7 @@ namespace PSFilterLoad.PSApi
             }
 
             bool validImageBounds = rect.left < source.Width && rect.top < source.Height;
-            short padErr = SetFilterPadding(inDataPtr, stride, rect, nplanes, channelIndex, filterRecord->inputPadding, padding, tempSurface);
+            short padErr = SetFilterPadding(inDataPtr, stride, rect, nplanes, channelIndex, filterRecord->inputPadding, padding, tempSurface!);
             if (padErr != PSError.noErr || !validImageBounds)
             {
                 return padErr;
@@ -1769,7 +1769,7 @@ namespace PSFilterLoad.PSApi
 
             void* ptr = inDataPtr.ToPointer();
 
-            using (ISurfaceLock surfaceLock = tempSurface.Lock(lockRect, SurfaceLockMode.Read))
+            using (ISurfaceLock surfaceLock = tempSurface!.Lock(lockRect, SurfaceLockMode.Read))
             {
                 for (int y = 0; y < lockRect.Height; y++)
                 {
@@ -1863,7 +1863,7 @@ namespace PSFilterLoad.PSApi
         private unsafe void ScaleTempMask(Fixed16 maskRate, Rectangle lockRect)
         {
             // If the scale rectangle bounds are not valid return a copy of the original surface.
-            if (lockRect.X >= mask.Width || lockRect.Y >= mask.Height)
+            if (lockRect.X >= mask!.Width || lockRect.Y >= mask.Height)
             {
                 if ((tempMask == null) || tempMask.Width != mask.Width || tempMask.Height != mask.Height)
                 {
@@ -1933,7 +1933,7 @@ namespace PSFilterLoad.PSApi
             int width = rect.right - rect.left;
             int height = rect.bottom - rect.top;
 
-            FilterPadding padding = new(rect, width, height, mask.Size, filterRecord->maskRate);
+            FilterPadding padding = new(rect, width, height, mask!.Size, filterRecord->maskRate);
 
             Rectangle lockRect = new(rect.left + padding.left, rect.top + padding.top, width - padding.Horizontal, height - padding.Vertical);
 
@@ -1963,7 +1963,7 @@ namespace PSFilterLoad.PSApi
             filterRecord->maskRowBytes = width;
 
             bool validImageBounds = rect.left < mask.Width && rect.top < mask.Height;
-            short err = SetMaskPadding(maskDataPtr, width, rect, filterRecord->maskPadding, padding, tempMask);
+            short err = SetMaskPadding(maskDataPtr, width, rect, filterRecord->maskPadding, padding, tempMask!);
             if (err != PSError.noErr || !validImageBounds)
             {
                 return err;
@@ -1971,7 +1971,7 @@ namespace PSFilterLoad.PSApi
 
             byte* ptr = (byte*)maskDataPtr.ToPointer();
 
-            using (ISurfaceLock maskLock = tempMask.Lock(lockRect, SurfaceLockMode.Read))
+            using (ISurfaceLock maskLock = tempMask!.Lock(lockRect, SurfaceLockMode.Read))
             {
                 for (int y = 0; y < lockRect.Height; y++)
                 {
@@ -2172,7 +2172,7 @@ namespace PSFilterLoad.PSApi
         {
             using (ISurfaceLock sourceLock = source.Lock(SurfaceLockMode.Read))
             using (ISurfaceLock destLock = dest.Lock(SurfaceLockMode.Write))
-            using (ISurfaceLock maskLock = mask.Lock(SurfaceLockMode.Read))
+            using (ISurfaceLock maskLock = mask!.Lock(SurfaceLockMode.Read))
             {
                 for (int y = 0; y < dest.Height; y++)
                 {
@@ -2376,7 +2376,7 @@ namespace PSFilterLoad.PSApi
                     bottom = height;
                 }
 
-                using (ISurfaceLock displaySurfaceLock = displaySurface.Lock(SurfaceLockMode.Write))
+                using (ISurfaceLock displaySurfaceLock = displaySurface!.Lock(SurfaceLockMode.Write))
                 {
                     if (srcPixelMap->colBytes == 1)
                     {
@@ -2471,7 +2471,7 @@ namespace PSFilterLoad.PSApi
                 HDC hdc = (HDC)platformContext;
                 RECT hdcBounds = new(dstCol, dstRow, dstCol + width, dstRow + height);
 
-                displayPixelsRenderTarget.BindToDeviceContext(hdc, hdcBounds);
+                displayPixelsRenderTarget!.BindToDeviceContext(hdc, hdcBounds);
 
                 displayPixelsRenderTarget.BeginDraw();
                 try
@@ -2581,7 +2581,7 @@ namespace PSFilterLoad.PSApi
                        total,
                        progress);
 
-            Action<byte> callback = progressFunc;
+            Action<byte>? callback = progressFunc;
 
             if (callback != null)
             {
@@ -2868,17 +2868,8 @@ namespace PSFilterLoad.PSApi
                         module = null;
                     }
 
-                    if (source != null)
-                    {
-                        source.Dispose();
-                        source = null;
-                    }
-
-                    if (dest != null)
-                    {
-                        dest.Dispose();
-                        dest = null;
-                    }
+                    source?.Dispose();
+                    dest?.Dispose();
 
                     if (transparencyCheckerboard != null)
                     {
@@ -2922,29 +2913,10 @@ namespace PSFilterLoad.PSApi
                         displaySurface = null;
                     }
 
-                    if (descriptorSuite != null)
-                    {
-                        descriptorSuite.Dispose();
-                        descriptorSuite = null;
-                    }
-
-                    if (channelPortsSuite != null)
-                    {
-                        channelPortsSuite.Dispose();
-                        channelPortsSuite = null;
-                    }
-
-                    if (readImageDocument != null)
-                    {
-                        readImageDocument.Dispose();
-                        readImageDocument = null;
-                    }
-
-                    if (basicSuiteProvider != null)
-                    {
-                        basicSuiteProvider.Dispose();
-                        basicSuiteProvider = null;
-                    }
+                    descriptorSuite?.Dispose();
+                    channelPortsSuite?.Dispose();
+                    readImageDocument?.Dispose();
+                    basicSuiteProvider?.Dispose();
                 }
 
                 if (platformDataPtr != IntPtr.Zero)
@@ -3038,7 +3010,7 @@ namespace PSFilterLoad.PSApi
                             {
                                 if (globalParameters.ParameterDataExecutable)
                                 {
-                                    Memory.FreeExecutable(filterParametersHandle, globalParameters.GetParameterDataBytes().Length);
+                                    Memory.FreeExecutable(filterParametersHandle, globalParameters!.GetParameterDataBytes()!.Length);
                                 }
                                 else
                                 {
@@ -3088,7 +3060,7 @@ namespace PSFilterLoad.PSApi
                         {
                             if (globalParameters.PluginDataExecutable)
                             {
-                                Memory.FreeExecutable(pluginDataHandle, globalParameters.GetPluginDataBytes().Length);
+                                Memory.FreeExecutable(pluginDataHandle, globalParameters!.GetPluginDataBytes()!.Length);
                             }
                             else
                             {

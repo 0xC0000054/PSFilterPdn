@@ -12,8 +12,6 @@
 
 using System.Runtime.CompilerServices;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Diagnostics
 {
     internal interface IPluginLoadingLogger

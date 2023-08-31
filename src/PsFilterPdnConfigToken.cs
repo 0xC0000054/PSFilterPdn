@@ -19,17 +19,16 @@ namespace PSFilterPdn
 {
     public sealed class PSFilterPdnConfigToken : PaintDotNet.Effects.EffectConfigToken
     {
-        internal PSFilterPdnConfigToken(IBitmap<ColorBgra32> dest, PluginData filterData, bool useShim, Dictionary<PluginData, ParameterData> paramData,
-            PseudoResourceCollection resources, DescriptorRegistryValues registryValues, ConfigDialogState configDialog)
+        internal PSFilterPdnConfigToken()
             : base()
         {
-            Dest = dest;
-            FilterData = filterData;
-            RunWith32BitShim = useShim;
-            FilterParameters = paramData;
-            PseudoResources = resources;
-            DescriptorRegistry = registryValues;
-            DialogState = configDialog;
+            Dest = null;
+            FilterData = null;
+            RunWith32BitShim = false;
+            FilterParameters = new Dictionary<PluginData, ParameterData>();
+            PseudoResources = new PseudoResourceCollection();
+            DescriptorRegistry = null;
+            DialogState = null;
         }
 
         private PSFilterPdnConfigToken(PSFilterPdnConfigToken copyMe)
@@ -44,9 +43,9 @@ namespace PSFilterPdn
             DialogState = copyMe.DialogState;
         }
 
-        internal IBitmap<ColorBgra32> Dest { get; set; }
+        internal IBitmap<ColorBgra32>? Dest { get; set; }
 
-        internal PluginData FilterData { get; set; }
+        internal PluginData? FilterData { get; set; }
 
         internal bool RunWith32BitShim { get; set; }
 
@@ -54,9 +53,9 @@ namespace PSFilterPdn
 
         internal PseudoResourceCollection PseudoResources { get; set; }
 
-        internal DescriptorRegistryValues DescriptorRegistry { get; set; }
+        internal DescriptorRegistryValues? DescriptorRegistry { get; set; }
 
-        internal ConfigDialogState DialogState { get; set; }
+        internal ConfigDialogState? DialogState { get; set; }
 
         public override object Clone()
         {

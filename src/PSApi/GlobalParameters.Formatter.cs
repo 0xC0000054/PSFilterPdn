@@ -14,8 +14,6 @@ using MessagePack;
 using MessagePack.Formatters;
 using System.Buffers;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     internal sealed partial class GlobalParameters

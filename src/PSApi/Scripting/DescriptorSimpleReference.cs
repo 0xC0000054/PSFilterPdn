@@ -15,8 +15,6 @@ using MessagePack.Formatters;
 using System;
 using System.Buffers;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     [MessagePackObject]

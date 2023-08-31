@@ -21,7 +21,7 @@ namespace PSFilterPdn
     // Adapted from 'Problem and Solution: The Terrible Inefficiency of FileStream and BinaryReader'
     // https://jacksondunstan.com/articles/3568
 
-    internal sealed class EndianBinaryReader : IDisposable
+    internal sealed class EndianBinaryReader : PSFilterLoad.PSApi.Disposable
     {
 #pragma warning disable IDE0032 // Use auto property
         private Stream stream;
@@ -143,22 +143,6 @@ namespace PSFilterPdn
                         stream.Seek(value, SeekOrigin.Begin);
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            if (stream != null)
-            {
-                if (!leaveOpen)
-                {
-                    stream.Dispose();
-                }
-                stream = null;
-                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
 
@@ -469,6 +453,18 @@ namespace PSFilterPdn
             return value;
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (!leaveOpen)
+                {
+                    stream.Dispose();
+                }
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
+        }
+
         /// <summary>
         /// Ensures that the buffer contains at least the number of bytes requested.
         /// </summary>
@@ -514,18 +510,6 @@ namespace PSFilterPdn
 
             readOffset = 0;
             readLength = numBytesRead;
-        }
-
-        /// <summary>
-        /// Verifies that the <see cref="EndianBinaryReader"/> has not been disposed.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
-        private void VerifyNotDisposed()
-        {
-            if (stream == null)
-            {
-                throw new ObjectDisposedException(nameof(EndianBinaryReader));
-            }
         }
     }
 }

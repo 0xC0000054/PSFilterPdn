@@ -225,7 +225,7 @@ namespace PSFilterLoad.PSApi
         private static unsafe BOOL EnumPiMI(HMODULE hModule, ushort* lpszType, ushort* lpszName, nint lParam)
         {
             GCHandle handle = GCHandle.FromIntPtr(lParam);
-            QueryFilter query = (QueryFilter)handle.Target;
+            QueryFilter query = (QueryFilter)handle.Target!;
             nuint pluginResourceName = new(lpszName);
 
             try
@@ -265,7 +265,7 @@ namespace PSFilterLoad.PSApi
                 byte* resPtr = (byte*)filterLock + 2;
 
                 // The plug-ins are assumed to have a unique name, so the strings are not pooled.
-                string title = StringUtil.FromCString(resPtr, StringCreationOptions.TrimWhiteSpace);
+                string title = StringUtil.FromCString(resPtr, StringCreationOptions.TrimWhiteSpace)!;
 
                 if (!GetPiMIResourceData(hModule, lpszName, query, out string category))
                 {
@@ -300,7 +300,7 @@ namespace PSFilterLoad.PSApi
         private static unsafe BOOL EnumPiPL(HMODULE hModule, ushort* lpszType, ushort* lpszName, nint lParam)
         {
             GCHandle handle = GCHandle.FromIntPtr(lParam);
-            QueryFilter query = (QueryFilter)handle.Target;
+            QueryFilter query = (QueryFilter)handle.Target!;
             nuint pluginResourceName = new(lpszName);
 
             try
@@ -347,12 +347,12 @@ namespace PSFilterLoad.PSApi
                                      PSConstants.LatestPiPLVersion);
                     return BOOL.TRUE;
                 }
-                string entryPoint = null;
-                string category = null;
-                string title = null;
-                FilterCaseInfoCollection filterInfo = null;
-                AETEData aete = null;
-                string enableInfo = null;
+                string entryPoint = string.Empty;
+                string category = string.Empty;
+                string title = string.Empty;
+                FilterCaseInfoCollection? filterInfo = null;
+                AETEData? aete = null;
+                string enableInfo = string.Empty;
 
                 int count = resourceHeader->count;
 
@@ -388,7 +388,7 @@ namespace PSFilterLoad.PSApi
                     }
                     else if (propKey == query.platformEntryPoint)
                     {
-                        entryPoint = StringUtil.FromCString(dataPtr, StringCreationOptions.UseStringPool);
+                        entryPoint = StringUtil.FromCString(dataPtr, StringCreationOptions.UseStringPool)!;
                     }
                     else if (propKey == PIPropertyID.PIVersionProperty)
                     {
@@ -424,16 +424,16 @@ namespace PSFilterLoad.PSApi
                     else if (propKey == PIPropertyID.PICategoryProperty)
                     {
                         category = StringUtil.FromPascalString(dataPtr,
-                                                               StringCreationOptions.TrimWhiteSpaceAndNullTerminator | StringCreationOptions.UseStringPool);
+                                                               StringCreationOptions.TrimWhiteSpaceAndNullTerminator | StringCreationOptions.UseStringPool)!;
                     }
                     else if (propKey == PIPropertyID.PINameProperty)
                     {
                         // The plug-ins are assumed to have a unique name, so the strings are not pooled.
-                        title = StringUtil.FromPascalString(dataPtr);
+                        title = StringUtil.FromPascalString(dataPtr)!;
                     }
                     else if (propKey == PIPropertyID.PIFilterCaseInfoProperty)
                     {
-                        FilterCaseInfoResult result = FilterCaseInfoParser.Parse(dataPtr, propertyLength);
+                        FilterCaseInfoResult? result = FilterCaseInfoParser.Parse(dataPtr, propertyLength);
 
                         if (result != null)
                         {
@@ -453,14 +453,14 @@ namespace PSFilterLoad.PSApi
                         if (term->version == PSConstants.LatestTerminologyVersion)
                         {
 #if DEBUG
-                            string aeteName = StringUtil.FromCString(term->scopeString);
+                            string? aeteName = StringUtil.FromCString(term->scopeString);
 #endif
                             aete = AeteResource.Parse(hModule, term->terminologyID);
                         }
                     }
                     else if (propKey == PIPropertyID.PIEnableInfoProperty)
                     {
-                        enableInfo = StringUtil.FromCString(dataPtr, StringCreationOptions.RemoveAllWhiteSpace | StringCreationOptions.UseStringPool);
+                        enableInfo = StringUtil.FromCString(dataPtr, StringCreationOptions.RemoveAllWhiteSpace | StringCreationOptions.UseStringPool)!;
                     }
                     else if (propKey == PIPropertyID.PIRequiredHostProperty)
                     {

@@ -23,16 +23,16 @@ namespace PSFilterPdn
 {
     internal sealed class PSFilterShimPipeServer : IDisposable
     {
-        private NamedPipeServerStream server;
+        private NamedPipeServerStream? server;
         private readonly byte[] oneByteParameterReplyBuffer;
         private readonly IDocumentMetadataProvider documentMetadataProvider;
 
         private readonly Func<bool> abortFunc;
         private readonly PluginData pluginData;
         private readonly PSFilterShimSettings settings;
-        private readonly Action<PSFilterShimErrorInfo> errorCallback;
+        private readonly Action<PSFilterShimErrorInfo?> errorCallback;
         private readonly Action<FilterPostProcessingOptions> postProcessingOptionsCallback;
-        private readonly Action<byte> progressCallback;
+        private readonly Action<byte>? progressCallback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PSFilterShimService"/> class.
@@ -56,9 +56,9 @@ namespace PSFilterPdn
         public PSFilterShimPipeServer(Func<bool> abort,
                                       PluginData plugin,
                                       PSFilterShimSettings settings,
-                                      Action<PSFilterShimErrorInfo> error,
+                                      Action<PSFilterShimErrorInfo?> error,
                                       Action<FilterPostProcessingOptions> postProcessingOptions,
-                                      Action<byte> progress,
+                                      Action<byte>? progress,
                                       IDocumentMetadataProvider documentMetadataProvider)
         {
             ArgumentNullException.ThrowIfNull(nameof(plugin));
@@ -136,7 +136,7 @@ namespace PSFilterPdn
             const int MaxStackAllocBufferSize = 128;
 
             Span<byte> buffer = stackalloc byte[MaxStackAllocBufferSize];
-            byte[] bufferFromPool = null;
+            byte[]? bufferFromPool = null;
 
             try
             {
@@ -157,7 +157,7 @@ namespace PSFilterPdn
                         SendReplyToClient((byte)(abortFunc() ? 1 : 0));
                         break;
                     case Command.ReportProgress:
-                        progressCallback(messageBytes[1]);
+                        progressCallback!(messageBytes[1]);
                         SendEmptyReplyToClient();
                         break;
                     case Command.GetPluginData:
@@ -212,14 +212,14 @@ namespace PSFilterPdn
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
         }
 
-        private static PSFilterShimErrorInfo GetErrorInfo(ReadOnlySpan<byte> buffer)
+        private static PSFilterShimErrorInfo? GetErrorInfo(ReadOnlySpan<byte> buffer)
         {
             const int HeaderSize = sizeof(int) * 2;
 
             int messageLength = BinaryPrimitives.ReadInt32LittleEndian(buffer);
             int detailsLength = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(sizeof(int)));
 
-            PSFilterShimErrorInfo errorInfo = null;
+            PSFilterShimErrorInfo? errorInfo = null;
 
             if (messageLength > 0)
             {
@@ -246,14 +246,14 @@ namespace PSFilterPdn
 
         private void SendEmptyReplyToClient()
         {
-            server.Write(EmptyReplyMessage);
+            server!.Write(EmptyReplyMessage);
         }
 
         private void SendReplyToClient(byte data)
         {
             // The constructor already set the message header.
             oneByteParameterReplyBuffer[4] = data;
-            server.Write(oneByteParameterReplyBuffer, 0, oneByteParameterReplyBuffer.Length);
+            server!.Write(oneByteParameterReplyBuffer, 0, oneByteParameterReplyBuffer.Length);
         }
 
         [SkipLocalsInit]
@@ -272,7 +272,7 @@ namespace PSFilterPdn
                 int totalMessageLength = sizeof(int) + count;
 
                 Span<byte> buffer = stackalloc byte[MaxStackAllocBufferSize];
-                byte[] bufferFromPool = null;
+                byte[]? bufferFromPool = null;
 
                 try
                 {
@@ -287,7 +287,7 @@ namespace PSFilterPdn
                     BinaryPrimitives.WriteInt32LittleEndian(messageBytes, count);
                     data.CopyTo(messageBytes.Slice(sizeof(int)));
 
-                    server.Write(messageBytes);
+                    server!.Write(messageBytes);
                 }
                 finally
                 {

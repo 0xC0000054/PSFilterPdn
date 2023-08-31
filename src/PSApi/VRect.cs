@@ -33,7 +33,7 @@ namespace PSFilterLoad.PSApi
             return left == rect.left && top == rect.top && right == rect.right && bottom == rect.bottom;
         }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is VRect other && Equals(other);
         }

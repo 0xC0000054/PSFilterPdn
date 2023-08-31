@@ -114,7 +114,7 @@ namespace PSFilterLoad.PSApi
         /// </value>
         public Architecture ProcessorArchitecture { get; }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == null)
             {
@@ -129,7 +129,7 @@ namespace PSFilterLoad.PSApi
             return Equals(obj as PluginData);
         }
 
-        public bool Equals(PluginData other)
+        public bool Equals(PluginData? other)
         {
             if (other == null)
             {
@@ -157,14 +157,14 @@ namespace PSFilterLoad.PSApi
             return hash;
         }
 
-        public static bool operator ==(PluginData pluginData1, PluginData pluginData2)
+        public static bool operator ==(PluginData? pluginData1, PluginData? pluginData2)
         {
             if (ReferenceEquals(pluginData1, pluginData2))
             {
                 return true;
             }
 
-            if (((object)pluginData1) == null || ((object)pluginData2) == null)
+            if (((object?)pluginData1) == null || ((object?)pluginData2) == null)
             {
                 return false;
             }
@@ -172,7 +172,7 @@ namespace PSFilterLoad.PSApi
             return pluginData1.Equals(pluginData2);
         }
 
-        public static bool operator !=(PluginData pluginData1, PluginData pluginData2)
+        public static bool operator !=(PluginData? pluginData1, PluginData? pluginData2)
         {
             return !(pluginData1 == pluginData2);
         }

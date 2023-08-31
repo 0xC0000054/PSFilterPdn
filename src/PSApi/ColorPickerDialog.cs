@@ -16,8 +16,6 @@ using TerraFX.Interop.Windows;
 
 using static TerraFX.Interop.Windows.Windows;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     internal sealed class ColorPickerDialog

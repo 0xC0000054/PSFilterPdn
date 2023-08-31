@@ -42,7 +42,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="type">The type.</param>
         /// <param name="index">The index.</param>
         /// <returns>The pseudo-resource with the specified type and index, if found; otherwise, null.</returns>
-        public PseudoResource Find(uint type, int index)
+        public PseudoResource? Find(uint type, int index)
         {
             IList<PseudoResource> items = Items;
 

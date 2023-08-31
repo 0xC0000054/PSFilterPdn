@@ -10,8 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Diagnostics
 {
     internal readonly unsafe struct PointerAsStringFormatter<T> where T : unmanaged

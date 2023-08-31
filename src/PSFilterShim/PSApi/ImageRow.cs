@@ -13,8 +13,6 @@
 using System;
 using System.Runtime.Intrinsics;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     internal static unsafe class ImageRow

@@ -162,7 +162,7 @@ namespace PSFilterLoad.PSApi
         {
             logger.Log(PluginApiLogCategory.ResourceSuite, "{0}, {1}", new FourCCAsStringFormatter(ofType), index);
 
-            PseudoResource res = pseudoResources.Find(ofType, index);
+            PseudoResource? res = pseudoResources.Find(ofType, index);
 
             if (res != null)
             {

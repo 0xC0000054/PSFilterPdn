@@ -14,8 +14,6 @@ using TerraFX.Interop.DirectX;
 using TerraFX.Interop.Windows;
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Rendering
 {
     internal class Direct2DException : Exception

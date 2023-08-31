@@ -18,8 +18,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
 
-#nullable enable
-
 namespace PSFilterPdn
 {
     /// <summary>
@@ -259,7 +257,7 @@ namespace PSFilterPdn
             }
             else if (path.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase) && dereferenceLinks)
             {
-                if (shellLink!.TryGetTargetPath(path, out string target))
+                if (shellLink!.TryGetTargetPath(path, out string? target))
                 {
                     if (!string.IsNullOrEmpty(target))
                     {

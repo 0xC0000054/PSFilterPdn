@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PSFilterLoad.PSApi.PICA
 {
@@ -22,7 +23,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <param name="list">The reference.</param>
         /// <param name="values">The values contained within the list.</param>
         /// <returns><c>true</c> if the reference is valid; otherwise, <c>false</c>.</returns>
-        bool TryGetReferenceValues(PIActionReference reference, out ReadOnlyCollection<ActionReferenceItem> values);
+        bool TryGetReferenceValues(PIActionReference reference, [MaybeNullWhen(false)] out ReadOnlyCollection<ActionReferenceItem> values);
 
         /// <summary>
         /// Creates a reference that contains the specified values.

@@ -12,8 +12,6 @@
 
 using TerraFX.Interop.Windows;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
     internal sealed unsafe class WICBitmapSurfaceLock<TPixel> : Disposable, ISurfaceLock where TPixel : unmanaged, IPixelFormatInfo

@@ -50,7 +50,7 @@ namespace PSFilterLoad.PSApi
                 return defaultValue;
             }
 
-            return FromPascalString((byte*)pascalString.ToPointer());
+            return FromPascalString((byte*)pascalString.ToPointer())!;
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace PSFilterLoad.PSApi
         /// A managed string that holds a copy of the Pascal string.
         /// If <paramref name="pascalString"/> is null, the method returns null.
         /// </returns>
-        internal static unsafe string FromPascalString(byte* pascalString)
+        internal static unsafe string? FromPascalString(byte* pascalString)
         {
             return FromPascalString(pascalString, StringCreationOptions.TrimWhiteSpaceAndNullTerminator);
         }
@@ -75,7 +75,7 @@ namespace PSFilterLoad.PSApi
         /// A managed string that holds a copy of the Pascal string.
         /// If <paramref name="pascalString"/> is null, the method returns null.
         /// </returns>
-        internal static unsafe string FromPascalString(byte* pascalString, StringCreationOptions options)
+        internal static unsafe string? FromPascalString(byte* pascalString, StringCreationOptions options)
         {
             if (pascalString == null)
             {
@@ -92,7 +92,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A managed string that holds a copy of the C string.
         /// </returns>
-        internal static string FromCString(IntPtr ptr)
+        internal static string? FromCString(IntPtr ptr)
         {
             return FromCString(ptr, StringCreationOptions.None);
         }
@@ -105,7 +105,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A managed string that holds a copy of the C string.
         /// </returns>
-        internal static unsafe string FromCString(IntPtr ptr, StringCreationOptions options)
+        internal static unsafe string? FromCString(IntPtr ptr, StringCreationOptions options)
         {
             if (!TryGetCStringData(ptr, out ReadOnlySpan<byte> data))
             {
@@ -122,7 +122,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A managed string that holds a copy of the C string.
         /// </returns>
-        internal static unsafe string FromCString(byte* ptr)
+        internal static unsafe string? FromCString(byte* ptr)
         {
             return FromCString(ptr, StringCreationOptions.None);
         }
@@ -135,7 +135,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A managed string that holds a copy of the C string.
         /// </returns>
-        internal static unsafe string FromCString(byte* ptr, StringCreationOptions options)
+        internal static unsafe string? FromCString(byte* ptr, StringCreationOptions options)
         {
             if (!TryGetCStringData(ptr, out ReadOnlySpan<byte> data))
             {
@@ -154,7 +154,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A managed string that holds a copy of the C string.
         /// </returns>
-        internal static unsafe string FromCString(byte* ptr, int length, StringCreationOptions options)
+        internal static unsafe string? FromCString(byte* ptr, int length, StringCreationOptions options)
         {
             if (ptr == null)
             {
@@ -186,7 +186,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A managed string that holds a copy of the C string.
         /// </returns>
-        internal static unsafe string FromCStringUni(char* ptr, int length, StringCreationOptions options)
+        internal static unsafe string? FromCStringUni(char* ptr, int length, StringCreationOptions options)
         {
             if (ptr == null)
             {
@@ -257,7 +257,7 @@ namespace PSFilterLoad.PSApi
 
             if (options.HasFlag(StringCreationOptions.RemoveAllWhiteSpace))
             {
-                byte[] arrayFromPool = null;
+                byte[]? arrayFromPool = null;
 
                 try
                 {

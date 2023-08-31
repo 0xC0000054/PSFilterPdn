@@ -99,7 +99,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Occurs when a handle allocated by the suite is disposed.
         /// </summary>
-        public event HandleDisposedEventHandler SuiteHandleDisposed;
+        public event HandleDisposedEventHandler? SuiteHandleDisposed;
 
         NewPIHandleProc IHandleSuiteCallbacks.HandleNewProc => handleNewProc;
 
@@ -305,7 +305,7 @@ namespace PSFilterLoad.PSApi
         {
             if (handle != Handle.Null && IsValidReadPtr(handle.Value))
             {
-                if (handles.TryGetValue(handle, out HandleEntry item))
+                if (handles.TryGetValue(handle, out HandleEntry? item))
                 {
                     item.Dispose();
                     handles.Remove(handle);
@@ -332,7 +332,7 @@ namespace PSFilterLoad.PSApi
         {
             Span<byte> data;
 
-            if (handles.TryGetValue(handle, out HandleEntry entry))
+            if (handles.TryGetValue(handle, out HandleEntry? entry))
             {
                 data = new Span<byte>(entry.Pointer.ToPointer(), entry.Size);
             }
@@ -351,7 +351,7 @@ namespace PSFilterLoad.PSApi
                        new HandleAsHexStringFormatter(h),
                        moveHigh);
 
-            if (handles.TryGetValue(h, out HandleEntry item))
+            if (handles.TryGetValue(h, out HandleEntry? item))
             {
                 return item.Pointer;
             }
@@ -387,7 +387,7 @@ namespace PSFilterLoad.PSApi
         {
             logger.Log(PluginApiLogCategory.HandleSuite, "Handle: 0x{0}", new HandleAsHexStringFormatter(h));
 
-            if (handles.TryGetValue(h, out HandleEntry item))
+            if (handles.TryGetValue(h, out HandleEntry? item))
             {
                 return item.Size;
             }

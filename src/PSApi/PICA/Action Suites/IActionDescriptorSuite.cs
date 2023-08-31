@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PSFilterLoad.PSApi.PICA
 {
@@ -22,7 +23,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <param name="descriptor">The descriptor.</param>
         /// <param name="values">The values contained within the descriptor.</param>
         /// <returns><c>true</c> if the descriptor is valid; otherwise, <c>false</c>.</returns>
-        bool TryGetDescriptorValues(PIActionDescriptor descriptor, out Dictionary<uint, AETEValue> values);
+        bool TryGetDescriptorValues(PIActionDescriptor descriptor, [MaybeNullWhen(false)] out Dictionary<uint, AETEValue> values);
 
         /// <summary>
         /// Creates a descriptor that contains the specified values.

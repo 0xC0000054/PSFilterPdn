@@ -16,7 +16,7 @@ namespace PSFilterPdn.EnableInfo
 {
     internal sealed class Token
     {
-        public Token(TokenType type) : this(type, null)
+        public Token(TokenType type) : this(type, string.Empty)
         {
         }
 
@@ -32,7 +32,7 @@ namespace PSFilterPdn.EnableInfo
 
         public override string ToString()
         {
-            if (Value != null)
+            if (!string.IsNullOrEmpty(Value))
             {
                 return string.Format(CultureInfo.InvariantCulture, "Type: {0}, Value: {1}", Type, Value);
             }

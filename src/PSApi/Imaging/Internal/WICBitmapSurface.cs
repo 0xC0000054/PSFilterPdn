@@ -14,8 +14,6 @@ using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
     internal sealed unsafe class WICBitmapSurface<TPixel> : ImageSurface where TPixel : unmanaged, INaturalPixelInfo

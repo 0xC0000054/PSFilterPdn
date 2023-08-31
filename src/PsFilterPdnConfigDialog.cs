@@ -48,7 +48,7 @@ namespace PSFilterPdn
     {
         private const string DummyTreeNodeName = "dummyTreeNode";
 
-        private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location), "PSFilterShim.exe");
+        private static readonly string PSFilterShimPath = Path.Combine(Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location)!, "PSFilterShim.exe");
         private static readonly Guid FilterExecutionLogSaveDialogClientGuid = new("3CD2A43A-C6DD-407D-89FE-C542B2594B35");
 
         private Button buttonOK;
@@ -90,29 +90,29 @@ namespace PSFilterPdn
         private readonly IImagingFactory imagingFactory;
         private readonly DocumentDpi documentDpi;
         private readonly DocumentMetadataProvider documentMetadataProvider;
-        private EffectInputBitmapSurface sourceBitmap;
-        private MaskSurface selectionMask;
-        private TransparencyCheckerboardSurface transparencyCheckerboard;
+        private EffectInputBitmapSurface? sourceBitmap;
+        private MaskSurface? selectionMask;
+        private TransparencyCheckerboardSurface? transparencyCheckerboard;
         private ColorRgb24 primaryColor;
         private ColorRgb24 secondaryColor;
         private bool environmentInitialized;
 
-        private IBitmap<ColorBgra32> destSurface;
-        private PluginData filterData;
+        private IBitmap<ColorBgra32>? destSurface;
+        private PluginData? filterData;
         private Dictionary<PluginData, ParameterData> filterParameters;
         private PseudoResourceCollection pseudoResources;
         private bool runWith32BitShim;
-        private DescriptorRegistryValues descriptorRegistry;
+        private DescriptorRegistryValues? descriptorRegistry;
 
-        private Thread filterThread;
-        private PSFilterShimDataFolder proxyTempDir;
+        private Thread? filterThread;
+        private PSFilterShimDataFolder? proxyTempDir;
 
         private bool filterRunning;
         private bool formClosePending;
         private List<string> expandedNodes;
-        private FilterTreeNodeCollection filterTreeNodes;
+        private FilterTreeNodeCollection? filterTreeNodes;
         private List<string> searchDirectories;
-        private ListViewItem[] searchDirListViewCache;
+        private ListViewItem[]? searchDirListViewCache;
         private int cacheStartIndex;
 
         private PSFilterPdnSettings settings;
@@ -122,26 +122,32 @@ namespace PSFilterPdn
 
         private readonly bool highDpiMode;
 
+        // Disable nullable warnings for the constructor, InitializeComponent produces a bunch of false warnings.
+        // The analyzer doesn't check the methods that the constructor calls when ensuring that all fields have been initialized.
+#pragma warning disable CS8618
         public PsFilterPdnConfigDialog(IBitmapEffectEnvironment bitmapEffectEnvironment)
         {
             InitializeComponent();
-            filterExecutionLogSaveDialog.ClientGuid = FilterExecutionLogSaveDialogClientGuid;
+            filterExecutionLogSaveDialog!.ClientGuid = FilterExecutionLogSaveDialogClientGuid;
             destSurface = null;
             expandedNodes = new List<string>();
             filterParameters = new Dictionary<PluginData, ParameterData>();
             pseudoResources = new PseudoResourceCollection();
-            fileNameLbl.Text = string.Empty;
-            folderNameLbl.Text = string.Empty;
+            fileNameLbl!.Text = string.Empty;
+            folderNameLbl!.Text = string.Empty;
             searchDirectories = new List<string>();
             highDpiMode = DeviceDpi > DpiHelper.LogicalDpi;
             imagingFactory = bitmapEffectEnvironment.ImagingFactory;
             documentDpi = new DocumentDpi(bitmapEffectEnvironment.Document.Resolution);
             documentMetadataProvider = new DocumentMetadataProvider(bitmapEffectEnvironment.Document);
+            settings = new PSFilterPdnSettings();
+            lastSelectedFilterTitle = string.Empty;
 
             PluginThemingUtil.UpdateControlBackColor(this);
             PluginThemingUtil.UpdateControlForeColor(this);
-            filterSearchBox.ForeColor = SystemColors.GrayText;
+            filterSearchBox!.ForeColor = SystemColors.GrayText;
         }
+#pragma warning restore CS8618
 
         protected override bool UseAppThemeColorsDefault => true;
 
@@ -163,12 +169,12 @@ namespace PSFilterPdn
         {
             if (InvokeRequired)
             {
-                Invoke(new Action<Exception>((Exception ex) => Services.GetService<IExceptionDialogService>().ShowErrorDialog(this, ex.Message, ex)),
+                Invoke(new Action<Exception>((Exception ex) => Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(this, ex.Message, ex)),
                        exception);
             }
             else
             {
-                Services.GetService<IExceptionDialogService>().ShowErrorDialog(this, exception.Message, exception);
+                Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(this, exception.Message, exception);
             }
         }
 
@@ -177,12 +183,12 @@ namespace PSFilterPdn
             if (InvokeRequired)
             {
                 Invoke(new Action<string, string>((string errorMessage, string errorDetails)
-                    => Services.GetService<IExceptionDialogService>().ShowErrorDialog(this, errorMessage, errorDetails)),
+                    => Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(this, errorMessage, errorDetails)),
                        message, details);
             }
             else
             {
-                Services.GetService<IExceptionDialogService>().ShowErrorDialog(this, message, details);
+                Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(this, message, details);
             }
 
             return DialogResult.OK;
@@ -190,7 +196,7 @@ namespace PSFilterPdn
 
         protected override EffectConfigToken OnCreateInitialToken()
         {
-            return new PSFilterPdnConfigToken(null, null, false, null, null, null, null);
+            return new PSFilterPdnConfigToken();
         }
 
         protected override void OnUpdateTokenFromDialog(PSFilterPdnConfigToken token)
@@ -201,7 +207,7 @@ namespace PSFilterPdn
             token.FilterParameters = filterParameters;
             token.PseudoResources = pseudoResources;
             token.DescriptorRegistry = descriptorRegistry;
-            token.DialogState = new ConfigDialogState(expandedNodes.AsReadOnly(), filterTreeNodes, searchDirectories.AsReadOnly());
+            token.DialogState = new ConfigDialogState(expandedNodes.AsReadOnly(), filterTreeNodes!, searchDirectories.AsReadOnly());
         }
 
         protected override void OnUpdateDialogFromToken(PSFilterPdnConfigToken token)
@@ -211,12 +217,9 @@ namespace PSFilterPdn
                 lastSelectedFilterTitle = token.FilterData.Title;
             }
 
-            if (token.FilterParameters != null)
-            {
-                filterParameters = token.FilterParameters;
-            }
+            filterParameters = token.FilterParameters;
 
-            if ((token.PseudoResources != null) && token.PseudoResources.Count > 0)
+            if (token.PseudoResources.Count > 0)
             {
                 pseudoResources = token.PseudoResources;
             }
@@ -687,14 +690,14 @@ namespace PSFilterPdn
 
         }
 
-        private void buttonOK_Click(object sender, EventArgs e)
+        private void buttonOK_Click(object? sender, EventArgs e)
         {
             UpdateTokenFromDialog();
             DialogResult = DialogResult.OK;
             Close();
         }
 
-        private void buttonCancel_Click(object sender, EventArgs e)
+        private void buttonCancel_Click(object? sender, EventArgs e)
         {
             Close();
         }
@@ -729,7 +732,7 @@ namespace PSFilterPdn
         }
 
         private bool Run32BitFilterProxy(FilterThreadData data,
-                                         out PSFilterShimErrorInfo errorInfo)
+                                         out PSFilterShimErrorInfo? errorInfo)
         {
             // Check that PSFilterShim exists first thing and abort if it does not.
             if (!File.Exists(PSFilterShimPath))
@@ -740,18 +743,18 @@ namespace PSFilterPdn
 
             CreateProxyTempDirectory();
 
-            string srcFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
+            string srcFileName = proxyTempDir!.GetRandomFilePathWithExtension(".psi");
             string destFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
             string checkerboardFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
             string parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
             string resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
             string descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-            string selectionMaskFileName = null;
+            string? selectionMaskFileName = null;
 
-            PSFilterShimImage.Save(srcFileName, sourceBitmap);
-            PSFilterShimImage.Save(checkerboardFileName, transparencyCheckerboard);
+            PSFilterShimImage.Save(srcFileName, sourceBitmap!);
+            PSFilterShimImage.Save(checkerboardFileName, transparencyCheckerboard!);
 
-            if ((filterParameters != null) && filterParameters.TryGetValue(data.PluginData, out ParameterData parameterData))
+            if ((filterParameters != null) && filterParameters.TryGetValue(data.PluginData, out ParameterData? parameterData))
             {
                 MessagePackSerializerUtil.Serialize(parameterDataFileName, parameterData, MessagePackResolver.Options);
             }
@@ -766,7 +769,7 @@ namespace PSFilterPdn
                 MessagePackSerializerUtil.Serialize(descriptorRegistryFileName, descriptorRegistry, MessagePackResolver.Options);
             }
 
-            MaskSurface selectionMask = null;
+            MaskSurface? selectionMask = null;
 
             try
             {
@@ -784,7 +787,7 @@ namespace PSFilterPdn
                 selectionMask?.Dispose();
             }
 
-            FilterCase filterCase = data.PluginData.GetFilterTransparencyMode(!string.IsNullOrEmpty(selectionMaskFileName), sourceBitmap);
+            FilterCase filterCase = data.PluginData.GetFilterTransparencyMode(!string.IsNullOrEmpty(selectionMaskFileName), sourceBitmap!);
 
             PSFilterShimSettings settings = new(repeatEffect: false,
                                                 data.ShowAboutDialog,
@@ -804,13 +807,13 @@ namespace PSFilterPdn
                                                 new PluginUISettings(highDpiMode));
 
             bool result = true; // assume the filter succeeded this will be set to false if it failed
-            PSFilterShimErrorInfo proxyError = null;
+            PSFilterShimErrorInfo? proxyError = null;
             FilterPostProcessingOptions postProcessingOptions = FilterPostProcessingOptions.None;
 
             using (PSFilterShimPipeServer server = new(AbortCallback,
                                                        data.PluginData,
                                                        settings,
-                                                       new Action<PSFilterShimErrorInfo>(delegate(PSFilterShimErrorInfo error)
+                                                       new Action<PSFilterShimErrorInfo?>(delegate(PSFilterShimErrorInfo? error)
                                                        {
                                                            result = false;
                                                            proxyError = error;
@@ -932,7 +935,7 @@ namespace PSFilterPdn
             transparencyCheckerboard = new PDNTransparencyCheckerboardSurface(imagingFactory);
         }
 
-        private void runFilterBtn_Click(object sender, EventArgs e)
+        private void runFilterBtn_Click(object? sender, EventArgs e)
         {
             if (filterTree.SelectedNode?.Tag != null)
             {
@@ -961,13 +964,13 @@ namespace PSFilterPdn
             }
         }
 
-        private void RunFilterThreadProc(object state)
+        private void RunFilterThreadProc(object? state)
         {
-            HostErrorInfo errorInfo = null;
+            HostErrorInfo? errorInfo = null;
 
             try
             {
-                FilterThreadData threadData = (FilterThreadData)state;
+                FilterThreadData threadData = (FilterThreadData)state!;
 
                 PluginData data = threadData.PluginData;
 
@@ -975,7 +978,7 @@ namespace PSFilterPdn
                 {
                     runWith32BitShim = true;
 
-                    if (!Run32BitFilterProxy(threadData, out PSFilterShimErrorInfo error))
+                    if (!Run32BitFilterProxy(threadData, out PSFilterShimErrorInfo? error))
                     {
                         if (error != null)
                         {
@@ -989,7 +992,7 @@ namespace PSFilterPdn
 
                     filterRunning = true;
 
-                    IPluginApiLogWriter logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(data,
+                    IPluginApiLogWriter? logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(data,
                                                                                                           threadData.LogFilePath);
                     try
                     {
@@ -999,10 +1002,10 @@ namespace PSFilterPdn
 
                         PluginUISettings pluginUISettings = new(highDpiMode);
                         RenderTargetFactory renderTargetFactory = new(Services);
-                        FilterCase filterCase = data.GetFilterTransparencyMode(selectionMask is not null, sourceBitmap);
+                        FilterCase filterCase = data.GetFilterTransparencyMode(selectionMask is not null, sourceBitmap!);
 
-                        using (SurfaceFactory surfaceFactory = new(imagingFactory, transparencyCheckerboard))
-                        using (LoadPsFilter lps = new(sourceBitmap,
+                        using (SurfaceFactory surfaceFactory = new(imagingFactory, transparencyCheckerboard!))
+                        using (LoadPsFilter lps = new(sourceBitmap!,
                                                       takeOwnershipOfSource: false,
                                                       selectionMask,
                                                       takeOwnershipOfSelectionMask: false,
@@ -1026,7 +1029,7 @@ namespace PSFilterPdn
                                 lps.SetRegistryValues(descriptorRegistry);
                             }
 
-                            if ((filterParameters != null) && filterParameters.TryGetValue(data, out ParameterData parameterData))
+                            if ((filterParameters != null) && filterParameters.TryGetValue(data, out ParameterData? parameterData))
                             {
                                 lps.FilterParameters = parameterData;
                             }
@@ -1046,7 +1049,7 @@ namespace PSFilterPdn
                                     FilterPostProcessing.Apply(Environment, destSurface, lps.PostProcessingOptions);
 
                                     filterData = data;
-                                    filterParameters.AddOrUpdate(data, lps.FilterParameters);
+                                    filterParameters!.AddOrUpdate(data, lps.FilterParameters);
                                     pseudoResources = lps.PseudoResources;
                                     descriptorRegistry = lps.GetRegistryValues();
                                 }
@@ -1087,7 +1090,7 @@ namespace PSFilterPdn
 
         private void FilterCompleted(HostErrorInfo errorInfo)
         {
-            filterThread.Join();
+            filterThread!.Join();
 
             if (errorInfo != null)
             {
@@ -1115,7 +1118,7 @@ namespace PSFilterPdn
             }
         }
 
-        private void addDirBtn_Click(object sender, EventArgs e)
+        private void addDirBtn_Click(object? sender, EventArgs e)
         {
             using (FolderBrowserDialog fbd = new())
             {
@@ -1137,7 +1140,7 @@ namespace PSFilterPdn
             }
         }
 
-        private void remDirBtn_Click(object sender, EventArgs e)
+        private void remDirBtn_Click(object? sender, EventArgs e)
         {
             if (searchDirListView.SelectedIndices.Count > 0)
             {
@@ -1192,8 +1195,8 @@ namespace PSFilterPdn
 
             public HostErrorInfo(Exception exception)
             {
-                ErrorMessage = null;
-                ErrorDetails = null;
+                ErrorMessage = string.Empty;
+                ErrorDetails = string.Empty;
                 Exception = exception;
             }
 
@@ -1201,7 +1204,7 @@ namespace PSFilterPdn
 
             public string ErrorDetails { get; }
 
-            public Exception Exception { get; }
+            public Exception? Exception { get; }
         }
 
         private sealed class WorkerArgs
@@ -1332,10 +1335,10 @@ namespace PSFilterPdn
             return true;
         }
 
-        private void updateFilterListBw_DoWork(object sender, DoWorkEventArgs e)
+        private void updateFilterListBw_DoWork(object? sender, DoWorkEventArgs e)
         {
-            BackgroundWorker worker = (BackgroundWorker)sender;
-            WorkerArgs args = (WorkerArgs)e.Argument;
+            BackgroundWorker worker = (BackgroundWorker)sender!;
+            WorkerArgs args = (WorkerArgs)e.Argument!;
 
             Dictionary<string, List<TreeNodeEx>> nodes = new(StringComparer.Ordinal);
 
@@ -1374,7 +1377,7 @@ namespace PSFilterPdn
                                 Tag = plugin
                             };
 
-                            if (nodes.TryGetValue(plugin.Category, out List<TreeNodeEx> childNodes))
+                            if (nodes.TryGetValue(plugin.Category, out List<TreeNodeEx>? childNodes))
                             {
                                 if (IsNotDuplicateNode(ref childNodes, plugin))
                                 {
@@ -1399,14 +1402,14 @@ namespace PSFilterPdn
             e.Result = new WorkerResult(nodes, logWriter.Dictionary);
         }
 
-        private void updateFilterListBw_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void updateFilterListBw_ProgressChanged(object? sender, ProgressChangedEventArgs e)
         {
             folderLoadProgress.PerformStep();
             folderCountLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderCount_Format, e.ProgressPercentage + 1, searchDirectories.Count);
             folderNameLbl.Text = string.Format(CultureInfo.CurrentCulture, Resources.ConfigDialog_FolderName_Format, e.UserState);
         }
 
-        private void updateFilterListBw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void updateFilterListBw_RunWorkerCompleted(object? sender, RunWorkerCompletedEventArgs e)
         {
             if (!e.Cancelled)
             {
@@ -1416,7 +1419,7 @@ namespace PSFilterPdn
                 }
                 else
                 {
-                    WorkerResult result = (WorkerResult)e.Result;
+                    WorkerResult result = (WorkerResult)e.Result!;
 
                     filterTreeNodes = new FilterTreeNodeCollection(result.nodes);
 
@@ -1457,17 +1460,20 @@ namespace PSFilterPdn
             filterTree.Nodes.Clear();
             filterTree.TreeViewNodeSorter = null;
 
-            foreach (KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>> item in filterTreeNodes)
+            if (filterTreeNodes != null)
             {
-                TreeNode dummy = new() { Name = DummyTreeNodeName };
-
-                TreeNodeEx categoryNode = new(item.Key, new TreeNode[] { dummy })
+                foreach (KeyValuePair<string, ReadOnlyCollection<TreeNodeEx>> item in filterTreeNodes)
                 {
-                    Enabled = item.Value.Any(x => x.Enabled == true),
-                    Name = item.Key
-                };
+                    TreeNode dummy = new() { Name = DummyTreeNodeName };
 
-                filterTree.Nodes.Add(categoryNode);
+                    TreeNodeEx categoryNode = new(item.Key, new TreeNode[] { dummy })
+                    {
+                        Enabled = item.Value.Any(x => x.Enabled == true),
+                        Name = item.Key
+                    };
+
+                    filterTree.Nodes.Add(categoryNode);
+                }
             }
 
             filterTree.TreeViewNodeSorter = TreeNodeItemComparer.Instance;
@@ -1532,9 +1538,9 @@ namespace PSFilterPdn
             base.OnFormClosing(e);
         }
 
-        private void filterTree_AfterSelect(object sender, TreeViewEventArgs e)
+        private void filterTree_AfterSelect(object? sender, TreeViewEventArgs e)
         {
-            if (e.Node.Tag != null)
+            if (e.Node?.Tag != null)
             {
                 runFilterBtn.Enabled = true;
                 fileNameLbl.Text = Path.GetFileName(((PluginData)e.Node.Tag).FileName);
@@ -1649,12 +1655,7 @@ namespace PSFilterPdn
             if (settings != null)
             {
                 subDirSearchCb.Checked = settings.SearchSubdirectories;
-                HashSet<string> dirs = settings.SearchDirectories;
-
-                if (dirs != null)
-                {
-                    directories.AddRange(dirs);
-                }
+                directories.AddRange(settings.SearchDirectories);
             }
             else
             {
@@ -1683,7 +1684,7 @@ namespace PSFilterPdn
         {
             string pluginPath = typeof(PSFilterPdnEffect).Assembly.Location;
 
-            IFileSystemService fileSystemService = Services.GetService<IFileSystemService>();
+            IFileSystemService? fileSystemService = Services.GetService<IFileSystemService>();
 
             string effectsFolderPath = string.Empty;
 
@@ -1725,7 +1726,7 @@ namespace PSFilterPdn
             }
         }
 
-        private void subDirSearchCb_CheckedChanged(object sender, EventArgs e)
+        private void subDirSearchCb_CheckedChanged(object? sender, EventArgs e)
         {
             if (settings != null)
             {
@@ -1734,7 +1735,7 @@ namespace PSFilterPdn
             UpdateFilterList();
         }
 
-        private void filterSearchBox_Enter(object sender, EventArgs e)
+        private void filterSearchBox_Enter(object? sender, EventArgs e)
         {
             if (filterSearchBox.Text == Resources.ConfigDialog_FilterSearchBox_BackText)
             {
@@ -1745,7 +1746,7 @@ namespace PSFilterPdn
             }
         }
 
-        private void filterSearchBox_Leave(object sender, EventArgs e)
+        private void filterSearchBox_Leave(object? sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(filterSearchBox.Text))
             {
@@ -1762,7 +1763,7 @@ namespace PSFilterPdn
         /// <param name="keyword">The text to filter by</param>
         private void FilterTreeView(string keyword)
         {
-            if (filterTreeNodes.Count > 0)
+            if (filterTreeNodes != null && filterTreeNodes.Count > 0)
             {
                 filterTree.SelectedNode = null;
                 runFilterBtn.Enabled = false;
@@ -1785,7 +1786,7 @@ namespace PSFilterPdn
                             TreeNodeEx child = childNodes[i];
                             if (child.Text.Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
                             {
-                                if (nodes.TryGetValue(category, out TreeNodeEx node))
+                                if (nodes.TryGetValue(category, out TreeNodeEx? node))
                                 {
                                     node.Nodes.Add(child.CloneT());
                                 }
@@ -1814,7 +1815,7 @@ namespace PSFilterPdn
             }
         }
 
-        private void filterSearchBox_TextChanged(object sender, EventArgs e)
+        private void filterSearchBox_TextChanged(object? sender, EventArgs e)
         {
             // Ignore the TextChanged event sent by the Enter and Leave methods.
             if (searchBoxIgnoreTextChanged)
@@ -1826,7 +1827,7 @@ namespace PSFilterPdn
             FilterTreeView(filterSearchBox.Text);
         }
 
-        private void searchDirListView_SelectedIndexChanged(object sender, EventArgs e)
+        private void searchDirListView_SelectedIndexChanged(object? sender, EventArgs e)
         {
             if (searchDirListView.SelectedIndices.Count > 0)
             {
@@ -1841,7 +1842,7 @@ namespace PSFilterPdn
             }
         }
 
-        private void filterTree_DoubleClick(object sender, EventArgs e)
+        private void filterTree_DoubleClick(object? sender, EventArgs e)
         {
             if (filterTree.SelectedNode?.Tag != null)
             {
@@ -1849,9 +1850,9 @@ namespace PSFilterPdn
             }
         }
 
-        private void filterTree_AfterCollapse(object sender, TreeViewEventArgs e)
+        private void filterTree_AfterCollapse(object? sender, TreeViewEventArgs e)
         {
-            if (e.Action == TreeViewAction.Collapse)
+            if (e.Action == TreeViewAction.Collapse && e.Node != null)
             {
                 if (expandedNodes.Contains(e.Node.Text))
                 {
@@ -1860,9 +1861,9 @@ namespace PSFilterPdn
             }
         }
 
-        private void filterTree_AfterExpand(object sender, TreeViewEventArgs e)
+        private void filterTree_AfterExpand(object? sender, TreeViewEventArgs e)
         {
-            if (e.Action == TreeViewAction.Expand)
+            if (e.Action == TreeViewAction.Expand && e.Node != null)
             {
                 if (!expandedNodes.Contains(e.Node.Text))
                 {
@@ -1871,7 +1872,7 @@ namespace PSFilterPdn
             }
         }
 
-        private void filterTree_KeyDown(object sender, KeyEventArgs e)
+        private void filterTree_KeyDown(object? sender, KeyEventArgs e)
         {
             // if the selectedNode is a filter run it when the Enter key is pressed
             if (e.KeyCode == Keys.Enter && filterTree.SelectedNode?.Tag != null)
@@ -1885,16 +1886,16 @@ namespace PSFilterPdn
             }
         }
 
-        private void donateLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void donateLink_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
         {
-            Services.GetService<IShellService>().LaunchUrl(this, "http://forums.getpaint.net/index.php?showtopic=20622");
+            Services.GetService<IShellService>()!.LaunchUrl(this, "http://forums.getpaint.net/index.php?showtopic=20622");
         }
 
-        private void filterTree_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        private void filterTree_BeforeExpand(object? sender, TreeViewCancelEventArgs e)
         {
-            if (e.Action == TreeViewAction.Expand && !e.Cancel)
+            if (e.Action == TreeViewAction.Expand && !e.Cancel && filterTreeNodes != null)
             {
-                TreeNode item = e.Node;
+                TreeNode item = e.Node!;
 
                 if (item.Nodes.Count == 1 && item.Nodes[0].Name.Equals(DummyTreeNodeName, StringComparison.Ordinal))
                 {
@@ -1918,7 +1919,7 @@ namespace PSFilterPdn
             }
         }
 
-        private void searchDirListView_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
+        private void searchDirListView_RetrieveVirtualItem(object? sender, RetrieveVirtualItemEventArgs e)
         {
             if (searchDirListViewCache != null && e.ItemIndex >= cacheStartIndex && e.ItemIndex < cacheStartIndex + searchDirListViewCache.Length)
             {
@@ -1930,7 +1931,7 @@ namespace PSFilterPdn
             }
         }
 
-        private void searchDirListView_CacheVirtualItems(object sender, CacheVirtualItemsEventArgs e)
+        private void searchDirListView_CacheVirtualItems(object? sender, CacheVirtualItemsEventArgs e)
         {
             // Check if the cache needs to be refreshed.
             if (searchDirListViewCache != null && e.StartIndex >= cacheStartIndex && e.EndIndex <= cacheStartIndex + searchDirListViewCache.Length)
@@ -1977,7 +1978,7 @@ namespace PSFilterPdn
         {
             if (descriptorRegistry == null)
             {
-                string userDataPath = Services.GetService<IUserFilesService>().UserFilesPath;
+                string userDataPath = Services.GetService<IUserFilesService>()?.UserFilesPath ?? throw new IOException(Resources.UnknownUserFilePath);
                 string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
 
                 descriptorRegistry = DescriptorRegistryFile.Load(path);
@@ -1988,11 +1989,11 @@ namespace PSFilterPdn
         {
             if (descriptorRegistry != null && descriptorRegistry.Dirty)
             {
-                string userDataPath = Services.GetService<IUserFilesService>().UserFilesPath;
-                string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
-
                 try
                 {
+                    string userDataPath = Services.GetService<IUserFilesService>()?.UserFilesPath ?? throw new IOException(Resources.UnknownUserFilePath);
+                    string path = Path.Combine(userDataPath, "PSFilterPdnRegistry.dat");
+
                     DescriptorRegistryFile.Save(path, descriptorRegistry);
                 }
                 catch (IOException ex)
@@ -2031,7 +2032,7 @@ namespace PSFilterPdn
                         TreeNodeEx node = filterCollection[i];
                         PluginData plugin = (PluginData)node.Tag;
 
-                        node.Enabled = plugin.SupportsHostState(sourceBitmap.Width,
+                        node.Enabled = plugin.SupportsHostState(sourceBitmap!.Width,
                                                                 sourceBitmap.Height,
                                                                 sourceBitmap,
                                                                 hostState);
@@ -2040,7 +2041,7 @@ namespace PSFilterPdn
             }
         }
 
-        private void pluginLoadErrorListView_SelectedIndexChanged(object sender, EventArgs e)
+        private void pluginLoadErrorListView_SelectedIndexChanged(object? sender, EventArgs e)
         {
             if (pluginLoadErrorListView.SelectedItems.Count > 0)
             {
@@ -2064,15 +2065,15 @@ namespace PSFilterPdn
             }
         }
 
-        private void copyLoadErrorDetailsButton_Click(object sender, EventArgs e)
+        private void copyLoadErrorDetailsButton_Click(object? sender, EventArgs e)
         {
             if (pluginLoadErrorDetailsTextBox.Text.Length > 0)
             {
-                Services.GetService<IClipboardService>().SetText(pluginLoadErrorDetailsTextBox.Text);
+                Services.GetService<IClipboardService>()!.SetText(pluginLoadErrorDetailsTextBox.Text);
             }
         }
 
-        private void filterExecutionLogBrowseButton_Click(object sender, EventArgs e)
+        private void filterExecutionLogBrowseButton_Click(object? sender, EventArgs e)
         {
             filterExecutionLogSaveDialog.FileName = "FilterLog-" + DateTime.Now.ToString("yyyyMMdd-THHmmss") + ".log";
 

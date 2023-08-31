@@ -25,8 +25,8 @@ namespace PSFilterLoad.PSApi
         private readonly ReadPortForWritePortProc readPortForWritePortProc;
         private readonly IPluginApiLogger logger;
 
-        private ISurface<ImageSurface> scaledChannelSurface;
-        private ISurface<MaskSurface> scaledSelectionMask;
+        private ISurface<ImageSurface>? scaledChannelSurface;
+        private ISurface<MaskSurface>? scaledSelectionMask;
         private bool disposed;
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (srcWidth == dstWidth && srcHeight == dstHeight)
                 {
-                    FillSelectionMask(destination, filterImageProvider.Mask, srcRect);
+                    FillSelectionMask(destination, filterImageProvider.Mask!, srcRect);
                 }
                 else
                 {
@@ -217,7 +217,7 @@ namespace PSFilterLoad.PSApi
                             scaledSelectionMask = null;
                         }
 
-                        scaledSelectionMask = filterImageProvider.Mask.CreateScaledSurface(dstWidth, dstHeight);
+                        scaledSelectionMask = filterImageProvider.Mask!.CreateScaledSurface(dstWidth, dstHeight);
                     }
 
                     FillSelectionMask(destination, scaledSelectionMask, dstRect);

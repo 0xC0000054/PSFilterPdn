@@ -15,8 +15,6 @@ using TerraFX.Interop.Windows;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-#nullable enable
-
 using static TerraFX.Interop.DirectX.D2D1_FACTORY_TYPE;
 using static TerraFX.Interop.DirectX.DirectX;
 using static TerraFX.Interop.Windows.Windows;

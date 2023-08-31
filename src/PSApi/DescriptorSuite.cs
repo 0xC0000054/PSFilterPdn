@@ -104,7 +104,7 @@ namespace PSFilterLoad.PSApi
         private readonly Dictionary<PIWriteDescriptor, Dictionary<uint, AETEValue>> writeDescriptors;
         private readonly IHandleSuite handleSuite;
         private readonly IPluginApiLogger logger;
-        private AETEData aete;
+        private AETEData? aete;
         private int readDescriptorsIndex;
         private int writeDescriptorsIndex;
         private bool disposed;
@@ -237,17 +237,15 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public bool TryGetScriptingData(Handle descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
+        public bool TryGetScriptingData(Handle descriptorHandle, out Dictionary<uint, AETEValue>? scriptingData)
         {
-            scriptingData = null;
-
-            if (descriptorHandles.TryGetValue(descriptorHandle, out Dictionary<uint, AETEValue> data))
+            if (descriptorHandles.TryGetValue(descriptorHandle, out Dictionary<uint, AETEValue>? data))
             {
                 scriptingData = data;
-
                 return true;
             }
 
+            scriptingData = null;
             return false;
         }
 
@@ -297,7 +295,7 @@ namespace PSFilterLoad.PSApi
 
             short error = PSError.noErr;
 
-            if (readDescriptors.TryGetValue(descriptor, out ReadDescriptorState state))
+            if (readDescriptors.TryGetValue(descriptor, out ReadDescriptorState? state))
             {
                 error = state.lastReadError;
                 readDescriptors.Remove(descriptor);
@@ -321,7 +319,7 @@ namespace PSFilterLoad.PSApi
                 return PSBoolean.False;
             }
 
-            if (readDescriptors.TryGetValue(descriptor, out ReadDescriptorState state))
+            if (readDescriptors.TryGetValue(descriptor, out ReadDescriptorState? state))
             {
                 if (state.keyIndex >= state.keyCount)
                 {
@@ -1072,7 +1070,7 @@ namespace PSFilterLoad.PSApi
             try
             {
                 // If the handle is a sub key add it to the parent descriptor.
-                if (descriptorHandles.TryGetValue(descriptorHandle, out Dictionary<uint, AETEValue> subKeys))
+                if (descriptorHandles.TryGetValue(descriptorHandle, out Dictionary<uint, AETEValue>? subKeys))
                 {
                     writeDescriptors[descriptor].AddOrUpdate(key, new AETEValue(type, subKeys));
                     descriptorHandles.Remove(descriptorHandle);

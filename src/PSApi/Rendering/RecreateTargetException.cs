@@ -12,8 +12,6 @@
 
 using TerraFX.Interop.DirectX;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Rendering
 {
     internal sealed class RecreateTargetException : Direct2DException

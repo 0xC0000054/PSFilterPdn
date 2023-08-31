@@ -27,9 +27,9 @@ namespace PSFilterLoad.PSApi
 
         public FilterCaseInfo this[FilterCase filterCase] => this[(int)filterCase - 1];
 
-        private sealed class Formatter : IMessagePackFormatter<FilterCaseInfoCollection>
+        private sealed class Formatter : IMessagePackFormatter<FilterCaseInfoCollection?>
         {
-            public FilterCaseInfoCollection Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+            public FilterCaseInfoCollection? Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
             {
                 if (reader.TryReadNil())
                 {
@@ -45,7 +45,7 @@ namespace PSFilterLoad.PSApi
                 return new FilterCaseInfoCollection(items);
             }
 
-            public void Serialize(ref MessagePackWriter writer, FilterCaseInfoCollection value, MessagePackSerializerOptions options)
+            public void Serialize(ref MessagePackWriter writer, FilterCaseInfoCollection? value, MessagePackSerializerOptions options)
             {
                 if (value is null)
                 {

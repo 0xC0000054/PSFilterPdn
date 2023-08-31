@@ -14,6 +14,7 @@ using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterLoad.PSApi.PICA;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
@@ -34,17 +35,17 @@ namespace PSFilterLoad.PSApi
         private readonly SPBasicUndefined spUndefined;
 
         private ActionSuiteProvider actionSuites;
-        private PICABufferSuite bufferSuite;
-        private PICAColorSpaceSuite colorSpaceSuite;
-        private DescriptorRegistrySuite descriptorRegistrySuite;
-        private ErrorSuite errorSuite;
-        private PICAHandleSuite picaHandleSuite;
-        private PICAUIHooksSuite uiHooksSuite;
-        private ASZStringSuite zstringSuite;
+        private PICABufferSuite? bufferSuite;
+        private PICAColorSpaceSuite? colorSpaceSuite;
+        private DescriptorRegistrySuite? descriptorRegistrySuite;
+        private ErrorSuite? errorSuite;
+        private PICAHandleSuite? picaHandleSuite;
+        private PICAUIHooksSuite? uiHooksSuite;
+        private ASZStringSuite? zstringSuite;
 
-        private ActivePICASuites activePICASuites;
+        private readonly ActivePICASuites activePICASuites;
         private string pluginName;
-        private DescriptorRegistryValues registryValues;
+        private DescriptorRegistryValues? registryValues;
         private bool disposed;
 
         /// <summary>
@@ -86,6 +87,7 @@ namespace PSFilterLoad.PSApi
             colorSpaceSuite = null;
             errorSuite = null;
             picaHandleSuite = null;
+            pluginName = string.Empty;
             disposed = false;
         }
 
@@ -97,7 +99,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The error suite message.
         /// </value>
-        public string ErrorSuiteMessage => errorSuite?.ErrorMessage;
+        public string? ErrorSuiteMessage => errorSuite?.ErrorMessage;
 
         private ASZStringSuite ASZStringSuite
         {
@@ -138,17 +140,8 @@ namespace PSFilterLoad.PSApi
             {
                 disposed = true;
 
-                if (actionSuites != null)
-                {
-                    actionSuites.Dispose();
-                    actionSuites = null;
-                }
-
-                if (activePICASuites != null)
-                {
-                    activePICASuites.Dispose();
-                    activePICASuites = null;
-                }
+                actionSuites?.Dispose();
+                activePICASuites?.Dispose();
 
                 if (bufferSuite != null)
                 {
@@ -164,7 +157,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A <see cref="PluginSettingsRegistry"/> containing the plug-in settings.
         /// </returns>
-        public DescriptorRegistryValues GetRegistryValues()
+        public DescriptorRegistryValues? GetRegistryValues()
         {
             if (descriptorRegistrySuite != null)
             {
@@ -217,7 +210,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="descriptorHandle">The descriptor handle.</param>
         /// <param name="scriptingData">The scripting data.</param>
         /// <returns><c>true</c> if the descriptor handle contains scripting data; otherwise, <c>false</c></returns>
-        public bool TryGetScriptingData(Handle descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
+        public bool TryGetScriptingData(Handle descriptorHandle, [MaybeNullWhen(false)] out Dictionary<uint, AETEValue> scriptingData)
             => actionSuites.TryGetScriptingData(descriptorHandle, out scriptingData);
 
         private unsafe int SPBasicAcquireSuite(IntPtr name, int version, IntPtr* suite)
@@ -231,7 +224,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                string suiteName = StringUtil.FromCString(name, StringCreationOptions.UseStringPool);
+                string? suiteName = StringUtil.FromCString(name, StringCreationOptions.UseStringPool);
                 if (suiteName == null)
                 {
                     return PSError.kSPBadParameterError;
@@ -440,7 +433,11 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                string suiteName = StringUtil.FromCString(name, StringCreationOptions.UseStringPool);
+                string? suiteName = StringUtil.FromCString(name, StringCreationOptions.UseStringPool);
+                if (suiteName == null)
+                {
+                    return PSError.kSPBadParameterError;
+                }
 
                 logger.Log(PluginApiLogCategory.SPBasicSuite, "name: {0}, version: {1}", suiteName, version);
 

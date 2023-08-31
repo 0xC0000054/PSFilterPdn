@@ -44,7 +44,7 @@ namespace PSFilterLoad.PSApi.PICA
                 references.Add(item);
             }
 
-            public ActionReferenceContainer GetNextContainer()
+            public ActionReferenceContainer? GetNextContainer()
             {
                 int nextIndex = index + 1;
                 if (nextIndex < references.Count)
@@ -55,7 +55,7 @@ namespace PSFilterLoad.PSApi.PICA
                 return null;
             }
 
-            public ActionReferenceItem GetReference()
+            public ActionReferenceItem? GetReference()
             {
                 if (index < references.Count)
                 {
@@ -132,15 +132,13 @@ namespace PSFilterLoad.PSApi.PICA
 
         bool IActionReferenceSuite.TryGetReferenceValues(PIActionReference reference, out ReadOnlyCollection<ActionReferenceItem> values)
         {
-            values = null;
-
-            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer? container))
             {
                 values = container.GetReferencesAsReadOnly();
-
                 return true;
             }
 
+            values = null!;
             return false;
         }
 
@@ -239,9 +237,9 @@ namespace PSFilterLoad.PSApi.PICA
 
             logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
-            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer? container))
             {
-                ActionReferenceItem item = container.GetReference();
+                ActionReferenceItem? item = container.GetReference();
                 if (item != null)
                 {
                     *value = item.Form;
@@ -262,9 +260,9 @@ namespace PSFilterLoad.PSApi.PICA
 
             logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
-            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer? container))
             {
-                ActionReferenceItem item = container.GetReference();
+                ActionReferenceItem? item = container.GetReference();
                 if (item != null)
                 {
                     *value = item.DesiredClass;
@@ -431,12 +429,12 @@ namespace PSFilterLoad.PSApi.PICA
 
             logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
-            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer? container))
             {
-                ActionReferenceItem item = container.GetReference();
+                ActionReferenceItem? item = container.GetReference();
                 if (item != null)
                 {
-                    byte[] bytes = (byte[])item.Value;
+                    byte[] bytes = (byte[])item.Value!;
                     *stringLength = (uint)bytes.Length;
 
                     return PSError.kSPNoError;
@@ -452,14 +450,14 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
-                if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
+                if (actionReferences.TryGetValue(reference, out ActionReferenceContainer? container))
                 {
-                    ActionReferenceItem item = container.GetReference();
+                    ActionReferenceItem? item = container.GetReference();
                     if (item != null)
                     {
                         if (maxLength > 0)
                         {
-                            byte[] bytes = (byte[])item.Value;
+                            byte[] bytes = (byte[])item.Value!;
 
                             // Ensure that the buffer has room for the null terminator.
                             int length = (int)Math.Min(bytes.Length, maxLength - 1);
@@ -485,12 +483,12 @@ namespace PSFilterLoad.PSApi.PICA
 
             logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
-            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer? container))
             {
-                ActionReferenceItem item = container.GetReference();
+                ActionReferenceItem? item = container.GetReference();
                 if (item != null)
                 {
-                    *value = (uint)item.Value;
+                    *value = (uint)item.Value!;
 
                     return PSError.kSPNoError;
                 }
@@ -508,12 +506,12 @@ namespace PSFilterLoad.PSApi.PICA
 
             logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
-            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer? container))
             {
-                ActionReferenceItem item = container.GetReference();
+                ActionReferenceItem? item = container.GetReference();
                 if (item != null)
                 {
-                    *value = (uint)item.Value;
+                    *value = (uint)item.Value!;
 
                     return PSError.kSPNoError;
                 }
@@ -531,12 +529,12 @@ namespace PSFilterLoad.PSApi.PICA
 
             logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
-            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer? container))
             {
-                ActionReferenceItem item = container.GetReference();
+                ActionReferenceItem? item = container.GetReference();
                 if (item != null)
                 {
-                    *value = (int)item.Value;
+                    *value = (int)item.Value!;
 
                     return PSError.kSPNoError;
                 }
@@ -554,12 +552,12 @@ namespace PSFilterLoad.PSApi.PICA
 
             logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
-            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer? container))
             {
-                ActionReferenceItem item = container.GetReference();
+                ActionReferenceItem? item = container.GetReference();
                 if (item != null)
                 {
-                    EnumeratedValue enumerated = (EnumeratedValue)item.Value;
+                    EnumeratedValue enumerated = (EnumeratedValue)item.Value!;
                     if (type != null)
                     {
                         *type = enumerated.Type;
@@ -582,12 +580,12 @@ namespace PSFilterLoad.PSApi.PICA
 
             logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
-            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer? container))
             {
-                ActionReferenceItem item = container.GetReference();
+                ActionReferenceItem? item = container.GetReference();
                 if (item != null)
                 {
-                    *value = (uint)item.Value;
+                    *value = (uint)item.Value!;
 
                     return PSError.kSPNoError;
                 }
@@ -605,11 +603,11 @@ namespace PSFilterLoad.PSApi.PICA
 
             logger.Log(PluginApiLogCategory.PicaActionSuites, "reference: {0}", reference);
 
-            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer container))
+            if (actionReferences.TryGetValue(reference, out ActionReferenceContainer? container))
             {
                 try
                 {
-                    ActionReferenceContainer nextContainer = container.GetNextContainer();
+                    ActionReferenceContainer? nextContainer = container.GetNextContainer();
                     if (nextContainer != null)
                     {
                         *value = GenerateDictionaryKey();

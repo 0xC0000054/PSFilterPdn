@@ -13,6 +13,7 @@
 using PSFilterLoad.PSApi.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PSFilterLoad.PSApi.PICA
 {
@@ -24,12 +25,12 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly ISPBasicSuiteProvider basicSuiteProvider;
         private readonly IHandleSuite handleSuite;
         private readonly IPluginApiLogger logger;
-        private ActionDescriptorSuite actionDescriptorSuite;
-        private ActionListSuite actionListSuite;
-        private ActionReferenceSuite actionReferenceSuite;
-        private AETEData aete;
+        private ActionDescriptorSuite? actionDescriptorSuite;
+        private ActionListSuite? actionListSuite;
+        private ActionReferenceSuite? actionReferenceSuite;
+        private AETEData? aete;
         private Handle descriptorHandle;
-        private Dictionary<uint, AETEValue> scriptingData;
+        private Dictionary<uint, AETEValue>? scriptingData;
         private bool disposed;
 
         /// <summary>
@@ -80,7 +81,7 @@ namespace PSFilterLoad.PSApi.PICA
                     CreateDescriptorSuite();
                 }
 
-                return actionDescriptorSuite;
+                return actionDescriptorSuite!;
             }
         }
 
@@ -104,7 +105,7 @@ namespace PSFilterLoad.PSApi.PICA
                     CreateDescriptorSuite();
                 }
 
-                return actionListSuite;
+                return actionListSuite!;
             }
         }
 
@@ -171,7 +172,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <param name="descriptorHandle">The descriptor handle.</param>
         /// <param name="scriptingData">The scripting data.</param>
         /// <returns><c>true</c> if the descriptor handle contains scripting data; otherwise, <c>false</c></returns>
-        public bool TryGetScriptingData(Handle descriptorHandle, out Dictionary<uint, AETEValue> scriptingData)
+        public bool TryGetScriptingData(Handle descriptorHandle, [MaybeNullWhen(false)] out Dictionary<uint, AETEValue> scriptingData)
         {
             if (actionDescriptorSuite is not null)
             {

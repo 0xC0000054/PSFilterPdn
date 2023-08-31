@@ -13,8 +13,6 @@
 using PaintDotNet.Imaging;
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
     internal sealed class PDNMaskSurface : MaskSurface

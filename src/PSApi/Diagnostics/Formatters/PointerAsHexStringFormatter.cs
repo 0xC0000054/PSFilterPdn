@@ -12,8 +12,6 @@
 
 using System;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Diagnostics
 {
     internal readonly unsafe struct PointerAsHexStringFormatter

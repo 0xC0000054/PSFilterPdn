@@ -40,10 +40,10 @@ namespace PSFilterPdn
                                                PluginIconUtil.GetIconResourceNameForDpi(UIScaleFactor.Current.Dpi));
 
         private bool repeatEffect;
-        private IBitmap<ColorBgra32> filterOutput;
-        private IBitmapSource<ColorBgra32> sourceBitmap;
-        private Thread filterThread;
-        private static ManualResetEvent filterDone;
+        private IBitmap<ColorBgra32>? filterOutput;
+        private IBitmapSource<ColorBgra32>? sourceBitmap;
+        private Thread? filterThread;
+        private static ManualResetEvent? filterDone;
 
         public PSFilterPdnEffect()
             : base(StaticName, StaticIcon, null, BitmapEffectOptions.Create() with { IsConfigurable = true })
@@ -70,18 +70,18 @@ namespace PSFilterPdn
 
         private void ShowErrorMessage(IWin32Window window, Exception exception)
         {
-            Services.GetService<IExceptionDialogService>().ShowErrorDialog(window, exception.Message, exception);
+            Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(window, exception.Message, exception);
         }
 
         private void ShowErrorMessage(IWin32Window window, string message, string details = "")
         {
-            Services.GetService<IExceptionDialogService>().ShowErrorDialog(window, message, details);
+            Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(window, message, details);
         }
 
         private void Run32BitFilterProxy(PSFilterPdnConfigToken token, IWin32Window window)
         {
             // Check that PSFilterShim exists first thing and abort if it does not.
-            string shimPath = Path.Combine(Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location), "PSFilterShim.exe");
+            string shimPath = Path.Combine(Path.GetDirectoryName(typeof(PSFilterPdnEffect).Assembly.Location)!, "PSFilterShim.exe");
 
             if (!File.Exists(shimPath))
             {
@@ -89,7 +89,7 @@ namespace PSFilterPdn
                 return;
             }
 
-            EffectInputBitmapSurface source = null;
+            EffectInputBitmapSurface? source = null;
             try
             {
                 using (PSFilterShimDataFolder proxyTempDir = new())
@@ -97,10 +97,10 @@ namespace PSFilterPdn
                     string srcFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
                     string destFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
                     string checkerboardFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
-                    string parameterDataFileName = null;
-                    string resourceDataFileName = null;
-                    string descriptorRegistryFileName = null;
-                    string selectionMaskFileName = null;
+                    string? parameterDataFileName = null;
+                    string? resourceDataFileName = null;
+                    string? descriptorRegistryFileName = null;
+                    string? selectionMaskFileName = null;
 
                     DocumentDpi documentDpi = new(Environment.Document.Resolution);
                     IImagingFactory imagingFactory = Services.GetService<IImagingFactory>() ?? throw new InvalidOperationException("Failed to get the WIC factory.");
@@ -114,7 +114,7 @@ namespace PSFilterPdn
                         PSFilterShimImage.Save(checkerboardFileName, surface);
                     }
 
-                    if (token.FilterParameters.TryGetValue(token.FilterData, out ParameterData parameterData))
+                    if (token.FilterParameters.TryGetValue(token.FilterData!, out ParameterData? parameterData))
                     {
                         parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
                         MessagePackSerializerUtil.Serialize(parameterDataFileName, parameterData, MessagePackResolver.Options);
@@ -136,7 +136,7 @@ namespace PSFilterPdn
                                                             MessagePackResolver.Options);
                     }
 
-                    MaskSurface selectionMask = null;
+                    MaskSurface? selectionMask = null;
 
                     try
                     {
@@ -154,8 +154,8 @@ namespace PSFilterPdn
                     }
 
                     bool proxyResult = true;
-                    PSFilterShimErrorInfo proxyError = null;
-                    FilterCase filterCase = token.FilterData.GetFilterTransparencyMode(!string.IsNullOrEmpty(selectionMaskFileName), source);
+                    PSFilterShimErrorInfo? proxyError = null;
+                    FilterCase filterCase = token.FilterData!.GetFilterTransparencyMode(!string.IsNullOrEmpty(selectionMaskFileName), source);
 
                     PSFilterShimSettings settings = new(repeatEffect: true,
                                                         showAboutDialog: false,
@@ -179,7 +179,7 @@ namespace PSFilterPdn
                     using (PSFilterShimPipeServer server = new(AbortCallback,
                                                                token.FilterData,
                                                                settings,
-                                                               delegate (PSFilterShimErrorInfo data)
+                                                               delegate (PSFilterShimErrorInfo? data)
                                                                {
                                                                    proxyResult = false;
                                                                    proxyError = data;
@@ -194,7 +194,7 @@ namespace PSFilterPdn
                         string args = server.PipeName + " " + window.Handle.ToString(CultureInfo.InvariantCulture);
                         ProcessStartInfo psi = new(shimPath, args);
 
-                        using (Process proxy = Process.Start(psi))
+                        using (Process proxy = Process.Start(psi)!)
                         {
                             proxy.WaitForExit();
                         }
@@ -240,13 +240,13 @@ namespace PSFilterPdn
 
         private void RunRepeatFilter(PSFilterPdnConfigToken token, IWin32Window window)
         {
-            EffectInputBitmapSurface source = null;
-            MaskSurface selectionMask = null;
+            EffectInputBitmapSurface? source = null;
+            MaskSurface? selectionMask = null;
             try
             {
                 DocumentDpi documentDpi = new(Environment.Document.Resolution);
 
-                IPluginApiLogWriter logWriter = null;
+                IPluginApiLogWriter? logWriter = null;
 
                 if (Debugger.IsAttached)
                 {
@@ -261,7 +261,7 @@ namespace PSFilterPdn
                 source = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), Services);
                 selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
                 RenderTargetFactory renderTargetFactory = new(Services);
-                FilterCase filterCase = token.FilterData.GetFilterTransparencyMode(selectionMask is not null, source);
+                FilterCase filterCase = token.FilterData!.GetFilterTransparencyMode(selectionMask is not null, source);
 
                 using (SurfaceFactory surfaceFactory = new(Services))
                 using (LoadPsFilter lps = new(source,
@@ -290,7 +290,7 @@ namespace PSFilterPdn
                         lps.SetRegistryValues(token.DescriptorRegistry);
                     }
 
-                    if (token.FilterParameters.TryGetValue(token.FilterData, out ParameterData parameterData))
+                    if (token.FilterParameters.TryGetValue(token.FilterData, out ParameterData? parameterData))
                     {
                         lps.FilterParameters = parameterData;
                     }
@@ -332,7 +332,7 @@ namespace PSFilterPdn
             {
                 source?.Dispose();
                 selectionMask?.Dispose();
-                filterDone.Set();
+                filterDone!.Set();
             }
         }
 
@@ -376,70 +376,73 @@ namespace PSFilterPdn
             base.OnInitializeRenderInfo(renderInfo);
         }
 
-        protected override void OnSetToken(PSFilterPdnConfigToken token)
+        protected override void OnSetToken(PSFilterPdnConfigToken? token)
         {
-            if (repeatEffect)
+            if (token != null)
             {
-                if (token.Dest != null)
+                if (repeatEffect)
                 {
-                    token.Dest.Dispose();
-                    token.Dest = null;
-                }
-
-                if (token.FilterData != null)
-                {
-                    Win32Window win32Window = new(Process.GetCurrentProcess().MainWindowHandle);
-
-                    if (CheckSourceSurfaceSize(win32Window))
+                    if (token.Dest != null)
                     {
-                        if (token.RunWith32BitShim)
-                        {
-                            Run32BitFilterProxy(token, win32Window);
-                        }
-                        else
-                        {
-                            filterDone = new ManualResetEvent(false);
-
-                            filterThread = new Thread(() => RunRepeatFilter(token, win32Window))
-                            {
-                                IsBackground = true,
-                                Priority = ThreadPriority.AboveNormal
-                            };
-                            // Some filters may use OLE which requires Single Threaded Apartment mode.
-                            filterThread.SetApartmentState(ApartmentState.STA);
-                            filterThread.Start();
-
-                            filterDone.WaitOne();
-                            filterDone.Close();
-                            filterDone = null;
-
-                            filterThread.Join();
-                            filterThread = null;
-                        }
-
-                        // Create the source bitmap if the plugin returned an error.
-                        if (filterOutput is null)
-                        {
-                            sourceBitmap ??= Environment.GetSourceBitmapBgra32();
-                        }
+                        token.Dest.Dispose();
+                        token.Dest = null;
                     }
-                }
-            }
-            else
-            {
-                if (token.Dest != null)
-                {
-                    filterOutput ??= Environment.ImagingFactory.CreateBitmap<ColorBgra32>(Environment.Document.Size);
 
-                    using (IBitmapLock<ColorBgra32> src = token.Dest.Lock(BitmapLockOptions.Read))
-                    using (IBitmapLock<ColorBgra32> dst = filterOutput.Lock(BitmapLockOptions.Write))
+                    if (token.FilterData != null)
                     {
-                        src.AsRegionPtr().CopyTo(dst.AsRegionPtr());
+                        Win32Window win32Window = new(Process.GetCurrentProcess().MainWindowHandle);
+
+                        if (CheckSourceSurfaceSize(win32Window))
+                        {
+                            if (token.RunWith32BitShim)
+                            {
+                                Run32BitFilterProxy(token, win32Window);
+                            }
+                            else
+                            {
+                                filterDone = new ManualResetEvent(false);
+
+                                filterThread = new Thread(() => RunRepeatFilter(token, win32Window))
+                                {
+                                    IsBackground = true,
+                                    Priority = ThreadPriority.AboveNormal
+                                };
+                                // Some filters may use OLE which requires Single Threaded Apartment mode.
+                                filterThread.SetApartmentState(ApartmentState.STA);
+                                filterThread.Start();
+
+                                filterDone.WaitOne();
+                                filterDone.Close();
+                                filterDone = null;
+
+                                filterThread.Join();
+                                filterThread = null;
+                            }
+
+                            // Create the source bitmap if the plugin returned an error.
+                            if (filterOutput is null)
+                            {
+                                sourceBitmap ??= Environment.GetSourceBitmapBgra32();
+                            }
+                        }
                     }
                 }
                 else
                 {
-                    sourceBitmap ??= Environment.GetSourceBitmapBgra32();
+                    if (token.Dest != null)
+                    {
+                        filterOutput ??= Environment.ImagingFactory.CreateBitmap<ColorBgra32>(Environment.Document.Size);
+
+                        using (IBitmapLock<ColorBgra32> src = token.Dest.Lock(BitmapLockOptions.Read))
+                        using (IBitmapLock<ColorBgra32> dst = filterOutput.Lock(BitmapLockOptions.Write))
+                        {
+                            src.AsRegionPtr().CopyTo(dst.AsRegionPtr());
+                        }
+                    }
+                    else
+                    {
+                        sourceBitmap ??= Environment.GetSourceBitmapBgra32();
+                    }
                 }
             }
 
@@ -460,7 +463,7 @@ namespace PSFilterPdn
             {
                 using (IBitmapLock<ColorBgra32> dst = output.LockBgra32())
                 {
-                    sourceBitmap.CopyPixels(dst.Buffer, dst.BufferStride, dst.BufferSize, output.Bounds);
+                    sourceBitmap!.CopyPixels(dst.Buffer, dst.BufferStride, dst.BufferSize, output.Bounds);
                 }
             }
         }

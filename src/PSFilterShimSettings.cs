@@ -14,8 +14,6 @@ using MessagePack;
 using PSFilterLoad.PSApi;
 using System;
 
-#nullable enable
-
 namespace PSFilterPdn
 {
     [MessagePackObject]

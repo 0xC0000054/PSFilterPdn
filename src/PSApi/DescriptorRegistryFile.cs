@@ -15,6 +15,7 @@ using PSFilterPdn;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -30,7 +31,7 @@ namespace PSFilterLoad.PSApi
 
                 using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
                 {
-                    if (DescriptorRegistryFileHeader.TryCreate(fs, out DescriptorRegistryFileHeader header))
+                    if (DescriptorRegistryFileHeader.TryCreate(fs, out DescriptorRegistryFileHeader? header))
                     {
                         if (header.FileVersion == 5)
                         {
@@ -120,7 +121,7 @@ namespace PSFilterLoad.PSApi
             private static ReadOnlySpan<byte> Signature => "PFPR"u8;
 
             [SkipLocalsInit]
-            public static bool TryCreate(Stream stream, out DescriptorRegistryFileHeader header)
+            public static bool TryCreate(Stream stream, [MaybeNullWhen(false)] out DescriptorRegistryFileHeader header)
             {
                 header = null;
 

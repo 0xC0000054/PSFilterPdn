@@ -26,14 +26,14 @@ namespace PSFilterPdn.Controls
 
     internal sealed class DoubleBufferedTreeView : TreeView
     {
-        private Bitmap collapseGlyph;
-        private Bitmap disabledGlyph;
-        private Bitmap expandGlyph;
+        private Bitmap? collapseGlyph;
+        private Bitmap? disabledGlyph;
+        private Bitmap? expandGlyph;
         private SolidBrush backgroundBrush;
         private Color disabledGlyphBackColor;
         private Color previousForeColor;
-        private string disabledGlyphResourceName;
-        private string previousDisabledGlyphResourceName;
+        private string? disabledGlyphResourceName;
+        private string? previousDisabledGlyphResourceName;
 
         private static readonly KeyValuePair<int, int>[] IconSizesToDpi = new KeyValuePair<int, int>[]
         {
@@ -82,18 +82,15 @@ namespace PSFilterPdn.Controls
 #pragma warning disable 0067
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public new event DrawTreeNodeEventHandler DrawNode;
+        public new event DrawTreeNodeEventHandler? DrawNode;
 #pragma warning restore 0067
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                if (backgroundBrush != null)
-                {
-                    backgroundBrush.Dispose();
-                    backgroundBrush = null;
-                }
+                backgroundBrush?.Dispose();
+
                 if (collapseGlyph != null)
                 {
                     collapseGlyph.Dispose();
@@ -131,14 +128,20 @@ namespace PSFilterPdn.Controls
 
         protected override void OnBeforeExpand(TreeViewCancelEventArgs e)
         {
-            e.Cancel = !NodeEnabled(e.Node);
+            if (e.Node != null)
+            {
+                e.Cancel = !NodeEnabled(e.Node);
+            }
 
             base.OnBeforeExpand(e);
         }
 
         protected override void OnBeforeSelect(TreeViewCancelEventArgs e)
         {
-            e.Cancel = !NodeEnabled(e.Node);
+            if (e.Node != null)
+            {
+                e.Cancel = !NodeEnabled(e.Node);
+            }
 
             base.OnBeforeSelect(e);
         }
@@ -158,6 +161,11 @@ namespace PSFilterPdn.Controls
         {
             base.OnDrawNode(e);
 
+            if (e.Node is null)
+            {
+                return;
+            }
+
             Rectangle bounds = e.Node.Bounds;
 
             if (bounds.IsEmpty || e.Node.TreeView.Nodes.Count == 0)
@@ -173,7 +181,7 @@ namespace PSFilterPdn.Controls
 
             if (e.Node.Parent == null)
             {
-                int maxDimension = Math.Min(collapseGlyph.Height, bounds.Height);
+                int maxDimension = Math.Min(collapseGlyph!.Height, bounds.Height);
 
                 if (maxDimension != bounds.Height)
                 {
@@ -198,7 +206,7 @@ namespace PSFilterPdn.Controls
                     }
                     else
                     {
-                        e.Graphics.DrawImageUnscaledAndClipped(expandGlyph, cropRect);
+                        e.Graphics.DrawImageUnscaledAndClipped(expandGlyph!, cropRect);
                     }
                 }
                 else
@@ -210,7 +218,7 @@ namespace PSFilterPdn.Controls
                         DrawDisbledGlyph();
                     }
 
-                    e.Graphics.DrawImageUnscaledAndClipped(disabledGlyph, cropRect);
+                    e.Graphics.DrawImageUnscaledAndClipped(disabledGlyph!, cropRect);
                 }
             }
 

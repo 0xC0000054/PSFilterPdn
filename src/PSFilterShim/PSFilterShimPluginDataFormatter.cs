@@ -16,8 +16,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     internal sealed class PSFilterShimPluginDataFormatter : IMessagePackFormatter<PluginData>

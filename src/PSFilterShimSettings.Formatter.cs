@@ -14,8 +14,6 @@ using MessagePack;
 using MessagePack.Formatters;
 using PSFilterLoad.PSApi;
 
-#nullable enable
-
 namespace PSFilterPdn
 {
     internal sealed partial class PSFilterShimSettings

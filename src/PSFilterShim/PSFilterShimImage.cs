@@ -16,8 +16,6 @@ using PSFilterPdn;
 using System;
 using System.IO;
 
-#nullable enable
-
 namespace PSFilterShim
 {
     // This file must be kept in sync with PSFilterPdn/PSFilterShimImage.cs.

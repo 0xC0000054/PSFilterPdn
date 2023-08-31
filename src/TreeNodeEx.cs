@@ -58,7 +58,7 @@ namespace PSFilterPdn
             {
                 if (string.Equals(item.Name, EnabledSerializationName, StringComparison.Ordinal))
                 {
-                    Enabled = (bool)item.Value;
+                    Enabled = (bool)item.Value!;
                 }
             }
         }

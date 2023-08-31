@@ -12,8 +12,6 @@
 
 using TerraFX.Interop.Windows;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
     internal unsafe interface IWICFactory

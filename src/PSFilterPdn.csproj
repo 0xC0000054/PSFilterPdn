@@ -180,6 +180,7 @@
     <!-- All of these warnings are related to the DLLs that are not being trimmed -->
     <ILLinkIgnoredWarnings>IL2026;IL2028;IL2034;IL2046;IL2050;IL2055;IL2057;IL2058;IL2059;IL2060;IL2062;IL2065;IL2066;IL2067;IL2070;IL2072;IL2075;IL2077;IL2080;IL2087;IL2088;IL2090;IL2091;IL2092;IL2093;IL2094;IL2096;IL2104;IL2111;IL2118;IL2121</ILLinkIgnoredWarnings>
     <ILLinkFolderName>link</ILLinkFolderName>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <!-- The SourceFile items will be copied to the output folder -->

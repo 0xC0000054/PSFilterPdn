@@ -28,7 +28,7 @@ namespace PSFilterLoad.PSApi
         public short bottom;
         public short right;
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is Rect16 other && Equals(other);
         }

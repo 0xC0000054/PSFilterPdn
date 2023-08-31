@@ -16,10 +16,10 @@ namespace PSFilterLoad.PSApi
     {
         private sealed class FilterCaseInfoResult
         {
-            public readonly FilterCaseInfoCollection filterCaseInfo;
+            public readonly FilterCaseInfoCollection? filterCaseInfo;
             public readonly int propertyLength;
 
-            public FilterCaseInfoResult(FilterCaseInfoCollection filterCaseInfo, int actualArrayLength)
+            public FilterCaseInfoResult(FilterCaseInfoCollection? filterCaseInfo, int actualArrayLength)
             {
                 this.filterCaseInfo = filterCaseInfo;
                 propertyLength = actualArrayLength;
@@ -28,7 +28,7 @@ namespace PSFilterLoad.PSApi
 
         private static class FilterCaseInfoParser
         {
-            public static unsafe FilterCaseInfoResult Parse(byte* ptr, int length)
+            public static unsafe FilterCaseInfoResult? Parse(byte* ptr, int length)
             {
                 const int MinLength = 7 * FilterCaseInfo.SizeOf;
 

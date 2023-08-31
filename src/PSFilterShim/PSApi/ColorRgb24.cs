@@ -14,8 +14,6 @@ using MessagePack;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi
 {
     [MessagePackObject]

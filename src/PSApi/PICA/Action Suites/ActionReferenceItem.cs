@@ -13,8 +13,6 @@
 using MessagePack;
 using MessagePack.Formatters;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.PICA
 {
     internal static class ActionReferenceForm

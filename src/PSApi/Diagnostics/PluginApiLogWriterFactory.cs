@@ -13,8 +13,6 @@
 using System.Diagnostics;
 using System.IO;
 
-#nullable enable
-
 namespace PSFilterLoad.PSApi.Diagnostics
 {
     internal static class PluginApiLogWriterFactory

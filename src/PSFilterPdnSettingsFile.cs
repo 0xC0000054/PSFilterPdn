@@ -11,6 +11,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet;
+using PaintDotNet.AppModel;
+using PSFilterPdn.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,7 +31,7 @@ namespace PSFilterPdn
 
             try
             {
-                string userDataPath = serviceProvider.GetService<PaintDotNet.AppModel.IUserFilesService>().UserFilesPath;
+                string userDataPath = serviceProvider.GetService<IUserFilesService>()?.UserFilesPath ?? throw new IOException(Resources.UnknownUserFilePath);
 
                 string path = Path.Combine(userDataPath, SettingsFileName);
 
@@ -60,7 +62,7 @@ namespace PSFilterPdn
                         else
                         {
                             DataContractSerializer serializer = new(typeof(PSFilterPdnSettings));
-                            settings = (PSFilterPdnSettings)serializer.ReadObject(xmlReader);
+                            settings = (PSFilterPdnSettings)serializer.ReadObject(xmlReader)!;
                             settings.Dirty = false;
                         }
                     }
@@ -77,7 +79,7 @@ namespace PSFilterPdn
 
         public static void Save(IServiceProvider serviceProvider, PSFilterPdnSettings settings)
         {
-            string userDataPath = serviceProvider.GetService<PaintDotNet.AppModel.IUserFilesService>().UserFilesPath;
+            string userDataPath = serviceProvider.GetService<IUserFilesService>()?.UserFilesPath ?? throw new IOException(Resources.UnknownUserFilePath);
 
             DirectoryInfo info = new(userDataPath);
 
@@ -108,7 +110,7 @@ namespace PSFilterPdn
             XmlDocument xmlDocument = new();
             xmlDocument.Load(xmlReader);
 
-            XmlNode searchDirsNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchDirectoriesPath);
+            XmlNode? searchDirsNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchDirectoriesPath);
             if (searchDirsNode != null)
             {
                 string dirs = searchDirsNode.InnerText.Trim();
@@ -145,7 +147,7 @@ namespace PSFilterPdn
                 }
             }
 
-            XmlNode searchSubDirNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchSubdirectoriesPath);
+            XmlNode? searchSubDirNode = xmlDocument.SelectSingleNode(OldXmlSettings.SearchSubdirectoriesPath);
             if (searchSubDirNode != null)
             {
                 if (bool.TryParse(searchSubDirNode.InnerText.Trim(), out bool result))
