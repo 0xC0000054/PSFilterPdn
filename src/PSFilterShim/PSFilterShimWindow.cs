@@ -416,7 +416,7 @@ namespace PSFilterShim
                                 if (!lps.IsRepeatEffect)
                                 {
                                     ParameterData parameterData = lps.FilterParameters;
-                                    if (parameterData.ShouldSerialize())
+                                    if (parameterData.ShouldSerialize() && !string.IsNullOrWhiteSpace(settings.ParameterDataPath))
                                     {
                                         MessagePackSerializerUtil.Serialize(settings.ParameterDataPath,
                                                                             parameterData,
@@ -424,7 +424,7 @@ namespace PSFilterShim
                                     }
 
                                     pseudoResources = lps.PseudoResources;
-                                    if (pseudoResources != null && pseudoResources.Count > 0)
+                                    if (pseudoResources.Count > 0 && !string.IsNullOrWhiteSpace(settings.PseudoResourcePath))
                                     {
                                         MessagePackSerializerUtil.Serialize(settings.PseudoResourcePath,
                                                                             pseudoResources,
@@ -432,7 +432,9 @@ namespace PSFilterShim
                                     }
 
                                     registryValues = lps.GetRegistryValues();
-                                    if (registryValues != null && registryValues.HasData)
+                                    if (registryValues != null
+                                        && registryValues.HasData
+                                        && !string.IsNullOrWhiteSpace(settings.DescriptorRegistryPath))
                                     {
                                         MessagePackSerializerUtil.Serialize(settings.DescriptorRegistryPath,
                                                                             registryValues,
