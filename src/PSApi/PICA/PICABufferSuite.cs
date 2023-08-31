@@ -14,7 +14,6 @@ using PSFilterLoad.PSApi.Diagnostics;
 using TerraFX.Interop.Windows;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {

@@ -15,7 +15,6 @@ using PaintDotNet.AppModel;
 using PaintDotNet.Clipboard;
 using PaintDotNet.Effects;
 using PaintDotNet.Imaging;
-using PaintDotNet.Rendering;
 using PSFilterLoad.PSApi;
 using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterLoad.PSApi.Imaging;
