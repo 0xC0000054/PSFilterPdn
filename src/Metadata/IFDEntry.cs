@@ -50,17 +50,7 @@ namespace PSFilterPdn.Metadata
 
         public override int GetHashCode()
         {
-            int hashCode = 1198491158;
-
-            unchecked
-            {
-                hashCode = (hashCode * -1521134295) + Tag.GetHashCode();
-                hashCode = (hashCode * -1521134295) + Count.GetHashCode();
-                hashCode = (hashCode * -1521134295) + Type.GetHashCode();
-                hashCode = (hashCode * -1521134295) + Offset.GetHashCode();
-            }
-
-            return hashCode;
+            return HashCode.Combine(Tag, Count, Type, Offset);
         }
 
         public void Write(System.IO.BinaryWriter writer)

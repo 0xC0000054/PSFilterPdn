@@ -83,15 +83,7 @@ namespace PSFilterLoad.PSApi
 
             public override int GetHashCode()
             {
-                int hash = 23;
-
-                unchecked
-                {
-                    hash = (hash * 127) + name.GetHashCode();
-                    hash = (hash * 127) + version.GetHashCode();
-                }
-
-                return hash;
+                return HashCode.Combine(name, version);
             }
 
             public bool Equals(PICASuiteKey? other)

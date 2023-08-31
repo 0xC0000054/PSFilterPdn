@@ -210,23 +210,20 @@ namespace PSFilterPdn.EnableInfo
 
         public override int GetHashCode()
         {
-            int hashCode = -1703666161;
+            HashCode hashCode = new();
 
-            unchecked
-            {
-                hashCode = (hashCode * -1521134295) + imageMode?.GetHashCode() ?? 0;
-                hashCode = (hashCode * -1521134295) + imageDepth.GetHashCode();
-                hashCode = (hashCode * -1521134295) + hasLayerMask.GetHashCode();
-                hashCode = (hashCode * -1521134295) + hasSelectionMask.GetHashCode();
-                hashCode = (hashCode * -1521134295) + hasTransparencyMask.GetHashCode();
-                hashCode = (hashCode * -1521134295) + targetChannelCount.GetHashCode();
-                hashCode = (hashCode * -1521134295) + trueChannelCount.GetHashCode();
-                hashCode = (hashCode * -1521134295) + isTargetComposite.GetHashCode();
-                hashCode = (hashCode * -1521134295) + imageWidth.GetHashCode();
-                hashCode = (hashCode * -1521134295) + imageHeight.GetHashCode();
-            }
+            hashCode.Add(imageMode);
+            hashCode.Add(imageDepth);
+            hashCode.Add(hasLayerMask);
+            hashCode.Add(hasSelectionMask);
+            hashCode.Add(hasTransparencyMask);
+            hashCode.Add(targetChannelCount);
+            hashCode.Add(trueChannelCount);
+            hashCode.Add(isTargetComposite);
+            hashCode.Add(imageWidth);
+            hashCode.Add(imageHeight);
 
-            return hashCode;
+            return hashCode.ToHashCode();
         }
 
         public static bool operator ==(EnableInfoVariables? variables1, EnableInfoVariables? variables2)

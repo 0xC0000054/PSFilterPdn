@@ -268,17 +268,14 @@ namespace PSFilterLoad.PSApi
 
         public override int GetHashCode()
         {
-            int hash = 23;
+            HashCode hashCode = new();
 
-            unchecked
-            {
-                hash = (hash * 127) + (FileName != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(FileName) : 0);
-                hash = (hash * 127) + (EntryPoint != null ? EntryPoint.GetHashCode() : 0);
-                hash = (hash * 127) + (Category != null ? Category.GetHashCode() : 0);
-                hash = (hash * 127) + (Title != null ? Title.GetHashCode() : 0);
-            }
+            hashCode.Add(FileName, StringComparer.OrdinalIgnoreCase);
+            hashCode.Add(EntryPoint);
+            hashCode.Add(Category);
+            hashCode.Add(Title);
 
-            return hash;
+            return hashCode.ToHashCode();
         }
 
         /// <summary>

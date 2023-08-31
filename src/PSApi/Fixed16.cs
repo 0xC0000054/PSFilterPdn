@@ -91,7 +91,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public override readonly int GetHashCode()
         {
-            return fixedValue.GetHashCode();
+            return HashCode.Combine(fixedValue);
         }
 
         /// <summary>

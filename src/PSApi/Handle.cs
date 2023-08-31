@@ -37,7 +37,7 @@ namespace PSFilterLoad.PSApi
 
         public override int GetHashCode()
         {
-            return -1937169414 + Value.GetHashCode();
+            return HashCode.Combine(Value);
         }
 
         public static bool operator ==(Handle left, Handle right)

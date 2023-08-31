@@ -45,7 +45,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         public override readonly int GetHashCode()
         {
-            return -1584136870 + value.GetHashCode();
+            return HashCode.Combine(value);
         }
 
         public override readonly string ToString()
