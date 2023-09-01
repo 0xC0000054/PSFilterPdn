@@ -23,13 +23,13 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
         private readonly IEffectInputBitmap<ColorAlpha8> effectInputBitmap;
         private readonly IImagingFactory imagingFactory;
 
-        public EffectSelectionMaskSurface(IEffectInputBitmap<ColorAlpha8> effectInputBitmap, IServiceProvider serviceProvider)
+        public EffectSelectionMaskSurface(IEffectInputBitmap<ColorAlpha8> effectInputBitmap, IImagingFactory imagingFactory)
         {
             ArgumentNullException.ThrowIfNull(effectInputBitmap, nameof(effectInputBitmap));
-            ArgumentNullException.ThrowIfNull(serviceProvider, nameof(serviceProvider));
+            ArgumentNullException.ThrowIfNull(imagingFactory, nameof(imagingFactory));
 
             this.effectInputBitmap = effectInputBitmap;
-            imagingFactory = serviceProvider.GetService<IImagingFactory>() ?? throw new InvalidOperationException("Failed to get the WIC factory.");
+            this.imagingFactory = imagingFactory;
 
             SizeInt32 size = effectInputBitmap.Size;
 

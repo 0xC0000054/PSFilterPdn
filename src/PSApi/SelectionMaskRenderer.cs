@@ -14,13 +14,12 @@ using PaintDotNet.Effects;
 using PaintDotNet.Rendering;
 using PSFilterLoad.PSApi.Imaging;
 using PSFilterLoad.PSApi.Imaging.Internal;
-using System;
 
 namespace PSFilterLoad.PSApi
 {
     internal static class SelectionMaskRenderer
     {
-        public static MaskSurface? FromPdnSelection(IEffectEnvironment environment, IServiceProvider serviceProvider)
+        public static MaskSurface? FromPdnSelection(IBitmapEffectEnvironment environment)
         {
             SizeInt32 documentSize = environment.Document.Size;
             RectInt32 documentBounds = new(Point2Int32.Zero, documentSize);
@@ -31,7 +30,7 @@ namespace PSFilterLoad.PSApi
 
             if (selectionInfo.RenderBounds != documentBounds)
             {
-                selectionMask = new EffectSelectionMaskSurface(selectionInfo.MaskBitmap, serviceProvider);
+                selectionMask = new EffectSelectionMaskSurface(selectionInfo.MaskBitmap, environment.ImagingFactory);
             }
 
             return selectionMask;

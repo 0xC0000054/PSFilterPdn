@@ -140,7 +140,7 @@ namespace PSFilterPdn
 
                     try
                     {
-                        selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
+                        selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment);
 
                         if (selectionMask != null)
                         {
@@ -259,7 +259,7 @@ namespace PSFilterPdn
 
                 DocumentMetadataProvider documentMetadataProvider = new(Environment.Document);
                 source = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), Services);
-                selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, Services);
+                selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment);
                 RenderTargetFactory renderTargetFactory = new(Services);
                 FilterCase filterCase = token.FilterData!.GetFilterTransparencyMode(selectionMask is not null, source);
 
