@@ -34,7 +34,7 @@ namespace PSFilterLoad.PSApi
         private readonly SPBasicReleaseSuite spReleaseSuite;
         private readonly SPBasicUndefined spUndefined;
 
-        private ActionSuiteProvider actionSuites;
+        private readonly ActionSuiteProvider actionSuites;
         private PICABufferSuite? bufferSuite;
         private PICAColorSpaceSuite? colorSpaceSuite;
         private DescriptorRegistrySuite? descriptorRegistrySuite;

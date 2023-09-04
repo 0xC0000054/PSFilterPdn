@@ -80,7 +80,7 @@ namespace PSFilterLoad.PSApi
 
         private ISurface<ImageSurface> source;
 #pragma warning disable IDE0032 // Use auto property
-        private ISurface<ImageSurface> dest;
+        private readonly ISurface<ImageSurface> dest;
 #pragma warning restore IDE0032 // Use auto property
         private ISurface<MaskSurface>? mask;
         private ISurface<ImageSurface>? tempSurface;
@@ -130,13 +130,13 @@ namespace PSFilterLoad.PSApi
 
         private readonly BufferSuite bufferSuite;
         private readonly HandleSuite handleSuite;
-        private ChannelPortsSuite channelPortsSuite;
-        private DescriptorSuite descriptorSuite;
+        private readonly ChannelPortsSuite channelPortsSuite;
+        private readonly DescriptorSuite descriptorSuite;
         private readonly ImageServicesSuite imageServicesSuite;
         private readonly PropertySuite propertySuite;
-        private ReadImageDocument readImageDocument;
+        private readonly ReadImageDocument readImageDocument;
         private readonly ResourceSuite resourceSuite;
-        private SPBasicSuiteProvider basicSuiteProvider;
+        private readonly SPBasicSuiteProvider basicSuiteProvider;
 
         /// <summary>
         /// The host signature (.PDN in little-endian byte order) - 'NDP.'

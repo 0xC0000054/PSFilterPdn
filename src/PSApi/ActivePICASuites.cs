@@ -167,7 +167,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private Dictionary<PICASuiteKey, PICASuite> activeSuites;
+        private readonly Dictionary<PICASuiteKey, PICASuite> activeSuites;
         private bool disposed;
 
         /// <summary>

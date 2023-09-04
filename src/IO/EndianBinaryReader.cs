@@ -24,7 +24,7 @@ namespace PSFilterPdn
     internal sealed class EndianBinaryReader : PSFilterLoad.PSApi.Disposable
     {
 #pragma warning disable IDE0032 // Use auto property
-        private Stream stream;
+        private readonly Stream stream;
         private int readOffset;
         private int readLength;
 
