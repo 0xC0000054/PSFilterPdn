@@ -37,8 +37,8 @@ namespace PSFilterPdn.Metadata
 
             byte[] exifBytes = new byte[checked((int)ifdInfo.EXIFDataLength)];
 
-            using (MemoryStream stream = new MemoryStream(exifBytes))
-            using (BinaryWriter writer = new BinaryWriter(stream))
+            using (MemoryStream stream = new(exifBytes))
+            using (BinaryWriter writer = new(stream))
             {
                 IFDEntryInfo imageInfo = ifdEntries[ExifSection.Image];
                 IFDEntryInfo exifInfo = ifdEntries[ExifSection.Photo];
