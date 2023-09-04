@@ -49,7 +49,7 @@ namespace PSFilterPdn.EnableInfo
         {
             StringBuilder sb = new(Name, 256);
 
-            sb.Append("(");
+            sb.Append('(');
 
             ReadOnlyCollection<Expression> args = Arguments;
 
@@ -67,7 +67,7 @@ namespace PSFilterPdn.EnableInfo
                 }
             }
 
-            sb.Append(")");
+            sb.Append(')');
 
             return sb.ToString();
         }
