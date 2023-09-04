@@ -172,10 +172,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         PIActionList IActionListSuite.CreateList(ReadOnlyCollection<ActionListItem> values)
         {
-            if (values == null)
-            {
-                throw new ArgumentNullException(nameof(values));
-            }
+            ArgumentNullException.ThrowIfNull(values, nameof(values));
 
             PIActionList list = GenerateDictionaryKey();
             actionLists.Add(list, new ActionListItemCollection(values));
@@ -191,10 +188,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
+                ArgumentNullException.ThrowIfNull(value, nameof(value));
 
                 actionDescriptorSuite = value;
             }

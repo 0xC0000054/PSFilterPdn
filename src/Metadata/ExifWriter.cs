@@ -473,10 +473,7 @@ namespace PSFilterPdn.Metadata
         {
             public IFDEntryInfo(List<IFDEntry> ifdEntries, long startOffset, long nextAvailableOffset)
             {
-                if (ifdEntries is null)
-                {
-                    throw new ArgumentNullException(nameof(ifdEntries));
-                }
+                ArgumentNullException.ThrowIfNull(ifdEntries, nameof(ifdEntries));
 
                 IFDEntries = ifdEntries;
                 StartOffset = startOffset;
@@ -494,10 +491,7 @@ namespace PSFilterPdn.Metadata
         {
             public IFDInfo(Dictionary<ExifSection, IFDEntryInfo> entries, long exifDataLength)
             {
-                if (entries is null)
-                {
-                    throw new ArgumentNullException(nameof(entries));
-                }
+                ArgumentNullException.ThrowIfNull(entries, nameof(entries));
 
                 IFDEntries = entries;
                 EXIFDataLength = exifDataLength;

@@ -144,10 +144,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         PIActionReference IActionReferenceSuite.CreateReference(ReadOnlyCollection<ActionReferenceItem> values)
         {
-            if (values == null)
-            {
-                throw new ArgumentNullException(nameof(values));
-            }
+            ArgumentNullException.ThrowIfNull(values, nameof(values));
 
             PIActionReference reference = GenerateDictionaryKey();
             actionReferences.Add(reference, new ActionReferenceContainer(values));

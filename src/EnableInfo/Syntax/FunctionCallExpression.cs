@@ -28,10 +28,7 @@ namespace PSFilterPdn.EnableInfo
         /// </exception>
         public FunctionCallExpression(string name, ReadOnlyCollection<Expression> arguments)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
+            ArgumentNullException.ThrowIfNull(name, nameof(name));
 
             Name = name;
             Arguments = arguments;

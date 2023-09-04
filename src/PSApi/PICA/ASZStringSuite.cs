@@ -257,10 +257,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         ASZString IASZStringSuite.CreateFromString(string value)
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            ArgumentNullException.ThrowIfNull(value, nameof(value));
 
             ASZString newZString;
 

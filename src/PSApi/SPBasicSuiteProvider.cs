@@ -182,10 +182,7 @@ namespace PSFilterLoad.PSApi
         /// <exception cref="ArgumentNullException">name</exception>
         public void SetPluginName(string name)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
+            ArgumentNullException.ThrowIfNull(name, nameof(name));
 
             pluginName = name;
         }

@@ -59,10 +59,7 @@ namespace PSFilterPdn
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="byteOrder"/> is not a valid <see cref="Endianess"/> value.</exception>
         public EndianBinaryReader(Stream stream, Endianess byteOrder, bool leaveOpen)
         {
-            if (stream == null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
+            ArgumentNullException.ThrowIfNull(stream, nameof(stream));
 
             if (byteOrder < Endianess.Big || byteOrder > Endianess.Little)
             {
@@ -159,10 +156,7 @@ namespace PSFilterPdn
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public int Read(byte[] bytes, int offset, int count)
         {
-            if (bytes == null)
-            {
-                throw new ArgumentNullException(nameof(bytes));
-            }
+            ArgumentNullException.ThrowIfNull(bytes, nameof(bytes));
             if (count < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(count));

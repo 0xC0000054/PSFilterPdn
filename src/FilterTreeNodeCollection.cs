@@ -29,10 +29,7 @@ namespace PSFilterPdn
         /// <exception cref="ArgumentNullException"><paramref name="items"/> is null.</exception>
         internal FilterTreeNodeCollection(IReadOnlyDictionary<string, List<TreeNodeEx>> items)
         {
-            if (items == null)
-            {
-                throw new ArgumentNullException(nameof(items));
-            }
+            ArgumentNullException.ThrowIfNull(items, nameof(items));
 
             nodes = new Dictionary<string, ReadOnlyCollection<TreeNodeEx>>(items.Count, StringComparer.Ordinal);
 

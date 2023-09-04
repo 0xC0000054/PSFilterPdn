@@ -39,10 +39,7 @@ namespace PSFilterPdn.EnableInfo
         /// <exception cref="EnableInfoException">The specified expression is not valid.</exception>
         public bool Evaluate(Expression node)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
+            ArgumentNullException.ThrowIfNull(node, nameof(node));
 
             return Visit(node) is BooleanConstantExpression result && result.Value;
         }

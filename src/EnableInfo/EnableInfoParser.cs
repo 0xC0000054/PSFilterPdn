@@ -31,10 +31,7 @@ namespace PSFilterPdn.EnableInfo
         /// <exception cref="ArgumentNullException"><paramref name="tokens"/> is null.</exception>
         private EnableInfoParser(ReadOnlyCollection<Token> tokens)
         {
-            if (tokens == null)
-            {
-                throw new ArgumentNullException(nameof(tokens));
-            }
+            ArgumentNullException.ThrowIfNull(tokens, nameof(tokens));
 
             this.tokens = tokens;
             index = 0;
@@ -53,10 +50,7 @@ namespace PSFilterPdn.EnableInfo
         /// <exception cref="EnableInfoException">The enable information string is not valid.</exception>
         public static Expression Parse(string enableInfo)
         {
-            if (enableInfo == null)
-            {
-                throw new ArgumentNullException(nameof(enableInfo));
-            }
+            ArgumentNullException.ThrowIfNull(enableInfo, nameof(enableInfo));
 
             ReadOnlyCollection<Token> tokens = new EnableInfoLexer(enableInfo).GetTokens();
 

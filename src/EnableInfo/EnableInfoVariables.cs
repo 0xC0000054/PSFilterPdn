@@ -49,10 +49,7 @@ namespace PSFilterPdn.EnableInfo
                                    int trueChannelCount,
                                    HostState hostState)
         {
-            if (hostState == null)
-            {
-                throw new ArgumentNullException(nameof(hostState));
-            }
+            ArgumentNullException.ThrowIfNull(hostState, nameof(hostState));
 
             switch (imageMode)
             {

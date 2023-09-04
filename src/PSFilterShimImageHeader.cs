@@ -32,10 +32,7 @@ namespace PSFilterPdn
 
         public PSFilterShimImageHeader(Stream stream)
         {
-            if (stream is null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
+            ArgumentNullException.ThrowIfNull(stream, nameof(stream));
 
             int signature = ReadInt32LittleEndian(stream);
 
@@ -97,10 +94,7 @@ namespace PSFilterPdn
 
         public void Save(Stream stream)
         {
-            if (stream is null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
+            ArgumentNullException.ThrowIfNull(stream, nameof(stream));
 
             WriteInt32LittleEndian(stream, FileSignature);
             WriteInt32LittleEndian(stream, fileVersion);

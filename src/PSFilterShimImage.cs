@@ -68,10 +68,7 @@ namespace PSFilterPdn
 
         public static unsafe void Save(string path, ImageSurface bitmap)
         {
-            if (bitmap is null)
-            {
-                throw new ArgumentNullException(nameof(bitmap));
-            }
+            ArgumentNullException.ThrowIfNull(bitmap, nameof(bitmap));
 
             PSFilterShimImageHeader header = new(bitmap.Width,
                                                  bitmap.Height,
@@ -104,10 +101,7 @@ namespace PSFilterPdn
 
         public static unsafe void Save(string path, TransparencyCheckerboardSurface bitmap)
         {
-            if (bitmap is null)
-            {
-                throw new ArgumentNullException(nameof(bitmap));
-            }
+            ArgumentNullException.ThrowIfNull(bitmap, nameof(bitmap));
 
             PSFilterShimImageHeader header = new(bitmap.Width,
                                                  bitmap.Height,
@@ -140,10 +134,7 @@ namespace PSFilterPdn
 
         public static void SaveSelectionMask(string path, MaskSurface surface)
         {
-            if (surface is null)
-            {
-                throw new ArgumentNullException(nameof(surface));
-            }
+            ArgumentNullException.ThrowIfNull(surface, nameof(surface));
 
             PSFilterShimImageHeader header = new(surface.Width,
                                                  surface.Height,

@@ -30,10 +30,7 @@ namespace PSFilterPdn.EnableInfo
         /// <exception cref="ArgumentNullException"><paramref name="input"/> is null.</exception>
         public EnableInfoLexer(string input)
         {
-            if (input == null)
-            {
-                throw new ArgumentNullException(nameof(input));
-            }
+            ArgumentNullException.ThrowIfNull(input, nameof(input));
 
             source = input;
             index = 0;

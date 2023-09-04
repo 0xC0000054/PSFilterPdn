@@ -30,14 +30,8 @@ namespace PSFilterPdn.EnableInfo
         /// </exception>
         public LogicalExpression(Expression left, ExpressionType op, Expression right)
         {
-            if (left == null)
-            {
-                throw new ArgumentNullException(nameof(left));
-            }
-            if (right == null)
-            {
-                throw new ArgumentNullException(nameof(right));
-            }
+            ArgumentNullException.ThrowIfNull(left, nameof(left));
+            ArgumentNullException.ThrowIfNull(right, nameof(right));
 
             Left = left;
             NodeType = op;

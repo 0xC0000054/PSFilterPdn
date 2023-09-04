@@ -19,10 +19,7 @@ namespace PSFilterLoad.PSApi
     {
         public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
         {
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException(nameof(dictionary));
-            }
+            ArgumentNullException.ThrowIfNull(dictionary, nameof(dictionary));
 
             if (!dictionary.ContainsKey(key))
             {

@@ -26,10 +26,7 @@ namespace PSFilterPdn.EnableInfo
         /// </exception>
         public UnaryExpression(Expression expression, ExpressionType op)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
+            ArgumentNullException.ThrowIfNull(expression, nameof(expression));
 
             Expression = expression;
             NodeType = op;

@@ -262,10 +262,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         PIActionDescriptor IActionDescriptorSuite.CreateDescriptor(Dictionary<uint, AETEValue> values)
         {
-            if (values == null)
-            {
-                throw new ArgumentNullException(nameof(values));
-            }
+            ArgumentNullException.ThrowIfNull(values, nameof(values));
 
             PIActionDescriptor descriptor = GenerateDictionaryKey();
             actionDescriptors.Add(descriptor, new ScriptingParameters(values));

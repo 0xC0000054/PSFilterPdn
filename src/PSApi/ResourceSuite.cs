@@ -45,10 +45,7 @@ namespace PSFilterLoad.PSApi
             get => pseudoResources;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
+                ArgumentNullException.ThrowIfNull(value, nameof(value));
 
                 pseudoResources = value;
             }

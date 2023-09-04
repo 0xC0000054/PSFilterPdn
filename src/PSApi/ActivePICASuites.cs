@@ -33,10 +33,7 @@ namespace PSFilterLoad.PSApi
             /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
             public PICASuiteKey(string name, int version)
             {
-                if (name == null)
-                {
-                    throw new ArgumentNullException(nameof(name));
-                }
+                ArgumentNullException.ThrowIfNull(name, nameof(name));
 
                 this.name = name;
                 this.version = version;

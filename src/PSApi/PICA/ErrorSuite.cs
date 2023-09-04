@@ -31,10 +31,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <exception cref="ArgumentNullException"><paramref name="zstringSuite"/> is null.</exception>
         public ErrorSuite(IASZStringSuite zstringSuite)
         {
-            if (zstringSuite == null)
-            {
-                throw new ArgumentNullException(nameof(zstringSuite));
-            }
+            ArgumentNullException.ThrowIfNull(zstringSuite, nameof(zstringSuite));
 
             setErrorFromPString = new ErrorSuiteSetErrorFromPString(SetErrorFromPString);
             setErrorFromCString = new ErrorSuiteSetErrorFromCString(SetErrorFromCString);

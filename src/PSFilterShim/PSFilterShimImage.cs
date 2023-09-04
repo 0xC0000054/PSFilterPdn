@@ -148,10 +148,7 @@ namespace PSFilterShim
 
         public static void Save(string path, ISurface<ImageSurface> surface)
         {
-            if (surface is null)
-            {
-                throw new ArgumentNullException(nameof(surface));
-            }
+            ArgumentNullException.ThrowIfNull(surface, nameof(surface));
 
             PSFilterShimImageHeader header = new(surface.Width,
                                                  surface.Height,

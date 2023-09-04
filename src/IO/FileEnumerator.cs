@@ -69,15 +69,8 @@ namespace PSFilterPdn
         /// <exception cref="SecurityException">The caller does not have the required permission.</exception>
         public FileEnumerator(string path, string fileExtension, bool recurseSubdirectories, bool dereferenceLinks)
         {
-            if (path is null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
-            if (fileExtension is null)
-            {
-                throw new ArgumentNullException(nameof(fileExtension));
-            }
+            ArgumentNullException.ThrowIfNull(path, nameof(path));
+            ArgumentNullException.ThrowIfNull(fileExtension, nameof(fileExtension));
 
             this.fileExtension = fileExtension;
             enumerationOptions = new EnumerationOptions
