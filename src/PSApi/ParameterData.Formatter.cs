@@ -18,10 +18,15 @@ namespace PSFilterLoad.PSApi
 {
     internal sealed partial class ParameterData
     {
-        private sealed class Formatter : IMessagePackFormatter<ParameterData>
+        private sealed class Formatter : IMessagePackFormatter<ParameterData?>
         {
-            public ParameterData Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+            public ParameterData? Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
             {
+                if (reader.TryReadNil())
+                {
+                    return null;
+                }
+
                 IFormatterResolver resolver = options.Resolver;
 
                 options.Security.DepthStep(ref reader);
@@ -34,8 +39,14 @@ namespace PSFilterLoad.PSApi
                 return new ParameterData(globalParameters, scriptingData);
             }
 
-            public void Serialize(ref MessagePackWriter writer, ParameterData value, MessagePackSerializerOptions options)
+            public void Serialize(ref MessagePackWriter writer, ParameterData? value, MessagePackSerializerOptions options)
             {
+                if (value is null)
+                {
+                    writer.WriteNil();
+                    return;
+                }
+
                 IFormatterResolver resolver = options.Resolver;
 
                 resolver.GetFormatterWithVerify<GlobalParameters>().Serialize(ref writer, value.GlobalParameters, options);

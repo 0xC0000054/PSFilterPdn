@@ -10,48 +10,28 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using CommunityToolkit.HighPerformance.Buffers;
 using MessagePack;
 using System;
 using System.Buffers;
-using System.IO;
 
 namespace PSFilterPdn
 {
     public static class MessagePackSerializerUtil
     {
-        public static T Deserialize<T>(string path, MessagePackSerializerOptions options)
+        public static T Deserialize<T>(ReadOnlySpan<byte> buffer, MessagePackSerializerOptions options)
         {
-            T obj;
-
-            using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
+            using (MemoryOwner<byte> owner = MemoryOwner<byte>.Allocate(buffer.Length))
             {
-                obj = Deserialize<T>(fs, options);
+                buffer.CopyTo(owner.Span);
+
+                return Deserialize<T>(owner.Memory, options);
             }
-
-            return obj;
-        }
-
-        public static T Deserialize<T>(Stream stream, MessagePackSerializerOptions options)
-        {
-            return MessagePackSerializer.Deserialize<T>(stream, options);
         }
 
         public static T Deserialize<T>(ReadOnlyMemory<byte> buffer, MessagePackSerializerOptions options)
         {
             return MessagePackSerializer.Deserialize<T>(buffer, options);
-        }
-
-        public static void Serialize<T>(string path, T obj, MessagePackSerializerOptions options)
-        {
-            using (FileStream fs = new(path, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                Serialize(fs, obj, options);
-            }
-        }
-
-        public static void Serialize<T>(Stream stream, T obj, MessagePackSerializerOptions options)
-        {
-            MessagePackSerializer.Serialize(stream, obj, options);
         }
 
         public static void Serialize<T>(IBufferWriter<byte> bufferWriter, T obj, MessagePackSerializerOptions options)

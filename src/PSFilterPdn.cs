@@ -90,126 +90,74 @@ namespace PSFilterPdn
             }
 
             EffectInputBitmapSurface? source = null;
+            MaskSurface? selectionMask = null;
+            TransparencyCheckerboardSurface? transparencyCheckerboard = null;
             try
             {
-                using (PSFilterShimDataFolder proxyTempDir = new())
+
+                DocumentDpi documentDpi = new(Environment.Document.Resolution);
+                IImagingFactory imagingFactory = Services.GetService<IImagingFactory>() ?? throw new InvalidOperationException("Failed to get the WIC factory.");
+
+                source = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), imagingFactory);
+                selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment);
+                transparencyCheckerboard = new PDNTransparencyCheckerboardSurface(imagingFactory);
+
+                if (!token.FilterParameters.TryGetValue(token.FilterData!, out ParameterData? parameterData))
                 {
-                    string srcFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
-                    string destFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
-                    string checkerboardFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
-                    string? parameterDataFileName = null;
-                    string? resourceDataFileName = null;
-                    string? descriptorRegistryFileName = null;
-                    string? selectionMaskFileName = null;
+                    parameterData = null;
+                }
 
-                    DocumentDpi documentDpi = new(Environment.Document.Resolution);
-                    IImagingFactory imagingFactory = Services.GetService<IImagingFactory>() ?? throw new InvalidOperationException("Failed to get the WIC factory.");
+                bool proxyResult = true;
+                PSFilterShimErrorInfo? proxyError = null;
+                FilterCase filterCase = token.FilterData!.GetFilterTransparencyMode(selectionMask != null, source);
 
-                    source = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), imagingFactory);
+                PSFilterShimSettings settings = new(repeatEffect: true,
+                                                    showAboutDialog: false,
+                                                    new ColorRgb24(Environment.PrimaryColor),
+                                                    new ColorRgb24(Environment.SecondaryColor),
+                                                    documentDpi.X,
+                                                    documentDpi.Y,
+                                                    filterCase,
+                                                    parameterData,
+                                                    token.PseudoResources,
+                                                    token.DescriptorRegistry);
 
-                    PSFilterShimImage.Save(srcFileName, source);
+                DocumentMetadataProvider documentMetadataProvider = new(Environment.Document);
 
-                    using (PDNTransparencyCheckerboardSurface surface = new(imagingFactory))
+                using (PSFilterShimPipeServer server = new(AbortCallback,
+                                                           token.FilterData,
+                                                           settings,
+                                                           delegate (PSFilterShimErrorInfo? data)
+                                                           {
+                                                               proxyResult = false;
+                                                               proxyError = data;
+                                                           },
+                                                           null,
+                                                           new Action<Stream, FilterPostProcessingOptions>(delegate (Stream stream, FilterPostProcessingOptions options)
+                                                           {
+                                                               filterOutput = PSFilterShimImage.Load(stream, Environment.ImagingFactory);
+                                                               FilterPostProcessing.Apply(Environment, filterOutput, options);
+                                                           }),
+                                                           documentMetadataProvider,
+                                                           source,
+                                                           ownsSourceImage: false,
+                                                           selectionMask,
+                                                           ownsMaskImage: false,
+                                                           transparencyCheckerboard,
+                                                           ownsTransparencyCheckerboard: false))
+                {
+                    string args = server.PipeName + " " + window.Handle.ToString(CultureInfo.InvariantCulture);
+                    ProcessStartInfo psi = new(shimPath, args);
+
+                    using (Process proxy = Process.Start(psi)!)
                     {
-                        PSFilterShimImage.Save(checkerboardFileName, surface);
+                        proxy.WaitForExit();
                     }
+                }
 
-                    if (token.FilterParameters.TryGetValue(token.FilterData!, out ParameterData? parameterData))
-                    {
-                        parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-                        MessagePackSerializerUtil.Serialize(parameterDataFileName, parameterData, MessagePackResolver.Options);
-                    }
-
-                    if (token.PseudoResources.Count > 0)
-                    {
-                        resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-                        MessagePackSerializerUtil.Serialize(resourceDataFileName,
-                                                            token.PseudoResources,
-                                                            MessagePackResolver.Options);
-                    }
-
-                    if (token.DescriptorRegistry != null && token.DescriptorRegistry.HasData)
-                    {
-                        descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-                        MessagePackSerializerUtil.Serialize(descriptorRegistryFileName,
-                                                            token.DescriptorRegistry,
-                                                            MessagePackResolver.Options);
-                    }
-
-                    MaskSurface? selectionMask = null;
-
-                    try
-                    {
-                        selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment);
-
-                        if (selectionMask != null)
-                        {
-                            selectionMaskFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
-                            PSFilterShimImage.SaveSelectionMask(selectionMaskFileName, selectionMask);
-                        }
-                    }
-                    finally
-                    {
-                        selectionMask?.Dispose();
-                    }
-
-                    bool proxyResult = true;
-                    PSFilterShimErrorInfo? proxyError = null;
-                    FilterCase filterCase = token.FilterData!.GetFilterTransparencyMode(!string.IsNullOrEmpty(selectionMaskFileName), source);
-
-                    PSFilterShimSettings settings = new(repeatEffect: true,
-                                                        showAboutDialog: false,
-                                                        srcFileName,
-                                                        destFileName,
-                                                        checkerboardFileName,
-                                                        new ColorRgb24(Environment.PrimaryColor),
-                                                        new ColorRgb24(Environment.SecondaryColor),
-                                                        documentDpi.X,
-                                                        documentDpi.Y,
-                                                        filterCase,
-                                                        selectionMaskFileName,
-                                                        parameterDataFileName,
-                                                        resourceDataFileName,
-                                                        descriptorRegistryFileName);
-
-                    DocumentMetadataProvider documentMetadataProvider = new(Environment.Document);
-
-                    FilterPostProcessingOptions postProcessingOptions = FilterPostProcessingOptions.None;
-
-                    using (PSFilterShimPipeServer server = new(AbortCallback,
-                                                               token.FilterData,
-                                                               settings,
-                                                               delegate (PSFilterShimErrorInfo? data)
-                                                               {
-                                                                   proxyResult = false;
-                                                                   proxyError = data;
-                                                               },
-                                                               delegate (FilterPostProcessingOptions options)
-                                                               {
-                                                                   postProcessingOptions = options;
-                                                               },
-                                                               null,
-                                                               documentMetadataProvider))
-                    {
-                        string args = server.PipeName + " " + window.Handle.ToString(CultureInfo.InvariantCulture);
-                        ProcessStartInfo psi = new(shimPath, args);
-
-                        using (Process proxy = Process.Start(psi)!)
-                        {
-                            proxy.WaitForExit();
-                        }
-                    }
-
-                    if (proxyResult && File.Exists(destFileName))
-                    {
-                        filterOutput = PSFilterShimImage.Load(destFileName, Environment.ImagingFactory);
-
-                        FilterPostProcessing.Apply(Environment, filterOutput, postProcessingOptions);
-                    }
-                    else if (proxyError != null)
-                    {
-                        ShowErrorMessage(window, proxyError.Message, proxyError.Details);
-                    }
+                if (!proxyResult && proxyError != null)
+                {
+                    ShowErrorMessage(window, proxyError.Message, proxyError.Details);
                 }
             }
             catch (ArgumentException ax)
@@ -235,6 +183,8 @@ namespace PSFilterPdn
             finally
             {
                 source?.Dispose();
+                selectionMask?.Dispose();
+                transparencyCheckerboard?.Dispose();
             }
         }
 

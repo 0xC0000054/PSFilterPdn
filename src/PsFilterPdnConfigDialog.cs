@@ -104,7 +104,6 @@ namespace PSFilterPdn
         private DescriptorRegistryValues? descriptorRegistry;
 
         private Thread? filterThread;
-        private PSFilterShimDataFolder? proxyTempDir;
 
         private bool filterRunning;
         private bool formClosePending;
@@ -154,11 +153,6 @@ namespace PSFilterPdn
         {
             if (disposing)
             {
-                if (proxyTempDir != null)
-                {
-                    proxyTempDir.Dispose();
-                    proxyTempDir = null;
-                }
                 sourceBitmap?.Dispose();
                 selectionMask?.Dispose();
                 transparencyCheckerboard?.Dispose();
@@ -721,18 +715,6 @@ namespace PSFilterPdn
             }
         }
 
-        private void CreateProxyTempDirectory()
-        {
-            if (proxyTempDir is null)
-            {
-                proxyTempDir = new PSFilterShimDataFolder();
-            }
-            else
-            {
-                proxyTempDir.Clean();
-            }
-        }
-
         private bool Run32BitFilterProxy(FilterThreadData data,
                                          out PSFilterShimErrorInfo? errorInfo)
         {
@@ -743,63 +725,28 @@ namespace PSFilterPdn
                 return false;
             }
 
-            CreateProxyTempDirectory();
-
-            string srcFileName = proxyTempDir!.GetRandomFilePathWithExtension(".psi");
-            string destFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
-            string checkerboardFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
-            string parameterDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-            string resourceDataFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-            string descriptorRegistryFileName = proxyTempDir.GetRandomFilePathWithExtension(".dat");
-            string? selectionMaskFileName = null;
-
-            PSFilterShimImage.Save(srcFileName, sourceBitmap!);
-            PSFilterShimImage.Save(checkerboardFileName, transparencyCheckerboard!);
-
-            if ((filterParameters != null) && filterParameters.TryGetValue(data.PluginData, out ParameterData? parameterData))
+            if (!filterParameters.TryGetValue(data.PluginData, out ParameterData? parameterData))
             {
-                MessagePackSerializerUtil.Serialize(parameterDataFileName, parameterData, MessagePackResolver.Options);
+                parameterData = null;
             }
 
-            if (pseudoResources.Count > 0)
-            {
-                MessagePackSerializerUtil.Serialize(resourceDataFileName, pseudoResources, MessagePackResolver.Options);
-            }
-
-            if (descriptorRegistry != null && descriptorRegistry.HasData)
-            {
-                MessagePackSerializerUtil.Serialize(descriptorRegistryFileName, descriptorRegistry, MessagePackResolver.Options);
-            }
-
-            if (selectionMask != null)
-            {
-                selectionMaskFileName = proxyTempDir.GetRandomFilePathWithExtension(".psi");
-
-                PSFilterShimImage.SaveSelectionMask(selectionMaskFileName, selectionMask);
-            }
-
-            FilterCase filterCase = data.PluginData.GetFilterTransparencyMode(!string.IsNullOrEmpty(selectionMaskFileName), sourceBitmap!);
+            FilterCase filterCase = data.PluginData.GetFilterTransparencyMode(selectionMask != null, sourceBitmap!);
 
             PSFilterShimSettings settings = new(repeatEffect: false,
                                                 data.ShowAboutDialog,
-                                                srcFileName,
-                                                destFileName,
-                                                checkerboardFileName,
                                                 new ColorRgb24(Environment.PrimaryColor),
                                                 new ColorRgb24(Environment.SecondaryColor),
                                                 documentDpi.X,
                                                 documentDpi.Y,
                                                 filterCase,
-                                                selectionMaskFileName,
-                                                parameterDataFileName,
-                                                resourceDataFileName,
-                                                descriptorRegistryFileName,
+                                                parameterData,
+                                                pseudoResources,
+                                                descriptorRegistry,
                                                 data.LogFilePath,
                                                 new PluginUISettings(highDpiMode));
 
             bool result = true; // assume the filter succeeded this will be set to false if it failed
             PSFilterShimErrorInfo? proxyError = null;
-            FilterPostProcessingOptions postProcessingOptions = FilterPostProcessingOptions.None;
 
             using (PSFilterShimPipeServer server = new(AbortCallback,
                                                        data.PluginData,
@@ -809,12 +756,19 @@ namespace PSFilterPdn
                                                            result = false;
                                                            proxyError = error;
                                                        }),
-                                                       new Action<FilterPostProcessingOptions>(delegate(FilterPostProcessingOptions options)
-                                                       {
-                                                           postProcessingOptions = options;
-                                                       }),
                                                        UpdateProgress,
-                                                       documentMetadataProvider))
+                                                       new Action<Stream, FilterPostProcessingOptions>(delegate(Stream stream, FilterPostProcessingOptions options)
+                                                       {
+                                                           destSurface = PSFilterShimImage.Load(stream, imagingFactory);
+                                                           FilterPostProcessing.Apply(Environment, destSurface, options);
+                                                       }),
+                                                       documentMetadataProvider,
+                                                       sourceBitmap!,
+                                                       ownsSourceImage: false,
+                                                       selectionMask,
+                                                       ownsMaskImage: false,
+                                                       transparencyCheckerboard!,
+                                                       ownsTransparencyCheckerboard: false))
             {
                 int exitCode;
 
@@ -834,12 +788,23 @@ namespace PSFilterPdn
                 {
                     if (!data.ShowAboutDialog)
                     {
-                        SetProxyResultData(destFileName,
-                                           data.PluginData,
-                                           postProcessingOptions,
-                                           parameterDataFileName,
-                                           resourceDataFileName,
-                                           descriptorRegistryFileName);
+                        filterData = data.PluginData;
+
+                        parameterData = server.ParameterData;
+                        if (parameterData != null)
+                        {
+                            filterParameters.AddOrUpdate(data.PluginData, parameterData);
+                        }
+
+                        if (server.PseudoResources != null)
+                        {
+                            pseudoResources = server.PseudoResources;
+                        }
+
+                        if (server.DescriptorRegistry != null)
+                        {
+                            descriptorRegistry = server.DescriptorRegistry;
+                        }
                     }
                 }
                 else
@@ -863,58 +828,6 @@ namespace PSFilterPdn
 
             errorInfo = proxyError;
             return result;
-        }
-
-        private void SetProxyResultData(string destFileName,
-                                        PluginData data,
-                                        FilterPostProcessingOptions postProcessingOptions,
-                                        string parameterDataFileName,
-                                        string resourceDataFileName,
-                                        string descriptorRegistryFileName)
-        {
-
-            destSurface?.Dispose();
-            try
-            {
-                destSurface = PSFilterShimImage.Load(destFileName, imagingFactory);
-                filterData = data;
-            }
-            catch (FileNotFoundException)
-            {
-                destSurface = null;
-                return;
-            }
-
-            FilterPostProcessing.Apply(Environment, destSurface, postProcessingOptions);
-
-            try
-            {
-                ParameterData parameterData = MessagePackSerializerUtil.Deserialize<ParameterData>(parameterDataFileName,
-                                                                                                   MessagePackResolver.Options);
-
-                filterParameters.AddOrUpdate(data, parameterData);
-            }
-            catch (FileNotFoundException)
-            {
-            }
-
-            try
-            {
-                pseudoResources = MessagePackSerializerUtil.Deserialize<PseudoResourceCollection>(resourceDataFileName,
-                                                                                                  MessagePackResolver.Options);
-            }
-            catch (FileNotFoundException)
-            {
-            }
-
-            try
-            {
-                descriptorRegistry = MessagePackSerializerUtil.Deserialize<DescriptorRegistryValues>(descriptorRegistryFileName,
-                                                                                                     MessagePackResolver.Options);
-            }
-            catch (FileNotFoundException)
-            {
-            }
         }
 
         private void InitializeEnvironment()

@@ -93,16 +93,21 @@ namespace PSFilterLoad.PSApi
                 || sessionValues.TryGetValue(key, out value);
         }
 
-        private sealed class Formatter : IMessagePackFormatter<DescriptorRegistryValues>
+        private sealed class Formatter : IMessagePackFormatter<DescriptorRegistryValues?>
         {
-            public static readonly IMessagePackFormatter<DescriptorRegistryValues> Instance = new Formatter();
+            public static readonly IMessagePackFormatter<DescriptorRegistryValues?> Instance = new Formatter();
 
             private Formatter()
             {
             }
 
-            public DescriptorRegistryValues Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+            public DescriptorRegistryValues? Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
             {
+                if (reader.TryReadNil())
+                {
+                    return null;
+                }
+
                 options.Security.DepthStep(ref reader);
 
                 var formatter = options.Resolver.GetFormatterWithVerify<Dictionary<string, Dictionary<uint, AETEValue>>>();
@@ -115,8 +120,14 @@ namespace PSFilterLoad.PSApi
                 return new DescriptorRegistryValues(persistedValues, sessionValues);
             }
 
-            public void Serialize(ref MessagePackWriter writer, DescriptorRegistryValues value, MessagePackSerializerOptions options)
+            public void Serialize(ref MessagePackWriter writer, DescriptorRegistryValues? value, MessagePackSerializerOptions options)
             {
+                if (value is null)
+                {
+                    writer.WriteNil();
+                    return;
+                }
+
                 var formatter = options.Resolver.GetFormatterWithVerify<Dictionary<string, Dictionary<uint, AETEValue>>>();
 
                 formatter.Serialize(ref writer, value.persistedValues, options);

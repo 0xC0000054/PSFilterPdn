@@ -17,156 +17,40 @@ using System.IO;
 
 namespace PSFilterPdn
 {
-    // This file must be kept in sync with PSFilterShim/PSFilterShimImage.cs.
-    // The files are duplicated because PSFilterPdn uses the Paint.NET Surface class,
-    // and PSFilterShim uses its own implementation.
-
     internal static class PSFilterShimImage
     {
-        private const int BufferSize = 4096;
-
-        public static IBitmap<ColorBgra32> Load(string path, IImagingFactory imagingFactory)
+        public static IBitmap<ColorBgra32> Load(Stream stream, IImagingFactory imagingFactory)
         {
             IBitmap<ColorBgra32> bitmap;
 
-            using (FileStream stream = new(path,
-                                           FileMode.Open,
-                                           FileAccess.Read,
-                                           FileShare.Read,
-                                           BufferSize,
-                                           FileOptions.SequentialScan))
+
+            PSFilterShimImageHeader header = new(stream);
+
+            if (header.Format != SurfacePixelFormat.Bgra32)
             {
-                PSFilterShimImageHeader header = new(stream);
+                throw new InvalidOperationException("This method requires an image that uses the Bgra32 format.");
+            }
 
-                if (header.Format != SurfacePixelFormat.Bgra32)
+            bitmap = imagingFactory.CreateBitmap<ColorBgra32>(header.Width, header.Height);
+
+            unsafe
+            {
+                using (IBitmapLock<ColorBgra32> dstLock = bitmap.Lock(BitmapLockOptions.Write))
                 {
-                    throw new InvalidOperationException("This method requires an image that uses the Bgra32 format.");
-                }
+                    byte* dstScan0 = (byte*)dstLock.Buffer;
+                    nuint dstStride = (nuint)dstLock.BufferStride;
+                    int rowLengthInBytes = header.Stride;
 
-                bitmap = imagingFactory.CreateBitmap<ColorBgra32>(header.Width, header.Height);
-
-                unsafe
-                {
-                    using (IBitmapLock<ColorBgra32> dstLock = bitmap.Lock(BitmapLockOptions.Write))
+                    for (int y = 0; y < header.Height; y++)
                     {
-                        byte* dstScan0 = (byte*)dstLock.Buffer;
-                        nuint dstStride = (nuint)dstLock.BufferStride;
-                        int rowLengthInBytes = header.Stride;
+                        byte* dstRow = dstScan0 + ((nuint)y * dstStride);
 
-                        for (int y = 0; y < header.Height; y++)
-                        {
-                            byte* dstRow = dstScan0 + ((nuint)y * dstStride);
-
-                            stream.ReadExactly(new Span<byte>(dstRow, rowLengthInBytes));
-                        }
+                        stream.ReadExactly(new Span<byte>(dstRow, rowLengthInBytes));
                     }
                 }
             }
 
             return bitmap;
-        }
-
-        public static unsafe void Save(string path, ImageSurface bitmap)
-        {
-            ArgumentNullException.ThrowIfNull(bitmap, nameof(bitmap));
-
-            PSFilterShimImageHeader header = new(bitmap.Width,
-                                                 bitmap.Height,
-                                                 bitmap.Format);
-            FileStreamOptions options = new()
-            {
-                Mode = FileMode.Create,
-                Access = FileAccess.Write,
-                Share = FileShare.None,
-                PreallocationSize = header.GetTotalFileSize(),
-            };
-
-            using (FileStream stream = new(path, options))
-            {
-                header.Save(stream);
-
-                using (ISurfaceLock bitmapLock = bitmap.Lock(SurfaceLockMode.Read))
-                {
-                    int bufferStride = header.Stride;
-
-                    for (int y = 0; y < header.Height; y++)
-                    {
-                        ReadOnlySpan<byte> pixels = new(bitmapLock.GetRowPointerUnchecked(y), bufferStride);
-
-                        stream.Write(pixels);
-                    }
-                }
-            }
-        }
-
-        public static unsafe void Save(string path, TransparencyCheckerboardSurface bitmap)
-        {
-            ArgumentNullException.ThrowIfNull(bitmap, nameof(bitmap));
-
-            PSFilterShimImageHeader header = new(bitmap.Width,
-                                                 bitmap.Height,
-                                                 SurfacePixelFormat.Pbgra32);
-            FileStreamOptions options = new()
-            {
-                Mode = FileMode.Create,
-                Access = FileAccess.Write,
-                Share = FileShare.None,
-                PreallocationSize = header.GetTotalFileSize(),
-            };
-
-            using (FileStream stream = new(path, options))
-            {
-                header.Save(stream);
-
-                using (ISurfaceLock bitmapLock = bitmap.Lock(SurfaceLockMode.Read))
-                {
-                    int bufferStride = header.Stride;
-
-                    for (int y = 0; y < header.Height; y++)
-                    {
-                        ReadOnlySpan<byte> pixels = new(bitmapLock.GetRowPointerUnchecked(y), bufferStride);
-
-                        stream.Write(pixels);
-                    }
-                }
-            }
-        }
-
-        public static void SaveSelectionMask(string path, MaskSurface surface)
-        {
-            ArgumentNullException.ThrowIfNull(surface, nameof(surface));
-
-            PSFilterShimImageHeader header = new(surface.Width,
-                                                 surface.Height,
-                                                 SurfacePixelFormat.Gray8);
-
-            FileStreamOptions options = new()
-            {
-                Mode = FileMode.Create,
-                Access = FileAccess.Write,
-                Share = FileShare.None,
-                PreallocationSize = header.GetTotalFileSize(),
-            };
-
-            using (FileStream stream = new(path, options))
-            {
-                header.Save(stream);
-
-                int rowLengthInBytes = header.Stride;
-
-                unsafe
-                {
-                    using (ISurfaceLock maskLock = surface.Lock(SurfaceLockMode.Read))
-                    {
-                        for (int y = 0; y < header.Height; y++)
-                        {
-                            byte* src = maskLock.GetRowPointerUnchecked(y);
-
-                            stream.Write(new ReadOnlySpan<byte>(src, rowLengthInBytes));
-                        }
-                    }
-                }
-            }
         }
     }
 }

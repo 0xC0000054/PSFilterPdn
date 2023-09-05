@@ -12,7 +12,6 @@
 
 using MessagePack;
 using PSFilterLoad.PSApi;
-using System;
 
 namespace PSFilterPdn
 {
@@ -22,35 +21,27 @@ namespace PSFilterPdn
     {
         public PSFilterShimSettings(bool repeatEffect,
                                     bool showAboutDialog,
-                                    string sourceImagePath,
-                                    string destinationImagePath,
-                                    string transparencyCheckerboardPath,
                                     ColorRgb24 primaryColor,
                                     ColorRgb24 secondaryColor,
                                     double dpiX,
                                     double dpiY,
                                     FilterCase filterCase,
-                                    string? selectionMaskPath,
-                                    string? parameterDataPath,
-                                    string? pseudoResourcePath,
-                                    string? descriptorRegistryPath,
+                                    ParameterData? parameterData,
+                                    PseudoResourceCollection pseudoResources,
+                                    DescriptorRegistryValues? descriptorRegistry,
                                     string? logFilePath = null,
                                     PluginUISettings? pluginUISettings = null)
         {
             RepeatEffect = repeatEffect;
             ShowAboutDialog = showAboutDialog;
-            SourceImagePath = sourceImagePath ?? throw new ArgumentNullException(nameof(sourceImagePath));
-            DestinationImagePath = destinationImagePath ?? throw new ArgumentNullException(nameof(destinationImagePath));
-            TransparencyCheckerboardPath = transparencyCheckerboardPath ?? throw new ArgumentNullException(nameof(transparencyCheckerboardPath));
             PrimaryColor = primaryColor;
             SecondaryColor = secondaryColor;
             DpiX = dpiX;
             DpiY = dpiY;
             FilterCase = filterCase;
-            SelectionMaskPath = selectionMaskPath;
-            ParameterDataPath = parameterDataPath;
-            PseudoResourcePath = pseudoResourcePath;
-            DescriptorRegistryPath = descriptorRegistryPath;
+            ParameterData = parameterData;
+            PseudoResources = pseudoResources;
+            DescriptorRegistry = descriptorRegistry;
             LogFilePath = logFilePath;
             PluginUISettings = pluginUISettings;
         }
@@ -58,12 +49,6 @@ namespace PSFilterPdn
         public bool RepeatEffect { get; }
 
         public bool ShowAboutDialog { get; }
-
-        public string SourceImagePath { get; }
-
-        public string DestinationImagePath { get; }
-
-        public string TransparencyCheckerboardPath { get; }
 
         public ColorRgb24 PrimaryColor { get; }
 
@@ -75,13 +60,11 @@ namespace PSFilterPdn
 
         public FilterCase FilterCase { get; }
 
-        public string? SelectionMaskPath { get; }
+        public ParameterData? ParameterData { get; }
 
-        public string? ParameterDataPath { get; }
+        public PseudoResourceCollection PseudoResources { get; }
 
-        public string? PseudoResourcePath { get; }
-
-        public string? DescriptorRegistryPath { get; }
+        public DescriptorRegistryValues? DescriptorRegistry { get; }
 
         public string? LogFilePath { get; }
 

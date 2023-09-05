@@ -21,7 +21,6 @@ using TerraFX.Interop.Windows;
 using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.IO;
 using System.Runtime.InteropServices;
 
 using static TerraFX.Interop.Windows.Windows;
@@ -302,53 +301,20 @@ namespace PSFilterShim
                 PluginData pdata = pipeClient.GetPluginData();
                 PSFilterShimSettings settings = pipeClient.GetShimSettings();
 
-                ParameterData? filterParameters = null;
-                if (!string.IsNullOrEmpty(settings.ParameterDataPath))
-                {
-                    try
-                    {
-                        filterParameters = MessagePackSerializerUtil.Deserialize<ParameterData>(settings.ParameterDataPath,
-                                                                                                MessagePackResolver.Options);
-                    }
-                    catch (FileNotFoundException)
-                    {
-                    }
-                }
-
-                PseudoResourceCollection? pseudoResources = null;
-                if (!string.IsNullOrEmpty(settings.PseudoResourcePath))
-                {
-                    try
-                    {
-                        pseudoResources = MessagePackSerializerUtil.Deserialize<PseudoResourceCollection>(settings.PseudoResourcePath,
-                                                                                                          MessagePackResolver.Options);
-                    }
-                    catch (FileNotFoundException)
-                    {
-                    }
-                }
-
-                DescriptorRegistryValues? registryValues = null;
-                if (!string.IsNullOrEmpty(settings.DescriptorRegistryPath))
-                {
-                    try
-                    {
-                        registryValues = MessagePackSerializerUtil.Deserialize<DescriptorRegistryValues>(settings.DescriptorRegistryPath,
-                                                                                                         MessagePackResolver.Options);
-                    }
-                    catch (FileNotFoundException)
-                    {
-                    }
-                }
+                ParameterData? filterParameters = settings.ParameterData;
+                PseudoResourceCollection pseudoResources = settings.PseudoResources;
+                DescriptorRegistryValues? registryValues = settings.DescriptorRegistry;
 
                 IPluginApiLogWriter? logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(pdata, settings.LogFilePath);
                 ImageSurface? source = null;
                 MaskSurface? selectionMask = null;
+                TransparencyCheckerboardSurface? transparencyCheckerboard = null;
 
                 try
                 {
-                    source = PSFilterShimImage.Load(settings.SourceImagePath, imagingFactory);
-                    selectionMask = PSFilterShimImage.LoadSelectionMask(settings.SelectionMaskPath, imagingFactory);
+                    source = pipeClient.GetSourceImage(imagingFactory);
+                    selectionMask = pipeClient.GetSelectionMask(imagingFactory);
+                    transparencyCheckerboard = pipeClient.GetTransparencyCheckerboard(imagingFactory);
 
                     IPluginApiLogger logger = PluginApiLogger.Create(logWriter,
                                                                      () => PluginApiLogCategories.Default,
@@ -359,7 +325,7 @@ namespace PSFilterShim
                     ColorRgb24 secondaryColor = settings.SecondaryColor;
                     RenderTargetFactory renderTargetFactory = new(direct2DFactory);
 
-                    using (SurfaceFactory surfaceFactory = new(imagingFactory, settings.TransparencyCheckerboardPath))
+                    using (SurfaceFactory surfaceFactory = new(imagingFactory, ref transparencyCheckerboard))
                     using (LoadPsFilter lps = new(source,
                                                   takeOwnershipOfSource: true,
                                                   selectionMask,
@@ -410,35 +376,26 @@ namespace PSFilterShim
                         {
                             if (!settings.ShowAboutDialog)
                             {
-                                PSFilterShimImage.Save(settings.DestinationImagePath, lps.Dest);
-                                pipeClient.SetPostProcessingOptions(lps.PostProcessingOptions);
+                                pipeClient.SetDestinationImage(lps.Dest, lps.PostProcessingOptions);
 
                                 if (!lps.IsRepeatEffect)
                                 {
                                     ParameterData parameterData = lps.FilterParameters;
-                                    if (parameterData.ShouldSerialize() && !string.IsNullOrWhiteSpace(settings.ParameterDataPath))
+                                    if (parameterData.ShouldSerialize())
                                     {
-                                        MessagePackSerializerUtil.Serialize(settings.ParameterDataPath,
-                                                                            parameterData,
-                                                                            MessagePackResolver.Options);
+                                        pipeClient.SetParameterData(parameterData);
                                     }
 
                                     pseudoResources = lps.PseudoResources;
-                                    if (pseudoResources.Count > 0 && !string.IsNullOrWhiteSpace(settings.PseudoResourcePath))
+                                    if (pseudoResources.Count > 0)
                                     {
-                                        MessagePackSerializerUtil.Serialize(settings.PseudoResourcePath,
-                                                                            pseudoResources,
-                                                                            MessagePackResolver.Options);
+                                        pipeClient.SetPseudoResources(pseudoResources);
                                     }
 
                                     registryValues = lps.GetRegistryValues();
-                                    if (registryValues != null
-                                        && registryValues.HasData
-                                        && !string.IsNullOrWhiteSpace(settings.DescriptorRegistryPath))
+                                    if (registryValues != null && registryValues.HasData)
                                     {
-                                        MessagePackSerializerUtil.Serialize(settings.DescriptorRegistryPath,
-                                                                            registryValues,
-                                                                            MessagePackResolver.Options);
+                                        pipeClient.SetDescriptorRegistry(registryValues);
                                     }
                                 }
                             }
@@ -457,6 +414,7 @@ namespace PSFilterShim
                     }
                     source?.Dispose();
                     selectionMask?.Dispose();
+                    transparencyCheckerboard?.Dispose();
                 }
             }
             catch (Exception ex)

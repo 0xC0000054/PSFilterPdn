@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PSFilterLoad.PSApi.Imaging.Internal;
-using PSFilterShim;
 using System;
 
 namespace PSFilterLoad.PSApi.Imaging
@@ -21,10 +20,11 @@ namespace PSFilterLoad.PSApi.Imaging
         private readonly IWICFactory imagingFactory;
         private readonly TransparencyCheckerboardSurface transparencyCheckerboardSurface;
 
-        public SurfaceFactory(IWICFactory imagingFactory, string transparencyCheckerboardPath)
+        public SurfaceFactory(IWICFactory imagingFactory, ref TransparencyCheckerboardSurface transparencyCheckerboard)
         {
             this.imagingFactory = imagingFactory ?? throw new ArgumentNullException(nameof(imagingFactory));
-            transparencyCheckerboardSurface = PSFilterShimImage.LoadTransparencyCheckerboard(transparencyCheckerboardPath, imagingFactory);
+            transparencyCheckerboardSurface = transparencyCheckerboard ?? throw new ArgumentNullException(nameof(transparencyCheckerboard));
+            transparencyCheckerboard = null!;
         }
 
         public DisplayPixelsSurface CreateDisplayPixelsSurface(int width, int height)

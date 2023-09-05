@@ -29,18 +29,14 @@ namespace PSFilterPdn
 
                 bool repeatEffect = reader.ReadBoolean();
                 bool showAboutDialog = reader.ReadBoolean();
-                string sourceImagePath = reader.ReadString()!;
-                string destinationImagePath = reader.ReadString()!;
-                string transparencyCheckerboardPath = reader.ReadString()!;
                 ColorRgb24 primaryColor = colorFormatter.Deserialize(ref reader, options);
                 ColorRgb24 secondaryColor = colorFormatter.Deserialize(ref reader, options);
                 double dpiX = reader.ReadDouble();
                 double dpiY = reader.ReadDouble();
                 FilterCase filterCase = resolver.GetFormatterWithVerify<FilterCase>().Deserialize(ref reader, options);
-                string? selectionMaskPath = reader.ReadString();
-                string? parameterDataPath = reader.ReadString();
-                string? pseudoResourcePath = reader.ReadString();
-                string? descriptorRegistryPath = reader.ReadString();
+                ParameterData? parameterData = resolver.GetFormatterWithVerify<ParameterData?>().Deserialize(ref reader, options);
+                PseudoResourceCollection pseudoResources = resolver.GetFormatterWithVerify<PseudoResourceCollection>().Deserialize(ref reader, options);
+                DescriptorRegistryValues? descriptorRegistry = resolver.GetFormatterWithVerify<DescriptorRegistryValues?>().Deserialize(ref reader, options);
                 string? logFilePath = reader.ReadString();
                 PluginUISettings? pluginUISettings = resolver.GetFormatterWithVerify<PluginUISettings?>().Deserialize(ref reader, options);
 
@@ -48,18 +44,14 @@ namespace PSFilterPdn
 
                 return new PSFilterShimSettings(repeatEffect,
                                                 showAboutDialog,
-                                                sourceImagePath,
-                                                destinationImagePath,
-                                                transparencyCheckerboardPath,
                                                 primaryColor,
                                                 secondaryColor,
                                                 dpiX,
                                                 dpiY,
                                                 filterCase,
-                                                selectionMaskPath,
-                                                parameterDataPath,
-                                                pseudoResourcePath,
-                                                descriptorRegistryPath,
+                                                parameterData,
+                                                pseudoResources,
+                                                descriptorRegistry,
                                                 logFilePath,
                                                 pluginUISettings);
             }
@@ -71,18 +63,14 @@ namespace PSFilterPdn
 
                 writer.Write(value.RepeatEffect);
                 writer.Write(value.ShowAboutDialog);
-                writer.Write(value.SourceImagePath);
-                writer.Write(value.DestinationImagePath);
-                writer.Write(value.TransparencyCheckerboardPath);
                 colorFormatter.Serialize(ref writer, value.PrimaryColor, options);
                 colorFormatter.Serialize(ref writer, value.SecondaryColor, options);
                 writer.Write(value.DpiX);
                 writer.Write(value.DpiY);
                 resolver.GetFormatterWithVerify<FilterCase>().Serialize(ref writer, value.FilterCase, options);
-                writer.Write(value.SelectionMaskPath);
-                writer.Write(value.ParameterDataPath);
-                writer.Write(value.PseudoResourcePath);
-                writer.Write(value.DescriptorRegistryPath);
+                resolver.GetFormatterWithVerify<ParameterData?>().Serialize(ref writer, value.ParameterData, options);
+                resolver.GetFormatterWithVerify<PseudoResourceCollection>().Serialize(ref writer, value.PseudoResources, options);
+                resolver.GetFormatterWithVerify<DescriptorRegistryValues?>().Serialize(ref writer, value.DescriptorRegistry, options);
                 writer.Write(value.LogFilePath);
                 resolver.GetFormatterWithVerify<PluginUISettings?>().Serialize(ref writer, value.PluginUISettings, options);
             }
