@@ -89,11 +89,12 @@ namespace PSFilterPdn
         private readonly IImagingFactory imagingFactory;
         private readonly DocumentDpi documentDpi;
         private readonly DocumentMetadataProvider documentMetadataProvider;
-        private readonly EffectInputBitmapSurface sourceBitmap;
-        private readonly MaskSurface? selectionMask;
-        private readonly TransparencyCheckerboardSurface transparencyCheckerboard;
-        private readonly ColorRgb24 primaryColor;
-        private readonly ColorRgb24 secondaryColor;
+        private EffectInputBitmapSurface? sourceBitmap;
+        private MaskSurface? selectionMask;
+        private TransparencyCheckerboardSurface? transparencyCheckerboard;
+        private ColorRgb24 primaryColor;
+        private ColorRgb24 secondaryColor;
+        private bool environmentInitialized;
 
         private IBitmap<ColorBgra32>? destSurface;
         private PluginData? filterData;
@@ -140,11 +141,6 @@ namespace PSFilterPdn
             documentMetadataProvider = new DocumentMetadataProvider(bitmapEffectEnvironment.Document);
             settings = new PSFilterPdnSettings();
             lastSelectedFilterTitle = string.Empty;
-            sourceBitmap = new EffectInputBitmapSurface(bitmapEffectEnvironment.GetSourceBitmapBgra32(), imagingFactory);
-            primaryColor = new ColorRgb24(bitmapEffectEnvironment.PrimaryColor);
-            secondaryColor = new ColorRgb24(bitmapEffectEnvironment.SecondaryColor);
-            selectionMask = SelectionMaskRenderer.FromPdnSelection(bitmapEffectEnvironment);
-            transparencyCheckerboard = new PDNTransparencyCheckerboardSurface(imagingFactory);
 
             PluginThemingUtil.UpdateControlBackColor(this);
             PluginThemingUtil.UpdateControlForeColor(this);
@@ -921,6 +917,15 @@ namespace PSFilterPdn
             }
         }
 
+        private void InitializeEnvironment()
+        {
+            sourceBitmap = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), imagingFactory);
+            primaryColor = new ColorRgb24(Environment.PrimaryColor);
+            secondaryColor = new ColorRgb24(Environment.SecondaryColor);
+            selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, imagingFactory);
+            transparencyCheckerboard = new PDNTransparencyCheckerboardSurface(imagingFactory);
+        }
+
         private void runFilterBtn_Click(object? sender, EventArgs e)
         {
             if (filterTree.SelectedNode?.Tag != null)
@@ -930,6 +935,12 @@ namespace PSFilterPdn
                 if (!filterRunning)
                 {
                     filterRunning = true;
+
+                    if (!environmentInitialized)
+                    {
+                        InitializeEnvironment();
+                        environmentInitialized = true;
+                    }
 
                     FilterThreadData threadData = new(data,
                                                       Handle,
@@ -1991,6 +2002,12 @@ namespace PSFilterPdn
         {
             if (filterTreeNodes != null)
             {
+                if (!environmentInitialized)
+                {
+                    InitializeEnvironment();
+                    environmentInitialized = true;
+                }
+
                 HostState hostState = new()
                 {
                     HasMultipleLayers = false,
