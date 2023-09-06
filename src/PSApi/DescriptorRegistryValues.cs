@@ -39,7 +39,7 @@ namespace PSFilterLoad.PSApi
         }
 
         private DescriptorRegistryValues(Dictionary<string, Dictionary<uint, AETEValue>> persistedValues,
-                                        Dictionary<string, Dictionary<uint, AETEValue>> sessionValues)
+                                         Dictionary<string, Dictionary<uint, AETEValue>> sessionValues)
         {
             this.persistedValues = persistedValues ?? throw new ArgumentNullException(nameof(persistedValues));
             this.sessionValues = sessionValues ?? throw new ArgumentNullException(nameof(sessionValues));
