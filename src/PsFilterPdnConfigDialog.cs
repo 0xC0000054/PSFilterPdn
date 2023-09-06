@@ -830,9 +830,9 @@ namespace PSFilterPdn
 
         private void InitializeEnvironment()
         {
-            IBitmapEffectEnvironment environment = Environment.CreateRef<IBitmapEffectEnvironment>();
+            imagingFactory = Services.GetService<IImagingFactory>() ?? throw new InvalidOperationException("Failed to get the WIC factory.");
 
-            imagingFactory = environment.ImagingFactory;
+            IEffectEnvironment environment = Environment;
             documentDpi = new DocumentDpi(environment.Document.Resolution);
             documentMetadataProvider = new DocumentMetadataProvider(environment.Document);
             sourceBitmap = new EffectInputBitmapSurface(environment.GetSourceBitmapBgra32(), imagingFactory);
