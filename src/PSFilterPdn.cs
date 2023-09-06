@@ -65,7 +65,7 @@ namespace PSFilterPdn
         protected override IEffectConfigForm OnCreateConfigForm()
         {
             repeatEffect = false;
-            return new PsFilterPdnConfigDialog(Environment);
+            return new PsFilterPdnConfigDialog();
         }
 
         private void ShowErrorMessage(IWin32Window window, Exception exception)

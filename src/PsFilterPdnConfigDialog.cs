@@ -13,6 +13,7 @@
 using PaintDotNet;
 using PaintDotNet.AppModel;
 using PaintDotNet.Clipboard;
+using PaintDotNet.ComponentModel;
 using PaintDotNet.Effects;
 using PaintDotNet.Imaging;
 using PSFilterLoad.PSApi;
@@ -86,9 +87,9 @@ namespace PSFilterPdn
         private ColumnHeader plugInLoadErrorListViewColumnHeader;
         private Button copyLoadErrorDetailsButton;
 
-        private readonly IImagingFactory imagingFactory;
-        private readonly DocumentDpi documentDpi;
-        private readonly DocumentMetadataProvider documentMetadataProvider;
+        private IImagingFactory? imagingFactory;
+        private DocumentDpi documentDpi;
+        private DocumentMetadataProvider? documentMetadataProvider;
         private EffectInputBitmapSurface? sourceBitmap;
         private MaskSurface? selectionMask;
         private TransparencyCheckerboardSurface? transparencyCheckerboard;
@@ -123,7 +124,7 @@ namespace PSFilterPdn
         // Disable nullable warnings for the constructor, InitializeComponent produces a bunch of false warnings.
         // The analyzer doesn't check the methods that the constructor calls when ensuring that all fields have been initialized.
 #pragma warning disable CS8618
-        public PsFilterPdnConfigDialog(IBitmapEffectEnvironment bitmapEffectEnvironment)
+        public PsFilterPdnConfigDialog()
         {
             InitializeComponent();
             filterExecutionLogSaveDialog!.ClientGuid = FilterExecutionLogSaveDialogClientGuid;
@@ -135,9 +136,6 @@ namespace PSFilterPdn
             folderNameLbl!.Text = string.Empty;
             searchDirectories = new List<string>();
             highDpiMode = DeviceDpi > DpiHelper.LogicalDpi;
-            imagingFactory = bitmapEffectEnvironment.ImagingFactory;
-            documentDpi = new DocumentDpi(bitmapEffectEnvironment.Document.Resolution);
-            documentMetadataProvider = new DocumentMetadataProvider(bitmapEffectEnvironment.Document);
             settings = new PSFilterPdnSettings();
             lastSelectedFilterTitle = string.Empty;
 
@@ -759,10 +757,10 @@ namespace PSFilterPdn
                                                        UpdateProgress,
                                                        new Action<Stream, FilterPostProcessingOptions>(delegate(Stream stream, FilterPostProcessingOptions options)
                                                        {
-                                                           destSurface = PSFilterShimImage.Load(stream, imagingFactory);
+                                                           destSurface = PSFilterShimImage.Load(stream, imagingFactory!);
                                                            FilterPostProcessing.Apply(Environment, destSurface, options);
                                                        }),
-                                                       documentMetadataProvider,
+                                                       documentMetadataProvider!,
                                                        sourceBitmap!,
                                                        ownsSourceImage: false,
                                                        selectionMask,
@@ -832,10 +830,15 @@ namespace PSFilterPdn
 
         private void InitializeEnvironment()
         {
-            sourceBitmap = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), imagingFactory);
-            primaryColor = new ColorRgb24(Environment.PrimaryColor);
-            secondaryColor = new ColorRgb24(Environment.SecondaryColor);
-            selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment, imagingFactory);
+            IBitmapEffectEnvironment environment = Environment.CreateRef<IBitmapEffectEnvironment>();
+
+            imagingFactory = environment.ImagingFactory;
+            documentDpi = new DocumentDpi(environment.Document.Resolution);
+            documentMetadataProvider = new DocumentMetadataProvider(environment.Document);
+            sourceBitmap = new EffectInputBitmapSurface(environment.GetSourceBitmapBgra32(), imagingFactory);
+            primaryColor = new ColorRgb24(environment.PrimaryColor);
+            secondaryColor = new ColorRgb24(environment.SecondaryColor);
+            selectionMask = SelectionMaskRenderer.FromPdnSelection(environment, imagingFactory);
             transparencyCheckerboard = new PDNTransparencyCheckerboardSurface(imagingFactory);
         }
 
@@ -908,7 +911,7 @@ namespace PSFilterPdn
                         RenderTargetFactory renderTargetFactory = new(Services);
                         FilterCase filterCase = data.GetFilterTransparencyMode(selectionMask is not null, sourceBitmap!);
 
-                        using (SurfaceFactory surfaceFactory = new(imagingFactory, transparencyCheckerboard!))
+                        using (SurfaceFactory surfaceFactory = new(imagingFactory!, transparencyCheckerboard!))
                         using (LoadPsFilter lps = new(sourceBitmap!,
                                                       takeOwnershipOfSource: false,
                                                       selectionMask,
@@ -919,7 +922,7 @@ namespace PSFilterPdn
                                                       documentDpi.Y,
                                                       threadData.ParentWindowHandle,
                                                       filterCase,
-                                                      documentMetadataProvider,
+                                                      documentMetadataProvider!,
                                                       surfaceFactory,
                                                       renderTargetFactory,
                                                       logger,
@@ -948,7 +951,7 @@ namespace PSFilterPdn
                                 if (!showAboutDialog)
                                 {
                                     destSurface?.Dispose();
-                                    destSurface = SurfaceUtil.ToBitmapBgra32(lps.Dest, imagingFactory);
+                                    destSurface = SurfaceUtil.ToBitmapBgra32(lps.Dest, imagingFactory!);
 
                                     FilterPostProcessing.Apply(Environment, destSurface, lps.PostProcessingOptions);
 
