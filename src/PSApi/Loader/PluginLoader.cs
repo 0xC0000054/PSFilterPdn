@@ -109,7 +109,7 @@ namespace PSFilterLoad.PSApi
 
                                 error = ERROR.ERROR_SUCCESS;
 
-                                fixed (char* typePtr = "PiMI")
+                                fixed (char* typePtr = "_8BFM")
                                 {
                                     if (!Windows.EnumResourceNamesW(dll, (ushort*)typePtr, &EnumPiMI, callback))
                                     {
