@@ -13,7 +13,6 @@
 using PaintDotNet;
 using PaintDotNet.AppModel;
 using PaintDotNet.Clipboard;
-using PaintDotNet.ComponentModel;
 using PaintDotNet.Effects;
 using PaintDotNet.Imaging;
 using PSFilterLoad.PSApi;
