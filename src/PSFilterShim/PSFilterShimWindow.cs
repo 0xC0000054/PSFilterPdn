@@ -301,10 +301,6 @@ namespace PSFilterShim
                 PluginData pdata = pipeClient.GetPluginData();
                 PSFilterShimSettings settings = pipeClient.GetShimSettings();
 
-                ParameterData? filterParameters = settings.ParameterData;
-                PseudoResourceCollection pseudoResources = settings.PseudoResources;
-                DescriptorRegistryValues? registryValues = settings.DescriptorRegistry;
-
                 IPluginApiLogWriter? logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(pdata, settings.LogFilePath);
                 ImageSurface? source = null;
                 MaskSurface? selectionMask = null;
@@ -354,16 +350,22 @@ namespace PSFilterShim
                             lps.SetProgressCallback(pipeClient.UpdateFilterProgress);
                         }
 
+                        ParameterData? filterParameters = settings.ParameterData;
+
                         if (filterParameters != null)
                         {
                             lps.FilterParameters = filterParameters;
                             lps.IsRepeatEffect = settings.RepeatEffect;
                         }
 
+                        PseudoResourceCollection pseudoResources = settings.PseudoResources;
+
                         if (pseudoResources != null)
                         {
                             lps.PseudoResources = pseudoResources;
                         }
+
+                        DescriptorRegistryValues? registryValues = settings.DescriptorRegistry;
 
                         if (registryValues != null)
                         {
@@ -380,10 +382,10 @@ namespace PSFilterShim
 
                                 if (!lps.IsRepeatEffect)
                                 {
-                                    ParameterData parameterData = lps.FilterParameters;
-                                    if (parameterData.ShouldSerialize())
+                                    filterParameters = lps.FilterParameters;
+                                    if (filterParameters.ShouldSerialize())
                                     {
-                                        pipeClient.SetParameterData(parameterData);
+                                        pipeClient.SetParameterData(filterParameters);
                                     }
 
                                     pseudoResources = lps.PseudoResources;
