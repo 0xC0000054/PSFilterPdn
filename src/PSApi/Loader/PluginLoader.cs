@@ -550,7 +550,7 @@ namespace PSFilterLoad.PSApi
                 query.logger.Log(query.fileName,
                                  PluginLoadingLogCategory.Error,
                                  "FindResource failed for PiMI.");
-                return true;
+                return false;
             }
 
             HGLOBAL loadRes = Windows.LoadResource(hModule, hRes);
@@ -559,7 +559,7 @@ namespace PSFilterLoad.PSApi
                 query.logger.Log(query.fileName,
                                  PluginLoadingLogCategory.Error,
                                  "LoadResource failed for PiMI.");
-                return true;
+                return false;
             }
 
             void* lockRes = Windows.LockResource(loadRes);
@@ -568,7 +568,7 @@ namespace PSFilterLoad.PSApi
                 query.logger.Log(query.fileName,
                                  PluginLoadingLogCategory.Error,
                                  "LockResource failed for PiMI.");
-                return true;
+                return false;
             }
 
             // The PiMI resource format starts with a 2-byte version number, this is followed by the NUL-terminated filter
