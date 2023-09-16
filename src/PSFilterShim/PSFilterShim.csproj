@@ -28,6 +28,8 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <TrimMode>partial</TrimMode>
     <Configurations>Debug;Release;FastDebug</Configurations>
+    <Nullable>enable</Nullable>
+    <ApplicationIcon>PSFilterShim.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -180,7 +182,6 @@
   </PropertyGroup>
   <PropertyGroup>
     <PdnOutDir>D:\Program Files\paint.net\Effects\PSFilterPdn</PdnOutDir>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <PublishedFiles Include="$(ProjectDir)$(PublishDir)*.*" />

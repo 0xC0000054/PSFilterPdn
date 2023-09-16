@@ -81,6 +81,7 @@ namespace PSFilterShim
                     lpfnWndProc = &WindowProc,
                     hInstance = hInstance,
                     hCursor = arrowCursor,
+                    hIcon = GetApplicationIcon(),
                     hbrBackground = new HBRUSH((void*)(COLOR.COLOR_WINDOW + 1)),
                     lpszClassName = (ushort*)lpszClassName
                 };
@@ -193,6 +194,105 @@ namespace PSFilterShim
 
                 windowRect.X = Math.Max(workingArea.X, workingArea.X + (workingArea.Width - windowRect.Width) / 2);
                 windowRect.Y = Math.Max(workingArea.Y, workingArea.Y + (workingArea.Height - windowRect.Height) / 2);
+            }
+        }
+
+        private static unsafe HICON GetApplicationIcon()
+        {
+            HICON icon = HICON.NULL;
+
+            ushort? iconResourceId = TryGetApplicationIconResourceId();
+
+            if (iconResourceId.HasValue)
+            {
+                HRSRC hResInfo = FindResourceW(HMODULE.NULL, MAKEINTRESOURCE(iconResourceId.Value), RT.RT_ICON);
+
+                if (hResInfo != HRSRC.NULL)
+                {
+                    HGLOBAL hResData = LoadResource(HMODULE.NULL, hResInfo);
+
+                    if (hResData != HGLOBAL.NULL)
+                    {
+                        void* data = LockResource(hResData);
+
+                        if (data != null)
+                        {
+                            uint resourceSize = SizeofResource(HMODULE.NULL, hResInfo);
+
+                            if (resourceSize > 0)
+                            {
+                                icon = CreateIconFromResourceEx((byte*)data,
+                                                                resourceSize,
+                                                                BOOL.TRUE,
+                                                                0x00030000,
+                                                                LR.LR_DEFAULTSIZE,
+                                                                LR.LR_DEFAULTSIZE,
+                                                                LR.LR_DEFAULTCOLOR);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return icon;
+        }
+
+        private static unsafe ushort? TryGetApplicationIconResourceId()
+        {
+            ushort? result = null;
+
+            ushort? iconGroup = TryGetApplicationIconGroupId();
+
+            if (iconGroup.HasValue)
+            {
+                HRSRC hResInfo = FindResourceW(HMODULE.NULL, MAKEINTRESOURCE(iconGroup.Value), RT.RT_GROUP_ICON);
+
+                if (hResInfo != HRSRC.NULL)
+                {
+                    HGLOBAL hResData = LoadResource(HMODULE.NULL, hResInfo);
+
+                    if (hResData != HGLOBAL.NULL)
+                    {
+                        void* data = LockResource(hResData);
+
+                        if (data != null)
+                        {
+                            int id = LookupIconIdFromDirectoryEx((byte*)data, BOOL.TRUE, 0, 0, LR.LR_DEFAULTCOLOR);
+
+                            if (id != 0)
+                            {
+                                result = checked((ushort)id);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private static unsafe ushort? TryGetApplicationIconGroupId()
+        {
+            ushort? result = null;
+
+            ushort value = 0;
+
+            if (EnumResourceNamesW(HMODULE.NULL, RT.RT_GROUP_ICON, &EnumResources, new nint(&value)))
+            {
+                result = value;
+            }
+
+            return result;
+
+            [UnmanagedCallersOnly]
+            static unsafe BOOL EnumResources(HMODULE hModule, ushort* lpType, ushort* lpName, nint lParam)
+            {
+                // The application icon is the first icon and only icon group in the executable.
+                ushort* value = (ushort*)lParam;
+
+                *value = (ushort)new UIntPtr(lpName).ToUInt64();
+
+                return BOOL.TRUE;
             }
         }
 
