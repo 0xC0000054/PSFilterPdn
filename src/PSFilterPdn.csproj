@@ -122,6 +122,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\ClayRGB-elle-V2-g22.icc" />
     <EmbeddedResource Include="Resources\Icons\feather-96.png" />
+    <EmbeddedResource Include="Resources\Icons\feather-120.png" />
     <EmbeddedResource Include="Resources\Icons\feather-144.png" />
     <EmbeddedResource Include="Resources\Icons\feather-192.png" />
     <EmbeddedResource Include="Resources\Icons\feather-384.png" />
@@ -202,7 +203,7 @@
     <Exec Condition="'$(Configuration)' != 'FastDebug' And !Exists('$(NETCoreAppDir)')" Command="$(PkgNuGet_CommandLine)\tools\NuGet.exe install $(NETCoreAppPackageName) -Version $(CurrentRuntimeVersion) -OutputDirectory $(NugetSourceRoot)" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" />
     <Exec Condition="'$(Configuration)' != 'FastDebug' And !Exists('$(WindowsDesktopAppDir)')" Command="$(PkgNuGet_CommandLine)\tools\NuGet.exe install $(WindowsDesktopPackageName) -Version $(CurrentRuntimeVersion) -OutputDirectory $(NugetSourceRoot)" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" />
     <!-- 2nd Step: Trimming with ILLink -->
-    <Exec Condition="'$(Configuration)' != 'FastDebug'" Command="dotnet exec &quot;$(illink)&quot; -a &quot;$(TargetPath)&quot; all &#45;&#45;trim-mode copy &#45;&#45;action copy &#45;&#45;action link &quot;CommunityToolkit.HighPerformance&quot; &#45;&#45;action link &quot;TerraFX.Interop.Windows&quot;  -d $(TargetDir) -d $(NETCoreAppDir) -d $(WindowsDesktopAppDir) &#45;&#45;skip-unresolved -out &quot;$(TargetDir)$(ILLinkFolderName)&quot; &#45;&#45;nowarn $(ILLinkIgnoredWarnings)" />
+    <Exec Condition="'$(Configuration)' != 'FastDebug'" Command="dotnet exec &quot;$(illink)&quot; -a &quot;$(TargetPath)&quot; all --trim-mode copy --action copy --action link &quot;CommunityToolkit.HighPerformance&quot; --action link &quot;TerraFX.Interop.Windows&quot;  -d $(TargetDir) -d $(NETCoreAppDir) -d $(WindowsDesktopAppDir) --skip-unresolved -out &quot;$(TargetDir)$(ILLinkFolderName)&quot; --nowarn $(ILLinkIgnoredWarnings)" />
     <!-- 3rd Step: Copy all dependencies to the output directory -->
     <Copy SourceFiles="@(SourceFile)" DestinationFolder="$(TargetDir)output" OverwriteReadOnlyFiles="true" SkipUnchangedFiles="true" />
     <!-- 4th Step: Delete the ILLink output directory -->
