@@ -287,7 +287,7 @@ namespace PSFilterShim
             [UnmanagedCallersOnly]
             static unsafe BOOL EnumResources(HMODULE hModule, ushort* lpType, ushort* lpName, nint lParam)
             {
-                // The application icon is the first icon and only icon group in the executable.
+                // The application icon is the first and only icon group in the executable.
                 ushort* value = (ushort*)lParam;
 
                 *value = (ushort)new UIntPtr(lpName).ToUInt64();
