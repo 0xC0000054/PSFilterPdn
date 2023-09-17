@@ -75,18 +75,22 @@ namespace PSFilterShim
                     throw new Win32Exception();
                 }
 
-                WNDCLASSW windowClass = new()
+                (ushort largeIcon, ushort smallIcon)? appIconResourceIds = TryGetApplicationIconResourceIds();
+
+                WNDCLASSEXW windowClass = new()
                 {
+                    cbSize = (uint)sizeof(WNDCLASSEXW),
                     style = CS.CS_HREDRAW | CS.CS_VREDRAW,
                     lpfnWndProc = &WindowProc,
                     hInstance = hInstance,
                     hCursor = arrowCursor,
-                    hIcon = GetApplicationIcon(),
+                    hIcon = appIconResourceIds.HasValue ? TryLoadIcon(appIconResourceIds.Value.largeIcon) : HICON.NULL,
                     hbrBackground = new HBRUSH((void*)(COLOR.COLOR_WINDOW + 1)),
-                    lpszClassName = (ushort*)lpszClassName
+                    lpszClassName = (ushort*)lpszClassName,
+                    hIconSm = appIconResourceIds.HasValue ? TryLoadIcon(appIconResourceIds.Value.smallIcon) : HICON.NULL
                 };
 
-                if (RegisterClassW(&windowClass) == 0)
+                if (RegisterClassExW(&windowClass) == 0)
                 {
                     throw new Win32Exception();
                 }
@@ -197,38 +201,33 @@ namespace PSFilterShim
             }
         }
 
-        private static unsafe HICON GetApplicationIcon()
+        private static unsafe HICON TryLoadIcon(ushort iconResourceId)
         {
             HICON icon = HICON.NULL;
 
-            ushort? iconResourceId = TryGetApplicationIconResourceId();
+            HRSRC hResInfo = FindResourceW(HMODULE.NULL, MAKEINTRESOURCE(iconResourceId), RT.RT_ICON);
 
-            if (iconResourceId.HasValue)
+            if (hResInfo != HRSRC.NULL)
             {
-                HRSRC hResInfo = FindResourceW(HMODULE.NULL, MAKEINTRESOURCE(iconResourceId.Value), RT.RT_ICON);
+                HGLOBAL hResData = LoadResource(HMODULE.NULL, hResInfo);
 
-                if (hResInfo != HRSRC.NULL)
+                if (hResData != HGLOBAL.NULL)
                 {
-                    HGLOBAL hResData = LoadResource(HMODULE.NULL, hResInfo);
+                    void* data = LockResource(hResData);
 
-                    if (hResData != HGLOBAL.NULL)
+                    if (data != null)
                     {
-                        void* data = LockResource(hResData);
+                        uint resourceSize = SizeofResource(HMODULE.NULL, hResInfo);
 
-                        if (data != null)
+                        if (resourceSize > 0)
                         {
-                            uint resourceSize = SizeofResource(HMODULE.NULL, hResInfo);
-
-                            if (resourceSize > 0)
-                            {
-                                icon = CreateIconFromResourceEx((byte*)data,
-                                                                resourceSize,
-                                                                BOOL.TRUE,
-                                                                0x00030000,
-                                                                LR.LR_DEFAULTSIZE,
-                                                                LR.LR_DEFAULTSIZE,
-                                                                LR.LR_DEFAULTCOLOR);
-                            }
+                            icon = CreateIconFromResourceEx((byte*)data,
+                                                            resourceSize,
+                                                            BOOL.TRUE,
+                                                            0x00030000,
+                                                            0,
+                                                            0,
+                                                            LR.LR_DEFAULTCOLOR);
                         }
                     }
                 }
@@ -237,9 +236,10 @@ namespace PSFilterShim
             return icon;
         }
 
-        private static unsafe ushort? TryGetApplicationIconResourceId()
+        private static unsafe (ushort largeIcon, ushort smallIcon)? TryGetApplicationIconResourceIds()
         {
-            ushort? result = null;
+            ushort largeIcon = 0;
+            ushort smallIcon = 0;
 
             ushort? iconGroup = TryGetApplicationIconGroupId();
 
@@ -257,18 +257,22 @@ namespace PSFilterShim
 
                         if (data != null)
                         {
-                            int id = LookupIconIdFromDirectoryEx((byte*)data, BOOL.TRUE, 0, 0, LR.LR_DEFAULTCOLOR);
-
-                            if (id != 0)
-                            {
-                                result = checked((ushort)id);
-                            }
+                            largeIcon = checked((ushort)LookupIconIdFromDirectoryEx((byte*)data,
+                                                                                    BOOL.TRUE,
+                                                                                    GetSystemMetrics(SM.SM_CXICON),
+                                                                                    GetSystemMetrics(SM.SM_CYICON),
+                                                                                    LR.LR_DEFAULTCOLOR));
+                            smallIcon = checked((ushort)LookupIconIdFromDirectoryEx((byte*)data,
+                                                                                    BOOL.TRUE,
+                                                                                    GetSystemMetrics(SM.SM_CXSMICON),
+                                                                                    GetSystemMetrics(SM.SM_CYSMICON),
+                                                                                    LR.LR_DEFAULTCOLOR));
                         }
                     }
                 }
             }
 
-            return result;
+            return largeIcon != 0 && smallIcon != 0 ? (largeIcon, smallIcon) : null;
         }
 
         private static unsafe ushort? TryGetApplicationIconGroupId()
