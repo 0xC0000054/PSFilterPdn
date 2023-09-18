@@ -387,7 +387,7 @@ namespace PSFilterShim
                     }
                     return 0;
                 case EndFilterThreadMessage:
-                    WaitForSingleObject(window!.filterThreadHandle, INFINITE);
+                    _ = WaitForSingleObject(window!.filterThreadHandle, INFINITE);
                     CloseHandle(window.filterThreadHandle);
 
                     DestroyWindow(hwnd);
