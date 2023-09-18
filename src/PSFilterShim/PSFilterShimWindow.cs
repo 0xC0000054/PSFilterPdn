@@ -402,10 +402,10 @@ namespace PSFilterShim
         {
             try
             {
-                PluginData pdata = pipeClient.GetPluginData();
+                PluginData pluginData = pipeClient.GetPluginData();
                 PSFilterShimSettings settings = pipeClient.GetShimSettings();
 
-                IPluginApiLogWriter? logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(pdata, settings.LogFilePath);
+                IPluginApiLogWriter? logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(pluginData, settings.LogFilePath);
                 ImageSurface? source = null;
                 MaskSurface? selectionMask = null;
                 TransparencyCheckerboardSurface? transparencyCheckerboard = null;
@@ -476,7 +476,7 @@ namespace PSFilterShim
                             lps.SetRegistryValues(registryValues);
                         }
 
-                        bool result = lps.RunPlugin(pdata, settings.ShowAboutDialog);
+                        bool result = lps.RunPlugin(pluginData, settings.ShowAboutDialog);
 
                         if (result)
                         {

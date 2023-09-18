@@ -44,7 +44,7 @@ namespace PSFilterLoad.PSApi
             {
                 Architecture platform = PEFile.GetProcessorArchitecture(fileName);
 
-                if (!DllProcessorArchtectureIsSupported(platform))
+                if (!DllProcessorArchitectureIsSupported(platform))
                 {
                     logger.Log(fileName,
                                PluginLoadingLogCategory.Error,
@@ -195,7 +195,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// <see langword="true"/> if the DLL processor architecture is supported; otherwise, <see langword="false"/>.
         /// </returns>
-        private static bool DllProcessorArchtectureIsSupported(Architecture platform)
+        private static bool DllProcessorArchitectureIsSupported(Architecture platform)
         {
             bool result;
 
