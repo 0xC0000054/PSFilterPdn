@@ -431,12 +431,12 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Loads a filter from the PluginData.
         /// </summary>
-        /// <param name="pdata">The PluginData of the filter to load.</param>
+        /// <param name="data">The PluginData of the filter to load.</param>
         /// <exception cref="EntryPointNotFoundException">The entry point specified by the PluginData.entryPoint field was not found.</exception>
         /// <exception cref="System.IO.FileNotFoundException">The file specified by the PluginData.fileName field cannot be found.</exception>
-        private void LoadFilter(PluginData pdata)
+        private void LoadFilter(PluginData data)
         {
-            module = new PluginModule(pdata.FileName, pdata.EntryPoint);
+            module = new PluginModule(data.FileName, data.EntryPoint);
         }
 
         /// <summary>
@@ -706,7 +706,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private bool PluginAbout(PluginData pdata)
+        private bool PluginAbout(PluginData data)
         {
             result = PSError.noErr;
 
@@ -719,14 +719,14 @@ namespace PSFilterLoad.PSApi
                 plugInRef = IntPtr.Zero
             };
 
-            if (pdata.ModuleEntryPoints == null)
+            if (data.ModuleEntryPoints == null)
             {
                 module!.entryPoint(FilterSelector.About, &aboutRecord, ref filterGlobalData, ref result);
             }
             else
             {
                 // call all the entry points in the module only one should show the about box.
-                foreach (string entryPoint in pdata.ModuleEntryPoints)
+                foreach (string entryPoint in data.ModuleEntryPoints)
                 {
                     PluginEntryPoint ep = module!.GetEntryPoint(entryPoint);
 
@@ -1079,26 +1079,26 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Runs a filter from the specified PluginData
         /// </summary>
-        /// <param name="pdata">The PluginData to run</param>
+        /// <param name="data">The PluginData to run</param>
         /// <param name="showAbout">Show the Filter's About Box</param>
         /// <returns><c>true</c> if the filter completed processing; otherwise <c>false</c> if an error occurred.</returns>
-        internal bool RunPlugin(PluginData pdata, bool showAbout)
+        internal bool RunPlugin(PluginData data, bool showAbout)
         {
-            LoadFilter(pdata);
+            LoadFilter(data);
 
             if (showAbout)
             {
-                return PluginAbout(pdata);
+                return PluginAbout(data);
             }
 
-            useChannelPorts = EnableChannelPorts(pdata);
-            basicSuiteProvider.SetPluginName(pdata.Title.TrimEnd('.'));
+            useChannelPorts = EnableChannelPorts(data);
+            basicSuiteProvider.SetPluginName(data.Title.TrimEnd('.'));
 
             bool copySourceToDestination = true;
 
-            if (pdata.FilterInfo != null)
+            if (data.FilterInfo != null)
             {
-                FilterCaseInfo info = pdata.FilterInfo[filterCase];
+                FilterCaseInfo info = data.FilterInfo[filterCase];
                 inputHandling = info.InputHandling;
                 outputHandling = info.OutputHandling;
                 FilterCaseInfoFlags filterCaseFlags = info.Flags1;
@@ -1126,10 +1126,10 @@ namespace PSFilterLoad.PSApi
                 CopySourceToDestination();
             }
 
-            if (pdata.Aete != null)
+            if (data.Aete != null)
             {
-                descriptorSuite.Aete = pdata.Aete;
-                basicSuiteProvider.SetAeteData(pdata.Aete);
+                descriptorSuite.Aete = data.Aete;
+                basicSuiteProvider.SetAeteData(data.Aete);
             }
 
             SetupSuites();
@@ -1262,18 +1262,18 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="inData">The buffer to check.</param>
         /// <param name="inRect">The new source rectangle.</param>
-        /// <param name="loplane">The loplane.</param>
-        /// <param name="hiplane">The hiplane.</param>
+        /// <param name="loPlane">The low plane.</param>
+        /// <param name="hiPlane">The high plane.</param>
         /// <returns> <c>true</c> if a the buffer needs to be resized; otherwise, <c>false</c></returns>
-        private static bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loplane, int hiplane)
+        private static bool ResizeBuffer(IntPtr inData, Rect16 inRect, int loPlane, int hiPlane)
         {
             nuint size = Memory.Size(inData);
 
             int width = inRect.right - inRect.left;
             int height = inRect.bottom - inRect.top;
-            int nplanes = hiplane - loplane + 1;
+            int numberOfPlanes = hiPlane - loPlane + 1;
 
-            ulong bufferSize = (ulong)width * (ulong)nplanes * (ulong)height;
+            ulong bufferSize = (ulong)width * (ulong)numberOfPlanes * (ulong)height;
 
             return bufferSize != size;
         }
@@ -1288,7 +1288,7 @@ namespace PSFilterLoad.PSApi
             short error;
 
             logger.Log(PluginApiLogCategory.AdvanceStateCallback,
-                       "Inrect = {0}, Outrect = {1}, maskRect = {2}",
+                       "inRect = {0}, outRect = {1}, maskRect = {2}",
                        filterRecord->inRect,
                        filterRecord->outRect,
                        filterRecord->maskRect);
@@ -1704,7 +1704,7 @@ namespace PSFilterLoad.PSApi
         private unsafe short FillInputBuffer(FilterRecord* filterRecord)
         {
             logger.Log(PluginApiLogCategory.AdvanceStateCallback,
-                       "inRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}, inputRate: {4}",
+                       "inRowBytes: {0}, Rect: {1}, loPlane: {2}, hiPlane: {3}, inputRate: {4}",
                        filterRecord->inRowBytes,
                        filterRecord->inRect,
                        filterRecord->inLoPlane,
@@ -1790,7 +1790,7 @@ namespace PSFilterLoad.PSApi
         private unsafe short FillOutputBuffer(FilterRecord* filterRecord)
         {
             logger.Log(PluginApiLogCategory.AdvanceStateCallback,
-                       "outRowBytes: {0}, Rect: {1}, loplane: {2}, hiplane: {3}",
+                       "outRowBytes: {0}, Rect: {1}, loPlane: {2}, hiPlane: {3}",
                        filterRecord->outRowBytes,
                        filterRecord->outRect,
                        filterRecord->outLoPlane,
@@ -1991,16 +1991,16 @@ namespace PSFilterLoad.PSApi
         /// <param name="outData">The output buffer.</param>
         /// <param name="outRowBytes">The stride of the output buffer.</param>
         /// <param name="rect">The target rectangle within the image.</param>
-        /// <param name="loplane">The output loPlane.</param>
-        /// <param name="hiplane">The output hiPlane.</param>
-        private unsafe void StoreOutputBuffer(IntPtr outData, int outRowBytes, Rect16 rect, int loplane, int hiplane)
+        /// <param name="loPlane">The output loPlane.</param>
+        /// <param name="hiPlane">The output hiPlane.</param>
+        private unsafe void StoreOutputBuffer(IntPtr outData, int outRowBytes, Rect16 rect, int loPlane, int hiPlane)
         {
             logger.Log(PluginApiLogCategory.AdvanceStateCallback,
-                       "inRowBytes = {0}, Rect = {1}, loplane = {2}, hiplane = {3}",
+                       "inRowBytes = {0}, Rect = {1}, loPlane = {2}, hiPlane = {3}",
                        outRowBytes,
                        rect,
-                       loplane,
-                       hiplane);
+                       loPlane,
+                       hiPlane);
 
             if (outData == IntPtr.Zero)
             {
@@ -2014,8 +2014,8 @@ namespace PSFilterLoad.PSApi
                     return;
                 }
 
-                int channelIndex = loplane;
-                switch (loplane)
+                int channelIndex = loPlane;
+                switch (loPlane)
                 {
                     case 0:
                         channelIndex = 2;
@@ -2025,7 +2025,7 @@ namespace PSFilterLoad.PSApi
                         break;
                 }
 
-                int nplanes = hiplane - loplane + 1;
+                int nplanes = hiPlane - loPlane + 1;
                 int width = rect.right - rect.left;
                 int height = rect.bottom - rect.top;
 
@@ -2364,7 +2364,7 @@ namespace PSFilterLoad.PSApi
             {
                 SetupDisplaySurface(width, height, hasTransparencyMask);
 
-                byte* baseAddr = (byte*)srcPixelMap->baseAddr.ToPointer();
+                byte* baseAddress = (byte*)srcPixelMap->baseAddr.ToPointer();
 
                 int top = srcRect->top;
                 int left = srcRect->left;
@@ -2384,7 +2384,7 @@ namespace PSFilterLoad.PSApi
                         int bluePlaneOffset = srcPixelMap->planeBytes * 2;
                         for (int y = top; y < bottom; y++)
                         {
-                            byte* redPlane = baseAddr + (y * srcPixelMap->rowBytes) + left;
+                            byte* redPlane = baseAddress + (y * srcPixelMap->rowBytes) + left;
                             byte* greenPlane = redPlane + greenPlaneOffset;
                             byte* bluePlane = redPlane + bluePlaneOffset;
 
@@ -2407,7 +2407,7 @@ namespace PSFilterLoad.PSApi
                     {
                         for (int y = top; y < bottom; y++)
                         {
-                            byte* src = baseAddr + (y * srcPixelMap->rowBytes) + (left * srcPixelMap->colBytes);
+                            byte* src = baseAddress + (y * srcPixelMap->rowBytes) + (left * srcPixelMap->colBytes);
                             byte* dst = displaySurfaceLock.GetRowPointerUnchecked(y - top);
 
                             for (int x = 0; x < width; x++)
@@ -2424,7 +2424,7 @@ namespace PSFilterLoad.PSApi
                 }
 
                 // Apply the transparency mask if present.
-                bool hasTranparency = false;
+                bool hasTransparency = false;
 
                 if (hasTransparencyMask)
                 {
@@ -2446,7 +2446,7 @@ namespace PSFilterLoad.PSApi
 
                                     if (alpha < 255)
                                     {
-                                        hasTranparency = true;
+                                        hasTransparency = true;
                                         dst[0] = PremultiplyColor(dst[0], alpha);
                                         dst[1] = PremultiplyColor(dst[1], alpha);
                                         dst[2] = PremultiplyColor(dst[2], alpha);
@@ -2476,7 +2476,7 @@ namespace PSFilterLoad.PSApi
                 displayPixelsRenderTarget.BeginDraw();
                 try
                 {
-                    if (hasTranparency)
+                    if (hasTransparency)
                     {
                         transparencyCheckerboard ??= surfaceFactory.CreateTransparencyCheckerboardSurface();
                         checkerboardBrush ??= displayPixelsRenderTarget.CreateBitmapBrush(transparencyCheckerboard);
@@ -2498,7 +2498,7 @@ namespace PSFilterLoad.PSApi
                         }
                     }
 
-                    using (IDeviceBitmap deviceBitmap = displayPixelsRenderTarget.CreateBitmap(displaySurface, !hasTranparency))
+                    using (IDeviceBitmap deviceBitmap = displayPixelsRenderTarget.CreateBitmap(displaySurface, !hasTransparency))
                     {
                         displayPixelsRenderTarget.DrawBitmap(deviceBitmap);
                     }
@@ -2955,12 +2955,12 @@ namespace PSFilterLoad.PSApi
                 }
                 if (descriptorParametersPtr != IntPtr.Zero)
                 {
-                    PIDescriptorParameters* descParam = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
+                    PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
 
-                    if (descParam->descriptor != Handle.Null)
+                    if (descriptorParameters->descriptor != Handle.Null)
                     {
-                        handleSuite.UnlockHandle(descParam->descriptor);
-                        handleSuite.DisposeHandle(descParam->descriptor);
+                        handleSuite.UnlockHandle(descriptorParameters->descriptor);
+                        handleSuite.DisposeHandle(descriptorParameters->descriptor);
                     }
 
                     Memory.Free(descriptorParametersPtr);
