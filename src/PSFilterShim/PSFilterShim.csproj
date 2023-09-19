@@ -3,10 +3,6 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <PlatformTarget>x86</PlatformTarget>
     <OutputType>WinExe</OutputType>
-    <SccProjectName>Svn</SccProjectName>
-    <SccLocalPath>Svn</SccLocalPath>
-    <SccAuxPath>Svn</SccAuxPath>
-    <SccProvider>SubversionScc</SccProvider>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
