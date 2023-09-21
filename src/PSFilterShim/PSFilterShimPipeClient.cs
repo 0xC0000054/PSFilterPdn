@@ -454,42 +454,6 @@ namespace PSFilterShim
         }
 
         [SkipLocalsInit]
-        private byte[] SendMessageToServer(Command command, int value)
-        {
-            byte[] reply = Array.Empty<byte>();
-
-            using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
-            {
-                stream.Connect();
-
-                const int dataLength = sizeof(byte) + sizeof(int);
-
-                Span<byte> messageBuffer = stackalloc byte[sizeof(int) + dataLength];
-
-                BinaryPrimitives.WriteInt32LittleEndian(messageBuffer, dataLength);
-                messageBuffer[4] = (byte)command;
-                BinaryPrimitives.WriteInt32LittleEndian(messageBuffer.Slice(5), value);
-
-                stream.Write(messageBuffer);
-
-                Span<byte> replyLengthBuffer = stackalloc byte[4];
-
-                stream.ReadExactly(replyLengthBuffer);
-
-                int replyLength = BinaryPrimitives.ReadInt32LittleEndian(replyLengthBuffer);
-
-                if (replyLength > 0)
-                {
-                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
-
-                    stream.Read(reply, 0, replyLength);
-                }
-            }
-
-            return reply;
-        }
-
-        [SkipLocalsInit]
         private byte[] SendErrorMessageToServer(string message, string details)
         {
             byte[] reply = Array.Empty<byte>();
