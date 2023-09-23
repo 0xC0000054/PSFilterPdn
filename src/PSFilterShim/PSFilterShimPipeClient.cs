@@ -404,7 +404,6 @@ namespace PSFilterShim
             return reply;
         }
 
-        [SkipLocalsInit]
         private byte[] SendErrorMessageToServer(string message, string details)
         {
             byte[] reply = Array.Empty<byte>();
@@ -413,57 +412,9 @@ namespace PSFilterShim
             {
                 stream.Connect();
 
-                int errorMessageLength = 0;
-                int errorDetailsLength = 0;
-
-                if (!string.IsNullOrEmpty(message))
-                {
-                    errorMessageLength = Encoding.UTF8.GetByteCount(message);
-
-                    if (!string.IsNullOrEmpty(details))
-                    {
-                        errorDetailsLength = Encoding.UTF8.GetByteCount(details);
-                    }
-                }
-
                 stream.WriteByte((byte)Command.SetErrorInfo);
-                stream.WriteInt32LittleEndian(errorMessageLength);
-                stream.WriteInt32LittleEndian(errorDetailsLength);
-
-                if (errorMessageLength > 0)
-                {
-                    int maxStringLength = Math.Max(errorMessageLength, errorDetailsLength);
-                    byte[]? arrayFromPool = null;
-
-                    try
-                    {
-                        const int MaxStackBufferSize = 256;
-
-                        Span<byte> buffer = stackalloc byte[MaxStackBufferSize];
-
-                        if (maxStringLength > MaxStackBufferSize)
-                        {
-                            arrayFromPool = ArrayPool<byte>.Shared.Rent(maxStringLength);
-                            buffer = arrayFromPool;
-                        }
-
-                        int bytesWritten = Encoding.UTF8.GetBytes(message, buffer);
-                        stream.Write(buffer.Slice(0, bytesWritten));
-
-                        if (errorDetailsLength > 0)
-                        {
-                            bytesWritten = Encoding.UTF8.GetBytes(details, buffer);
-                            stream.Write(buffer.Slice(0, bytesWritten));
-                        }
-                    }
-                    finally
-                    {
-                        if (arrayFromPool != null)
-                        {
-                            ArrayPool<byte>.Shared.Return(arrayFromPool);
-                        }
-                    }
-                }
+                WriteUtf8String(stream, message);
+                WriteUtf8String(stream, details);
 
                 int replyLength = stream.ReadInt32LittleEndian();
 
@@ -537,6 +488,43 @@ namespace PSFilterShim
                 }
 
                 stream.WaitForPipeDrain();
+            }
+        }
+
+        [SkipLocalsInit]
+        private void WriteUtf8String(Stream stream, string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                stream.WriteInt32LittleEndian(0);
+                return;
+            }
+
+            int maxStringLength = Encoding.UTF8.GetMaxByteCount(value.Length);
+            byte[]? arrayFromPool = null;
+
+            try
+            {
+                const int MaxStackBufferSize = 256;
+
+                Span<byte> buffer = stackalloc byte[MaxStackBufferSize];
+
+                if (maxStringLength > MaxStackBufferSize)
+                {
+                    arrayFromPool = ArrayPool<byte>.Shared.Rent(maxStringLength);
+                    buffer = arrayFromPool;
+                }
+
+                int bytesWritten = Encoding.UTF8.GetBytes(value, buffer);
+                stream.WriteInt32LittleEndian(bytesWritten);
+                stream.Write(buffer.Slice(0, bytesWritten));
+            }
+            finally
+            {
+                if (arrayFromPool != null)
+                {
+                    ArrayPool<byte>.Shared.Return(arrayFromPool);
+                }
             }
         }
     }

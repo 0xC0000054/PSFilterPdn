@@ -271,21 +271,13 @@ namespace PSFilterPdn
 
         private static PSFilterShimErrorInfo? GetErrorInfo(Stream stream)
         {
-            int messageLength = stream.ReadInt32LittleEndian();
-            int detailsLength = stream.ReadInt32LittleEndian();
+            string message = ReadUtf8String(stream);
+            string details = ReadUtf8String(stream);
 
             PSFilterShimErrorInfo? errorInfo = null;
 
-            if (messageLength > 0)
+            if (!string.IsNullOrEmpty(message))
             {
-                string message = ReadUtf8String(stream, messageLength);
-                string details = string.Empty;
-
-                if (detailsLength > 0)
-                {
-                    details = ReadUtf8String(stream, detailsLength);
-                }
-
                 errorInfo = new PSFilterShimErrorInfo(message, details);
             }
 
@@ -293,9 +285,11 @@ namespace PSFilterPdn
         }
 
         [SkipLocalsInit]
-        private static string ReadUtf8String(Stream stream, int lengthInBytes)
+        private static string ReadUtf8String(Stream stream)
         {
             string value = string.Empty;
+
+            int lengthInBytes = stream.ReadInt32LittleEndian();
 
             if (lengthInBytes > 0)
             {
@@ -485,8 +479,7 @@ namespace PSFilterPdn
 
         private void SetDestinationImage(Stream stream)
         {
-            int mapNameLength = stream.ReadInt32LittleEndian();
-            string mapName = ReadUtf8String(stream, mapNameLength);
+            string mapName = ReadUtf8String(stream);
             FilterPostProcessingOptions options = (FilterPostProcessingOptions)stream.ReadInt32LittleEndian();
 
             using (MemoryMappedFile file = MemoryMappedFile.OpenExisting(mapName))
