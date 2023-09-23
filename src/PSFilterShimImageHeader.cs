@@ -12,9 +12,7 @@
 
 using PSFilterLoad.PSApi.Imaging;
 using System;
-using System.Buffers.Binary;
 using System.IO;
-using System.Runtime.CompilerServices;
 
 namespace PSFilterPdn
 {
@@ -34,24 +32,24 @@ namespace PSFilterPdn
         {
             ArgumentNullException.ThrowIfNull(stream, nameof(stream));
 
-            int signature = ReadInt32LittleEndian(stream);
+            int signature = stream.ReadInt32LittleEndian();
 
             if (signature != FileSignature)
             {
                 throw new FormatException("The PSFilterShimImage has an invalid file signature.");
             }
 
-            fileVersion = ReadInt32LittleEndian(stream);
+            fileVersion = stream.ReadInt32LittleEndian();
 
             if (fileVersion != 3)
             {
                 throw new FormatException("The PSFilterShimImage has an unsupported file version.");
             }
 
-            width = ReadInt32LittleEndian(stream);
-            height = ReadInt32LittleEndian(stream);
-            format = (SurfacePixelFormat)ReadInt32LittleEndian(stream);
-            stride = ReadInt32LittleEndian(stream);
+            width = stream.ReadInt32LittleEndian();
+            height = stream.ReadInt32LittleEndian();
+            format = (SurfacePixelFormat)stream.ReadInt32LittleEndian();
+            stride = stream.ReadInt32LittleEndian();
         }
 
         public PSFilterShimImageHeader(int width,
@@ -96,12 +94,12 @@ namespace PSFilterPdn
         {
             ArgumentNullException.ThrowIfNull(stream, nameof(stream));
 
-            WriteInt32LittleEndian(stream, FileSignature);
-            WriteInt32LittleEndian(stream, fileVersion);
-            WriteInt32LittleEndian(stream, width);
-            WriteInt32LittleEndian(stream, height);
-            WriteInt32LittleEndian(stream, (int)format);
-            WriteInt32LittleEndian(stream, stride);
+            stream.WriteInt32LittleEndian(FileSignature);
+            stream.WriteInt32LittleEndian(fileVersion);
+            stream.WriteInt32LittleEndian(width);
+            stream.WriteInt32LittleEndian(height);
+            stream.WriteInt32LittleEndian((int)format);
+            stream.WriteInt32LittleEndian(stride);
         }
 
         private static long GetHeaderSize()
@@ -114,26 +112,6 @@ namespace PSFilterPdn
             headerSize += sizeof(int); // stride
 
             return headerSize;
-        }
-
-        [SkipLocalsInit]
-        private static int ReadInt32LittleEndian(Stream stream)
-        {
-            Span<byte> bytes = stackalloc byte[sizeof(int)];
-
-            stream.ReadExactly(bytes);
-
-            return BinaryPrimitives.ReadInt32LittleEndian(bytes);
-        }
-
-        [SkipLocalsInit]
-        private static void WriteInt32LittleEndian(Stream stream, int value)
-        {
-            Span<byte> bytes = stackalloc byte[sizeof(int)];
-
-            BinaryPrimitives.WriteInt32LittleEndian(bytes, value);
-
-            stream.Write(bytes);
         }
     }
 }

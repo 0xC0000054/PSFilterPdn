@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using CommunityToolkit.HighPerformance.Buffers;
 using MessagePack;
 using System;
 using System.Buffers;
@@ -19,16 +18,6 @@ namespace PSFilterPdn
 {
     public static class MessagePackSerializerUtil
     {
-        public static T Deserialize<T>(ReadOnlySpan<byte> buffer, MessagePackSerializerOptions options)
-        {
-            using (MemoryOwner<byte> owner = MemoryOwner<byte>.Allocate(buffer.Length))
-            {
-                buffer.CopyTo(owner.Span);
-
-                return Deserialize<T>(owner.Memory, options);
-            }
-        }
-
         public static T Deserialize<T>(ReadOnlyMemory<byte> buffer, MessagePackSerializerOptions options)
         {
             return MessagePackSerializer.Deserialize<T>(buffer, options);

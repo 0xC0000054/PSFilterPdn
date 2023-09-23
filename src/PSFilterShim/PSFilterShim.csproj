@@ -133,6 +133,7 @@
     <Compile Include="..\PSFilterShimResolver.cs" Link="PSFilterShimResolver.cs" />
     <Compile Include="..\PSFilterShimSettings.cs" Link="PSFilterShimSettings.cs" />
     <Compile Include="..\PSFilterShimSettings.Formatter.cs" Link="PSFilterShimSettings.Formatter.cs" />
+    <Compile Include="..\StreamExtensions.cs" Link="StreamExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.1" />

@@ -18,6 +18,7 @@ using PSFilterPdn;
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
+using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.IO.Pipes;
 using System.Runtime.CompilerServices;
@@ -29,15 +30,11 @@ namespace PSFilterShim
     {
         private readonly string pipeName;
         private readonly byte[] oneByteReplyBuffer;
-        private readonly byte[] noParameterMessageBuffer;
-        private readonly byte[] oneByteParameterMessageBuffer;
 
         public PSFilterShimPipeClient(string pipeName)
         {
             this.pipeName = pipeName ?? throw new ArgumentNullException(nameof(pipeName));
             oneByteReplyBuffer = new byte[1];
-            noParameterMessageBuffer = CreateNoParameterMessageBuffer();
-            oneByteParameterMessageBuffer = CreateOneByteParameterMessageBuffer();
         }
 
         private enum Command : byte
@@ -297,34 +294,6 @@ namespace PSFilterShim
             }
         }
 
-        private static byte[] CreateNoParameterMessageBuffer()
-        {
-            const int dataLength = sizeof(byte);
-
-            byte[] noParameterMessageBuffer = new byte[sizeof(int) + dataLength];
-
-            noParameterMessageBuffer[0] = dataLength & 0xff;
-            noParameterMessageBuffer[1] = (dataLength >> 8) & 0xff;
-            noParameterMessageBuffer[2] = (dataLength >> 16) & 0xff;
-            noParameterMessageBuffer[3] = (dataLength >> 24) & 0xff;
-
-            return noParameterMessageBuffer;
-        }
-
-        private static byte[] CreateOneByteParameterMessageBuffer()
-        {
-            const int dataLength = sizeof(byte) * 2;
-
-            byte[] oneByteParameterMessageBuffer = new byte[sizeof(int) + dataLength];
-
-            oneByteParameterMessageBuffer[0] = dataLength & 0xff;
-            oneByteParameterMessageBuffer[1] = (dataLength >> 8) & 0xff;
-            oneByteParameterMessageBuffer[2] = (dataLength >> 16) & 0xff;
-            oneByteParameterMessageBuffer[3] = (dataLength >> 24) & 0xff;
-
-            return oneByteParameterMessageBuffer;
-        }
-
         private T DeserializeClass<T>(Command command) where T : class
         {
             ReadOnlyMemory<byte> reply = SendMessageToServer(command);
@@ -341,15 +310,9 @@ namespace PSFilterShim
             {
                 stream.Connect();
 
-                noParameterMessageBuffer[4] = (byte)command;
+                stream.WriteByte((byte)command);
 
-                stream.Write(noParameterMessageBuffer, 0, noParameterMessageBuffer.Length);
-
-                Span<byte> replyLengthBuffer = stackalloc byte[4];
-
-                stream.ReadExactly(replyLengthBuffer);
-
-                int replyLength = BinaryPrimitives.ReadInt32LittleEndian(replyLengthBuffer);
+                int replyLength = stream.ReadInt32LittleEndian();
 
                 if (replyLength > 0)
                 {
@@ -397,15 +360,9 @@ namespace PSFilterShim
             {
                 stream.Connect();
 
-                noParameterMessageBuffer[4] = (byte)command;
+                stream.WriteByte((byte)command);
 
-                stream.Write(noParameterMessageBuffer, 0, noParameterMessageBuffer.Length);
-
-                Span<byte> replyLengthBuffer = stackalloc byte[4];
-
-                stream.ReadExactly(replyLengthBuffer);
-
-                int replyLength = BinaryPrimitives.ReadInt32LittleEndian(replyLengthBuffer);
+                int replyLength = stream.ReadInt32LittleEndian();
 
                 if (replyLength > 0)
                 {
@@ -429,16 +386,10 @@ namespace PSFilterShim
             {
                 stream.Connect();
 
-                oneByteParameterMessageBuffer[4] = (byte)command;
-                oneByteParameterMessageBuffer[5] = value;
+                stream.WriteByte((byte)command);
+                stream.WriteByte(value);
 
-                stream.Write(oneByteParameterMessageBuffer, 0, oneByteParameterMessageBuffer.Length);
-
-                Span<byte> replyLengthBuffer = stackalloc byte[4];
-
-                stream.ReadExactly(replyLengthBuffer);
-
-                int replyLength = BinaryPrimitives.ReadInt32LittleEndian(replyLengthBuffer);
+                int replyLength = stream.ReadInt32LittleEndian();
 
                 if (replyLength > 0)
                 {
@@ -475,58 +426,46 @@ namespace PSFilterShim
                     }
                 }
 
-                const int HeaderLength = sizeof(int) * 2;
+                stream.WriteByte((byte)Command.SetErrorInfo);
+                stream.WriteInt32LittleEndian(errorMessageLength);
+                stream.WriteInt32LittleEndian(errorDetailsLength);
 
-                int dataLength = sizeof(byte) + HeaderLength + errorMessageLength + errorDetailsLength;
-                int totalMessageLength = sizeof(int) + dataLength;
-
-                byte[]? arrayFromPool = null;
-
-                try
+                if (errorMessageLength > 0)
                 {
-                    const int MaxStackBufferSize = 256;
+                    int maxStringLength = Math.Max(errorMessageLength, errorDetailsLength);
+                    byte[]? arrayFromPool = null;
 
-                    Span<byte> buffer = stackalloc byte[MaxStackBufferSize];
-
-                    if (totalMessageLength > MaxStackBufferSize)
+                    try
                     {
-                        arrayFromPool = ArrayPool<byte>.Shared.Rent(totalMessageLength);
-                        buffer = arrayFromPool;
-                    }
+                        const int MaxStackBufferSize = 256;
 
-                    Span<byte> messageBuffer = buffer.Slice(0, totalMessageLength);
+                        Span<byte> buffer = stackalloc byte[MaxStackBufferSize];
 
-                    BinaryPrimitives.WriteInt32LittleEndian(messageBuffer, dataLength);
-                    messageBuffer[4] = (byte)Command.SetErrorInfo;
+                        if (maxStringLength > MaxStackBufferSize)
+                        {
+                            arrayFromPool = ArrayPool<byte>.Shared.Rent(maxStringLength);
+                            buffer = arrayFromPool;
+                        }
 
-                    BinaryPrimitives.WriteInt32LittleEndian(messageBuffer.Slice(5), errorMessageLength);
-                    BinaryPrimitives.WriteInt32LittleEndian(messageBuffer.Slice(5 + sizeof(int)), errorDetailsLength);
-
-                    if (errorMessageLength > 0)
-                    {
-                        Encoding.UTF8.GetBytes(message, messageBuffer.Slice(5 + HeaderLength));
+                        int bytesWritten = Encoding.UTF8.GetBytes(message, buffer);
+                        stream.Write(buffer.Slice(0, bytesWritten));
 
                         if (errorDetailsLength > 0)
                         {
-                            Encoding.UTF8.GetBytes(details, messageBuffer.Slice(5 + HeaderLength + errorMessageLength));
+                            bytesWritten = Encoding.UTF8.GetBytes(details, buffer);
+                            stream.Write(buffer.Slice(0, bytesWritten));
                         }
                     }
-
-                    stream.Write(messageBuffer);
-                }
-                finally
-                {
-                    if (arrayFromPool != null)
+                    finally
                     {
-                        ArrayPool<byte>.Shared.Return(arrayFromPool);
+                        if (arrayFromPool != null)
+                        {
+                            ArrayPool<byte>.Shared.Return(arrayFromPool);
+                        }
                     }
                 }
 
-                Span<byte> replyLengthBuffer = stackalloc byte[4];
-
-                stream.ReadExactly(replyLengthBuffer);
-
-                int replyLength = BinaryPrimitives.ReadInt32LittleEndian(replyLengthBuffer);
+                int replyLength = stream.ReadInt32LittleEndian();
 
                 if (replyLength > 0)
                 {
@@ -541,7 +480,6 @@ namespace PSFilterShim
             return reply;
         }
 
-        [SkipLocalsInit]
         private byte[] SendMessageToServer(Command command, ReadOnlySpan<byte> bytes)
         {
             byte[] reply = Array.Empty<byte>();
@@ -550,44 +488,10 @@ namespace PSFilterShim
             {
                 stream.Connect();
 
-                int dataLength = sizeof(byte) + bytes.Length;
-                int totalMessageLength = sizeof(int) + dataLength;
+                stream.WriteByte((byte)command);
+                stream.Write(bytes);
 
-                byte[]? arrayFromPool = null;
-
-                try
-                {
-                    const int MaxStackBufferSize = 256;
-
-                    Span<byte> buffer = stackalloc byte[MaxStackBufferSize];
-
-                    if (totalMessageLength > MaxStackBufferSize)
-                    {
-                        arrayFromPool = ArrayPool<byte>.Shared.Rent(totalMessageLength);
-                        buffer = arrayFromPool;
-                    }
-
-                    Span<byte> messageBuffer = buffer.Slice(0, totalMessageLength);
-
-                    BinaryPrimitives.WriteInt32LittleEndian(messageBuffer, dataLength);
-                    messageBuffer[4] = (byte)command;
-                    bytes.CopyTo(messageBuffer.Slice(5));
-
-                    stream.Write(messageBuffer);
-                }
-                finally
-                {
-                    if (arrayFromPool != null)
-                    {
-                        ArrayPool<byte>.Shared.Return(arrayFromPool);
-                    }
-                }
-
-                Span<byte> replyLengthBuffer = stackalloc byte[4];
-
-                stream.ReadExactly(replyLengthBuffer);
-
-                int replyLength = BinaryPrimitives.ReadInt32LittleEndian(replyLengthBuffer);
+                int replyLength = stream.ReadInt32LittleEndian();
 
                 if (replyLength > 0)
                 {
@@ -604,20 +508,35 @@ namespace PSFilterShim
 
         private void SendFilterDataToServer<T>(FilterDataType type, T value) where T : class
         {
-            using (ArrayPoolBufferWriter<byte> writer = new())
+            byte[] reply;
+
+            using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
             {
-                WriteByte(writer, (byte)type);
+                stream.Connect();
 
-                MessagePackSerializerUtil.Serialize(writer, value, MessagePackResolver.Options);
+                stream.WriteByte((byte)Command.SetFilterData);
+                stream.WriteByte((byte)type);
 
-                SendMessageToServer(Command.SetFilterData, writer.WrittenSpan);
-            }
+                using (ArrayPoolBufferWriter<byte> writer = new())
+                {
+                    MessagePackSerializerUtil.Serialize(writer, value, MessagePackResolver.Options);
 
-            static void WriteByte(IBufferWriter<byte> writer, byte value)
-            {
-                Span<byte> span = writer.GetSpan(1);
-                span[0] = value;
-                writer.Advance(1);
+                    ReadOnlySpan<byte> bytes = writer.WrittenSpan;
+
+                    stream.WriteInt32LittleEndian(bytes.Length);
+                    stream.Write(bytes);
+                }
+
+                int replyLength = stream.ReadInt32LittleEndian();
+
+                if (replyLength > 0)
+                {
+                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
+
+                    stream.ReadExactly(reply, 0, replyLength);
+                }
+
+                stream.WaitForPipeDrain();
             }
         }
     }

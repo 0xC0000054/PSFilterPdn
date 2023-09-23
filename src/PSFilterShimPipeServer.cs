@@ -201,97 +201,68 @@ namespace PSFilterPdn
                 return;
             }
 
-            Span<byte> replySizeBuffer = stackalloc byte[sizeof(int)];
-            server.ReadExactly(replySizeBuffer);
+            Command command = (Command)server.ReadByteEx();
 
-            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(replySizeBuffer);
-
-            const int MaxStackAllocBufferSize = 128;
-
-            Span<byte> buffer = stackalloc byte[MaxStackAllocBufferSize];
-            byte[]? bufferFromPool = null;
-
-            try
+            switch (command)
             {
-                if (messageLength > MaxStackAllocBufferSize)
-                {
-                    bufferFromPool = ArrayPool<byte>.Shared.Rent(messageLength);
-                    buffer = bufferFromPool;
-                }
-
-                Span<byte> messageBytes = buffer.Slice(0, messageLength);
-                server.ReadExactly(messageBytes);
-
-                Command command = (Command)messageBytes[0];
-
-                switch (command)
-                {
-                    case Command.AbortCallback:
-                        SendReplyToClient((byte)(abortFunc() ? 1 : 0));
-                        break;
-                    case Command.ReportProgress:
-                        progressCallback!(messageBytes[1]);
-                        SendEmptyReplyToClient();
-                        break;
-                    case Command.GetPluginData:
-                        using (ArrayPoolBufferWriter<byte> bufferWriter = new())
-                        {
-                            MessagePackSerializerUtil.Serialize(bufferWriter, pluginData, PSFilterShimResolver.Options);
-                            SendReplyToClient(bufferWriter.WrittenSpan);
-                        }
-                        break;
-                    case Command.GetSettings:
-                        using (ArrayPoolBufferWriter<byte> bufferWriter = new())
-                        {
-                            MessagePackSerializerUtil.Serialize(bufferWriter, settings, PSFilterShimResolver.Options);
-                            SendReplyToClient(bufferWriter.WrittenSpan);
-                        }
-                        break;
-                    case Command.SetErrorInfo:
-                        errorCallback(GetErrorInfo(messageBytes.Slice(1)));
-                        SendEmptyReplyToClient();
-                        break;
-                    case Command.GetExifMetadata:
-                        SendReplyToClient(documentMetadataProvider.GetExifData());
-                        break;
-                    case Command.GetXmpMetadata:
-                        SendReplyToClient(documentMetadataProvider.GetXmpData());
-                        break;
-                    case Command.GetIccProfile:
-                        SendReplyToClient(documentMetadataProvider.GetIccProfileData());
-                        break;
-                    case Command.GetSourceImage:
-                        SendSourceImageToClient();
-                        break;
-                    case Command.GetSelectionMask:
-                        SendSelectionMaskToClient();
-                        break;
-                    case Command.GetTransparencyCheckerboardImage:
-                        SendTransparencyCheckerboardToClient();
-                        break;
-                    case Command.ReleaseMappedFile:
-                        memoryMappedFile?.Dispose();
-                        memoryMappedFile = null;
-                        SendEmptyReplyToClient();
-                        break;
-                    case Command.SetDestinationImage:
-                        SetDestinationImage(messageBytes.Slice(1));
-                        SendEmptyReplyToClient();
-                        break;
-                    case Command.SetFilterData:
-                        SetFilterData(messageBytes.Slice(1));
-                        SendEmptyReplyToClient();
-                        break;
-                    default:
-                        throw new InvalidOperationException($"Unknown command value: {command}.");
-                }
-            }
-            finally
-            {
-                if (bufferFromPool != null)
-                {
-                    ArrayPool<byte>.Shared.Return(bufferFromPool);
-                }
+                case Command.AbortCallback:
+                    SendReplyToClient((byte)(abortFunc() ? 1 : 0));
+                    break;
+                case Command.ReportProgress:
+                    progressCallback!(server.ReadByteEx());
+                    SendEmptyReplyToClient();
+                    break;
+                case Command.GetPluginData:
+                    using (ArrayPoolBufferWriter<byte> bufferWriter = new())
+                    {
+                        MessagePackSerializerUtil.Serialize(bufferWriter, pluginData, PSFilterShimResolver.Options);
+                        SendReplyToClient(bufferWriter.WrittenSpan);
+                    }
+                    break;
+                case Command.GetSettings:
+                    using (ArrayPoolBufferWriter<byte> bufferWriter = new())
+                    {
+                        MessagePackSerializerUtil.Serialize(bufferWriter, settings, PSFilterShimResolver.Options);
+                        SendReplyToClient(bufferWriter.WrittenSpan);
+                    }
+                    break;
+                case Command.SetErrorInfo:
+                    errorCallback(GetErrorInfo(server));
+                    SendEmptyReplyToClient();
+                    break;
+                case Command.GetExifMetadata:
+                    SendReplyToClient(documentMetadataProvider.GetExifData());
+                    break;
+                case Command.GetXmpMetadata:
+                    SendReplyToClient(documentMetadataProvider.GetXmpData());
+                    break;
+                case Command.GetIccProfile:
+                    SendReplyToClient(documentMetadataProvider.GetIccProfileData());
+                    break;
+                case Command.GetSourceImage:
+                    SendSourceImageToClient();
+                    break;
+                case Command.GetSelectionMask:
+                    SendSelectionMaskToClient();
+                    break;
+                case Command.GetTransparencyCheckerboardImage:
+                    SendTransparencyCheckerboardToClient();
+                    break;
+                case Command.ReleaseMappedFile:
+                    memoryMappedFile?.Dispose();
+                    memoryMappedFile = null;
+                    SendEmptyReplyToClient();
+                    break;
+                case Command.SetDestinationImage:
+                    SetDestinationImage(server);
+                    SendEmptyReplyToClient();
+                    break;
+                case Command.SetFilterData:
+                    SetFilterData(server);
+                    SendEmptyReplyToClient();
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unknown command value: {command}.");
             }
 
             server.WaitForPipeDrain();
@@ -303,29 +274,65 @@ namespace PSFilterPdn
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
         }
 
-        private static PSFilterShimErrorInfo? GetErrorInfo(ReadOnlySpan<byte> buffer)
+        private static PSFilterShimErrorInfo? GetErrorInfo(Stream stream)
         {
-            const int HeaderSize = sizeof(int) * 2;
-
-            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(buffer);
-            int detailsLength = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(sizeof(int)));
+            int messageLength = stream.ReadInt32LittleEndian();
+            int detailsLength = stream.ReadInt32LittleEndian();
 
             PSFilterShimErrorInfo? errorInfo = null;
 
             if (messageLength > 0)
             {
-                string message = Encoding.UTF8.GetString(buffer.Slice(HeaderSize, messageLength));
+                string message = ReadUtf8String(stream, messageLength);
                 string details = string.Empty;
 
                 if (detailsLength > 0)
                 {
-                    details = Encoding.UTF8.GetString(buffer.Slice(HeaderSize + messageLength, detailsLength));
+                    details = ReadUtf8String(stream, detailsLength);
                 }
 
                 errorInfo = new PSFilterShimErrorInfo(message, details);
             }
 
             return errorInfo;
+        }
+
+        [SkipLocalsInit]
+        private static string ReadUtf8String(Stream stream, int lengthInBytes)
+        {
+            string value = string.Empty;
+
+            if (lengthInBytes > 0)
+            {
+                const int MaxStackAllocBufferSize = 256;
+
+                Span<byte> buffer = stackalloc byte[MaxStackAllocBufferSize];
+                byte[]? bufferFromPool = null;
+
+                try
+                {
+                    if (lengthInBytes > MaxStackAllocBufferSize)
+                    {
+                        bufferFromPool = ArrayPool<byte>.Shared.Rent(lengthInBytes);
+                        buffer = bufferFromPool;
+                    }
+
+                    Span<byte> stringBytes = buffer.Slice(0, lengthInBytes);
+
+                    stream.ReadExactly(stringBytes);
+
+                    value = Encoding.UTF8.GetString(stringBytes);
+                }
+                finally
+                {
+                    if (bufferFromPool != null)
+                    {
+                        ArrayPool<byte>.Shared.Return(bufferFromPool);
+                    }
+                }
+            }
+
+            return value;
         }
 
         private void SendEmptyReplyToClient()
@@ -383,6 +390,7 @@ namespace PSFilterPdn
             }
         }
 
+        [SkipLocalsInit]
         private void SendReplyToClient(string value)
         {
             const int MaxStackAllocBufferSize = 256;
@@ -522,11 +530,11 @@ namespace PSFilterPdn
             SendReplyToClient(name);
         }
 
-        private void SetDestinationImage(ReadOnlySpan<byte> message)
+        private void SetDestinationImage(Stream stream)
         {
-            int mapNameLength = BinaryPrimitives.ReadInt32LittleEndian(message);
-            string mapName = Encoding.UTF8.GetString(message.Slice(sizeof(int), mapNameLength));
-            FilterPostProcessingOptions options = (FilterPostProcessingOptions)BinaryPrimitives.ReadInt32LittleEndian(message.Slice(sizeof(int) + mapNameLength));
+            int mapNameLength = stream.ReadInt32LittleEndian();
+            string mapName = ReadUtf8String(stream, mapNameLength);
+            FilterPostProcessingOptions options = (FilterPostProcessingOptions)stream.ReadInt32LittleEndian();
 
             using (MemoryMappedFile file = MemoryMappedFile.OpenExisting(mapName))
             using (MemoryMappedViewStream viewStream = file.CreateViewStream())
@@ -535,25 +543,29 @@ namespace PSFilterPdn
             }
         }
 
-        private void SetFilterData(ReadOnlySpan<byte> message)
+        private void SetFilterData(Stream stream)
         {
-            FilterDataType type = (FilterDataType)message[0];
+            FilterDataType type = (FilterDataType)stream.ReadByteEx();
+            int dataLength = stream.ReadInt32LittleEndian();
 
-            ReadOnlySpan<byte> data = message.Slice(1);
-
-            switch (type)
+            using (MemoryOwner<byte> owner = MemoryOwner<byte>.Allocate(dataLength))
             {
-                case FilterDataType.Parameter:
-                    ParameterData = MessagePackSerializerUtil.Deserialize<ParameterData>(data, MessagePackResolver.Options);
-                    break;
-                case FilterDataType.PseudoResource:
-                    PseudoResources = MessagePackSerializerUtil.Deserialize<PseudoResourceCollection>(data, MessagePackResolver.Options);
-                    break;
-                case FilterDataType.DescriptorRegistry:
-                    DescriptorRegistry = MessagePackSerializerUtil.Deserialize<DescriptorRegistryValues>(data, MessagePackResolver.Options);
-                    break;
-                default:
-                    throw new InvalidOperationException($"Unsupported {nameof(FilterDataType)}: {type}.");
+                stream.ReadExactly(owner.Span);
+
+                switch (type)
+                {
+                    case FilterDataType.Parameter:
+                        ParameterData = MessagePackSerializerUtil.Deserialize<ParameterData>(owner.Memory, MessagePackResolver.Options);
+                        break;
+                    case FilterDataType.PseudoResource:
+                        PseudoResources = MessagePackSerializerUtil.Deserialize<PseudoResourceCollection>(owner.Memory, MessagePackResolver.Options);
+                        break;
+                    case FilterDataType.DescriptorRegistry:
+                        DescriptorRegistry = MessagePackSerializerUtil.Deserialize<DescriptorRegistryValues>(owner.Memory, MessagePackResolver.Options);
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Unsupported {nameof(FilterDataType)}: {type}.");
+                }
             }
         }
     }
