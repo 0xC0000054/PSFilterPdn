@@ -28,7 +28,6 @@ namespace PSFilterPdn
     {
         private NamedPipeServerStream server;
         private MemoryMappedFile? memoryMappedFile;
-        private readonly byte[] oneByteParameterReplyBuffer;
         private readonly IDocumentMetadataProvider documentMetadataProvider;
         private readonly ImageSurface sourceImage;
         private readonly bool ownsSourceImage;
@@ -115,10 +114,6 @@ namespace PSFilterPdn
             this.ownsMaskImage = ownsMaskImage;
             this.transparencyCheckerboard = transparencyCheckerboard;
             this.ownsTransparencyCheckerboard = ownsTransparencyCheckerboard;
-
-            // 4 bytes for the payload length and one byte for the payload.
-            oneByteParameterReplyBuffer = new byte[5];
-            BinaryPrimitives.WriteInt32LittleEndian(oneByteParameterReplyBuffer, sizeof(byte));
 
             server = new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
@@ -342,52 +337,14 @@ namespace PSFilterPdn
 
         private void SendReplyToClient(byte data)
         {
-            // The constructor already set the message header.
-            oneByteParameterReplyBuffer[4] = data;
-            server!.Write(oneByteParameterReplyBuffer, 0, oneByteParameterReplyBuffer.Length);
+            server!.WriteInt32LittleEndian(1);
+            server.WriteByte(data);
         }
 
-        [SkipLocalsInit]
         private void SendReplyToClient(ReadOnlySpan<byte> data)
         {
-            int count = data.Length;
-
-            if (count == 0)
-            {
-                SendEmptyReplyToClient();
-            }
-            else
-            {
-                const int MaxStackAllocBufferSize = 256;
-
-                int totalMessageLength = sizeof(int) + count;
-
-                Span<byte> buffer = stackalloc byte[MaxStackAllocBufferSize];
-                byte[]? bufferFromPool = null;
-
-                try
-                {
-                    if (totalMessageLength > MaxStackAllocBufferSize)
-                    {
-                        bufferFromPool = ArrayPool<byte>.Shared.Rent(totalMessageLength);
-                        buffer = bufferFromPool;
-                    }
-
-                    Span<byte> messageBytes = buffer.Slice(0, totalMessageLength);
-
-                    BinaryPrimitives.WriteInt32LittleEndian(messageBytes, count);
-                    data.CopyTo(messageBytes.Slice(sizeof(int)));
-
-                    server!.Write(messageBytes);
-                }
-                finally
-                {
-                    if (bufferFromPool != null)
-                    {
-                        ArrayPool<byte>.Shared.Return(bufferFromPool);
-                    }
-                }
-            }
+            server!.WriteInt32LittleEndian(data.Length);
+            server.Write(data);
         }
 
         [SkipLocalsInit]
@@ -395,27 +352,23 @@ namespace PSFilterPdn
         {
             const int MaxStackAllocBufferSize = 256;
 
-            int stringLengthInBytes = Encoding.UTF8.GetByteCount(value);
-
-            int totalMessageLength = checked(sizeof(int) + stringLengthInBytes);
+            int maxStringLengthInBytes = Encoding.UTF8.GetMaxByteCount(value.Length);
 
             Span<byte> buffer = stackalloc byte[MaxStackAllocBufferSize];
             byte[]? bufferFromPool = null;
 
             try
             {
-                if (totalMessageLength > MaxStackAllocBufferSize)
+                if (maxStringLengthInBytes > MaxStackAllocBufferSize)
                 {
-                    bufferFromPool = ArrayPool<byte>.Shared.Rent(totalMessageLength);
+                    bufferFromPool = ArrayPool<byte>.Shared.Rent(maxStringLengthInBytes);
                     buffer = bufferFromPool;
                 }
 
-                Span<byte> messageBytes = buffer.Slice(0, totalMessageLength);
+                int bytesWritten = Encoding.UTF8.GetBytes(value, buffer);
 
-                BinaryPrimitives.WriteInt32LittleEndian(messageBytes, stringLengthInBytes);
-                Encoding.UTF8.GetBytes(value, messageBytes.Slice(sizeof(int)));
-
-                server!.Write(messageBytes);
+                server!.WriteInt32LittleEndian(bytesWritten);
+                server.Write(buffer.Slice(0, bytesWritten));
             }
             finally
             {
