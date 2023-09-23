@@ -261,22 +261,22 @@ namespace PSFilterPdn
                     }
                 }
             }
-            catch (FileNotFoundException fnfex)
+            catch (FileNotFoundException ex)
             {
-                ShowErrorMessage(window, fnfex);
+                ShowErrorMessage(window, ex);
             }
-            catch (NullReferenceException nrex)
+            catch (NullReferenceException ex)
             {
                 // The filter probably tried to access an unimplemented callback function without checking if it is valid.
-                ShowErrorMessage(window, nrex);
+                ShowErrorMessage(window, ex);
             }
-            catch (Win32Exception w32ex)
+            catch (Win32Exception ex)
             {
-                ShowErrorMessage(window, w32ex);
+                ShowErrorMessage(window, ex);
             }
-            catch (System.Runtime.InteropServices.ExternalException eex)
+            catch (System.Runtime.InteropServices.ExternalException ex)
             {
-                ShowErrorMessage(window, eex);
+                ShowErrorMessage(window, ex);
             }
             finally
             {
