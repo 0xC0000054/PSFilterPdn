@@ -17,7 +17,6 @@ using PSFilterLoad.PSApi.Imaging.Internal;
 using PSFilterPdn;
 using System;
 using System.Buffers;
-using System.Buffers.Binary;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.IO.Pipes;
