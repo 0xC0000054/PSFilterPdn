@@ -280,17 +280,7 @@ namespace PSFilterShim
                     }
                 }
 
-                // A GUID string using the 'n' format has a fixed length of 32 characters.
-                const int StringLength = 32;
-                const int BufferSize = sizeof(int) + StringLength + sizeof(int);
-
-                Span<byte> buffer = stackalloc byte[BufferSize];
-
-                BinaryPrimitives.WriteInt32LittleEndian(buffer, StringLength);
-                Encoding.UTF8.GetBytes(mapName, buffer.Slice(sizeof(int), StringLength));
-                BinaryPrimitives.WriteInt32LittleEndian(buffer.Slice(sizeof(int) + StringLength), (int)options);
-
-                SendMessageToServer(Command.SetDestinationImage, buffer);
+                SendDestinationImageToServer(mapName, options);
             }
         }
 
@@ -431,7 +421,7 @@ namespace PSFilterShim
             return reply;
         }
 
-        private byte[] SendMessageToServer(Command command, ReadOnlySpan<byte> bytes)
+        private byte[] SendDestinationImageToServer(string mapName, FilterPostProcessingOptions options)
         {
             byte[] reply = Array.Empty<byte>();
 
@@ -439,8 +429,9 @@ namespace PSFilterShim
             {
                 stream.Connect();
 
-                stream.WriteByte((byte)command);
-                stream.Write(bytes);
+                stream.WriteByte((byte)Command.SetDestinationImage);
+                WriteUtf8String(stream, mapName);
+                stream.WriteInt32LittleEndian((int)options);
 
                 int replyLength = stream.ReadInt32LittleEndian();
 
