@@ -341,6 +341,94 @@ namespace PSFilterShim
             return name;
         }
 
+        private byte[] SendDestinationImageToServer(string mapName, FilterPostProcessingOptions options)
+        {
+            byte[] reply = Array.Empty<byte>();
+
+            using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
+            {
+                stream.Connect();
+
+                stream.WriteByte((byte)Command.SetDestinationImage);
+                WriteUtf8String(stream, mapName);
+                stream.WriteInt32LittleEndian((int)options);
+
+                int replyLength = stream.ReadInt32LittleEndian();
+
+                if (replyLength > 0)
+                {
+                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
+
+                    stream.ReadExactly(reply, 0, replyLength);
+                }
+
+                stream.WaitForPipeDrain();
+            }
+
+            return reply;
+        }
+
+        private byte[] SendErrorMessageToServer(string message, string details)
+        {
+            byte[] reply = Array.Empty<byte>();
+
+            using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
+            {
+                stream.Connect();
+
+                stream.WriteByte((byte)Command.SetErrorInfo);
+                WriteUtf8String(stream, message);
+                WriteUtf8String(stream, details);
+
+                int replyLength = stream.ReadInt32LittleEndian();
+
+                if (replyLength > 0)
+                {
+                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
+
+                    stream.ReadExactly(reply, 0, replyLength);
+                }
+
+                stream.WaitForPipeDrain();
+            }
+
+            return reply;
+        }
+
+        private void SendFilterDataToServer<T>(FilterDataType type, T value) where T : class
+        {
+            byte[] reply;
+
+            using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
+            {
+                stream.Connect();
+
+                stream.WriteByte((byte)Command.SetFilterData);
+                stream.WriteByte((byte)type);
+
+                using (ArrayPoolBufferWriter<byte> writer = new())
+                {
+                    MessagePackSerializerUtil.Serialize(writer, value, MessagePackResolver.Options);
+
+                    ReadOnlySpan<byte> bytes = writer.WrittenSpan;
+
+                    stream.WriteInt32LittleEndian(bytes.Length);
+                    stream.Write(bytes);
+                }
+
+                int replyLength = stream.ReadInt32LittleEndian();
+
+                if (replyLength > 0)
+                {
+                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
+
+                    stream.ReadExactly(reply, 0, replyLength);
+                }
+
+                stream.WaitForPipeDrain();
+            }
+        }
+
         [SkipLocalsInit]
         private byte[] SendMessageToServer(Command command)
         {
@@ -392,94 +480,6 @@ namespace PSFilterShim
             }
 
             return reply;
-        }
-
-        private byte[] SendErrorMessageToServer(string message, string details)
-        {
-            byte[] reply = Array.Empty<byte>();
-
-            using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
-            {
-                stream.Connect();
-
-                stream.WriteByte((byte)Command.SetErrorInfo);
-                WriteUtf8String(stream, message);
-                WriteUtf8String(stream, details);
-
-                int replyLength = stream.ReadInt32LittleEndian();
-
-                if (replyLength > 0)
-                {
-                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
-
-                    stream.ReadExactly(reply, 0, replyLength);
-                }
-
-                stream.WaitForPipeDrain();
-            }
-
-            return reply;
-        }
-
-        private byte[] SendDestinationImageToServer(string mapName, FilterPostProcessingOptions options)
-        {
-            byte[] reply = Array.Empty<byte>();
-
-            using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
-            {
-                stream.Connect();
-
-                stream.WriteByte((byte)Command.SetDestinationImage);
-                WriteUtf8String(stream, mapName);
-                stream.WriteInt32LittleEndian((int)options);
-
-                int replyLength = stream.ReadInt32LittleEndian();
-
-                if (replyLength > 0)
-                {
-                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
-
-                    stream.ReadExactly(reply, 0, replyLength);
-                }
-
-                stream.WaitForPipeDrain();
-            }
-
-            return reply;
-        }
-
-        private void SendFilterDataToServer<T>(FilterDataType type, T value) where T : class
-        {
-            byte[] reply;
-
-            using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
-            {
-                stream.Connect();
-
-                stream.WriteByte((byte)Command.SetFilterData);
-                stream.WriteByte((byte)type);
-
-                using (ArrayPoolBufferWriter<byte> writer = new())
-                {
-                    MessagePackSerializerUtil.Serialize(writer, value, MessagePackResolver.Options);
-
-                    ReadOnlySpan<byte> bytes = writer.WrittenSpan;
-
-                    stream.WriteInt32LittleEndian(bytes.Length);
-                    stream.Write(bytes);
-                }
-
-                int replyLength = stream.ReadInt32LittleEndian();
-
-                if (replyLength > 0)
-                {
-                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
-
-                    stream.ReadExactly(reply, 0, replyLength);
-                }
-
-                stream.WaitForPipeDrain();
-            }
         }
 
         [SkipLocalsInit]
