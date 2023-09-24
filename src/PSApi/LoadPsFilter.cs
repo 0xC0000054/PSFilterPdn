@@ -95,12 +95,12 @@ namespace PSFilterLoad.PSApi
         private bool disposed;
         private PluginModule? module;
         private PluginPhase previousPhase;
-        private Action<byte>? progressFunc;
         private byte lastProgressPercentage;
         private IntPtr filterGlobalData;
         private short result;
 
-        private Func<bool>? abortFunc;
+        private readonly Func<bool>? abortFunc;
+        private readonly Action<byte>? progressFunc;
         private string errorMessage;
         private readonly FilterCase filterCase;
         private readonly double dpiX;
@@ -229,7 +229,7 @@ namespace PSFilterLoad.PSApi
         /// or
         /// <paramref name="logger"/> is null.
         /// or
-        /// <paramref name="abortCallback"/> is null. 
+        /// <paramref name="abortCallback"/> is null.
         /// </exception>
         internal unsafe LoadPsFilter(ImageSurface source,
                                      bool takeOwnershipOfSource,
