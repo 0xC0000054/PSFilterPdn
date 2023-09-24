@@ -352,8 +352,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = new byte[replyLength];
-
+                    reply = GC.AllocateUninitializedArray<byte>(replyLength);
                     stream.ReadExactly(reply, 0, replyLength);
                 }
 
@@ -379,8 +378,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = new byte[replyLength];
-
+                    reply = GC.AllocateUninitializedArray<byte>(replyLength);
                     stream.ReadExactly(reply, 0, replyLength);
                 }
 
@@ -415,8 +413,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = new byte[replyLength];
-
+                    reply = GC.AllocateUninitializedArray<byte>(replyLength);
                     stream.ReadExactly(reply, 0, replyLength);
                 }
 
@@ -439,8 +436,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = new byte[replyLength];
-
+                    reply = GC.AllocateUninitializedArray<byte>(replyLength);
                     stream.ReadExactly(reply, 0, replyLength);
                 }
 
@@ -466,8 +462,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = new byte[replyLength];
-
+                    reply = GC.AllocateUninitializedArray<byte>(replyLength);
                     stream.ReadExactly(reply, 0, replyLength);
                 }
 
