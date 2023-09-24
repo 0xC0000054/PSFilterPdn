@@ -150,20 +150,6 @@ namespace PSFilterLoad.PSApi
         internal ISurface<ImageSurface> Dest => dest;
 
         /// <summary>
-        /// The filter progress callback.
-        /// </summary>
-        /// <param name="callback">The progress callback.</param>
-        internal void SetProgressCallback(Action<byte> callback)
-        {
-            progressFunc = callback ?? throw new ArgumentNullException(nameof(callback));
-        }
-
-        internal void SetAbortCallback(Func<bool> callback)
-        {
-            abortFunc = callback ?? throw new ArgumentNullException(nameof(callback));
-        }
-
-        /// <summary>
         /// Gets the plug-in settings for the current session.
         /// </summary>
         /// <returns>
@@ -237,7 +223,13 @@ namespace PSFilterLoad.PSApi
         /// or
         /// <paramref name="documentMetadataProvider"/> is null.
         /// or
+        /// <paramref name="surfaceFactory"/> is null.
+        /// or
+        /// <paramref name="renderTargetFactory"/> is null.
+        /// or
         /// <paramref name="logger"/> is null.
+        /// or
+        /// <paramref name="abortCallback"/> is null. 
         /// </exception>
         internal unsafe LoadPsFilter(ImageSurface source,
                                      bool takeOwnershipOfSource,
@@ -253,12 +245,16 @@ namespace PSFilterLoad.PSApi
                                      ISurfaceFactory surfaceFactory,
                                      IRenderTargetFactory renderTargetFactory,
                                      IPluginApiLogger logger,
-                                     PluginUISettings? pluginUISettings)
+                                     PluginUISettings? pluginUISettings,
+                                     Func<bool> abortCallback,
+                                     Action<byte>? progressCallback)
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(documentMetadataProvider);
             ArgumentNullException.ThrowIfNull(surfaceFactory);
+            ArgumentNullException.ThrowIfNull(renderTargetFactory);
             ArgumentNullException.ThrowIfNull(logger);
+            ArgumentNullException.ThrowIfNull(abortCallback);
 
             inputHandling = FilterDataHandling.None;
             outputHandling = FilterDataHandling.None;
@@ -277,6 +273,8 @@ namespace PSFilterLoad.PSApi
             scriptingData = null;
             useChannelPorts = false;
             parentWindowHandle = owner;
+            abortFunc = abortCallback;
+            progressFunc = progressCallback;
             PostProcessingOptions = FilterPostProcessingOptions.None;
 
             lastOutRect = Rect16.Empty;

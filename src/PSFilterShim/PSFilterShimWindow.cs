@@ -424,6 +424,8 @@ namespace PSFilterShim
                     ColorRgb24 primaryColor = settings.PrimaryColor;
                     ColorRgb24 secondaryColor = settings.SecondaryColor;
                     RenderTargetFactory renderTargetFactory = new(direct2DFactory);
+                    // As Paint.NET does not currently allow custom progress reporting only set this callback for the effect dialog.
+                    Action<byte>? progressCallback = settings.RepeatEffect ? null : pipeClient.UpdateFilterProgress;
 
                     using (SurfaceFactory surfaceFactory = new(imagingFactory, ref transparencyCheckerboard))
                     using (LoadPsFilter lps = new(source,
@@ -440,19 +442,13 @@ namespace PSFilterShim
                                                   surfaceFactory,
                                                   renderTargetFactory,
                                                   logger,
-                                                  settings.PluginUISettings))
+                                                  settings.PluginUISettings,
+                                                  pipeClient.AbortFilter,
+                                                  progressCallback))
                     {
                         // These items are now owned by the LoadPsFilter instance.
                         source = null;
                         selectionMask = null;
-
-                        lps.SetAbortCallback(pipeClient.AbortFilter);
-
-                        if (!settings.RepeatEffect)
-                        {
-                            // As Paint.NET does not currently allow custom progress reporting only set this callback for the effect dialog.
-                            lps.SetProgressCallback(pipeClient.UpdateFilterProgress);
-                        }
 
                         ParameterData? filterParameters = settings.ParameterData;
 

@@ -927,11 +927,10 @@ namespace PSFilterPdn
                                                       surfaceFactory,
                                                       renderTargetFactory,
                                                       logger,
-                                                      pluginUISettings))
+                                                      pluginUISettings,
+                                                      AbortCallback,
+                                                      UpdateProgress))
                         {
-                            lps.SetAbortCallback(AbortCallback);
-                            lps.SetProgressCallback(UpdateProgress);
-
                             if (descriptorRegistry != null)
                             {
                                 lps.SetRegistryValues(descriptorRegistry);

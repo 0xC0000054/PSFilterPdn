@@ -228,13 +228,14 @@ namespace PSFilterPdn
                                               surfaceFactory,
                                               renderTargetFactory,
                                               logger,
+                                              null,
+                                              AbortCallback,
                                               null))
                 {
                     // These items are now owned by the LoadPsFilter instance.
                     source = null;
                     selectionMask = null;
 
-                    lps.SetAbortCallback(AbortCallback);
                     if (token.DescriptorRegistry != null)
                     {
                         lps.SetRegistryValues(token.DescriptorRegistry);
