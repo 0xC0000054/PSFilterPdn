@@ -10,6 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using CommunityToolkit.HighPerformance;
 using CommunityToolkit.HighPerformance.Buffers;
 using PSFilterLoad.PSApi;
 using PSFilterLoad.PSApi.Imaging;
@@ -20,6 +21,7 @@ using System.IO.MemoryMappedFiles;
 using System.IO.Pipes;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 
 namespace PSFilterPdn
 {
@@ -27,6 +29,11 @@ namespace PSFilterPdn
     {
         private NamedPipeServerStream server;
         private MemoryMappedFile? memoryMappedFile;
+        private readonly PluginData pluginData;
+        private readonly PSFilterShimSettings settings;
+        private readonly Action<PSFilterShimErrorInfo?> errorCallback;
+        private readonly Action<byte>? progressCallback;
+        private readonly Action<Stream, FilterPostProcessingOptions> setDestinationImage;
         private readonly IDocumentMetadataProvider documentMetadataProvider;
         private readonly ImageSurface sourceImage;
         private readonly bool ownsSourceImage;
@@ -34,18 +41,11 @@ namespace PSFilterPdn
         private readonly bool ownsMaskImage;
         private readonly TransparencyCheckerboardSurface transparencyCheckerboard;
         private readonly bool ownsTransparencyCheckerboard;
-
-        private readonly Func<bool> abortFunc;
-        private readonly PluginData pluginData;
-        private readonly PSFilterShimSettings settings;
-        private readonly Action<PSFilterShimErrorInfo?> errorCallback;
-        private readonly Action<byte>? progressCallback;
-        private readonly Action<Stream, FilterPostProcessingOptions> setDestinationImage;
+        private readonly CancellationToken cancellationToken;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PSFilterShimService"/> class.
         /// </summary>
-        /// <param name="abort">The abort callback.</param>
         /// <param name="plugin">The plug-in data.</param>
         /// <param name="settings">The settings for the shim application.</param>
         /// <param name="error">The error callback.</param>
@@ -77,8 +77,7 @@ namespace PSFilterPdn
         /// or
         /// <paramref name="transparencyCheckerboard"/> is null.
         /// </exception>
-        public PSFilterShimPipeServer(Func<bool> abort,
-                                      PluginData plugin,
+        public PSFilterShimPipeServer(PluginData plugin,
                                       PSFilterShimSettings settings,
                                       Action<PSFilterShimErrorInfo?> error,
                                       Action<byte>? progress,
@@ -89,7 +88,8 @@ namespace PSFilterPdn
                                       MaskSurface? maskImage,
                                       bool ownsMaskImage,
                                       TransparencyCheckerboardSurface transparencyCheckerboard,
-                                      bool ownsTransparencyCheckerboard)
+                                      bool ownsTransparencyCheckerboard,
+                                      CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(nameof(plugin));
             ArgumentNullException.ThrowIfNull(nameof(settings));
@@ -100,7 +100,6 @@ namespace PSFilterPdn
             ArgumentNullException.ThrowIfNull(nameof(transparencyCheckerboard));
 
             PipeName = "PSFilterShim_" + Guid.NewGuid().ToString();
-            abortFunc = abort;
             pluginData = plugin;
             this.settings = settings;
             errorCallback = error;
@@ -113,6 +112,7 @@ namespace PSFilterPdn
             this.ownsMaskImage = ownsMaskImage;
             this.transparencyCheckerboard = transparencyCheckerboard;
             this.ownsTransparencyCheckerboard = ownsTransparencyCheckerboard;
+            this.cancellationToken = cancellationToken;
 
             server = new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
@@ -200,7 +200,7 @@ namespace PSFilterPdn
             switch (command)
             {
                 case Command.AbortCallback:
-                    SendReplyToClient((byte)(abortFunc() ? 1 : 0));
+                    SendReplyToClient(cancellationToken.IsCancellationRequested.ToByte());
                     break;
                 case Command.ReportProgress:
                     progressCallback!(server.ReadByteEx());

@@ -106,7 +106,6 @@ namespace PSFilterPdn
         private Thread? filterThread;
 
         private bool filterRunning;
-        private bool formClosePending;
         private List<string> expandedNodes;
         private FilterTreeNodeCollection? filterTreeNodes;
         private List<string> searchDirectories;
@@ -118,6 +117,7 @@ namespace PSFilterPdn
         private bool foundEffectsDir;
         private bool searchBoxIgnoreTextChanged;
 
+        private readonly CancellationTokenSource filterCancellationTokenSource;
         private readonly bool highDpiMode;
 
         // Disable nullable warnings for the constructor, InitializeComponent produces a bunch of false warnings.
@@ -137,6 +137,7 @@ namespace PSFilterPdn
             highDpiMode = DeviceDpi > DpiHelper.LogicalDpi;
             settings = new PSFilterPdnSettings();
             lastSelectedFilterTitle = string.Empty;
+            filterCancellationTokenSource = new CancellationTokenSource();
 
             PluginThemingUtil.UpdateControlBackColor(this);
             PluginThemingUtil.UpdateControlForeColor(this);
@@ -153,6 +154,7 @@ namespace PSFilterPdn
                 sourceBitmap?.Dispose();
                 selectionMask?.Dispose();
                 transparencyCheckerboard?.Dispose();
+                filterCancellationTokenSource?.Dispose();
             }
 
             base.OnDispose(disposing);
@@ -697,7 +699,7 @@ namespace PSFilterPdn
 
         private bool AbortCallback()
         {
-            return formClosePending;
+            return filterCancellationTokenSource.IsCancellationRequested;
         }
 
         private void UpdateProgress(byte progressPercentage)
@@ -745,8 +747,7 @@ namespace PSFilterPdn
             bool result = true; // assume the filter succeeded this will be set to false if it failed
             PSFilterShimErrorInfo? proxyError = null;
 
-            using (PSFilterShimPipeServer server = new(AbortCallback,
-                                                       data.PluginData,
+            using (PSFilterShimPipeServer server = new(data.PluginData,
                                                        settings,
                                                        new Action<PSFilterShimErrorInfo?>(delegate(PSFilterShimErrorInfo? error)
                                                        {
@@ -765,7 +766,8 @@ namespace PSFilterPdn
                                                        selectionMask,
                                                        ownsMaskImage: false,
                                                        transparencyCheckerboard!,
-                                                       ownsTransparencyCheckerboard: false))
+                                                       ownsTransparencyCheckerboard: false,
+                                                       filterCancellationTokenSource.Token))
             {
                 int exitCode;
 
@@ -1014,7 +1016,7 @@ namespace PSFilterPdn
 
             filterRunning = false;
 
-            if (formClosePending)
+            if (filterCancellationTokenSource.IsCancellationRequested)
             {
                 Close();
             }
@@ -1317,7 +1319,11 @@ namespace PSFilterPdn
 
         private void updateFilterListBw_RunWorkerCompleted(object? sender, RunWorkerCompletedEventArgs e)
         {
-            if (!e.Cancelled)
+            if (e.Cancelled)
+            {
+                Close();
+            }
+            else
             {
                 if (e.Error != null)
                 {
@@ -1336,12 +1342,8 @@ namespace PSFilterPdn
                     folderLoadProgress.Value = 0;
                     folderLoadPanel.Visible = false;
                 }
-            }
 
-            Cursor = Cursors.Default;
-            if (formClosePending)
-            {
-                Close();
+                Cursor = Cursors.Default;
             }
         }
 
@@ -1408,7 +1410,6 @@ namespace PSFilterPdn
             if (updateFilterListBw.IsBusy && searchDirectories.Count > 0)
             {
                 updateFilterListBw.CancelAsync();
-                formClosePending = true;
                 e.Cancel = true;
             }
 
@@ -1416,7 +1417,7 @@ namespace PSFilterPdn
             {
                 if (DialogResult == DialogResult.Cancel)
                 {
-                    formClosePending = true;
+                    filterCancellationTokenSource.Cancel();
                 }
                 e.Cancel = true;
             }

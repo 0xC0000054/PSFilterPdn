@@ -124,8 +124,7 @@ namespace PSFilterPdn
 
                 DocumentMetadataProvider documentMetadataProvider = new(Environment.Document);
 
-                using (PSFilterShimPipeServer server = new(AbortCallback,
-                                                           token.FilterData,
+                using (PSFilterShimPipeServer server = new(token.FilterData,
                                                            settings,
                                                            delegate (PSFilterShimErrorInfo? data)
                                                            {
@@ -144,7 +143,8 @@ namespace PSFilterPdn
                                                            selectionMask,
                                                            ownsMaskImage: false,
                                                            transparencyCheckerboard,
-                                                           ownsTransparencyCheckerboard: false))
+                                                           ownsTransparencyCheckerboard: false,
+                                                           CancellationToken))
                 {
                     string args = server.PipeName + " " + window.Handle.ToString(CultureInfo.InvariantCulture);
                     ProcessStartInfo psi = new(shimPath, args);
