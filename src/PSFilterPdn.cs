@@ -229,8 +229,8 @@ namespace PSFilterPdn
                                               renderTargetFactory,
                                               logger,
                                               null,
-                                              AbortCallback,
-                                              null))
+                                              null,
+                                              CancellationToken))
                 {
                     // These items are now owned by the LoadPsFilter instance.
                     source = null;

@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 using static TerraFX.Interop.Windows.Windows;
 
@@ -99,7 +100,7 @@ namespace PSFilterLoad.PSApi
         private IntPtr filterGlobalData;
         private short result;
 
-        private readonly Func<bool>? abortFunc;
+        private readonly CancellationToken cancellationToken;
         private readonly Action<byte>? progressFunc;
         private string errorMessage;
         private readonly FilterCase filterCase;
@@ -217,7 +218,11 @@ namespace PSFilterLoad.PSApi
         /// <param name="filterCase">The filter transparency mode.</param>
         /// <param name="documentMetadataProvider">The document meta data provider.</param>
         /// <param name="surfaceFactory">The surface factory.</param>
+        /// <param name="renderTargetFactory">The render target factory.</param>
+        /// <param name="logger">The logger.</param>
         /// <param name="pluginUISettings">The user interface settings for plug-in created dialogs.</param>
+        /// <param name="progressCallback">The progress callback.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="source"/> is null.
         /// or
@@ -246,15 +251,14 @@ namespace PSFilterLoad.PSApi
                                      IRenderTargetFactory renderTargetFactory,
                                      IPluginApiLogger logger,
                                      PluginUISettings? pluginUISettings,
-                                     Func<bool> abortCallback,
-                                     Action<byte>? progressCallback)
+                                     Action<byte>? progressCallback,
+                                     CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(documentMetadataProvider);
             ArgumentNullException.ThrowIfNull(surfaceFactory);
             ArgumentNullException.ThrowIfNull(renderTargetFactory);
             ArgumentNullException.ThrowIfNull(logger);
-            ArgumentNullException.ThrowIfNull(abortCallback);
 
             inputHandling = FilterDataHandling.None;
             outputHandling = FilterDataHandling.None;
@@ -273,7 +277,7 @@ namespace PSFilterLoad.PSApi
             scriptingData = null;
             useChannelPorts = false;
             parentWindowHandle = owner;
-            abortFunc = abortCallback;
+            this.cancellationToken = cancellationToken;
             progressFunc = progressCallback;
             PostProcessingOptions = FilterPostProcessingOptions.None;
 
@@ -1234,12 +1238,7 @@ namespace PSFilterLoad.PSApi
         {
             logger.LogFunctionName(PluginApiLogCategory.AbortCallback);
 
-            if (abortFunc != null)
-            {
-                return abortFunc();
-            }
-
-            return PSBoolean.False;
+            return cancellationToken.IsCancellationRequested;
         }
 
         /// <summary>

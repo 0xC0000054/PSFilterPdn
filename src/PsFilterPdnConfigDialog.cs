@@ -697,11 +697,6 @@ namespace PSFilterPdn
             Close();
         }
 
-        private bool AbortCallback()
-        {
-            return filterCancellationTokenSource.IsCancellationRequested;
-        }
-
         private void UpdateProgress(byte progressPercentage)
         {
             if (InvokeRequired)
@@ -928,8 +923,8 @@ namespace PSFilterPdn
                                                       renderTargetFactory,
                                                       logger,
                                                       pluginUISettings,
-                                                      AbortCallback,
-                                                      UpdateProgress))
+                                                      UpdateProgress,
+                                                      filterCancellationTokenSource.Token))
                         {
                             if (descriptorRegistry != null)
                             {

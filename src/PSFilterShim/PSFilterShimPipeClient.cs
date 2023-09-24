@@ -28,17 +28,15 @@ namespace PSFilterShim
     internal sealed class PSFilterShimPipeClient
     {
         private readonly string pipeName;
-        private readonly byte[] oneByteReplyBuffer;
 
         public PSFilterShimPipeClient(string pipeName)
         {
             this.pipeName = pipeName ?? throw new ArgumentNullException(nameof(pipeName));
-            oneByteReplyBuffer = new byte[1];
         }
 
         private enum Command : byte
         {
-            AbortCallback = 0,
+            GetAbortEventHandleName = 0,
             ReportProgress,
             GetPluginData,
             GetSettings,
@@ -61,11 +59,9 @@ namespace PSFilterShim
             DescriptorRegistry
         }
 
-        public bool AbortFilter()
+        public string GetAbortEventHandleName()
         {
-            byte[] reply = SendMessageToServer(Command.AbortCallback);
-
-            return reply[0] != 0;
+            return ReadString(Command.GetAbortEventHandleName);
         }
 
         public PluginData GetPluginData()
@@ -112,7 +108,7 @@ namespace PSFilterShim
         {
             ImageSurface surface;
 
-            string mapName = GetMemoryMappedFileName(Command.GetSourceImage);
+            string mapName = ReadString(Command.GetSourceImage);
 
             using (MemoryMappedFile file = MemoryMappedFile.OpenExisting(mapName))
             using (MemoryMappedViewStream stream = file.CreateViewStream())
@@ -151,7 +147,7 @@ namespace PSFilterShim
         {
             MaskSurface? surface = null;
 
-            string mapName = GetMemoryMappedFileName(Command.GetSelectionMask);
+            string mapName = ReadString(Command.GetSelectionMask);
 
             if (!string.IsNullOrEmpty(mapName))
             {
@@ -193,7 +189,7 @@ namespace PSFilterShim
         {
             TransparencyCheckerboardSurface surface;
 
-            string mapName = GetMemoryMappedFileName(Command.GetTransparencyCheckerboardImage);
+            string mapName = ReadString(Command.GetTransparencyCheckerboardImage);
 
             using (MemoryMappedFile file = MemoryMappedFile.OpenExisting(mapName))
             using (MemoryMappedViewStream stream = file.CreateViewStream())
@@ -291,7 +287,7 @@ namespace PSFilterShim
         }
 
         [SkipLocalsInit]
-        private string GetMemoryMappedFileName(Command command)
+        private string ReadString(Command command)
         {
             string name = string.Empty;
 
@@ -356,7 +352,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
+                    reply = new byte[replyLength];
 
                     stream.ReadExactly(reply, 0, replyLength);
                 }
@@ -383,7 +379,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
+                    reply = new byte[replyLength];
 
                     stream.ReadExactly(reply, 0, replyLength);
                 }
@@ -419,7 +415,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
+                    reply = new byte[replyLength];
 
                     stream.ReadExactly(reply, 0, replyLength);
                 }
@@ -443,7 +439,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
+                    reply = new byte[replyLength];
 
                     stream.ReadExactly(reply, 0, replyLength);
                 }
@@ -470,7 +466,7 @@ namespace PSFilterShim
 
                 if (replyLength > 0)
                 {
-                    reply = replyLength == 1 ? oneByteReplyBuffer : new byte[replyLength];
+                    reply = new byte[replyLength];
 
                     stream.ReadExactly(reply, 0, replyLength);
                 }

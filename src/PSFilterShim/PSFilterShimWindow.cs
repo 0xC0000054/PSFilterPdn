@@ -427,6 +427,7 @@ namespace PSFilterShim
                     // As Paint.NET does not currently allow custom progress reporting only set this callback for the effect dialog.
                     Action<byte>? progressCallback = settings.RepeatEffect ? null : pipeClient.UpdateFilterProgress;
 
+                    using (EventWaitHandleCancellationSource cancellationSource = new(pipeClient.GetAbortEventHandleName()))
                     using (SurfaceFactory surfaceFactory = new(imagingFactory, ref transparencyCheckerboard))
                     using (LoadPsFilter lps = new(source,
                                                   takeOwnershipOfSource: true,
@@ -443,8 +444,8 @@ namespace PSFilterShim
                                                   renderTargetFactory,
                                                   logger,
                                                   settings.PluginUISettings,
-                                                  pipeClient.AbortFilter,
-                                                  progressCallback))
+                                                  progressCallback,
+                                                  cancellationSource.Token))
                     {
                         // These items are now owned by the LoadPsFilter instance.
                         source = null;

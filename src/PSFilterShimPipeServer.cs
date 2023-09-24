@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using CommunityToolkit.HighPerformance;
 using CommunityToolkit.HighPerformance.Buffers;
 using PSFilterLoad.PSApi;
 using PSFilterLoad.PSApi.Imaging;
@@ -20,6 +19,8 @@ using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.IO.Pipes;
 using System.Runtime.CompilerServices;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
 
@@ -29,6 +30,8 @@ namespace PSFilterPdn
     {
         private NamedPipeServerStream server;
         private MemoryMappedFile? memoryMappedFile;
+        private readonly string cancellationEventName;
+        private readonly EventWaitHandle cancellationEventWaitHandle;
         private readonly PluginData pluginData;
         private readonly PSFilterShimSettings settings;
         private readonly Action<PSFilterShimErrorInfo?> errorCallback;
@@ -42,6 +45,7 @@ namespace PSFilterPdn
         private readonly TransparencyCheckerboardSurface transparencyCheckerboard;
         private readonly bool ownsTransparencyCheckerboard;
         private readonly CancellationToken cancellationToken;
+        private readonly CancellationTokenRegistration cancellationTokenRegistration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PSFilterShimService"/> class.
@@ -100,6 +104,12 @@ namespace PSFilterPdn
             ArgumentNullException.ThrowIfNull(nameof(transparencyCheckerboard));
 
             PipeName = "PSFilterShim_" + Guid.NewGuid().ToString();
+            cancellationEventName = Guid.NewGuid().ToString();
+            cancellationEventWaitHandle = EventWaitHandleAcl.Create(false,
+                                                                    EventResetMode.ManualReset,
+                                                                    cancellationEventName,
+                                                                    out _,
+                                                                    CreateEventWaitHandleSecurity());
             pluginData = plugin;
             this.settings = settings;
             errorCallback = error;
@@ -113,6 +123,7 @@ namespace PSFilterPdn
             this.transparencyCheckerboard = transparencyCheckerboard;
             this.ownsTransparencyCheckerboard = ownsTransparencyCheckerboard;
             this.cancellationToken = cancellationToken;
+            cancellationTokenRegistration = this.cancellationToken.Register(SignalCancelRequest);
 
             server = new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
@@ -120,7 +131,7 @@ namespace PSFilterPdn
 
         private enum Command : byte
         {
-            AbortCallback = 0,
+            GetAbortEventHandleName = 0,
             ReportProgress,
             GetPluginData,
             GetSettings,
@@ -160,6 +171,8 @@ namespace PSFilterPdn
             if (disposing)
             {
                 server?.Dispose();
+                cancellationTokenRegistration.Dispose();
+                cancellationEventWaitHandle.Dispose();
 
                 if (ownsSourceImage)
                 {
@@ -176,6 +189,25 @@ namespace PSFilterPdn
                     transparencyCheckerboard.Dispose();
                 }
             }
+        }
+
+        private static EventWaitHandleSecurity CreateEventWaitHandleSecurity()
+        {
+            // The EventWaitHandle documentation on MSDN warns that the default permissions are
+            // machine-wide and that callers may want to restrict access to the current user.
+            NTAccount user = new(Environment.UserDomainName, Environment.UserName);
+
+            EventWaitHandleSecurity security = new();
+
+            // Add a rule that grants the current user the right to signal or wait on the event.
+            security.AddAccessRule(new EventWaitHandleAccessRule(user,
+                                                                 EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize,
+                                                                 AccessControlType.Allow));
+            // Add a rule that denies the current user the right to change permissions on the event.
+            security.AddAccessRule(new EventWaitHandleAccessRule(user,
+                                                                 EventWaitHandleRights.ChangePermissions,
+                                                                 AccessControlType.Deny));
+            return security;
         }
 
         [SkipLocalsInit]
@@ -199,8 +231,8 @@ namespace PSFilterPdn
 
             switch (command)
             {
-                case Command.AbortCallback:
-                    SendReplyToClient(cancellationToken.IsCancellationRequested.ToByte());
+                case Command.GetAbortEventHandleName:
+                    SendReplyToClient(cancellationEventName);
                     break;
                 case Command.ReportProgress:
                     progressCallback!(server.ReadByteEx());
@@ -326,12 +358,6 @@ namespace PSFilterPdn
         private void SendEmptyReplyToClient()
         {
             server!.Write(EmptyReplyMessage);
-        }
-
-        private void SendReplyToClient(byte data)
-        {
-            server!.WriteInt32LittleEndian(1);
-            server.WriteByte(data);
         }
 
         private void SendReplyToClient(ReadOnlySpan<byte> data)
@@ -513,5 +539,7 @@ namespace PSFilterPdn
                 }
             }
         }
+
+        private void SignalCancelRequest() => cancellationEventWaitHandle.Set();
     }
 }
