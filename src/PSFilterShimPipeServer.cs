@@ -221,7 +221,7 @@ namespace PSFilterPdn
                     }
                     break;
                 case Command.SetErrorInfo:
-                    errorCallback(GetErrorInfo(server));
+                    errorCallback(GetErrorInfo());
                     SendEmptyReplyToClient();
                     break;
                 case Command.GetExifMetadata:
@@ -248,7 +248,7 @@ namespace PSFilterPdn
                     SendEmptyReplyToClient();
                     break;
                 case Command.SetDestinationImage:
-                    SetDestinationImage(server);
+                    SetDestinationImage();
                     SendEmptyReplyToClient();
                     break;
                 case Command.SetFilterData:
@@ -268,10 +268,10 @@ namespace PSFilterPdn
             server.BeginWaitForConnection(WaitForConnectionCallback, null);
         }
 
-        private static PSFilterShimErrorInfo? GetErrorInfo(Stream stream)
+        private PSFilterShimErrorInfo? GetErrorInfo()
         {
-            string message = ReadUtf8String(stream);
-            string details = ReadUtf8String(stream);
+            string message = ReadUtf8String();
+            string details = ReadUtf8String();
 
             PSFilterShimErrorInfo? errorInfo = null;
 
@@ -284,11 +284,11 @@ namespace PSFilterPdn
         }
 
         [SkipLocalsInit]
-        private static string ReadUtf8String(Stream stream)
+        private string ReadUtf8String()
         {
             string value = string.Empty;
 
-            int lengthInBytes = stream.ReadInt32LittleEndian();
+            int lengthInBytes = server!.ReadInt32LittleEndian();
 
             if (lengthInBytes > 0)
             {
@@ -307,7 +307,7 @@ namespace PSFilterPdn
 
                     Span<byte> stringBytes = buffer.Slice(0, lengthInBytes);
 
-                    stream.ReadExactly(stringBytes);
+                    server.ReadExactly(stringBytes);
 
                     value = Encoding.UTF8.GetString(stringBytes);
                 }
@@ -476,10 +476,10 @@ namespace PSFilterPdn
             SendReplyToClient(name);
         }
 
-        private void SetDestinationImage(Stream stream)
+        private void SetDestinationImage()
         {
-            string mapName = ReadUtf8String(stream);
-            FilterPostProcessingOptions options = (FilterPostProcessingOptions)stream.ReadInt32LittleEndian();
+            string mapName = ReadUtf8String();
+            FilterPostProcessingOptions options = (FilterPostProcessingOptions)server.ReadInt32LittleEndian();
 
             using (MemoryMappedFile file = MemoryMappedFile.OpenExisting(mapName))
             using (MemoryMappedViewStream viewStream = file.CreateViewStream())
