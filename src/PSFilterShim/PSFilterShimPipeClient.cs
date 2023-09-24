@@ -345,7 +345,7 @@ namespace PSFilterShim
                 stream.Connect();
 
                 stream.WriteByte((byte)Command.SetDestinationImage);
-                WriteUtf8String(stream, mapName);
+                WriteString(stream, mapName);
                 stream.WriteInt32LittleEndian((int)options);
 
                 int replyLength = stream.ReadInt32LittleEndian();
@@ -372,8 +372,8 @@ namespace PSFilterShim
                 stream.Connect();
 
                 stream.WriteByte((byte)Command.SetErrorInfo);
-                WriteUtf8String(stream, message);
-                WriteUtf8String(stream, details);
+                WriteString(stream, message);
+                WriteString(stream, details);
 
                 int replyLength = stream.ReadInt32LittleEndian();
 
@@ -478,7 +478,7 @@ namespace PSFilterShim
         }
 
         [SkipLocalsInit]
-        private void WriteUtf8String(Stream stream, string value)
+        private void WriteString(Stream stream, string value)
         {
             if (string.IsNullOrEmpty(value))
             {
