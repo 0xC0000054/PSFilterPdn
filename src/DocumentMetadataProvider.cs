@@ -115,9 +115,7 @@ namespace PSFilterPdn
 
                 if (!string.IsNullOrEmpty(resourceName))
                 {
-                    Assembly assembly = typeof(DocumentMetadataProvider).Assembly;
-
-                    using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
+                    using (Stream? stream = typeof(DocumentMetadataProvider).Assembly.GetManifestResourceStream(resourceName))
                     {
                         if (stream != null)
                         {
