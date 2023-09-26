@@ -11,6 +11,7 @@ PSFilterPdn is a [Paint.NET](http://www.getpaint.net) effect plugin that enables
   --------|----------
   Classic | C:\Program Files\Paint.NET\Effects    
   Microsoft Store | Documents\paint.net App Files\Effects
+  Portable | <Paint.NET folder>\Effects
 
 3. Restart Paint.NET.
 4. The plug-in will now be available as the 8bf Filter menu item in the Paint.NET Effects menu.

@@ -17,6 +17,7 @@ Installation
 
   Classic: C:\Program Files\Paint.NET\Effects.
   Microsoft Store: Documents\paint.net App Files\Effects
+  Portable: <Paint.NET folder>\Effects
 
 3. Restart Paint.NET.
 
