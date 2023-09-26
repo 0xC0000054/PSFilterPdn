@@ -16,7 +16,7 @@ using System.Buffers;
 
 namespace PSFilterPdn
 {
-    public static class MessagePackSerializerUtil
+    internal static class MessagePackSerializerUtil
     {
         public static T Deserialize<T>(ReadOnlyMemory<byte> buffer, MessagePackSerializerOptions options)
         {
