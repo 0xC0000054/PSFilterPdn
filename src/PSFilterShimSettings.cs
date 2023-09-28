@@ -12,6 +12,7 @@
 
 using MessagePack;
 using PSFilterLoad.PSApi;
+using System;
 
 namespace PSFilterPdn
 {
@@ -19,7 +20,8 @@ namespace PSFilterPdn
     [MessagePackFormatter(typeof(Formatter))]
     internal sealed partial class PSFilterShimSettings
     {
-        public PSFilterShimSettings(bool repeatEffect,
+        public PSFilterShimSettings(PluginData pluginData,
+                                    bool repeatEffect,
                                     bool showAboutDialog,
                                     ColorRgb24 primaryColor,
                                     ColorRgb24 secondaryColor,
@@ -32,6 +34,9 @@ namespace PSFilterPdn
                                     string? logFilePath = null,
                                     PluginUISettings? pluginUISettings = null)
         {
+            ArgumentNullException.ThrowIfNull(pluginData, nameof(pluginData));
+
+            PluginData = pluginData;
             RepeatEffect = repeatEffect;
             ShowAboutDialog = showAboutDialog;
             PrimaryColor = primaryColor;
@@ -45,6 +50,8 @@ namespace PSFilterPdn
             LogFilePath = logFilePath;
             PluginUISettings = pluginUISettings;
         }
+
+        public PluginData PluginData { get; }
 
         public bool RepeatEffect { get; }
 

@@ -32,7 +32,6 @@ namespace PSFilterPdn
         private MemoryMappedFile? memoryMappedFile;
         private readonly string cancellationEventName;
         private readonly EventWaitHandle cancellationEventWaitHandle;
-        private readonly PluginData pluginData;
         private readonly PSFilterShimSettings settings;
         private readonly Action<PSFilterShimErrorInfo?> errorCallback;
         private readonly Action<byte>? progressCallback;
@@ -50,7 +49,6 @@ namespace PSFilterPdn
         /// <summary>
         /// Initializes a new instance of the <see cref="PSFilterShimService"/> class.
         /// </summary>
-        /// <param name="plugin">The plug-in data.</param>
         /// <param name="settings">The settings for the shim application.</param>
         /// <param name="error">The error callback.</param>
         /// <param name="progress">The progress callback.</param>
@@ -69,8 +67,6 @@ namespace PSFilterPdn
         /// <see langword="true"/> if this instance take ownership of <paramref name="transparencyCheckerboard"/>; otherwise, <see langword="false"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="plugin"/> is null.
-        /// or
         /// <paramref name="settings"/> is null.
         /// or
         /// <paramref name="error"/> is null.
@@ -81,8 +77,7 @@ namespace PSFilterPdn
         /// or
         /// <paramref name="transparencyCheckerboard"/> is null.
         /// </exception>
-        public PSFilterShimPipeServer(PluginData plugin,
-                                      PSFilterShimSettings settings,
+        public PSFilterShimPipeServer(PSFilterShimSettings settings,
                                       Action<PSFilterShimErrorInfo?> error,
                                       Action<byte>? progress,
                                       Action<Stream, FilterPostProcessingOptions> setDestinationImage,
@@ -95,7 +90,6 @@ namespace PSFilterPdn
                                       bool ownsTransparencyCheckerboard,
                                       CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(nameof(plugin));
             ArgumentNullException.ThrowIfNull(nameof(settings));
             ArgumentNullException.ThrowIfNull(nameof(error));
             ArgumentNullException.ThrowIfNull(nameof(setDestinationImage));
@@ -110,7 +104,6 @@ namespace PSFilterPdn
                                                                     cancellationEventName,
                                                                     out _,
                                                                     CreateEventWaitHandleSecurity());
-            pluginData = plugin;
             this.settings = settings;
             errorCallback = error;
             this.documentMetadataProvider = documentMetadataProvider;
@@ -133,7 +126,6 @@ namespace PSFilterPdn
         {
             GetAbortEventHandleName = 0,
             ReportProgress,
-            GetPluginData,
             GetSettings,
             SetErrorInfo,
             GetExifMetadata,
@@ -237,13 +229,6 @@ namespace PSFilterPdn
                 case Command.ReportProgress:
                     progressCallback!(server.ReadByteEx());
                     SendEmptyReplyToClient();
-                    break;
-                case Command.GetPluginData:
-                    using (ArrayPoolBufferWriter<byte> bufferWriter = new())
-                    {
-                        MessagePackSerializerUtil.Serialize(bufferWriter, pluginData, PSFilterShimResolver.Options);
-                        SendReplyToClient(bufferWriter.WrittenSpan);
-                    }
                     break;
                 case Command.GetSettings:
                     using (ArrayPoolBufferWriter<byte> bufferWriter = new())

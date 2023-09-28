@@ -111,7 +111,8 @@ namespace PSFilterPdn
                 PSFilterShimErrorInfo? proxyError = null;
                 FilterCase filterCase = token.FilterData!.GetFilterTransparencyMode(selectionMask != null, source);
 
-                PSFilterShimSettings settings = new(repeatEffect: true,
+                PSFilterShimSettings settings = new(token.FilterData,
+                                                    repeatEffect: true,
                                                     showAboutDialog: false,
                                                     new ColorRgb24(Environment.PrimaryColor),
                                                     new ColorRgb24(Environment.SecondaryColor),
@@ -124,8 +125,7 @@ namespace PSFilterPdn
 
                 DocumentMetadataProvider documentMetadataProvider = new(Environment.Document);
 
-                using (PSFilterShimPipeServer server = new(token.FilterData,
-                                                           settings,
+                using (PSFilterShimPipeServer server = new(settings,
                                                            delegate (PSFilterShimErrorInfo? data)
                                                            {
                                                                proxyResult = false;

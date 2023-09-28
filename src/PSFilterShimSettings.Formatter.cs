@@ -27,6 +27,7 @@ namespace PSFilterPdn
                 var resolver = options.Resolver;
                 IMessagePackFormatter<ColorRgb24> colorFormatter = resolver.GetFormatterWithVerify<ColorRgb24>();
 
+                PluginData pluginData = resolver.GetFormatterWithVerify<PluginData>().Deserialize(ref reader, options);
                 bool repeatEffect = reader.ReadBoolean();
                 bool showAboutDialog = reader.ReadBoolean();
                 ColorRgb24 primaryColor = colorFormatter.Deserialize(ref reader, options);
@@ -42,7 +43,8 @@ namespace PSFilterPdn
 
                 reader.Depth--;
 
-                return new PSFilterShimSettings(repeatEffect,
+                return new PSFilterShimSettings(pluginData,
+                                                repeatEffect,
                                                 showAboutDialog,
                                                 primaryColor,
                                                 secondaryColor,
@@ -61,6 +63,7 @@ namespace PSFilterPdn
                 var resolver = options.Resolver;
                 IMessagePackFormatter<ColorRgb24> colorFormatter = resolver.GetFormatterWithVerify<ColorRgb24>();
 
+                resolver.GetFormatterWithVerify<PluginData>().Serialize(ref writer, value.PluginData, options);
                 writer.Write(value.RepeatEffect);
                 writer.Write(value.ShowAboutDialog);
                 colorFormatter.Serialize(ref writer, value.PrimaryColor, options);

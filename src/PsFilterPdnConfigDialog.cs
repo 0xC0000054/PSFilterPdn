@@ -726,7 +726,8 @@ namespace PSFilterPdn
 
             FilterCase filterCase = data.PluginData.GetFilterTransparencyMode(selectionMask != null, sourceBitmap!);
 
-            PSFilterShimSettings settings = new(repeatEffect: false,
+            PSFilterShimSettings settings = new(data.PluginData,
+                                                repeatEffect: false,
                                                 data.ShowAboutDialog,
                                                 new ColorRgb24(Environment.PrimaryColor),
                                                 new ColorRgb24(Environment.SecondaryColor),
@@ -742,8 +743,7 @@ namespace PSFilterPdn
             bool result = true; // assume the filter succeeded this will be set to false if it failed
             PSFilterShimErrorInfo? proxyError = null;
 
-            using (PSFilterShimPipeServer server = new(data.PluginData,
-                                                       settings,
+            using (PSFilterShimPipeServer server = new(settings,
                                                        new Action<PSFilterShimErrorInfo?>(delegate(PSFilterShimErrorInfo? error)
                                                        {
                                                            result = false;

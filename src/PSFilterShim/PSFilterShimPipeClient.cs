@@ -38,7 +38,6 @@ namespace PSFilterShim
         {
             GetAbortEventHandleName = 0,
             ReportProgress,
-            GetPluginData,
             GetSettings,
             SetErrorInfo,
             GetExifMetadata,
@@ -62,11 +61,6 @@ namespace PSFilterShim
         public string GetAbortEventHandleName()
         {
             return ReadString(Command.GetAbortEventHandleName);
-        }
-
-        public PluginData GetPluginData()
-        {
-            return DeserializeClass<PluginData>(Command.GetPluginData);
         }
 
         public PSFilterShimSettings GetShimSettings()

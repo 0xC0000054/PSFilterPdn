@@ -402,8 +402,8 @@ namespace PSFilterShim
         {
             try
             {
-                PluginData pluginData = pipeClient.GetPluginData();
                 PSFilterShimSettings settings = pipeClient.GetShimSettings();
+                PluginData pluginData = settings.PluginData;
 
                 IPluginApiLogWriter? logWriter = PluginApiLogWriterFactory.CreateFilterExecutionLogger(pluginData, settings.LogFilePath);
                 ImageSurface? source = null;
