@@ -22,5 +22,5 @@ See [Installing 8bf filters](https://github.com/0xC0000054/PSFilterPdn/wiki/Inst
 
 ## License
 
-This project is licensed under the terms of the Microsoft Public License.   
+This project is licensed under the terms of the MIT License.   
 See [License.txt](License.txt) for more information.

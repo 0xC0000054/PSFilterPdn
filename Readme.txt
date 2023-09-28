@@ -27,7 +27,7 @@ A copy of Paint.NET can be obtained from the official website.
 Licensing 
 ----------
 
-This software is licensed under the terms of the Microsoft Public License.
+This software is licensed under the terms of the MIT License.
 Please see License.txt for details.
 
 
