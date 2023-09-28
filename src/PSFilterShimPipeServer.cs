@@ -269,7 +269,7 @@ namespace PSFilterPdn
                     SendEmptyReplyToClient();
                     break;
                 case Command.SetFilterData:
-                    SetFilterData(server);
+                    SetFilterData();
                     SendEmptyReplyToClient();
                     break;
                 default:
@@ -499,14 +499,14 @@ namespace PSFilterPdn
             }
         }
 
-        private void SetFilterData(Stream stream)
+        private void SetFilterData()
         {
-            FilterDataType type = (FilterDataType)stream.ReadByteEx();
-            int dataLength = stream.ReadInt32LittleEndian();
+            FilterDataType type = (FilterDataType)server.ReadByteEx();
+            int dataLength = server.ReadInt32LittleEndian();
 
             using (MemoryOwner<byte> owner = MemoryOwner<byte>.Allocate(dataLength))
             {
-                stream.ReadExactly(owner.Span);
+                server.ReadExactly(owner.Span);
 
                 switch (type)
                 {
