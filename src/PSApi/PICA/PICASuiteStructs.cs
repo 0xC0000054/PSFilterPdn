@@ -57,7 +57,7 @@ namespace PSFilterLoad.PSApi.PICA
     }
 #pragma warning restore 0649
 
-    internal struct ColorID : IEquatable<ColorID>
+    internal readonly struct ColorID : IEquatable<ColorID>
     {
         private readonly IntPtr value;
 
@@ -151,7 +151,7 @@ namespace PSFilterLoad.PSApi.PICA
         public UnmanagedFunctionPointer<UISuiteGetPluginName> GetPluginName;
     }
 
-    internal struct ASZString : IEquatable<ASZString>
+    internal readonly struct ASZString : IEquatable<ASZString>
     {
         private readonly IntPtr value;
 

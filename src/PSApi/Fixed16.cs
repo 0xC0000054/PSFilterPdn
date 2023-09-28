@@ -22,7 +22,7 @@ namespace PSFilterLoad.PSApi
     [DebuggerDisplay("{DebuggerDisplay, nq}")]
     [DebuggerTypeProxy(typeof(Fixed16DebugView))]
     [StructLayout(LayoutKind.Sequential)]
-    internal struct Fixed16 : IEquatable<Fixed16>
+    internal readonly struct Fixed16 : IEquatable<Fixed16>
     {
         private readonly int fixedValue;
 

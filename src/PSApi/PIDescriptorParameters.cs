@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    internal struct PIReadDescriptor : IEquatable<PIReadDescriptor>
+    internal readonly struct PIReadDescriptor : IEquatable<PIReadDescriptor>
     {
         private readonly IntPtr value;
 
@@ -64,7 +64,7 @@ namespace PSFilterLoad.PSApi
         }
     }
 
-    internal struct PIWriteDescriptor : IEquatable<PIWriteDescriptor>
+    internal readonly struct PIWriteDescriptor : IEquatable<PIWriteDescriptor>
     {
         private readonly IntPtr value;
 

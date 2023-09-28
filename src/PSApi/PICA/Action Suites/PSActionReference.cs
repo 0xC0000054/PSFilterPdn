@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi.PICA
 {
-    internal struct PIActionReference : IEquatable<PIActionReference>
+    internal readonly struct PIActionReference : IEquatable<PIActionReference>
     {
         private readonly IntPtr value;
 
