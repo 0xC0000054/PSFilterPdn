@@ -20,6 +20,8 @@ namespace PSFilterLoad.PSApi
 
         ReadOnlySpan<byte> GetIccProfileData();
 
+        ReadOnlySpan<byte> GetIptcCaptionRecord();
+
         ReadOnlySpan<byte> GetXmpData();
     }
 }

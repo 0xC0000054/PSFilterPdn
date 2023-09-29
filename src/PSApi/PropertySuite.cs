@@ -196,7 +196,7 @@ namespace PSFilterLoad.PSApi
                     error = GetSimpleProperty(simpleProperty, new Fixed16(PSConstants.Properties.BigNudgeDistance).Value);
                     break;
                 case PSProperties.Caption:
-                    error = CreateComplexPropertyHandle(complexProperty, ReadOnlySpan<byte>.Empty);
+                    error = CreateComplexPropertyHandle(complexProperty, documentMetadataProvider.GetIptcCaptionRecord());
                     break;
                 case PSProperties.ChannelName:
                     string name;

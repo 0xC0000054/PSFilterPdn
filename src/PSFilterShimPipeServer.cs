@@ -131,6 +131,7 @@ namespace PSFilterPdn
             GetExifMetadata,
             GetXmpMetadata,
             GetIccProfile,
+            GetIptcCaptionRecord,
             GetSourceImage,
             GetSelectionMask,
             GetTransparencyCheckerboardImage,
@@ -249,6 +250,9 @@ namespace PSFilterPdn
                     break;
                 case Command.GetIccProfile:
                     SendReplyToClient(documentMetadataProvider.GetIccProfileData());
+                    break;
+                case Command.GetIptcCaptionRecord:
+                    SendReplyToClient(documentMetadataProvider.GetIptcCaptionRecord());
                     break;
                 case Command.GetSourceImage:
                     SendSourceImageToClient();

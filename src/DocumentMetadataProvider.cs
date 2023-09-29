@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 namespace PSFilterPdn
@@ -33,6 +32,7 @@ namespace PSFilterPdn
         private readonly IEffectDocumentInfo documentInfo;
         private readonly Lazy<byte[]> exifBytes;
         private readonly Lazy<byte[]> iccProfileBytes;
+        private readonly Lazy<byte[]> iptcCaptionRecordBytes;
         private readonly Lazy<byte[]> xmpBytes;
 
         public DocumentMetadataProvider(IEffectDocumentInfo documentInfo)
@@ -42,12 +42,15 @@ namespace PSFilterPdn
             this.documentInfo = documentInfo;
             exifBytes = new Lazy<byte[]>(CacheExifBytes);
             iccProfileBytes = new Lazy<byte[]>(CacheIccProfileBytes);
+            iptcCaptionRecordBytes = new Lazy<byte[]>(CacheIptcCaptionRecordBytes);
             xmpBytes = new Lazy<byte[]>(CacheXmpBytes);
         }
 
         public ReadOnlySpan<byte> GetExifData() => exifBytes.Value;
 
         public ReadOnlySpan<byte> GetIccProfileData() => iccProfileBytes.Value;
+
+        public ReadOnlySpan<byte> GetIptcCaptionRecord() => iptcCaptionRecordBytes.Value;
 
         public ReadOnlySpan<byte> GetXmpData() => xmpBytes.Value;
 
@@ -159,6 +162,41 @@ namespace PSFilterPdn
                 }
 
                 return profileResourceName;
+            }
+        }
+
+        private byte[] CacheIptcCaptionRecordBytes()
+        {
+            byte[] bytes = Array.Empty<byte>();
+
+            string caption = GetCaptionString(documentInfo.Metadata.IptcPropertyItems);
+
+            if (!string.IsNullOrEmpty(caption))
+            {
+                bytes = new IptcWriter(caption).CreateCaptionRecordBlob();
+            }
+
+            return bytes;
+
+            static string GetCaptionString(IReadOnlyList<IptcPropertyItem> iptcPropertyItems)
+            {
+                foreach (IptcPropertyItem item in iptcPropertyItems)
+                {
+                    switch (item.Key.ID)
+                    {
+                       case "Caption":
+                       // WIC can also encode the IPTC record and data set numbers as a big-endian integer.
+                       // The caption uses record number 2 and data set number 120, (2 << 8) + 120 == 632.
+                       case "632":
+                            if (item.Value is IptcStringValue stringValue)
+                            {
+                                return stringValue.Value;
+                            }
+                            break;
+                    }
+                }
+
+                return string.Empty;
             }
         }
 

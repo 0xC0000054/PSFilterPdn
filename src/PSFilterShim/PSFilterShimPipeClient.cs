@@ -43,6 +43,7 @@ namespace PSFilterShim
             GetExifMetadata,
             GetXmpMetadata,
             GetIccProfile,
+            GetIptcCaptionRecord,
             GetSourceImage,
             GetSelectionMask,
             GetTransparencyCheckerboardImage,
@@ -91,6 +92,11 @@ namespace PSFilterShim
         public byte[] GetIccProfileData()
         {
             return SendMessageToServer(Command.GetIccProfile);
+        }
+
+        public byte[] GetIptcCaptionRecordData()
+        {
+            return SendMessageToServer(Command.GetIptcCaptionRecord);
         }
 
         public byte[] GetXmpData()
