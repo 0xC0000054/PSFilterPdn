@@ -201,7 +201,7 @@ namespace PSFilterLoad.PSApi.Rendering.Internal
             {
                 throw;
             }
-            catch (PaintDotNet.Direct2D1.RecreateTargetException)
+            catch (RecreateDeviceContextException)
             {
                 throw new RecreateTargetException();
             }

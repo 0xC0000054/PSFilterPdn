@@ -92,8 +92,8 @@ namespace PSFilterPdn
         private EffectInputBitmapSurface? sourceBitmap;
         private MaskSurface? selectionMask;
         private TransparencyCheckerboardSurface? transparencyCheckerboard;
-        private ColorRgb24 primaryColor;
-        private ColorRgb24 secondaryColor;
+        private PSFilterLoad.PSApi.ColorRgb24 primaryColor;
+        private PSFilterLoad.PSApi.ColorRgb24 secondaryColor;
         private bool environmentInitialized;
 
         private IBitmap<ColorBgra32>? destSurface;
@@ -729,8 +729,8 @@ namespace PSFilterPdn
             PSFilterShimSettings settings = new(data.PluginData,
                                                 repeatEffect: false,
                                                 data.ShowAboutDialog,
-                                                new ColorRgb24(Environment.PrimaryColor),
-                                                new ColorRgb24(Environment.SecondaryColor),
+                                                new PSFilterLoad.PSApi.ColorRgb24(Environment.PrimaryColor),
+                                                new PSFilterLoad.PSApi.ColorRgb24(Environment.SecondaryColor),
                                                 documentDpi.X,
                                                 documentDpi.Y,
                                                 filterCase,
@@ -832,8 +832,8 @@ namespace PSFilterPdn
             documentDpi = new DocumentDpi(environment.Document.Resolution);
             documentMetadataProvider = new DocumentMetadataProvider(environment.Document);
             sourceBitmap = new EffectInputBitmapSurface(environment.GetSourceBitmapBgra32(), imagingFactory);
-            primaryColor = new ColorRgb24(environment.PrimaryColor);
-            secondaryColor = new ColorRgb24(environment.SecondaryColor);
+            primaryColor = new PSFilterLoad.PSApi.ColorRgb24(environment.PrimaryColor);
+            secondaryColor = new PSFilterLoad.PSApi.ColorRgb24(environment.SecondaryColor);
             selectionMask = SelectionMaskRenderer.FromPdnSelection(environment, imagingFactory);
             transparencyCheckerboard = new PDNTransparencyCheckerboardSurface(imagingFactory);
         }
