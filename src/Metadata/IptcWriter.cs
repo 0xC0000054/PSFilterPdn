@@ -20,16 +20,16 @@ namespace PSFilterPdn.Metadata
     internal sealed class IptcWriter
     {
         private readonly string caption;
-        private readonly int captionLengthInUtf8Bytes;
 
         public IptcWriter(string caption)
         {
             this.caption = caption ?? throw new ArgumentNullException(nameof(caption));
-            captionLengthInUtf8Bytes = Encoding.UTF8.GetByteCount(caption);
         }
 
         public byte[] CreateCaptionRecordBlob()
         {
+            int captionLengthInUtf8Bytes = Encoding.UTF8.GetByteCount(caption);
+
             if (captionLengthInUtf8Bytes > IptcConstants.MaxCaptionLength)
             {
                 return Array.Empty<byte>();
