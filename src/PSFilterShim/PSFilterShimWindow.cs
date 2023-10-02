@@ -201,39 +201,65 @@ namespace PSFilterShim
             }
         }
 
-        private static unsafe HICON TryLoadIcon(ushort iconResourceId)
+        [UnmanagedCallersOnly]
+        private static unsafe uint ThreadProc(void* lpParameter)
         {
-            HICON icon = HICON.NULL;
+            PSFilterShimWindow window = (PSFilterShimWindow)GCHandle.FromIntPtr((nint)lpParameter).Target!;
 
-            HRSRC hResInfo = FindResourceW(HMODULE.NULL, MAKEINTRESOURCE(iconResourceId), RT.RT_ICON);
+            // Some filters may use the clipboard or other features that require COM to be initialized.
+            const COINIT dwFlags = COINIT.COINIT_APARTMENTTHREADED | COINIT.COINIT_DISABLE_OLE1DDE;
 
-            if (hResInfo != HRSRC.NULL)
+            HRESULT hr = CoInitializeEx(null, (uint)dwFlags);
+
+            if (SUCCEEDED(hr))
             {
-                HGLOBAL hResData = LoadResource(HMODULE.NULL, hResInfo);
-
-                if (hResData != HGLOBAL.NULL)
+                try
                 {
-                    void* data = LockResource(hResData);
-
-                    if (data != null)
+                    using (WICFactory imagingFactory = new())
+                    using (Direct2DFactory direct2DFactory = new())
                     {
-                        uint resourceSize = SizeofResource(HMODULE.NULL, hResInfo);
-
-                        if (resourceSize > 0)
-                        {
-                            icon = CreateIconFromResourceEx((byte*)data,
-                                                            resourceSize,
-                                                            BOOL.TRUE,
-                                                            0x00030000,
-                                                            0,
-                                                            0,
-                                                            LR.LR_DEFAULTCOLOR);
-                        }
+                        window.RunFilter(imagingFactory, direct2DFactory);
                     }
                 }
+                finally
+                {
+                    CoUninitialize();
+                }
+            }
+            else
+            {
+                window.pipeClient.SetProxyErrorMessage(string.Format(CultureInfo.InvariantCulture,
+                                                                     Resources.InitializeCOMErrorFormat,
+                                                                     hr));
             }
 
-            return icon;
+            _ = PostMessageW(window.hwnd, EndFilterThreadMessage, 0, 0);
+            return 0;
+        }
+
+        private static unsafe ushort? TryGetApplicationIconGroupId()
+        {
+            ushort? result = null;
+
+            ushort value = 0;
+
+            if (EnumResourceNamesW(HMODULE.NULL, RT.RT_GROUP_ICON, &EnumResources, new nint(&value)))
+            {
+                result = value;
+            }
+
+            return result;
+
+            [UnmanagedCallersOnly]
+            static unsafe BOOL EnumResources(HMODULE hModule, ushort* lpType, ushort* lpName, nint lParam)
+            {
+                // The application icon is the first and only icon group in the executable.
+                ushort* value = (ushort*)lParam;
+
+                *value = (ushort)new UIntPtr(lpName).ToUInt64();
+
+                return BOOL.TRUE;
+            }
         }
 
         private static unsafe (ushort largeIcon, ushort smallIcon)? TryGetApplicationIconResourceIds()
@@ -275,65 +301,39 @@ namespace PSFilterShim
             return largeIcon != 0 && smallIcon != 0 ? (largeIcon, smallIcon) : null;
         }
 
-        private static unsafe ushort? TryGetApplicationIconGroupId()
+        private static unsafe HICON TryLoadIcon(ushort iconResourceId)
         {
-            ushort? result = null;
+            HICON icon = HICON.NULL;
 
-            ushort value = 0;
+            HRSRC hResInfo = FindResourceW(HMODULE.NULL, MAKEINTRESOURCE(iconResourceId), RT.RT_ICON);
 
-            if (EnumResourceNamesW(HMODULE.NULL, RT.RT_GROUP_ICON, &EnumResources, new nint(&value)))
+            if (hResInfo != HRSRC.NULL)
             {
-                result = value;
-            }
+                HGLOBAL hResData = LoadResource(HMODULE.NULL, hResInfo);
 
-            return result;
-
-            [UnmanagedCallersOnly]
-            static unsafe BOOL EnumResources(HMODULE hModule, ushort* lpType, ushort* lpName, nint lParam)
-            {
-                // The application icon is the first and only icon group in the executable.
-                ushort* value = (ushort*)lParam;
-
-                *value = (ushort)new UIntPtr(lpName).ToUInt64();
-
-                return BOOL.TRUE;
-            }
-        }
-
-        [UnmanagedCallersOnly]
-        private static unsafe uint ThreadProc(void* lpParameter)
-        {
-            PSFilterShimWindow window = (PSFilterShimWindow)GCHandle.FromIntPtr((nint)lpParameter).Target!;
-
-            // Some filters may use the clipboard or other features that require COM to be initialized.
-            const COINIT dwFlags = COINIT.COINIT_APARTMENTTHREADED | COINIT.COINIT_DISABLE_OLE1DDE;
-
-            HRESULT hr = CoInitializeEx(null, (uint)dwFlags);
-
-            if (SUCCEEDED(hr))
-            {
-                try
+                if (hResData != HGLOBAL.NULL)
                 {
-                    using (WICFactory imagingFactory = new())
-                    using (Direct2DFactory direct2DFactory = new())
+                    void* data = LockResource(hResData);
+
+                    if (data != null)
                     {
-                        window.RunFilter(imagingFactory, direct2DFactory);
+                        uint resourceSize = SizeofResource(HMODULE.NULL, hResInfo);
+
+                        if (resourceSize > 0)
+                        {
+                            icon = CreateIconFromResourceEx((byte*)data,
+                                                            resourceSize,
+                                                            BOOL.TRUE,
+                                                            0x00030000,
+                                                            0,
+                                                            0,
+                                                            LR.LR_DEFAULTCOLOR);
+                        }
                     }
                 }
-                finally
-                {
-                    CoUninitialize();
-                }
-            }
-            else
-            {
-                window.pipeClient.SetProxyErrorMessage(string.Format(CultureInfo.InvariantCulture,
-                                                                     Resources.InitializeCOMErrorFormat,
-                                                                     hr));
             }
 
-            _ = PostMessageW(window.hwnd, EndFilterThreadMessage, 0, 0);
-            return 0;
+            return icon;
         }
 
         [UnmanagedCallersOnly]
