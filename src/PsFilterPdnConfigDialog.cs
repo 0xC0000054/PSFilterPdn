@@ -835,7 +835,7 @@ namespace PSFilterPdn
             primaryColor = new PSFilterLoad.PSApi.ColorRgb24(environment.PrimaryColor);
             secondaryColor = new PSFilterLoad.PSApi.ColorRgb24(environment.SecondaryColor);
             selectionMask = SelectionMaskRenderer.FromPdnSelection(environment, imagingFactory);
-            transparencyCheckerboard = new PDNTransparencyCheckerboardSurface(imagingFactory);
+            transparencyCheckerboard = new PDNTransparencyCheckerboardSurface(Services, imagingFactory);
         }
 
         private void runFilterBtn_Click(object? sender, EventArgs e)

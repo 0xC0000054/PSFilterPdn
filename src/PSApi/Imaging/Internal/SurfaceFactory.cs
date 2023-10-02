@@ -27,7 +27,7 @@ namespace PSFilterLoad.PSApi.Imaging
             ArgumentNullException.ThrowIfNull(serviceProvider, nameof(serviceProvider));
 
             imagingFactory = serviceProvider.GetService<IImagingFactory>() ?? throw new InvalidOperationException("Failed to get the WIC factory.");
-            transparencyCheckerboardSurface = new PDNTransparencyCheckerboardSurface(imagingFactory);
+            transparencyCheckerboardSurface = new PDNTransparencyCheckerboardSurface(serviceProvider, imagingFactory);
         }
 
         public SurfaceFactory(IImagingFactory imagingFactory, TransparencyCheckerboardSurface transparencyCheckerboardSurface)

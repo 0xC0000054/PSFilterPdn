@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet;
+using PaintDotNet.AppModel;
 using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
 using System;
@@ -21,37 +22,28 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
     {
         private readonly WICBitmapSurface<ColorPbgra32> bitmap;
 
-        public PDNTransparencyCheckerboardSurface(IImagingFactory imagingFactory)
+        public PDNTransparencyCheckerboardSurface(IServiceProvider serviceProvider, IImagingFactory imagingFactory)
         {
-            // TODO: Change this to use PaintDotNet.AppModel.IVisualStylingService after PDN 5.0.10 is released.
-            int dpiScaleFactor = (int)Math.Floor(UIScaleFactor.Current.Scale);
+            IVisualStylingService visualStylingService = serviceProvider.GetService<IVisualStylingService>() ?? throw new InvalidOperationException("Failed to get the visual styling service.");
+            ICheckerboardVisualStyling checkerboardVisualStyling = visualStylingService.Checkerboard;
 
-            // At 96 DPI (scale factor 1.0), each checkerboard tile is 8x8 pixels.
-            // We create an image that is a 2x2 grid of checkerboard tiles and scale it by the UI DPI.
-            int size = 16 * dpiScaleFactor;
+            SizeInt32 size = checkerboardVisualStyling.GetRepeatingBitmapSize(CheckerboardTileSize.Medium);
 
-            Width = size;
-            Height = size;
-            bitmap = new WICBitmapSurface<ColorPbgra32>(size, size, imagingFactory);
+            Width = size.Width;
+            Height = size.Height;
+            bitmap = new WICBitmapSurface<ColorPbgra32>(Width, Height, imagingFactory);
 
             try
             {
-                using (Surface checkerboardSurface = new(size, size))
+                using (ISurfaceLock surfaceLock = bitmap.Lock(SurfaceLockMode.Write))
                 {
-                    checkerboardSurface.ClearWithCheckerboardPattern();
+                    RegionPtr<ColorPbgra32> region = new((ColorPbgra32*)surfaceLock.Buffer,
+                                                         surfaceLock.Width,
+                                                         surfaceLock.Height,
+                                                         surfaceLock.BufferStride);
 
-                    RegionPtr<ColorBgra> region = checkerboardSurface.AsRegionPtr();
-
+                    checkerboardVisualStyling.Render(region.Cast<ColorBgr32>(), CheckerboardTileSize.Medium);
                     PixelKernels.SetAlphaChannel(region.Cast<ColorBgra32>(), ColorAlpha8.Opaque);
-
-                    using (ISurfaceLock surfaceLock = bitmap.Lock(SurfaceLockMode.Write))
-                    {
-                        RegionPtr<ColorPbgra32> dst = new((ColorPbgra32*)surfaceLock.Buffer,
-                                                          surfaceLock.Width,
-                                                          surfaceLock.Height,
-                                                          surfaceLock.BufferStride);
-                        region.Cast<ColorPbgra32>().CopyTo(dst);
-                    }
                 }
             }
             catch (Exception)

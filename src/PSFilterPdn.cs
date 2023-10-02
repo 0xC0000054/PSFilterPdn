@@ -100,7 +100,7 @@ namespace PSFilterPdn
 
                 source = new EffectInputBitmapSurface(Environment.GetSourceBitmapBgra32(), imagingFactory);
                 selectionMask = SelectionMaskRenderer.FromPdnSelection(Environment);
-                transparencyCheckerboard = new PDNTransparencyCheckerboardSurface(imagingFactory);
+                transparencyCheckerboard = new PDNTransparencyCheckerboardSurface(Services, imagingFactory);
 
                 if (!token.FilterParameters.TryGetValue(token.FilterData!, out ParameterData? parameterData))
                 {
