@@ -17,16 +17,9 @@ using System.Text;
 
 namespace PSFilterPdn.Metadata
 {
-    internal sealed class IptcWriter
+    internal static class IptcWriter
     {
-        private readonly string caption;
-
-        public IptcWriter(string caption)
-        {
-            this.caption = caption ?? throw new ArgumentNullException(nameof(caption));
-        }
-
-        public byte[] CreateCaptionRecordBlob()
+        public static byte[] CreateCaptionRecordBlob(string caption)
         {
             int captionLengthInUtf8Bytes = Encoding.UTF8.GetByteCount(caption);
 

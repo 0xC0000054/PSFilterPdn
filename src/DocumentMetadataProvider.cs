@@ -173,7 +173,7 @@ namespace PSFilterPdn
 
             if (!string.IsNullOrEmpty(caption))
             {
-                bytes = new IptcWriter(caption).CreateCaptionRecordBlob();
+                bytes = IptcWriter.CreateCaptionRecordBlob(caption);
             }
 
             return bytes;
