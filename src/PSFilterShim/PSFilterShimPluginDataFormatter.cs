@@ -36,10 +36,10 @@ namespace PSFilterLoad.PSApi
             string entryPoint = reader.ReadString()!;
             string category = reader.ReadString()!;
             string title = reader.ReadString()!;
-            FilterCaseInfoCollection filterInfo = resolver.GetFormatterWithVerify<FilterCaseInfoCollection>().Deserialize(ref reader, options);
-            AETEData aete = resolver.GetFormatterWithVerify<AETEData>().Deserialize(ref reader, options);
-            ReadOnlyCollection<string> moduleEntryPoints = resolver.GetFormatterWithVerify<ReadOnlyCollection<string>>().Deserialize(ref reader,
-                                                                                                                                     options);
+            FilterCaseInfoCollection? filterInfo = resolver.GetFormatterWithVerify<FilterCaseInfoCollection?>().Deserialize(ref reader, options);
+            AETEData? aete = resolver.GetFormatterWithVerify<AETEData?>().Deserialize(ref reader, options);
+            ReadOnlyCollection<string>? moduleEntryPoints = resolver.GetFormatterWithVerify<ReadOnlyCollection<string>?>().Deserialize(ref reader,
+                                                                                                                                       options);
             Architecture processorArchitecture = resolver.GetFormatterWithVerify<Architecture>().Deserialize(ref reader, options);
             reader.Depth--;
 

@@ -35,9 +35,9 @@ namespace PSFilterLoad.PSApi
                             string entryPoint,
                             string category,
                             string title,
-                            FilterCaseInfoCollection filterInfo,
-                            AETEData aete,
-                            ReadOnlyCollection<string> moduleEntryPoints,
+                            FilterCaseInfoCollection? filterInfo,
+                            AETEData? aete,
+                            ReadOnlyCollection<string>? moduleEntryPoints,
                             Architecture processorArchitecture)
         {
             FileName = fileName;
@@ -88,7 +88,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The filter information used to determine how transparency is processed.
         /// </value>
-        public FilterCaseInfoCollection FilterInfo { get; }
+        public FilterCaseInfoCollection? FilterInfo { get; }
 
         /// <summary>
         /// Gets the AETE scripting information.
@@ -96,7 +96,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The AETE scripting information.
         /// </value>
-        public AETEData Aete { get; }
+        public AETEData? Aete { get; }
 
         /// <summary>
         /// Gets a collection containing all of the entry points in the filter module.
@@ -104,7 +104,7 @@ namespace PSFilterLoad.PSApi
         /// <value>
         /// The collection containing all of the entry points in the module.
         /// </value>
-        public ReadOnlyCollection<string> ModuleEntryPoints { get; internal set; }
+        public ReadOnlyCollection<string>? ModuleEntryPoints { get; internal set; }
 
         /// <summary>
         /// Gets the processor architecture that the plug-in was built for.
