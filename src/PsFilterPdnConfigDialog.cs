@@ -13,6 +13,7 @@
 using PaintDotNet;
 using PaintDotNet.AppModel;
 using PaintDotNet.Clipboard;
+using PaintDotNet.Collections;
 using PaintDotNet.Effects;
 using PaintDotNet.Imaging;
 using PSFilterLoad.PSApi;
@@ -1116,8 +1117,7 @@ namespace PSFilterPdn
 
             public WorkerArgs(ICollection<string> searchDirectories, bool searchSubDirectories)
             {
-                directories = new string[searchDirectories.Count];
-                searchDirectories.CopyTo(directories, 0);
+                directories = searchDirectories.ToArrayEx();
                 recurseSubDirectories = searchSubDirectories;
             }
         }
