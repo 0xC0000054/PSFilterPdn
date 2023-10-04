@@ -38,7 +38,7 @@ namespace PSFilterLoad.PSApi
                 if (keyArray != IntPtr.Zero)
                 {
                     int offset = 0;
-                    uint* ptr = (uint*)keyArray.ToPointer();
+                    uint* ptr = (uint*)keyArray;
                     while (*ptr != 0U)
                     {
                         offsets.Add(*ptr, offset);
@@ -171,7 +171,7 @@ namespace PSFilterLoad.PSApi
 
             unsafe
             {
-                ReadDescriptorProcs* readDescriptor = (ReadDescriptorProcs*)readDescriptorPtr.ToPointer();
+                ReadDescriptorProcs* readDescriptor = (ReadDescriptorProcs*)readDescriptorPtr;
                 readDescriptor->readDescriptorProcsVersion = PSConstants.kCurrentReadDescriptorProcsVersion;
                 readDescriptor->numReadDescriptorProcs = PSConstants.kCurrentReadDescriptorProcsCount;
                 readDescriptor->openReadDescriptorProc = new UnmanagedFunctionPointer<OpenReadDescriptorProc>(openReadDescriptorProc);
@@ -203,7 +203,7 @@ namespace PSFilterLoad.PSApi
 
             unsafe
             {
-                WriteDescriptorProcs* writeDescriptor = (WriteDescriptorProcs*)writeDescriptorPtr.ToPointer();
+                WriteDescriptorProcs* writeDescriptor = (WriteDescriptorProcs*)writeDescriptorPtr;
                 writeDescriptor->writeDescriptorProcsVersion = PSConstants.kCurrentWriteDescriptorProcsVersion;
                 writeDescriptor->numWriteDescriptorProcs = PSConstants.kCurrentWriteDescriptorProcsCount;
                 writeDescriptor->openWriteDescriptorProc = new UnmanagedFunctionPointer<OpenWriteDescriptorProc>(openWriteDescriptorProc);

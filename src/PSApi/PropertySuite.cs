@@ -99,7 +99,7 @@ namespace PSFilterLoad.PSApi
         {
             IntPtr propertyProcsPtr = Memory.Allocate(Marshal.SizeOf<PropertyProcs>(), MemoryAllocationOptions.ZeroFill);
 
-            PropertyProcs* propertyProcs = (PropertyProcs*)propertyProcsPtr.ToPointer();
+            PropertyProcs* propertyProcs = (PropertyProcs*)propertyProcsPtr;
             propertyProcs->propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion;
             propertyProcs->numPropertyProcs = PSConstants.kCurrentPropertyProcsCount;
             propertyProcs->getPropertyProc = new UnmanagedFunctionPointer<GetPropertyProc>(getPropertyProc);

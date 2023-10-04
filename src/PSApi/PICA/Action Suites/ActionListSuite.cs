@@ -1037,7 +1037,7 @@ namespace PSFilterLoad.PSApi.PICA
                 int valueCount = (int)count;
                 unsafe
                 {
-                    int* ptr = (int*)data.ToPointer();
+                    int* ptr = (int*)data;
 
                     for (int i = 0; i < valueCount; i++)
                     {

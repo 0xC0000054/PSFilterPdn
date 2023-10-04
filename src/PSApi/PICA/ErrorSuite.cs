@@ -64,7 +64,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (str != IntPtr.Zero)
             {
-                errorMessage = StringUtil.FromPascalString((byte*)str.ToPointer())!;
+                errorMessage = StringUtil.FromPascalString((byte*)str)!;
 
                 return PSError.kSPNoError;
             }

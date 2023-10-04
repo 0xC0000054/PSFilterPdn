@@ -119,7 +119,7 @@ namespace PSFilterLoad.PSApi
         {
             IntPtr basicSuitePtr = Memory.Allocate(Marshal.SizeOf<SPBasicSuite>(), MemoryAllocationOptions.ZeroFill);
 
-            SPBasicSuite* basicSuite = (SPBasicSuite*)basicSuitePtr.ToPointer();
+            SPBasicSuite* basicSuite = (SPBasicSuite*)basicSuitePtr;
             basicSuite->acquireSuite = new UnmanagedFunctionPointer<SPBasicAcquireSuite>(spAcquireSuite);
             basicSuite->releaseSuite = new UnmanagedFunctionPointer<SPBasicReleaseSuite>(spReleaseSuite);
             basicSuite->isEqual = new UnmanagedFunctionPointer<SPBasicIsEqual>(spIsEqual);
@@ -467,8 +467,8 @@ namespace PSFilterLoad.PSApi
             }
 
             // Compare two null-terminated ASCII strings for equality.
-            byte* src = (byte*)token1.ToPointer();
-            byte* dst = (byte*)token2.ToPointer();
+            byte* src = (byte*)token1;
+            byte* dst = (byte*)token2;
 
             int diff;
 

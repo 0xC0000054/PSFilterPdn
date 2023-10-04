@@ -52,7 +52,7 @@ namespace PSFilterLoad.PSApi
 
             unsafe
             {
-                BufferProcs* bufferProcs = (BufferProcs*)bufferProcsPtr.ToPointer();
+                BufferProcs* bufferProcs = (BufferProcs*)bufferProcsPtr;
                 bufferProcs->bufferProcsVersion = PSConstants.kCurrentBufferProcsVersion;
                 bufferProcs->numBufferProcs = PSConstants.kCurrentBufferProcsCount;
                 bufferProcs->allocateProc = new UnmanagedFunctionPointer<AllocateBufferProc>(allocProc);

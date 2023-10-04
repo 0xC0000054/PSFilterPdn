@@ -58,7 +58,7 @@ namespace PSFilterLoad.PSApi
         {
             IntPtr channelPortsPtr = Memory.Allocate(Marshal.SizeOf<ChannelPortProcs>(), MemoryAllocationOptions.ZeroFill);
 
-            ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr.ToPointer();
+            ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr;
             channelPorts->channelPortProcsVersion = PSConstants.kCurrentChannelPortProcsVersion;
             channelPorts->numChannelPortProcs = PSConstants.kCurrentChannelPortProcsCount;
             channelPorts->readPixelsProc = new UnmanagedFunctionPointer<ReadPixelsProc>(readPixelsProc);
@@ -90,7 +90,7 @@ namespace PSFilterLoad.PSApi
 
         private static unsafe void FillChannelData(int channel, PixelMemoryDesc* destiniation, ISurface<ImageSurface> source, VRect srcRect)
         {
-            byte* dstPtr = (byte*)destiniation->data.ToPointer();
+            byte* dstPtr = (byte*)destiniation->data;
             int stride = destiniation->rowBits / 8;
             int bpp = destiniation->colBits / 8;
             int offset = destiniation->bitOffset / 8;
@@ -131,7 +131,7 @@ namespace PSFilterLoad.PSApi
 
         private static unsafe void FillSelectionMask(PixelMemoryDesc* destiniation, ISurface<MaskSurface> mask, VRect srcRect)
         {
-            byte* dstPtr = (byte*)destiniation->data.ToPointer();
+            byte* dstPtr = (byte*)destiniation->data;
             int stride = destiniation->rowBits / 8;
             int bpp = destiniation->colBits / 8;
             int offset = destiniation->bitOffset / 8;

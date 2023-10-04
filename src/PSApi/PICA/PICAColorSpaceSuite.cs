@@ -332,7 +332,7 @@ namespace PSFilterLoad.PSApi.PICA
             byte c1 = 0;
             byte c2 = 0;
             byte c3 = 0;
-            CS_Color8* color = (CS_Color8*)colorArray.ToPointer();
+            CS_Color8* color = (CS_Color8*)colorArray;
 
             for (int i = 0; i < count; i++)
             {
@@ -520,8 +520,8 @@ namespace PSFilterLoad.PSApi.PICA
                     }
                 }
 
-                byte* input = (byte*)inputData.ToPointer();
-                ushort* output = (ushort*)outputData.ToPointer();
+                byte* input = (byte*)inputData;
+                ushort* output = (ushort*)outputData;
 
                 for (int i = 0; i < count; i++)
                 {
@@ -559,8 +559,8 @@ namespace PSFilterLoad.PSApi.PICA
                     }
                 }
 
-                ushort* input = (ushort*)inputData.ToPointer();
-                byte* output = (byte*)outputData.ToPointer();
+                ushort* input = (ushort*)inputData;
+                byte* output = (byte*)outputData;
 
                 for (int i = 0; i < count; i++)
                 {

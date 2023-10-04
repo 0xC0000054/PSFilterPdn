@@ -90,7 +90,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                ReadImageDocumentDesc* doc = (ReadImageDocumentDesc*)readDocumentPtr.ToPointer();
+                ReadImageDocumentDesc* doc = (ReadImageDocumentDesc*)readDocumentPtr;
                 doc->minVersion = PSConstants.kCurrentMinVersReadImageDocDesc;
                 doc->maxVersion = PSConstants.kCurrentMaxVersReadImageDocDesc;
                 doc->imageMode = PSConstants.plugInModeRGBColor;
@@ -105,7 +105,7 @@ namespace PSFilterLoad.PSApi
 
                 IntPtr channel = CreateReadChannelDesc(PSConstants.ChannelPorts.Red, StringResources.RedChannelName, doc->depth, doc->bounds);
 
-                ReadChannelDesc* ch = (ReadChannelDesc*)channel.ToPointer();
+                ReadChannelDesc* ch = (ReadChannelDesc*)channel;
 
                 for (int i = PSConstants.ChannelPorts.Green; i <= PSConstants.ChannelPorts.Blue; i++)
                 {
@@ -126,7 +126,7 @@ namespace PSFilterLoad.PSApi
 
                     ch->next = ptr;
 
-                    ch = (ReadChannelDesc*)ptr.ToPointer();
+                    ch = (ReadChannelDesc*)ptr;
                 }
 
                 doc->targetCompositeChannels = doc->mergedCompositeChannels = channel;
@@ -195,7 +195,7 @@ namespace PSFilterLoad.PSApi
                 throw;
             }
 
-            ReadChannelDesc* desc = (ReadChannelDesc*)addressPtr.ToPointer();
+            ReadChannelDesc* desc = (ReadChannelDesc*)addressPtr;
             desc->minVersion = PSConstants.kCurrentMinVersReadChannelDesc;
             desc->maxVersion = PSConstants.kCurrentMaxVersReadChannelDesc;
             desc->depth = depth;

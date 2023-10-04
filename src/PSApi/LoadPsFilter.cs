@@ -446,7 +446,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         private unsafe void SaveScriptingParameters()
         {
-            PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
+            PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr;
             if (descriptorParameters->descriptor != Handle.Null)
             {
                 if (basicSuiteProvider.TryGetScriptingData(descriptorParameters->descriptor, out Dictionary<uint, AETEValue>? data))
@@ -1966,7 +1966,7 @@ namespace PSFilterLoad.PSApi
                 return err;
             }
 
-            byte* ptr = (byte*)maskDataPtr.ToPointer();
+            byte* ptr = (byte*)maskDataPtr;
 
             using (ISurfaceLock maskLock = tempMask!.Lock(lockRect, SurfaceLockMode.Read))
             {
@@ -2283,7 +2283,7 @@ namespace PSFilterLoad.PSApi
                     break;
                 case ColorServicesSelector.SamplePoint:
 
-                    Point16* point = (Point16*)info->selectorParameter.globalSamplePoint.ToPointer();
+                    Point16* point = (Point16*)info->selectorParameter.globalSamplePoint;
 
                     if (point->h >= 0 && point->h < source.Width && point->v >= 0 && point->v < source.Height)
                     {
@@ -2361,7 +2361,7 @@ namespace PSFilterLoad.PSApi
             {
                 SetupDisplaySurface(width, height, hasTransparencyMask);
 
-                byte* baseAddress = (byte*)srcPixelMap->baseAddr.ToPointer();
+                byte* baseAddress = (byte*)srcPixelMap->baseAddr;
 
                 int top = srcRect->top;
                 int left = srcRect->left;
@@ -2429,7 +2429,7 @@ namespace PSFilterLoad.PSApi
 
                     if (mask->maskData != IntPtr.Zero && mask->colBytes != 0 && mask->rowBytes != 0)
                     {
-                        byte* maskPtr = (byte*)mask->maskData.ToPointer();
+                        byte* maskPtr = (byte*)mask->maskData;
 
                         using (ISurfaceLock displaySurfaceLock = displaySurface.Lock(SurfaceLockMode.ReadWrite))
                         {
@@ -2651,7 +2651,7 @@ namespace PSFilterLoad.PSApi
         private unsafe void SetupSuites()
         {
             platformDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), MemoryAllocationOptions.ZeroFill);
-            ((PlatformData*)platformDataPtr.ToPointer())->hwnd = parentWindowHandle;
+            ((PlatformData*)platformDataPtr)->hwnd = parentWindowHandle;
 
             bufferProcsPtr = bufferSuite.CreateBufferProcsPointer();
 
@@ -2667,7 +2667,7 @@ namespace PSFilterLoad.PSApi
             writeDescriptorPtr = descriptorSuite.CreateWriteDescriptorPointer();
 
             descriptorParametersPtr = Memory.Allocate(Marshal.SizeOf<PIDescriptorParameters>(), MemoryAllocationOptions.ZeroFill);
-            PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
+            PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr;
             descriptorParameters->descriptorParametersVersion = PSConstants.kCurrentDescriptorParametersVersion;
             descriptorParameters->readDescriptorProcs = readDescriptorPtr;
             descriptorParameters->writeDescriptorProcs = writeDescriptorPtr;
@@ -2952,7 +2952,7 @@ namespace PSFilterLoad.PSApi
                 }
                 if (descriptorParametersPtr != IntPtr.Zero)
                 {
-                    PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr.ToPointer();
+                    PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr;
 
                     if (descriptorParameters->descriptor != Handle.Null)
                     {

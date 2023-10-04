@@ -69,7 +69,7 @@ namespace PSFilterLoad.PSApi
 
             unsafe
             {
-                ResourceProcs* resourceProcs = (ResourceProcs*)resourceProcsPtr.ToPointer();
+                ResourceProcs* resourceProcs = (ResourceProcs*)resourceProcsPtr;
                 resourceProcs->resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion;
                 resourceProcs->numResourceProcs = PSConstants.kCurrentResourceProcsCount;
                 resourceProcs->addProc = new UnmanagedFunctionPointer<AddPIResourceProc>(addResourceProc);

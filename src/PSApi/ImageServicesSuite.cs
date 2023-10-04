@@ -35,7 +35,7 @@ namespace PSFilterLoad.PSApi
         {
             IntPtr imageServicesProcsPtr = Memory.Allocate(Marshal.SizeOf<ImageServicesProcs>(), MemoryAllocationOptions.ZeroFill);
 
-            ImageServicesProcs* imageServicesProcs = (ImageServicesProcs*)imageServicesProcsPtr.ToPointer();
+            ImageServicesProcs* imageServicesProcs = (ImageServicesProcs*)imageServicesProcsPtr;
 
             imageServicesProcs->imageServicesProcsVersion = PSConstants.kCurrentImageServicesProcsVersion;
             imageServicesProcs->numImageServicesProcs = PSConstants.kCurrentImageServicesProcsCount;

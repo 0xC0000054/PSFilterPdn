@@ -123,7 +123,7 @@ namespace PSFilterLoad.PSApi
 
             unsafe
             {
-                HandleProcs* handleProcs = (HandleProcs*)handleProcsPtr.ToPointer();
+                HandleProcs* handleProcs = (HandleProcs*)handleProcsPtr;
                 handleProcs->handleProcsVersion = PSConstants.kCurrentHandleProcsVersion;
                 handleProcs->numHandleProcs = PSConstants.kCurrentHandleProcsCount;
                 handleProcs->newProc = new UnmanagedFunctionPointer<NewPIHandleProc>(handleNewProc);

@@ -602,7 +602,7 @@ namespace PSFilterLoad.PSApi.PICA
             ScriptingParameters parameters = actionDescriptors[descriptor];
             bool result = true;
 
-            uint* key = (uint*)keyArray.ToPointer();
+            uint* key = (uint*)keyArray;
 
             while (*key != 0U)
             {

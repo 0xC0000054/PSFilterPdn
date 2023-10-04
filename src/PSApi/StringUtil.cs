@@ -50,7 +50,7 @@ namespace PSFilterLoad.PSApi
                 return defaultValue;
             }
 
-            return FromPascalString((byte*)pascalString.ToPointer())!;
+            return FromPascalString((byte*)pascalString)!;
         }
 
         /// <summary>
