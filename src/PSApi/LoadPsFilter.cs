@@ -308,7 +308,7 @@ namespace PSFilterLoad.PSApi
             imageServicesSuite = new ImageServicesSuite(logger.CreateInstanceForType(nameof(ImageServicesSuite)));
             propertySuite = new PropertySuite(handleSuite,
                                               documentMetadataProvider,
-                                              logger.CreateInstanceForType(nameof(PSApi.PropertySuite)),
+                                              logger.CreateInstanceForType(nameof(PropertySuite)),
                                               source.Width,
                                               source.Height,
                                               pluginUISettings);
@@ -391,7 +391,7 @@ namespace PSFilterLoad.PSApi
             MEMORY_BASIC_INFORMATION mbi = new();
             uint mbiSize = (uint)sizeof(MEMORY_BASIC_INFORMATION);
 
-            if (Windows.VirtualQuery(ptr.ToPointer(), &mbi, mbiSize) == 0)
+            if (VirtualQuery(ptr.ToPointer(), &mbi, mbiSize) == 0)
             {
                 return false;
             }
