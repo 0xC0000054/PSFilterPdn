@@ -17,7 +17,7 @@ using static TerraFX.Interop.Windows.Windows;
 
 namespace PSFilterShim
 {
-    static partial class Program
+    static class Program
     {
         static PSFilterShimPipeClient? pipeClient;
 
