@@ -467,18 +467,22 @@ namespace PSFilterLoad.PSApi
             }
 
             // Compare two null-terminated ASCII strings for equality.
-            byte* src = (byte*)token1;
-            byte* dst = (byte*)token2;
+            ASBoolean result;
 
-            int diff;
-
-            while ((diff = *src - *dst) == 0 && *dst != 0)
+            try
             {
-                src++;
-                dst++;
+                ReadOnlySpan<byte> a = MemoryMarshal.CreateReadOnlySpanFromNullTerminated((byte*)token1);
+                ReadOnlySpan<byte> b = MemoryMarshal.CreateReadOnlySpanFromNullTerminated((byte*)token2);
+
+                result = a.SequenceEqual(b);
+            }
+            catch (ArgumentException)
+            {
+                // A string is not null-terminated or is longer than int.MaxValue.
+                result = ASBoolean.False;
             }
 
-            return diff == 0;
+            return result;
         }
 
         private unsafe int SPBasicAllocateBlock(int size, IntPtr* block)
