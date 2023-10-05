@@ -19,14 +19,9 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="pointer">The pointer.</param>
         /// <returns></returns>
-        public static string ToHexString(this System.IntPtr pointer)
+        public static string ToHexString(this nint pointer)
         {
-            if (System.IntPtr.Size == 8)
-            {
-                return pointer.ToString("X16");
-            }
-
-            return pointer.ToString("X8");
+            return pointer.ToString(nint.Size == 8 ? "X16" : "X8");
         }
     }
 }
