@@ -12,25 +12,13 @@
 
 using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Text;
+using static TerraFX.Interop.Windows.Windows;
 
 namespace PSFilterShim
 {
     static partial class Program
     {
-        static partial class NativeMethods
-        {
-            [LibraryImport("kernel32.dll", EntryPoint = "SetProcessDEPPolicy")]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static partial bool SetProcessDEPPolicy(uint dwFlags);
-
-            [LibraryImport("kernel32.dll", EntryPoint = "SetErrorMode")]
-            internal static partial uint SetErrorMode(uint uMode);
-
-            internal const uint SEM_FAILCRITICALERRORS = 1U;
-        }
-
         static PSFilterShimPipeClient? pipeClient;
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -53,7 +41,7 @@ namespace PSFilterShim
             try
             {
                 // Try to Opt-out of DEP as many filters are not compatible with it.
-                NativeMethods.SetProcessDEPPolicy(0U);
+                SetProcessDEPPolicy(0U);
             }
             catch (EntryPointNotFoundException)
             {
@@ -61,7 +49,7 @@ namespace PSFilterShim
             }
 
             // Disable the critical-error-handler message box displayed when a filter cannot find a dependency.
-            NativeMethods.SetErrorMode(NativeMethods.SetErrorMode(0U) | NativeMethods.SEM_FAILCRITICALERRORS);
+            SetErrorMode(SetErrorMode(0U) | SEM_FAILCRITICALERRORS);
 
             string pipeName = args[0];
 
