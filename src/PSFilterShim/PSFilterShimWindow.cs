@@ -221,6 +221,10 @@ namespace PSFilterShim
                         window.RunFilter(imagingFactory, direct2DFactory);
                     }
                 }
+                catch (Exception ex)
+                {
+                    window.pipeClient.SetProxyErrorMessage(ex);
+                }
                 finally
                 {
                     CoUninitialize();
