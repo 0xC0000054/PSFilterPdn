@@ -464,7 +464,7 @@ namespace PSFilterLoad.PSApi
             // 0x0B = Vertical Tab
             // 0x0C = Form Feed
             // 0x0D = Carriage Return
-            // 0xA0 Non-breaking space
+            // 0xA0 = Non-breaking space
 
             return value == 0x20 || (value >= 0x09 && value <= 0x0D) || value == 0xA0;
         }
