@@ -1556,7 +1556,10 @@ namespace PSFilterPdn
             if (settings != null)
             {
                 subDirSearchCb.Checked = settings.SearchSubdirectories;
-                directories.AddRange(settings.SearchDirectories);
+                if (settings.SearchDirectories != null)
+                {
+                    directories.AddRange(settings.SearchDirectories);
+                }
             }
             else
             {
