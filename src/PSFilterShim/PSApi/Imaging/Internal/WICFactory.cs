@@ -35,7 +35,7 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
                                               null,
                                               (uint)CLSCTX.CLSCTX_INPROC_SERVER,
                                               __uuidof<IWICImagingFactory2>(),
-                                              (void**)factory.GetAddressOf());
+                                              (void**)ppFactory);
                 WICException.ThrowIfFailed("Failed to create the WIC factory", hr);
             }
         }
