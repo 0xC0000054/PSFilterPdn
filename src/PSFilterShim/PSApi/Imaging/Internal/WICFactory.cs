@@ -28,17 +28,15 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
         public WICFactory()
         {
-            factory = default;
             Guid clsid = CLSID.CLSID_WICImagingFactory2;
-
-            HRESULT hr = CoCreateInstance(&clsid,
-                                          null,
-                                          (uint)CLSCTX.CLSCTX_INPROC_SERVER,
-                                          __uuidof<IWICImagingFactory2>(),
-                                          (void**)factory.GetAddressOf());
-            if (hr.FAILED)
+            fixed (IWICImagingFactory** ppFactory = factory)
             {
-                Marshal.ThrowExceptionForHR(hr.Value);
+                HRESULT hr = CoCreateInstance(&clsid,
+                                              null,
+                                              (uint)CLSCTX.CLSCTX_INPROC_SERVER,
+                                              __uuidof<IWICImagingFactory2>(),
+                                              (void**)factory.GetAddressOf());
+                WICException.ThrowIfFailed("Failed to create the WIC factory", hr);
             }
         }
 

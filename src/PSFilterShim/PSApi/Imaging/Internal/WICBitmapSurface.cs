@@ -41,12 +41,15 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
             Guid wicPixelFormat = GetWICPixelFormat(Format);
 
-            HRESULT hr = factory.Get()->CreateBitmap((uint)width,
-                                                     (uint)height,
-                                                     &wicPixelFormat,
-                                                     WICBitmapCacheOnLoad,
-                                                     bitmap.GetAddressOf());
-            WICException.ThrowIfFailed("Failed to create the WIC Bitmap.", hr);
+            fixed (IWICBitmap** ppBitmap = bitmap)
+            {
+                HRESULT hr = factory.Get()->CreateBitmap((uint)width,
+                                                         (uint)height,
+                                                         &wicPixelFormat,
+                                                         WICBitmapCacheOnLoad,
+                                                         ppBitmap);
+                WICException.ThrowIfFailed("Failed to create the WIC Bitmap.", hr);
+            }
             this.factory = factory;
         }
 
@@ -65,11 +68,15 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
             Guid wicPixelFormat = GetWICPixelFormat(Format);
 
-            HRESULT hr = factory.Get()->CreateBitmap((uint)newWidth,
-                                                     (uint)newHeight,
-                                                     &wicPixelFormat,
-                                                     WICBitmapCacheOnLoad,
-                                                     bitmap.GetAddressOf());
+            HRESULT hr;
+            fixed (IWICBitmap** ppBitmap = bitmap)
+            {
+                hr = factory.Get()->CreateBitmap((uint)newWidth,
+                                                 (uint)newHeight,
+                                                 &wicPixelFormat,
+                                                 WICBitmapCacheOnLoad,
+                                                 ppBitmap);
+            }
             WICException.ThrowIfFailed("Failed to create the WIC Bitmap.", hr);
 
             try
@@ -124,11 +131,15 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
             Guid wicPixelFormat = GetWICPixelFormat(Format);
 
-            HRESULT hr = factory.Get()->CreateBitmap((uint)Width,
-                                                     (uint)Height,
-                                                     &wicPixelFormat,
-                                                     WICBitmapCacheOnLoad,
-                                                     bitmap.GetAddressOf());
+            HRESULT hr;
+            fixed (IWICBitmap** ppBitmap = bitmap)
+            {
+                hr = factory.Get()->CreateBitmap((uint)original.Width,
+                                                 (uint)original.Height,
+                                                 &wicPixelFormat,
+                                                 WICBitmapCacheOnLoad,
+                                                 ppBitmap);
+            }
             WICException.ThrowIfFailed("Failed to create the WIC Bitmap.", hr);
 
             try

@@ -37,12 +37,19 @@ namespace PSFilterLoad.PSApi.Rendering.Internal
                                                            96.0f,
                                                            D2D1_RENDER_TARGET_USAGE.D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE);
 
-            HRESULT hr = factory.Get()->CreateDCRenderTarget(&properties, renderTarget.GetAddressOf());
+            HRESULT hr;
+            fixed (ID2D1DCRenderTarget** ppRenderTarget = renderTarget)
+            {
+                hr = factory.Get()->CreateDCRenderTarget(&properties, ppRenderTarget);
+            }
             Direct2DException.ThrowIfFailed("Failed to create the ID2D1DCRenderTarget.", hr);
 
             try
             {
-                hr = renderTarget.Get()->QueryInterface(__uuidof<ID2D1DeviceContext>(), (void**)d2d1DeviceContext.GetAddressOf());
+                fixed (ID2D1DeviceContext** ppDeviceContext = d2d1DeviceContext)
+                {
+                    hr = renderTarget.Get()->QueryInterface(__uuidof<ID2D1DeviceContext>(), (void**)ppDeviceContext);
+                }
                 Direct2DException.ThrowIfFailed("Failed to get the ID2D1DeviceContext.", hr);
             }
             catch (Exception)

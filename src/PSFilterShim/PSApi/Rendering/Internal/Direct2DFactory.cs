@@ -30,10 +30,11 @@ namespace PSFilterLoad.PSApi.Rendering.Internal
 
         public Direct2DFactory()
         {
-            factory = default;
-
-            HRESULT hr = D2D1CreateFactory<ID2D1Factory>(D2D1_FACTORY_TYPE_MULTI_THREADED, (void**)factory.GetAddressOf());
-            Direct2DException.ThrowIfFailed("Failed to create the ID2D1Factory.", hr);
+            fixed (ID2D1Factory** ppFactory = factory)
+            {
+                HRESULT hr = D2D1CreateFactory<ID2D1Factory>(D2D1_FACTORY_TYPE_MULTI_THREADED, (void**)ppFactory);
+                Direct2DException.ThrowIfFailed("Failed to create the ID2D1Factory.", hr);
+            }
         }
 
         public ID2D1Factory* Get()

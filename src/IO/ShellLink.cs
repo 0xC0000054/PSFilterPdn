@@ -30,15 +30,17 @@ namespace PSFilterPdn
         /// </summary>
         public ShellLink()
         {
-            shellLink = default;
-            HRESULT hr = Windows.CoCreateInstance(Windows.__uuidof<TerraFX.Interop.Windows.ShellLink>(),
-                                                  null,
-                                                  (uint)CLSCTX.CLSCTX_INPROC_SERVER,
-                                                  Windows.__uuidof<IShellLinkW>(),
-                                                  (void**)shellLink.GetAddressOf());
-            if (hr.FAILED)
+            fixed (IShellLinkW** ppShellLink = shellLink)
             {
-                Marshal.ThrowExceptionForHR(hr.Value);
+                HRESULT hr = Windows.CoCreateInstance(Windows.__uuidof<TerraFX.Interop.Windows.ShellLink>(),
+                                                      null,
+                                                      (uint)CLSCTX.CLSCTX_INPROC_SERVER,
+                                                      Windows.__uuidof<IShellLinkW>(),
+                                                      (void**)ppShellLink);
+                if (hr.FAILED)
+                {
+                    Marshal.ThrowExceptionForHR(hr.Value);
+                }
             }
         }
 
