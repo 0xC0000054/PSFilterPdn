@@ -68,14 +68,14 @@ namespace PSFilterPdn
             return new PsFilterPdnConfigDialog();
         }
 
-        private void ShowErrorMessage(IWin32Window window, Exception exception)
+        private void ShowErrorMessage(Exception exception)
         {
-            Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(window, exception.Message, exception);
+            Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(null, exception.Message, exception);
         }
 
-        private void ShowErrorMessage(IWin32Window window, string message, string details = "")
+        private void ShowErrorMessage(string message, string details = "")
         {
-            Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(window, message, details);
+            Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(null, message, details);
         }
 
         private void Run32BitFilterProxy(PSFilterPdnConfigToken token, IWin32Window window)
@@ -85,7 +85,7 @@ namespace PSFilterPdn
 
             if (!File.Exists(shimPath))
             {
-                ShowErrorMessage(window, Resources.PSFilterShimNotFound);
+                ShowErrorMessage(Resources.PSFilterShimNotFound);
                 return;
             }
 
@@ -157,28 +157,28 @@ namespace PSFilterPdn
 
                 if (!proxyResult && proxyError != null)
                 {
-                    ShowErrorMessage(window, proxyError.Message, proxyError.Details);
+                    ShowErrorMessage(proxyError.Message, proxyError.Details);
                 }
             }
             catch (ArgumentException ax)
             {
-                ShowErrorMessage(window, ax);
+                ShowErrorMessage(ax);
             }
             catch (IOException ex)
             {
-                ShowErrorMessage(window, ex);
+                ShowErrorMessage(ex);
             }
             catch (NotSupportedException ex)
             {
-                ShowErrorMessage(window, ex);
+                ShowErrorMessage(ex);
             }
             catch (UnauthorizedAccessException ex)
             {
-                ShowErrorMessage(window, ex);
+                ShowErrorMessage(ex);
             }
             catch (Win32Exception wx)
             {
-                ShowErrorMessage(window, wx);
+                ShowErrorMessage(wx);
             }
             finally
             {
@@ -258,26 +258,26 @@ namespace PSFilterPdn
                     }
                     else if (!string.IsNullOrEmpty(lps.ErrorMessage))
                     {
-                        ShowErrorMessage(window, lps.ErrorMessage);
+                        ShowErrorMessage(lps.ErrorMessage);
                     }
                 }
             }
             catch (FileNotFoundException ex)
             {
-                ShowErrorMessage(window, ex);
+                ShowErrorMessage(ex);
             }
             catch (NullReferenceException ex)
             {
                 // The filter probably tried to access an unimplemented callback function without checking if it is valid.
-                ShowErrorMessage(window, ex);
+                ShowErrorMessage(ex);
             }
             catch (Win32Exception ex)
             {
-                ShowErrorMessage(window, ex);
+                ShowErrorMessage(ex);
             }
             catch (System.Runtime.InteropServices.ExternalException ex)
             {
-                ShowErrorMessage(window, ex);
+                ShowErrorMessage(ex);
             }
             finally
             {
@@ -312,7 +312,7 @@ namespace PSFilterPdn
                     }
                 }
 
-                ShowErrorMessage(window, message);
+                ShowErrorMessage(message);
                 return false;
             }
             else
