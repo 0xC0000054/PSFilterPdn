@@ -466,19 +466,6 @@ namespace PSFilterPdn.Metadata
                                       new byte[] { 2, 3, 0, 0 }));
                 }
             }
-
-            if (metadataEntries.TryGetValue(ExifSection.Interop, out Dictionary<ushort, ExifValue>? interopItems))
-            {
-                if (!interopItems.ContainsKey(ExifPropertyKeys.Interop.InteroperabilityVersion.Path.TagID))
-                {
-#pragma warning disable IDE0230 // Use UTF-8 string literal
-                    interopItems.Add(
-                        ExifPropertyKeys.Interop.InteroperabilityVersion.Path.TagID,
-                        new ExifValue(ExifValueType.Undefined,
-                                      new byte[] { (byte)'0', (byte)'1', (byte)'0', (byte)'0' }));
-#pragma warning restore IDE0230 // Use UTF-8 string literal
-                }
-            }
         }
 
         private sealed class IFDEntryInfo
