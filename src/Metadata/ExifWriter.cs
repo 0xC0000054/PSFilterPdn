@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using PaintDotNet.Imaging;
-using PaintDotNet.Rendering;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,13 +20,57 @@ namespace PSFilterPdn.Metadata
 {
     internal sealed class ExifWriter
     {
-        private readonly Dictionary<ExifSection, Dictionary<ushort, ExifValue>> metadata;
-
         private const int FirstIFDOffset = 8;
 
-        public ExifWriter(ExifWriterInfo exifWriterInfo, SizeInt32 documentSize)
+        private static readonly HashSet<ushort> supportedImageSectionTags = new()
         {
-            metadata = CreateTagDictionary(exifWriterInfo, documentSize);
+            // The tags related to storing offsets are included for reference,
+            // but are not written to the EXIF blob.
+
+            // Tags relating to image data structure
+            256, // ImageWidth
+            257, // ImageLength
+            258, // BitsPerSample
+            259, // Compression
+            262, // PhotometricInterpretation
+            274, // Orientation
+            277, // SamplesPerPixel
+            284, // PlanarConfiguration
+            530, // YCbCrSubSampling
+            531, // YCbCrPositioning
+            282, // XResolution
+            283, // YResolution
+            296, // ResolutionUnit
+
+            // Tags relating to recording offset
+            //273, // StripOffsets
+            //278, // RowsPerStrip
+            //279, // StripByteCounts
+            //513, // JPEGInterchangeFormat
+            //514, // JPEGInterchangeFormatLength
+
+            // Tags relating to image data characteristics
+            301, // TransferFunction
+            318, // WhitePoint
+            319, // PrimaryChromaticities
+            529, // YCbCrCoefficients
+            532, // ReferenceBlackWhite
+
+            // Other tags
+            306, // DateTime
+            270, // ImageDescription
+            271, // Make
+            272, // Model
+            305, // Software
+            315, // Artist
+            33432 // Copyright
+        };
+
+        private readonly Dictionary<ExifSection, Dictionary<ushort, ExifValue>> metadata;
+
+        public ExifWriter(IReadOnlyList<ExifPropertyItem> exifPropertyItems)
+        {
+            metadata = CreateTagDictionary(exifPropertyItems);
         }
 
         public byte[] CreateExifBlob()
@@ -291,12 +334,8 @@ namespace PSFilterPdn.Metadata
         }
 
         private static Dictionary<ExifSection, Dictionary<ushort, ExifValue>> CreateTagDictionary(
-            ExifWriterInfo exifWriterInfo,
-            SizeInt32 documentSize)
+            IReadOnlyList<ExifPropertyItem> exifPropertyItems)
         {
-            IReadOnlyDictionary<ExifPropertyPath, ExifValue> entries = exifWriterInfo.Tags;
-            ExifColorSpace exifColorSpace = exifWriterInfo.ColorSpace;
-
             Dictionary<ExifSection, Dictionary<ushort, ExifValue>> metadataEntries = new()
             {
                 {
@@ -311,98 +350,45 @@ namespace PSFilterPdn.Metadata
                 },
                 {
                     ExifSection.Photo,
-                    new Dictionary<ushort, ExifValue>
-                    {
-                        {
-                            ExifPropertyKeys.Photo.ColorSpace.Path.TagID,
-                            ExifConverter.EncodeShort((ushort)exifColorSpace)
-                        }
-                    }
+                    new Dictionary<ushort, ExifValue>()
                 }
             };
 
-            HashSet<ExifPropertyPath> tagsToSkip = new();
+            ExifColorSpace exifColorSpace = ExifColorSpace.Srgb;
+            bool setColorSpace = false;
 
-            // Add the image size tags.
-            if (IsUncompressedImage(entries))
+            foreach (ExifPropertyItem item in exifPropertyItems)
             {
-                Dictionary<ushort, ExifValue> imageSection = metadataEntries[ExifSection.Image];
-                imageSection.Add(ExifPropertyKeys.Image.ImageWidth.Path.TagID,
-                                 ExifConverter.EncodeLong((uint)documentSize.Width));
-                imageSection.Add(ExifPropertyKeys.Image.ImageLength.Path.TagID,
-                                 ExifConverter.EncodeLong((uint)documentSize.Height));
-
-                // These tags should not be included in uncompressed images.
-                tagsToSkip.Add(ExifPropertyKeys.Photo.PixelXDimension.Path);
-                tagsToSkip.Add(ExifPropertyKeys.Photo.PixelYDimension.Path);
-            }
-            else
-            {
-                Dictionary<ushort, ExifValue> exifSection = metadataEntries[ExifSection.Photo];
-                exifSection.Add(ExifPropertyKeys.Photo.PixelXDimension.Path.TagID,
-                                ExifConverter.EncodeLong((uint)documentSize.Width));
-                exifSection.Add(ExifPropertyKeys.Photo.PixelYDimension.Path.TagID,
-                                ExifConverter.EncodeLong((uint)documentSize.Height));
-
-                // These tags should not be included in compressed images.
-                tagsToSkip.Add(ExifPropertyKeys.Image.ImageWidth.Path);
-                tagsToSkip.Add(ExifPropertyKeys.Image.ImageLength.Path);
-            }
-
-            // Add the Interoperability IFD tags for sRGB or Adobe RGB images.
-            if (exifColorSpace == ExifColorSpace.Srgb || exifColorSpace == ExifColorSpace.AdobeRgb)
-            {
-                // Remove the existing tags, if present.
-                tagsToSkip.Add(ExifPropertyKeys.Interop.InteroperabilityIndex.Path);
-                tagsToSkip.Add(ExifPropertyKeys.Interop.InteroperabilityVersion.Path);
-
-                byte[] interoperabilityIndexData;
-
-                switch (exifColorSpace)
-                {
-                    case ExifColorSpace.Srgb:
-                        interoperabilityIndexData = new byte[] { (byte)'R', (byte)'9', (byte)'8', 0 };
-                        break;
-                    case ExifColorSpace.AdobeRgb:
-                        interoperabilityIndexData = new byte[] { (byte)'R', (byte)'0', (byte)'3', 0 };
-                        break;
-                    default:
-                        throw new InvalidOperationException("Unsupported ExifColorSpace value.");
-                }
-
-#pragma warning disable IDE0230 // Use UTF-8 string literal
-                Dictionary<ushort, ExifValue> interopSection = new()
-                {
-                    {
-                        ExifPropertyKeys.Interop.InteroperabilityIndex.Path.TagID,
-                        new ExifValue(ExifValueType.Ascii, interoperabilityIndexData)
-                    },
-                    {
-                        ExifPropertyKeys.Interop.InteroperabilityVersion.Path.TagID,
-                        new ExifValue(ExifValueType.Undefined,
-                                      new byte[] { (byte)'0', (byte)'1', (byte)'0', (byte)'0' })
-
-                    }
-                };
-#pragma warning restore IDE0230 // Use UTF-8 string literal
-
-                metadataEntries.Add(ExifSection.Interop, interopSection);
-            }
-
-            foreach (KeyValuePair<ExifPropertyPath, ExifValue> kvp in entries)
-            {
-                ExifPropertyPath key = kvp.Key;
-                ExifValue value = kvp.Value;
-
-                if (tagsToSkip.Contains(key))
-                {
-                    continue;
-                }
+                ExifPropertyPath key = item.Path;
+                ExifValue value = item.Value;
 
                 ExifSection section = key.Section;
 
-                if (section == ExifSection.Image && !ExifTagHelper.CanWriteImageSectionTag(key.TagID))
+                if (section == ExifSection.Image)
                 {
+                    if (key == ExifPropertyKeys.Image.InterColorProfile.Path)
+                    {
+                        exifColorSpace = ExifColorSpace.Uncalibrated;
+                        setColorSpace = true;
+                        continue;
+                    }
+                    else if (!supportedImageSectionTags.Contains(key.TagID))
+                    {
+                        continue;
+                    }
+                }
+                else if (key == ExifPropertyKeys.Photo.ColorSpace.Path)
+                {
+                    if (!setColorSpace)
+                    {
+                        exifColorSpace = (ExifColorSpace)ExifConverter.DecodeShort(value.Data);
+                        setColorSpace = true;
+                    }
+                    continue;
+                }
+                else if (key.Section == ExifSection.Interop)
+                {
+                    // The Interop values will be written based on the color space of the image.
                     continue;
                 }
 
@@ -419,14 +405,40 @@ namespace PSFilterPdn.Metadata
                 }
             }
 
+            // Add the EXIF color space tag.
+            // AdobeRGB is not an official EXIF color space value, so it is treated as uncalibrated.
+            metadataEntries[ExifSection.Photo].Add(ExifPropertyKeys.Photo.ColorSpace.Path.TagID,
+                                                   ExifConverter.EncodeShort(exifColorSpace == ExifColorSpace.AdobeRgb ?
+                                                                             (ushort)ExifColorSpace.Uncalibrated :
+                                                                             (ushort)exifColorSpace));
+
+            // Add the Interoperability IFD tags for sRGB or Adobe RGB images.
+            if (exifColorSpace == ExifColorSpace.Srgb || exifColorSpace == ExifColorSpace.AdobeRgb)
+            {
+                byte[] interoperabilityIndexData = exifColorSpace switch
+                {
+                    ExifColorSpace.Srgb => new byte[] { (byte)'R', (byte)'9', (byte)'8', 0 },
+                    ExifColorSpace.AdobeRgb => new byte[] { (byte)'R', (byte)'0', (byte)'3', 0 },
+                    _ => throw new InvalidOperationException("Unsupported ExifColorSpace value."),
+                };
+                Dictionary<ushort, ExifValue> interopSection = new()
+                {
+                    {
+                        ExifPropertyKeys.Interop.InteroperabilityIndex.Path.TagID,
+                        new ExifValue(ExifValueType.Ascii, interoperabilityIndexData)
+                    },
+                    {
+                        ExifPropertyKeys.Interop.InteroperabilityVersion.Path.TagID,
+                        new ExifValue(ExifValueType.Undefined, "0100"u8.ToArray())
+                    }
+                };
+
+                metadataEntries.Add(ExifSection.Interop, interopSection);
+            }
+
             AddVersionEntries(ref metadataEntries);
 
             return metadataEntries;
-        }
-
-        private static bool IsUncompressedImage(IReadOnlyDictionary<ExifPropertyPath, ExifValue> entries)
-        {
-            return entries.ContainsKey(ExifPropertyKeys.Image.ImageWidth.Path);
         }
 
         private static void AddVersionEntries(ref Dictionary<ExifSection, Dictionary<ushort, ExifValue>> metadataEntries)

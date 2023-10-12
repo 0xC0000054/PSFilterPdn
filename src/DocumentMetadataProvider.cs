@@ -54,15 +54,7 @@ namespace PSFilterPdn
 
         public ReadOnlySpan<byte> GetXmpData() => xmpBytes.Value;
 
-        private byte[] CacheExifBytes()
-        {
-            ExifWriterInfo exifWriterInfo = GetExifWriterInfo(documentInfo.Metadata.ExifPropertyItems);
-            SizeInt32 documentSize = documentInfo.Size;
-
-            ExifWriter writer = new(exifWriterInfo, documentSize);
-
-            return writer.CreateExifBlob();
-        }
+        private byte[] CacheExifBytes() => new ExifWriter(documentInfo.Metadata.ExifPropertyItems).CreateExifBlob();
 
         private byte[] CacheIccProfileBytes()
         {
@@ -213,56 +205,6 @@ namespace PSFilterPdn
             }
 
             return xmpPacketBytes;
-        }
-
-        private static ExifWriterInfo GetExifWriterInfo(IReadOnlyList<ExifPropertyItem> exifPropertyItems)
-        {
-            ExifPropertyPath colorSpacePath = ExifPropertyKeys.Photo.ColorSpace.Path;
-            ExifPropertyPath iccProfilePath = ExifPropertyKeys.Image.InterColorProfile.Path;
-            bool setColorSpace = false;
-            bool foundIccProfile = false;
-
-            ExifColorSpace colorSpace = ExifColorSpace.Srgb;
-            Dictionary<ExifPropertyPath, ExifValue> exifMetadata = new();
-
-            foreach (ExifPropertyItem propertyItem in exifPropertyItems)
-            {
-                ExifPropertyPath path = propertyItem.Path;
-                ExifValue value = propertyItem.Value;
-
-                if (path == colorSpacePath)
-                {
-                    if (!setColorSpace)
-                    {
-                        if (value.Type == ExifValueType.Short)
-                        {
-                            colorSpace = (ExifColorSpace)ExifConverter.DecodeShort(value.Data);
-                        }
-                        setColorSpace = true;
-                    }
-                    continue;
-                }
-
-                if (path == iccProfilePath)
-                {
-                    colorSpace = ExifColorSpace.Uncalibrated;
-                    setColorSpace = true;
-                    foundIccProfile = true;
-                    continue;
-                }
-
-                exifMetadata.TryAdd(path, value);
-            }
-
-            if (foundIccProfile)
-            {
-                // Remove the InteroperabilityIndex and related tags, these tags should
-                // not be written if the image has an ICC color profile.
-                exifMetadata.Remove(ExifPropertyKeys.Interop.InteroperabilityIndex.Path);
-                exifMetadata.Remove(ExifPropertyKeys.Interop.InteroperabilityVersion.Path);
-            }
-
-            return new ExifWriterInfo(colorSpace, exifMetadata);
         }
     }
 }
