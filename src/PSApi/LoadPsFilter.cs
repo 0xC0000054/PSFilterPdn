@@ -1062,18 +1062,37 @@ namespace PSFilterLoad.PSApi
             {
                 if (sourceLock.Width == destLock.Width
                     && sourceLock.Height == destLock.Height
-                    && sourceLock.Format == destLock.Format
-                    && sourceLock.BufferStride == destLock.BufferStride)
+                    && sourceLock.Format == destLock.Format)
                 {
                     nuint bytesPerPixel = (nuint)source.ChannelCount * (nuint)(source.BitsPerChannel / 8);
 
-                    nuint imageDataSize = (((nuint)sourceLock.Height - 1) * (nuint)sourceLock.BufferStride) + ((nuint)sourceLock.Width * bytesPerPixel);
+                    if (sourceLock.BufferStride == destLock.BufferStride)
+                    {
+                        nuint imageDataSize = (((nuint)sourceLock.Height - 1) * (nuint)sourceLock.BufferStride) + ((nuint)sourceLock.Width * bytesPerPixel);
 
-                    NativeMemory.Copy(sourceLock.Buffer, destLock.Buffer, imageDataSize);
+                        NativeMemory.Copy(sourceLock.Buffer, destLock.Buffer, imageDataSize);
+                    }
+                    else
+                    {
+                        nuint byteCount = (nuint)sourceLock.Width * bytesPerPixel;
+
+                        for (int y = 0; y < sourceLock.Height; y++)
+                        {
+                            byte* source = sourceLock.GetRowPointerUnchecked(y);
+                            byte* destination = destLock.GetRowPointerUnchecked(y);
+
+                            NativeMemory.Copy(source, destination, byteCount);
+                        }
+                    }
                 }
                 else
                 {
-                    throw new NotSupportedException("The source and destination images must have the same size, format and stride.");
+                    string message = string.Format(CultureInfo.CurrentCulture,
+                                                    "The source and destination images must have the same size and format, width={0}, height={1}, format={2}.",
+                                                    source.Width,
+                                                    source.Height,
+                                                    sourceLock.Format);
+                    throw new NotSupportedException(message);
                 }
             }
         }
