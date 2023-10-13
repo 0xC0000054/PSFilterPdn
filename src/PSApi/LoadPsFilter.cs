@@ -1032,12 +1032,12 @@ namespace PSFilterLoad.PSApi
             {
                 for (int y = 0; y < height; y++)
                 {
-                    byte* ptr = sourceLock.GetRowPointerUnchecked(y);
-                    byte* endPtr = ptr + width;
+                    uint* ptr = (uint*)sourceLock.GetRowPointerUnchecked(y);
+                    uint* endPtr = ptr + width;
 
                     while (ptr < endPtr)
                     {
-                        if (ptr[3] > 0)
+                        if (*ptr >= 0x01000000)
                         {
                             return false;
                         }
