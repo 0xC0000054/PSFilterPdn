@@ -340,13 +340,7 @@ namespace PSFilterPdn.Metadata
             {
                 {
                     ExifSection.Image,
-                    new Dictionary<ushort, ExifValue>
-                    {
-                        {
-                            ExifPropertyKeys.Image.Orientation.Path.TagID,
-                            ExifConverter.EncodeShort(TiffConstants.Orientation.TopLeft)
-                        }
-                    }
+                    new Dictionary<ushort, ExifValue>()
                 },
                 {
                     ExifSection.Photo,
