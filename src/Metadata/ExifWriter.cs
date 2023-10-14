@@ -257,7 +257,7 @@ namespace PSFilterPdn.Metadata
                 {
                     case ExifValueType.Byte:
                     case ExifValueType.Ascii:
-                    case (ExifValueType)6: // SByte
+                    case ExifValueType.SByte:
                     case ExifValueType.Undefined:
                         count = lengthInBytes;
                         break;
@@ -268,6 +268,7 @@ namespace PSFilterPdn.Metadata
                     case ExifValueType.Long:
                     case ExifValueType.SLong:
                     case ExifValueType.Float:
+                    case ExifValueType.Ifd:
                         count = lengthInBytes / 4;
                         break;
                     case ExifValueType.Rational:
