@@ -13,7 +13,6 @@
 using PaintDotNet.Collections;
 using PaintDotNet.Effects;
 using PaintDotNet.Imaging;
-using PaintDotNet.Rendering;
 using PSFilterLoad.PSApi;
 using PSFilterPdn.Metadata;
 using System;
