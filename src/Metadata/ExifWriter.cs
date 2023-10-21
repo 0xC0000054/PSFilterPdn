@@ -107,7 +107,7 @@ namespace PSFilterPdn.Metadata
             return exifBytes;
         }
 
-        private static void WriteDirectory(BinaryWriter writer, Dictionary<ushort, ExifValue> tags,  List<IFDEntry> entries, long ifdOffset)
+        private static void WriteDirectory(BinaryWriter writer, Dictionary<ushort, ExifValue> tags, List<IFDEntry> entries, long ifdOffset)
         {
             writer.BaseStream.Position = ifdOffset;
 
