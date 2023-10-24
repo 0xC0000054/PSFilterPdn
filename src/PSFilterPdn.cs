@@ -94,7 +94,6 @@ namespace PSFilterPdn
             TransparencyCheckerboardSurface? transparencyCheckerboard = null;
             try
             {
-
                 DocumentDpi documentDpi = new(Environment.Document.Resolution);
                 IImagingFactory imagingFactory = Services.GetService<IImagingFactory>() ?? throw new InvalidOperationException("Failed to get the WIC factory.");
 
