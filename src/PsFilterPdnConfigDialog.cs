@@ -143,6 +143,10 @@ namespace PSFilterPdn
             PluginThemingUtil.UpdateControlBackColor(this);
             PluginThemingUtil.UpdateControlForeColor(this);
             filterSearchBox!.ForeColor = SystemColors.GrayText;
+
+            Version version = typeof(PsFilterPdnConfigDialog).Assembly.GetName().Version!;
+
+            Text += $" v{version.ToString(3)}";
         }
 #pragma warning restore CS8618
 
