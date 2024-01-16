@@ -1265,43 +1265,75 @@ namespace PSFilterPdn
 
                 worker.ReportProgress(i, Path.GetFileName(directory));
 
-                using (FileEnumerator enumerator = new(directory, ".8bf", recurseSubDirectories, true))
+                try
                 {
-                    while (enumerator.MoveNext())
+                    using (FileEnumerator enumerator = new(directory, ".8bf", recurseSubDirectories, true))
                     {
-                        if (worker.CancellationPending)
+                        bool shouldContinue = false;
+                        do
                         {
-                            e.Cancel = true;
-                            return;
-                        }
-
-                        foreach (PluginData plugin in PluginLoader.LoadFiltersFromFile(enumerator.Current, logger))
-                        {
-                            TreeNodeEx child = new(plugin.Title)
+                            bool foundFile = false;
+                            try
                             {
-                                Name = plugin.Title,
-                                Tag = plugin
-                            };
-
-                            if (nodes.TryGetValue(plugin.Category, out List<TreeNodeEx>? childNodes))
+                                foundFile = enumerator.MoveNext();
+                                shouldContinue = foundFile;
+                            }
+                            catch (Exception ex)
                             {
-                                if (IsNotDuplicateNode(ref childNodes, plugin))
+                                logger.Log(directory, PluginLoadingLogCategory.Error, ex);
+                                foundFile = false;
+                                shouldContinue = true;
+                            }
+
+                            if (foundFile)
+                            {
+                                if (worker.CancellationPending)
                                 {
-                                    childNodes.Add(child);
-                                    nodes[plugin.Category] = childNodes;
+                                    e.Cancel = true;
+                                    return;
+                                }
+
+                                string file = enumerator.Current;
+                                try
+                                {
+                                    foreach (PluginData plugin in PluginLoader.LoadFiltersFromFile(file, logger))
+                                    {
+                                        TreeNodeEx child = new(plugin.Title)
+                                        {
+                                            Name = plugin.Title,
+                                            Tag = plugin
+                                        };
+
+                                        if (nodes.TryGetValue(plugin.Category, out List<TreeNodeEx>? childNodes))
+                                        {
+                                            if (IsNotDuplicateNode(ref childNodes, plugin))
+                                            {
+                                                childNodes.Add(child);
+                                                nodes[plugin.Category] = childNodes;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            List<TreeNodeEx> items = new()
+                                            {
+                                                child
+                                            };
+
+                                            nodes.Add(plugin.Category, items);
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    logger.Log(file, PluginLoadingLogCategory.Error, ex);
                                 }
                             }
-                            else
-                            {
-                                List<TreeNodeEx> items = new()
-                                {
-                                    child
-                                };
-
-                                nodes.Add(plugin.Category, items);
-                            }
-                        }
+                        } while (shouldContinue);
                     }
+                }
+                catch (Exception ex)
+                {
+                    logger.Log(directory, PluginLoadingLogCategory.Error, ex);
                 }
             }
 

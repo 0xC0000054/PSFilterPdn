@@ -285,9 +285,6 @@ namespace PSFilterPdn
                 this.fileExtension = fileExtension;
             }
 
-            // The previous code always silently ignored errors when enumerating the directories.
-            protected override bool ContinueOnError(int error) => true;
-
             protected override bool ShouldIncludeEntry(ref FileSystemEntry entry)
             {
                 bool result = false;
