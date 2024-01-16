@@ -250,30 +250,17 @@ namespace PSFilterPdn
             }
             else if (path.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase) && dereferenceLinks)
             {
-                if (shellLink!.TryGetTargetPath(path, out string? target))
+                if (shellLink!.TryGetTargetPath(path, out string? target, out uint fileAttributes))
                 {
-                    if (!string.IsNullOrEmpty(target))
+                    if ((fileAttributes & FILE.FILE_ATTRIBUTE_DIRECTORY) != 0)
                     {
-                        uint fileAttributes = Windows.INVALID_FILE_ATTRIBUTES;
-
-                        fixed (char* lpFileName = target)
-                        {
-                            fileAttributes = Windows.GetFileAttributesW((ushort*)lpFileName);
-                        }
-
-                        if (fileAttributes != Windows.INVALID_FILE_ATTRIBUTES)
-                        {
-                            if ((fileAttributes & FILE.FILE_ATTRIBUTE_DIRECTORY) != 0)
-                            {
-                                // If the shortcut target is a directory, add it to the search list.
-                                searchDirectories.Enqueue(target);
-                            }
-                            else if (target.EndsWith(fileExtension, StringComparison.OrdinalIgnoreCase))
-                            {
-                                shellLinkTarget = target;
-                                result = true;
-                            }
-                        }
+                        // If the shortcut target is a directory, add it to the search list.
+                        searchDirectories.Enqueue(target);
+                    }
+                    else if (target.EndsWith(fileExtension, StringComparison.OrdinalIgnoreCase))
+                    {
+                        shellLinkTarget = target;
+                        result = true;
                     }
                 }
             }

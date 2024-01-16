@@ -49,12 +49,17 @@ namespace PSFilterPdn
         /// </summary>
         /// <param name="path">The shortcut to load.</param>
         /// <param name="targetPath">The path of the shortcut target.</param>
+        /// <param name="fileAttributes">The file attributes of the shortcut target.</param>
         /// <returns>
         /// <see langword="true"/> if the shortcut target path was retrieved; otherwise, <see langword="false"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"><paramref name="path"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="path"/> is empty.</exception>
-        public bool TryGetTargetPath(string path, [MaybeNullWhen(false)] out string targetPath)
+        /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        public bool TryGetTargetPath(
+            string path,
+            [MaybeNullWhen(false)] out string targetPath,
+            out uint fileAttributes)
         {
             ArgumentNullException.ThrowIfNull(path, nameof(path));
 
@@ -92,17 +97,20 @@ namespace PSFilterPdn
                 // The runtime will determine the length of the native string when it reads from the
                 // allocated buffer.
                 char* pszFile = stackalloc char[cchMaxPath];
+                WIN32_FIND_DATAW findData;
 
-                hr = shellLink.Get()->GetPath((ushort*)pszFile, cchMaxPath, null, 0U);
+                hr = shellLink.Get()->GetPath((ushort*)pszFile, cchMaxPath, &findData, 0U);
 
                 if (hr.SUCCEEDED)
                 {
                     targetPath = new string(pszFile);
+                    fileAttributes = findData.dwFileAttributes;
                     return true;
                 }
             }
 
             targetPath = null;
+            fileAttributes = 0;
             return false;
         }
 
