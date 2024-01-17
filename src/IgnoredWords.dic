@@ -19,6 +19,7 @@ dpi
 dst
 dw
 Exif
+Endian
 hsb
 hsl
 hwnd
