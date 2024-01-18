@@ -169,16 +169,16 @@
   <PropertyGroup>
     <!-- Set the .NET runtime information -->
     <CurrentRuntime>$(TargetFramework.Replace('-windows', ''))</CurrentRuntime>
-    <CurrentRuntimeSDKVersion>7.0.405</CurrentRuntimeSDKVersion>
+    <CurrentRuntimeVersion>7.0.14</CurrentRuntimeVersion>
     <CurrentRID>$(NETCoreSdkRuntimeIdentifier)</CurrentRID>
     <!-- Set Path Variables -->
     <PdnRoot>D:\Program Files\paint.net</PdnRoot>
     <illink>$(PkgMicrosoft_NET_ILLink_Tasks)\tools\$(CurrentRuntime)\illink.dll</illink>
     <NugetSourceRoot>$(UserProfile)\.nuget\packages</NugetSourceRoot>
     <NETCoreAppPackageName>Microsoft.NETCore.App.Runtime.$(CurrentRID)</NETCoreAppPackageName>
-    <NETCoreAppDir>$(NugetSourceRoot)\$(NETCoreAppPackageName)\$(CurrentRuntimeSDKVersion)\runtimes\$(CurrentRID)\lib\$(CurrentRuntime)</NETCoreAppDir>
+    <NETCoreAppDir>$(NugetSourceRoot)\$(NETCoreAppPackageName)\$(CurrentRuntimeVersion)\runtimes\$(CurrentRID)\lib\$(CurrentRuntime)</NETCoreAppDir>
     <WindowsDesktopPackageName>Microsoft.WindowsDesktop.App.Runtime.$(CurrentRID)</WindowsDesktopPackageName>
-    <WindowsDesktopAppDir>$(NugetSourceRoot)\$(WindowsDesktopPackageName)\$(CurrentRuntimeSDKVersion)\runtimes\$(CurrentRID)\lib\$(CurrentRuntime)</WindowsDesktopAppDir>
+    <WindowsDesktopAppDir>$(NugetSourceRoot)\$(WindowsDesktopPackageName)\$(CurrentRuntimeVersion)\runtimes\$(CurrentRID)\lib\$(CurrentRuntime)</WindowsDesktopAppDir>
     <!-- Set a few additional properties -->
     <!-- All of these warnings are related to the DLLs that are not being trimmed -->
     <ILLinkIgnoredWarnings>IL2026;IL2028;IL2034;IL2046;IL2050;IL2055;IL2057;IL2058;IL2059;IL2060;IL2062;IL2065;IL2066;IL2067;IL2070;IL2072;IL2075;IL2077;IL2080;IL2087;IL2088;IL2090;IL2091;IL2092;IL2093;IL2094;IL2096;IL2104;IL2111;IL2118;IL2121</ILLinkIgnoredWarnings>
@@ -202,8 +202,8 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <!-- 1st Step: Install the .NET packages that are required for trimming -->
     <!-- All errors are ignored because NuGet reports that is doesn't support the package type after installing it  -->
-    <Exec Condition="'$(Configuration)' != 'FastDebug' And !Exists('$(NETCoreAppDir)')" Command="$(PkgNuGet_CommandLine)\tools\NuGet.exe install $(NETCoreAppPackageName) -Version $(CurrentRuntimeSDKVersion) -OutputDirectory $(NugetSourceRoot)" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" />
-    <Exec Condition="'$(Configuration)' != 'FastDebug' And !Exists('$(WindowsDesktopAppDir)')" Command="$(PkgNuGet_CommandLine)\tools\NuGet.exe install $(WindowsDesktopPackageName) -Version $(CurrentRuntimeSDKVersion) -OutputDirectory $(NugetSourceRoot)" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" />
+    <Exec Condition="'$(Configuration)' != 'FastDebug' And !Exists('$(NETCoreAppDir)')" Command="$(PkgNuGet_CommandLine)\tools\NuGet.exe install $(NETCoreAppPackageName) -Version $(CurrentRuntimeVersion) -OutputDirectory $(NugetSourceRoot)" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" />
+    <Exec Condition="'$(Configuration)' != 'FastDebug' And !Exists('$(WindowsDesktopAppDir)')" Command="$(PkgNuGet_CommandLine)\tools\NuGet.exe install $(WindowsDesktopPackageName) -Version $(CurrentRuntimeVersion) -OutputDirectory $(NugetSourceRoot)" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" />
     <!-- 2nd Step: Trimming with ILLink -->
     <Exec Condition="'$(Configuration)' != 'FastDebug'" Command="dotnet exec &quot;$(illink)&quot; -a &quot;$(TargetPath)&quot; all --trim-mode copy --action copy --action link &quot;CommunityToolkit.HighPerformance&quot; --action link &quot;TerraFX.Interop.Windows&quot;  -d $(TargetDir) -d $(NETCoreAppDir) -d $(WindowsDesktopAppDir) --skip-unresolved -out &quot;$(TargetDir)$(ILLinkFolderName)&quot; --nowarn $(ILLinkIgnoredWarnings)" />
     <!-- 3rd Step: Copy all dependencies to the output directory -->
