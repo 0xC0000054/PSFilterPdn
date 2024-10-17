@@ -150,7 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.1" />
-    <PackageReference Include="MessagePack" Version="2.5.124" />
+    <PackageReference Include="MessagePack" Version="2.5.187" />
     <PackageReference Include="NuGet.CommandLine" Version="6.6.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

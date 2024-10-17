@@ -137,7 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.1" />
-    <PackageReference Include="MessagePack" Version="2.5.124" />
+    <PackageReference Include="MessagePack" Version="2.5.187" />
     <PackageReference Include="PointerToolkit" Version="1.0.0" />
     <PackageReference Include="PointerToolkit.TerraFX.Interop.Windows" Version="10.0.22621.2" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
