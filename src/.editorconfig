@@ -46,6 +46,9 @@ csharp_style_prefer_switch_expression                 = false : suggestion
 # IDE:0057: Use range operator
 csharp_style_prefer_range_operator                    = false : suggestion
 
+# IDE0130: Namespace does not match folder structure
+dotnet_style_namespace_match_folder = false
+
 [*.xml]
 indent_style = space
 indent_size  = 2
