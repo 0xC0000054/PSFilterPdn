@@ -16,6 +16,8 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+using static TerraFX.Interop.Windows.Windows;
+
 namespace PSFilterLoad.PSApi
 {
     internal sealed class BufferSuite
@@ -172,7 +174,7 @@ namespace PSFilterLoad.PSApi
             {
                 dwLength = (uint)sizeof(MEMORYSTATUSEX)
             };
-            if (Windows.GlobalMemoryStatusEx(&buffer))
+            if (GlobalMemoryStatusEx(&buffer))
             {
                 if (buffer.ullAvailVirtual < (ulong)space)
                 {

@@ -168,7 +168,7 @@ namespace PSFilterPdn.Controls
 
             Rectangle bounds = e.Node.Bounds;
 
-            if (bounds.IsEmpty || e.Node.TreeView.Nodes.Count == 0)
+            if (bounds.IsEmpty || e.Node.TreeView!.Nodes.Count == 0)
             {
                 return;
             }
@@ -255,7 +255,7 @@ namespace PSFilterPdn.Controls
         {
             base.OnHandleCreated(e);
 
-            Windows.SendMessageW(
+            TerraFX.Interop.Windows.Windows.SendMessageW(
                 (HWND)Handle,
                 TVM.TVM_SETEXTENDEDSTYLE,
                 TVS.TVS_EX_DOUBLEBUFFER,

@@ -61,7 +61,7 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
             fixed (char* lpFileName = "Windowscodecs.dll")
             {
-                module = LoadLibraryExW((ushort*)lpFileName, HANDLE.NULL, LOAD.LOAD_LIBRARY_SEARCH_SYSTEM32);
+                module = LoadLibraryExW(lpFileName, HANDLE.NULL, LOAD.LOAD_LIBRARY_SEARCH_SYSTEM32);
 
                 if (module == HMODULE.NULL)
                 {

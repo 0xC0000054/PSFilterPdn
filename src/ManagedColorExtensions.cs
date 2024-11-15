@@ -10,23 +10,15 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using System;
+using PaintDotNet.Imaging;
 
-namespace PSFilterPdn.EnableInfo
+namespace PSFilterPdn
 {
-    [Serializable]
-    internal sealed class EnableInfoException : Exception
+    internal static class ManagedColorExtensions
     {
-        public EnableInfoException()
+        public static ColorBgra32 GetWorkingSpaceBgra32(this ManagedColor color)
         {
-        }
-
-        public EnableInfoException(string message) : base(message)
-        {
-        }
-
-        public EnableInfoException(string message, Exception innerException) : base(message, innerException)
-        {
+            return color.GetBgra32(color.ColorContext);
         }
     }
 }

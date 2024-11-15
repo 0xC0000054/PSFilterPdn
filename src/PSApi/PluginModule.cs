@@ -19,6 +19,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
+using static TerraFX.Interop.Windows.Windows;
+
 namespace PSFilterLoad.PSApi
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl), System.Security.SuppressUnmanagedCodeSecurity]
@@ -44,7 +46,7 @@ namespace PSFilterLoad.PSApi
         {
             fixed (char* lpFileName = fileName)
             {
-                handle = Windows.LoadLibraryExW((ushort*)lpFileName, HANDLE.NULL, 0U);
+                handle = LoadLibraryExW(lpFileName, HANDLE.NULL, 0U);
             }
 
             if (handle != HANDLE.NULL)
@@ -85,7 +87,7 @@ namespace PSFilterLoad.PSApi
         {
             if (handle != HMODULE.NULL)
             {
-                Windows.FreeLibrary(handle);
+                FreeLibrary(handle);
                 handle = HMODULE.NULL;
             }
         }
@@ -127,9 +129,9 @@ namespace PSFilterLoad.PSApi
 
                 fixed (byte* lpProcName = buffer)
                 {
-                    IntPtr address = Windows.GetProcAddress(handle, (sbyte*)lpProcName);
+                    void* address = GetProcAddress(handle, (sbyte*)lpProcName);
 
-                    if (address == IntPtr.Zero)
+                    if (address == null)
                     {
                         throw new EntryPointNotFoundException(string.Format(CultureInfo.CurrentCulture,
                                                                             StringResources.PluginEntryPointNotFound,
@@ -137,7 +139,7 @@ namespace PSFilterLoad.PSApi
                                                                             fileName));
                     }
 
-                    entryPoint = Marshal.GetDelegateForFunctionPointer<PluginEntryPoint>(address);
+                    entryPoint = Marshal.GetDelegateForFunctionPointer<PluginEntryPoint>((nint)address);
                 }
             }
             finally

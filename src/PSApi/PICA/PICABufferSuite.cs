@@ -15,6 +15,8 @@ using TerraFX.Interop.Windows;
 using System;
 using System.Collections.Generic;
 
+using static TerraFX.Interop.Windows.Windows;
+
 namespace PSFilterLoad.PSApi.PICA
 {
     internal sealed class PICABufferSuite : IDisposable, IPICASuiteAllocator
@@ -225,7 +227,7 @@ namespace PSFilterLoad.PSApi.PICA
             {
                 dwLength = (uint)sizeof(MEMORYSTATUSEX)
             };
-            if (Windows.GlobalMemoryStatusEx(&buffer))
+            if (GlobalMemoryStatusEx(&buffer))
             {
                 if (buffer.ullAvailVirtual < uint.MaxValue)
                 {

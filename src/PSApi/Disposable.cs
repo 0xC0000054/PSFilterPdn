@@ -30,7 +30,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public bool IsDisposed => Thread.VolatileRead(ref disposedValue) != 0;
+        public bool IsDisposed => Volatile.Read(ref disposedValue) != 0;
 
         public void Dispose()
         {

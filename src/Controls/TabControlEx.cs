@@ -531,7 +531,7 @@ namespace PSFilterPdn.Controls
                 flags = 0
             };
 
-            int index = (int)Windows.SendMessageW((HWND)Handle, TCM.TCM_HITTEST, 0, (LPARAM)(&hti));
+            int index = (int)TerraFX.Interop.Windows.Windows.SendMessageW((HWND)Handle, TCM.TCM_HITTEST, 0, (LPARAM)(&hti));
 
             return index;
         }

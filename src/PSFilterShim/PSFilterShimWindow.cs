@@ -86,7 +86,7 @@ namespace PSFilterShim
                     hCursor = arrowCursor,
                     hIcon = appIconResourceIds.HasValue ? TryLoadIcon(appIconResourceIds.Value.largeIcon) : HICON.NULL,
                     hbrBackground = new HBRUSH((void*)(COLOR.COLOR_WINDOW + 1)),
-                    lpszClassName = (ushort*)lpszClassName,
+                    lpszClassName = lpszClassName,
                     hIconSm = appIconResourceIds.HasValue ? TryLoadIcon(appIconResourceIds.Value.smallIcon) : HICON.NULL
                 };
 
@@ -110,7 +110,7 @@ namespace PSFilterShim
                 // the user from interacting with Paint.NET if the PSFilterShim process crashes.
                 if (CreateWindowExW(0,
                                     windowClass.lpszClassName,
-                                    (ushort*)lpWindowName,
+                                    lpWindowName,
                                     WS.WS_OVERLAPPED | WS.WS_CAPTION | WS.WS_VISIBLE,
                                     windowRect.X,
                                     windowRect.Y,
@@ -255,7 +255,7 @@ namespace PSFilterShim
             return result;
 
             [UnmanagedCallersOnly]
-            static unsafe BOOL EnumResources(HMODULE hModule, ushort* lpType, ushort* lpName, nint lParam)
+            static unsafe BOOL EnumResources(HMODULE hModule, char* lpType, char* lpName, nint lParam)
             {
                 // The application icon is the first and only icon group in the executable.
                 ushort* value = (ushort*)lParam;

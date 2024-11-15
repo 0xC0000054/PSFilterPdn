@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using MessagePack;
+using PSFilterPdn;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
@@ -29,6 +30,11 @@ namespace PSFilterLoad.PSApi
 
         internal ColorRgb24(PaintDotNet.Imaging.ColorBgra32 color)
             : this(color.R, color.G, color.B)
+        {
+        }
+
+        internal ColorRgb24(PaintDotNet.Imaging.ManagedColor color)
+            : this(color.GetWorkingSpaceBgra32())
         {
         }
 

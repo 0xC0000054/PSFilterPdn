@@ -74,7 +74,7 @@ namespace PSFilterLoad.PSApi
                 {
                     fixed (char* lpString = dialog.title)
                     {
-                        _ = SetWindowTextW(hWnd, (ushort*)lpString);
+                        _ = SetWindowTextW(hWnd, lpString);
                     }
                 }
             }

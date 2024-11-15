@@ -833,7 +833,7 @@ namespace PSFilterPdn
         {
             imagingFactory = Services.GetService<IImagingFactory>() ?? throw new InvalidOperationException("Failed to get the WIC factory.");
 
-            IEffectEnvironment environment = Environment;
+            IEffectEnvironment2 environment = Environment;
             documentDpi = new DocumentDpi(environment.Document.Resolution);
             documentMetadataProvider = new DocumentMetadataProvider(environment.Document);
             sourceBitmap = new EffectInputBitmapSurface(environment.GetSourceBitmapBgra32(), imagingFactory);
@@ -1207,7 +1207,7 @@ namespace PSFilterPdn
             if (index >= 0)
             {
                 TreeNode node = nodes[index];
-                PluginData menuData = (PluginData)node.Tag;
+                PluginData menuData = (PluginData)node.Tag!;
 
                 if (Is64BitFilterIncompatible(data))
                 {
@@ -1423,7 +1423,7 @@ namespace PSFilterPdn
                 {
                     if (filterTree.Nodes.ContainsKey(item))
                     {
-                        TreeNode node = filterTree.Nodes[item];
+                        TreeNode node = filterTree.Nodes[item]!;
                         node.Expand();
 
                         if (!string.IsNullOrEmpty(lastSelectedFilterTitle) && node.Nodes.ContainsKey(lastSelectedFilterTitle))
@@ -1839,7 +1839,7 @@ namespace PSFilterPdn
 
                 if (item.Nodes.Count == 1 && item.Nodes[0].Name.Equals(DummyTreeNodeName, StringComparison.Ordinal))
                 {
-                    TreeNode parent = filterTree.Nodes[item.Name];
+                    TreeNode parent = filterTree.Nodes[item.Name]!;
 
                     // Remove the placeholder node and add the real nodes.
                     parent.Nodes.RemoveAt(0);
@@ -1970,7 +1970,7 @@ namespace PSFilterPdn
                     for (int i = 0; i < filterCollection.Count; i++)
                     {
                         TreeNodeEx node = filterCollection[i];
-                        PluginData plugin = (PluginData)node.Tag;
+                        PluginData plugin = (PluginData)node.Tag!;
 
                         node.Enabled = plugin.SupportsHostState(sourceBitmap!.Width,
                                                                 sourceBitmap.Height,
@@ -1989,7 +1989,7 @@ namespace PSFilterPdn
 
                 pluginLoadErrorDetailsTextBox.Clear();
 
-                List<string> errorMessages = (List<string>)selectedItem.Tag;
+                List<string> errorMessages = (List<string>)selectedItem.Tag!;
 
                 pluginLoadErrorDetailsTextBox.Text = errorMessages[0];
 

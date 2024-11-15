@@ -63,7 +63,7 @@ namespace PSFilterLoad.PSApi
 
                 fixed (char* lpFileName = fileName)
                 {
-                    dll = Windows.LoadLibraryExW((ushort*)lpFileName, HANDLE.NULL, dwFlags);
+                    dll = TerraFX.Interop.Windows.Windows.LoadLibraryExW(lpFileName, HANDLE.NULL, dwFlags);
 
                     if (dll == HANDLE.NULL)
                     {
@@ -89,7 +89,7 @@ namespace PSFilterLoad.PSApi
 
                         fixed (char* typePtr = "PiPL")
                         {
-                            if (!Windows.EnumResourceNamesW(dll, (ushort*)typePtr, &EnumPiPL, callback))
+                            if (!TerraFX.Interop.Windows.Windows.EnumResourceNamesW(dll, typePtr, &EnumPiPL, callback))
                             {
                                 error = Marshal.GetLastSystemError();
                             }
@@ -111,7 +111,7 @@ namespace PSFilterLoad.PSApi
 
                                 fixed (char* typePtr = "_8BFM")
                                 {
-                                    if (!Windows.EnumResourceNamesW(dll, (ushort*)typePtr, &EnumPiMI, callback))
+                                    if (!TerraFX.Interop.Windows.Windows.EnumResourceNamesW(dll, typePtr, &EnumPiMI, callback))
                                     {
                                         error = Marshal.GetLastSystemError();
                                     }
@@ -156,7 +156,7 @@ namespace PSFilterLoad.PSApi
                 }
                 finally
                 {
-                    Windows.FreeLibrary(dll);
+                    TerraFX.Interop.Windows.Windows.FreeLibrary(dll);
                 }
 
                 List<PluginData> pluginData = queryFilter.plugins;
@@ -222,7 +222,7 @@ namespace PSFilterLoad.PSApi
         }
 
         [UnmanagedCallersOnly]
-        private static unsafe BOOL EnumPiMI(HMODULE hModule, ushort* lpszType, ushort* lpszName, nint lParam)
+        private static unsafe BOOL EnumPiMI(HMODULE hModule, char* lpszType, char* lpszName, nint lParam)
         {
             GCHandle handle = GCHandle.FromIntPtr(lParam);
             QueryFilter query = (QueryFilter)handle.Target!;
@@ -230,7 +230,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                HRSRC filterRes = Windows.FindResourceW(hModule, lpszName, lpszType);
+                HRSRC filterRes = TerraFX.Interop.Windows.Windows.FindResourceW(hModule, lpszName, lpszType);
 
                 if (filterRes == HRSRC.NULL)
                 {
@@ -240,7 +240,7 @@ namespace PSFilterLoad.PSApi
                     return BOOL.TRUE;
                 }
 
-                HGLOBAL filterLoad = Windows.LoadResource(hModule, filterRes);
+                HGLOBAL filterLoad = TerraFX.Interop.Windows.Windows.LoadResource(hModule, filterRes);
 
                 if (filterLoad == HGLOBAL.NULL)
                 {
@@ -250,7 +250,7 @@ namespace PSFilterLoad.PSApi
                     return BOOL.TRUE;
                 }
 
-                void* filterLock = Windows.LockResource(filterLoad);
+                void* filterLock = TerraFX.Interop.Windows.Windows.LockResource(filterLoad);
 
                 if (filterLock == null)
                 {
@@ -297,7 +297,7 @@ namespace PSFilterLoad.PSApi
         }
 
         [UnmanagedCallersOnly]
-        private static unsafe BOOL EnumPiPL(HMODULE hModule, ushort* lpszType, ushort* lpszName, nint lParam)
+        private static unsafe BOOL EnumPiPL(HMODULE hModule, char* lpszType, char* lpszName, nint lParam)
         {
             GCHandle handle = GCHandle.FromIntPtr(lParam);
             QueryFilter query = (QueryFilter)handle.Target!;
@@ -305,7 +305,7 @@ namespace PSFilterLoad.PSApi
 
             try
             {
-                HRSRC hRes = Windows.FindResourceW(hModule, lpszName, lpszType);
+                HRSRC hRes = TerraFX.Interop.Windows.Windows.FindResourceW(hModule, lpszName, lpszType);
                 if (hRes == IntPtr.Zero)
                 {
                     query.logger.Log(query.fileName,
@@ -314,7 +314,7 @@ namespace PSFilterLoad.PSApi
                     return BOOL.TRUE;
                 }
 
-                HGLOBAL loadRes = Windows.LoadResource(hModule, hRes);
+                HGLOBAL loadRes = TerraFX.Interop.Windows.Windows.LoadResource(hModule, hRes);
                 if (loadRes == IntPtr.Zero)
                 {
                     query.logger.Log(query.fileName,
@@ -324,7 +324,7 @@ namespace PSFilterLoad.PSApi
                     return BOOL.TRUE;
                 }
 
-                void* lockRes = Windows.LockResource(loadRes);
+                void* lockRes = TerraFX.Interop.Windows.Windows.LockResource(loadRes);
                 if (lockRes == null)
                 {
                     query.logger.Log(query.fileName,
@@ -533,7 +533,7 @@ namespace PSFilterLoad.PSApi
         private static bool EnumResourceCallbackWasCancelled(int lastError)
             => lastError == ERROR.ERROR_RESOURCE_ENUM_USER_STOP;
 
-        private static unsafe bool GetPiMIResourceData(HMODULE hModule, ushort* lpszName, QueryFilter query, out string category)
+        private static unsafe bool GetPiMIResourceData(HMODULE hModule, char* lpszName, QueryFilter query, out string category)
         {
             category = string.Empty;
             nuint pluginResourceName = new(lpszName);
@@ -542,7 +542,7 @@ namespace PSFilterLoad.PSApi
 
             fixed (char* typePtr = "PiMI")
             {
-                hRes = Windows.FindResourceW(hModule, lpszName, (ushort*)typePtr);
+                hRes = TerraFX.Interop.Windows.Windows.FindResourceW(hModule, lpszName, typePtr);
             }
 
             if (hRes == HRSRC.NULL)
@@ -553,7 +553,7 @@ namespace PSFilterLoad.PSApi
                 return false;
             }
 
-            HGLOBAL loadRes = Windows.LoadResource(hModule, hRes);
+            HGLOBAL loadRes = TerraFX.Interop.Windows.Windows.LoadResource(hModule, hRes);
             if (loadRes == HGLOBAL.NULL)
             {
                 query.logger.Log(query.fileName,
@@ -562,7 +562,7 @@ namespace PSFilterLoad.PSApi
                 return false;
             }
 
-            void* lockRes = Windows.LockResource(loadRes);
+            void* lockRes = TerraFX.Interop.Windows.Windows.LockResource(loadRes);
             if (lockRes == null)
             {
                 query.logger.Log(query.fileName,

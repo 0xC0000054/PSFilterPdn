@@ -58,7 +58,7 @@ namespace PSFilterLoad.PSApi.Rendering.Internal
 
             fixed (char* lpFileName = "d2d1.dll")
             {
-                module = LoadLibraryExW((ushort*)lpFileName, HANDLE.NULL, LOAD.LOAD_LIBRARY_SEARCH_SYSTEM32);
+                module = LoadLibraryExW(lpFileName, HANDLE.NULL, LOAD.LOAD_LIBRARY_SEARCH_SYSTEM32);
 
                 if (module == HMODULE.NULL)
                 {

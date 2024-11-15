@@ -16,6 +16,8 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
+using static TerraFX.Interop.Windows.Windows;
+
 namespace PSFilterPdn
 {
     /// <summary>
@@ -32,11 +34,11 @@ namespace PSFilterPdn
         {
             fixed (IShellLinkW** ppShellLink = shellLink)
             {
-                HRESULT hr = Windows.CoCreateInstance(Windows.__uuidof<TerraFX.Interop.Windows.ShellLink>(),
-                                                      null,
-                                                      (uint)CLSCTX.CLSCTX_INPROC_SERVER,
-                                                      Windows.__uuidof<IShellLinkW>(),
-                                                      (void**)ppShellLink);
+                HRESULT hr = CoCreateInstance(__uuidof<TerraFX.Interop.Windows.ShellLink>(),
+                                              null,
+                                              (uint)CLSCTX.CLSCTX_INPROC_SERVER,
+                                               __uuidof<IShellLinkW>(),
+                                              (void**)ppShellLink);
                 if (hr.FAILED)
                 {
                     Marshal.ThrowExceptionForHR(hr.Value);
@@ -83,7 +85,7 @@ namespace PSFilterPdn
                 {
                     fixed (char* pszFileName = path)
                     {
-                        hr = asPersistFile.Get()->Load((ushort*)pszFileName, 0);
+                        hr = asPersistFile.Get()->Load(pszFileName, 0);
                     }
                 }
             }
@@ -99,7 +101,7 @@ namespace PSFilterPdn
                 char* pszFile = stackalloc char[cchMaxPath];
                 WIN32_FIND_DATAW findData;
 
-                hr = shellLink.Get()->GetPath((ushort*)pszFile, cchMaxPath, &findData, 0U);
+                hr = shellLink.Get()->GetPath(pszFile, cchMaxPath, &findData, 0U);
 
                 if (hr.SUCCEEDED)
                 {

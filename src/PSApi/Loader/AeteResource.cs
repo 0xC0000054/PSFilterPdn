@@ -30,7 +30,7 @@ namespace PSFilterLoad.PSApi.Loader
 
             fixed (char* typePtr = "AETE")
             {
-                hRes = FindResourceW(hModule, MAKEINTRESOURCE((ushort)resourceID), (ushort*)typePtr);
+                hRes = FindResourceW(hModule, MAKEINTRESOURCE((ushort)resourceID), typePtr);
             }
 
             if (hRes == HRSRC.NULL)

@@ -90,13 +90,6 @@ namespace PSFilterPdn
                                       bool ownsTransparencyCheckerboard,
                                       CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(nameof(settings));
-            ArgumentNullException.ThrowIfNull(nameof(error));
-            ArgumentNullException.ThrowIfNull(nameof(setDestinationImage));
-            ArgumentNullException.ThrowIfNull(nameof(documentMetadataProvider));
-            ArgumentNullException.ThrowIfNull(nameof(sourceImage));
-            ArgumentNullException.ThrowIfNull(nameof(transparencyCheckerboard));
-
             PipeName = "PSFilterShim_" + Guid.NewGuid().ToString();
             cancellationEventName = Guid.NewGuid().ToString();
             cancellationEventWaitHandle = EventWaitHandleAcl.Create(false,
