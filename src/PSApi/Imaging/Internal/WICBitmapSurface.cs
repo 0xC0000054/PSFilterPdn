@@ -35,7 +35,7 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
 
             this.imagingFactory = imagingFactory;
 
-            bitmap = imagingFactory.CreateBitmap<TPixel>(width, height);
+            bitmap = imagingFactory.CreateBitmap<TPixel>(width, height, BitmapAllocationOptions.Contiguous);
         }
 
         private WICBitmapSurface(WICBitmapSurface<TPixel> original, int newWidth, int newHeight)
