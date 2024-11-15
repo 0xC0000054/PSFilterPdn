@@ -169,7 +169,7 @@
   <PropertyGroup>
     <!-- Set the .NET runtime information -->
     <CurrentRuntime>$(TargetFramework.Replace('-windows', ''))</CurrentRuntime>
-    <CurrentRuntimeVersion>7.0.14</CurrentRuntimeVersion>
+    <CurrentRuntimeVersion>9.0.0</CurrentRuntimeVersion>
     <CurrentRID>$(NETCoreSdkRuntimeIdentifier)</CurrentRID>
     <!-- Set Path Variables -->
     <PdnRoot>D:\Program Files\paint.net</PdnRoot>
