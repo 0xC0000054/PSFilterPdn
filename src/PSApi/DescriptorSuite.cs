@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
+using TerraFX.Interop.Windows;
 
 namespace PSFilterLoad.PSApi
 {
@@ -29,27 +30,6 @@ namespace PSFilterLoad.PSApi
             public readonly ReadOnlyCollection<uint> keys;
             public readonly ReadOnlyDictionary<uint, AETEValue> items;
             public readonly IntPtr expectedKeys;
-            public readonly ReadOnlyDictionary<uint, int> expectedKeyOffsets;
-
-            private static unsafe ReadOnlyDictionary<uint, int> GetKeyArrayOffsets(IntPtr keyArray)
-            {
-                Dictionary<uint, int> offsets = new();
-
-                if (keyArray != IntPtr.Zero)
-                {
-                    int offset = 0;
-                    uint* ptr = (uint*)keyArray;
-                    while (*ptr != 0U)
-                    {
-                        offsets.Add(*ptr, offset);
-
-                        offset += sizeof(uint);
-                        ptr++;
-                    }
-                }
-
-                return new ReadOnlyDictionary<uint, int>(offsets);
-            }
 
             public ReadDescriptorState(Dictionary<uint, AETEValue> dictionary, IntPtr keyArray)
             {
@@ -60,7 +40,6 @@ namespace PSFilterLoad.PSApi
                 keys = new ReadOnlyCollection<uint>(new List<uint>(dictionary.Keys));
                 items = new ReadOnlyDictionary<uint, AETEValue>(dictionary);
                 expectedKeys = keyArray;
-                expectedKeyOffsets = GetKeyArrayOffsets(keyArray);
             }
         }
 
@@ -334,9 +313,14 @@ namespace PSFilterLoad.PSApi
                 // The plug-in can use this information to determine if any required keys are missing.
                 if (state.expectedKeys != IntPtr.Zero)
                 {
-                    if (state.expectedKeyOffsets.TryGetValue(state.currentKey, out int offset))
+                    uint* ptr = (uint*)state.expectedKeys;
+                    while (*ptr != 0U)
                     {
-                        Marshal.WriteInt32(state.expectedKeys, offset, unchecked((int)DescriptorTypes.Null));
+                        if (*ptr == state.currentKey)
+                        {
+                            *ptr = DescriptorTypes.Null;
+                        }
+                        ptr++;
                     }
                 }
 
