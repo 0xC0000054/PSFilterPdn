@@ -38,7 +38,8 @@ namespace PSFilterLoad.PSApi
                             FilterCaseInfoCollection? filterInfo,
                             AETEData? aete,
                             ReadOnlyCollection<string>? moduleEntryPoints,
-                            Architecture processorArchitecture)
+                            Architecture processorArchitecture,
+                            PluginCompatibilityOptions compatibilityOptions)
         {
             FileName = fileName;
             EntryPoint = entryPoint;
@@ -48,6 +49,7 @@ namespace PSFilterLoad.PSApi
             Aete = aete;
             ModuleEntryPoints = moduleEntryPoints;
             ProcessorArchitecture = processorArchitecture;
+            CompatibilityOptions = compatibilityOptions;
         }
 
         /// <summary>
@@ -113,6 +115,14 @@ namespace PSFilterLoad.PSApi
         /// The processor architecture.
         /// </value>
         public Architecture ProcessorArchitecture { get; }
+
+        /// <summary>
+        /// Gets the plugin compatibility options.
+        /// </summary>
+        /// <value>
+        /// The plugin compatibility options.
+        /// </value>
+        public PluginCompatibilityOptions CompatibilityOptions { get; }
 
         public override bool Equals(object? obj)
         {

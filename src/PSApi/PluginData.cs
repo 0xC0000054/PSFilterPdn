@@ -40,7 +40,7 @@ namespace PSFilterLoad.PSApi
                             string category,
                             string title,
                             Architecture processorArchitecture) :
-            this(fileName, entryPoint, category, title, null, true, null, string.Empty, processorArchitecture)
+            this(fileName, entryPoint, category, title, null, true, null, string.Empty, processorArchitecture, PluginCompatibilityOptions.None)
         {
         }
 
@@ -63,7 +63,8 @@ namespace PSFilterLoad.PSApi
                             bool runWith32BitShim,
                             AETEData? aete,
                             string enableInfo,
-                            Architecture processorArchitecture)
+                            Architecture processorArchitecture,
+                            PluginCompatibilityOptions compatibilityOptions)
         {
             this.enableInfo = enableInfo;
             FileName = fileName;
@@ -75,6 +76,7 @@ namespace PSFilterLoad.PSApi
             Aete = aete;
             ModuleEntryPoints = null;
             ProcessorArchitecture = processorArchitecture;
+            CompatibilityOptions = compatibilityOptions;
         }
 
         /// <summary>
@@ -148,6 +150,14 @@ namespace PSFilterLoad.PSApi
         /// The processor architecture.
         /// </value>
         public Architecture ProcessorArchitecture { get; }
+
+        /// <summary>
+        /// Gets the plugin compatibility options.
+        /// </summary>
+        /// <value>
+        /// The plugin compatibility options.
+        /// </value>
+        public PluginCompatibilityOptions CompatibilityOptions { get; }
 
         public override bool Equals(object? obj)
         {

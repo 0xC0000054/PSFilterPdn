@@ -44,6 +44,7 @@ namespace PSFilterPdn
             resolver.GetFormatterWithVerify<AETEData?>().Serialize(ref writer, value.Aete, options);
             resolver.GetFormatterWithVerify<ReadOnlyCollection<string>?>().Serialize(ref writer, value.ModuleEntryPoints, options);
             resolver.GetFormatterWithVerify<Architecture>().Serialize(ref writer, value.ProcessorArchitecture, options);
+            resolver.GetFormatterWithVerify<PluginCompatibilityOptions>().Serialize(ref writer, value.CompatibilityOptions, options);
         }
     }
 }

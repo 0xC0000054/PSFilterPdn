@@ -845,14 +845,18 @@ namespace PSFilterLoad.PSApi
             return true;
         }
 
-        private bool PluginParameters()
+        private bool PluginParameters(PluginData pluginData)
         {
             result = PSError.noErr;
 
             /* Photoshop sets the size info before the FilterSelectorParameters call even though the documentation says it does not.*/
             SetupSizes();
             SetFilterRecordValues();
-            RestoreParameterHandles();
+
+            if (!pluginData.CompatibilityOptions.HasFlag(PluginCompatibilityOptions.DoNotRestoreGlobalParametersWhenReshowingUI))
+            {
+                RestoreParameterHandles();
+            }
 
             logger.Log(PluginApiLogCategory.Selector, "Before FilterSelectorParameters");
 
@@ -1160,7 +1164,7 @@ namespace PSFilterLoad.PSApi
 
             if (!isRepeatEffect)
             {
-                if (!PluginParameters())
+                if (!PluginParameters(data))
                 {
                     return false;
                 }

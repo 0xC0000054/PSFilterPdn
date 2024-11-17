@@ -493,6 +493,9 @@ namespace PSFilterLoad.PSApi
                     return BOOL.TRUE;
                 }
 
+                PluginCompatibilityOptions compatibilityOptions = GetPluginCompatibilityOptions(category,
+                                                                                                !query.runWith32BitShim);
+
                 query.plugins.Add(new PluginData(query.fileName,
                                                  entryPoint,
                                                  category,
@@ -501,7 +504,8 @@ namespace PSFilterLoad.PSApi
                                                  query.runWith32BitShim,
                                                  aete,
                                                  enableInfo,
-                                                 query.processorArchitecture));
+                                                 query.processorArchitecture,
+                                                 compatibilityOptions));
             }
             catch (Exception ex)
             {
@@ -634,6 +638,29 @@ namespace PSFilterLoad.PSApi
             }
 
             return true;
+        }
+
+        private static PluginCompatibilityOptions GetPluginCompatibilityOptions(string category, bool is64Bit)
+        {
+            PluginCompatibilityOptions options = PluginCompatibilityOptions.None;
+
+            if (is64Bit && category.Equals("Mehdi"))
+            {
+                // The 64-bit Mehdi plugins crash when reshowing the UI with the saved 'global' parameters.
+                // They appear to have been built with FilterMeister version 1.09g, but I don't think it is a
+                // FilterMeister bug.
+                // It is likely due to a behavior change in .NET 5+ or the OS. The process exit code appears
+                // to be a Windows 'Exception thrown from user callback' error.
+                //
+                // Only the 64-bit versions of the plugins crash, the 32-bit versions work fine.
+                // The non-interactive 'repeat effect' command works also without crashing.
+                //
+                // To fix this, we do not restore the 'global' parameters when reshowing the UI.
+                // The plugins will use their AETE scripting parameters instead.
+                options = PluginCompatibilityOptions.DoNotRestoreGlobalParametersWhenReshowingUI;
+            }
+
+            return options;
         }
 
         private static bool ValidatePluginResourceData(string category,

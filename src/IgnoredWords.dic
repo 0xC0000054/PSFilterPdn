@@ -18,8 +18,8 @@ dict
 dpi
 dst
 dw
-Exif
 Endian
+Exif
 hsb
 hsl
 hwnd
@@ -29,6 +29,7 @@ Iptc
 lexer
 lparam
 lpfn
+Mehdi
 Mem
 Metadata
 Nik

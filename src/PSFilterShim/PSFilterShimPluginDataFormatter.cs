@@ -41,9 +41,10 @@ namespace PSFilterLoad.PSApi
             ReadOnlyCollection<string>? moduleEntryPoints = resolver.GetFormatterWithVerify<ReadOnlyCollection<string>?>().Deserialize(ref reader,
                                                                                                                                        options);
             Architecture processorArchitecture = resolver.GetFormatterWithVerify<Architecture>().Deserialize(ref reader, options);
+            PluginCompatibilityOptions compatibilityOptions = resolver.GetFormatterWithVerify<PluginCompatibilityOptions>().Deserialize(ref reader, options);
             reader.Depth--;
 
-            return new PluginData(fileName, entryPoint, category, title, filterInfo, aete, moduleEntryPoints, processorArchitecture);
+            return new PluginData(fileName, entryPoint, category, title, filterInfo, aete, moduleEntryPoints, processorArchitecture, compatibilityOptions);
         }
 
         public void Serialize(ref MessagePackWriter writer, PluginData value, MessagePackSerializerOptions options)

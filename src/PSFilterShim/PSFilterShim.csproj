@@ -99,6 +99,7 @@
     <Compile Include="..\PSApi\ParameterData.Formatter.cs" Link="PSApi\ParameterData.Formatter.cs" />
     <Compile Include="..\PSApi\PIDescriptorParameters.cs" Link="PSApi\PIDescriptorParameters.cs" />
     <Compile Include="..\PSApi\PlatformData.cs" Link="PSApi\PlatformData.cs" />
+    <Compile Include="..\PSApi\PluginCompatibilityOptions.cs" Link="PSApi\PluginCompatibilityOptions.cs" />
     <Compile Include="..\PSApi\PlugInModule.cs" Link="PSApi\PlugInModule.cs" />
     <Compile Include="..\PSApi\PlugInMonitor.cs" Link="PSApi\PlugInMonitor.cs" />
     <Compile Include="..\PSApi\PluginPhase.cs" Link="PSApi\PluginPhase.cs" />
