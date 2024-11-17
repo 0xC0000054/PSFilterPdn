@@ -644,7 +644,7 @@ namespace PSFilterLoad.PSApi
         {
             PluginCompatibilityOptions options = PluginCompatibilityOptions.None;
 
-            if (is64Bit && category.Equals("Mehdi"))
+            if (is64Bit && category.StartsWith("Mehdi", StringComparison.Ordinal))
             {
                 // The 64-bit Mehdi plugins crash when reshowing the UI with the saved 'global' parameters.
                 // They appear to have been built with FilterMeister version 1.09g, but I don't think it is a
