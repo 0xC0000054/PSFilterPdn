@@ -233,7 +233,7 @@ namespace PSFilterPdn
 
             if (count == 0)
             {
-                return Array.Empty<byte>();
+                return [];
             }
 
             byte[] bytes = new byte[count];

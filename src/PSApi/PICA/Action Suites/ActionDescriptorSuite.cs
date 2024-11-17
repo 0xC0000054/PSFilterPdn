@@ -28,8 +28,8 @@ namespace PSFilterLoad.PSApi.PICA
 
             public ScriptingParameters()
             {
-                parameters = new Dictionary<uint, AETEValue>();
-                keys = new List<uint>();
+                parameters = [];
+                keys = [];
             }
             public ScriptingParameters(IDictionary<uint, AETEValue> dict)
             {
@@ -241,8 +241,8 @@ namespace PSFilterLoad.PSApi.PICA
             this.actionReferenceSuite = actionReferenceSuite;
             this.zstringSuite = zstringSuite;
             this.logger = logger;
-            actionDescriptors = new Dictionary<PIActionDescriptor, ScriptingParameters>();
-            descriptorHandles = new Dictionary<Handle, ScriptingParameters>();
+            actionDescriptors = [];
+            descriptorHandles = [];
             actionDescriptorsIndex = 0;
             this.handleSuite.SuiteHandleDisposed += SuiteHandleDisposed;
             disposed = false;

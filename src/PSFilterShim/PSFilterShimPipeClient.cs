@@ -338,7 +338,7 @@ namespace PSFilterShim
 
         private byte[] SendDestinationImageToServer(string mapName, FilterPostProcessingOptions options)
         {
-            byte[] reply = Array.Empty<byte>();
+            byte[] reply = [];
 
             using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
             {
@@ -364,7 +364,7 @@ namespace PSFilterShim
 
         private byte[] SendErrorMessageToServer(string message, string details)
         {
-            byte[] reply = Array.Empty<byte>();
+            byte[] reply = [];
 
             using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
             {
@@ -424,7 +424,7 @@ namespace PSFilterShim
         [SkipLocalsInit]
         private byte[] SendMessageToServer(Command command)
         {
-            byte[] reply = Array.Empty<byte>();
+            byte[] reply = [];
 
             using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
             {
@@ -449,7 +449,7 @@ namespace PSFilterShim
         [SkipLocalsInit]
         private byte[] SendMessageToServer(Command command, byte value)
         {
-            byte[] reply = Array.Empty<byte>();
+            byte[] reply = [];
 
             using (NamedPipeClientStream stream = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
             {

@@ -117,7 +117,7 @@ namespace PSFilterPdn
 
                 if (!string.IsNullOrEmpty(dirs))
                 {
-                    string[] splitDirs = dirs.Split(new char[] { ',' }, StringSplitOptions.None);
+                    string[] splitDirs = dirs.Split([','], StringSplitOptions.None);
 
                     for (int i = 0; i < splitDirs.Length; i++)
                     {

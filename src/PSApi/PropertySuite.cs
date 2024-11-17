@@ -264,7 +264,7 @@ namespace PSFilterLoad.PSApi
                     error = CreateComplexPropertyHandle(complexProperty, HostSerial);
                     break;
                 case PSProperties.URL:
-                    error = CreateComplexPropertyHandle(complexProperty, ReadOnlySpan<byte>.Empty);
+                    error = CreateComplexPropertyHandle(complexProperty, []);
                     break;
                 case PSProperties.Title:
                 case PSProperties.UnicodeTitle:

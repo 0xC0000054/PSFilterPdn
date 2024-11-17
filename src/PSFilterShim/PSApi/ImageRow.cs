@@ -17,16 +17,16 @@ namespace PSFilterLoad.PSApi
 {
     internal static unsafe class ImageRow
     {
-        private static ReadOnlySpan<byte> XyzwToZyxwVector128 => new byte[16]
-        {
+        private static ReadOnlySpan<byte> XyzwToZyxwVector128 =>
+        [
             0x2, 0x1, 0x0, 0x3, // pixel 1
             0x6, 0x5, 0x4, 0x7, // pixel 2
             0xA, 0x9, 0x8, 0xB, // pixel 3
             0xE, 0xD, 0xC, 0xF, // pixel 4
-        };
+        ];
 
-        private static ReadOnlySpan<byte> XyzwToZyxwVector256 => new byte[32]
-        {
+        private static ReadOnlySpan<byte> XyzwToZyxwVector256 =>
+        [
             0x02, 0x01, 0x00, 0x03, // pixel 1
             0x06, 0x05, 0x04, 0x07, // pixel 2
             0x0A, 0x09, 0x08, 0x0B, // pixel 3
@@ -35,7 +35,7 @@ namespace PSFilterLoad.PSApi
             0x16, 0x15, 0x14, 0x17, // pixel 6
             0x1A, 0x19, 0x18, 0x1B, // pixel 7
             0x1E, 0x1D, 0x1C, 0x1F, // pixel 8
-        };
+        ];
 
         public static void Fill(uint source, byte* destination, int rowWidth, int channelIndex, int numberOfPlanes)
         {

@@ -21,7 +21,7 @@ namespace PSFilterPdn.Metadata
         public const int MaxCaptionLength = 2000;
         public const int MaxStandardDataSetLength = 32767;
 
-        public static ReadOnlySpan<byte> CodedCharacterSetUtf8Marker => new byte[] { 0x1b, 0x25, 0x47 };
+        public static ReadOnlySpan<byte> CodedCharacterSetUtf8Marker => [0x1b, 0x25, 0x47];
 
         public static class Records
         {

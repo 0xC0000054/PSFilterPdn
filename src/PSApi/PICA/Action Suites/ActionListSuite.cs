@@ -153,7 +153,7 @@ namespace PSFilterLoad.PSApi.PICA
             this.actionReferenceSuite = actionReferenceSuite;
             this.zstringSuite = zstringSuite;
             this.logger = logger;
-            actionLists = new Dictionary<PIActionList, ActionListItemCollection>();
+            actionLists = [];
             actionListsIndex = 0;
         }
 

@@ -150,7 +150,7 @@ namespace PSFilterPdn
 
         // This property represents an Int32 with the value of 0.
         // The client reads this as the required buffer length for the payload.
-        private static ReadOnlySpan<byte> EmptyReplyMessage => new byte[] { 0, 0, 0, 0 };
+        private static ReadOnlySpan<byte> EmptyReplyMessage => [0, 0, 0, 0];
 
         protected override void Dispose(bool disposing)
         {

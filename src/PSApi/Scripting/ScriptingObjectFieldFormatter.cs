@@ -38,8 +38,8 @@ namespace PSFilterLoad.PSApi
 
         public static readonly IMessagePackFormatter<object?> Instance = new ScriptingObjectFieldFormatter();
 
-        private static readonly HashSet<Type> ScriptingObjectExtensionTypes = new()
-        {
+        private static readonly HashSet<Type> ScriptingObjectExtensionTypes =
+        [
             typeof(UnitFloat),
             typeof(EnumeratedValue),
             typeof(DescriptorSimpleReference),
@@ -49,7 +49,7 @@ namespace PSFilterLoad.PSApi
             typeof(ActionDescriptorZString),
             typeof(ActionListDescriptor),
             typeof(int[]),
-        };
+        ];
 
         private ScriptingObjectFieldFormatter()
         {

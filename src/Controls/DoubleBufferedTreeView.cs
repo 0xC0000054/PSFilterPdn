@@ -35,14 +35,14 @@ namespace PSFilterPdn.Controls
         private string? disabledGlyphResourceName;
         private string? previousDisabledGlyphResourceName;
 
-        private static readonly KeyValuePair<int, int>[] IconSizesToDpi = new KeyValuePair<int, int>[]
-        {
+        private static readonly KeyValuePair<int, int>[] IconSizesToDpi =
+        [
             new KeyValuePair<int, int>(16, 96),
             new KeyValuePair<int, int>(20, 120),
             new KeyValuePair<int, int>(24, 144),
             new KeyValuePair<int, int>(32, 192),
             new KeyValuePair<int, int>(64, 384)
-        };
+        ];
 
         public DoubleBufferedTreeView()
         {

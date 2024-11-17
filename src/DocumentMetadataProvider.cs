@@ -64,7 +64,7 @@ namespace PSFilterPdn
 
             ExifPropertyItem? iccProfilePropertyItem = exifPropertyItems.FirstOrDefault(p => p.Path == iccProfilePath);
 
-            byte[] iccProfileBytes = Array.Empty<byte>();
+            byte[] iccProfileBytes = [];
 
             if (iccProfilePropertyItem != null)
             {
@@ -158,7 +158,7 @@ namespace PSFilterPdn
 
         private byte[] CacheIptcCaptionRecordBytes()
         {
-            byte[] bytes = Array.Empty<byte>();
+            byte[] bytes = [];
 
             string caption = GetCaptionString(documentInfo.Metadata.IptcPropertyItems);
 
@@ -193,7 +193,7 @@ namespace PSFilterPdn
 
         private byte[] CacheXmpBytes()
         {
-            byte[] xmpPacketBytes = Array.Empty<byte>();
+            byte[] xmpPacketBytes = [];
 
             XmpPacket? xmpPacket = documentInfo.Metadata.XmpPacket;
 

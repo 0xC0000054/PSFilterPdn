@@ -155,7 +155,7 @@ namespace PSFilterLoad.PSApi.PICA
             lengthAsPascalString = new ASZStringLengthAsPascalString(LengthAsPascalString);
             asPascalString = new ASZStringAsPascalString(AsPascalString);
 
-            strings = new Dictionary<ASZString, ZString>();
+            strings = [];
             stringsIndex = 0;
         }
 

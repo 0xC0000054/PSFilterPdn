@@ -51,7 +51,7 @@ namespace PSFilterLoad.PSApi
                                "The plug-in processor architecture is not supported.");
 
                     // Ignore any DLLs that cannot be used on the current platform.
-                    return Enumerable.Empty<PluginData>();
+                    return [];
                 }
 
                 QueryFilter queryFilter = new(fileName, platform, logger);
@@ -74,7 +74,7 @@ namespace PSFilterLoad.PSApi
                                    "LoadLibraryExW failed with error code 0x{0}",
                                    new Win32ErrorCodeHexStringFormatter(lastError));
 
-                        return Enumerable.Empty<PluginData>();
+                        return [];
                     }
                 }
 
@@ -184,7 +184,7 @@ namespace PSFilterLoad.PSApi
             {
                 logger.Log(fileName, PluginLoadingLogCategory.Error, ex);
 
-                return Enumerable.Empty<PluginData>();
+                return [];
             }
         }
 

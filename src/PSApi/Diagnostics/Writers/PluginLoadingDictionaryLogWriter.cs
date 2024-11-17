@@ -34,7 +34,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
             }
             else
             {
-                dictionary.Add(fileName, new List<string>() { message });
+                dictionary.Add(fileName, [message]);
             }
         }
     }

@@ -28,13 +28,13 @@ namespace PSFilterPdn
         {
             Instance = new MessagePackResolver();
             Options = new MessagePackSerializerOptions(Instance).WithCompression(MessagePackCompression.Lz4BlockArray);
-            Resolvers = new IFormatterResolver[]
-            {
+            Resolvers =
+            [
                 BuiltinResolver.Instance,
                 AttributeFormatterResolver.Instance,
                 ImmutableCollectionResolver.Instance,
                 DynamicGenericResolver.Instance
-            };
+            ];
         }
 
         private MessagePackResolver()

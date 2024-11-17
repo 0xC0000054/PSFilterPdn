@@ -129,12 +129,12 @@ namespace PSFilterPdn
             InitializeComponent();
             filterExecutionLogSaveDialog!.ClientGuid = FilterExecutionLogSaveDialogClientGuid;
             destSurface = null;
-            expandedNodes = new List<string>();
-            filterParameters = new Dictionary<PluginData, ParameterData>();
-            pseudoResources = new PseudoResourceCollection();
+            expandedNodes = [];
+            filterParameters = [];
+            pseudoResources = [];
             fileNameLbl!.Text = string.Empty;
             folderNameLbl!.Text = string.Empty;
-            searchDirectories = new List<string>();
+            searchDirectories = [];
             highDpiMode = DeviceDpi > DpiHelper.LogicalDpi;
             settings = new PSFilterPdnSettings();
             lastSelectedFilterTitle = string.Empty;
@@ -516,8 +516,8 @@ namespace PSFilterPdn
             //
             // searchDirListView
             //
-            searchDirListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            dirHeader});
+            searchDirListView.Columns.AddRange([
+            dirHeader]);
             searchDirListView.Location = new System.Drawing.Point(6, 6);
             searchDirListView.MultiSelect = false;
             searchDirListView.Name = "searchDirListView";
@@ -620,8 +620,8 @@ namespace PSFilterPdn
             //
             // pluginLoadErrorListView
             //
-            pluginLoadErrorListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            plugInLoadErrorListViewColumnHeader});
+            pluginLoadErrorListView.Columns.AddRange([
+            plugInLoadErrorListViewColumnHeader]);
             pluginLoadErrorListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
             pluginLoadErrorListView.Location = new System.Drawing.Point(6, 24);
             pluginLoadErrorListView.Name = "pluginLoadErrorListView";
@@ -1314,10 +1314,10 @@ namespace PSFilterPdn
                                         }
                                         else
                                         {
-                                            List<TreeNodeEx> items = new()
-                                            {
+                                            List<TreeNodeEx> items =
+                                            [
                                                 child
-                                            };
+                                            ];
 
                                             nodes.Add(plugin.Category, items);
                                         }
@@ -1404,7 +1404,7 @@ namespace PSFilterPdn
                 {
                     TreeNode dummy = new() { Name = DummyTreeNodeName };
 
-                    TreeNodeEx categoryNode = new(item.Key, new TreeNode[] { dummy })
+                    TreeNodeEx categoryNode = new(item.Key, [dummy])
                     {
                         Enabled = item.Value.Any(x => x.Enabled == true),
                         Name = item.Key
@@ -1579,7 +1579,7 @@ namespace PSFilterPdn
                 ShowErrorMessage(ex);
             }
 
-            List<string> directories = new();
+            List<string> directories = [];
 
             string effectsFolderPath = GetEffectsFolderPath();
 

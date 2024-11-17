@@ -412,8 +412,8 @@ namespace PSFilterPdn.Metadata
             {
                 byte[] interoperabilityIndexData = exifColorSpace switch
                 {
-                    ExifColorSpace.Srgb => new byte[] { (byte)'R', (byte)'9', (byte)'8', 0 },
-                    ExifColorSpace.AdobeRgb => new byte[] { (byte)'R', (byte)'0', (byte)'3', 0 },
+                    ExifColorSpace.Srgb => [(byte)'R', (byte)'9', (byte)'8', 0],
+                    ExifColorSpace.AdobeRgb => [(byte)'R', (byte)'0', (byte)'3', 0],
                     _ => throw new InvalidOperationException("Unsupported ExifColorSpace value."),
                 };
                 Dictionary<ushort, ExifValue> interopSection = new()
@@ -446,7 +446,7 @@ namespace PSFilterPdn.Metadata
                     exifItems.Add(
                         ExifPropertyKeys.Photo.ExifVersion.Path.TagID,
                         new ExifValue(ExifValueType.Undefined,
-                                      new byte[] { (byte)'0', (byte)'2', (byte)'3', (byte)'0' }));
+                                      [(byte)'0', (byte)'2', (byte)'3', (byte)'0']));
 #pragma warning restore IDE0230 // Use UTF-8 string literal
                 }
             }
@@ -458,7 +458,7 @@ namespace PSFilterPdn.Metadata
                     gpsItems.Add(
                         ExifPropertyKeys.GpsInfo.GPSVersionID.Path.TagID,
                         new ExifValue(ExifValueType.Byte,
-                                      new byte[] { 2, 3, 0, 0 }));
+                                      [2, 3, 0, 0]));
                 }
             }
         }

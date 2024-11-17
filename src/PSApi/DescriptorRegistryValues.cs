@@ -27,14 +27,14 @@ namespace PSFilterLoad.PSApi
 
         public DescriptorRegistryValues()
         {
-            persistedValues = new Dictionary<string, Dictionary<uint, AETEValue>>();
-            sessionValues = new Dictionary<string, Dictionary<uint, AETEValue>>();
+            persistedValues = [];
+            sessionValues = [];
         }
 
         internal DescriptorRegistryValues(Dictionary<string, Dictionary<uint, AETEValue>> persistedValues)
         {
             this.persistedValues = persistedValues ?? throw new ArgumentNullException(nameof(persistedValues));
-            sessionValues = new Dictionary<string, Dictionary<uint, AETEValue>>();
+            sessionValues = [];
             Dirty = false;
         }
 

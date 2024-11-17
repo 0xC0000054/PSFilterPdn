@@ -37,7 +37,7 @@ namespace PSFilterLoad.PSApi
             addResourceProc = new AddPIResourceProc(AddResource);
             deleteResourceProc = new DeletePIResourceProc(DeleteResource);
             getResourceProc = new GetPIResourceProc(GetResource);
-            pseudoResources = new PseudoResourceCollection();
+            pseudoResources = [];
         }
 
         public PseudoResourceCollection PseudoResources

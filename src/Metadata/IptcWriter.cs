@@ -25,7 +25,7 @@ namespace PSFilterPdn.Metadata
 
             if (captionLengthInUtf8Bytes > IptcConstants.MaxCaptionLength)
             {
-                return Array.Empty<byte>();
+                return [];
             }
 
             IptcStandardDataSetTag codedCharacterSet = new(IptcConstants.Records.Envelope,
