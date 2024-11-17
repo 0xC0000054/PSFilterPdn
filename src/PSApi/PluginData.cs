@@ -303,10 +303,7 @@ namespace PSFilterLoad.PSApi
         /// </exception>
         internal bool SupportsHostState(int imageWidth, int imageHeight, ISurfaceHasTransparency surface, HostState hostState)
         {
-            if (hostState == null)
-            {
-                throw new ArgumentNullException(nameof(hostState));
-            }
+            ArgumentNullException.ThrowIfNull(hostState);
 
             bool result = true;
 
