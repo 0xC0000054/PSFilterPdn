@@ -493,7 +493,7 @@ namespace PSFilterLoad.PSApi
                     return BOOL.TRUE;
                 }
 
-                PluginCompatibilityOptions compatibilityOptions = GetPluginCompatibilityOptions(category,
+                PluginCompatibilityOptions compatibilityOptions = GetPluginCompatibilityOptions(hModule,
                                                                                                 !query.runWith32BitShim);
 
                 query.plugins.Add(new PluginData(query.fileName,
@@ -640,27 +640,44 @@ namespace PSFilterLoad.PSApi
             return true;
         }
 
-        private static PluginCompatibilityOptions GetPluginCompatibilityOptions(string category, bool is64Bit)
+        private static PluginCompatibilityOptions GetPluginCompatibilityOptions(HMODULE hModule, bool is64Bit)
         {
             PluginCompatibilityOptions options = PluginCompatibilityOptions.None;
 
-            if (is64Bit && category.StartsWith("Mehdi", StringComparison.Ordinal))
+            if (IsStandaloneFilterMeisterPlugin(hModule, is64Bit))
             {
-                // The 64-bit Mehdi plugins crash when reshowing the UI with the saved 'global' parameters.
-                // They appear to have been built with FilterMeister version 1.09g, but I don't think it is a
-                // FilterMeister bug.
-                // It is likely due to a behavior change in .NET 5+ or the OS. The process exit code appears
-                // to be a Windows 'Exception thrown from user callback' error.
+                // Many standalone 32-bit and 64-bit FilterMeister-based plugins crash when reshowing
+                // the UI with the saved 'global' parameters.
+                // I don't think it is a FilterMeister bug, it is likely due to a behavior change in
+                // .NET 5+ or the OS. The process exit code appears to be a Windows
+                // 'Exception thrown from user callback' error.
                 //
-                // Only the 64-bit versions of the plugins crash, the 32-bit versions work fine.
-                // The non-interactive 'repeat effect' command works also without crashing.
+                // The crash only occurs when reshowing the UI the second time if the saved 'global'
+                // parameters are restored, the non-interactive 'repeat effect' command works without
+                // crashing.
                 //
                 // To fix this, we do not restore the 'global' parameters when reshowing the UI.
-                // The plugins will use their AETE scripting parameters instead.
+                // The plugins will show their default parameters unless they use AETE scripting system,
+                // in which case they will restore the last used parameters from that data instead.
                 options = PluginCompatibilityOptions.DoNotRestoreGlobalParametersWhenReshowingUI;
             }
 
             return options;
+        }
+
+        private static unsafe bool IsStandaloneFilterMeisterPlugin(HMODULE hModule, bool is64Bit)
+        {
+            bool result = false;
+
+            fixed (char* lpType = "FMCODE")
+            {
+                ushort resourceName = (ushort)(is64Bit ? 164 : 132);
+                char* lpName = TerraFX.Interop.Windows.Windows.MAKEINTRESOURCE(resourceName);
+
+                result = TerraFX.Interop.Windows.Windows.FindResourceW(hModule, lpName, lpType) != 0;
+            }
+
+            return result;
         }
 
         private static bool ValidatePluginResourceData(string category,
