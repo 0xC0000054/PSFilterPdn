@@ -13,6 +13,7 @@
 using PaintDotNet.Collections;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PSFilterPdn.Metadata
 {
@@ -22,7 +23,7 @@ namespace PSFilterPdn.Metadata
         {
             ArgumentNullException.ThrowIfNull(items);
 
-            return items is T[] asArray ? asArray : items.ToArrayEx();
+            return items is T[] asArray ? asArray : items.ToArray();
         }
     }
 }

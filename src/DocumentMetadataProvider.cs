@@ -68,7 +68,7 @@ namespace PSFilterPdn
 
             if (iccProfilePropertyItem != null)
             {
-                iccProfileBytes = iccProfilePropertyItem.Value.Data.ToArrayEx();
+                iccProfileBytes = [.. iccProfilePropertyItem.Value.Data];
             }
             else
             {

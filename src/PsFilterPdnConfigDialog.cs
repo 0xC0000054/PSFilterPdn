@@ -1121,7 +1121,7 @@ namespace PSFilterPdn
 
             public WorkerArgs(ICollection<string> searchDirectories, bool searchSubDirectories)
             {
-                directories = searchDirectories.ToArrayEx();
+                directories = [.. searchDirectories];
                 recurseSubDirectories = searchSubDirectories;
             }
         }
