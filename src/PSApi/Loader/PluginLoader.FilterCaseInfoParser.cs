@@ -74,13 +74,6 @@ namespace PSFilterLoad.PSApi
                 return new FilterCaseInfoResult(filterInfoValid ? new FilterCaseInfoCollection(info) : null, offset);
             }
 
-            private static bool IsHexadecimalChar(char value)
-            {
-                return value >= '0' && value <= '9' ||
-                       value >= 'A' && value <= 'F' ||
-                       value >= 'a' && value <= 'f';
-            }
-
             private static unsafe byte? ParseField(byte* data, int startOffset, out int fieldLength)
             {
                 byte value = data[startOffset];
@@ -97,7 +90,7 @@ namespace PSFilterLoad.PSApi
                         // Convert the hexadecimal characters to a decimal number.
                         char hexChar = (char)data[offset];
 
-                        if (IsHexadecimalChar(hexChar))
+                        if (char.IsAsciiHexDigit(hexChar))
                         {
                             int fieldValue = 0;
 
@@ -125,7 +118,7 @@ namespace PSFilterLoad.PSApi
                                 offset++;
                                 hexChar = (char)data[offset];
 
-                            } while (IsHexadecimalChar(hexChar));
+                            } while (char.IsAsciiHexDigit(hexChar));
 
                             if (fieldValue >= byte.MinValue && fieldValue <= byte.MaxValue)
                             {
