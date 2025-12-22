@@ -4,7 +4,7 @@
 // https://github.com/0xC0000054/PSFilterPdn
 //
 // This software is provided under the MIT License:
-//   Copyright (C) 2010-2024 Nicholas Hayes
+//   Copyright (C) 2010-2025 Nicholas Hayes
 //
 // See LICENSE.txt for complete licensing and attribution information.
 //
@@ -23,7 +23,7 @@ using System.Runtime.Versioning;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("null54")]
 [assembly: AssemblyProduct("PSFilterPdn")]
-[assembly: AssemblyCopyright("Copyright © 2010-2024 Nicholas Hayes (aka null54)")]
+[assembly: AssemblyCopyright("Copyright © 2010-2025 Nicholas Hayes (aka null54)")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
