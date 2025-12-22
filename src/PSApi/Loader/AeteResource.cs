@@ -139,10 +139,7 @@ namespace PSFilterLoad.PSApi.Loader
                         short parameterFlags = *(short*)propPtr;
                         propPtr += 2;
 
-                        if (!aeteParameterFlags.ContainsKey(key))
-                        {
-                            aeteParameterFlags.Add(key, parameterFlags);
-                        }
+                        aeteParameterFlags.TryAdd(key, parameterFlags);
                     }
 
 #if DEBUG

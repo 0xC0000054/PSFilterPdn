@@ -47,14 +47,13 @@ namespace PSFilterLoad.PSApi.PICA
 
             public void Add(uint key, AETEValue value)
             {
-                if (parameters.ContainsKey(key))
+                if (parameters.TryAdd(key, value))
                 {
-                    parameters[key] = value;
+                    keys.Add(key);
                 }
                 else
                 {
-                    parameters.Add(key, value);
-                    keys.Add(key);
+                    parameters[key] = value;
                 }
             }
 
