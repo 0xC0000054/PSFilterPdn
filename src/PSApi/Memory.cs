@@ -24,6 +24,7 @@ using TerraFX.Interop.Windows;
 using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 using static TerraFX.Interop.Windows.Windows;
 
@@ -309,11 +310,11 @@ namespace PSFilterLoad.PSApi
             private static long pressure;
             private static long committedPressure;
 
-            private static readonly object sync = new();
+            private static readonly Lock sync = new();
 
             internal static void AddMemoryPressure(long amount)
             {
-                System.Threading.Interlocked.Add(ref pressure, amount);
+                Interlocked.Add(ref pressure, amount);
                 PressureCheck();
             }
 
