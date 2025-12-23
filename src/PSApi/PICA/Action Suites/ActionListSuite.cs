@@ -27,13 +27,13 @@ namespace PSFilterLoad.PSApi.PICA
             {
             }
 
-            public ActionListItemCollection(ReadOnlyCollection<ActionListItem> items) : base(new List<ActionListItem>(items))
+            public ActionListItemCollection(ReadOnlyCollection<ActionListItem> items) : base([.. items])
             {
             }
 
             public ReadOnlyCollection<ActionListItem> GetListAsReadOnly()
             {
-                List<ActionListItem> clone = new(Items);
+                List<ActionListItem> clone = [.. Items];
                 return clone.AsReadOnly();
             }
         }

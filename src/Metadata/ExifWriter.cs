@@ -22,8 +22,8 @@ namespace PSFilterPdn.Metadata
     {
         private const int FirstIFDOffset = 8;
 
-        private static readonly HashSet<ushort> supportedImageSectionTags = new()
-        {
+        private static readonly HashSet<ushort> supportedImageSectionTags =
+        [
             // The tags related to storing offsets are included for reference,
             // but are not written to the EXIF blob.
 
@@ -64,7 +64,7 @@ namespace PSFilterPdn.Metadata
             305, // Software
             315, // Artist
             33432 // Copyright
-        };
+        ];
 
         private readonly Dictionary<ExifSection, Dictionary<ushort, ExifValue>> metadata;
 

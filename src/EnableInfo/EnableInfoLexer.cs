@@ -107,7 +107,7 @@ namespace PSFilterPdn.EnableInfo
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private IList<Token> ScanTokens()
         {
-            List<Token> tokens = new();
+            List<Token> tokens = [];
             index = 0;
 
             while (!IsAtEnd)

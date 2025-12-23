@@ -25,8 +25,8 @@ namespace PSFilterPdn
             Dest = null;
             FilterData = null;
             RunWith32BitShim = false;
-            FilterParameters = new Dictionary<PluginData, ParameterData>();
-            PseudoResources = new PseudoResourceCollection();
+            FilterParameters = [];
+            PseudoResources = [];
             DescriptorRegistry = null;
             DialogState = null;
         }

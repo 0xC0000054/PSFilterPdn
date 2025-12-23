@@ -34,13 +34,13 @@ namespace PSFilterLoad.PSApi.PICA
             public ScriptingParameters(IDictionary<uint, AETEValue> dict)
             {
                 parameters = new Dictionary<uint, AETEValue>(dict);
-                keys = new List<uint>(dict.Keys);
+                keys = [.. dict.Keys];
             }
 
             private ScriptingParameters(ScriptingParameters cloneMe)
             {
                 parameters = new Dictionary<uint, AETEValue>(cloneMe.parameters);
-                keys = new List<uint>(cloneMe.keys);
+                keys = [.. cloneMe.keys];
             }
 
             public int Count => parameters.Count;

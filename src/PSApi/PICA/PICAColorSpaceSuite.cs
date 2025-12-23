@@ -114,7 +114,7 @@ namespace PSFilterLoad.PSApi.PICA
             csConvertToMonitorRGB = new CSConvertToMonitorRGB(ConvertToMonitorRGB);
             this.zstringSuite = zstringSuite;
             this.logger = logger;
-            colors = new Dictionary<ColorID, Color>();
+            colors = [];
             colorsIndex = 0;
             lookup16To8 = null;
             lookup8To16 = null;

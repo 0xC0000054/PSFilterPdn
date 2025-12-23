@@ -54,7 +54,7 @@ namespace PSFilterLoad.PSApi
                         throw new PlatformNotSupportedException($"No platform entry point was defined for { nameof(Architecture) }.{ platform }.");
                 }
                 processorArchitecture = platform;
-                plugins = new List<PluginData>();
+                plugins = [];
                 runWith32BitShim = platform == Architecture.X86 && RuntimeInformation.ProcessArchitecture != Architecture.X86;
             }
         }

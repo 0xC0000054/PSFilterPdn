@@ -104,7 +104,7 @@ namespace PSFilterPdn
 
         private static (List<string>, bool) ParseOldSettingsFormat(XmlReader xmlReader)
         {
-            List<string> directories = new();
+            List<string> directories = [];
             bool searchSubdirectories = true;
 
             XmlDocument xmlDocument = new();

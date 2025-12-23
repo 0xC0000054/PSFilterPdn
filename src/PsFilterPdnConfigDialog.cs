@@ -237,7 +237,7 @@ namespace PSFilterPdn
                     state.ExpandedNodes != null &&
                     state.ExpandedNodes.Count > 0)
                 {
-                    expandedNodes = new List<string>(state.ExpandedNodes);
+                    expandedNodes = [.. state.ExpandedNodes];
                 }
 
                 if (filterTreeNodes == null &&
@@ -250,7 +250,7 @@ namespace PSFilterPdn
                     state.SearchDirectories != null &&
                     state.SearchDirectories.Count > 0)
                 {
-                    searchDirectories = new List<string>(state.SearchDirectories);
+                    searchDirectories = [.. state.SearchDirectories];
                 }
             }
         }

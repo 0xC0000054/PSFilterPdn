@@ -37,7 +37,7 @@ namespace PSFilterLoad.PSApi
                 lastReadError = PSError.noErr;
                 keyIndex = 0;
                 keyCount = dictionary.Count;
-                keys = new ReadOnlyCollection<uint>(new List<uint>(dictionary.Keys));
+                keys = new ReadOnlyCollection<uint>([.. dictionary.Keys]);
                 items = new ReadOnlyDictionary<uint, AETEValue>(dictionary);
                 expectedKeys = keyArray;
             }
@@ -133,9 +133,9 @@ namespace PSFilterLoad.PSApi
             putTextProc = new PutTextProc(PutTextProc);
             putUnitFloatProc = new PutUnitFloatProc(PutUnitFloatProc);
 
-            readDescriptors = new Dictionary<PIReadDescriptor, ReadDescriptorState>();
-            descriptorHandles = new Dictionary<Handle, Dictionary<uint, AETEValue>>();
-            writeDescriptors = new Dictionary<PIWriteDescriptor, Dictionary<uint, AETEValue>>();
+            readDescriptors = [];
+            descriptorHandles = [];
+            writeDescriptors = [];
             this.handleSuite = handleSuite;
             this.logger = logger;
             readDescriptorsIndex = 0;
@@ -798,7 +798,7 @@ namespace PSFilterLoad.PSApi
             PIWriteDescriptor descriptor = new(writeDescriptorsIndex);
             try
             {
-                writeDescriptors.Add(descriptor, new Dictionary<uint, AETEValue>());
+                writeDescriptors.Add(descriptor, []);
 
                 logger.Log(PluginApiLogCategory.DescriptorSuite, "descriptor: {0}", descriptor);
             }

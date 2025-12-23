@@ -315,7 +315,7 @@ namespace PSFilterPdn.EnableInfo
         {
             Consume(TokenType.LeftParentheses, "Missing '(' in a function call expression.");
 
-            List<Expression> args = new();
+            List<Expression> args = [];
 
             if (Peek().Type != TokenType.RightParentheses)
             {

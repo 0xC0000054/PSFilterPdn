@@ -172,7 +172,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         public ActivePICASuites()
         {
-            activeSuites = new Dictionary<PICASuiteKey, PICASuite>();
+            activeSuites = [];
             disposed = false;
         }
 

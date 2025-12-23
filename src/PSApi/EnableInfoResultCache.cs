@@ -69,7 +69,7 @@ namespace PSFilterLoad.PSApi
                 {
                     expression = null;
                 }
-                resultCache = new Dictionary<EnableInfoVariables, bool>();
+                resultCache = [];
             }
 
             internal bool? TryGetResult(EnableInfoVariables variables)

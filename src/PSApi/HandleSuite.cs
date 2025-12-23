@@ -92,7 +92,7 @@ namespace PSFilterLoad.PSApi
             handleUnlockProc = new UnlockPIHandleProc(UnlockHandle);
             handleRecoverSpaceProc = new RecoverSpaceProc(RecoverHandleSpace);
             handleDisposeRegularProc = new DisposeRegularPIHandleProc(DisposeRegularHandle);
-            handles = new Dictionary<Handle, HandleEntry>();
+            handles = [];
             this.logger = logger;
         }
 

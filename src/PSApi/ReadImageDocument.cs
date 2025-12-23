@@ -80,7 +80,7 @@ namespace PSFilterLoad.PSApi
             this.documentHeight = documentHeight;
             this.dpiX = dpiX;
             this.dpiY = dpiY;
-            channelReadDescPtrs = new List<ChannelDescPtrs>();
+            channelReadDescPtrs = [];
             disposed = false;
         }
 

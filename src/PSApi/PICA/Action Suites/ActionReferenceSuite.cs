@@ -25,11 +25,11 @@ namespace PSFilterLoad.PSApi.PICA
             private readonly List<ActionReferenceItem> references;
             private readonly int index;
 
-            public ActionReferenceContainer() : this(new List<ActionReferenceItem>(), 0)
+            public ActionReferenceContainer() : this([], 0)
             {
             }
 
-            public ActionReferenceContainer(ReadOnlyCollection<ActionReferenceItem> references) : this(new List<ActionReferenceItem>(references), 0)
+            public ActionReferenceContainer(ReadOnlyCollection<ActionReferenceItem> references) : this([.. references], 0)
             {
             }
 
@@ -67,7 +67,7 @@ namespace PSFilterLoad.PSApi.PICA
 
             public ReadOnlyCollection<ActionReferenceItem> GetReferencesAsReadOnly()
             {
-                List<ActionReferenceItem> clone = new(references);
+                List<ActionReferenceItem> clone = [.. references];
                 return clone.AsReadOnly();
             }
         }
@@ -126,7 +126,7 @@ namespace PSFilterLoad.PSApi.PICA
             getContainer = new ActionReferenceGetContainer(GetContainer);
 
             this.logger = logger;
-            actionReferences = new Dictionary<PIActionReference, ActionReferenceContainer>();
+            actionReferences = [];
             actionReferencesIndex = 0;
         }
 

@@ -33,7 +33,7 @@ namespace PSFilterPdn
         {
             Dirty = false;
             searchSubdirectories = true;
-            searchDirectories = new HashSet<string>();
+            searchDirectories = [];
         }
 
         /// <summary>
