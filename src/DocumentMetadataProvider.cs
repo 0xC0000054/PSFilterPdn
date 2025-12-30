@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-using PaintDotNet.Collections;
 using PaintDotNet.Effects;
 using PaintDotNet.Imaging;
 using PSFilterLoad.PSApi;
