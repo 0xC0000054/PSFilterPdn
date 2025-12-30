@@ -120,7 +120,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\ClayRGB-elle-V2-g22.icc" />
     <EmbeddedResource Include="Resources\Icons\feather-96.png" />
     <EmbeddedResource Include="Resources\Icons\feather-120.png" />
     <EmbeddedResource Include="Resources\Icons\feather-144.png" />
@@ -146,7 +145,6 @@
     <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-144.png" />
     <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-192.png" />
     <EmbeddedResource Include="Resources\Icons\VistaThemedExpand-384.png" />
-    <EmbeddedResource Include="Resources\sRGB.icc" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.3.2" />
