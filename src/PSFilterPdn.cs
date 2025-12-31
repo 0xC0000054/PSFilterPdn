@@ -286,7 +286,7 @@ namespace PSFilterPdn
             }
         }
 
-        private bool CheckSourceSurfaceSize(IWin32Window window)
+        private bool CheckSourceSurfaceSize()
         {
             int width = Environment.Document.Size.Width;
             int height = Environment.Document.Size.Height;
@@ -342,7 +342,7 @@ namespace PSFilterPdn
                     {
                         Win32Window win32Window = new(Process.GetCurrentProcess().MainWindowHandle);
 
-                        if (CheckSourceSurfaceSize(win32Window))
+                        if (CheckSourceSurfaceSize())
                         {
                             if (token.RunWith32BitShim)
                             {
