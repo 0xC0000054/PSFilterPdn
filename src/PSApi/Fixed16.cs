@@ -24,8 +24,6 @@ namespace PSFilterLoad.PSApi
     [StructLayout(LayoutKind.Sequential)]
     internal readonly struct Fixed16 : IEquatable<Fixed16>
     {
-        private readonly int fixedValue;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Fixed16"/> structure.
         /// </summary>
@@ -38,7 +36,7 @@ namespace PSFilterLoad.PSApi
                 throw new ArgumentOutOfRangeException(nameof(value), value, "The value must be between 0 and 65535.");
             }
 
-            fixedValue = value << 16;
+            Value = value << 16;
         }
 
         /// <summary>
@@ -47,17 +45,17 @@ namespace PSFilterLoad.PSApi
         /// <param name="value">The value.</param>
         public Fixed16(double value)
         {
-            fixedValue = (int)(value * 65536.0);
+            Value = (int)(value * 65536.0);
         }
 
         /// <summary>
         /// Gets the 16.16 fixed point number.
         /// </summary>
         /// <returns>The 16.16 fixed point number.</returns>
-        public readonly int Value => fixedValue;
+        public readonly int Value { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly string DebuggerDisplay => string.Format("Fixed = {0}", fixedValue);
+        private readonly string DebuggerDisplay => string.Format("Fixed = {0}", Value);
 
         /// <summary>
         /// Determines whether the specified <see cref="object"/>, is equal to this instance.
@@ -80,7 +78,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public readonly bool Equals(Fixed16 other)
         {
-            return fixedValue == other.fixedValue;
+            return Value == other.Value;
         }
 
         /// <summary>
@@ -91,7 +89,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public override readonly int GetHashCode()
         {
-            return HashCode.Combine(fixedValue);
+            return HashCode.Combine(Value);
         }
 
         /// <summary>
@@ -100,7 +98,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>The 16.16 fixed point value converted to an Int32.</returns>
         public readonly int ToInt32()
         {
-            return fixedValue >> 16;
+            return Value >> 16;
         }
 
         /// <summary>
@@ -109,7 +107,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>The 16.16 fixed point value converted to a Double.</returns>
         public readonly double ToDouble()
         {
-            return fixedValue / 65536.0;
+            return Value / 65536.0;
         }
 
         public static bool operator ==(Fixed16 left, Fixed16 right)
@@ -151,7 +149,7 @@ namespace PSFilterLoad.PSApi
                 this.fixed16 = fixed16;
             }
 
-            public int FixedValue => fixed16.fixedValue;
+            public int FixedValue => fixed16.Value;
 
             public int Int32Value => fixed16.ToInt32();
 
