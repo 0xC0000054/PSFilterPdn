@@ -128,8 +128,10 @@ namespace PSFilterLoad.PSApi
                 }
             }
             // TODO: Implement bilinear and bicubic sampling.
+            //       The Shear filter (Shear8B.8BF) is currently unusable due to it requiring bicubic sampling.
             //       This would also require updating the value returned for the InterpolationMethod property
-            //       in PropertySuite.cs.
+            //       in PropertySuite.cs so that filters which use that property would select the higher
+            //       quality sampling modes.
 
             return PSError.memFullErr;
         }
@@ -191,8 +193,10 @@ namespace PSFilterLoad.PSApi
                 }
             }
             // TODO: Implement bilinear and bicubic sampling.
+            //       The Shear filter (Shear8B.8BF) is currently unusable due to it requiring bicubic sampling.
             //       This would also require updating the value returned for the InterpolationMethod property
-            //       in PropertySuite.cs.
+            //       in PropertySuite.cs so that filters which use that property would select the higher
+            //       quality sampling modes.
 
             return PSError.noErr;
         }
