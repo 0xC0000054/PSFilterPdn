@@ -38,7 +38,7 @@ namespace PSFilterLoad.PSApi
     internal unsafe delegate short PIResampleProc(PSImagePlane* source,
                                                   PSImagePlane* destination,
                                                   Rect16* area,
-                                                  IntPtr coords,
+                                                  Fixed16* coordinates,
                                                   InterpolationMethod method);
 
     [StructLayout(LayoutKind.Sequential)]

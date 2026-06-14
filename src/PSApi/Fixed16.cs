@@ -49,6 +49,14 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
+        /// Gets a value indicating if the 16.16 fixed point number is an integer.
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if the 16.16 fixed point number is an integer; otherwise, <c>false</c>.
+        /// </returns>
+        public readonly bool IsInteger => GetFractionalPart() == 0;
+
+        /// <summary>
         /// Gets the 16.16 fixed point number.
         /// </summary>
         /// <returns>The 16.16 fixed point number.</returns>
@@ -93,12 +101,35 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
+        /// Gets the fractional part of the 16.16 fixed point value.
+        /// </summary>
+        /// <returns>
+        /// The fractional part of the 16.16 fixed point value.
+        /// </returns>
+        public readonly int GetFractionalPart()
+        {
+            return Value & 0xffff;
+        }
+
+        /// <summary>
+        /// Gets the whole number part of the 16.16 fixed point value.
+        /// </summary>
+        /// <returns>
+        /// The whole number part of the 16.16 fixed point value.
+        /// </returns>
+        public readonly int GetWholeNumberPart()
+        {
+            return Value >> 16;
+        }
+
+        /// <summary>
         /// Converts the 16.16 fixed point value to an Int32.
         /// </summary>
         /// <returns>The 16.16 fixed point value converted to an Int32.</returns>
         public readonly int ToInt32()
         {
-            return Value >> 16;
+            // When converting to an Int32 the number is truncated.
+            return GetWholeNumberPart();
         }
 
         /// <summary>
