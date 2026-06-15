@@ -240,7 +240,7 @@ namespace PSFilterLoad.PSApi
                     error = GetSimpleProperty(simpleProperty, PSConstants.plugInModeRGBColor);
                     break;
                 case PSProperties.InterpolationMethod:
-                    error = GetSimpleProperty(simpleProperty, PSConstants.Properties.InterpolationMethod.PointSampling);
+                    error = GetSimpleProperty(simpleProperty, PSConstants.Properties.InterpolationMethod.Bilinear);
                     break;
                 case PSProperties.NumberOfChannels:
                     error = GetSimpleProperty(simpleProperty, numberOfChannels);
