@@ -27,12 +27,11 @@ namespace PSFilterLoad.PSApi.Diagnostics
                 writer = new PluginApiFileLogWriter(logFilePath);
 
                 // Include the plug-in information at the start of the log.
-                writer.Write("FileName: " + Path.GetFileName(plugin.FileName));
-                writer.Write("Architecture:" + plugin.ProcessorArchitecture);
-                writer.Write("Category: " + plugin.Category);
-                writer.Write("Title: " + plugin.Title);
-
-                writer.Write(string.Empty);
+                writer.WriteLine("FileName: " + Path.GetFileName(plugin.FileName));
+                writer.WriteLine("Architecture:" + plugin.ProcessorArchitecture);
+                writer.WriteLine("Category: " + plugin.Category);
+                writer.WriteLine("Title: " + plugin.Title);
+                writer.WriteLine(string.Empty);
             }
             else if (Debugger.IsAttached)
             {

@@ -21,7 +21,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
         public PluginApiFileLogWriter(string path)
             => writer = File.CreateText(path);
 
-        public void Write(string logMessage)
+        public void WriteLine(string logMessage)
         {
             VerifyNotDisposed();
 

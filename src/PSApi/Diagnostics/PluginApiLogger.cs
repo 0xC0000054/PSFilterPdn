@@ -73,7 +73,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
 
             string message = value?.ToString() ?? string.Empty;
             string logMessage = FormatMessage(memberName, message);
-            writer.Write(logMessage);
+            writer.WriteLine(logMessage);
         }
 
         public void Log<T0>(PluginApiLogCategory logCategory,
@@ -89,7 +89,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
 
             string message = string.Format(format, arg0);
             string logMessage = FormatMessage(memberName, message);
-            writer.Write(logMessage);
+            writer.WriteLine(logMessage);
         }
 
         public void Log<T0, T1>(PluginApiLogCategory logCategory,
@@ -106,7 +106,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
 
             string message = string.Format(format, arg0, arg1);
             string logMessage = FormatMessage(memberName, message);
-            writer.Write(logMessage);
+            writer.WriteLine(logMessage);
         }
 
         public void Log<T0, T1, T2>(PluginApiLogCategory logCategory,
@@ -124,7 +124,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
 
             string message = string.Format(format, arg0, arg1, arg2);
             string logMessage = FormatMessage(memberName, message);
-            writer.Write(logMessage);
+            writer.WriteLine(logMessage);
         }
 
         public void Log<T0, T1, T2, T3>(PluginApiLogCategory logCategory,
@@ -143,7 +143,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
 
             string message = string.Format(format, arg0, arg1, arg2, arg3);
             string logMessage = FormatMessage(memberName, message);
-            writer.Write(logMessage);
+            writer.WriteLine(logMessage);
         }
 
         public void Log<T0, T1, T2, T3, T4>(PluginApiLogCategory logCategory,
@@ -163,7 +163,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
 
             string message = string.Format(format, arg0, arg1, arg2, arg3, arg4);
             string logMessage = FormatMessage(memberName, message);
-            writer.Write(logMessage);
+            writer.WriteLine(logMessage);
         }
 
         public void Log<T0, T1, T2, T3, T4, T5>(PluginApiLogCategory logCategory,
@@ -184,7 +184,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
 
             string message = string.Format(format, arg0, arg1, arg2, arg3, arg4, arg5);
             string logMessage = FormatMessage(memberName, message);
-            writer.Write(logMessage);
+            writer.WriteLine(logMessage);
         }
 
         public void LogFunctionName(PluginApiLogCategory logCategory,
@@ -196,7 +196,7 @@ namespace PSFilterLoad.PSApi.Diagnostics
             }
 
             string logMessage = FormatFunctionName(memberName);
-            writer.Write(logMessage);
+            writer.WriteLine(logMessage);
         }
 
         private string FormatFunctionName(string functionName)

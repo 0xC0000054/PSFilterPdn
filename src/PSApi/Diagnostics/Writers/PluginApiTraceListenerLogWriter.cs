@@ -20,6 +20,6 @@ namespace PSFilterLoad.PSApi.Diagnostics
 
         public static PluginApiTraceListenerLogWriter Instance { get; } = new PluginApiTraceListenerLogWriter();
 
-        public void Write(string logMessage) => System.Diagnostics.Trace.WriteLine(logMessage);
+        public void WriteLine(string logMessage) => System.Diagnostics.Trace.WriteLine(logMessage);
     }
 }

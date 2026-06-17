@@ -14,6 +14,6 @@ namespace PSFilterLoad.PSApi.Diagnostics
 {
     internal interface IPluginApiLogWriter
     {
-        void Write(string logMessage);
+        void WriteLine(string logMessage);
     }
 }
