@@ -114,52 +114,28 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private sealed class PICASuite : IDisposable
+        private sealed class PICASuite : Disposable
         {
-            private IntPtr suitePointer;
-            private int refCount;
-            private bool disposed;
-
-            public IntPtr SuitePointer => suitePointer;
-
-            public int RefCount
-            {
-                get => refCount;
-                set => refCount = value;
-            }
-
             public PICASuite(IntPtr suite)
             {
-                suitePointer = suite;
-                refCount = 1;
+                SuitePointer = suite;
+                RefCount = 1;
             }
 
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
+            public IntPtr SuitePointer { get; private set; }
 
-            ~PICASuite()
-            {
-                Dispose(false);
-            }
+            public int RefCount { get; set; }
 
-            private void Dispose(bool disposing)
+            protected override void Dispose(bool disposing)
             {
-                if (!disposed)
+                if (disposing)
                 {
-                    if (disposing)
-                    {
-                    }
+                }
 
-                    if (suitePointer != IntPtr.Zero)
-                    {
-                        Memory.Free(suitePointer);
-                        suitePointer = IntPtr.Zero;
-                    }
-
-                    disposed = true;
+                if (SuitePointer != IntPtr.Zero)
+                {
+                    Memory.Free(SuitePointer);
+                    SuitePointer = IntPtr.Zero;
                 }
             }
         }
