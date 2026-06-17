@@ -30,7 +30,7 @@ namespace PSFilterLoad.PSApi
     internal unsafe struct PSPixelMask
     {
         public PSPixelMask* next;
-        public System.IntPtr maskData;
+        public nint maskData;
         public int rowBytes;
         public int colBytes;
         public MaskDescription maskDescription;
@@ -73,7 +73,7 @@ namespace PSFilterLoad.PSApi
         public int rowBytes;
         public int colBytes;
         public int planeBytes;
-        public System.IntPtr baseAddr;
+        public nint baseAddr;
         public PSPixelMask* mat;
         public PSPixelMask* masks;
         public int maskPhaseRow;

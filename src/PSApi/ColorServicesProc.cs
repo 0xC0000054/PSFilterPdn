@@ -48,9 +48,9 @@ namespace PSFilterLoad.PSApi
     internal struct SelectorParameters
     {
         [FieldOffset(0)]
-        public System.IntPtr pickerPrompt;
+        public nint pickerPrompt;
         [FieldOffset(0)]
-        public System.IntPtr globalSamplePoint;
+        public nint globalSamplePoint;
         [FieldOffset(0)]
         public SpecialColorID specialColorID;
     }
@@ -67,10 +67,10 @@ namespace PSFilterLoad.PSApi
         public ColorSpace resultSpace;
         public PSBoolean resultGamutInfoValid;
         public PSBoolean resultInGamut;
-        public System.IntPtr reservedSourceSpaceInfo;
-        public System.IntPtr reservedResultSpaceInfo;
+        public nint reservedSourceSpaceInfo;
+        public nint reservedResultSpaceInfo;
         public fixed short colorComponents[4];
-        public System.IntPtr reserved;
+        public nint reserved;
         public SelectorParameters selectorParameter;
     }
 }

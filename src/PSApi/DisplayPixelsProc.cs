@@ -24,5 +24,5 @@ namespace PSFilterLoad.PSApi
                                                      [In()] VRect* srcRect,
                                                      [In()] int dstRow,
                                                      [In()] int dstCol,
-                                                     [In()] System.IntPtr platformContext);
+                                                     [In()] nint platformContext);
 }

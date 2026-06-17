@@ -20,5 +20,5 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate void ProcessEventProc(System.IntPtr @event);
+    internal delegate void ProcessEventProc(nint @event);
 }
