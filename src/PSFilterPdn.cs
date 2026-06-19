@@ -53,15 +53,6 @@ namespace PSFilterPdn
             filterDone = null;
         }
 
-        /// <summary>
-        /// The function that the Photoshop filters can poll to check if to abort.
-        /// </summary>
-        /// <returns>The effect's IsCancelRequested property.</returns>
-        private bool AbortCallback()
-        {
-            return IsCancelRequested;
-        }
-
         protected override IEffectConfigForm OnCreateConfigForm()
         {
             repeatEffect = false;
