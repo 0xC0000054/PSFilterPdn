@@ -31,7 +31,7 @@ namespace PSFilterLoad.PSApi
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is less than zero or greater than 65535.</exception>
         public Fixed16(int value)
         {
-            if (value < 0 || value > 65535)
+            if (unchecked((uint)value) > 65535)
             {
                 throw new ArgumentOutOfRangeException(nameof(value), value, "The value must be between 0 and 65535.");
             }
