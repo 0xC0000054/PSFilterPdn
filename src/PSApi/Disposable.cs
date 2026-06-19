@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace PSFilterLoad.PSApi
@@ -45,16 +44,7 @@ namespace PSFilterLoad.PSApi
 
         protected void VerifyNotDisposed()
         {
-            if (IsDisposed)
-            {
-                ThrowObjectDisposedException(GetType().Name);
-            }
-
-            [DoesNotReturn]
-            static void ThrowObjectDisposedException(string objectName)
-            {
-                throw new ObjectDisposedException(objectName);
-            }
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
         }
     }
 }
