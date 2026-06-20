@@ -102,6 +102,7 @@ namespace PSFilterLoad.PSApi
         private readonly Action<byte>? progressFunc;
         private string errorMessage;
         private readonly FilterCase filterCase;
+        private readonly short numberOfPlanes;
         private readonly double dpiX;
         private readonly double dpiY;
         private readonly bool hasSelectionMask;
@@ -299,6 +300,23 @@ namespace PSFilterLoad.PSApi
             progressProc = new ProgressProc(ProgressProc);
             abortProc = new TestAbortProc(AbortProc);
 
+            switch (filterCase)
+            {
+                case FilterCase.FlatImageNoSelection:
+                case FilterCase.FlatImageWithSelection:
+                case FilterCase.FloatingSelection:
+                case FilterCase.ProtectedTransparencyNoSelection:
+                case FilterCase.ProtectedTransparencyWithSelection:
+                    numberOfPlanes = 3;
+                    break;
+                case FilterCase.EditableTransparencyNoSelection:
+                case FilterCase.EditableTransparencyWithSelection:
+                    numberOfPlanes = 4;
+                    break;
+                default:
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Unsupported filter case: {0}", filterCase));
+            }
+
             bufferSuite = new BufferSuite(logger.CreateInstanceForType(nameof(BufferSuite)));
             handleSuite = new HandleSuite(logger.CreateInstanceForType(nameof(HandleSuite)));
             channelPortsSuite = new ChannelPortsSuite(this, logger.CreateInstanceForType(nameof(ChannelPortsSuite)));
@@ -309,7 +327,8 @@ namespace PSFilterLoad.PSApi
                                               logger.CreateInstanceForType(nameof(PropertySuite)),
                                               source.Width,
                                               source.Height,
-                                              pluginUISettings);
+                                              pluginUISettings,
+                                              numberOfPlanes);
             resourceSuite = new ResourceSuite(handleSuite, logger.CreateInstanceForType(nameof(ResourceSuite)));
             basicSuiteProvider = new SPBasicSuiteProvider(this,
                                                           handleSuite,
@@ -2636,24 +2655,7 @@ namespace PSFilterLoad.PSApi
 
             filterRecord->imageSize.h = width;
             filterRecord->imageSize.v = height;
-
-            switch (filterCase)
-            {
-                case FilterCase.FlatImageNoSelection:
-                case FilterCase.FlatImageWithSelection:
-                case FilterCase.FloatingSelection:
-                case FilterCase.ProtectedTransparencyNoSelection:
-                case FilterCase.ProtectedTransparencyWithSelection:
-                    filterRecord->planes = 3;
-                    break;
-                case FilterCase.EditableTransparencyNoSelection:
-                case FilterCase.EditableTransparencyWithSelection:
-                    filterRecord->planes = 4;
-                    break;
-                default:
-                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Unsupported filter case: {0}", filterCase));
-            }
-            propertySuite.NumberOfChannels = filterRecord->planes;
+            filterRecord->planes = numberOfPlanes;
 
             filterRecord->floatCoord.h = 0;
             filterRecord->floatCoord.v = 0;

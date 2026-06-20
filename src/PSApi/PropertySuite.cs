@@ -29,7 +29,7 @@ namespace PSFilterLoad.PSApi
         private readonly int documentWidth;
         private readonly int documentHeight;
         private readonly bool highDpi;
-        private int numberOfChannels;
+        private readonly int numberOfChannels;
 
         private static ReadOnlySpan<byte> HostSerial => "0"u8;
 
@@ -38,7 +38,8 @@ namespace PSFilterLoad.PSApi
                                     IPluginApiLogger logger,
                                     int documentWidth,
                                     int documentHeight,
-                                    PluginUISettings? pluginUISettings)
+                                    PluginUISettings? pluginUISettings,
+                                    int numberOfChannels)
         {
             ArgumentNullException.ThrowIfNull(handleSuite);
             ArgumentNullException.ThrowIfNull(documentMetadataProvider);
@@ -52,7 +53,7 @@ namespace PSFilterLoad.PSApi
             this.documentWidth = documentWidth;
             this.documentHeight = documentHeight;
             highDpi = pluginUISettings?.HighDpi ?? false;
-            numberOfChannels = 0;
+            this.numberOfChannels = numberOfChannels;
         }
 
         IntPtr IPICASuiteAllocator.Allocate(int version)
@@ -74,26 +75,6 @@ namespace PSFilterLoad.PSApi
         /// The get property callback delegate.
         /// </value>
         public GetPropertyProc GetPropertyCallback => getPropertyProc;
-
-        /// <summary>
-        /// Sets the number of channels.
-        /// </summary>
-        /// <value>
-        /// The number of channels.
-        /// </value>
-        /// <exception cref="ArgumentOutOfRangeException">The number of channels is less than one.</exception>
-        public int NumberOfChannels
-        {
-            set
-            {
-                if (value < 1)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, "The value must be at least one.");
-                }
-
-                numberOfChannels = value;
-            }
-        }
 
         public unsafe IntPtr CreatePropertySuitePointer()
         {
