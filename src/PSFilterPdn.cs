@@ -394,10 +394,9 @@ namespace PSFilterPdn
         {
             if (filterOutput != null)
             {
-                using (IBitmapLock<ColorBgra32> src = filterOutput.Lock(output.Bounds, BitmapLockOptions.Read))
                 using (IBitmapLock<ColorBgra32> dst = output.LockBgra32())
                 {
-                    src.AsRegionPtr().CopyTo(dst.AsRegionPtr());
+                    filterOutput.CopyPixels(dst.Buffer, dst.BufferStride, dst.BufferSize, output.Bounds);
                 }
             }
             else
