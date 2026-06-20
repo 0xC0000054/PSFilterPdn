@@ -11,6 +11,7 @@ cmyk
 config
 coord
 cust
+dereference
 desc
 deserialize
 deserialized
@@ -39,6 +40,7 @@ nullable
 num
 pdn
 Photoshop
+Picas
 plugin
 plugins
 proc
@@ -46,6 +48,7 @@ procs
 ptr
 ptrs
 rect
+recurse
 rects
 rgb
 romanization
