@@ -169,7 +169,7 @@ namespace PSFilterPdn
         {
             if (InvokeRequired)
             {
-                Invoke(new Action<Exception>((Exception ex) => Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(this, ex.Message, ex)),
+                Invoke(new Action<Exception>(ex => Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(this, ex.Message, ex)),
                        exception);
             }
             else
@@ -182,7 +182,7 @@ namespace PSFilterPdn
         {
             if (InvokeRequired)
             {
-                Invoke(new Action<string, string>((string errorMessage, string errorDetails)
+                Invoke(new Action<string, string>((errorMessage, errorDetails)
                     => Services.GetService<IExceptionDialogService>()!.ShowErrorDialog(this, errorMessage, errorDetails)),
                        message, details);
             }
