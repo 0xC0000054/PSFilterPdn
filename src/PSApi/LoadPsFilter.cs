@@ -80,9 +80,7 @@ namespace PSFilterLoad.PSApi
         private bool pluginDataRestored;
 
         private ISurface<ImageSurface> source;
-#pragma warning disable IDE0032 // Use auto property
-        private readonly ISurface<ImageSurface> dest;
-#pragma warning restore IDE0032 // Use auto property
+        private readonly ImageSurface dest;
         private ISurface<MaskSurface>? mask;
         private ISurface<ImageSurface>? tempSurface;
         private ISurface<MaskSurface>? tempMask;
