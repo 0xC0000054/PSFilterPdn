@@ -70,7 +70,7 @@ namespace PSFilterLoad.PSApi
         public const int kASBadParameter = 0x5041524d;
         public const int kASBufferTooSmallErr = 0x42554646;
         public const int kASOutOfMemory = 0x214d454d;
-        public const int kASNotImplmented = 0x21494d50;
+        public const int kASNotImplemented = 0x21494d50;
 
         // Scripting error codes
         public const int errMissingParameter = -1715;

@@ -378,7 +378,7 @@ namespace PSFilterLoad.PSApi.PICA
                        trim,
                        isSigned);
 
-            return PSError.kASNotImplmented;
+            return PSError.kASNotImplemented;
         }
 
         private unsafe int MakeRomanizationOfDouble(double value, ASZString* newZString)
