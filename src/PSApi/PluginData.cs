@@ -26,6 +26,8 @@ namespace PSFilterLoad.PSApi
     internal sealed class PluginData : IEquatable<PluginData>
     {
         private readonly string enableInfo;
+        private readonly Size? maxImageSize;
+        private readonly Size? minImageSize;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginData"/> class.
@@ -40,7 +42,18 @@ namespace PSFilterLoad.PSApi
                             string category,
                             string title,
                             Architecture processorArchitecture) :
-            this(fileName, entryPoint, category, title, null, true, null, string.Empty, processorArchitecture, PluginCompatibilityOptions.None)
+            this(fileName,
+                 entryPoint,
+                 category,
+                 title,
+                 null,
+                 true,
+                 null,
+                 string.Empty,
+                 processorArchitecture,
+                 PluginCompatibilityOptions.None,
+                 null,
+                 null)
         {
         }
 
@@ -55,6 +68,8 @@ namespace PSFilterLoad.PSApi
         /// <param name="runWith32BitShim"><c>true</c> if the filter should be run with the 32-bit surrogate process; otherwise, <c>false</c>.</param>
         /// <param name="aete">The AETE scripting information.</param>
         /// <param name="processorArchitecture">The processor architecture of the plug-in.</param>
+        /// <param name="maxImageSize">The maximum image size the filter can process.</param>
+        /// <param name="minImageSize">The minimum image size the filter can process.</param>
         internal PluginData(string fileName,
                             string entryPoint,
                             string category,
@@ -64,7 +79,9 @@ namespace PSFilterLoad.PSApi
                             AETEData? aete,
                             string enableInfo,
                             Architecture processorArchitecture,
-                            PluginCompatibilityOptions compatibilityOptions)
+                            PluginCompatibilityOptions compatibilityOptions,
+                            Size? maxImageSize,
+                            Size? minImageSize)
         {
             this.enableInfo = enableInfo;
             FileName = fileName;
@@ -77,6 +94,8 @@ namespace PSFilterLoad.PSApi
             ModuleEntryPoints = null;
             ProcessorArchitecture = processorArchitecture;
             CompatibilityOptions = compatibilityOptions;
+            this.maxImageSize = maxImageSize;
+            this.minImageSize = minImageSize;
         }
 
         /// <summary>
@@ -304,6 +323,28 @@ namespace PSFilterLoad.PSApi
         internal bool SupportsHostState(int imageWidth, int imageHeight, ISurfaceHasTransparency surface, HostState hostState)
         {
             ArgumentNullException.ThrowIfNull(hostState);
+
+            if (maxImageSize.HasValue)
+            {
+                // The max image size specified by a plugin will usually be well outside
+                // the 32000x32000 pixel limit we impose, but it is checked anyway.
+                Size size = maxImageSize.Value;
+
+                if (imageWidth > size.Width || imageHeight > size.Height)
+                {
+                    return false;
+                }
+            }
+
+            if (minImageSize.HasValue)
+            {
+                Size size = minImageSize.Value;
+
+                if (imageWidth < size.Width || imageHeight < size.Height)
+                {
+                    return false;
+                }
+            }
 
             bool result = true;
 

@@ -352,6 +352,8 @@ namespace PSFilterLoad.PSApi
                 FilterCaseInfoCollection? filterInfo = null;
                 AETEData? aete = null;
                 string enableInfo = string.Empty;
+                Size? maxImageSize = null;
+                Size? minImageSize = null;
 
                 int count = resourceHeader->count;
 
@@ -474,6 +476,50 @@ namespace PSFilterLoad.PSApi
                             return BOOL.TRUE;
                         }
                     }
+                    else if (propKey == PIPropertyID.PIPriorityProperty)
+                    {
+                        // This property consists of a single Int32 value that is used to control
+                        // the order in which items that have the same name appear in the filter menu.
+                        // Our menu system does not implement that feature, and the property is silently
+                        // ignored to reduce logging noise.
+                    }
+                    else if (propKey == PIPropertyID.FilterLayerSupport)
+                    {
+                        // We silently ignore this property to reduce logging noise, but may need
+                        // to honor it if Paint.NET ever gets non-destructive filter layers.
+                        // The property format is a single UInt32 value that has the high bit set
+                        // when the plugin can be used with filter layers.
+                    }
+                    else if (propKey == PIPropertyID.MaxImageSize)
+                    {
+                        // The maximum image size this filter can process.
+                        // The format is a pair of Int32 values specifying the height and width.
+
+                        if (propertyLength == 8)
+                        {
+                            int* pData = (int*)dataPtr;
+
+                            int height = pData[0];
+                            int width = pData[1];
+
+                            maxImageSize = new Size(width, height); 
+                        }
+                    }
+                    else if (propKey == PIPropertyID.MinImageSize)
+                    {
+                        // The minimum image size this filter can process.
+                        // The format is a pair of Int32 values specifying the height and width.
+
+                        if (propertyLength == 8)
+                        {
+                            int* pData = (int*)dataPtr;
+
+                            int height = pData[0];
+                            int width = pData[1];
+
+                            minImageSize = new Size(width, height); 
+                        }
+                    }
                     else
                     {
                         query.logger.Log(query.fileName,
@@ -504,7 +550,9 @@ namespace PSFilterLoad.PSApi
                                                  aete,
                                                  enableInfo,
                                                  query.processorArchitecture,
-                                                 compatibilityOptions));
+                                                 compatibilityOptions,
+                                                 maxImageSize,
+                                                 minImageSize));
             }
             catch (Exception ex)
             {

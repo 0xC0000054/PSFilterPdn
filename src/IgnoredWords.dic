@@ -7,6 +7,8 @@ arg
 bgr
 bgra
 bicubic
+bitmask
+catg
 cmyk
 config
 coord
@@ -20,10 +22,14 @@ dict
 dpi
 dst
 dw
+enbl
 Endian
 Exif
+fici
+flly
 hsb
 hsl
+hstm
 hwnd
 ifd
 Interop
@@ -45,11 +51,12 @@ plugin
 plugins
 proc
 procs
+prty
 ptr
 ptrs
 rect
-recurse
 rects
+recurse
 rgb
 romanization
 serializer

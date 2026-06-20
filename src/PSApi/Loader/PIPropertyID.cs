@@ -24,16 +24,16 @@ namespace PSFilterLoad.PSApi.Loader
         /// </summary>
         public const uint PIKindProperty = 0x6b696e64U;
         /// <summary>
-        /// Win32 Intel code descriptor, Entrypoint - 'wx86'
+        /// Win32 Intel code descriptor, Entry point - 'wx86'
         /// </summary>
         public const uint PIWin32X86CodeProperty = 0x77783836U;
         /// <summary>
-        /// Win64 Intel code descriptor, Entrypoint - '8664'
+        /// Win64 Intel code descriptor, Entry point - '8664'
         /// </summary>
         /// <remarks>Taken from the PiPL resources of a 64-bit Photoshop Plugin.</remarks>
         public const uint PIWin64X86CodeProperty = 0x38363634U;
         /// <summary>
-        /// Win64 ARM code descriptor, Entrypoint - 'wa64'
+        /// Win64 ARM code descriptor, Entry point - 'wa64'
         /// </summary>
         /// <remarks>Taken from the PiPL resources of an ARM64 Photoshop Plugin.</remarks>
         public const uint PIWin64ARMCodeProperty = 0x77613634U;
@@ -69,5 +69,30 @@ namespace PSFilterLoad.PSApi.Loader
         /// EnableInfo property - 'enbl'
         /// </summary>
         public const uint PIEnableInfoProperty = 0x656e626cU;
+        /// <summary>
+        /// Priority property that controls how items with the same name appear in the menu - 'prty'.
+        /// </summary>
+        public const uint PIPriorityProperty = 0x70727479U;
+        /// <summary>
+        /// Indicates if the plugin can be used with filter layers for non-destructive editing - 'flly'.
+        /// </summary>
+        /// <remarks>
+        /// Taken from the PiPL resources of a plugin.
+        /// </remarks>
+        public const uint FilterLayerSupport = 0x666c6c79U;
+        /// <summary>
+        /// The maximum image size the filter can process - 'ms32'
+        /// </summary>
+        /// <remarks>
+        /// Taken from the PiPL resources of a plugin.
+        /// </remarks>
+        public const uint MaxImageSize = 0x6d733332U;
+        /// <summary>
+        /// The minimum image size the filter can process - 'mn32'
+        /// </summary>
+        /// <remarks>
+        /// Taken from the PiPL resources of a plugin.
+        /// </remarks>
+        public const uint MinImageSize = 0x6d6e3332U;
     }
 }
