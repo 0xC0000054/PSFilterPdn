@@ -22,9 +22,6 @@ namespace PSFilterLoad.PSApi
         [DebuggerDisplay("{DebuggerDisplay,nq}")]
         internal sealed class PICASuiteKey : IEquatable<PICASuiteKey>
         {
-            private readonly string name;
-            private readonly int version;
-
             /// <summary>
             /// Initializes a new instance of the <see cref="PICASuiteKey"/> class.
             /// </summary>
@@ -35,8 +32,8 @@ namespace PSFilterLoad.PSApi
             {
                 ArgumentNullException.ThrowIfNull(name, nameof(name));
 
-                this.name = name;
-                this.version = version;
+                Name = name;
+                Version = version;
             }
 
             /// <summary>
@@ -45,7 +42,7 @@ namespace PSFilterLoad.PSApi
             /// <value>
             /// The suite name.
             /// </value>
-            public string Name => name;
+            public string Name { get; }
 
             /// <summary>
             /// Gets the suite version.
@@ -53,9 +50,9 @@ namespace PSFilterLoad.PSApi
             /// <value>
             /// The suite version.
             /// </value>
-            public int Version => version;
+            public int Version { get; }
 
-            private string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "{0}, version {1}", name, version);
+            private string DebuggerDisplay => string.Format(CultureInfo.CurrentCulture, "{0}, version {1}", Name, Version);
 
             public override bool Equals(object? obj)
             {
@@ -80,7 +77,7 @@ namespace PSFilterLoad.PSApi
 
             public override int GetHashCode()
             {
-                return HashCode.Combine(name, version);
+                return HashCode.Combine(Name, Version);
             }
 
             public bool Equals(PICASuiteKey? other)
@@ -90,7 +87,7 @@ namespace PSFilterLoad.PSApi
                     return false;
                 }
 
-                return name.Equals(other.name, StringComparison.Ordinal) && version == other.version;
+                return Name.Equals(other.Name, StringComparison.Ordinal) && Version == other.Version;
             }
 
             public static bool operator ==(PICASuiteKey? p1, PICASuiteKey? p2)
