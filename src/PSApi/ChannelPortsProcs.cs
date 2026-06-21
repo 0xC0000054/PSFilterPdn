@@ -45,7 +45,7 @@ namespace PSFilterLoad.PSApi
                                                   VRect* wroteRect);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal unsafe delegate short WriteBasePixelsProc(IntPtr port, [In()] VRect* writeRect, [In()] PixelMemoryDesc source);
+    internal unsafe delegate short WriteBasePixelsProc(IntPtr port, [In()] VRect* writeRect, [In()] PixelMemoryDesc* source);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal unsafe delegate short ReadPortForWritePortProc(IntPtr* readPort, [In()] IntPtr writePort);

@@ -253,7 +253,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private unsafe short WriteBasePixels(IntPtr port, VRect* writeRect, PixelMemoryDesc srcDesc)
+        private unsafe short WriteBasePixels(IntPtr port, VRect* writeRect, PixelMemoryDesc* srcDesc)
         {
             logger.Log(PluginApiLogCategory.ChannelPortsSuite,
                        "port: {0}, rect: {1}",
