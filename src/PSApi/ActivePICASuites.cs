@@ -66,13 +66,7 @@ namespace PSFilterLoad.PSApi
                     return true;
                 }
 
-                PICASuiteKey? key = obj as PICASuiteKey;
-                if (key == null)
-                {
-                    return false;
-                }
-
-                return Equals(key);
+                return Equals(obj as PICASuiteKey);
             }
 
             public override int GetHashCode()
@@ -82,12 +76,7 @@ namespace PSFilterLoad.PSApi
 
             public bool Equals(PICASuiteKey? other)
             {
-                if (other == null)
-                {
-                    return false;
-                }
-
-                return Name.Equals(other.Name, StringComparison.Ordinal) && Version == other.Version;
+                return other is not null && Name.Equals(other.Name, StringComparison.Ordinal) && Version == other.Version;
             }
 
             public static bool operator ==(PICASuiteKey? p1, PICASuiteKey? p2)
