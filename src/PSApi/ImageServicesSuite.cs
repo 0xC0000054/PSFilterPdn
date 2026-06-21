@@ -33,16 +33,14 @@ namespace PSFilterLoad.PSApi
             this.logger = logger;
         }
 
-        public IntPtr CreateImageServicesSuitePointer()
+        public ImageServicesProcs* CreateImageServicesSuitePointer()
         {
-            IntPtr imageServicesProcsPtr = Memory.Allocate(Marshal.SizeOf<ImageServicesProcs>(), MemoryAllocationOptions.ZeroFill);
+            ImageServicesProcs* imageServicesProcsPtr = Memory.Allocate<ImageServicesProcs>(MemoryAllocationOptions.ZeroFill);
 
-            ImageServicesProcs* imageServicesProcs = (ImageServicesProcs*)imageServicesProcsPtr;
-
-            imageServicesProcs->imageServicesProcsVersion = PSConstants.kCurrentImageServicesProcsVersion;
-            imageServicesProcs->numImageServicesProcs = PSConstants.kCurrentImageServicesProcsCount;
-            imageServicesProcs->interpolate1DProc = new UnmanagedFunctionPointer<PIResampleProc>(interpolate1DProc);
-            imageServicesProcs->interpolate2DProc = new UnmanagedFunctionPointer<PIResampleProc>(interpolate2DProc);
+            imageServicesProcsPtr->imageServicesProcsVersion = PSConstants.kCurrentImageServicesProcsVersion;
+            imageServicesProcsPtr->numImageServicesProcs = PSConstants.kCurrentImageServicesProcsCount;
+            imageServicesProcsPtr->interpolate1DProc = new UnmanagedFunctionPointer<PIResampleProc>(interpolate1DProc);
+            imageServicesProcsPtr->interpolate2DProc = new UnmanagedFunctionPointer<PIResampleProc>(interpolate2DProc);
 
             return imageServicesProcsPtr;
         }

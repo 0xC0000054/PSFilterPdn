@@ -52,24 +52,24 @@ namespace PSFilterLoad.PSApi
 
         private FilterRecord* filterRecord;
 
-        private IntPtr platformDataPtr;
+        private PlatformData* platformDataPtr;
 
-        private IntPtr bufferProcsPtr;
+        private BufferProcs* bufferProcsPtr;
 
-        private IntPtr handleProcsPtr;
-        private IntPtr imageServicesProcsPtr;
-        private IntPtr propertyProcsPtr;
-        private IntPtr resourceProcsPtr;
+        private HandleProcs* handleProcsPtr;
+        private ImageServicesProcs* imageServicesProcsPtr;
+        private PropertyProcs* propertyProcsPtr;
+        private ResourceProcs* resourceProcsPtr;
 
-        private IntPtr descriptorParametersPtr;
-        private IntPtr readDescriptorPtr;
-        private IntPtr writeDescriptorPtr;
-        private IntPtr errorStringPtr;
+        private PIDescriptorParameters* descriptorParametersPtr;
+        private ReadDescriptorProcs* readDescriptorPtr;
+        private WriteDescriptorProcs* writeDescriptorPtr;
+        private Str255* errorStringPtr;
 
-        private IntPtr channelPortsPtr;
-        private IntPtr readDocumentPtr;
+        private ChannelPortProcs* channelPortsPtr;
+        private ReadImageDocumentDesc* readDocumentPtr;
 
-        private IntPtr basicSuitePtr;
+        private SPBasicSuite* basicSuitePtr;
 
         private GlobalParameters globalParameters;
         private Dictionary<uint, AETEValue>? scriptingData;
@@ -463,20 +463,19 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         private unsafe void SaveScriptingParameters()
         {
-            PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr;
-            if (descriptorParameters->descriptor != Handle.Null)
+            if (descriptorParametersPtr->descriptor != Handle.Null)
             {
-                if (basicSuiteProvider.TryGetScriptingData(descriptorParameters->descriptor, out Dictionary<uint, AETEValue>? data))
+                if (basicSuiteProvider.TryGetScriptingData(descriptorParametersPtr->descriptor, out Dictionary<uint, AETEValue>? data))
                 {
                     scriptingData = data;
                 }
-                else if (descriptorSuite.TryGetScriptingData(descriptorParameters->descriptor, out data))
+                else if (descriptorSuite.TryGetScriptingData(descriptorParametersPtr->descriptor, out data))
                 {
                     scriptingData = data;
                 }
-                handleSuite.UnlockHandle(descriptorParameters->descriptor);
-                handleSuite.DisposeHandle(descriptorParameters->descriptor);
-                descriptorParameters->descriptor = Handle.Null;
+                handleSuite.UnlockHandle(descriptorParametersPtr->descriptor);
+                handleSuite.DisposeHandle(descriptorParametersPtr->descriptor);
+                descriptorParametersPtr->descriptor = Handle.Null;
             }
         }
 
@@ -1209,7 +1208,9 @@ namespace PSFilterLoad.PSApi
             {
                 if (error == PSError.errReportString)
                 {
-                    message = basicSuiteProvider.ErrorSuiteMessage ?? StringUtil.FromPascalString(errorStringPtr, string.Empty);
+                    message = basicSuiteProvider.ErrorSuiteMessage
+                              ?? StringUtil.FromPascalString(errorStringPtr->data)
+                              ?? string.Empty;
                 }
                 else
                 {
@@ -2673,8 +2674,8 @@ namespace PSFilterLoad.PSApi
 
         private unsafe void SetupSuites()
         {
-            platformDataPtr = Memory.Allocate(Marshal.SizeOf<PlatformData>(), MemoryAllocationOptions.ZeroFill);
-            ((PlatformData*)platformDataPtr)->hwnd = parentWindowHandle;
+            platformDataPtr = Memory.Allocate<PlatformData>(MemoryAllocationOptions.ZeroFill);
+            platformDataPtr->hwnd = parentWindowHandle;
 
             bufferProcsPtr = bufferSuite.CreateBufferProcsPointer();
 
@@ -2689,42 +2690,29 @@ namespace PSFilterLoad.PSApi
             readDescriptorPtr = descriptorSuite.CreateReadDescriptorPointer();
             writeDescriptorPtr = descriptorSuite.CreateWriteDescriptorPointer();
 
-            descriptorParametersPtr = Memory.Allocate(Marshal.SizeOf<PIDescriptorParameters>(), MemoryAllocationOptions.ZeroFill);
-            PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr;
-            descriptorParameters->descriptorParametersVersion = PSConstants.kCurrentDescriptorParametersVersion;
-            descriptorParameters->readDescriptorProcs = readDescriptorPtr;
-            descriptorParameters->writeDescriptorProcs = writeDescriptorPtr;
-            if (!isRepeatEffect)
-            {
-                descriptorParameters->recordInfo = RecordInfo.plugInDialogOptional;
-            }
-            else
-            {
-                descriptorParameters->recordInfo = RecordInfo.plugInDialogNone;
-            }
+            descriptorParametersPtr = Memory.Allocate<PIDescriptorParameters>(MemoryAllocationOptions.ZeroFill);
+            descriptorParametersPtr->descriptorParametersVersion = PSConstants.kCurrentDescriptorParametersVersion;
+            descriptorParametersPtr->readDescriptorProcs = readDescriptorPtr;
+            descriptorParametersPtr->writeDescriptorProcs = writeDescriptorPtr;
+            descriptorParametersPtr->recordInfo = isRepeatEffect ? RecordInfo.plugInDialogNone : RecordInfo.plugInDialogOptional;
 
             if (scriptingData != null)
             {
-                descriptorParameters->descriptor = handleSuite.NewHandle(0);
-                if (descriptorParameters->descriptor == Handle.Null)
+                descriptorParametersPtr->descriptor = handleSuite.NewHandle(0);
+                if (descriptorParametersPtr->descriptor == Handle.Null)
                 {
                     throw new OutOfMemoryException(StringResources.OutOfMemoryError);
                 }
-                descriptorSuite.SetScriptingData(descriptorParameters->descriptor, scriptingData);
-                basicSuiteProvider.SetScriptingData(descriptorParameters->descriptor, scriptingData);
-                if (!isRepeatEffect)
-                {
-                    descriptorParameters->playInfo = PlayInfo.plugInDialogDisplay;
-                }
-                else
-                {
-                    descriptorParameters->playInfo = PlayInfo.plugInDialogDontDisplay;
-                }
+                descriptorSuite.SetScriptingData(descriptorParametersPtr->descriptor, scriptingData);
+                basicSuiteProvider.SetScriptingData(descriptorParametersPtr->descriptor, scriptingData);
+                descriptorParametersPtr->playInfo = isRepeatEffect ? PlayInfo.plugInDialogDontDisplay : PlayInfo.plugInDialogDisplay;
             }
             else
             {
-                descriptorParameters->playInfo = PlayInfo.plugInDialogDisplay;
+                descriptorParametersPtr->playInfo = PlayInfo.plugInDialogDisplay;
             }
+
+            errorStringPtr = Memory.Allocate<Str255>(MemoryAllocationOptions.ZeroFill);
 
             if (useChannelPorts)
             {
@@ -2733,8 +2721,8 @@ namespace PSFilterLoad.PSApi
             }
             else
             {
-                channelPortsPtr = IntPtr.Zero;
-                readDescriptorPtr = IntPtr.Zero;
+                channelPortsPtr = null;
+                readDescriptorPtr = null;
             }
 
             basicSuitePtr = basicSuiteProvider.CreateSPBasicSuitePointer();
@@ -2823,8 +2811,7 @@ namespace PSFilterLoad.PSApi
             filterRecord->maskTileOrigin.v = 0;
 
             filterRecord->descriptorParameters = descriptorParametersPtr;
-            errorStringPtr = Memory.Allocate(256, MemoryAllocationOptions.ZeroFill);
-            filterRecord->errorString = errorStringPtr; // some filters trash the filterRecord->errorString pointer so the errorStringPtr value is used instead.
+            filterRecord->errorString = errorStringPtr;
             filterRecord->channelPortProcs = channelPortsPtr;
             filterRecord->documentInfo = readDocumentPtr;
 
@@ -2939,86 +2926,30 @@ namespace PSFilterLoad.PSApi
                     basicSuiteProvider?.Dispose();
                 }
 
-                if (platformDataPtr != IntPtr.Zero)
-                {
-                    Memory.Free(platformDataPtr);
-                    platformDataPtr = IntPtr.Zero;
-                }
+                Memory.Free(ref platformDataPtr);
+                Memory.Free(ref bufferProcsPtr);
+                Memory.Free(ref handleProcsPtr);
+                Memory.Free(ref imageServicesProcsPtr);
+                Memory.Free(ref propertyProcsPtr);
+                Memory.Free(ref resourceProcsPtr);
 
-                if (bufferProcsPtr != IntPtr.Zero)
+                if (descriptorParametersPtr != null)
                 {
-                    Memory.Free(bufferProcsPtr);
-                    bufferProcsPtr = IntPtr.Zero;
-                }
-                if (handleProcsPtr != IntPtr.Zero)
-                {
-                    Memory.Free(handleProcsPtr);
-                    handleProcsPtr = IntPtr.Zero;
-                }
-
-                if (imageServicesProcsPtr != IntPtr.Zero)
-                {
-                    Memory.Free(imageServicesProcsPtr);
-                    imageServicesProcsPtr = IntPtr.Zero;
-                }
-
-                if (propertyProcsPtr != IntPtr.Zero)
-                {
-                    Memory.Free(propertyProcsPtr);
-                    propertyProcsPtr = IntPtr.Zero;
-                }
-
-                if (resourceProcsPtr != IntPtr.Zero)
-                {
-                    Memory.Free(resourceProcsPtr);
-                    resourceProcsPtr = IntPtr.Zero;
-                }
-                if (descriptorParametersPtr != IntPtr.Zero)
-                {
-                    PIDescriptorParameters* descriptorParameters = (PIDescriptorParameters*)descriptorParametersPtr;
-
-                    if (descriptorParameters->descriptor != Handle.Null)
+                    if (descriptorParametersPtr->descriptor != Handle.Null)
                     {
-                        handleSuite.UnlockHandle(descriptorParameters->descriptor);
-                        handleSuite.DisposeHandle(descriptorParameters->descriptor);
+                        handleSuite.UnlockHandle(descriptorParametersPtr->descriptor);
+                        handleSuite.DisposeHandle(descriptorParametersPtr->descriptor);
                     }
 
-                    Memory.Free(descriptorParametersPtr);
-                    descriptorParametersPtr = IntPtr.Zero;
-                }
-                if (readDescriptorPtr != IntPtr.Zero)
-                {
-                    Memory.Free(readDescriptorPtr);
-                    readDescriptorPtr = IntPtr.Zero;
-                }
-                if (writeDescriptorPtr != IntPtr.Zero)
-                {
-                    Memory.Free(writeDescriptorPtr);
-                    writeDescriptorPtr = IntPtr.Zero;
-                }
-                if (errorStringPtr != IntPtr.Zero)
-                {
-                    Memory.Free(errorStringPtr);
-                    errorStringPtr = IntPtr.Zero;
+                    Memory.Free(ref descriptorParametersPtr);
                 }
 
-                if (channelPortsPtr != IntPtr.Zero)
-                {
-                    Memory.Free(channelPortsPtr);
-                    channelPortsPtr = IntPtr.Zero;
-                }
-
-                if (readDocumentPtr != IntPtr.Zero)
-                {
-                    Memory.Free(readDocumentPtr);
-                    readDocumentPtr = IntPtr.Zero;
-                }
-
-                if (basicSuitePtr != IntPtr.Zero)
-                {
-                    Memory.Free(basicSuitePtr);
-                    basicSuitePtr = IntPtr.Zero;
-                }
+                Memory.Free(ref readDescriptorPtr);
+                Memory.Free(ref writeDescriptorPtr);
+                Memory.Free(ref errorStringPtr);
+                Memory.Free(ref channelPortsPtr);
+                Memory.Free(ref readDocumentPtr);
+                Memory.Free(ref basicSuitePtr);
 
                 if (filterRecord != null)
                 {

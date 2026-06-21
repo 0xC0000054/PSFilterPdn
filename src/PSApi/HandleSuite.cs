@@ -117,24 +117,20 @@ namespace PSFilterLoad.PSApi
 
         DisposeRegularPIHandleProc IHandleSuiteCallbacks.HandleDisposeRegularProc => handleDisposeRegularProc;
 
-        public IntPtr CreateHandleProcsPointer()
+        public unsafe HandleProcs* CreateHandleProcsPointer()
         {
-            IntPtr handleProcsPtr = Memory.Allocate(Marshal.SizeOf<HandleProcs>(), MemoryAllocationOptions.ZeroFill);
+            HandleProcs* handleProcsPtr = Memory.Allocate<HandleProcs>(MemoryAllocationOptions.ZeroFill);
 
-            unsafe
-            {
-                HandleProcs* handleProcs = (HandleProcs*)handleProcsPtr;
-                handleProcs->handleProcsVersion = PSConstants.kCurrentHandleProcsVersion;
-                handleProcs->numHandleProcs = PSConstants.kCurrentHandleProcsCount;
-                handleProcs->newProc = new UnmanagedFunctionPointer<NewPIHandleProc>(handleNewProc);
-                handleProcs->disposeProc = new UnmanagedFunctionPointer<DisposePIHandleProc>(handleDisposeProc);
-                handleProcs->getSizeProc = new UnmanagedFunctionPointer<GetPIHandleSizeProc>(handleGetSizeProc);
-                handleProcs->setSizeProc = new UnmanagedFunctionPointer<SetPIHandleSizeProc>(handleSetSizeProc);
-                handleProcs->lockProc = new UnmanagedFunctionPointer<LockPIHandleProc>(handleLockProc);
-                handleProcs->unlockProc = new UnmanagedFunctionPointer<UnlockPIHandleProc>(handleUnlockProc);
-                handleProcs->recoverSpaceProc = new UnmanagedFunctionPointer<RecoverSpaceProc>(handleRecoverSpaceProc);
-                handleProcs->disposeRegularHandleProc = new UnmanagedFunctionPointer<DisposeRegularPIHandleProc>(handleDisposeRegularProc);
-            }
+            handleProcsPtr->handleProcsVersion = PSConstants.kCurrentHandleProcsVersion;
+            handleProcsPtr->numHandleProcs = PSConstants.kCurrentHandleProcsCount;
+            handleProcsPtr->newProc = new UnmanagedFunctionPointer<NewPIHandleProc>(handleNewProc);
+            handleProcsPtr->disposeProc = new UnmanagedFunctionPointer<DisposePIHandleProc>(handleDisposeProc);
+            handleProcsPtr->getSizeProc = new UnmanagedFunctionPointer<GetPIHandleSizeProc>(handleGetSizeProc);
+            handleProcsPtr->setSizeProc = new UnmanagedFunctionPointer<SetPIHandleSizeProc>(handleSetSizeProc);
+            handleProcsPtr->lockProc = new UnmanagedFunctionPointer<LockPIHandleProc>(handleLockProc);
+            handleProcsPtr->unlockProc = new UnmanagedFunctionPointer<UnlockPIHandleProc>(handleUnlockProc);
+            handleProcsPtr->recoverSpaceProc = new UnmanagedFunctionPointer<RecoverSpaceProc>(handleRecoverSpaceProc);
+            handleProcsPtr->disposeRegularHandleProc = new UnmanagedFunctionPointer<DisposeRegularPIHandleProc>(handleDisposeRegularProc);
 
             return handleProcsPtr;
         }

@@ -278,14 +278,14 @@ namespace PSFilterLoad.PSApi
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct PIDescriptorParameters
+    internal unsafe struct PIDescriptorParameters
     {
         public short descriptorParametersVersion;
         public PlayInfo playInfo;
         public RecordInfo recordInfo;
         public Handle descriptor;
-        public IntPtr writeDescriptorProcs;
-        public IntPtr readDescriptorProcs;
+        public WriteDescriptorProcs* writeDescriptorProcs;
+        public ReadDescriptorProcs* readDescriptorProcs;
     }
 
     internal enum RecordInfo : short

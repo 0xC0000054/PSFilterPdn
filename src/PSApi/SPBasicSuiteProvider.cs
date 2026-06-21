@@ -115,18 +115,17 @@ namespace PSFilterLoad.PSApi
         /// Creates the SPBasic suite pointer.
         /// </summary>
         /// <returns>An unmanaged pointer containing the SPBasic suite structure.</returns>
-        public unsafe IntPtr CreateSPBasicSuitePointer()
+        public unsafe SPBasicSuite* CreateSPBasicSuitePointer()
         {
-            IntPtr basicSuitePtr = Memory.Allocate(Marshal.SizeOf<SPBasicSuite>(), MemoryAllocationOptions.ZeroFill);
+            SPBasicSuite* basicSuitePtr = Memory.Allocate<SPBasicSuite>(MemoryAllocationOptions.ZeroFill);
 
-            SPBasicSuite* basicSuite = (SPBasicSuite*)basicSuitePtr;
-            basicSuite->acquireSuite = new UnmanagedFunctionPointer<SPBasicAcquireSuite>(spAcquireSuite);
-            basicSuite->releaseSuite = new UnmanagedFunctionPointer<SPBasicReleaseSuite>(spReleaseSuite);
-            basicSuite->isEqual = new UnmanagedFunctionPointer<SPBasicIsEqual>(spIsEqual);
-            basicSuite->allocateBlock = new UnmanagedFunctionPointer<SPBasicAllocateBlock>(spAllocateBlock);
-            basicSuite->freeBlock = new UnmanagedFunctionPointer<SPBasicFreeBlock>(spFreeBlock);
-            basicSuite->reallocateBlock = new UnmanagedFunctionPointer<SPBasicReallocateBlock>(spReallocateBlock);
-            basicSuite->undefined = new UnmanagedFunctionPointer<SPBasicUndefined>(spUndefined);
+            basicSuitePtr->acquireSuite = new UnmanagedFunctionPointer<SPBasicAcquireSuite>(spAcquireSuite);
+            basicSuitePtr->releaseSuite = new UnmanagedFunctionPointer<SPBasicReleaseSuite>(spReleaseSuite);
+            basicSuitePtr->isEqual = new UnmanagedFunctionPointer<SPBasicIsEqual>(spIsEqual);
+            basicSuitePtr->allocateBlock = new UnmanagedFunctionPointer<SPBasicAllocateBlock>(spAllocateBlock);
+            basicSuitePtr->freeBlock = new UnmanagedFunctionPointer<SPBasicFreeBlock>(spFreeBlock);
+            basicSuitePtr->reallocateBlock = new UnmanagedFunctionPointer<SPBasicReallocateBlock>(spReallocateBlock);
+            basicSuitePtr->undefined = new UnmanagedFunctionPointer<SPBasicUndefined>(spUndefined);
 
             return basicSuitePtr;
         }

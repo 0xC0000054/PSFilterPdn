@@ -18,13 +18,13 @@ namespace PSFilterLoad.PSApi
 {
     internal sealed class ReadImageDocument : IDisposable
     {
-        private sealed class ChannelDescPtrs : IDisposable
+        private sealed unsafe class ChannelDescPtrs : IDisposable
         {
-            private IntPtr readChannelDesc;
+            private ReadChannelDesc* readChannelDesc;
             private IntPtr channelName;
             private bool disposed;
 
-            public ChannelDescPtrs(IntPtr readChannelDesc, IntPtr channelName)
+            public ChannelDescPtrs(ReadChannelDesc* readChannelDesc, IntPtr channelName)
             {
                 this.readChannelDesc = readChannelDesc;
                 this.channelName = channelName;
@@ -52,11 +52,7 @@ namespace PSFilterLoad.PSApi
                     {
                     }
 
-                    if (readChannelDesc != IntPtr.Zero)
-                    {
-                        Memory.Free(readChannelDesc);
-                        readChannelDesc = IntPtr.Zero;
-                    }
+                    Memory.Free(ref readChannelDesc);
 
                     if (channelName != IntPtr.Zero)
                     {
@@ -84,28 +80,30 @@ namespace PSFilterLoad.PSApi
             disposed = false;
         }
 
-        public unsafe IntPtr CreateReadImageDocumentPointer(FilterCase filterCase, bool hasSelection)
+        public unsafe ReadImageDocumentDesc* CreateReadImageDocumentPointer(FilterCase filterCase, bool hasSelection)
         {
-            IntPtr readDocumentPtr = Memory.Allocate(Marshal.SizeOf<ReadImageDocumentDesc>(), MemoryAllocationOptions.ZeroFill);
+            ReadImageDocumentDesc* readDocumentPtr = Memory.Allocate<ReadImageDocumentDesc>(MemoryAllocationOptions.ZeroFill);
 
             try
             {
-                ReadImageDocumentDesc* doc = (ReadImageDocumentDesc*)readDocumentPtr;
-                doc->minVersion = PSConstants.kCurrentMinVersReadImageDocDesc;
-                doc->maxVersion = PSConstants.kCurrentMaxVersReadImageDocDesc;
-                doc->imageMode = PSConstants.plugInModeRGBColor;
-                doc->depth = 8;
+                readDocumentPtr->minVersion = PSConstants.kCurrentMinVersReadImageDocDesc;
+                readDocumentPtr->maxVersion = PSConstants.kCurrentMaxVersReadImageDocDesc;
+                readDocumentPtr->imageMode = PSConstants.plugInModeRGBColor;
+                readDocumentPtr->depth = 8;
 
-                doc->bounds.top = 0;
-                doc->bounds.left = 0;
-                doc->bounds.right = documentWidth;
-                doc->bounds.bottom = documentHeight;
-                doc->hResolution = new Fixed16((int)(dpiX + 0.5));
-                doc->vResolution = new Fixed16((int)(dpiY + 0.5));
+                readDocumentPtr->bounds.top = 0;
+                readDocumentPtr->bounds.left = 0;
+                readDocumentPtr->bounds.right = documentWidth;
+                readDocumentPtr->bounds.bottom = documentHeight;
+                readDocumentPtr->hResolution = new Fixed16((int)(dpiX + 0.5));
+                readDocumentPtr->vResolution = new Fixed16((int)(dpiY + 0.5));
 
-                IntPtr channel = CreateReadChannelDesc(PSConstants.ChannelPorts.Red, StringResources.RedChannelName, doc->depth, doc->bounds);
+                ReadChannelDesc* rgbChannels = CreateReadChannelDesc(PSConstants.ChannelPorts.Red,
+                                                                     StringResources.RedChannelName,
+                                                                     readDocumentPtr->depth,
+                                                                     readDocumentPtr->bounds);
 
-                ReadChannelDesc* ch = (ReadChannelDesc*)channel;
+                ReadChannelDesc* ch = rgbChannels;
 
                 for (int i = PSConstants.ChannelPorts.Green; i <= PSConstants.ChannelPorts.Blue; i++)
                 {
@@ -122,40 +120,36 @@ namespace PSFilterLoad.PSApi
                             throw new InvalidOperationException("Unsupported channel index.");
                     }
 
-                    IntPtr ptr = CreateReadChannelDesc(i, name, doc->depth, doc->bounds);
+                    ReadChannelDesc* ptr = CreateReadChannelDesc(i, name, readDocumentPtr->depth, readDocumentPtr->bounds);
 
                     ch->next = ptr;
 
-                    ch = (ReadChannelDesc*)ptr;
+                    ch = ptr;
                 }
 
-                doc->targetCompositeChannels = doc->mergedCompositeChannels = channel;
+                readDocumentPtr->targetCompositeChannels = readDocumentPtr->mergedCompositeChannels = rgbChannels;
 
                 if (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection)
                 {
-                    IntPtr alphaPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.Alpha,
-                                                            StringResources.AlphaChannelName,
-                                                            doc->depth,
-                                                            doc->bounds);
-                    doc->targetTransparency = doc->mergedTransparency = alphaPtr;
+                    ReadChannelDesc* alphaPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.Alpha,
+                                                                      StringResources.AlphaChannelName,
+                                                                      readDocumentPtr->depth,
+                                                                      readDocumentPtr->bounds);
+                    readDocumentPtr->targetTransparency = readDocumentPtr->mergedTransparency = alphaPtr;
                 }
 
                 if (hasSelection)
                 {
-                    IntPtr selectionPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.SelectionMask,
-                                                                StringResources.SelectionMaskChannelName,
-                                                                doc->depth,
-                                                                doc->bounds);
-                    doc->selection = selectionPtr;
+                    ReadChannelDesc* selectionPtr = CreateReadChannelDesc(PSConstants.ChannelPorts.SelectionMask,
+                                                                          StringResources.SelectionMaskChannelName,
+                                                                          readDocumentPtr->depth,
+                                                                          readDocumentPtr->bounds);
+                    readDocumentPtr->selection = selectionPtr;
                 }
             }
             catch (Exception)
             {
-                if (readDocumentPtr != IntPtr.Zero)
-                {
-                    Memory.Free(readDocumentPtr);
-                }
-
+                Memory.Free(ref readDocumentPtr);
                 throw;
             }
 
@@ -175,19 +169,20 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private unsafe IntPtr CreateReadChannelDesc(int channel, string name, int depth, VRect bounds)
+        private unsafe ReadChannelDesc* CreateReadChannelDesc(int channel, string name, int depth, VRect bounds)
         {
-            IntPtr addressPtr = Memory.Allocate(Marshal.SizeOf<ReadChannelDesc>(), MemoryAllocationOptions.ZeroFill);
+            ReadChannelDesc* descPtr = Memory.Allocate<ReadChannelDesc>(MemoryAllocationOptions.ZeroFill);
+
             IntPtr namePtr = IntPtr.Zero;
             try
             {
                 namePtr = Marshal.StringToHGlobalAnsi(name);
 
-                channelReadDescPtrs.Add(new ChannelDescPtrs(addressPtr, namePtr));
+                channelReadDescPtrs.Add(new ChannelDescPtrs(descPtr, namePtr));
             }
             catch (Exception)
             {
-                Memory.Free(addressPtr);
+                Memory.Free(ref descPtr);
                 if (namePtr != IntPtr.Zero)
                 {
                     Marshal.FreeHGlobal(namePtr);
@@ -195,42 +190,41 @@ namespace PSFilterLoad.PSApi
                 throw;
             }
 
-            ReadChannelDesc* desc = (ReadChannelDesc*)addressPtr;
-            desc->minVersion = PSConstants.kCurrentMinVersReadChannelDesc;
-            desc->maxVersion = PSConstants.kCurrentMaxVersReadChannelDesc;
-            desc->depth = depth;
-            desc->bounds = bounds;
+            descPtr->minVersion = PSConstants.kCurrentMinVersReadChannelDesc;
+            descPtr->maxVersion = PSConstants.kCurrentMaxVersReadChannelDesc;
+            descPtr->depth = depth;
+            descPtr->bounds = bounds;
 
-            desc->target = channel < PSConstants.ChannelPorts.Alpha;
-            desc->shown = channel < PSConstants.ChannelPorts.SelectionMask;
+            descPtr->target = channel < PSConstants.ChannelPorts.Alpha;
+            descPtr->shown = channel < PSConstants.ChannelPorts.SelectionMask;
 
-            desc->tileOrigin.h = 0;
-            desc->tileOrigin.v = 0;
-            desc->tileSize.h = Math.Min(bounds.right - bounds.left, 1024);
-            desc->tileSize.v = Math.Min(bounds.bottom - bounds.top, 1024);
+            descPtr->tileOrigin.h = 0;
+            descPtr->tileOrigin.v = 0;
+            descPtr->tileSize.h = Math.Min(bounds.right - bounds.left, 1024);
+            descPtr->tileSize.v = Math.Min(bounds.bottom - bounds.top, 1024);
 
-            desc->port = new IntPtr(channel);
+            descPtr->port = new IntPtr(channel);
             switch (channel)
             {
                 case PSConstants.ChannelPorts.Red:
-                    desc->channelType = ChannelTypes.Red;
+                    descPtr->channelType = ChannelTypes.Red;
                     break;
                 case PSConstants.ChannelPorts.Green:
-                    desc->channelType = ChannelTypes.Green;
+                    descPtr->channelType = ChannelTypes.Green;
                     break;
                 case PSConstants.ChannelPorts.Blue:
-                    desc->channelType = ChannelTypes.Blue;
+                    descPtr->channelType = ChannelTypes.Blue;
                     break;
                 case PSConstants.ChannelPorts.Alpha:
-                    desc->channelType = ChannelTypes.Transparency;
+                    descPtr->channelType = ChannelTypes.Transparency;
                     break;
                 case PSConstants.ChannelPorts.SelectionMask:
-                    desc->channelType = ChannelTypes.SelectionMask;
+                    descPtr->channelType = ChannelTypes.SelectionMask;
                     break;
             }
-            desc->name = namePtr;
+            descPtr->name = namePtr;
 
-            return addressPtr;
+            return descPtr;
         }
     }
 }

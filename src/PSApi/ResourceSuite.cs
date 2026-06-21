@@ -51,32 +51,28 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        IntPtr IPICASuiteAllocator.Allocate(int version)
+        unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
         {
             if (version != PSConstants.kCurrentResourceProcsVersion)
             {
                 throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.ResourceSuite, version);
             }
 
-            return CreateResourceProcsPointer();
+            return new IntPtr(CreateResourceProcsPointer());
         }
 
         bool IPICASuiteAllocator.IsSupportedVersion(int version) => version == PSConstants.kCurrentResourceProcsVersion;
 
-        public IntPtr CreateResourceProcsPointer()
+        public unsafe ResourceProcs* CreateResourceProcsPointer()
         {
-            IntPtr resourceProcsPtr = Memory.Allocate(Marshal.SizeOf<ResourceProcs>(), MemoryAllocationOptions.ZeroFill);
+            ResourceProcs* resourceProcsPtr = Memory.Allocate<ResourceProcs>(MemoryAllocationOptions.ZeroFill);
 
-            unsafe
-            {
-                ResourceProcs* resourceProcs = (ResourceProcs*)resourceProcsPtr;
-                resourceProcs->resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion;
-                resourceProcs->numResourceProcs = PSConstants.kCurrentResourceProcsCount;
-                resourceProcs->addProc = new UnmanagedFunctionPointer<AddPIResourceProc>(addResourceProc);
-                resourceProcs->countProc = new UnmanagedFunctionPointer<CountPIResourcesProc>(countResourceProc);
-                resourceProcs->deleteProc = new UnmanagedFunctionPointer<DeletePIResourceProc>(deleteResourceProc);
-                resourceProcs->getProc = new UnmanagedFunctionPointer<GetPIResourceProc>(getResourceProc);
-            }
+            resourceProcsPtr->resourceProcsVersion = PSConstants.kCurrentResourceProcsVersion;
+            resourceProcsPtr->numResourceProcs = PSConstants.kCurrentResourceProcsCount;
+            resourceProcsPtr->addProc = new UnmanagedFunctionPointer<AddPIResourceProc>(addResourceProc);
+            resourceProcsPtr->countProc = new UnmanagedFunctionPointer<CountPIResourcesProc>(countResourceProc);
+            resourceProcsPtr->deleteProc = new UnmanagedFunctionPointer<DeletePIResourceProc>(deleteResourceProc);
+            resourceProcsPtr->getProc = new UnmanagedFunctionPointer<GetPIResourceProc>(getResourceProc);
 
             return resourceProcsPtr;
         }

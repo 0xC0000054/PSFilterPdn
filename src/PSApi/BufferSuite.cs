@@ -48,22 +48,18 @@ namespace PSFilterLoad.PSApi
             return bufferIDs.ContainsKey(buffer);
         }
 
-        public IntPtr CreateBufferProcsPointer()
+        public unsafe BufferProcs* CreateBufferProcsPointer()
         {
-            IntPtr bufferProcsPtr = Memory.Allocate(Marshal.SizeOf<BufferProcs>(), MemoryAllocationOptions.ZeroFill);
+            BufferProcs* bufferProcsPtr = Memory.Allocate<BufferProcs>(MemoryAllocationOptions.ZeroFill);
 
-            unsafe
-            {
-                BufferProcs* bufferProcs = (BufferProcs*)bufferProcsPtr;
-                bufferProcs->bufferProcsVersion = PSConstants.kCurrentBufferProcsVersion;
-                bufferProcs->numBufferProcs = PSConstants.kCurrentBufferProcsCount;
-                bufferProcs->allocateProc = new UnmanagedFunctionPointer<AllocateBufferProc>(allocProc);
-                bufferProcs->freeProc = new UnmanagedFunctionPointer<FreeBufferProc>(freeProc);
-                bufferProcs->lockProc = new UnmanagedFunctionPointer<LockBufferProc>(lockProc);
-                bufferProcs->unlockProc = new UnmanagedFunctionPointer<UnlockBufferProc>(unlockProc);
-                bufferProcs->spaceProc = new UnmanagedFunctionPointer<BufferSpaceProc>(spaceProc);
-            }
-
+            bufferProcsPtr->bufferProcsVersion = PSConstants.kCurrentBufferProcsVersion;
+            bufferProcsPtr->numBufferProcs = PSConstants.kCurrentBufferProcsCount;
+            bufferProcsPtr->allocateProc = new UnmanagedFunctionPointer<AllocateBufferProc>(allocProc);
+            bufferProcsPtr->freeProc = new UnmanagedFunctionPointer<FreeBufferProc>(freeProc);
+            bufferProcsPtr->lockProc = new UnmanagedFunctionPointer<LockBufferProc>(lockProc);
+            bufferProcsPtr->unlockProc = new UnmanagedFunctionPointer<UnlockBufferProc>(unlockProc);
+            bufferProcsPtr->spaceProc = new UnmanagedFunctionPointer<BufferSpaceProc>(spaceProc);
+            
             return bufferProcsPtr;
         }
 

@@ -69,12 +69,12 @@ namespace PSFilterLoad.PSApi
         public Point16 wholeSize;
         public PlugInMonitor monitor;
 
-        public IntPtr platformData;
-        public IntPtr bufferProcs;
-        public IntPtr resourceProcs;
+        public PlatformData* platformData;
+        public BufferProcs* bufferProcs;
+        public ResourceProcs* resourceProcs;
         public UnmanagedFunctionPointer<ProcessEventProc> processEvent;
         public UnmanagedFunctionPointer<DisplayPixelsProc> displayPixels;
-        public IntPtr handleProcs;
+        public HandleProcs* handleProcs;
 
         /* New in 3.0 */
         public PSBoolean supportsDummyChannels;
@@ -133,8 +133,8 @@ namespace PSFilterLoad.PSApi
         public int outPlaneBytes;
 
         /* New in 3.0.4. */
-        public IntPtr imageServicesProcs;
-        public IntPtr propertyProcs;
+        public ImageServicesProcs* imageServicesProcs;
+        public PropertyProcs* propertyProcs;
 
         public short inTileHeight;
         public short inTileWidth;
@@ -153,13 +153,13 @@ namespace PSFilterLoad.PSApi
         public Point16 maskTileOrigin;
 
         /* New in 4.0*/
-        public IntPtr descriptorParameters;
-        public IntPtr errorString;
-        public IntPtr channelPortProcs;
-        public IntPtr documentInfo;
+        public PIDescriptorParameters* descriptorParameters;
+        public Str255* errorString;
+        public ChannelPortProcs* channelPortProcs;
+        public ReadImageDocumentDesc* documentInfo;
 
         /* New in 5.0 */
-        public IntPtr sSPBasic;
+        public SPBasicSuite* sSPBasic;
         public IntPtr plugInRef;
         public int depth;
 

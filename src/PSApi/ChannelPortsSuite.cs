@@ -54,16 +54,15 @@ namespace PSFilterLoad.PSApi
             disposed = false;
         }
 
-        public unsafe IntPtr CreateChannelPortsPointer()
+        public unsafe ChannelPortProcs* CreateChannelPortsPointer()
         {
-            IntPtr channelPortsPtr = Memory.Allocate(Marshal.SizeOf<ChannelPortProcs>(), MemoryAllocationOptions.ZeroFill);
+            ChannelPortProcs* channelPortsPtr = Memory.Allocate<ChannelPortProcs>(MemoryAllocationOptions.ZeroFill);
 
-            ChannelPortProcs* channelPorts = (ChannelPortProcs*)channelPortsPtr;
-            channelPorts->channelPortProcsVersion = PSConstants.kCurrentChannelPortProcsVersion;
-            channelPorts->numChannelPortProcs = PSConstants.kCurrentChannelPortProcsCount;
-            channelPorts->readPixelsProc = new UnmanagedFunctionPointer<ReadPixelsProc>(readPixelsProc);
-            channelPorts->writeBasePixelsProc = new UnmanagedFunctionPointer<WriteBasePixelsProc>(writeBasePixelsProc);
-            channelPorts->readPortForWritePortProc = new UnmanagedFunctionPointer<ReadPortForWritePortProc>(readPortForWritePortProc);
+            channelPortsPtr->channelPortProcsVersion = PSConstants.kCurrentChannelPortProcsVersion;
+            channelPortsPtr->numChannelPortProcs = PSConstants.kCurrentChannelPortProcsCount;
+            channelPortsPtr->readPixelsProc = new UnmanagedFunctionPointer<ReadPixelsProc>(readPixelsProc);
+            channelPortsPtr->writeBasePixelsProc = new UnmanagedFunctionPointer<WriteBasePixelsProc>(writeBasePixelsProc);
+            channelPortsPtr->readPortForWritePortProc = new UnmanagedFunctionPointer<ReadPortForWritePortProc>(readPortForWritePortProc);
 
             return channelPortsPtr;
         }

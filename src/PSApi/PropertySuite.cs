@@ -56,14 +56,14 @@ namespace PSFilterLoad.PSApi
             this.numberOfChannels = numberOfChannels;
         }
 
-        IntPtr IPICASuiteAllocator.Allocate(int version)
+        unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
         {
             if (version != PSConstants.kCurrentPropertyProcsVersion)
             {
                 throw new UnsupportedPICASuiteVersionException(PSConstants.PICA.PropertySuite, version);
             }
 
-            return CreatePropertySuitePointer();
+            return new IntPtr(CreatePropertySuitePointer());
         }
 
         bool IPICASuiteAllocator.IsSupportedVersion(int version) => version == PSConstants.kCurrentPropertyProcsVersion;
@@ -76,15 +76,14 @@ namespace PSFilterLoad.PSApi
         /// </value>
         public GetPropertyProc GetPropertyCallback => getPropertyProc;
 
-        public unsafe IntPtr CreatePropertySuitePointer()
+        public unsafe PropertyProcs* CreatePropertySuitePointer()
         {
-            IntPtr propertyProcsPtr = Memory.Allocate(Marshal.SizeOf<PropertyProcs>(), MemoryAllocationOptions.ZeroFill);
+            PropertyProcs* propertyProcsPtr = Memory.Allocate<PropertyProcs>(MemoryAllocationOptions.ZeroFill);
 
-            PropertyProcs* propertyProcs = (PropertyProcs*)propertyProcsPtr;
-            propertyProcs->propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion;
-            propertyProcs->numPropertyProcs = PSConstants.kCurrentPropertyProcsCount;
-            propertyProcs->getPropertyProc = new UnmanagedFunctionPointer<GetPropertyProc>(getPropertyProc);
-            propertyProcs->setPropertyProc = new UnmanagedFunctionPointer<SetPropertyProc>(setPropertyProc);
+            propertyProcsPtr->propertyProcsVersion = PSConstants.kCurrentPropertyProcsVersion;
+            propertyProcsPtr->numPropertyProcs = PSConstants.kCurrentPropertyProcsCount;
+            propertyProcsPtr->getPropertyProc = new UnmanagedFunctionPointer<GetPropertyProc>(getPropertyProc);
+            propertyProcsPtr->setPropertyProc = new UnmanagedFunctionPointer<SetPropertyProc>(setPropertyProc);
 
             return propertyProcsPtr;
         }

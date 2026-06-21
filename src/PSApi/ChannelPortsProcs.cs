@@ -61,11 +61,11 @@ namespace PSFilterLoad.PSApi
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct ReadChannelDesc
+    internal unsafe struct ReadChannelDesc
     {
         public int minVersion;
         public int maxVersion;
-        public IntPtr next;
+        public ReadChannelDesc* next;
         public IntPtr port;
         public VRect bounds;
         public int depth;

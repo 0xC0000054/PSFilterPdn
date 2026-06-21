@@ -15,8 +15,8 @@
  * All rights reserved.
 */
 
-using System;
 using System.Runtime.InteropServices;
+
 namespace PSFilterLoad.PSApi
 {
     [StructLayout(LayoutKind.Sequential)]
@@ -32,12 +32,12 @@ namespace PSFilterLoad.PSApi
         public fixed byte redLUT[256];
         public fixed byte greenLUT[256];
         public fixed byte blueLUT[256];
-        public IntPtr targetCompositeChannels;
-        public IntPtr targetTransparency;
-        public IntPtr targetLayerMask;
-        public IntPtr mergedCompositeChannels;
-        public IntPtr mergedTransparency;
-        public IntPtr alphaChannels;
-        public IntPtr selection;
+        public ReadChannelDesc* targetCompositeChannels;
+        public ReadChannelDesc* targetTransparency;
+        public ReadChannelDesc* targetLayerMask;
+        public ReadChannelDesc* mergedCompositeChannels;
+        public ReadChannelDesc* mergedTransparency;
+        public ReadChannelDesc* alphaChannels;
+        public ReadChannelDesc* selection;
     }
 }

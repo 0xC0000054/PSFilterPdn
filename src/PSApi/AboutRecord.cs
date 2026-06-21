@@ -22,8 +22,8 @@ namespace PSFilterLoad.PSApi
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct AboutRecord
     {
-        public IntPtr platformData;
-        public IntPtr sSPBasic;
+        public PlatformData* platformData;
+        public SPBasicSuite* sSPBasic;
         public IntPtr plugInRef;
 
         public fixed byte reserved[244];

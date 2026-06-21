@@ -143,64 +143,56 @@ namespace PSFilterLoad.PSApi
             disposed = false;
         }
 
-        public IntPtr CreateReadDescriptorPointer()
+        public unsafe ReadDescriptorProcs* CreateReadDescriptorPointer()
         {
-            IntPtr readDescriptorPtr = Memory.Allocate(Marshal.SizeOf<ReadDescriptorProcs>(), MemoryAllocationOptions.ZeroFill);
+            ReadDescriptorProcs* readDescriptorPtr = Memory.Allocate<ReadDescriptorProcs>(MemoryAllocationOptions.ZeroFill);
 
-            unsafe
-            {
-                ReadDescriptorProcs* readDescriptor = (ReadDescriptorProcs*)readDescriptorPtr;
-                readDescriptor->readDescriptorProcsVersion = PSConstants.kCurrentReadDescriptorProcsVersion;
-                readDescriptor->numReadDescriptorProcs = PSConstants.kCurrentReadDescriptorProcsCount;
-                readDescriptor->openReadDescriptorProc = new UnmanagedFunctionPointer<OpenReadDescriptorProc>(openReadDescriptorProc);
-                readDescriptor->closeReadDescriptorProc = new UnmanagedFunctionPointer<CloseReadDescriptorProc>(closeReadDescriptorProc);
-                readDescriptor->getAliasProc = new UnmanagedFunctionPointer<GetAliasProc>(getAliasProc);
-                readDescriptor->getBooleanProc = new UnmanagedFunctionPointer<GetBooleanProc>(getBooleanProc);
-                readDescriptor->getClassProc = new UnmanagedFunctionPointer<GetClassProc>(getClassProc);
-                readDescriptor->getCountProc = new UnmanagedFunctionPointer<GetCountProc>(getCountProc);
-                readDescriptor->getEnumeratedProc = new UnmanagedFunctionPointer<GetEnumeratedProc>(getEnumeratedProc);
-                readDescriptor->getFloatProc = new UnmanagedFunctionPointer<GetFloatProc>(getFloatProc);
-                readDescriptor->getIntegerProc = new UnmanagedFunctionPointer<GetIntegerProc>(getIntegerProc);
-                readDescriptor->getKeyProc = new UnmanagedFunctionPointer<GetKeyProc>(getKeyProc);
-                readDescriptor->getObjectProc = new UnmanagedFunctionPointer<GetObjectProc>(getObjectProc);
-                readDescriptor->getPinnedFloatProc = new UnmanagedFunctionPointer<GetPinnedFloatProc>(getPinnedFloatProc);
-                readDescriptor->getPinnedIntegerProc = new UnmanagedFunctionPointer<GetPinnedIntegerProc>(getPinnedIntegerProc);
-                readDescriptor->getPinnedUnitFloatProc = new UnmanagedFunctionPointer<GetPinnedUnitFloatProc>(getPinnedUnitFloatProc);
-                readDescriptor->getSimpleReferenceProc = new UnmanagedFunctionPointer<GetSimpleReferenceProc>(getSimpleReferenceProc);
-                readDescriptor->getStringProc = new UnmanagedFunctionPointer<GetStringProc>(getStringProc);
-                readDescriptor->getTextProc = new UnmanagedFunctionPointer<GetTextProc>(getTextProc);
-                readDescriptor->getUnitFloatProc = new UnmanagedFunctionPointer<GetUnitFloatProc>(getUnitFloatProc);
-            }
+            readDescriptorPtr->readDescriptorProcsVersion = PSConstants.kCurrentReadDescriptorProcsVersion;
+            readDescriptorPtr->numReadDescriptorProcs = PSConstants.kCurrentReadDescriptorProcsCount;
+            readDescriptorPtr->openReadDescriptorProc = new UnmanagedFunctionPointer<OpenReadDescriptorProc>(openReadDescriptorProc);
+            readDescriptorPtr->closeReadDescriptorProc = new UnmanagedFunctionPointer<CloseReadDescriptorProc>(closeReadDescriptorProc);
+            readDescriptorPtr->getAliasProc = new UnmanagedFunctionPointer<GetAliasProc>(getAliasProc);
+            readDescriptorPtr->getBooleanProc = new UnmanagedFunctionPointer<GetBooleanProc>(getBooleanProc);
+            readDescriptorPtr->getClassProc = new UnmanagedFunctionPointer<GetClassProc>(getClassProc);
+            readDescriptorPtr->getCountProc = new UnmanagedFunctionPointer<GetCountProc>(getCountProc);
+            readDescriptorPtr->getEnumeratedProc = new UnmanagedFunctionPointer<GetEnumeratedProc>(getEnumeratedProc);
+            readDescriptorPtr->getFloatProc = new UnmanagedFunctionPointer<GetFloatProc>(getFloatProc);
+            readDescriptorPtr->getIntegerProc = new UnmanagedFunctionPointer<GetIntegerProc>(getIntegerProc);
+            readDescriptorPtr->getKeyProc = new UnmanagedFunctionPointer<GetKeyProc>(getKeyProc);
+            readDescriptorPtr->getObjectProc = new UnmanagedFunctionPointer<GetObjectProc>(getObjectProc);
+            readDescriptorPtr->getPinnedFloatProc = new UnmanagedFunctionPointer<GetPinnedFloatProc>(getPinnedFloatProc);
+            readDescriptorPtr->getPinnedIntegerProc = new UnmanagedFunctionPointer<GetPinnedIntegerProc>(getPinnedIntegerProc);
+            readDescriptorPtr->getPinnedUnitFloatProc = new UnmanagedFunctionPointer<GetPinnedUnitFloatProc>(getPinnedUnitFloatProc);
+            readDescriptorPtr->getSimpleReferenceProc = new UnmanagedFunctionPointer<GetSimpleReferenceProc>(getSimpleReferenceProc);
+            readDescriptorPtr->getStringProc = new UnmanagedFunctionPointer<GetStringProc>(getStringProc);
+            readDescriptorPtr->getTextProc = new UnmanagedFunctionPointer<GetTextProc>(getTextProc);
+            readDescriptorPtr->getUnitFloatProc = new UnmanagedFunctionPointer<GetUnitFloatProc>(getUnitFloatProc);
 
             return readDescriptorPtr;
         }
 
-        public IntPtr CreateWriteDescriptorPointer()
+        public unsafe WriteDescriptorProcs* CreateWriteDescriptorPointer()
         {
-            IntPtr writeDescriptorPtr = Memory.Allocate(Marshal.SizeOf<WriteDescriptorProcs>(), MemoryAllocationOptions.ZeroFill);
+            WriteDescriptorProcs* writeDescriptorPtr = Memory.Allocate<WriteDescriptorProcs>(MemoryAllocationOptions.ZeroFill);
 
-            unsafe
-            {
-                WriteDescriptorProcs* writeDescriptor = (WriteDescriptorProcs*)writeDescriptorPtr;
-                writeDescriptor->writeDescriptorProcsVersion = PSConstants.kCurrentWriteDescriptorProcsVersion;
-                writeDescriptor->numWriteDescriptorProcs = PSConstants.kCurrentWriteDescriptorProcsCount;
-                writeDescriptor->openWriteDescriptorProc = new UnmanagedFunctionPointer<OpenWriteDescriptorProc>(openWriteDescriptorProc);
-                writeDescriptor->closeWriteDescriptorProc = new UnmanagedFunctionPointer<CloseWriteDescriptorProc>(closeWriteDescriptorProc);
-                writeDescriptor->putAliasProc = new UnmanagedFunctionPointer<PutAliasProc>(putAliasProc);
-                writeDescriptor->putBooleanProc = new UnmanagedFunctionPointer<PutBooleanProc>(putBooleanProc);
-                writeDescriptor->putClassProc = new UnmanagedFunctionPointer<PutClassProc>(putClassProc);
-                writeDescriptor->putCountProc = new UnmanagedFunctionPointer<PutCountProc>(putCountProc);
-                writeDescriptor->putEnumeratedProc = new UnmanagedFunctionPointer<PutEnumeratedProc>(putEnumeratedProc);
-                writeDescriptor->putFloatProc = new UnmanagedFunctionPointer<PutFloatProc>(putFloatProc);
-                writeDescriptor->putIntegerProc = new UnmanagedFunctionPointer<PutIntegerProc>(putIntegerProc);
-                writeDescriptor->putObjectProc = new UnmanagedFunctionPointer<PutObjectProc>(putObjectProc);
-                writeDescriptor->putScopedClassProc = new UnmanagedFunctionPointer<PutScopedClassProc>(putScopedClassProc);
-                writeDescriptor->putScopedObjectProc = new UnmanagedFunctionPointer<PutScopedObjectProc>(putScopedObjectProc);
-                writeDescriptor->putSimpleReferenceProc = new UnmanagedFunctionPointer<PutSimpleReferenceProc>(putSimpleReferenceProc);
-                writeDescriptor->putStringProc = new UnmanagedFunctionPointer<PutStringProc>(putStringProc);
-                writeDescriptor->putTextProc = new UnmanagedFunctionPointer<PutTextProc>(putTextProc);
-                writeDescriptor->putUnitFloatProc = new UnmanagedFunctionPointer<PutUnitFloatProc>(putUnitFloatProc);
-            }
+            writeDescriptorPtr->writeDescriptorProcsVersion = PSConstants.kCurrentWriteDescriptorProcsVersion;
+            writeDescriptorPtr->numWriteDescriptorProcs = PSConstants.kCurrentWriteDescriptorProcsCount;
+            writeDescriptorPtr->openWriteDescriptorProc = new UnmanagedFunctionPointer<OpenWriteDescriptorProc>(openWriteDescriptorProc);
+            writeDescriptorPtr->closeWriteDescriptorProc = new UnmanagedFunctionPointer<CloseWriteDescriptorProc>(closeWriteDescriptorProc);
+            writeDescriptorPtr->putAliasProc = new UnmanagedFunctionPointer<PutAliasProc>(putAliasProc);
+            writeDescriptorPtr->putBooleanProc = new UnmanagedFunctionPointer<PutBooleanProc>(putBooleanProc);
+            writeDescriptorPtr->putClassProc = new UnmanagedFunctionPointer<PutClassProc>(putClassProc);
+            writeDescriptorPtr->putCountProc = new UnmanagedFunctionPointer<PutCountProc>(putCountProc);
+            writeDescriptorPtr->putEnumeratedProc = new UnmanagedFunctionPointer<PutEnumeratedProc>(putEnumeratedProc);
+            writeDescriptorPtr->putFloatProc = new UnmanagedFunctionPointer<PutFloatProc>(putFloatProc);
+            writeDescriptorPtr->putIntegerProc = new UnmanagedFunctionPointer<PutIntegerProc>(putIntegerProc);
+            writeDescriptorPtr->putObjectProc = new UnmanagedFunctionPointer<PutObjectProc>(putObjectProc);
+            writeDescriptorPtr->putScopedClassProc = new UnmanagedFunctionPointer<PutScopedClassProc>(putScopedClassProc);
+            writeDescriptorPtr->putScopedObjectProc = new UnmanagedFunctionPointer<PutScopedObjectProc>(putScopedObjectProc);
+            writeDescriptorPtr->putSimpleReferenceProc = new UnmanagedFunctionPointer<PutSimpleReferenceProc>(putSimpleReferenceProc);
+            writeDescriptorPtr->putStringProc = new UnmanagedFunctionPointer<PutStringProc>(putStringProc);
+            writeDescriptorPtr->putTextProc = new UnmanagedFunctionPointer<PutTextProc>(putTextProc);
+            writeDescriptorPtr->putUnitFloatProc = new UnmanagedFunctionPointer<PutUnitFloatProc>(putUnitFloatProc);
 
             return writeDescriptorPtr;
         }

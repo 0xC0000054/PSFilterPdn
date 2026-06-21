@@ -124,6 +124,7 @@
     <Compile Include="..\PSApi\RGBColor.cs" Link="PSApi\RGBColor.cs" />
     <Compile Include="..\PSApi\SPBasicSuite.cs" Link="PSApi\SPBasicSuite.cs" />
     <Compile Include="..\PSApi\SPBasicSuiteProvider.cs" Link="PSApi\SPBasicSuiteProvider.cs" />
+    <Compile Include="..\PSApi\Str255.cs" Link="PSApi\Str255.cs" />
     <Compile Include="..\PSApi\StringUtil.cs" Link="PSApi\StringUtil.cs" />
     <Compile Include="..\PSApi\TestAbortProc.cs" Link="PSApi\TestAbortProc.cs" />
     <Compile Include="..\PSApi\UnmanagedFunctionPointer`1.cs" Link="PSApi\UnmanagedFunctionPointer`1.cs" />
