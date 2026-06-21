@@ -17,7 +17,7 @@ using System.Globalization;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class ActivePICASuites : IDisposable
+    internal sealed class ActivePICASuites : Disposable
     {
         [DebuggerDisplay("{DebuggerDisplay,nq}")]
         internal sealed class PICASuiteKey : IEquatable<PICASuiteKey>
@@ -141,7 +141,6 @@ namespace PSFilterLoad.PSApi
         }
 
         private readonly Dictionary<PICASuiteKey, PICASuite> activeSuites;
-        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ActivePICASuites"/> class.
@@ -149,7 +148,6 @@ namespace PSFilterLoad.PSApi
         public ActivePICASuites()
         {
             activeSuites = [];
-            disposed = false;
         }
 
         /// <summary>
@@ -160,10 +158,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>The pointer to the allocated suite.</returns>
         public IntPtr AllocateSuite(PICASuiteKey key, IPICASuiteAllocator factory)
         {
-            if (disposed)
-            {
-                throw new ObjectDisposedException("ActivePICASuites");
-            }
+            VerifyNotDisposed();
 
             IntPtr suitePointer = factory.Allocate(key.Version);
             try
@@ -188,10 +183,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public bool IsLoaded(PICASuiteKey key)
         {
-            if (disposed)
-            {
-                throw new ObjectDisposedException("ActivePICASuites");
-            }
+            VerifyNotDisposed();
             return activeSuites.ContainsKey(key);
         }
 
@@ -215,10 +207,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="key">The <see cref="PICASuiteKey"/> specifying the suite name and version.</param>
         public void Release(PICASuiteKey key)
         {
-            if (disposed)
-            {
-                throw new ObjectDisposedException("ActivePICASuites");
-            }
+            VerifyNotDisposed();
 
             if (activeSuites.TryGetValue(key, out PICASuite? suite))
             {
@@ -236,12 +225,10 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (disposing)
             {
-                disposed = true;
-
                 foreach (PICASuite item in activeSuites.Values)
                 {
                     item.Dispose();
