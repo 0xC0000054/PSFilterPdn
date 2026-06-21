@@ -264,7 +264,7 @@ namespace PSFilterLoad.PSApi
                 byte* resPtr = (byte*)filterLock + 2;
 
                 // The plug-ins are assumed to have a unique name, so the strings are not pooled.
-                string title = StringUtil.FromCString(resPtr, StringCreationOptions.TrimWhiteSpace)!;
+                string? title = StringUtil.FromCString(resPtr, StringCreationOptions.TrimWhiteSpace);
 
                 if (!GetPiMIResourceData(hModule, lpszName, query, out string category))
                 {
@@ -280,7 +280,7 @@ namespace PSFilterLoad.PSApi
                     return BOOL.TRUE;
                 }
 
-                query.plugins.Add(new PluginData(query.fileName, entryPoint, category, title, query.processorArchitecture));
+                query.plugins.Add(new PluginData(query.fileName, entryPoint, category, title!, query.processorArchitecture));
             }
             catch (Exception ex)
             {
@@ -346,12 +346,12 @@ namespace PSFilterLoad.PSApi
                                      PSConstants.LatestPiPLVersion);
                     return BOOL.TRUE;
                 }
-                string entryPoint = string.Empty;
-                string category = string.Empty;
-                string title = string.Empty;
+                string? entryPoint = string.Empty;
+                string? category = string.Empty;
+                string? title = string.Empty;
                 FilterCaseInfoCollection? filterInfo = null;
                 AETEData? aete = null;
-                string enableInfo = string.Empty;
+                string? enableInfo = string.Empty;
                 Size? maxImageSize = null;
                 Size? minImageSize = null;
 
@@ -389,7 +389,7 @@ namespace PSFilterLoad.PSApi
                     }
                     else if (propKey == query.platformEntryPoint)
                     {
-                        entryPoint = StringUtil.FromCString(dataPtr, StringCreationOptions.UseStringPool)!;
+                        entryPoint = StringUtil.FromCString(dataPtr, StringCreationOptions.UseStringPool);
                     }
                     else if (propKey == PIPropertyID.PIVersionProperty)
                     {
@@ -425,12 +425,12 @@ namespace PSFilterLoad.PSApi
                     else if (propKey == PIPropertyID.PICategoryProperty)
                     {
                         category = StringUtil.FromPascalString(dataPtr,
-                                                               StringCreationOptions.TrimWhiteSpaceAndNullTerminator | StringCreationOptions.UseStringPool)!;
+                                                               StringCreationOptions.TrimWhiteSpaceAndNullTerminator | StringCreationOptions.UseStringPool);
                     }
                     else if (propKey == PIPropertyID.PINameProperty)
                     {
                         // The plug-ins are assumed to have a unique name, so the strings are not pooled.
-                        title = StringUtil.FromPascalString(dataPtr)!;
+                        title = StringUtil.FromPascalString(dataPtr);
                     }
                     else if (propKey == PIPropertyID.PIFilterCaseInfoProperty)
                     {
@@ -461,7 +461,8 @@ namespace PSFilterLoad.PSApi
                     }
                     else if (propKey == PIPropertyID.PIEnableInfoProperty)
                     {
-                        enableInfo = StringUtil.FromCString(dataPtr, StringCreationOptions.RemoveAllWhiteSpace | StringCreationOptions.UseStringPool)!;
+                        enableInfo = StringUtil.FromCString(dataPtr,
+                                                            StringCreationOptions.RemoveAllWhiteSpace | StringCreationOptions.UseStringPool) ?? string.Empty;
                     }
                     else if (propKey == PIPropertyID.PIRequiredHostProperty)
                     {
@@ -502,7 +503,7 @@ namespace PSFilterLoad.PSApi
                             int height = pData[0];
                             int width = pData[1];
 
-                            maxImageSize = new Size(width, height); 
+                            maxImageSize = new Size(width, height);
                         }
                     }
                     else if (propKey == PIPropertyID.MinImageSize)
@@ -517,7 +518,7 @@ namespace PSFilterLoad.PSApi
                             int height = pData[0];
                             int width = pData[1];
 
-                            minImageSize = new Size(width, height); 
+                            minImageSize = new Size(width, height);
                         }
                     }
                     else
@@ -542,9 +543,9 @@ namespace PSFilterLoad.PSApi
                                                                                                 !query.runWith32BitShim);
 
                 query.plugins.Add(new PluginData(query.fileName,
-                                                 entryPoint,
-                                                 category,
-                                                 title,
+                                                 entryPoint!,
+                                                 category!,
+                                                 title!,
                                                  filterInfo,
                                                  query.runWith32BitShim,
                                                  aete,
@@ -727,9 +728,9 @@ namespace PSFilterLoad.PSApi
             return result;
         }
 
-        private static bool ValidatePluginResourceData(string category,
-                                                       string title,
-                                                       string entryPoint,
+        private static bool ValidatePluginResourceData(string? category,
+                                                       string? title,
+                                                       string? entryPoint,
                                                        QueryFilter query,
                                                        string pluginResourceType,
                                                        nuint pluginResourceName)
