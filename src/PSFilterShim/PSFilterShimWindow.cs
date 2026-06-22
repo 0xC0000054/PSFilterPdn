@@ -52,84 +52,11 @@ namespace PSFilterShim
             }
         }
 
-        public unsafe void Initialize(nint parentWindowHandle)
+        public unsafe void Show(nint parentWindowHandle)
         {
-            string className = "PSFilterShim" + Guid.NewGuid().ToString();
-            string title = "PSFilterShim Filter Parent Window";
-            handle = GCHandle.Alloc(this);
+            CreateWindow(parentWindowHandle);
 
-            fixed (char* lpszClassName = className)
-            fixed (char* lpWindowName = title)
-            {
-                HINSTANCE hInstance = GetModuleHandleW(null);
-
-                if (hInstance == 0)
-                {
-                    throw new Win32Exception();
-                }
-
-                HCURSOR arrowCursor = LoadCursorW(HINSTANCE.NULL, IDC.IDC_ARROW);
-
-                if (arrowCursor == 0)
-                {
-                    throw new Win32Exception();
-                }
-
-                (ushort largeIcon, ushort smallIcon)? appIconResourceIds = TryGetApplicationIconResourceIds();
-
-                WNDCLASSEXW windowClass = new()
-                {
-                    cbSize = (uint)sizeof(WNDCLASSEXW),
-                    style = CS.CS_HREDRAW | CS.CS_VREDRAW,
-                    lpfnWndProc = &WindowProc,
-                    hInstance = hInstance,
-                    hCursor = arrowCursor,
-                    hIcon = appIconResourceIds.HasValue ? TryLoadIcon(appIconResourceIds.Value.largeIcon) : HICON.NULL,
-                    hbrBackground = new HBRUSH((void*)(COLOR.COLOR_WINDOW + 1)),
-                    lpszClassName = lpszClassName,
-                    hIconSm = appIconResourceIds.HasValue ? TryLoadIcon(appIconResourceIds.Value.smallIcon) : HICON.NULL
-                };
-
-                if (RegisterClassExW(&windowClass) == 0)
-                {
-                    throw new Win32Exception();
-                }
-
-                Rectangle windowRect = new(0, 0, 250, 50);
-
-                if (parentWindowHandle != 0)
-                {
-                    CenterOnParent((HWND)parentWindowHandle, ref windowRect);
-                }
-                else
-                {
-                    CenterOnPrimaryMonitor(ref windowRect);
-                }
-
-                // We do not set the parent window handle in CreateWindowExW because this could prevent
-                // the user from interacting with Paint.NET if the PSFilterShim process crashes.
-                if (CreateWindowExW(0,
-                                    windowClass.lpszClassName,
-                                    lpWindowName,
-                                    WS.WS_OVERLAPPED | WS.WS_CAPTION | WS.WS_VISIBLE,
-                                    windowRect.X,
-                                    windowRect.Y,
-                                    windowRect.Width,
-                                    windowRect.Height,
-                                    HWND.NULL,
-                                    HMENU.NULL,
-                                    windowClass.hInstance,
-                                    GCHandle.ToIntPtr(handle).ToPointer()) == 0)
-                {
-                    throw new Win32Exception();
-                }
-            }
-        }
-
-#pragma warning disable CA1822 // Mark members as static
-        public unsafe void RunMessageLoop()
-#pragma warning restore CA1822 // Mark members as static
-        {
+            // Run the message loop, which will block until a WM_QUIT message is received.
             MSG msg;
 
             while (GetMessageW(&msg, HWND.NULL, 0, 0) > 0)
@@ -399,6 +326,80 @@ namespace PSFilterShim
 
                 default:
                     return DefWindowProcW(hwnd, message, wParam, lParam);
+            }
+        }
+
+        private unsafe void CreateWindow(nint parentWindowHandle)
+        {
+            string className = "PSFilterShim" + Guid.NewGuid().ToString();
+            string title = "PSFilterShim Filter Parent Window";
+            handle = GCHandle.Alloc(this);
+
+            fixed (char* lpszClassName = className)
+            fixed (char* lpWindowName = title)
+            {
+                HINSTANCE hInstance = GetModuleHandleW(null);
+
+                if (hInstance == 0)
+                {
+                    throw new Win32Exception();
+                }
+
+                HCURSOR arrowCursor = LoadCursorW(HINSTANCE.NULL, IDC.IDC_ARROW);
+
+                if (arrowCursor == 0)
+                {
+                    throw new Win32Exception();
+                }
+
+                (ushort largeIcon, ushort smallIcon)? appIconResourceIds = TryGetApplicationIconResourceIds();
+
+                WNDCLASSEXW windowClass = new()
+                {
+                    cbSize = (uint)sizeof(WNDCLASSEXW),
+                    style = CS.CS_HREDRAW | CS.CS_VREDRAW,
+                    lpfnWndProc = &WindowProc,
+                    hInstance = hInstance,
+                    hCursor = arrowCursor,
+                    hIcon = appIconResourceIds.HasValue ? TryLoadIcon(appIconResourceIds.Value.largeIcon) : HICON.NULL,
+                    hbrBackground = new HBRUSH((void*)(COLOR.COLOR_WINDOW + 1)),
+                    lpszClassName = lpszClassName,
+                    hIconSm = appIconResourceIds.HasValue ? TryLoadIcon(appIconResourceIds.Value.smallIcon) : HICON.NULL
+                };
+
+                if (RegisterClassExW(&windowClass) == 0)
+                {
+                    throw new Win32Exception();
+                }
+
+                Rectangle windowRect = new(0, 0, 250, 50);
+
+                if (parentWindowHandle != 0)
+                {
+                    CenterOnParent((HWND)parentWindowHandle, ref windowRect);
+                }
+                else
+                {
+                    CenterOnPrimaryMonitor(ref windowRect);
+                }
+
+                // We do not set the parent window handle in CreateWindowExW because this could prevent
+                // the user from interacting with Paint.NET if the PSFilterShim process crashes.
+                if (CreateWindowExW(0,
+                                    windowClass.lpszClassName,
+                                    lpWindowName,
+                                    WS.WS_OVERLAPPED | WS.WS_CAPTION | WS.WS_VISIBLE,
+                                    windowRect.X,
+                                    windowRect.Y,
+                                    windowRect.Width,
+                                    windowRect.Height,
+                                    HWND.NULL,
+                                    HMENU.NULL,
+                                    windowClass.hInstance,
+                                    GCHandle.ToIntPtr(handle).ToPointer()) == 0)
+                {
+                    throw new Win32Exception();
+                }
             }
         }
 

@@ -67,8 +67,7 @@ namespace PSFilterShim
 
                 using (PSFilterShimWindow window = new(pipeClient))
                 {
-                    window.Initialize(parentWindowHandle);
-                    window.RunMessageLoop();
+                    window.Show(parentWindowHandle);
                 }
             }
             catch (Exception ex)
