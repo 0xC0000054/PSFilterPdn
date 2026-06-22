@@ -167,14 +167,6 @@ namespace PSFilterLoad.PSApi
         }
 
         /// <summary>
-        /// Sets the scripting information used by the plug-in.
-        /// </summary>
-        /// <value>
-        /// The scripting information used by the plug-in.
-        /// </value>
-        public void SetAeteData(AETEData aete) => actionSuites.SetAeteData(aete);
-
-        /// <summary>
         /// Sets the name of the plug-in.
         /// </summary>
         /// <param name="name">The name of the plug-in.</param>

@@ -1170,7 +1170,6 @@ namespace PSFilterLoad.PSApi
             if (data.Aete != null)
             {
                 descriptorSuite.Aete = data.Aete;
-                basicSuiteProvider.SetAeteData(data.Aete);
             }
 
             SetupSuites();

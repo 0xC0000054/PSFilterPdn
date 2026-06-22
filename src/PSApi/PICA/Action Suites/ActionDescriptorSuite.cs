@@ -95,7 +95,6 @@ namespace PSFilterLoad.PSApi.PICA
             }
         }
 
-        private readonly AETEData? aete;
         private readonly IHandleSuite handleSuite;
         private readonly IActionListSuite actionListSuite;
         private readonly IActionReferenceSuite actionReferenceSuite;
@@ -174,8 +173,7 @@ namespace PSFilterLoad.PSApi.PICA
         /// <paramref name="logger"/> is null.
         /// </exception>
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        public unsafe ActionDescriptorSuite(AETEData? aete,
-                                            IHandleSuite handleSuite,
+        public unsafe ActionDescriptorSuite(IHandleSuite handleSuite,
                                             IActionListSuite actionListSuite,
                                             IActionReferenceSuite actionReferenceSuite,
                                             IASZStringSuite zstringSuite,
@@ -234,7 +232,6 @@ namespace PSFilterLoad.PSApi.PICA
             getDataLength = new ActionDescriptorGetDataLength(GetDataLength);
             getData = new ActionDescriptorGetData(GetData);
 
-            this.aete = aete;
             this.handleSuite = handleSuite;
             this.actionListSuite = actionListSuite;
             this.actionReferenceSuite = actionReferenceSuite;

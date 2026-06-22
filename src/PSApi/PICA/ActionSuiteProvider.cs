@@ -28,7 +28,6 @@ namespace PSFilterLoad.PSApi.PICA
         private ActionDescriptorSuite? actionDescriptorSuite;
         private ActionListSuite? actionListSuite;
         private ActionReferenceSuite? actionReferenceSuite;
-        private AETEData? aete;
         private Handle descriptorHandle;
         private Dictionary<uint, AETEValue>? scriptingData;
         private bool disposed;
@@ -148,14 +147,6 @@ namespace PSFilterLoad.PSApi.PICA
         }
 
         /// <summary>
-        /// Sets the scripting information used by the plug-in.
-        /// </summary>
-        /// <param name="value">
-        /// The scripting information used by the plug-in.
-        /// </param>
-        public void SetAeteData(AETEData value) => aete = value;
-
-        /// <summary>
         /// Sets the scripting data.
         /// </summary>
         /// <param name="descriptorHandle">The descriptor handle.</param>
@@ -198,8 +189,7 @@ namespace PSFilterLoad.PSApi.PICA
                                                         zstringSuite,
                                                         logger);
 
-                actionDescriptorSuite = new ActionDescriptorSuite(aete,
-                                                                  handleSuite,
+                actionDescriptorSuite = new ActionDescriptorSuite(handleSuite,
                                                                   actionListSuite,
                                                                   actionReferenceSuite,
                                                                   zstringSuite,
