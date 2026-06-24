@@ -275,7 +275,7 @@ namespace PSFilterLoad.PSApi
                 // The entry point number is the same as the resource name.
                 string entryPoint = "ENTRYPOINT" + pluginResourceName.ToString(CultureInfo.InvariantCulture);
 
-                if (!ValidatePluginResourceData(category, title, entryPoint, query, "PiMI", pluginResourceName))
+                if (!ValidatePluginResourceData(category, title, query, "PiMI", pluginResourceName))
                 {
                     return BOOL.TRUE;
                 }
@@ -390,6 +390,14 @@ namespace PSFilterLoad.PSApi
                     else if (propKey == query.platformEntryPoint)
                     {
                         entryPoint = StringUtil.FromCString(dataPtr, StringCreationOptions.UseStringPool);
+                        if (string.IsNullOrWhiteSpace(entryPoint))
+                        {
+                            query.logger.Log(query.fileName,
+                                             PluginLoadingLogCategory.Error,
+                                             "PiPL resource '{0}' has an invalid entry point name.",
+                                             pluginResourceName);
+                            return BOOL.TRUE;
+                        }
                     }
                     else if (propKey == PIPropertyID.PIVersionProperty)
                     {
@@ -534,7 +542,7 @@ namespace PSFilterLoad.PSApi
                     propPtr = pipp->propertyData + propertyDataPaddedLength;
                 }
 
-                if (!ValidatePluginResourceData(category, title, entryPoint, query, "PiPL", pluginResourceName))
+                if (!ValidatePluginResourceData(category, title, query, "PiPL", pluginResourceName))
                 {
                     return BOOL.TRUE;
                 }
@@ -730,7 +738,6 @@ namespace PSFilterLoad.PSApi
 
         private static bool ValidatePluginResourceData(string? category,
                                                        string? title,
-                                                       string? entryPoint,
                                                        QueryFilter query,
                                                        string pluginResourceType,
                                                        nuint pluginResourceName)
@@ -763,14 +770,6 @@ namespace PSFilterLoad.PSApi
                 query.logger.Log(query.fileName,
                                  PluginLoadingLogCategory.Error,
                                  "{0} resource '{1}' has an invalid title.",
-                                 pluginResourceType,
-                                 pluginResourceName);
-            }
-            else if (string.IsNullOrWhiteSpace(entryPoint))
-            {
-                query.logger.Log(query.fileName,
-                                 PluginLoadingLogCategory.Error,
-                                 "{0} resource '{1}' has an invalid entry point name.",
                                  pluginResourceType,
                                  pluginResourceName);
             }
