@@ -55,7 +55,7 @@ namespace PSFilterLoad.PSApi
                 }
                 processorArchitecture = platform;
                 plugins = [];
-                runWith32BitShim = platform == Architecture.X86 && RuntimeInformation.ProcessArchitecture != Architecture.X86;
+                runWith32BitShim = platform == Architecture.X86;
             }
         }
     }
