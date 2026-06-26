@@ -17,7 +17,7 @@ using System.Runtime.InteropServices;
 namespace PSFilterLoad.PSApi.PICA
 {
     /// <summary>
-    /// Represents an ASBollean value.
+    /// Represents an ASBoolean value.
     /// </summary>
     /// <remarks>
     /// The underlying type is a 4-byte integer on Windows and a 1-byte integer on macOS.
