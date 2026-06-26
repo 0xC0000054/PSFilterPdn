@@ -529,6 +529,12 @@ namespace PSFilterLoad.PSApi
                             minImageSize = new Size(width, height);
                         }
                     }
+                    else if (propKey == PIPropertyID.ComponentVersion)
+                    {
+                        // We silently ignore this property to reduce logging noise.
+                        // The format appears to be a 4-byte big-endian version number using the
+                        // major.minor.build.revision format followed by a NUL-terminated string.
+                    }
                     else
                     {
                         query.logger.Log(query.fileName,

@@ -94,5 +94,12 @@ namespace PSFilterLoad.PSApi.Loader
         /// Taken from the PiPL resources of a plugin.
         /// </remarks>
         public const uint MinImageSize = 0x6d6e3332U;
+        /// <summary>
+        /// The plugin module version - 'cmpt'
+        /// </summary>
+        /// <remarks>
+        /// Taken from the PiPL resources of a plugin.
+        /// </remarks>
+        public const uint ComponentVersion = 0x636d7074U;
     }
 }
