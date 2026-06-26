@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class SPBasicSuiteProvider : IDisposable, ISPBasicSuiteProvider
+    internal sealed class SPBasicSuiteProvider : Disposable, ISPBasicSuiteProvider
     {
         private readonly IPICASuiteDataProvider picaSuiteData;
         private readonly IHandleSuiteCallbacks handleSuiteCallbacks;
@@ -46,7 +46,6 @@ namespace PSFilterLoad.PSApi
         private readonly ActivePICASuites activePICASuites;
         private string pluginName;
         private DescriptorRegistryValues? registryValues;
-        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SPBasicSuiteProvider"/> class.
@@ -88,7 +87,6 @@ namespace PSFilterLoad.PSApi
             errorSuite = null;
             picaHandleSuite = null;
             pluginName = string.Empty;
-            disposed = false;
         }
 
         IASZStringSuite ISPBasicSuiteProvider.ASZStringSuite => ASZStringSuite;
@@ -128,26 +126,6 @@ namespace PSFilterLoad.PSApi
             basicSuitePtr->undefined = new UnmanagedFunctionPointer<SPBasicUndefined>(spUndefined);
 
             return basicSuitePtr;
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            if (!disposed)
-            {
-                disposed = true;
-
-                actionSuites?.Dispose();
-                activePICASuites?.Dispose();
-
-                if (bufferSuite != null)
-                {
-                    bufferSuite.Dispose();
-                    bufferSuite = null;
-                }
-            }
         }
 
         /// <summary>
@@ -200,6 +178,21 @@ namespace PSFilterLoad.PSApi
         /// <returns><c>true</c> if the descriptor handle contains scripting data; otherwise, <c>false</c></returns>
         public bool TryGetScriptingData(Handle descriptorHandle, [MaybeNullWhen(false)] out Dictionary<uint, AETEValue> scriptingData)
             => actionSuites.TryGetScriptingData(descriptorHandle, out scriptingData);
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                actionSuites?.Dispose();
+                activePICASuites?.Dispose();
+
+                if (bufferSuite != null)
+                {
+                    bufferSuite.Dispose();
+                    bufferSuite = null;
+                }
+            }
+        }
 
         private unsafe int SPBasicAcquireSuite(IntPtr name, int version, IntPtr* suite)
         {
