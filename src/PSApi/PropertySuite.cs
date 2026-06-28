@@ -12,12 +12,11 @@
 
 using PSFilterLoad.PSApi.Diagnostics;
 using System;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class PropertySuite : IPICASuiteAllocator
+    internal sealed unsafe class PropertySuite : IPICASuiteAllocator
     {
 #pragma warning disable IDE0032 // Use auto property
         private readonly GetPropertyProc getPropertyProc;
@@ -33,13 +32,13 @@ namespace PSFilterLoad.PSApi
 
         private static ReadOnlySpan<byte> HostSerial => "0"u8;
 
-        public unsafe PropertySuite(IHandleSuite handleSuite,
-                                    IDocumentMetadataProvider documentMetadataProvider,
-                                    IPluginApiLogger logger,
-                                    int documentWidth,
-                                    int documentHeight,
-                                    PluginUISettings? pluginUISettings,
-                                    int numberOfChannels)
+        public PropertySuite(IHandleSuite handleSuite,
+                             IDocumentMetadataProvider documentMetadataProvider,
+                             IPluginApiLogger logger,
+                             int documentWidth,
+                             int documentHeight,
+                             PluginUISettings? pluginUISettings,
+                             int numberOfChannels)
         {
             ArgumentNullException.ThrowIfNull(handleSuite);
             ArgumentNullException.ThrowIfNull(documentMetadataProvider);
@@ -56,7 +55,7 @@ namespace PSFilterLoad.PSApi
             this.numberOfChannels = numberOfChannels;
         }
 
-        unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
+        IntPtr IPICASuiteAllocator.Allocate(int version)
         {
             if (version != PSConstants.kCurrentPropertyProcsVersion)
             {
@@ -76,7 +75,7 @@ namespace PSFilterLoad.PSApi
         /// </value>
         public GetPropertyProc GetPropertyCallback => getPropertyProc;
 
-        public unsafe PropertyProcs* CreatePropertySuitePointer()
+        public PropertyProcs* CreatePropertySuitePointer()
         {
             PropertyProcs* propertyProcsPtr = Memory.Allocate<PropertyProcs>(MemoryAllocationOptions.ZeroFill);
 
@@ -88,7 +87,7 @@ namespace PSFilterLoad.PSApi
             return propertyProcsPtr;
         }
 
-        private unsafe short CreateComplexPropertyHandle(Handle* complexProperty, ReadOnlySpan<byte> bytes)
+        private short CreateComplexPropertyHandle(Handle* complexProperty, ReadOnlySpan<byte> bytes)
         {
             if (complexProperty == null)
             {
@@ -113,7 +112,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private unsafe short CreateComplexPropertyHandle(Handle* complexProperty, string text, Encoding encoding)
+        private short CreateComplexPropertyHandle(Handle* complexProperty, string text, Encoding encoding)
         {
             if (complexProperty == null)
             {
@@ -140,9 +139,9 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private static unsafe short GetSimpleProperty(IntPtr* simpleProperty, bool value) => GetSimpleProperty(simpleProperty, value ? 1 : 0);
+        private static short GetSimpleProperty(IntPtr* simpleProperty, bool value) => GetSimpleProperty(simpleProperty, value ? 1 : 0);
 
-        private static unsafe short GetSimpleProperty(IntPtr* simpleProperty, int value)
+        private static short GetSimpleProperty(IntPtr* simpleProperty, int value)
         {
             if (simpleProperty == null)
             {
@@ -154,7 +153,7 @@ namespace PSFilterLoad.PSApi
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        private unsafe short PropertyGetProc(uint signature, uint key, int index, IntPtr* simpleProperty, Handle* complexProperty)
+        private short PropertyGetProc(uint signature, uint key, int index, IntPtr* simpleProperty, Handle* complexProperty)
         {
             logger.Log(PluginApiLogCategory.PropertySuite,
                        "Sig: {0}, Key: {1}, Index: {2}",
