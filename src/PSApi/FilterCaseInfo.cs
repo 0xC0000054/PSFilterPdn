@@ -75,6 +75,11 @@ namespace PSFilterLoad.PSApi
 
         public bool IsSupported => InputHandling != FilterDataHandling.CantFilter && OutputHandling != FilterDataHandling.CantFilter;
 
+        public override string ToString()
+        {
+            return $"{InputHandling}, {OutputHandling}, [{Flags1}], [{Flags2}]";
+        }
+
         private sealed class Formatter : IMessagePackFormatter<FilterCaseInfo>
         {
             public FilterCaseInfo Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
