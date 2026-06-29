@@ -195,15 +195,11 @@ namespace PSFilterLoad.PSApi
 
         public bool Equals(PluginData? other)
         {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return string.Equals(FileName, other.FileName, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(EntryPoint, other.EntryPoint, StringComparison.Ordinal) &&
-                   string.Equals(Category, other.Category, StringComparison.Ordinal) &&
-                   string.Equals(Title, other.Title, StringComparison.Ordinal);
+            return other is not null
+                   && string.Equals(FileName, other.FileName, StringComparison.OrdinalIgnoreCase)
+                   && string.Equals(EntryPoint, other.EntryPoint, StringComparison.Ordinal)
+                   && string.Equals(Category, other.Category, StringComparison.Ordinal)
+                   && string.Equals(Title, other.Title, StringComparison.Ordinal);
         }
 
         /// <summary>
