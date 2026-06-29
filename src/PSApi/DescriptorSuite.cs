@@ -230,7 +230,7 @@ namespace PSFilterLoad.PSApi
         }
 
         #region ReadDescriptorProcs
-        private unsafe PIReadDescriptor OpenReadDescriptorProc(Handle descriptorHandle, IntPtr keyArray)
+        private PIReadDescriptor OpenReadDescriptorProc(Handle descriptorHandle, IntPtr keyArray)
         {
             logger.Log(PluginApiLogCategory.DescriptorSuite,
                        "descriptorHandle: 0x{0}",

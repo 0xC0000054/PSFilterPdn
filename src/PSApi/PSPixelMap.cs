@@ -35,7 +35,7 @@ namespace PSFilterLoad.PSApi
         public int colBytes;
         public MaskDescription maskDescription;
 
-        public override readonly unsafe string ToString()
+        public override readonly string ToString()
         {
             System.Text.StringBuilder builder = new(256);
 
@@ -84,7 +84,7 @@ namespace PSFilterLoad.PSApi
                 new object[]{ version, bounds, ((ImageMode)imageMode).ToString("G"), rowBytes, colBytes, planeBytes, baseAddr.ToHexString(),
                      FormatPSPixelMask(mat), FormatPSPixelMask(masks) });
 
-        private static unsafe string FormatPSPixelMask(PSPixelMask* mask)
+        private static string FormatPSPixelMask(PSPixelMask* mask)
             => mask != null ? (*mask).ToString() : "null";
     }
 }

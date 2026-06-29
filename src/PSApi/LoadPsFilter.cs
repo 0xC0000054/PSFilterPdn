@@ -235,23 +235,23 @@ namespace PSFilterLoad.PSApi
         /// or
         /// <paramref name="abortCallback"/> is null.
         /// </exception>
-        internal unsafe LoadPsFilter(ImageSurface source,
-                                     bool takeOwnershipOfSource,
-                                     MaskSurface? selectionMask,
-                                     bool takeOwnershipOfSelectionMask,
-                                     ColorRgb24 primaryColor,
-                                     ColorRgb24 secondaryColor,
-                                     double dpiX,
-                                     double dpiY,
-                                     IntPtr owner,
-                                     FilterCase filterCase,
-                                     IDocumentMetadataProvider documentMetadataProvider,
-                                     ISurfaceFactory surfaceFactory,
-                                     IRenderTargetFactory renderTargetFactory,
-                                     IPluginApiLogger logger,
-                                     PluginUISettings? pluginUISettings,
-                                     Action<byte>? progressCallback,
-                                     CancellationToken cancellationToken)
+        internal LoadPsFilter(ImageSurface source,
+                              bool takeOwnershipOfSource,
+                              MaskSurface? selectionMask,
+                              bool takeOwnershipOfSelectionMask,
+                              ColorRgb24 primaryColor,
+                              ColorRgb24 secondaryColor,
+                              double dpiX,
+                              double dpiY,
+                              IntPtr owner,
+                              FilterCase filterCase,
+                              IDocumentMetadataProvider documentMetadataProvider,
+                              ISurfaceFactory surfaceFactory,
+                              IRenderTargetFactory renderTargetFactory,
+                              IPluginApiLogger logger,
+                              PluginUISettings? pluginUISettings,
+                              Action<byte>? progressCallback,
+                              CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(documentMetadataProvider);
@@ -461,7 +461,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Saves the filter scripting parameters for repeat runs.
         /// </summary>
-        private unsafe void SaveScriptingParameters()
+        private void SaveScriptingParameters()
         {
             if (descriptorParametersPtr->descriptor != Handle.Null)
             {
@@ -482,7 +482,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Save the filter parameter handles for repeat runs.
         /// </summary>
-        private unsafe void SaveParameterHandles()
+        private void SaveParameterHandles()
         {
             if (filterRecord->parameters != Handle.Null)
             {
@@ -622,7 +622,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Restore the filter parameter handles for repeat runs.
         /// </summary>
-        private unsafe void RestoreParameterHandles()
+        private void RestoreParameterHandles()
         {
             if (previousPhase == PluginPhase.Parameters)
             {
@@ -770,7 +770,7 @@ namespace PSFilterLoad.PSApi
             return true;
         }
 
-        private unsafe bool PluginApply()
+        private bool PluginApply()
         {
 #if DEBUG
             System.Diagnostics.Debug.Assert(previousPhase == PluginPhase.Prepare);
@@ -900,7 +900,7 @@ namespace PSFilterLoad.PSApi
             return true;
         }
 
-        private unsafe void SetFilterRecordValues()
+        private void SetFilterRecordValues()
         {
             if (frValuesSetup)
             {
@@ -1043,7 +1043,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         ///   <c>true</c> if the source surface is completely transparent; otherwise, <c>false</c>.
         /// </returns>
-        private unsafe bool IsBlankLayer()
+        private bool IsBlankLayer()
         {
             int height = source.Height;
             int width = source.Width;
@@ -1075,7 +1075,7 @@ namespace PSFilterLoad.PSApi
             return data.Category.Equals("Amico Perry", StringComparison.Ordinal);
         }
 
-        private unsafe void CopySourceToDestination()
+        private void CopySourceToDestination()
         {
             using (ISurfaceLock sourceLock = source.Lock(SurfaceLockMode.Read))
             using (ISurfaceLock destLock = dest.Lock(SurfaceLockMode.Write))
@@ -1315,7 +1315,7 @@ namespace PSFilterLoad.PSApi
             return bufferSize != size;
         }
 
-        private unsafe short AdvanceStateProc()
+        private short AdvanceStateProc()
         {
             if (outDataPtr != IntPtr.Zero && RectNonEmpty(lastOutRect))
             {
@@ -1448,7 +1448,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="maskPadding">The mask padding mode.</param>
         /// <param name="padding">The padding extents.</param>
         /// <param name="mask">The mask.</param>
-        private static unsafe short SetMaskPadding(IntPtr maskData, int maskRowBytes, Rect16 rect, short maskPadding, FilterPadding padding, ISurface<MaskSurface> mask)
+        private static short SetMaskPadding(IntPtr maskData, int maskRowBytes, Rect16 rect, short maskPadding, FilterPadding padding, ISurface<MaskSurface> mask)
         {
             if (!padding.IsEmpty)
             {
@@ -1476,7 +1476,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private static unsafe void SetMaskEdgePadding(IntPtr maskData,
+        private static void SetMaskEdgePadding(IntPtr maskData,
                                                       int maskRowBytes,
                                                       Rect16 rect,
                                                       FilterPadding padding,
@@ -1567,7 +1567,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="inputPadding">The input padding mode.</param>
         /// <param name="padding">The padding extents.</param>
         /// <param name="surface">The surface.</param>
-        private static unsafe short SetFilterPadding(IntPtr inData,
+        private static short SetFilterPadding(IntPtr inData,
                                                      int inRowBytes,
                                                      Rect16 rect,
                                                      int numberOfPlanes,
@@ -1601,7 +1601,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private static unsafe void SetFilterEdgePadding(IntPtr inData,
+        private static void SetFilterEdgePadding(IntPtr inData,
                                                         int inRowBytes,
                                                         Rect16 rect,
                                                         int numberOfPlanes,
@@ -1678,7 +1678,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="inputRate">The input scaling ratio.</param>
         /// <param name="lockRect">The rectangle to clamp the size to.</param>
-        private unsafe void ScaleTempSurface(Fixed16 inputRate, Rectangle lockRect)
+        private void ScaleTempSurface(Fixed16 inputRate, Rectangle lockRect)
         {
             // If the scale rectangle bounds are not valid return a copy of the original surface.
             if (lockRect.X >= source.Width || lockRect.Y >= source.Height)
@@ -1738,7 +1738,7 @@ namespace PSFilterLoad.PSApi
         /// Fills the input buffer with data from the source image.
         /// </summary>
         /// <param name="filterRecord">The filter record.</param>
-        private unsafe short FillInputBuffer(FilterRecord* filterRecord)
+        private short FillInputBuffer(FilterRecord* filterRecord)
         {
             logger.Log(PluginApiLogCategory.AdvanceStateCallback,
                        "inRowBytes: {0}, Rect: {1}, loPlane: {2}, hiPlane: {3}, inputRate: {4}",
@@ -1824,7 +1824,7 @@ namespace PSFilterLoad.PSApi
         /// Fills the output buffer with data from the destination image.
         /// </summary>
         /// <param name="filterRecord">The filter record.</param>
-        private unsafe short FillOutputBuffer(FilterRecord* filterRecord)
+        private short FillOutputBuffer(FilterRecord* filterRecord)
         {
             logger.Log(PluginApiLogCategory.AdvanceStateCallback,
                        "outRowBytes: {0}, Rect: {1}, loPlane: {2}, hiPlane: {3}",
@@ -1897,7 +1897,7 @@ namespace PSFilterLoad.PSApi
             return PSError.noErr;
         }
 
-        private unsafe void ScaleTempMask(Fixed16 maskRate, Rectangle lockRect)
+        private void ScaleTempMask(Fixed16 maskRate, Rectangle lockRect)
         {
             // If the scale rectangle bounds are not valid return a copy of the original surface.
             if (lockRect.X >= mask!.Width || lockRect.Y >= mask.Height)
@@ -1958,7 +1958,7 @@ namespace PSFilterLoad.PSApi
         /// Fills the mask buffer with data from the mask image.
         /// </summary>
         /// <param name="filterRecord">The filter record.</param>
-        private unsafe short FillMaskBuffer(FilterRecord* filterRecord)
+        private short FillMaskBuffer(FilterRecord* filterRecord)
         {
             logger.Log(PluginApiLogCategory.AdvanceStateCallback,
                        "maskRowBytes: {0}, Rect: {1}, maskRate: {2}",
@@ -2030,7 +2030,7 @@ namespace PSFilterLoad.PSApi
         /// <param name="rect">The target rectangle within the image.</param>
         /// <param name="loPlane">The output loPlane.</param>
         /// <param name="hiPlane">The output hiPlane.</param>
-        private unsafe void StoreOutputBuffer(IntPtr outData, int outRowBytes, Rect16 rect, int loPlane, int hiPlane)
+        private void StoreOutputBuffer(IntPtr outData, int outRowBytes, Rect16 rect, int loPlane, int hiPlane)
         {
             logger.Log(PluginApiLogCategory.AdvanceStateCallback,
                        "inRowBytes = {0}, Rect = {1}, loPlane = {2}, hiPlane = {3}",
@@ -2088,7 +2088,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private unsafe void PreProcessInputData()
+        private void PreProcessInputData()
         {
             if (inputHandling != FilterDataHandling.None && (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection))
             {
@@ -2163,7 +2163,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private unsafe void PostProcessOutputData()
+        private void PostProcessOutputData()
         {
             if (filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection)
             {
@@ -2235,7 +2235,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private unsafe short ColorServicesProc(ColorServicesInfo* info)
+        private short ColorServicesProc(ColorServicesInfo* info)
         {
             if (info == null)
             {
@@ -2372,7 +2372,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private unsafe short DisplayPixelsProc(PSPixelMap* srcPixelMap, VRect* srcRect, int dstRow, int dstCol, IntPtr platformContext)
+        private short DisplayPixelsProc(PSPixelMap* srcPixelMap, VRect* srcRect, int dstRow, int dstCol, IntPtr platformContext)
         {
             logger.Log(PluginApiLogCategory.DisplayPixelsCallback,
                        "srcPixelMap=[{0}], srcRect={1}, dstCol={2}, dstRow={3}, platformContext=0x{4}",
@@ -2564,7 +2564,7 @@ namespace PSFilterLoad.PSApi
             return err;
         }
 
-        private unsafe void DrawFloatingSelectionMask()
+        private void DrawFloatingSelectionMask()
         {
             int width = source.Width;
             int height = source.Height;
@@ -2641,7 +2641,7 @@ namespace PSFilterLoad.PSApi
             }
         }
 
-        private unsafe void SetupSizes()
+        private void SetupSizes()
         {
             if (sizesSetup)
             {
@@ -2671,7 +2671,7 @@ namespace PSFilterLoad.PSApi
             filterRecord->wholeSize.v = height;
         }
 
-        private unsafe void SetupSuites()
+        private void SetupSuites()
         {
             platformDataPtr = Memory.Allocate<PlatformData>(MemoryAllocationOptions.ZeroFill);
             platformDataPtr->hwnd = parentWindowHandle;
@@ -2727,7 +2727,7 @@ namespace PSFilterLoad.PSApi
             basicSuitePtr = basicSuiteProvider.CreateSPBasicSuitePointer();
         }
 
-        private unsafe void SetupFilterRecord()
+        private void SetupFilterRecord()
         {
             filterRecord = Memory.Allocate<FilterRecord>(MemoryAllocationOptions.ZeroFill);
 
@@ -2862,7 +2862,7 @@ namespace PSFilterLoad.PSApi
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        private unsafe void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!disposed)
             {

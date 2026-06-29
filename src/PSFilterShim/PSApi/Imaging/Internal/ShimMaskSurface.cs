@@ -25,7 +25,7 @@ namespace PSFilterLoad.PSApi.Imaging.Internal
     /// <summary>
     /// An 8-bit per pixel surface used for the selection mask.
     /// </summary>
-    internal sealed unsafe class ShimMaskSurface : MaskSurface
+    internal sealed class ShimMaskSurface : MaskSurface
     {
         private readonly WICBitmapSurface<ColorAlpha8> surface;
 

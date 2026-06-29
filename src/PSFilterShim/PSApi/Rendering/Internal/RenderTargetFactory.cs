@@ -14,7 +14,7 @@ using System;
 
 namespace PSFilterLoad.PSApi.Rendering.Internal
 {
-    internal sealed unsafe class RenderTargetFactory : IRenderTargetFactory
+    internal sealed class RenderTargetFactory : IRenderTargetFactory
     {
         private readonly IDirect2DFactory direct2DFactory;
 

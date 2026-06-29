@@ -12,7 +12,7 @@
 
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
-    internal sealed unsafe class ShimTransparencyCheckerboardSurface : TransparencyCheckerboardSurface
+    internal sealed class ShimTransparencyCheckerboardSurface : TransparencyCheckerboardSurface
     {
         private readonly WICBitmapSurface<ColorPbgra32> bitmap;
 

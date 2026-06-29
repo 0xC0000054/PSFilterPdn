@@ -12,7 +12,7 @@
 
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
-    internal sealed unsafe class ShimDisplayPixelsSurface : DisplayPixelsSurface
+    internal sealed class ShimDisplayPixelsSurface : DisplayPixelsSurface
     {
         private readonly WICBitmapSurface<ColorPbgra32> bitmap;
 

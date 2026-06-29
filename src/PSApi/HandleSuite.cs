@@ -283,21 +283,21 @@ namespace PSFilterLoad.PSApi
             return handle;
         }
 
-        public unsafe void DisposeHandle(Handle h)
+        public void DisposeHandle(Handle h)
         {
             logger.Log(PluginApiLogCategory.HandleSuite, "Handle: 0x{0}", new HandleAsHexStringFormatter(h));
 
             DisposeHandleImpl(h);
         }
 
-        private unsafe void DisposeRegularHandle(Handle h)
+        private void DisposeRegularHandle(Handle h)
         {
             logger.Log(PluginApiLogCategory.HandleSuite, "Handle: 0x{0}", new HandleAsHexStringFormatter(h));
 
             DisposeHandleImpl(h);
         }
 
-        private unsafe void DisposeHandleImpl(Handle handle)
+        private void DisposeHandleImpl(Handle handle)
         {
             if (handle != Handle.Null && IsValidReadPtr(handle.Value))
             {

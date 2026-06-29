@@ -239,7 +239,7 @@ namespace PSFilterPdn
 
         private string CreateFilePath(string path) => shellLinkTarget ?? path;
 
-        private unsafe bool IsFileIncluded(string path)
+        private bool IsFileIncluded(string path)
         {
             bool result = false;
 

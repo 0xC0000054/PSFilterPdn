@@ -40,8 +40,8 @@ namespace PSFilterPdn
             }
         }
 
-        private static unsafe void ClipToSelectionMask(IEffectEnvironment environment,
-                                                       IBitmap<ColorBgra32> destination)
+        private static void ClipToSelectionMask(IEffectEnvironment environment,
+                                                IBitmap<ColorBgra32> destination)
         {
             RectInt32 bounds = new(Point2Int32.Zero, environment.Document.Size);
 
@@ -57,7 +57,7 @@ namespace PSFilterPdn
             }
         }
 
-        private static unsafe void SetAlphaTo255(IBitmap<ColorBgra32> destination)
+        private static void SetAlphaTo255(IBitmap<ColorBgra32> destination)
         {
             using (IBitmapLock<ColorBgra32> bitmapLock = destination.Lock(destination.Bounds(), BitmapLockOptions.Write))
             {

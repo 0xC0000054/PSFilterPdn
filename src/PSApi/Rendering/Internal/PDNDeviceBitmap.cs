@@ -14,7 +14,7 @@ using System;
 
 namespace PSFilterLoad.PSApi.Rendering.Internal
 {
-    internal sealed unsafe class PDNDeviceBitmap : Disposable, IDeviceBitmap, INativeResourceProperty<PaintDotNet.Direct2D1.IDeviceBitmap>
+    internal sealed class PDNDeviceBitmap : Disposable, IDeviceBitmap, INativeResourceProperty<PaintDotNet.Direct2D1.IDeviceBitmap>
     {
         private readonly PaintDotNet.Direct2D1.IDeviceBitmap deviceBitmap;
 

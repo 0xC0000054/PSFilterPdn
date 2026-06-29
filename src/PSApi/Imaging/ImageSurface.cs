@@ -12,7 +12,7 @@
 
 namespace PSFilterLoad.PSApi.Imaging
 {
-    internal abstract unsafe class ImageSurface : Disposable, ISurface<ImageSurface>
+    internal abstract class ImageSurface : Disposable, ISurface<ImageSurface>
     {
         public abstract int Width { get; }
 

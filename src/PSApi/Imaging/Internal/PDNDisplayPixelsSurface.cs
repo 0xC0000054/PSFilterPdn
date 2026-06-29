@@ -14,7 +14,7 @@ using PaintDotNet.Imaging;
 
 namespace PSFilterLoad.PSApi.Imaging.Internal
 {
-    internal sealed unsafe class PDNDisplayPixelsSurface : DisplayPixelsSurface
+    internal sealed class PDNDisplayPixelsSurface : DisplayPixelsSurface
     {
         private readonly WICBitmapSurface<ColorPbgra32> bitmap;
 

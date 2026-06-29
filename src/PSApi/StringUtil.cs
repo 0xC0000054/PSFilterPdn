@@ -105,7 +105,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A managed string that holds a copy of the C string.
         /// </returns>
-        internal static unsafe string? FromCString(IntPtr ptr, StringCreationOptions options)
+        internal static string? FromCString(IntPtr ptr, StringCreationOptions options)
         {
             if (!TryGetCStringData(ptr, out ReadOnlySpan<byte> data))
             {
@@ -172,7 +172,7 @@ namespace PSFilterLoad.PSApi
         /// <returns>
         /// A managed string that holds a copy of the C string.
         /// </returns>
-        internal static unsafe string FromCString(ReadOnlySpan<byte> data, StringCreationOptions options)
+        internal static string FromCString(ReadOnlySpan<byte> data, StringCreationOptions options)
         {
             return CreateString(data, options);
         }
@@ -386,8 +386,8 @@ namespace PSFilterLoad.PSApi
             return result;
         }
 
-        private static unsafe ReadOnlySpan<byte> GetTrimmedStringData(ReadOnlySpan<byte> data,
-                                                                      StringCreationOptions options)
+        private static ReadOnlySpan<byte> GetTrimmedStringData(ReadOnlySpan<byte> data,
+                                                               StringCreationOptions options)
         {
             bool trimNullTerminator = options.HasFlag(StringCreationOptions.TrimNullTerminator);
             bool trimWhiteSpace = options.HasFlag(StringCreationOptions.TrimWhiteSpace);
@@ -416,8 +416,8 @@ namespace PSFilterLoad.PSApi
             return data.Slice(start, end - start + 1);
         }
 
-        private static unsafe ReadOnlySpan<char> GetTrimmedStringData(ReadOnlySpan<char> data,
-                                                                      StringCreationOptions options)
+        private static ReadOnlySpan<char> GetTrimmedStringData(ReadOnlySpan<char> data,
+                                                               StringCreationOptions options)
         {
             bool trimNullTerminator = options.HasFlag(StringCreationOptions.TrimNullTerminator);
             bool trimWhiteSpace = options.HasFlag(StringCreationOptions.TrimWhiteSpace);

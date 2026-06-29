@@ -82,7 +82,7 @@ namespace PSFilterLoad.PSApi
         /// </summary>
         /// <param name="options">The memory allocation options.</param>
         /// <returns>A pointer to the allocated block of memory.</returns>
-        public static unsafe T* Allocate<T>(MemoryAllocationOptions options) where T : unmanaged
+        public static T* Allocate<T>(MemoryAllocationOptions options) where T : unmanaged
         {
             return (T*)Allocate((nuint)Marshal.SizeOf<T>(), options);
         }
