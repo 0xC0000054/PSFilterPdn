@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    internal static partial class PluginLoader
+    internal static class PluginLoader
     {
         /// <summary>
         /// Loads the 8bf filters from the specified file.
