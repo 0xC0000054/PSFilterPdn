@@ -183,10 +183,6 @@ namespace PSFilterLoad.PSApi
             return result;
         }
 
-        
-
-        
-
         private static bool ResourceNotFound(int lastError)
         {
             switch (lastError)
