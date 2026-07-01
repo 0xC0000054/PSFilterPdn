@@ -12,7 +12,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace PSFilterLoad.PSApi.Loader
+namespace PSFilterLoad.PSApi.Loader.PIPL
 {
     // The Pack value is used to remove any padding between
     // the signature and version fields.

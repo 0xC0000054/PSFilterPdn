@@ -20,9 +20,9 @@ using System.Text;
 
 using static TerraFX.Interop.Windows.Windows;
 
-namespace PSFilterLoad.PSApi.Loader
+namespace PSFilterLoad.PSApi.Loader.PIPL
 {
-    internal static class AeteResource
+    internal static class BinaryAeteParser
     {
         internal static unsafe AETEData? Parse(HMODULE hModule, short resourceID)
         {
@@ -184,7 +184,7 @@ namespace PSFilterLoad.PSApi.Loader
         }
 
         [DebuggerDisplay("{DebuggerDisplay, nq}")]
-        private unsafe readonly ref struct AeteResourceCString
+        private readonly unsafe ref struct AeteResourceCString
         {
             private readonly ReadOnlySpan<byte> data;
 
@@ -225,7 +225,7 @@ namespace PSFilterLoad.PSApi.Loader
         }
 
         [DebuggerDisplay("{DebuggerDisplay, nq}")]
-        private unsafe readonly ref struct AeteResourcePascalString
+        private readonly unsafe ref struct AeteResourcePascalString
         {
             private readonly ReadOnlySpan<byte> data;
 
