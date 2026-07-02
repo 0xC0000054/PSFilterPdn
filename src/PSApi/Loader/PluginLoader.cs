@@ -55,7 +55,7 @@ namespace PSFilterLoad.PSApi
                 PluginScanningContext context = new(fileName, platform, logger);
 
                 // Use LOAD_LIBRARY_AS_DATAFILE to prevent a BadImageFormatException from being thrown if the file is a different processor architecture than the parent process.
-                const uint dwFlags = LOAD.LOAD_LIBRARY_AS_DATAFILE | LOAD.LOAD_LIBRARY_AS_IMAGE_RESOURCE;
+                const uint dwFlags = LOAD.LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE | LOAD.LOAD_LIBRARY_AS_IMAGE_RESOURCE;
 
                 HMODULE dll = HMODULE.NULL;
 
