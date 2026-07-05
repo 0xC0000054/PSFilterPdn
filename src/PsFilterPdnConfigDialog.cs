@@ -734,8 +734,8 @@ namespace PSFilterPdn
             PSFilterShimSettings settings = new(data.PluginData,
                                                 repeatEffect: false,
                                                 data.ShowAboutDialog,
-                                                new PSFilterLoad.PSApi.ColorRgb24(Environment.PrimaryColor),
-                                                new PSFilterLoad.PSApi.ColorRgb24(Environment.SecondaryColor),
+                                                primaryColor,
+                                                secondaryColor,
                                                 documentDpi.X,
                                                 documentDpi.Y,
                                                 filterCase,
@@ -837,8 +837,8 @@ namespace PSFilterPdn
             documentDpi = new DocumentDpi(environment.Document.Resolution);
             documentMetadataProvider = new DocumentMetadataProvider(environment.Document);
             sourceBitmap = new EffectInputBitmapSurface(environment.GetSourceBitmapBgra32(), imagingFactory);
-            primaryColor = new PSFilterLoad.PSApi.ColorRgb24(environment.PrimaryColor);
-            secondaryColor = new PSFilterLoad.PSApi.ColorRgb24(environment.SecondaryColor);
+            primaryColor = environment.PrimaryColor.ToColorRgb24();
+            secondaryColor = environment.SecondaryColor.ToColorRgb24();
             selectionMask = SelectionMaskRenderer.FromPdnSelection(environment, imagingFactory);
             transparencyCheckerboard = new PDNTransparencyCheckerboardSurface(Services, imagingFactory);
         }

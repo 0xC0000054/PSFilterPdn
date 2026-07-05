@@ -56,6 +56,7 @@
     <Compile Include="..\PSApi\ChannelPortsSuite.cs" Link="PSApi\ChannelPortsSuite.cs" />
     <Compile Include="..\PSApi\ColorPickerDialog.cs" Link="PSApi\ColorPickerDialog.cs" />
     <Compile Include="..\PSApi\ColorPickerService.cs" Link="PSApi\ColorPickerService.cs" />
+    <Compile Include="..\PSApi\ColorRgb24.cs" Link="PSApi\ColorRgb24.cs" />
     <Compile Include="..\PSApi\ColorRgb24.Formatter.cs" Link="PSApi\ColorRgb24.Formatter.cs" />
     <Compile Include="..\PSApi\ColorServicesConvert.cs" Link="PSApi\ColorServicesConvert.cs" />
     <Compile Include="..\PSApi\ColorServicesProc.cs" Link="PSApi\ColorServicesProc.cs" />

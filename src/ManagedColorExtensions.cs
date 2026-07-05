@@ -16,9 +16,11 @@ namespace PSFilterPdn
 {
     internal static class ManagedColorExtensions
     {
-        public static ColorBgra32 GetWorkingSpaceBgra32(this ManagedColor color)
+        public static PSFilterLoad.PSApi.ColorRgb24 ToColorRgb24(this ManagedColor color)
         {
-            return color.GetBgra32(color.ColorContext);
+            ColorBgra32 bgra32 = color.GetBgra32(color.ColorContext);
+
+            return new PSFilterLoad.PSApi.ColorRgb24(bgra32.R, bgra32.G, bgra32.B);
         }
     }
 }
