@@ -28,13 +28,16 @@ namespace PSFilterLoad.PSApi
 {
     internal sealed unsafe class LoadPsFilter : IDisposable, IFilterImageProvider, IPICASuiteDataProvider
     {
-        static bool RectNonEmpty(Rect16 rect)
-        {
-            return rect.left < rect.right && rect.top < rect.bottom;
-        }
-
         private static readonly uint OTOFHandleSize = (uint)IntPtr.Size + 4;
         private const int OTOFSignature = 0x464f544f;
+        /// <summary>
+        /// The host signature (.PDN in little-endian byte order) - 'NDP.'
+        /// </summary>
+        /// <remarks>
+        /// The signature is specified in little-endian byte order for compatibility with previous versions
+        /// that used BitConverter.ToUInt32 after converting ".PDN" to a byte array with Encoding.ASCII.GetBytes.
+        /// </remarks>
+        private const uint HostSignature = 0x4e44502e;
 
         #region CallbackDelegates
         // MiscCallbacks
@@ -137,66 +140,6 @@ namespace PSFilterLoad.PSApi
         private readonly ReadImageDocument readImageDocument;
         private readonly ResourceSuite resourceSuite;
         private readonly SPBasicSuiteProvider basicSuiteProvider;
-
-        /// <summary>
-        /// The host signature (.PDN in little-endian byte order) - 'NDP.'
-        /// </summary>
-        /// <remarks>
-        /// The signature is specified in little-endian byte order for compatibility with previous versions
-        /// that used BitConverter.ToUInt32 after converting ".PDN" to a byte array with Encoding.ASCII.GetBytes.
-        /// </remarks>
-        private const uint HostSignature = 0x4e44502e;
-
-        internal ISurface<ImageSurface> Dest => dest;
-
-        /// <summary>
-        /// Gets the plug-in settings for the current session.
-        /// </summary>
-        /// <returns>
-        /// The plug-in settings for the current session.
-        /// </returns>
-        internal DescriptorRegistryValues? GetRegistryValues()
-        {
-            return basicSuiteProvider.GetRegistryValues();
-        }
-
-        /// <summary>
-        /// Sets the plug-in settings for the current session.
-        /// </summary>
-        /// <param name="value">The plug-in settings for the current session.</param>
-        internal void SetRegistryValues(DescriptorRegistryValues value)
-        {
-            basicSuiteProvider.SetRegistryValues(value);
-        }
-
-        internal string ErrorMessage => errorMessage;
-
-        internal ParameterData FilterParameters
-        {
-            get => new(globalParameters, scriptingData);
-            set
-            {
-                globalParameters = value.GlobalParameters;
-                scriptingData = value.ScriptingData;
-            }
-        }
-
-        /// <summary>
-        /// Is the filter a repeat Effect.
-        /// </summary>
-        internal bool IsRepeatEffect
-        {
-            get => isRepeatEffect;
-            set => isRepeatEffect = value;
-        }
-
-        internal PseudoResourceCollection PseudoResources
-        {
-            get => resourceSuite.PseudoResources;
-            set => resourceSuite.PseudoResources = value;
-        }
-
-        internal FilterPostProcessingOptions PostProcessingOptions { get; private set; }
 
         /// <summary>
         /// Loads and runs Photoshop Filters
@@ -380,6 +323,57 @@ namespace PSFilterLoad.PSApi
             }
         }
 
+        internal ISurface<ImageSurface> Dest => dest;
+
+        /// <summary>
+        /// Gets the plug-in settings for the current session.
+        /// </summary>
+        /// <returns>
+        /// The plug-in settings for the current session.
+        /// </returns>
+        internal DescriptorRegistryValues? GetRegistryValues()
+        {
+            return basicSuiteProvider.GetRegistryValues();
+        }
+
+        /// <summary>
+        /// Sets the plug-in settings for the current session.
+        /// </summary>
+        /// <param name="value">The plug-in settings for the current session.</param>
+        internal void SetRegistryValues(DescriptorRegistryValues value)
+        {
+            basicSuiteProvider.SetRegistryValues(value);
+        }
+
+        internal string ErrorMessage => errorMessage;
+
+        internal ParameterData FilterParameters
+        {
+            get => new(globalParameters, scriptingData);
+            set
+            {
+                globalParameters = value.GlobalParameters;
+                scriptingData = value.ScriptingData;
+            }
+        }
+
+        /// <summary>
+        /// Is the filter a repeat Effect.
+        /// </summary>
+        internal bool IsRepeatEffect
+        {
+            get => isRepeatEffect;
+            set => isRepeatEffect = value;
+        }
+
+        internal PseudoResourceCollection PseudoResources
+        {
+            get => resourceSuite.PseudoResources;
+            set => resourceSuite.PseudoResources = value;
+        }
+
+        internal FilterPostProcessingOptions PostProcessingOptions { get; private set; }
+
         ISurface<ImageSurface> IFilterImageProvider.Source => source;
 
         ISurface<ImageSurface> IFilterImageProvider.Destination => dest;
@@ -395,6 +389,87 @@ namespace PSFilterLoad.PSApi
         ProgressProc IPICASuiteDataProvider.Progress => progressProc;
 
         TestAbortProc IPICASuiteDataProvider.TestAbort => abortProc;
+
+        /// <summary>
+        /// Runs a filter from the specified PluginData
+        /// </summary>
+        /// <param name="data">The PluginData to run</param>
+        /// <param name="showAbout">Show the Filter's About Box</param>
+        /// <returns><c>true</c> if the filter completed processing; otherwise <c>false</c> if an error occurred.</returns>
+        internal bool RunPlugin(PluginData data, bool showAbout)
+        {
+            LoadFilter(data);
+
+            if (showAbout)
+            {
+                return PluginAbout(data);
+            }
+
+            useChannelPorts = EnableChannelPorts(data);
+            basicSuiteProvider.SetPluginName(data.Title.TrimEnd('.'));
+
+            bool copySourceToDestination = true;
+
+            if (data.FilterInfo != null)
+            {
+                FilterCaseInfo info = data.FilterInfo[filterCase];
+                inputHandling = info.InputHandling;
+                outputHandling = info.OutputHandling;
+                FilterCaseInfoFlags filterCaseFlags = info.Flags1;
+
+                copySourceToDestination = (filterCaseFlags & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None;
+                writesOutsideSelection = (filterCaseFlags & FilterCaseInfoFlags.WritesOutsideSelection) != FilterCaseInfoFlags.None;
+
+                bool worksWithBlankData = (filterCaseFlags & FilterCaseInfoFlags.WorksWithBlankData) != FilterCaseInfoFlags.None;
+
+                if ((filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection) && !worksWithBlankData)
+                {
+                    // If the filter does not support processing completely transparent (blank) layers return an error message.
+                    if (IsBlankLayer())
+                    {
+                        errorMessage = StringResources.BlankDataNotSupported;
+                        return false;
+                    }
+                }
+            }
+
+            if (copySourceToDestination || filterCase != FilterCase.EditableTransparencyNoSelection && filterCase != FilterCase.EditableTransparencyWithSelection)
+            {
+                // We copy the source to the destination when the filter requests it, or if the filter does not
+                // support the editable transparency image modes.
+                CopySourceToDestination();
+            }
+
+            if (data.Aete != null)
+            {
+                descriptorSuite.Aete = data.Aete;
+            }
+
+            SetupSuites();
+            SetupFilterRecord();
+
+            PreProcessInputData();
+
+            if (!isRepeatEffect)
+            {
+                if (!PluginParameters(data))
+                {
+                    return false;
+                }
+            }
+
+            if (!PluginPrepare())
+            {
+                return false;
+            }
+
+            if (!PluginApply())
+            {
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Determines whether the memory block is marked as executable.
@@ -445,6 +520,11 @@ namespace PSFilterLoad.PSApi
             }
 
             return result;
+        }
+
+        private static bool RectNonEmpty(Rect16 rect)
+        {
+            return rect.left < rect.right && rect.top < rect.bottom;
         }
 
         /// <summary>
@@ -1115,87 +1195,6 @@ namespace PSFilterLoad.PSApi
                     throw new NotSupportedException(message);
                 }
             }
-        }
-
-        /// <summary>
-        /// Runs a filter from the specified PluginData
-        /// </summary>
-        /// <param name="data">The PluginData to run</param>
-        /// <param name="showAbout">Show the Filter's About Box</param>
-        /// <returns><c>true</c> if the filter completed processing; otherwise <c>false</c> if an error occurred.</returns>
-        internal bool RunPlugin(PluginData data, bool showAbout)
-        {
-            LoadFilter(data);
-
-            if (showAbout)
-            {
-                return PluginAbout(data);
-            }
-
-            useChannelPorts = EnableChannelPorts(data);
-            basicSuiteProvider.SetPluginName(data.Title.TrimEnd('.'));
-
-            bool copySourceToDestination = true;
-
-            if (data.FilterInfo != null)
-            {
-                FilterCaseInfo info = data.FilterInfo[filterCase];
-                inputHandling = info.InputHandling;
-                outputHandling = info.OutputHandling;
-                FilterCaseInfoFlags filterCaseFlags = info.Flags1;
-
-                copySourceToDestination = (filterCaseFlags & FilterCaseInfoFlags.DontCopyToDestination) == FilterCaseInfoFlags.None;
-                writesOutsideSelection = (filterCaseFlags & FilterCaseInfoFlags.WritesOutsideSelection) != FilterCaseInfoFlags.None;
-
-                bool worksWithBlankData = (filterCaseFlags & FilterCaseInfoFlags.WorksWithBlankData) != FilterCaseInfoFlags.None;
-
-                if ((filterCase == FilterCase.EditableTransparencyNoSelection || filterCase == FilterCase.EditableTransparencyWithSelection) && !worksWithBlankData)
-                {
-                    // If the filter does not support processing completely transparent (blank) layers return an error message.
-                    if (IsBlankLayer())
-                    {
-                        errorMessage = StringResources.BlankDataNotSupported;
-                        return false;
-                    }
-                }
-            }
-
-            if (copySourceToDestination || filterCase != FilterCase.EditableTransparencyNoSelection && filterCase != FilterCase.EditableTransparencyWithSelection)
-            {
-                // We copy the source to the destination when the filter requests it, or if the filter does not
-                // support the editable transparency image modes.
-                CopySourceToDestination();
-            }
-
-            if (data.Aete != null)
-            {
-                descriptorSuite.Aete = data.Aete;
-            }
-
-            SetupSuites();
-            SetupFilterRecord();
-
-            PreProcessInputData();
-
-            if (!isRepeatEffect)
-            {
-                if (!PluginParameters(data))
-                {
-                    return false;
-                }
-            }
-
-            if (!PluginPrepare())
-            {
-                return false;
-            }
-
-            if (!PluginApply())
-            {
-                return false;
-            }
-
-            return true;
         }
 
         private string GetErrorMessage(short error)
