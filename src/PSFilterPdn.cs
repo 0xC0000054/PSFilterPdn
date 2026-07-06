@@ -238,7 +238,7 @@ namespace PSFilterPdn
                     lps.PseudoResources = token.PseudoResources;
                     lps.IsRepeatEffect = true;
 
-                    bool result = lps.RunPlugin(token.FilterData, false);
+                    bool result = lps.RunPlugin(token.FilterData);
 
                     if (result)
                     {

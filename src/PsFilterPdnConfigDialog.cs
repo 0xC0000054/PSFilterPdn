@@ -943,12 +943,16 @@ namespace PSFilterPdn
 
                             lps.PseudoResources = pseudoResources;
 
-                            bool showAboutDialog = threadData.ShowAboutDialog;
-                            bool result = lps.RunPlugin(data, showAboutDialog);
-
-                            if (result)
+                            if (threadData.ShowAboutDialog)
                             {
-                                if (!showAboutDialog)
+                                if (!lps.ShowAboutDialog(data) && !string.IsNullOrEmpty(lps.ErrorMessage))
+                                {
+                                    errorInfo = new HostErrorInfo(lps.ErrorMessage);
+                                }
+                            }
+                            else
+                            {
+                                if (lps.RunPlugin(data))
                                 {
                                     destSurface?.Dispose();
                                     destSurface = SurfaceUtil.ToBitmapBgra32(lps.Dest, imagingFactory!);
@@ -960,18 +964,15 @@ namespace PSFilterPdn
                                     pseudoResources = lps.PseudoResources;
                                     descriptorRegistry = lps.GetRegistryValues();
                                 }
-                            }
-                            else
-                            {
-                                if (!string.IsNullOrEmpty(lps.ErrorMessage))
-                                {
-                                    errorInfo = new HostErrorInfo(lps.ErrorMessage);
-                                }
                                 else
                                 {
-                                    if (!showAboutDialog && destSurface != null)
+                                    if (!string.IsNullOrEmpty(lps.ErrorMessage))
                                     {
-                                        destSurface.Dispose();
+                                        errorInfo = new HostErrorInfo(lps.ErrorMessage);
+                                    }
+                                    else
+                                    {
+                                        destSurface?.Dispose();
                                         destSurface = null;
                                     }
                                 }

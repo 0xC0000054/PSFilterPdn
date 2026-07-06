@@ -394,16 +394,10 @@ namespace PSFilterLoad.PSApi
         /// Runs a filter from the specified PluginData
         /// </summary>
         /// <param name="data">The PluginData to run</param>
-        /// <param name="showAbout">Show the Filter's About Box</param>
         /// <returns><c>true</c> if the filter completed processing; otherwise <c>false</c> if an error occurred.</returns>
-        internal bool RunPlugin(PluginData data, bool showAbout)
+        internal bool RunPlugin(PluginData data)
         {
             LoadFilter(data);
-
-            if (showAbout)
-            {
-                return PluginAbout(data);
-            }
 
             useChannelPorts = EnableChannelPorts(data);
             basicSuiteProvider.SetPluginName(data.Title.TrimEnd('.'));
@@ -465,6 +459,67 @@ namespace PSFilterLoad.PSApi
 
             if (!PluginApply())
             {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Shows the about dialog for the specified plugin (if it has one).
+        /// </summary>
+        /// <param name="data">The PluginData to run.</param>
+        /// <returns><c>true</c> on success; otherwise, <c>false</c> if an error occurred.</returns>
+        internal bool ShowAboutDialog(PluginData data)
+        {
+            LoadFilter(data);
+
+            result = PSError.noErr;
+
+            basicSuitePtr = basicSuiteProvider.CreateSPBasicSuitePointer();
+
+            PlatformData platformData = new()
+            {
+                hwnd = parentWindowHandle
+            };
+
+            AboutRecord aboutRecord = new()
+            {
+                platformData = &platformData,
+                sSPBasic = basicSuitePtr,
+                plugInRef = IntPtr.Zero
+            };
+
+            if (data.ModuleEntryPoints == null)
+            {
+                module!.entryPoint(FilterSelector.About, &aboutRecord, ref filterGlobalData, ref result);
+            }
+            else
+            {
+                // From the SDK documentation, if a module contains more than one plugin the host
+                // must call all entry points in the module with the about selector.
+                // One of those entry points will show the about box, and the rest will return
+                // success without doing anything.
+                foreach (string entryPoint in data.ModuleEntryPoints)
+                {
+                    PluginEntryPoint ep = module!.GetEntryPoint(entryPoint);
+
+                    ep(FilterSelector.About, &aboutRecord, ref filterGlobalData, ref result);
+
+                    if (result != PSError.noErr)
+                    {
+                        break;
+                    }
+
+                    GC.KeepAlive(ep);
+                }
+            }
+
+            if (result != PSError.noErr)
+            {
+                logger.Log(PluginApiLogCategory.Error, "FilterSelectorAbout returned result code {0}", result);
+
+                errorMessage = GetErrorMessage(result);
                 return false;
             }
 
@@ -802,57 +857,6 @@ namespace PSFilterLoad.PSApi
                         throw new InvalidEnumArgumentException("PluginDataStorageMethod", (int)globalParameters.PluginDataStorageMethod, typeof(GlobalParameters.DataStorageMethod));
                 }
             }
-        }
-
-        private bool PluginAbout(PluginData data)
-        {
-            result = PSError.noErr;
-
-            basicSuitePtr = basicSuiteProvider.CreateSPBasicSuitePointer();
-
-            PlatformData platformData = new()
-            {
-                hwnd = parentWindowHandle
-            };
-
-            AboutRecord aboutRecord = new()
-            {
-                platformData = &platformData,
-                sSPBasic = basicSuitePtr,
-                plugInRef = IntPtr.Zero
-            };
-
-            if (data.ModuleEntryPoints == null)
-            {
-                module!.entryPoint(FilterSelector.About, &aboutRecord, ref filterGlobalData, ref result);
-            }
-            else
-            {
-                // call all the entry points in the module only one should show the about box.
-                foreach (string entryPoint in data.ModuleEntryPoints)
-                {
-                    PluginEntryPoint ep = module!.GetEntryPoint(entryPoint);
-
-                    ep(FilterSelector.About, &aboutRecord, ref filterGlobalData, ref result);
-
-                    if (result != PSError.noErr)
-                    {
-                        break;
-                    }
-
-                    GC.KeepAlive(ep);
-                }
-            }
-
-            if (result != PSError.noErr)
-            {
-                logger.Log(PluginApiLogCategory.Error, "FilterSelectorAbout returned result code {0}", result);
-
-                errorMessage = GetErrorMessage(result);
-                return false;
-            }
-
-            return true;
         }
 
         private bool PluginApply()

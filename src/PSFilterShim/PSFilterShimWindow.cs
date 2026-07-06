@@ -478,11 +478,16 @@ namespace PSFilterShim
                             lps.SetRegistryValues(registryValues);
                         }
 
-                        bool result = lps.RunPlugin(pluginData, settings.ShowAboutDialog);
-
-                        if (result)
+                        if (settings.ShowAboutDialog)
                         {
-                            if (!settings.ShowAboutDialog)
+                            if (!lps.ShowAboutDialog(pluginData))
+                            {
+                                pipeClient.SetProxyErrorMessage(lps.ErrorMessage);
+                            }
+                        }
+                        else
+                        {
+                            if (lps.RunPlugin(pluginData))
                             {
                                 pipeClient.SetDestinationImage(lps.Dest, lps.PostProcessingOptions);
 
@@ -507,10 +512,10 @@ namespace PSFilterShim
                                     }
                                 }
                             }
-                        }
-                        else
-                        {
-                            pipeClient.SetProxyErrorMessage(lps.ErrorMessage);
+                            else
+                            {
+                                pipeClient.SetProxyErrorMessage(lps.ErrorMessage);
+                            }
                         }
                     }
                 }
