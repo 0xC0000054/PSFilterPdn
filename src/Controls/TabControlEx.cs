@@ -116,7 +116,7 @@ namespace PSFilterPdn.Controls
                 {
                     backColor = value;
 
-                    // Negative values darken the specified color while positive values lighen it.
+                    // Negative values darken the specified color while positive values lighten it.
                     float correctionFactor = PluginThemingUtil.IsDarkMode(backColor) ? -0.5f : 0.5f;
 
                     inactiveTabColor = ChangeColorBrightness(value, correctionFactor);
