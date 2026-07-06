@@ -13,7 +13,6 @@
 using PSFilterLoad.PSApi.Diagnostics;
 using PSFilterLoad.PSApi.Imaging;
 using System;
-using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
