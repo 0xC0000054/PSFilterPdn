@@ -421,7 +421,6 @@ namespace PSFilterShim
             }
         }
 
-        [SkipLocalsInit]
         private byte[] SendMessageToServer(Command command)
         {
             byte[] reply = [];
@@ -446,7 +445,6 @@ namespace PSFilterShim
             return reply;
         }
 
-        [SkipLocalsInit]
         private byte[] SendMessageToServer(Command command, byte value)
         {
             byte[] reply = [];

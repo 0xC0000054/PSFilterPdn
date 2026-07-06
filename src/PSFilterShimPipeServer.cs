@@ -196,7 +196,6 @@ namespace PSFilterPdn
             return security;
         }
 
-        [SkipLocalsInit]
         private void WaitForConnectionCallback(IAsyncResult result)
         {
             if (IsDisposed)
