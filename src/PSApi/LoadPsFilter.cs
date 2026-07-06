@@ -810,9 +810,14 @@ namespace PSFilterLoad.PSApi
 
             basicSuitePtr = basicSuiteProvider.CreateSPBasicSuitePointer();
 
+            PlatformData platformData = new()
+            {
+                hwnd = parentWindowHandle
+            };
+
             AboutRecord aboutRecord = new()
             {
-                platformData = platformDataPtr,
+                platformData = &platformData,
                 sSPBasic = basicSuitePtr,
                 plugInRef = IntPtr.Zero
             };
