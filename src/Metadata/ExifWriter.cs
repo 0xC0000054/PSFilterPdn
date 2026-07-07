@@ -442,12 +442,10 @@ namespace PSFilterPdn.Metadata
             {
                 if (!exifItems.ContainsKey(ExifPropertyKeys.Photo.ExifVersion.Path.TagID))
                 {
-#pragma warning disable IDE0230 // Use UTF-8 string literal
                     exifItems.Add(
                         ExifPropertyKeys.Photo.ExifVersion.Path.TagID,
                         new ExifValue(ExifValueType.Undefined,
                                       [(byte)'0', (byte)'2', (byte)'3', (byte)'0']));
-#pragma warning restore IDE0230 // Use UTF-8 string literal
                 }
             }
 
