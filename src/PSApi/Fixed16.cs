@@ -12,6 +12,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
@@ -24,19 +25,19 @@ namespace PSFilterLoad.PSApi
     [StructLayout(LayoutKind.Sequential)]
     internal readonly struct Fixed16 : IEquatable<Fixed16>
     {
+        private const int WholeNumberShift = 16;
+        private const int FractionMask = 0xffff;
+
+        public static readonly Fixed16 Zero = new(0 << WholeNumberShift, isFixedNumber: true);
+        public static readonly Fixed16 One = new(1 << WholeNumberShift, isFixedNumber: true);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Fixed16"/> structure.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is less than zero or greater than 65535.</exception>
-        public Fixed16(int value)
+        public Fixed16(int value) : this(value, isFixedNumber: false)
         {
-            if (unchecked((uint)value) > 65535)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), value, "The value must be between 0 and 65535.");
-            }
-
-            Value = value << 16;
         }
 
         /// <summary>
@@ -46,6 +47,29 @@ namespace PSFilterLoad.PSApi
         public Fixed16(double value)
         {
             Value = (int)(value * 65536.0);
+        }
+
+        private Fixed16(int value, bool isFixedNumber)
+        {
+            if (isFixedNumber)
+            {
+                Value = value;
+            }
+            else
+            {
+                if (unchecked((uint)value) > 65535)
+                {
+                    ThrowForOutOfRangeInteger(value);
+                }
+
+                Value = value << WholeNumberShift;
+            }
+
+            [DoesNotReturn]
+            static void ThrowForOutOfRangeInteger(int value)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "The value must be between 0 and 65535.");
+            }
         }
 
         /// <summary>
@@ -108,7 +132,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public readonly int GetFractionalPart()
         {
-            return Value & 0xffff;
+            return Value & FractionMask;
         }
 
         /// <summary>
@@ -119,7 +143,7 @@ namespace PSFilterLoad.PSApi
         /// </returns>
         public readonly int GetWholeNumberPart()
         {
-            return Value >> 16;
+            return Value >> WholeNumberShift;
         }
 
         /// <summary>

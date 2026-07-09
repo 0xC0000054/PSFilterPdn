@@ -2794,8 +2794,8 @@ namespace PSFilterLoad.PSApi
             filterRecord->maskPadding = PSConstants.Padding.plugInWantsErrorOnBoundsException;
             filterRecord->samplingSupport = PSConstants.SamplingSupport.hostSupportsIntegralSampling;
             filterRecord->reservedByte = 0;
-            filterRecord->inputRate = new Fixed16(1);
-            filterRecord->maskRate = new Fixed16(1);
+            filterRecord->inputRate = Fixed16.One;
+            filterRecord->maskRate = Fixed16.One;
             filterRecord->colorServices = new UnmanagedFunctionPointer<ColorServicesProc>(colorProc);
 
             filterRecord->imageServicesProcs = imageServicesProcsPtr;

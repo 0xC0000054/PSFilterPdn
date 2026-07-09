@@ -237,7 +237,7 @@ namespace PSFilterLoad.PSApi
                     break;
                 case PSProperties.RulerOriginH:
                 case PSProperties.RulerOriginV:
-                    error = GetSimpleProperty(simpleProperty, new Fixed16(0).Value);
+                    error = GetSimpleProperty(simpleProperty, Fixed16.Zero.Value);
                     break;
                 case PSProperties.SerialString:
                     error = CreateComplexPropertyHandle(complexProperty, HostSerial);
