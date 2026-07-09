@@ -75,8 +75,8 @@ namespace PSFilterLoad.PSApi
                 readDocumentPtr->bounds.left = 0;
                 readDocumentPtr->bounds.right = documentWidth;
                 readDocumentPtr->bounds.bottom = documentHeight;
-                readDocumentPtr->hResolution = new Fixed16((int)(dpiX + 0.5));
-                readDocumentPtr->vResolution = new Fixed16((int)(dpiY + 0.5));
+                readDocumentPtr->hResolution = new Fixed16(dpiX);
+                readDocumentPtr->vResolution = new Fixed16(dpiY);
 
                 ReadChannelDesc* rgbChannels = CreateReadChannelDesc(PSConstants.ChannelPorts.Red,
                                                                      StringResources.RedChannelName,

@@ -2672,8 +2672,8 @@ namespace PSFilterLoad.PSApi
             filterRecord->filterRect.right = width;
             filterRecord->filterRect.bottom = height;
 
-            filterRecord->imageHRes = new Fixed16((int)(dpiX + 0.5));
-            filterRecord->imageVRes = new Fixed16((int)(dpiY + 0.5));
+            filterRecord->imageHRes = new Fixed16(dpiX);
+            filterRecord->imageVRes = new Fixed16(dpiY);
 
             filterRecord->wholeSize.h = width;
             filterRecord->wholeSize.v = height;
