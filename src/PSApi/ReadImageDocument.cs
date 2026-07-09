@@ -16,49 +16,31 @@ using System.Runtime.InteropServices;
 
 namespace PSFilterLoad.PSApi
 {
-    internal sealed class ReadImageDocument : IDisposable
+    internal sealed class ReadImageDocument : Disposable
     {
-        private sealed unsafe class ChannelDescPtrs : IDisposable
+        private sealed unsafe class ChannelDescPtrs : Disposable
         {
             private ReadChannelDesc* readChannelDesc;
             private IntPtr channelName;
-            private bool disposed;
 
             public ChannelDescPtrs(ReadChannelDesc* readChannelDesc, IntPtr channelName)
             {
                 this.readChannelDesc = readChannelDesc;
                 this.channelName = channelName;
-                disposed = false;
             }
 
-            ~ChannelDescPtrs()
+            protected override void Dispose(bool disposing)
             {
-                Dispose(false);
-            }
-
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-
-            private void Dispose(bool disposing)
-            {
-                if (!disposed)
+                if (disposing)
                 {
-                    disposed = true;
+                }
 
-                    if (disposing)
-                    {
-                    }
+                Memory.Free(ref readChannelDesc);
 
-                    Memory.Free(ref readChannelDesc);
-
-                    if (channelName != IntPtr.Zero)
-                    {
-                        Marshal.FreeHGlobal(channelName);
-                        channelName = IntPtr.Zero;
-                    }
+                if (channelName != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(channelName);
+                    channelName = IntPtr.Zero;
                 }
             }
         }
@@ -68,7 +50,6 @@ namespace PSFilterLoad.PSApi
         private readonly double dpiX;
         private readonly double dpiY;
         private readonly List<ChannelDescPtrs> channelReadDescPtrs;
-        private bool disposed;
 
         public ReadImageDocument(int documentWidth, int documentHeight, double dpiX, double dpiY)
         {
@@ -77,7 +58,6 @@ namespace PSFilterLoad.PSApi
             this.dpiX = dpiX;
             this.dpiY = dpiY;
             channelReadDescPtrs = [];
-            disposed = false;
         }
 
         public unsafe ReadImageDocumentDesc* CreateReadImageDocumentPointer(FilterCase filterCase, bool hasSelection)
@@ -156,12 +136,10 @@ namespace PSFilterLoad.PSApi
             return readDocumentPtr;
         }
 
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (disposing)
             {
-                disposed = true;
-
                 for (int i = 0; i < channelReadDescPtrs.Count; i++)
                 {
                     channelReadDescPtrs[i].Dispose();
