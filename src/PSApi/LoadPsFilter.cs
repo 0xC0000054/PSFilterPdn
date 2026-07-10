@@ -1767,7 +1767,7 @@ namespace PSFilterLoad.PSApi
             int stride = width * nplanes;
             if (inDataPtr == IntPtr.Zero)
             {
-                int len = stride * height;
+                long len = (long)stride * height;
 
                 try
                 {
@@ -1852,7 +1852,7 @@ namespace PSFilterLoad.PSApi
 
             if (outDataPtr == IntPtr.Zero)
             {
-                int len = stride * height;
+                long len = (long)stride * height;
 
                 try
                 {
@@ -1988,7 +1988,7 @@ namespace PSFilterLoad.PSApi
 
             if (maskDataPtr == IntPtr.Zero)
             {
-                int len = width * height;
+                long len = (long)width * height;
 
                 try
                 {
