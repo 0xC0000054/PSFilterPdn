@@ -1215,9 +1215,7 @@ namespace PSFilterLoad.PSApi
             {
                 if (error == PSError.errReportString)
                 {
-                    message = basicSuiteProvider.ErrorSuiteMessage
-                              ?? StringUtil.FromPascalString(errorStringPtr->data)
-                              ?? string.Empty;
+                    message = basicSuiteProvider.ErrorSuiteMessage ?? errorStringPtr->ToString();
                 }
                 else
                 {
@@ -2252,7 +2250,8 @@ namespace PSFilterLoad.PSApi
             {
                 case ColorServicesSelector.ChooseColor:
 
-                    string prompt = StringUtil.FromPascalString(info->selectorParameter.pickerPrompt, string.Empty);
+                    Str255* pickerPrompt = info->selectorParameter.pickerPrompt;
+                    string prompt = pickerPrompt != null ? pickerPrompt->ToString() : string.Empty;
 
                     if (info->sourceSpace != ColorSpace.RGBSpace)
                     {
@@ -2326,7 +2325,7 @@ namespace PSFilterLoad.PSApi
                     break;
                 case ColorServicesSelector.SamplePoint:
 
-                    Point16* point = (Point16*)info->selectorParameter.globalSamplePoint;
+                    Point16* point = info->selectorParameter.globalSamplePoint;
 
                     if (point->h >= 0 && point->h < source.Width && point->v >= 0 && point->v < source.Height)
                     {

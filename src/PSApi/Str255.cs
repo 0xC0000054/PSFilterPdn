@@ -21,5 +21,17 @@ namespace PSFilterLoad.PSApi
     internal unsafe struct Str255
     {
         public fixed byte data[256];
+
+        public override readonly string ToString()
+        {
+            string result;
+
+            fixed (byte* ptr = data)
+            {
+                result = StringUtil.FromPascalString(ptr) ?? string.Empty;
+            }
+
+            return result;
+        }
     }
 }

@@ -45,12 +45,12 @@ namespace PSFilterLoad.PSApi
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    internal struct SelectorParameters
+    internal unsafe struct SelectorParameters
     {
         [FieldOffset(0)]
-        public nint pickerPrompt;
+        public Str255* pickerPrompt;
         [FieldOffset(0)]
-        public nint globalSamplePoint;
+        public Point16* globalSamplePoint;
         [FieldOffset(0)]
         public SpecialColorID specialColorID;
     }
