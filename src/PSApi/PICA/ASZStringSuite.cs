@@ -550,7 +550,7 @@ namespace PSFilterLoad.PSApi.PICA
                 {
                     string value = item.Data;
 
-                    if (value != null && value.IndexOf('&') >= 0)
+                    if (value != null && value.Contains('&'))
                     {
                         try
                         {
