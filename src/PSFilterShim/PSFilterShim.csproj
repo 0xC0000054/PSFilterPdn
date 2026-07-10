@@ -67,6 +67,7 @@
     <Compile Include="..\PSApi\DictionaryExtensions.cs" Link="PSApi\DictionaryExtensions.cs" />
     <Compile Include="..\PSApi\DisplayPixelsProc.cs" Link="PSApi\DisplayPixelsProc.cs" />
     <Compile Include="..\PSApi\Disposable.cs" Link="PSApi\Disposable.cs" />
+    <Compile Include="..\PSApi\DisposableUtil.cs" Link="PSApi\DisposableUtil.cs" />
     <Compile Include="..\PSApi\FilterCase.cs" Link="PSApi\FilterCase.cs" />
     <Compile Include="..\PSApi\FilterCaseInfo.cs" Link="PSApi\FilterCaseInfo.cs" />
     <Compile Include="..\PSApi\FilterCaseInfoCollection.cs" Link="PSApi\FilterCaseInfoCollection.cs" />

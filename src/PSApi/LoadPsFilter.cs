@@ -1693,12 +1693,7 @@ namespace PSFilterLoad.PSApi
             {
                 if ((tempSurface == null) || tempSurface.Width != source.Width || tempSurface.Height != source.Height)
                 {
-                    if (tempSurface != null)
-                    {
-                        tempSurface.Dispose();
-                        tempSurface = null;
-                    }
-
+                    tempSurface?.Dispose();
                     tempSurface = source.Clone();
                 }
                 return;
@@ -1725,11 +1720,7 @@ namespace PSFilterLoad.PSApi
 
             if ((tempSurface == null) || scaleWidth != tempSurface.Width && scaleHeight != tempSurface.Height)
             {
-                if (tempSurface != null)
-                {
-                    tempSurface.Dispose();
-                    tempSurface = null;
-                }
+                tempSurface?.Dispose();
 
                 if (scaleFactor > 1) // Filter preview
                 {
@@ -1912,12 +1903,7 @@ namespace PSFilterLoad.PSApi
             {
                 if ((tempMask == null) || tempMask.Width != mask.Width || tempMask.Height != mask.Height)
                 {
-                    if (tempMask != null)
-                    {
-                        tempMask.Dispose();
-                        tempMask = null;
-                    }
-
+                    tempMask?.Dispose();
                     tempMask = mask.Clone();
                 }
                 return;
@@ -1945,11 +1931,7 @@ namespace PSFilterLoad.PSApi
 
             if ((tempMask == null) || scaleWidth != tempMask.Width && scaleHeight != tempMask.Height)
             {
-                if (tempMask != null)
-                {
-                    tempMask.Dispose();
-                    tempMask = null;
-                }
+                tempMask?.Dispose();
 
                 if (scaleFactor > 1) // Filter preview
                 {
@@ -2358,24 +2340,14 @@ namespace PSFilterLoad.PSApi
                 || width != displaySurface.Width
                 || height != displaySurface.Height)
             {
-                if (displaySurface != null)
-                {
-                    displaySurface.Dispose();
-                    displaySurface = null;
-                }
-
+                displaySurface?.Dispose();
                 displaySurface = surfaceFactory.CreateDisplayPixelsSurface(width, height);
             }
 
             if (displayPixelsRenderTarget == null
                 || haveMask != displayPixelsRenderTarget.SupportsTransparency)
             {
-                if (displayPixelsRenderTarget != null)
-                {
-                    displayPixelsRenderTarget.Dispose();
-                    displayPixelsRenderTarget = null;
-                }
-
+                displayPixelsRenderTarget?.Dispose();
                 displayPixelsRenderTarget = renderTargetFactory.Create(haveMask);
             }
         }
@@ -2876,57 +2848,19 @@ namespace PSFilterLoad.PSApi
             {
                 if (disposing)
                 {
-                    if (module != null)
-                    {
-                        module.Dispose();
-                        module = null;
-                    }
+                    DisposableUtil.Free(ref module);
 
                     source?.Dispose();
                     dest?.Dispose();
 
-                    if (transparencyCheckerboard != null)
-                    {
-                        transparencyCheckerboard.Dispose();
-                        transparencyCheckerboard = null;
-                    }
-
-                    if (checkerboardBrush != null)
-                    {
-                        checkerboardBrush.Dispose();
-                        checkerboardBrush = null;
-                    }
-
-                    if (displayPixelsRenderTarget != null)
-                    {
-                        displayPixelsRenderTarget.Dispose();
-                        displayPixelsRenderTarget = null;
-                    }
-
-                    if (tempSurface != null)
-                    {
-                        tempSurface.Dispose();
-                        tempSurface = null;
-                    }
-
-                    if (mask != null)
-                    {
-                        mask.Dispose();
-                        mask = null;
-                    }
-
-                    if (tempMask != null)
-                    {
-                        tempMask.Dispose();
-                        tempMask = null;
-                    }
-
-                    if (displaySurface != null)
-                    {
-                        displaySurface.Dispose();
-                        displaySurface = null;
-                    }
-
+                    DisposableUtil.Free(ref transparencyCheckerboard);
+                    DisposableUtil.Free(ref checkerboardBrush);
+                    DisposableUtil.Free(ref displayPixelsRenderTarget);
+                    DisposableUtil.Free(ref tempSurface);
+                    DisposableUtil.Free(ref mask);
+                    DisposableUtil.Free(ref tempMask);
+                    DisposableUtil.Free(ref displaySurface);
+                    
                     descriptorSuite?.Dispose();
                     channelPortsSuite?.Dispose();
                     readImageDocument?.Dispose();
