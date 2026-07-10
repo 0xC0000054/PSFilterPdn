@@ -76,7 +76,6 @@ namespace PSFilterLoad.PSApi
 
         private GlobalParameters globalParameters;
         private Dictionary<uint, AETEValue>? scriptingData;
-        private bool isRepeatEffect;
         private IntPtr pluginDataHandle;
         private IntPtr filterParametersHandle;
         private bool parameterDataRestored;
@@ -103,7 +102,6 @@ namespace PSFilterLoad.PSApi
 
         private readonly CancellationToken cancellationToken;
         private readonly Action<byte>? progressFunc;
-        private string errorMessage;
         private readonly FilterCase filterCase;
         private readonly short numberOfPlanes;
         private readonly double dpiX;
@@ -208,11 +206,11 @@ namespace PSFilterLoad.PSApi
 
             filterGlobalData = IntPtr.Zero;
             previousPhase = PluginPhase.None;
-            errorMessage = string.Empty;
+            ErrorMessage = string.Empty;
             disposed = false;
             sizesSetup = false;
             frValuesSetup = false;
-            isRepeatEffect = false;
+            IsRepeatEffect = false;
             parameterDataRestored = false;
             pluginDataRestored = false;
             globalParameters = new GlobalParameters();
@@ -345,7 +343,7 @@ namespace PSFilterLoad.PSApi
             basicSuiteProvider.SetRegistryValues(value);
         }
 
-        internal string ErrorMessage => errorMessage;
+        internal string ErrorMessage { get; private set; }
 
         internal ParameterData FilterParameters
         {
@@ -360,11 +358,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Is the filter a repeat Effect.
         /// </summary>
-        internal bool IsRepeatEffect
-        {
-            get => isRepeatEffect;
-            set => isRepeatEffect = value;
-        }
+        internal bool IsRepeatEffect { get; set; }
 
         internal PseudoResourceCollection PseudoResources
         {
@@ -421,7 +415,7 @@ namespace PSFilterLoad.PSApi
                     // If the filter does not support processing completely transparent (blank) layers return an error message.
                     if (IsBlankLayer())
                     {
-                        errorMessage = StringResources.BlankDataNotSupported;
+                        ErrorMessage = StringResources.BlankDataNotSupported;
                         return false;
                     }
                 }
@@ -444,7 +438,7 @@ namespace PSFilterLoad.PSApi
 
             PreProcessInputData();
 
-            if (!isRepeatEffect)
+            if (!IsRepeatEffect)
             {
                 if (!PluginParameters(data))
                 {
@@ -519,7 +513,7 @@ namespace PSFilterLoad.PSApi
             {
                 logger.Log(PluginApiLogCategory.Error, "FilterSelectorAbout returned result code {0}", result);
 
-                errorMessage = GetErrorMessage(result);
+                ErrorMessage = GetErrorMessage(result);
                 return false;
             }
 
@@ -874,11 +868,11 @@ namespace PSFilterLoad.PSApi
 
             if (result != PSError.noErr)
             {
-                errorMessage = GetErrorMessage(result);
+                ErrorMessage = GetErrorMessage(result);
 
                 logger.Log(PluginApiLogCategory.Error,
                            "FilterSelectorStart returned result code: {0}({1})",
-                           errorMessage,
+                           ErrorMessage,
                            result);
 
                 return false;
@@ -907,11 +901,11 @@ namespace PSFilterLoad.PSApi
 
                     logger.Log(PluginApiLogCategory.Selector, "After FilterSelectorFinish");
 
-                    errorMessage = GetErrorMessage(saved_result);
+                    ErrorMessage = GetErrorMessage(saved_result);
 
                     logger.Log(PluginApiLogCategory.Error,
                                "FilterSelectorContinue returned result code: {0}({1})",
-                               errorMessage,
+                               ErrorMessage,
                                saved_result);
 
                     return false;
@@ -923,7 +917,7 @@ namespace PSFilterLoad.PSApi
 
                     if (result != PSError.noErr)
                     {
-                        errorMessage = GetErrorMessage(result);
+                        ErrorMessage = GetErrorMessage(result);
                     }
 
                     return false;
@@ -941,7 +935,7 @@ namespace PSFilterLoad.PSApi
 
             PostProcessOutputData();
 
-            if (!isRepeatEffect && result == PSError.noErr)
+            if (!IsRepeatEffect && result == PSError.noErr)
             {
                 SaveParameterHandles();
                 SaveScriptingParameters();
@@ -974,11 +968,11 @@ namespace PSFilterLoad.PSApi
 
             if (result != PSError.noErr)
             {
-                errorMessage = GetErrorMessage(result);
+                ErrorMessage = GetErrorMessage(result);
 
                 logger.Log(PluginApiLogCategory.Error,
                            "FilterSelectorParameters failed result code: {0}({1})",
-                           errorMessage,
+                           ErrorMessage,
                            result);
 
                 return false;
@@ -1111,11 +1105,11 @@ namespace PSFilterLoad.PSApi
 
             if (result != PSError.noErr)
             {
-                errorMessage = GetErrorMessage(result);
+                ErrorMessage = GetErrorMessage(result);
 
                 logger.Log(PluginApiLogCategory.Error,
                            "FilterSelectorPrepare failed result code: {0}({1})",
-                           errorMessage,
+                           ErrorMessage,
                            result);
 
                 return false;
@@ -2685,7 +2679,7 @@ namespace PSFilterLoad.PSApi
             descriptorParametersPtr->descriptorParametersVersion = PSConstants.kCurrentDescriptorParametersVersion;
             descriptorParametersPtr->readDescriptorProcs = readDescriptorPtr;
             descriptorParametersPtr->writeDescriptorProcs = writeDescriptorPtr;
-            descriptorParametersPtr->recordInfo = isRepeatEffect ? RecordInfo.plugInDialogNone : RecordInfo.plugInDialogOptional;
+            descriptorParametersPtr->recordInfo = IsRepeatEffect ? RecordInfo.plugInDialogNone : RecordInfo.plugInDialogOptional;
 
             if (scriptingData != null)
             {
@@ -2696,7 +2690,7 @@ namespace PSFilterLoad.PSApi
                 }
                 descriptorSuite.SetScriptingData(descriptorParametersPtr->descriptor, scriptingData);
                 basicSuiteProvider.SetScriptingData(descriptorParametersPtr->descriptor, scriptingData);
-                descriptorParametersPtr->playInfo = isRepeatEffect ? PlayInfo.plugInDialogDontDisplay : PlayInfo.plugInDialogDisplay;
+                descriptorParametersPtr->playInfo = IsRepeatEffect ? PlayInfo.plugInDialogDontDisplay : PlayInfo.plugInDialogDisplay;
             }
             else
             {

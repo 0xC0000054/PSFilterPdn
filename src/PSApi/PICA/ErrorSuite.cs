@@ -20,9 +20,8 @@ namespace PSFilterLoad.PSApi.PICA
         private readonly ErrorSuiteSetErrorFromCString setErrorFromCString;
         private readonly ErrorSuiteSetErrorFromZString setErrorFromZString;
         private readonly IASZStringSuite zstringSuite;
-        private string errorMessage;
 
-        public string ErrorMessage => errorMessage;
+        public string ErrorMessage { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorSuite"/> class.
@@ -37,7 +36,7 @@ namespace PSFilterLoad.PSApi.PICA
             setErrorFromCString = new ErrorSuiteSetErrorFromCString(SetErrorFromCString);
             setErrorFromZString = new ErrorSuiteSetErrorFromZString(SetErrorFromZString);
             this.zstringSuite = zstringSuite;
-            errorMessage = string.Empty;
+            ErrorMessage = string.Empty;
         }
 
         unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
@@ -64,7 +63,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (str != IntPtr.Zero)
             {
-                errorMessage = StringUtil.FromPascalString((byte*)str)!;
+                ErrorMessage = StringUtil.FromPascalString((byte*)str)!;
 
                 return PSError.kSPNoError;
             }
@@ -76,7 +75,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (str != IntPtr.Zero)
             {
-                errorMessage = StringUtil.FromCString(str)!;
+                ErrorMessage = StringUtil.FromCString(str)!;
 
                 return PSError.kSPNoError;
             }
@@ -88,7 +87,7 @@ namespace PSFilterLoad.PSApi.PICA
         {
             if (zstringSuite.ConvertToString(str, out string? value))
             {
-                errorMessage = value;
+                ErrorMessage = value;
 
                 return PSError.kSPNoError;
             }

@@ -31,14 +31,9 @@ namespace PSFilterLoad.PSApi.PICA
 
         private sealed class ZString
         {
-            private int refCount;
             private string data;
 
-            public int RefCount
-            {
-                get => refCount;
-                set => refCount = value;
-            }
+            public int RefCount { get; set; }
 
             public string Data
             {
@@ -62,7 +57,7 @@ namespace PSFilterLoad.PSApi.PICA
                     throw new ArgumentNullException(nameof(ptr));
                 }
 
-                refCount = 1;
+                RefCount = 1;
 
                 switch (format)
                 {
@@ -86,7 +81,7 @@ namespace PSFilterLoad.PSApi.PICA
             /// <param name="data">The data.</param>
             public ZString(string data)
             {
-                refCount = 1;
+                RefCount = 1;
                 this.data = data;
             }
         }
