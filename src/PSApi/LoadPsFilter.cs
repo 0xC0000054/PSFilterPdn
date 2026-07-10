@@ -1699,14 +1699,21 @@ namespace PSFilterLoad.PSApi
                 return;
             }
 
-            int scaleFactor = inputRate.ToInt32();
-            if (scaleFactor == 0) // Photoshop 2.5 filters don't use the host scaling.
-            {
-                scaleFactor = 1;
-            }
+            int scaleWidth;
+            int scaleHeight;
 
-            int scaleWidth = source.Width / scaleFactor;
-            int scaleHeight = source.Height / scaleFactor;
+            int scaleFactor = FilterPreviewScaling.GetIntegerScaleFactor(inputRate);
+
+            if (scaleFactor > 1)
+            {
+                scaleWidth = source.Width / scaleFactor;
+                scaleHeight = source.Height / scaleFactor;
+            }
+            else
+            {
+                scaleWidth = source.Width;
+                scaleHeight = source.Height;
+            }
 
             if (lockRect.Width > scaleWidth)
             {
@@ -1837,7 +1844,7 @@ namespace PSFilterLoad.PSApi
             int width = rect.right - rect.left;
             int height = rect.bottom - rect.top;
 
-            FilterPadding padding = new(rect, width, height, dest.Size, null);
+            FilterPadding padding = new(rect, width, height, dest.Size, Fixed16.One);
 
             Rectangle lockRect = new(rect.left + padding.left, rect.top + padding.top, width - padding.Horizontal, height - padding.Vertical);
 
@@ -1909,15 +1916,21 @@ namespace PSFilterLoad.PSApi
                 return;
             }
 
-            int scaleFactor = maskRate.ToInt32();
+            int scaleWidth;
+            int scaleHeight;
 
-            if (scaleFactor == 0)
+            int scaleFactor = FilterPreviewScaling.GetIntegerScaleFactor(maskRate);
+
+            if (scaleFactor > 1)
             {
-                scaleFactor = 1;
+                scaleWidth = source.Width / scaleFactor;
+                scaleHeight = source.Height / scaleFactor;
             }
-
-            int scaleWidth = mask.Width / scaleFactor;
-            int scaleHeight = mask.Height / scaleFactor;
+            else
+            {
+                scaleWidth = source.Width;
+                scaleHeight = source.Height;
+            }
 
             if (lockRect.Width > scaleWidth)
             {
@@ -2056,7 +2069,7 @@ namespace PSFilterLoad.PSApi
                 int width = rect.right - rect.left;
                 int height = rect.bottom - rect.top;
 
-                FilterPadding padding = new(rect, width, height, dest.Size, null);
+                FilterPadding padding = new(rect, width, height, dest.Size, Fixed16.One);
 
                 Rectangle lockRect = new(rect.left + padding.left, rect.top + padding.top, width - padding.Horizontal, height - padding.Vertical);
 

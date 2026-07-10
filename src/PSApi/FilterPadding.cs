@@ -23,7 +23,7 @@ namespace PSFilterLoad.PSApi
                              int requestedWidth,
                              int requestedHeight,
                              in Size surfaceSize,
-                             Fixed16? scaling)
+                             Fixed16 scaling)
         {
             left = 0;
             top = 0;
@@ -45,14 +45,10 @@ namespace PSFilterLoad.PSApi
             int surfaceWidth;
             int surfaceHeight;
 
-            if (scaling.HasValue)
-            {
-                int scaleFactor = scaling.Value.ToInt32();
-                if (scaleFactor == 0)
-                {
-                    scaleFactor = 1;
-                }
+            int scaleFactor = FilterPreviewScaling.GetIntegerScaleFactor(scaling);
 
+            if (scaleFactor > 1)
+            {
                 surfaceWidth = surfaceSize.Width / scaleFactor;
                 surfaceHeight = surfaceSize.Height / scaleFactor;
             }
