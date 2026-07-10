@@ -1752,7 +1752,7 @@ namespace PSFilterLoad.PSApi
                        filterRecord->inRect,
                        filterRecord->inLoPlane,
                        filterRecord->inHiPlane,
-                       new Fixed16AsIntegerStringFormatter(filterRecord->inputRate));
+                       new Fixed16Formatter(filterRecord->inputRate));
 
             Rect16 rect = filterRecord->inRect;
 
@@ -1967,7 +1967,7 @@ namespace PSFilterLoad.PSApi
                        "maskRowBytes: {0}, Rect: {1}, maskRate: {2}",
                        filterRecord->maskRowBytes,
                        filterRecord->maskRect,
-                       new Fixed16AsIntegerStringFormatter(filterRecord->maskRate));
+                       new Fixed16Formatter(filterRecord->maskRate));
 
             Rect16 rect = filterRecord->maskRect;
             int width = rect.right - rect.left;

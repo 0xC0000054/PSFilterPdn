@@ -12,15 +12,15 @@
 
 namespace PSFilterLoad.PSApi.Diagnostics
 {
-    internal readonly struct Fixed16AsIntegerStringFormatter
+    internal readonly struct Fixed16Formatter
     {
         private readonly Fixed16 value;
 
-        public Fixed16AsIntegerStringFormatter(Fixed16 value) => this.value = value;
+        public Fixed16Formatter(Fixed16 value) => this.value = value;
 
         public override string ToString()
         {
-            return value.ToInt32().ToString();
+            return value.IsInteger ? value.ToInt32().ToString() : value.ToDouble().ToString();
         }
     }
 }
