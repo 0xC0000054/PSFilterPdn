@@ -57,7 +57,7 @@ namespace PSFilterLoad.PSApi.Loader
         }
 
         [UnmanagedCallersOnly]
-        private static unsafe BOOL EnumPiMI(HMODULE hModule, char* lpszType, char* lpszName, nint lParam)
+        private static BOOL EnumPiMI(HMODULE hModule, char* lpszType, char* lpszName, nint lParam)
         {
             GCHandle handle = GCHandle.FromIntPtr(lParam);
             PluginScanningContext context = (PluginScanningContext)handle.Target!;
