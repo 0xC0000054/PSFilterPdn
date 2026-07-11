@@ -36,18 +36,20 @@ namespace PSFilterLoad.PSApi
         /// <param name="entryPoint">The filter entry point.</param>
         /// <param name="category">The filter category.</param>
         /// <param name="title">The filter title.</param>
+        /// <param name="runWith32BitShim"><c>true</c> if the filter should be run with the 32-bit surrogate process; otherwise, <c>false</c>.</param>
         /// <param name="processorArchitecture">The processor architecture of the plug-in.</param>
         internal PluginData(string fileName,
                             string entryPoint,
                             string category,
                             string title,
+                            bool runWith32BitShim,
                             Architecture processorArchitecture) :
             this(fileName,
                  entryPoint,
                  category,
                  title,
                  null,
-                 true,
+                 runWith32BitShim,
                  null,
                  string.Empty,
                  processorArchitecture,

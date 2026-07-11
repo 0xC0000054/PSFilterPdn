@@ -120,7 +120,12 @@ namespace PSFilterLoad.PSApi.Loader
                 // The entry point number is the same as the resource name.
                 string entryPoint = "ENTRYPOINT" + pluginResourceName.ToString(CultureInfo.InvariantCulture);
 
-                context.plugins.Add(new PluginData(context.fileName, entryPoint, category, title!, context.processorArchitecture));
+                context.plugins.Add(new PluginData(context.fileName,
+                                                   entryPoint,
+                                                   category,
+                                                   title!,
+                                                   context.runWith32BitShim,
+                                                   context.processorArchitecture));
             }
             catch (Exception ex)
             {
