@@ -42,7 +42,7 @@ namespace PSFilterLoad.PSApi.Loader
 
                 fixed (char* typePtr = "_8BFM")
                 {
-                    if (!TerraFX.Interop.Windows.Windows.EnumResourceNamesW(hModule, typePtr, &EnumPiMI, GCHandle.ToIntPtr(handle)))
+                    if (!TerraFX.Interop.Windows.Windows.EnumResourceNamesW(hModule, typePtr, &Enum8BFM, GCHandle.ToIntPtr(handle)))
                     {
                         error = Marshal.GetLastSystemError();
                     }
@@ -57,7 +57,7 @@ namespace PSFilterLoad.PSApi.Loader
         }
 
         [UnmanagedCallersOnly]
-        private static BOOL EnumPiMI(HMODULE hModule, char* lpszType, char* lpszName, nint lParam)
+        private static BOOL Enum8BFM(HMODULE hModule, char* lpszType, char* lpszName, nint lParam)
         {
             GCHandle handle = GCHandle.FromIntPtr(lParam);
             PluginScanningContext context = (PluginScanningContext)handle.Target!;
