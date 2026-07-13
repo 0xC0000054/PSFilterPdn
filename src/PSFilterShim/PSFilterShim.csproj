@@ -73,7 +73,7 @@
     <Compile Include="..\PSApi\FilterCaseInfoCollection.cs" Link="PSApi\FilterCaseInfoCollection.cs" />
     <Compile Include="..\PSApi\FilterPadding.cs" Link="PSApi\FilterPadding.cs" />
     <Compile Include="..\PSApi\FilterPostProcessingOptions.cs" Link="PSApi\FilterPostProcessingOptions.cs" />
-    <Compile Include="..\PSApi\FilterPreviewScaling.cs" Link="FilterPreviewScaling.cs" />
+    <Compile Include="..\PSApi\FilterPreviewScaling.cs" Link="PSApi\FilterPreviewScaling.cs" />
     <Compile Include="..\PSApi\FilterRecord.cs" Link="PSApi\FilterRecord.cs" />
     <Compile Include="..\PSApi\FilterSelector.cs" Link="PSApi\FilterSelector.cs" />
     <Compile Include="..\PSApi\Fixed16.cs" Link="PSApi\Fixed16.cs" />
