@@ -107,7 +107,7 @@
     <Compile Include="..\PSApi\PlugInMonitor.cs" Link="PSApi\PlugInMonitor.cs" />
     <Compile Include="..\PSApi\PluginPhase.cs" Link="PSApi\PluginPhase.cs" />
     <Compile Include="..\PSApi\PluginUISettings.cs" Link="PSApi\PluginUISettings.cs" />
-    <Compile Include="..\PSApi\Point.cs" Link="PSApi\Point.cs" />
+    <Compile Include="..\PSApi\Point16.cs" Link="PSApi\Point16.cs" />
     <Compile Include="..\PSApi\ProcessEventProc.cs" Link="PSApi\ProcessEventProc.cs" />
     <Compile Include="..\PSApi\ProgressProc.cs" Link="PSApi\ProgressProc.cs" />
     <Compile Include="..\PSApi\PropertyProcs.cs" Link="PSApi\PropertyProcs.cs" />
@@ -121,7 +121,7 @@
     <Compile Include="..\PSApi\PSProperties.cs" Link="PSApi\PSProperties.cs" />
     <Compile Include="..\PSApi\ReadImageDocument.cs" Link="PSApi\ReadImageDocument.cs" />
     <Compile Include="..\PSApi\ReadImageDocumentDesc.cs" Link="PSApi\ReadImageDocumentDesc.cs" />
-    <Compile Include="..\PSApi\Rect.cs" Link="PSApi\Rect.cs" />
+    <Compile Include="..\PSApi\Rect16.cs" Link="PSApi\Rect16.cs" />
     <Compile Include="..\PSApi\ResourceProc.cs" Link="PSApi\ResourceProc.cs" />
     <Compile Include="..\PSApi\ResourceSuite.cs" Link="PSApi\ResourceSuite.cs" />
     <Compile Include="..\PSApi\RGBColor.cs" Link="PSApi\RGBColor.cs" />
