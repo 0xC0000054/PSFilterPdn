@@ -1341,7 +1341,7 @@ namespace PSFilterLoad.PSApi
                         filterRecord->maskData = IntPtr.Zero;
                     }
 
-                    error = FillMaskBuffer(filterRecord);
+                    error = FillMaskBuffer();
                     if (error != PSError.noErr)
                     {
                         return error;
@@ -1373,7 +1373,7 @@ namespace PSFilterLoad.PSApi
                         filterRecord->inData = IntPtr.Zero;
                     }
 
-                    error = FillInputBuffer(filterRecord);
+                    error = FillInputBuffer();
                     if (error != PSError.noErr)
                     {
                         return error;
@@ -1407,7 +1407,7 @@ namespace PSFilterLoad.PSApi
                         filterRecord->outData = IntPtr.Zero;
                     }
 
-                    error = FillOutputBuffer(filterRecord);
+                    error = FillOutputBuffer();
 
                     if (error != PSError.noErr)
                     {
@@ -1735,8 +1735,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Fills the input buffer with data from the source image.
         /// </summary>
-        /// <param name="filterRecord">The filter record.</param>
-        private short FillInputBuffer(FilterRecord* filterRecord)
+        private short FillInputBuffer()
         {
             logger.Log(PluginApiLogCategory.AdvanceStateCallback,
                        "inRowBytes: {0}, Rect: {1}, loPlane: {2}, hiPlane: {3}, inputRate: {4}",
@@ -1821,8 +1820,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Fills the output buffer with data from the destination image.
         /// </summary>
-        /// <param name="filterRecord">The filter record.</param>
-        private short FillOutputBuffer(FilterRecord* filterRecord)
+        private short FillOutputBuffer()
         {
             logger.Log(PluginApiLogCategory.AdvanceStateCallback,
                        "outRowBytes: {0}, Rect: {1}, loPlane: {2}, hiPlane: {3}",
@@ -1952,8 +1950,7 @@ namespace PSFilterLoad.PSApi
         /// <summary>
         /// Fills the mask buffer with data from the mask image.
         /// </summary>
-        /// <param name="filterRecord">The filter record.</param>
-        private short FillMaskBuffer(FilterRecord* filterRecord)
+        private short FillMaskBuffer()
         {
             logger.Log(PluginApiLogCategory.AdvanceStateCallback,
                        "maskRowBytes: {0}, Rect: {1}, maskRate: {2}",
