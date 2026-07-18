@@ -323,11 +323,8 @@ namespace PSFilterPdn
             {
                 if (repeatEffect)
                 {
-                    if (token.Dest != null)
-                    {
-                        token.Dest.Dispose();
-                        token.Dest = null;
-                    }
+                    token.Dest?.Dispose();
+                    token.Dest = null;
 
                     if (token.FilterData != null)
                     {
