@@ -18,46 +18,46 @@ namespace PSFilterShim
     internal sealed class DocumentMetadataProvider : IDocumentMetadataProvider
     {
         private readonly PSFilterShimPipeClient pipeClient;
-        private readonly Lazy<byte[]> exifBytes;
-        private readonly Lazy<byte[]> iccProfileBytes;
-        private readonly Lazy<byte[]> iptcCaptionRecordBytes;
-        private readonly Lazy<byte[]> xmpBytes;
+        private readonly Lazy<ReadOnlyMemory<byte>> exifBytes;
+        private readonly Lazy<ReadOnlyMemory<byte>> iccProfileBytes;
+        private readonly Lazy<ReadOnlyMemory<byte>> iptcCaptionRecordBytes;
+        private readonly Lazy<ReadOnlyMemory<byte>> xmpBytes;
 
         public DocumentMetadataProvider(PSFilterShimPipeClient pipeClient)
         {
             ArgumentNullException.ThrowIfNull(pipeClient);
 
             this.pipeClient = pipeClient;
-            exifBytes = new Lazy<byte[]>(CacheExifBytes);
-            iccProfileBytes = new Lazy<byte[]>(CacheIccProfileBytes);
-            iptcCaptionRecordBytes = new Lazy<byte[]>(CacheIptcCaptionRecordBytes);
-            xmpBytes = new Lazy<byte[]>(CacheXmpBytes);
+            exifBytes = new Lazy<ReadOnlyMemory<byte>>(CacheExifBytes);
+            iccProfileBytes = new Lazy<ReadOnlyMemory<byte>>(CacheIccProfileBytes);
+            iptcCaptionRecordBytes = new Lazy<ReadOnlyMemory<byte>>(CacheIptcCaptionRecordBytes);
+            xmpBytes = new Lazy<ReadOnlyMemory<byte>>(CacheXmpBytes);
         }
 
-        public ReadOnlySpan<byte> GetExifData() => exifBytes.Value;
+        public ReadOnlySpan<byte> GetExifData() => exifBytes.Value.Span;
 
-        public ReadOnlySpan<byte> GetIccProfileData() => iccProfileBytes.Value;
+        public ReadOnlySpan<byte> GetIccProfileData() => iccProfileBytes.Value.Span;
 
-        public ReadOnlySpan<byte> GetIptcCaptionRecord() => iptcCaptionRecordBytes.Value;
+        public ReadOnlySpan<byte> GetIptcCaptionRecord() => iptcCaptionRecordBytes.Value.Span;
 
-        public ReadOnlySpan<byte> GetXmpData() => xmpBytes.Value;
+        public ReadOnlySpan<byte> GetXmpData() => xmpBytes.Value.Span;
 
-        private byte[] CacheExifBytes()
+        private ReadOnlyMemory<byte> CacheExifBytes()
         {
             return pipeClient.GetExifData();
         }
 
-        private byte[] CacheIccProfileBytes()
+        private ReadOnlyMemory<byte> CacheIccProfileBytes()
         {
             return pipeClient.GetIccProfileData();
         }
 
-        private byte[] CacheIptcCaptionRecordBytes()
+        private ReadOnlyMemory<byte> CacheIptcCaptionRecordBytes()
         {
             return pipeClient.GetIptcCaptionRecordData();
         }
 
-        private byte[] CacheXmpBytes()
+        private ReadOnlyMemory<byte> CacheXmpBytes()
         {
             return pipeClient.GetXmpData();
         }
