@@ -84,22 +84,22 @@ namespace PSFilterShim
             SendMessageToServer(Command.ReportProgress, progressPercentage);
         }
 
-        public byte[] GetExifData()
+        public ReadOnlyMemory<byte> GetExifData()
         {
             return SendMessageToServer(Command.GetExifMetadata);
         }
 
-        public byte[] GetIccProfileData()
+        public ReadOnlyMemory<byte> GetIccProfileData()
         {
             return SendMessageToServer(Command.GetIccProfile);
         }
 
-        public byte[] GetIptcCaptionRecordData()
+        public ReadOnlyMemory<byte> GetIptcCaptionRecordData()
         {
             return SendMessageToServer(Command.GetIptcCaptionRecord);
         }
 
-        public byte[] GetXmpData()
+        public ReadOnlyMemory<byte> GetXmpData()
         {
             return SendMessageToServer(Command.GetXmpMetadata);
         }
