@@ -21,48 +21,25 @@ namespace PSFilterLoad.PSApi.PICA
 {
     internal sealed class PICABufferSuite : IDisposable, IPICASuiteAllocator
     {
-        private sealed class BufferEntry : IDisposable
+        private sealed class BufferEntry : Disposable
         {
             private IntPtr pointer;
-            private readonly uint size;
-            private bool disposed;
 
             public BufferEntry(IntPtr pointer, uint size)
             {
                 this.pointer = pointer;
-                this.size = size;
-                disposed = false;
+                Size = size;
             }
 
-            public uint Size => size;
+            public uint Size { get; }
 
-            public void Dispose()
+            protected override void Dispose(bool disposing)
             {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-
-            private void Dispose(bool disposing)
-            {
-                if (!disposed)
+                if (pointer != IntPtr.Zero)
                 {
-                    if (disposing)
-                    {
-                    }
-
-                    if (pointer != IntPtr.Zero)
-                    {
-                        Memory.Free(pointer);
-                        pointer = IntPtr.Zero;
-                    }
-
-                    disposed = true;
+                    Memory.Free(pointer);
+                    pointer = IntPtr.Zero;
                 }
-            }
-
-            ~BufferEntry()
-            {
-                Dispose(false);
             }
         }
 
