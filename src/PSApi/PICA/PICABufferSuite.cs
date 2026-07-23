@@ -66,10 +66,7 @@ namespace PSFilterLoad.PSApi.PICA
 
         unsafe IntPtr IPICASuiteAllocator.Allocate(int version)
         {
-            if (disposed)
-            {
-                throw new ObjectDisposedException("PICABufferSuite");
-            }
+            ObjectDisposedException.ThrowIf(disposed, this);
 
             if (!IsSupportedVersion(version))
             {
