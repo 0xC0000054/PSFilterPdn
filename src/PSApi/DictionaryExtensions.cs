@@ -15,7 +15,7 @@ using System.Collections.Generic;
 
 namespace PSFilterLoad.PSApi
 {
-    public static class DictionaryExtensions
+    internal static class DictionaryExtensions
     {
         public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
         {
