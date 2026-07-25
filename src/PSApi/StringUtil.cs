@@ -38,25 +38,6 @@ namespace PSFilterLoad.PSApi
         /// Creates a <see cref="string"/> from a Pascal string.
         /// </summary>
         /// <param name="pascalString">The pascal string to convert.</param>
-        /// <param name="defaultValue">The value returned if <paramref name="pascalString"/> is null.</param>
-        /// <returns>
-        /// A managed string that holds a copy of the Pascal string.
-        /// If <paramref name="pascalString"/> is null, the method returns <paramref name="defaultValue"/>.
-        /// </returns>
-        internal static unsafe string FromPascalString(IntPtr pascalString, string defaultValue)
-        {
-            if (pascalString == IntPtr.Zero)
-            {
-                return defaultValue;
-            }
-
-            return FromPascalString((byte*)pascalString)!;
-        }
-
-        /// <summary>
-        /// Creates a <see cref="string"/> from a Pascal string.
-        /// </summary>
-        /// <param name="pascalString">The pascal string to convert.</param>
         /// <returns>
         /// A managed string that holds a copy of the Pascal string.
         /// If <paramref name="pascalString"/> is null, the method returns null.
