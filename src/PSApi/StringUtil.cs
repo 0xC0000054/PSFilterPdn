@@ -236,61 +236,61 @@ namespace PSFilterLoad.PSApi
         {
             string result;
 
-            if (options.HasFlag(StringCreationOptions.RemoveAllWhiteSpace))
+            ReadOnlySpan<byte> trimmed = GetTrimmedStringData(data, options);
+
+            if (trimmed.Length == 0)
             {
-                byte[]? arrayFromPool = null;
-
-                try
-                {
-                    const int StackBufferSize = 256;
-
-                    Span<byte> buffer = stackalloc byte[StackBufferSize];
-
-                    if (data.Length > StackBufferSize)
-                    {
-                        arrayFromPool = ArrayPool<byte>.Shared.Rent(data.Length);
-                        buffer = arrayFromPool;
-                    }
-
-                    int index = 0;
-
-                    for (int i = 0; i < data.Length; i++)
-                    {
-                        byte value = data[i];
-
-                        if (!IsWhiteSpaceWindows1252(value))
-                        {
-                            buffer[index] = value;
-                            index++;
-                        }
-                    }
-
-                    Span<byte> bytes = buffer.Slice(0, index);
-
-                    if (options.HasFlag(StringCreationOptions.UseStringPool))
-                    {
-                        result = StringPool.Shared.GetOrAdd(bytes, Windows1252Encoding);
-                    }
-                    else
-                    {
-                        result = Windows1252Encoding.GetString(bytes);
-                    }
-                }
-                finally
-                {
-                    if (arrayFromPool != null)
-                    {
-                        ArrayPool<byte>.Shared.Return(arrayFromPool);
-                    }
-                }
+                result = string.Empty;
             }
             else
             {
-                ReadOnlySpan<byte> trimmed = GetTrimmedStringData(data, options);
-
-                if (trimmed.Length == 0)
+                if (options.HasFlag(StringCreationOptions.RemoveAllWhiteSpace))
                 {
-                    result = string.Empty;
+                    byte[]? arrayFromPool = null;
+
+                    try
+                    {
+                        const int StackBufferSize = 256;
+
+                        Span<byte> buffer = stackalloc byte[StackBufferSize];
+
+                        if (trimmed.Length > StackBufferSize)
+                        {
+                            arrayFromPool = ArrayPool<byte>.Shared.Rent(trimmed.Length);
+                            buffer = arrayFromPool;
+                        }
+
+                        int index = 0;
+
+                        for (int i = 0; i < trimmed.Length; i++)
+                        {
+                            byte value = trimmed[i];
+
+                            if (!IsWhiteSpaceWindows1252(value))
+                            {
+                                buffer[index] = value;
+                                index++;
+                            }
+                        }
+
+                        Span<byte> bytes = buffer.Slice(0, index);
+
+                        if (options.HasFlag(StringCreationOptions.UseStringPool))
+                        {
+                            result = StringPool.Shared.GetOrAdd(bytes, Windows1252Encoding);
+                        }
+                        else
+                        {
+                            result = Windows1252Encoding.GetString(bytes);
+                        }
+                    }
+                    finally
+                    {
+                        if (arrayFromPool != null)
+                        {
+                            ArrayPool<byte>.Shared.Return(arrayFromPool);
+                        }
+                    }
                 }
                 else
                 {
@@ -312,44 +312,44 @@ namespace PSFilterLoad.PSApi
         {
             string result;
 
-            if (options.HasFlag(StringCreationOptions.RemoveAllWhiteSpace))
+            ReadOnlySpan<char> trimmed = GetTrimmedStringData(data, options);
+
+            if (trimmed.Length == 0)
             {
-                using (SpanOwner<char> spanOwner = SpanOwner<char>.Allocate(data.Length))
-                {
-                    Span<char> buffer = spanOwner.Span;
-
-                    int index = 0;
-
-                    for (int i = 0; i < data.Length; i++)
-                    {
-                        char value = data[i];
-
-                        if (!char.IsWhiteSpace(value))
-                        {
-                            buffer[index] = value;
-                            index++;
-                        }
-                    }
-
-                    Span<char> chars = buffer.Slice(0, index);
-
-                    if (options.HasFlag(StringCreationOptions.UseStringPool))
-                    {
-                        result = StringPool.Shared.GetOrAdd(chars);
-                    }
-                    else
-                    {
-                        result = new string(chars);
-                    }
-                }
+                result = string.Empty;
             }
             else
             {
-                ReadOnlySpan<char> trimmed = GetTrimmedStringData(data, options);
-
-                if (trimmed.Length == 0)
+                if (options.HasFlag(StringCreationOptions.RemoveAllWhiteSpace))
                 {
-                    result = string.Empty;
+                    using (SpanOwner<char> spanOwner = SpanOwner<char>.Allocate(trimmed.Length))
+                    {
+                        Span<char> buffer = spanOwner.Span;
+
+                        int index = 0;
+
+                        for (int i = 0; i < trimmed.Length; i++)
+                        {
+                            char value = trimmed[i];
+
+                            if (!char.IsWhiteSpace(value))
+                            {
+                                buffer[index] = value;
+                                index++;
+                            }
+                        }
+
+                        Span<char> chars = buffer.Slice(0, index);
+
+                        if (options.HasFlag(StringCreationOptions.UseStringPool))
+                        {
+                            result = StringPool.Shared.GetOrAdd(chars);
+                        }
+                        else
+                        {
+                            result = new string(chars);
+                        }
+                    }
                 }
                 else
                 {
