@@ -24,11 +24,13 @@ namespace PSFilterLoad.PSApi.Loader
         /// Scans the specified module for binary PIPL resources.
         /// </summary>
         /// <param name="hModule">The module.</param>
-        /// <param name="context">The scanning context.</param>
+        /// <param name="generalContext">The scanning context.</param>
         /// <returns>The Windows error code from the scan.</returns>
-        internal static int Scan(HMODULE hModule, PluginScanningContext context)
+        internal static int Scan(HMODULE hModule, GeneralPluginScanningContext generalContext)
         {
             int error = ERROR.ERROR_SUCCESS;
+
+            BinaryPIPLPluginScanningContext context = new(generalContext);
 
             GCHandle handle = GCHandle.Alloc(context, GCHandleType.Normal);
             try
@@ -53,7 +55,7 @@ namespace PSFilterLoad.PSApi.Loader
         private static BOOL EnumPiPL(HMODULE hModule, char* lpszType, char* lpszName, nint lParam)
         {
             GCHandle handle = GCHandle.FromIntPtr(lParam);
-            PluginScanningContext context = (PluginScanningContext)handle.Target!;
+            BinaryPIPLPluginScanningContext context = (BinaryPIPLPluginScanningContext)handle.Target!;
             nuint pluginResourceName = new(lpszName);
 
             try
@@ -61,29 +63,29 @@ namespace PSFilterLoad.PSApi.Loader
                 HRSRC hRes = TerraFX.Interop.Windows.Windows.FindResourceW(hModule, lpszName, lpszType);
                 if (hRes == IntPtr.Zero)
                 {
-                    context.logger.Log(context.fileName,
-                                       PluginLoadingLogCategory.Error,
-                                       "FindResource failed for PiPL.");
+                    context.general.logger.Log(context.general.fileName,
+                                               PluginLoadingLogCategory.Error,
+                                               "FindResource failed for PiPL.");
                     return BOOL.TRUE;
                 }
 
                 HGLOBAL loadRes = TerraFX.Interop.Windows.Windows.LoadResource(hModule, hRes);
                 if (loadRes == IntPtr.Zero)
                 {
-                    context.logger.Log(context.fileName,
-                                       PluginLoadingLogCategory.Error,
-                                       "LoadResource failed for PiPL.",
-                                       context.fileName);
+                    context.general.logger.Log(context.general.fileName,
+                                               PluginLoadingLogCategory.Error,
+                                               "LoadResource failed for PiPL.",
+                                               context.general.fileName);
                     return BOOL.TRUE;
                 }
 
                 void* lockRes = TerraFX.Interop.Windows.Windows.LockResource(loadRes);
                 if (lockRes == null)
                 {
-                    context.logger.Log(context.fileName,
-                                       PluginLoadingLogCategory.Error,
-                                       "LockResource failed for PiPL.",
-                                       context.fileName);
+                    context.general.logger.Log(context.general.fileName,
+                                               PluginLoadingLogCategory.Error,
+                                               "LockResource failed for PiPL.",
+                                               context.general.fileName);
                     return BOOL.TRUE;
                 }
 
@@ -93,11 +95,11 @@ namespace PSFilterLoad.PSApi.Loader
 
                 if (version != PSConstants.LatestPiPLVersion)
                 {
-                    context.logger.Log(context.fileName,
-                                       PluginLoadingLogCategory.Error,
-                                       "Invalid PiPL version: {0}, expected version {1}.",
-                                       version,
-                                       PSConstants.LatestPiPLVersion);
+                    context.general.logger.Log(context.general.fileName,
+                                               PluginLoadingLogCategory.Error,
+                                               "Invalid PiPL version: {0}, expected version {1}.",
+                                               version,
+                                               PSConstants.LatestPiPLVersion);
                     return BOOL.TRUE;
                 }
                 string? entryPoint = string.Empty;
@@ -133,7 +135,7 @@ namespace PSFilterLoad.PSApi.Loader
                         uint kind = *(uint*)dataPtr;
                         if (kind != PSConstants.FilterKind)
                         {
-                            context.logger.Log(context.fileName,
+                            context.general.logger.Log(context.general.fileName,
                                                PluginLoadingLogCategory.Error,
                                                "PiPL resource '{0}' is not a Photoshop Filter; expected type 8BFM, actual type: '{1}'.",
                                                pluginResourceName,
@@ -141,12 +143,12 @@ namespace PSFilterLoad.PSApi.Loader
                             return BOOL.TRUE;
                         }
                     }
-                    else if (propKey == context.platformEntryPoint)
+                    else if (propKey == context.entryPointPropertyID)
                     {
                         entryPoint = StringUtil.FromCString(dataPtr, StringCreationOptions.UseStringPool);
                         if (string.IsNullOrWhiteSpace(entryPoint))
                         {
-                            context.logger.Log(context.fileName,
+                            context.general.logger.Log(context.general.fileName,
                                                PluginLoadingLogCategory.Error,
                                                "PiPL resource '{0}' has an invalid entry point name.",
                                                pluginResourceName);
@@ -162,14 +164,14 @@ namespace PSFilterLoad.PSApi.Loader
                         if (major > PSConstants.latestFilterVersion ||
                             major == PSConstants.latestFilterVersion && minor > PSConstants.latestFilterSubVersion)
                         {
-                            context.logger.Log(context.fileName,
-                                               PluginLoadingLogCategory.Error,
-                                               "PiPL resource '{0}' requires newer filter interface version {1}.{2} and only version {3}.{4} is supported.",
-                                               pluginResourceName,
-                                               major,
-                                               minor,
-                                               PSConstants.latestFilterVersion,
-                                               PSConstants.latestFilterSubVersion);
+                            context.general.logger.Log(context.general.fileName,
+                                                       PluginLoadingLogCategory.Error,
+                                                       "PiPL resource '{0}' requires newer filter interface version {1}.{2} and only version {3}.{4} is supported.",
+                                                       pluginResourceName,
+                                                       major,
+                                                       minor,
+                                                       PSConstants.latestFilterVersion,
+                                                       PSConstants.latestFilterSubVersion);
                             return BOOL.TRUE;
                         }
                     }
@@ -177,10 +179,10 @@ namespace PSFilterLoad.PSApi.Loader
                     {
                         if ((dataPtr[0] & PSConstants.flagSupportsRGBColor) != PSConstants.flagSupportsRGBColor)
                         {
-                            context.logger.Log(context.fileName,
-                                             PluginLoadingLogCategory.Error,
-                                             "PiPL resource '{0}' does not support the RGBColor image mode.",
-                                             pluginResourceName);
+                            context.general.logger.Log(context.general.fileName,
+                                                       PluginLoadingLogCategory.Error,
+                                                       "PiPL resource '{0}' does not support the RGBColor image mode.",
+                                                       pluginResourceName);
                             return BOOL.TRUE;
                         }
                     }
@@ -191,10 +193,10 @@ namespace PSFilterLoad.PSApi.Loader
 
                         if (string.IsNullOrWhiteSpace(category))
                         {
-                            context.logger.Log(context.fileName,
-                                               PluginLoadingLogCategory.Error,
-                                               "PiPL resource '{0}' has an invalid category name.",
-                                               pluginResourceName);
+                            context.general.logger.Log(context.general.fileName,
+                                                       PluginLoadingLogCategory.Error,
+                                                       "PiPL resource '{0}' has an invalid category name.",
+                                                       pluginResourceName);
                             return BOOL.TRUE;
                         }
                         else if (category.StartsWith("**Hidden*", StringComparison.Ordinal))
@@ -205,10 +207,10 @@ namespace PSFilterLoad.PSApi.Loader
                             //
                             // We check for the category name **Hidden* because that is what the Dfine 2 filter in
                             // the Google Nik Collection uses for its additional helper filters.
-                            context.logger.Log(context.fileName,
-                                               PluginLoadingLogCategory.Error,
-                                               "PiPL resource '{0}' can only be executed by scripting plug-ins.",
-                                               pluginResourceName);
+                            context.general.logger.Log(context.general.fileName,
+                                                       PluginLoadingLogCategory.Error,
+                                                       "PiPL resource '{0}' can only be executed by scripting plug-ins.",
+                                                       pluginResourceName);
                             return BOOL.TRUE;
                         }
 
@@ -220,10 +222,10 @@ namespace PSFilterLoad.PSApi.Loader
 
                         if (string.IsNullOrWhiteSpace(title))
                         {
-                            context.logger.Log(context.fileName,
-                                               PluginLoadingLogCategory.Error,
-                                               "PiPL resource '{0}' has an invalid title.",
-                                               pluginResourceName);
+                            context.general.logger.Log(context.general.fileName,
+                                                       PluginLoadingLogCategory.Error,
+                                                       "PiPL resource '{0}' has an invalid title.",
+                                                       pluginResourceName);
                             return BOOL.TRUE;
                         }
                     }
@@ -264,11 +266,11 @@ namespace PSFilterLoad.PSApi.Loader
                         uint host = *(uint*)dataPtr;
                         if (host != PSConstants.kPhotoshopSignature && host != PSConstants.AnyHostSignature)
                         {
-                            context.logger.Log(context.fileName,
-                                               PluginLoadingLogCategory.Error,
-                                               "PiPL resource '{0}' requires host '{1}'.",
-                                               pluginResourceName,
-                                               new FourCCAsStringFormatter(host));
+                            context.general.logger.Log(context.general.fileName,
+                                                       PluginLoadingLogCategory.Error,
+                                                       "PiPL resource '{0}' requires host '{1}'.",
+                                                       pluginResourceName,
+                                                       new FourCCAsStringFormatter(host));
                             return BOOL.TRUE;
                         }
                     }
@@ -324,11 +326,11 @@ namespace PSFilterLoad.PSApi.Loader
                     }
                     else
                     {
-                        context.logger.Log(context.fileName,
-                                           PluginLoadingLogCategory.Warning,
-                                           "PiPL resource '{0}' has an unsupported property '{1}'.",
-                                           pluginResourceName,
-                                           new FourCCAsStringFormatter(propKey));
+                        context.general.logger.Log(context.general.fileName,
+                                                   PluginLoadingLogCategory.Warning,
+                                                   "PiPL resource '{0}' has an unsupported property '{1}'.",
+                                                   pluginResourceName,
+                                                   new FourCCAsStringFormatter(propKey));
                     }
 
                     int propertyDataPaddedLength = (propertyLength + 3) & ~3;
@@ -336,28 +338,28 @@ namespace PSFilterLoad.PSApi.Loader
                 }
 
                 PluginCompatibilityOptions compatibilityOptions = GetPluginCompatibilityOptions(hModule,
-                                                                                                !context.runWith32BitShim);
+                                                                                                !context.general.runWith32BitShim);
 
-                context.plugins.Add(new PluginData(context.fileName,
-                                                 entryPoint!,
-                                                 category!,
-                                                 title!,
-                                                 filterInfo,
-                                                 context.runWith32BitShim,
-                                                 aete,
-                                                 enableInfo,
-                                                 context.processorArchitecture,
-                                                 compatibilityOptions,
-                                                 maxImageSize,
-                                                 minImageSize));
+                context.general.plugins.Add(new PluginData(context.general.fileName,
+                                                           entryPoint!,
+                                                           category!,
+                                                           title!,
+                                                           filterInfo,
+                                                           context.general.runWith32BitShim,
+                                                           aete,
+                                                           enableInfo,
+                                                           context.general.processorArchitecture,
+                                                           compatibilityOptions,
+                                                           maxImageSize,
+                                                           minImageSize));
             }
             catch (Exception ex)
             {
-                context.logger.Log(context.fileName,
-                                 PluginLoadingLogCategory.Error,
-                                 "Exception thrown when enumerating PiPL resource '{0}':\n\n {1}",
-                                 pluginResourceName,
-                                 ex);
+                context.general.logger.Log(context.general.fileName,
+                                           PluginLoadingLogCategory.Error,
+                                           "Exception thrown when enumerating PiPL resource '{0}':\n\n {1}",
+                                           pluginResourceName,
+                                           ex);
                 return BOOL.FALSE;
             }
 

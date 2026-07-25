@@ -26,7 +26,7 @@ namespace PSFilterLoad.PSApi.Loader
         /// <param name="hModule">The module.</param>
         /// <param name="context">The scanning context.</param>
         /// <returns>The Windows error code from the scan.</returns>
-        internal static int Scan(HMODULE hModule, PluginScanningContext context)
+        internal static int Scan(HMODULE hModule, GeneralPluginScanningContext context)
         {
             int error = ERROR.ERROR_SUCCESS;
 
@@ -60,7 +60,7 @@ namespace PSFilterLoad.PSApi.Loader
         private static BOOL Enum8BFM(HMODULE hModule, char* lpszType, char* lpszName, nint lParam)
         {
             GCHandle handle = GCHandle.FromIntPtr(lParam);
-            PluginScanningContext context = (PluginScanningContext)handle.Target!;
+            GeneralPluginScanningContext context = (GeneralPluginScanningContext)handle.Target!;
             nuint pluginResourceName = new(lpszName);
 
             try
@@ -140,7 +140,7 @@ namespace PSFilterLoad.PSApi.Loader
             return BOOL.TRUE;
         }
 
-        private static bool GetPiMIResourceData(HMODULE hModule, char* lpszName, PluginScanningContext context, out string category)
+        private static bool GetPiMIResourceData(HMODULE hModule, char* lpszName, GeneralPluginScanningContext context, out string category)
         {
             category = string.Empty;
             nuint pluginResourceName = new(lpszName);
