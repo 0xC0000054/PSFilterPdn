@@ -98,11 +98,7 @@ namespace PSFilterPdn
             }
             catch (Exception)
             {
-                if (shellLink is not null)
-                {
-                    shellLink.Dispose();
-                    shellLink = null;
-                }
+                DisposableUtil.Free(ref shellLink);
                 throw;
             }
         }
@@ -223,11 +219,7 @@ namespace PSFilterPdn
             {
                 fileEnumerator?.Dispose();
 
-                if (shellLink is not null)
-                {
-                    shellLink.Dispose();
-                    shellLink = null;
-                }
+                DisposableUtil.Free(ref shellLink);
 
                 current = null;
                 state = -1;
