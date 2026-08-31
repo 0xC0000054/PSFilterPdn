@@ -136,10 +136,10 @@ namespace PSFilterLoad.PSApi.Loader
                         if (kind != PSConstants.FilterKind)
                         {
                             context.general.logger.Log(context.general.fileName,
-                                               PluginLoadingLogCategory.Error,
-                                               "PiPL resource '{0}' is not a Photoshop Filter; expected type 8BFM, actual type: '{1}'.",
-                                               pluginResourceName,
-                                               new FourCCAsStringFormatter(kind));
+                                                       PluginLoadingLogCategory.Error,
+                                                       "PiPL resource '{0}' is not a Photoshop Filter; expected type 8BFM, actual type: '{1}'.",
+                                                       pluginResourceName,
+                                                       new FourCCAsStringFormatter(kind));
                             return BOOL.TRUE;
                         }
                     }
